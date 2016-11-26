@@ -2,7 +2,7 @@
 ===============================
 
 
-· Version: |release| · |today| · :ref:`empymod-manual` ·
+|release| |docs|
 
 The **e**\ lectro\ **m**\ agnetic **py**\ thon **mod**\ eller `empymod` can
 model electric or magnetic responses due to a three-dimensional electric or
