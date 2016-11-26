@@ -1,4 +1,10 @@
+Info
+====
+
 .. automodule:: empymod
+
+Code
+====
 
 .. automodule:: empymod.model
     :members:
