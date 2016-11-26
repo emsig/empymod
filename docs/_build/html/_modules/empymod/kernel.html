@@ -1,0 +1,1111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>empymod.kernel &#8212; empymod 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="empymod 0.9 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for empymod.kernel</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">:mod:`kernel` -- Kernel calculation</span>
+<span class="sd">===================================</span>
+
+<span class="sd">Kernel of `empymod`, calculates the wavenumber-domain electromagnetic response.</span>
+
+<span class="sd">The functions &#39;wavenumber&#39;, &#39;angle_factor&#39;, &#39;fullspace&#39;, &#39;greenfct&#39;,</span>
+<span class="sd">&#39;reflections&#39;, and &#39;fields&#39; are based on source files (specified in each</span>
+<span class="sd">function) from the source code distributed with [Hunziker_et_al_2015]_, which</span>
+<span class="sd">can be found at `software.seg.org/2015/0001</span>
+<span class="sd">&lt;http://software.seg.org/2015/0001&gt;`_.  These functions are (c) 2015 by</span>
+<span class="sd">Hunziker et al. and the Society of Exploration Geophysicists,</span>
+<span class="sd">http://software.seg.org/disclaimer.txt.  Please read the NOTICE-file in the</span>
+<span class="sd">root directory for more information regarding the involved licenses.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Copyright 2016 Dieter Werthmüller</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of `empymod`.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not</span>
+<span class="c1"># use this file except in compliance with the License.  You may obtain a copy</span>
+<span class="c1"># of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT</span>
+<span class="c1"># WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the</span>
+<span class="c1"># License for the specific language governing permissions and limitations under</span>
+<span class="c1"># the License.</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numexpr</span> <span class="k">import</span> <span class="n">evaluate</span> <span class="k">as</span> <span class="n">ne_eval</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;wavenumber&#39;</span><span class="p">,</span> <span class="s1">&#39;angle_factor&#39;</span><span class="p">,</span> <span class="s1">&#39;fullspace&#39;</span><span class="p">,</span> <span class="s1">&#39;greenfct&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;reflections&#39;</span><span class="p">,</span> <span class="s1">&#39;fields&#39;</span><span class="p">,</span> <span class="s1">&#39;halfspace&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="wavenumber"><a class="viewcode-back" href="../../empymod.html#empymod.kernel.wavenumber">[docs]</a><span class="k">def</span> <span class="nf">wavenumber</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">lambd</span><span class="p">,</span>
+               <span class="n">ab</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate wavenumber domain solution.</span>
+
+<span class="sd">    Return the wavenumber domain solutions `PJ0`, `PJ1`, and `PJ0b`, which have</span>
+<span class="sd">    to be transformed with a Hankel transform to the frequency domain.</span>
+<span class="sd">    `PJ0`/`PJ0b` and `PJ1` have to be transformed with Bessel functions of</span>
+<span class="sd">    order 0 (:math:`J_0`) and 1 (:math:`J_1`), respectively.</span>
+
+<span class="sd">    This function corresponds loosely to equations 105--107, 111--116,</span>
+<span class="sd">    119--121, and 123--128 in [Hunziker_et_al_2015]_, and equally loosely to</span>
+<span class="sd">    the file `kxwmod.c`.</span>
+
+<span class="sd">    [Hunziker_et_al_2015]_ uses Bessel functions of orders 0, 1, and 2</span>
+<span class="sd">    (:math:`J_0, J_1, J_2`). The implementations of the *Fast Hankel Transform*</span>
+<span class="sd">    and the *Quadrature-with-Extrapolation* in `transform` are set-up with</span>
+<span class="sd">    Bessel functions of order 0 and 1 only. This is achieved by applying the</span>
+<span class="sd">    recurrence formula</span>
+
+<span class="sd">    .. math:: J_2(kr) = \\frac{2}{kr} J_1(kr) - J_0(kr) \ .</span>
+
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        `PJ0` and `PJ0b` could theoretically be added here into one,</span>
+<span class="sd">        and then be transformed in one go.  However, `PJ0b` has to be</span>
+<span class="sd">        multiplied by `factAng` later. This has to be done after the Hankel</span>
+<span class="sd">        transform for methods which make use of spline interpolation, in order</span>
+<span class="sd">        to work for offsets that are not in line with each other.</span>
+
+<span class="sd">    This function is called from one of the Hankel functions in</span>
+<span class="sd">    :mod:`transform`.  Consult the modelling routines in :mod:`model` for a</span>
+<span class="sd">    description of the input and output parameters.</span>
+
+<span class="sd">    If you are solely interested in the wavenumber-domain solution you can call</span>
+<span class="sd">    this function directly. However, you have to make sure all input arguments</span>
+<span class="sd">    are correct, as no checks are carried out here.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ** CALCULATE GREEN&#39;S FUNCTIONS</span>
+    <span class="c1"># Shape of PTM, PTE: (noffs, nfilt)</span>
+    <span class="n">PTM</span><span class="p">,</span> <span class="n">PTE</span> <span class="o">=</span> <span class="n">greenfct</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span>
+                        <span class="n">zetaV</span><span class="p">,</span> <span class="n">lambd</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">)</span>
+
+    <span class="c1"># ** AB-SPECIFIC FACTORS AND CALCULATION OF PTOT&#39;S</span>
+    <span class="c1"># These are the factors from outside the integrals</span>
+    <span class="c1"># Eqs 105-107, 111-116, 119-121, 123-128</span>
+
+    <span class="c1"># Factors</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+        <span class="n">fact1</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">fact2</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">22</span><span class="p">]:</span>
+            <span class="n">fact1</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="p">]:</span>
+            <span class="n">fact2</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+            <span class="n">fact2</span> <span class="o">*=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">26</span><span class="p">]:</span>
+        <span class="n">fact1</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">fact2</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">34</span><span class="p">,</span> <span class="mi">26</span><span class="p">]:</span>
+            <span class="n">fact1</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># Calculate Ptot1 and Ptot2</span>
+    <span class="n">Ptot1</span> <span class="o">=</span> <span class="n">fact1</span><span class="o">*</span><span class="p">(</span><span class="n">PTM</span> <span class="o">+</span> <span class="n">PTE</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="n">Ptot2</span> <span class="o">=</span> <span class="n">fact2</span><span class="o">*</span><span class="p">(</span><span class="n">PTM</span> <span class="o">-</span> <span class="n">PTE</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="c1"># Group Ptot1 and Ptot2 into PJ0 and PJ1 for J0/J1 Hankel Transform</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>    <span class="c1"># Eqs 105, 106, 111, 112,</span>
+        <span class="c1"># J2(kr) = 2/(kr)*J1(kr) - J0(kr)         #     119, 120, 123, 124</span>
+        <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">Ptot1</span><span class="o">*</span><span class="n">lambd</span>
+        <span class="n">PJ1</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">Ptot1</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">]:</span>
+            <span class="n">PJ0</span> <span class="o">=</span> <span class="n">Ptot2</span><span class="o">*</span><span class="n">lambd</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">PJ0</span> <span class="o">=</span> <span class="n">Ptot2</span>  <span class="c1"># 0s</span>
+
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">26</span><span class="p">]:</span>  <span class="c1"># Eqs 107, 113, 114, 115,</span>
+        <span class="n">PJ0</span> <span class="o">=</span> <span class="n">Ptot2</span>   <span class="c1"># 0s                        # .   121, 125, 126, 127</span>
+        <span class="n">PJ1</span> <span class="o">=</span> <span class="n">Ptot1</span><span class="o">*</span><span class="n">lambd</span><span class="o">*</span><span class="n">lambd</span>
+        <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">Ptot2</span>  <span class="c1"># 0s</span>
+
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="p">]:</span>                            <span class="c1"># Eq 116</span>
+        <span class="n">PJ0</span> <span class="o">=</span> <span class="n">Ptot1</span><span class="o">*</span><span class="n">lambd</span><span class="o">*</span><span class="n">lambd</span><span class="o">*</span><span class="n">lambd</span>
+        <span class="n">PJ1</span> <span class="o">=</span> <span class="n">Ptot2</span>   <span class="c1"># 0s</span>
+        <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">Ptot2</span>  <span class="c1"># 0s</span>
+
+    <span class="c1"># If rec is magnetic switch sign (reciprocity MM/ME =&gt; EE/EM).</span>
+    <span class="k">if</span> <span class="n">mrec</span><span class="p">:</span>
+        <span class="n">PJ0</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">PJ1</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">PJ0b</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># Return PJ0, PJ1, PJ0b</span>
+    <span class="k">return</span> <span class="n">PJ0</span><span class="p">,</span> <span class="n">PJ1</span><span class="p">,</span> <span class="n">PJ0b</span></div>
+
+
+<div class="viewcode-block" id="angle_factor"><a class="viewcode-back" href="../../empymod.html#empymod.kernel.angle_factor">[docs]</a><span class="k">def</span> <span class="nf">angle_factor</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the angle-dependent factor.</span>
+
+<span class="sd">    The whole calculation in the wavenumber domain is only a function of the</span>
+<span class="sd">    distance between the source and the receiver, it is independent of the</span>
+<span class="sd">    angel. The angle-dependency is this factor, which can be applied to the</span>
+<span class="sd">    corresponding parts in the wavenumber or in the frequency domain.</span>
+
+<span class="sd">    The `angle_factor` corresponds to the sine and cosine-functions in Eqs</span>
+<span class="sd">    105-107, 111-116, 119-121, 123-128.</span>
+
+<span class="sd">    This function is called from one of the Hankel functions in</span>
+<span class="sd">    :mod:`transform`.  Consult the modelling routines in :mod:`model` for a</span>
+<span class="sd">    description of the input and output parameters.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># 33/66 are completely symmetric and hence independent of angle</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="p">]:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">angle</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1"># Reciprocity switch for magnetic receivers</span>
+    <span class="k">if</span> <span class="n">mrec</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">msrc</span><span class="p">:</span>  <span class="c1"># If src is electric, swap src and rec (ME =&gt; EM).</span>
+            <span class="c1"># G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)</span>
+            <span class="n">angle</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">35</span><span class="p">]:</span>
+        <span class="n">fct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span>
+        <span class="n">test_ang_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">test_ang_2</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span>
+        <span class="n">test_ang_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="n">test_ang_2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+        <span class="n">eangle</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">angle</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">eangle</span> <span class="o">=</span> <span class="n">angle</span>
+
+    <span class="c1"># Get factor</span>
+    <span class="n">factAng</span> <span class="o">=</span> <span class="n">fct</span><span class="p">(</span><span class="n">eangle</span><span class="p">)</span>
+
+    <span class="c1"># Ensure cos([pi/2, 3pi/2]) and sin([pi, 2pi]) are zero (floating point</span>
+    <span class="c1"># issue)</span>
+    <span class="n">factAng</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">eangle</span><span class="p">),</span> <span class="n">test_ang_1</span><span class="p">,</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">14</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">factAng</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">eangle</span><span class="p">),</span> <span class="n">test_ang_2</span><span class="p">,</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">14</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">factAng</span></div>
+
+
+<div class="viewcode-block" id="fullspace"><a class="viewcode-back" href="../../empymod.html#empymod.kernel.fullspace">[docs]</a><span class="k">def</span> <span class="nf">fullspace</span><span class="p">(</span><span class="n">xco</span><span class="p">,</span> <span class="n">yco</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span>
+              <span class="n">mrec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Analytical full-space solutions in the frequency domain.</span>
+
+<span class="sd">    .. math:: \\hat{G}^{ee}_{\\alpha\\beta}, \\hat{G}^{ee}_{3\\alpha},</span>
+<span class="sd">              \\hat{G}^{ee}_{33}, \\hat{G}^{em}_{\\alpha\\beta},</span>
+<span class="sd">              \\hat{G}^{em}_{\\alpha 3}</span>
+
+<span class="sd">    This function corresponds to equations 45--50 in [Hunziker_et_al_2015]_,</span>
+<span class="sd">    and loosely to the corresponding files `Gin11.F90`, `Gin12.F90`,</span>
+<span class="sd">    `Gin13.F90`, `Gin22.F90`, `Gin23.F90`, `Gin31.F90`, `Gin32.F90`,</span>
+<span class="sd">    `Gin33.F90`, `Gin41.F90`, `Gin42.F90`, `Gin43.F90`, `Gin51.F90`,</span>
+<span class="sd">    `Gin52.F90`, `Gin53.F90`, `Gin61.F90`, and `Gin62.F90`.</span>
+
+<span class="sd">    This function is called from one of the modelling routines in :mod:`model`.</span>
+<span class="sd">    Consult these modelling routines for a description of the input and output</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Reciprocity switches for magnetic receivers</span>
+    <span class="k">if</span> <span class="n">mrec</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">msrc</span><span class="p">:</span>  <span class="c1"># If src is also magnetic, switch eta and zeta (MM =&gt; EE).</span>
+            <span class="c1"># G^mm_ab(s, r, e, z) = -G^ee_ab(s, r, -z, -e)</span>
+            <span class="n">etaH</span><span class="p">,</span> <span class="n">zetaH</span> <span class="o">=</span> <span class="o">-</span><span class="n">zetaH</span><span class="p">,</span> <span class="o">-</span><span class="n">etaH</span>
+            <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaV</span> <span class="o">=</span> <span class="o">-</span><span class="n">zetaV</span><span class="p">,</span> <span class="o">-</span><span class="n">etaV</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># If src is electric, swap src and rec (ME =&gt; EM).</span>
+            <span class="c1"># G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)</span>
+            <span class="n">xco</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">yco</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span> <span class="o">=</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">zsrc</span>
+
+    <span class="c1"># Calculate TE/TM-variables</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">26</span><span class="p">]:</span>                      <span class="c1"># Calc TM</span>
+        <span class="n">lGamTM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">zetaH</span><span class="o">*</span><span class="n">etaV</span><span class="p">)</span>
+        <span class="n">RTM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">off</span><span class="o">*</span><span class="n">off</span> <span class="o">+</span> <span class="p">((</span><span class="n">zsrc</span><span class="o">-</span><span class="n">zrec</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">zsrc</span><span class="o">-</span><span class="n">zrec</span><span class="p">)</span><span class="o">*</span><span class="n">etaH</span><span class="o">/</span><span class="n">etaV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">])</span>
+        <span class="n">uGamTM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lGamTM</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">RTM</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">RTM</span> <span class="o">*</span>
+                                               <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">etaH</span><span class="o">/</span><span class="n">etaV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">]:</span>  <span class="c1"># Calc TE</span>
+        <span class="n">lGamTE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">zetaV</span><span class="o">*</span><span class="n">etaH</span><span class="p">)</span>
+        <span class="n">RTE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">off</span><span class="o">*</span><span class="n">off</span><span class="o">+</span><span class="p">(</span><span class="n">zsrc</span><span class="o">-</span><span class="n">zrec</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">zsrc</span><span class="o">-</span><span class="n">zrec</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">zetaH</span><span class="o">/</span><span class="n">zetaV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">])</span>
+        <span class="n">uGamTE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lGamTE</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">RTE</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">RTE</span> <span class="o">*</span>
+                                               <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">zetaH</span><span class="o">/</span><span class="n">zetaV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">])</span>
+
+    <span class="c1"># Calculate responses</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">]:</span>  <span class="c1"># Eqs 45, 46</span>
+
+        <span class="c1"># Define coo1, coo2, and delta</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">22</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="p">]:</span>
+                <span class="n">coo1</span> <span class="o">=</span> <span class="n">xco</span>
+                <span class="n">coo2</span> <span class="o">=</span> <span class="n">xco</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">coo1</span> <span class="o">=</span> <span class="n">yco</span>
+                <span class="n">coo2</span> <span class="o">=</span> <span class="n">yco</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">coo1</span> <span class="o">=</span> <span class="n">xco</span>
+            <span class="n">coo2</span> <span class="o">=</span> <span class="n">yco</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Calculate response</span>
+        <span class="n">term1</span> <span class="o">=</span> <span class="n">uGamTM</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">coo1</span><span class="o">*</span><span class="n">coo2</span><span class="o">/</span><span class="p">(</span><span class="n">RTM</span><span class="o">*</span><span class="n">RTM</span><span class="p">)</span> <span class="o">-</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="n">term1</span> <span class="o">*=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">etaV</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">RTM</span><span class="o">*</span><span class="n">RTM</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">lGamTM</span><span class="o">/</span><span class="n">etaV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">/</span><span class="n">RTM</span>
+        <span class="n">term1</span> <span class="o">+=</span> <span class="n">uGamTM</span><span class="o">*</span><span class="n">zetaH</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">coo1</span><span class="o">*</span><span class="n">coo2</span><span class="o">/</span><span class="p">(</span><span class="n">RTM</span><span class="o">*</span><span class="n">RTM</span><span class="p">)</span>
+
+        <span class="n">term2</span> <span class="o">=</span> <span class="o">-</span><span class="n">delta</span><span class="o">*</span><span class="n">zetaH</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">uGamTE</span>
+
+        <span class="n">term3</span> <span class="o">=</span> <span class="o">-</span><span class="n">zetaH</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">coo1</span><span class="o">*</span><span class="n">coo2</span><span class="o">/</span><span class="p">(</span><span class="n">off</span><span class="o">*</span><span class="n">off</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">uGamTM</span> <span class="o">-</span> <span class="n">uGamTE</span><span class="p">)</span>
+
+        <span class="n">term4</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">zetaH</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">coo1</span><span class="o">*</span><span class="n">coo2</span><span class="o">/</span><span class="p">(</span><span class="n">off</span><span class="o">*</span><span class="n">off</span><span class="p">)</span> <span class="o">-</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">zetaH</span><span class="o">.</span><span class="n">imag</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>  <span class="c1"># We need the sqrt where Im &gt; 0.</span>
+            <span class="n">term4</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>     <span class="c1"># This if-statement corrects for it.</span>
+        <span class="n">term4</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lGamTM</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">RTM</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lGamTE</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">RTE</span><span class="p">)</span>
+        <span class="n">term4</span> <span class="o">/=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">etaH</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">off</span><span class="o">*</span><span class="n">off</span>
+
+        <span class="n">gin</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">+</span> <span class="n">term2</span> <span class="o">+</span> <span class="n">term3</span> <span class="o">+</span> <span class="n">term4</span>
+
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">]:</span>  <span class="c1"># Eq 47</span>
+
+        <span class="c1"># Define coo</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">31</span><span class="p">]:</span>
+            <span class="n">coo</span> <span class="o">=</span> <span class="n">xco</span>
+        <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">23</span><span class="p">,</span> <span class="mi">32</span><span class="p">]:</span>
+            <span class="n">coo</span> <span class="o">=</span> <span class="n">yco</span>
+
+        <span class="c1"># Calculate response</span>
+        <span class="n">term1</span> <span class="o">=</span> <span class="p">(</span><span class="n">etaH</span><span class="o">/</span><span class="n">etaV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">zrec</span> <span class="o">-</span> <span class="n">zsrc</span><span class="p">)</span><span class="o">*</span><span class="n">coo</span><span class="o">/</span><span class="p">(</span><span class="n">RTM</span><span class="o">*</span><span class="n">RTM</span><span class="p">)</span>
+        <span class="n">term2</span> <span class="o">=</span> <span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="n">RTM</span><span class="o">*</span><span class="n">RTM</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">lGamTM</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">/</span><span class="n">RTM</span> <span class="o">+</span> <span class="p">(</span><span class="n">lGamTM</span><span class="o">*</span><span class="n">lGamTM</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">gin</span> <span class="o">=</span> <span class="n">term1</span><span class="o">*</span><span class="n">term2</span><span class="o">*</span><span class="n">uGamTM</span><span class="o">/</span><span class="n">etaV</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="p">]:</span>  <span class="c1"># Eq 48</span>
+
+        <span class="c1"># Calculate response</span>
+        <span class="n">term1</span> <span class="o">=</span> <span class="p">(((</span><span class="n">etaH</span><span class="o">/</span><span class="n">etaV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">zsrc</span> <span class="o">-</span> <span class="n">zrec</span><span class="p">)</span><span class="o">/</span><span class="n">RTM</span><span class="p">)</span> <span class="o">*</span>
+                 <span class="p">((</span><span class="n">etaH</span><span class="o">/</span><span class="n">etaV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">zsrc</span> <span class="o">-</span> <span class="n">zrec</span><span class="p">)</span><span class="o">/</span><span class="n">RTM</span><span class="p">)</span> <span class="o">*</span>
+                 <span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="n">RTM</span><span class="o">*</span><span class="n">RTM</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">lGamTM</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">/</span><span class="n">RTM</span> <span class="o">+</span>
+                     <span class="p">(</span><span class="n">lGamTM</span><span class="o">*</span><span class="n">lGamTM</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]))</span>
+        <span class="n">term2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">etaH</span><span class="o">/</span><span class="n">etaV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">/</span><span class="n">RTM</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">RTM</span> <span class="o">+</span> <span class="n">lGamTM</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-</span>
+                 <span class="p">(</span><span class="n">etaH</span><span class="o">*</span><span class="n">zetaH</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">])</span>
+        <span class="n">gin</span> <span class="o">=</span> <span class="p">(</span><span class="n">term1</span> <span class="o">+</span> <span class="n">term2</span><span class="p">)</span><span class="o">*</span><span class="n">uGamTM</span><span class="o">/</span><span class="n">etaV</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>  <span class="c1"># Eq 49</span>
+
+        <span class="c1"># Define coo1, coo2, coo3, coo4, delta, and pm</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+            <span class="n">coo1</span><span class="p">,</span> <span class="n">coo2</span> <span class="o">=</span> <span class="n">xco</span><span class="p">,</span> <span class="n">yco</span>
+            <span class="n">coo3</span><span class="p">,</span> <span class="n">coo4</span> <span class="o">=</span> <span class="n">xco</span><span class="p">,</span> <span class="n">yco</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">pm</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">]:</span>
+            <span class="n">coo1</span><span class="p">,</span> <span class="n">coo2</span> <span class="o">=</span> <span class="n">yco</span><span class="p">,</span> <span class="n">yco</span>
+            <span class="n">coo3</span><span class="p">,</span> <span class="n">coo4</span> <span class="o">=</span> <span class="n">xco</span><span class="p">,</span> <span class="n">xco</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">pm</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># 15/25: Swap x/y</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+            <span class="n">coo1</span><span class="p">,</span> <span class="n">coo3</span> <span class="o">=</span> <span class="n">coo3</span><span class="p">,</span> <span class="n">coo1</span>
+            <span class="n">coo2</span><span class="p">,</span> <span class="n">coo4</span> <span class="o">=</span> <span class="n">coo4</span><span class="p">,</span> <span class="n">coo2</span>
+
+        <span class="c1"># 24/25: Swap src/rec</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span><span class="p">[</span><span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+            <span class="n">zrec</span><span class="p">,</span> <span class="n">zsrc</span> <span class="o">=</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span>
+
+        <span class="c1"># Calculate response</span>
+        <span class="k">def</span> <span class="nf">term</span><span class="p">(</span><span class="n">lGam</span><span class="p">,</span> <span class="n">z_eH</span><span class="p">,</span> <span class="n">z_eV</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">co1</span><span class="p">,</span> <span class="n">co2</span><span class="p">):</span>
+            <span class="n">fac</span> <span class="o">=</span> <span class="p">(</span><span class="n">lGam</span><span class="o">*</span><span class="n">z_eH</span><span class="o">/</span><span class="n">z_eV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">/</span><span class="n">R</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lGam</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">R</span><span class="p">)</span>
+            <span class="n">term</span> <span class="o">=</span> <span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">off</span><span class="o">*</span><span class="n">off</span><span class="p">)</span> <span class="o">+</span> <span class="n">lGam</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">/</span><span class="n">R</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">R</span><span class="o">*</span><span class="n">R</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">fac</span><span class="o">*</span><span class="p">(</span><span class="n">co1</span><span class="o">*</span><span class="n">co2</span><span class="o">*</span><span class="n">term</span> <span class="o">-</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="n">termTM</span> <span class="o">=</span> <span class="n">term</span><span class="p">(</span><span class="n">lGamTM</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">RTM</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">coo1</span><span class="p">,</span> <span class="n">coo2</span><span class="p">)</span>
+        <span class="n">termTE</span> <span class="o">=</span> <span class="n">term</span><span class="p">(</span><span class="n">lGamTE</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">RTE</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">coo3</span><span class="p">,</span> <span class="n">coo4</span><span class="p">)</span>
+        <span class="n">mult</span> <span class="o">=</span> <span class="p">(</span><span class="n">zrec</span> <span class="o">-</span> <span class="n">zsrc</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">etaH</span><span class="o">*</span><span class="n">zetaH</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">off</span><span class="o">*</span><span class="n">off</span><span class="p">)</span>
+        <span class="n">gin</span> <span class="o">=</span> <span class="o">-</span><span class="n">mult</span><span class="o">*</span><span class="p">(</span><span class="n">pm</span><span class="o">*</span><span class="n">termTM</span> <span class="o">+</span> <span class="n">termTE</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">26</span><span class="p">]:</span>  <span class="c1"># Eqs 50, 51</span>
+
+        <span class="c1"># Define coo</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">34</span><span class="p">,</span> <span class="mi">16</span><span class="p">]:</span>
+            <span class="n">coo</span> <span class="o">=</span> <span class="n">yco</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">coo</span> <span class="o">=</span> <span class="o">-</span><span class="n">xco</span>
+
+        <span class="c1"># Define R, lGam, uGam, e_zH, and e_zV</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">]:</span>
+            <span class="n">coo</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">RTM</span>
+            <span class="n">lGam</span> <span class="o">=</span> <span class="n">lGamTM</span>
+            <span class="n">uGam</span> <span class="o">=</span> <span class="n">uGamTM</span>
+            <span class="n">e_zH</span> <span class="o">=</span> <span class="n">etaH</span>
+            <span class="n">e_zV</span> <span class="o">=</span> <span class="n">etaV</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">zrec</span><span class="p">,</span> <span class="n">zsrc</span> <span class="o">=</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">RTE</span>
+            <span class="n">lGam</span> <span class="o">=</span> <span class="n">lGamTE</span>
+            <span class="n">uGam</span> <span class="o">=</span> <span class="n">uGamTE</span>
+            <span class="n">e_zH</span> <span class="o">=</span> <span class="n">zetaH</span>
+            <span class="n">e_zV</span> <span class="o">=</span> <span class="n">zetaV</span>
+
+        <span class="c1"># Calculate response</span>
+        <span class="n">gin</span> <span class="o">=</span> <span class="n">coo</span><span class="o">*</span><span class="p">(</span><span class="n">e_zH</span><span class="o">/</span><span class="n">e_zV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span><span class="o">/</span><span class="n">R</span><span class="o">*</span><span class="p">(</span><span class="n">lGam</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="n">R</span><span class="p">)</span><span class="o">*</span><span class="n">uGam</span>
+
+    <span class="c1"># If rec is magnetic switch sign (reciprocity MM/ME =&gt; EE/EM).</span>
+    <span class="k">if</span> <span class="n">mrec</span><span class="p">:</span>
+        <span class="n">gin</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">gin</span></div>
+
+
+<div class="viewcode-block" id="greenfct"><a class="viewcode-back" href="../../empymod.html#empymod.kernel.greenfct">[docs]</a><span class="k">def</span> <span class="nf">greenfct</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">lambd</span><span class="p">,</span>
+             <span class="n">ab</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Green&#39;s function for TM and TE.</span>
+
+<span class="sd">    .. math:: \\tilde{g}^{tm}_{hh}, \\tilde{g}^{tm}_{hz},</span>
+<span class="sd">              \\tilde{g}^{tm}_{zh}, \\tilde{g}^{tm}_{zz},</span>
+<span class="sd">              \\tilde{g}^{te}_{hh}, \\tilde{g}^{te}_{zz}</span>
+
+<span class="sd">    This function corresponds to equations 108--110, 117/118, 122; 89--94,</span>
+<span class="sd">    A18--A23, B13--B15; 97--102 A26--A31, and B16--B18 in</span>
+<span class="sd">    [Hunziker_et_al_2015]_, and loosely to the corresponding files `Gamma.F90`,</span>
+<span class="sd">    `Wprop.F90`, `Ptotalx.F90`, `Ptotalxm.F90`, `Ptotaly.F90`, `Ptotalym.F90`,</span>
+<span class="sd">    `Ptotalz.F90`, and `Ptotalzm.F90`.</span>
+
+<span class="sd">    The Green&#39;s functions are multiplied according to Eqs 105-107, 111-116,</span>
+<span class="sd">    119-121, 123-128; with the factors inside the integrals.</span>
+
+<span class="sd">    This function is called from the function :mod:`kernel.wavenumber`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># GTM/GTE have shape (frequency, offset, lambda).</span>
+    <span class="c1"># gamTM/gamTE have shape (frequency, offset, layer, lambda):</span>
+
+    <span class="c1"># Reciprocity switches for magnetic receivers</span>
+    <span class="k">if</span> <span class="n">mrec</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">msrc</span><span class="p">:</span>  <span class="c1"># If src is also magnetic, switch eta and zeta (MM =&gt; EE).</span>
+            <span class="c1"># G^mm_ab(s, r, e, z) = -G^ee_ab(s, r, -z, -e)</span>
+            <span class="n">etaH</span><span class="p">,</span> <span class="n">zetaH</span> <span class="o">=</span> <span class="o">-</span><span class="n">zetaH</span><span class="p">,</span> <span class="o">-</span><span class="n">etaH</span>
+            <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaV</span> <span class="o">=</span> <span class="o">-</span><span class="n">zetaV</span><span class="p">,</span> <span class="o">-</span><span class="n">etaV</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># If src is electric, swap src and rec (ME =&gt; EM).</span>
+            <span class="c1"># G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)</span>
+            <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span> <span class="o">=</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">zsrc</span>
+            <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span> <span class="o">=</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">lsrc</span>
+
+    <span class="k">for</span> <span class="n">TM</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]:</span>
+
+        <span class="c1"># Continue if Green&#39;s function not required</span>
+        <span class="k">if</span> <span class="n">TM</span> <span class="ow">and</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">26</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">TM</span> <span class="ow">and</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">]:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Define eta/zeta depending if TM or TE</span>
+        <span class="k">if</span> <span class="n">TM</span><span class="p">:</span>
+            <span class="n">e_zH</span><span class="p">,</span> <span class="n">e_zV</span><span class="p">,</span> <span class="n">z_eH</span> <span class="o">=</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span>   <span class="c1"># TM: zetaV not used</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">e_zH</span><span class="p">,</span> <span class="n">e_zV</span><span class="p">,</span> <span class="n">z_eH</span> <span class="o">=</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">etaH</span>  <span class="c1"># TE: etaV not used</span>
+
+        <span class="c1"># Uppercase gamma</span>
+        <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+            <span class="n">ez_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">e_zH</span><span class="o">/</span><span class="n">e_zV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># NOQA</span>
+            <span class="n">ez_prod</span> <span class="o">=</span> <span class="p">(</span><span class="n">z_eH</span><span class="o">*</span><span class="n">e_zH</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>  <span class="c1"># NOQA</span>
+            <span class="n">lambd2</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;lambd*lambd&quot;</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># NOQA</span>
+            <span class="n">Gam</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;sqrt(ez_ratio*lambd2 + ez_prod)&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Gam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">e_zH</span><span class="o">/</span><span class="n">e_zV</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span>
+                          <span class="p">(</span><span class="n">lambd</span><span class="o">*</span><span class="n">lambd</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span>
+                          <span class="p">(</span><span class="n">z_eH</span><span class="o">*</span><span class="n">e_zH</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">])</span>
+
+        <span class="c1"># Reflection (coming from below (Rp) and above (Rm) rec)</span>
+        <span class="n">Rp</span><span class="p">,</span> <span class="n">Rm</span> <span class="o">=</span> <span class="n">reflections</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">e_zH</span><span class="p">,</span> <span class="n">Gam</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">)</span>
+
+        <span class="c1"># Field propagators (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74</span>
+        <span class="n">lrecGam</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lrec</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">if</span> <span class="n">lrec</span> <span class="o">!=</span> <span class="n">depth</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>  <span class="c1"># No upgoing field prop. if rec in last layer</span>
+            <span class="n">ddepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">lrec</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">zrec</span>
+            <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                <span class="n">Wu</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;exp(-lrecGam*ddepth)&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Wu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lrecGam</span><span class="o">*</span><span class="n">ddepth</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Wu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">lrecGam</span><span class="p">,</span> <span class="mi">0</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lrec</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>     <span class="c1"># No downgoing field propagator if rec in first layer</span>
+            <span class="n">ddepth</span> <span class="o">=</span> <span class="n">zrec</span> <span class="o">-</span> <span class="n">depth</span><span class="p">[</span><span class="n">lrec</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                <span class="n">Wd</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;exp(-lrecGam*ddepth)&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Wd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lrecGam</span><span class="o">*</span><span class="n">ddepth</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Wd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">lrecGam</span><span class="p">,</span> <span class="mi">0</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+
+        <span class="c1"># Field at receiver level (coming from below (Pu) and above (Pd) rec)</span>
+        <span class="n">Pu</span><span class="p">,</span> <span class="n">Pd</span> <span class="o">=</span> <span class="n">fields</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">Rp</span><span class="p">,</span> <span class="n">Rm</span><span class="p">,</span> <span class="n">Gam</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">TM</span><span class="p">,</span>
+                        <span class="n">use_ne_eval</span><span class="p">)</span>
+
+        <span class="c1"># Green&#39;s functions</span>
+        <span class="k">if</span> <span class="n">lsrc</span> <span class="o">==</span> <span class="n">lrec</span><span class="p">:</span>  <span class="c1"># Rec in src layer; Eqs 108, 109, 110, 117, 118, 122</span>
+
+            <span class="c1"># Green&#39;s function depending on &lt;ab&gt;</span>
+            <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+                <span class="n">green</span> <span class="o">=</span> <span class="n">Pu</span><span class="o">*</span><span class="n">Wu</span> <span class="o">-</span> <span class="n">Pd</span><span class="o">*</span><span class="n">Wd</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">green</span> <span class="o">=</span> <span class="n">Pu</span><span class="o">*</span><span class="n">Wu</span> <span class="o">+</span> <span class="n">Pd</span><span class="o">*</span><span class="n">Wd</span>
+
+            <span class="c1"># Direct field, if it is computed in the wavenumber domain</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">xdirect</span><span class="p">:</span>
+                <span class="c1"># Direct field</span>
+                <span class="n">directf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lrecGam</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">zsrc</span> <span class="o">-</span> <span class="n">zrec</span><span class="p">))</span>
+
+                <span class="c1"># Swap TM for certain &lt;ab&gt;</span>
+                <span class="k">if</span> <span class="n">TM</span> <span class="ow">and</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+                    <span class="n">directf</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+                <span class="c1"># Multiply by zrec-zsrc-sign for certain &lt;ab&gt;</span>
+                <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">]:</span>
+                    <span class="n">directf</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">zrec</span> <span class="o">-</span> <span class="n">zsrc</span><span class="p">)</span>
+
+                <span class="c1"># Add direct field to Green&#39;s function</span>
+                <span class="n">green</span> <span class="o">+=</span> <span class="n">directf</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># Calculate exponential factor</span>
+            <span class="k">if</span> <span class="n">lrec</span> <span class="o">==</span> <span class="n">depth</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">ddepth</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ddepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">lrec</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">depth</span><span class="p">[</span><span class="n">lrec</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                <span class="n">fexp</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;exp(-lrecGam*ddepth)&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fexp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">lrecGam</span><span class="o">*</span><span class="n">ddepth</span><span class="p">)</span>
+
+            <span class="c1"># Sign-switch for Green calculation</span>
+            <span class="k">if</span> <span class="n">TM</span> <span class="ow">and</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+                <span class="n">pmw</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pmw</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">lrec</span> <span class="o">&lt;</span> <span class="n">lsrc</span><span class="p">:</span>  <span class="c1"># Rec above src layer: Pd not used</span>
+                <span class="c1">#              Eqs 89-94, A18-A23, B13-B15</span>
+                <span class="n">green</span> <span class="o">=</span> <span class="n">Pu</span><span class="o">*</span><span class="p">(</span><span class="n">Wu</span> <span class="o">+</span> <span class="n">pmw</span><span class="o">*</span><span class="n">Rm</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">fexp</span><span class="o">*</span><span class="n">Wd</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">lrec</span> <span class="o">&gt;</span> <span class="n">lsrc</span><span class="p">:</span>  <span class="c1"># rec below src layer: Pu not used</span>
+                <span class="c1">#                Eqs 97-102 A26-A30, B16-B18</span>
+                <span class="n">green</span> <span class="o">=</span> <span class="n">Pd</span><span class="o">*</span><span class="p">(</span><span class="n">pmw</span><span class="o">*</span><span class="n">Wd</span> <span class="o">+</span> <span class="n">Rp</span><span class="p">[:,</span> <span class="p">:,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lsrc</span><span class="o">-</span><span class="n">lrec</span><span class="p">),</span> <span class="p">:]</span><span class="o">*</span><span class="n">fexp</span><span class="o">*</span><span class="n">Wu</span><span class="p">)</span>
+
+        <span class="c1"># Store in corresponding variable</span>
+        <span class="k">if</span> <span class="n">TM</span><span class="p">:</span>
+            <span class="n">gamTM</span><span class="p">,</span> <span class="n">GTM</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">,</span> <span class="n">green</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">gamTE</span><span class="p">,</span> <span class="n">GTE</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">,</span> <span class="n">green</span>
+
+    <span class="c1"># ** AB-SPECIFIC FACTORS AND CALCULATION OF PTOT&#39;S</span>
+    <span class="c1"># These are the factors inside the integrals</span>
+    <span class="c1"># Eqs 105-107, 111-116, 119-121, 123-128</span>
+
+    <span class="c1"># PTM, PTE</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">]:</span>
+        <span class="n">PTM</span> <span class="o">=</span> <span class="n">GTM</span><span class="o">*</span><span class="n">gamTM</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lrec</span><span class="p">,</span> <span class="p">:]</span><span class="o">/</span><span class="n">etaH</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">PTE</span> <span class="o">=</span> <span class="n">zetaH</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">GTE</span><span class="o">/</span><span class="n">gamTE</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>
+        <span class="n">PTM</span> <span class="o">=</span> <span class="p">((</span><span class="n">etaH</span><span class="p">[:,</span> <span class="n">lsrc</span><span class="p">]</span><span class="o">/</span><span class="n">etaH</span><span class="p">[:,</span> <span class="n">lrec</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span>
+               <span class="n">GTM</span><span class="o">*</span><span class="n">gamTM</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lrec</span><span class="p">,</span> <span class="p">:]</span><span class="o">/</span><span class="n">gamTM</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">PTE</span> <span class="o">=</span> <span class="n">GTE</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">]:</span>
+        <span class="n">PTM</span> <span class="o">=</span> <span class="o">-</span><span class="p">((</span><span class="n">etaH</span><span class="p">[:,</span> <span class="n">lsrc</span><span class="p">]</span><span class="o">/</span><span class="n">etaH</span><span class="p">[:,</span> <span class="n">lrec</span><span class="p">]</span><span class="o">/</span><span class="n">etaV</span><span class="p">[:,</span> <span class="n">lsrc</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span>
+                <span class="n">GTM</span><span class="o">*</span><span class="n">gamTM</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lrec</span><span class="p">,</span> <span class="p">:]</span><span class="o">/</span><span class="n">gamTM</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">PTE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">]:</span>
+        <span class="n">PTM</span> <span class="o">=</span> <span class="n">GTM</span><span class="o">/</span><span class="n">etaV</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">PTE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">]:</span>
+        <span class="n">PTM</span> <span class="o">=</span> <span class="p">((</span><span class="n">etaH</span><span class="p">[:,</span> <span class="n">lsrc</span><span class="p">]</span><span class="o">/</span><span class="n">etaV</span><span class="p">[:,</span> <span class="n">lrec</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span>
+               <span class="n">GTM</span><span class="o">/</span><span class="n">gamTM</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">PTE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">26</span><span class="p">]:</span>
+        <span class="n">PTM</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">PTE</span> <span class="o">=</span> <span class="p">((</span><span class="n">zetaH</span><span class="p">[:,</span> <span class="n">lsrc</span><span class="p">]</span><span class="o">/</span><span class="n">zetaV</span><span class="p">[:,</span> <span class="n">lsrc</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span>
+               <span class="n">GTE</span><span class="o">/</span><span class="n">gamTE</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">33</span><span class="p">,</span> <span class="p">]:</span>
+        <span class="n">PTM</span> <span class="o">=</span> <span class="p">((</span><span class="n">etaH</span><span class="p">[:,</span> <span class="n">lsrc</span><span class="p">]</span><span class="o">/</span><span class="n">etaV</span><span class="p">[:,</span> <span class="n">lsrc</span><span class="p">]</span><span class="o">/</span><span class="n">etaV</span><span class="p">[:,</span> <span class="n">lrec</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span>
+               <span class="n">GTM</span><span class="o">/</span><span class="n">gamTM</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">PTE</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Return Green&#39;s functions</span>
+    <span class="k">return</span> <span class="n">PTM</span><span class="p">,</span> <span class="n">PTE</span></div>
+
+
+<div class="viewcode-block" id="reflections"><a class="viewcode-back" href="../../empymod.html#empymod.kernel.reflections">[docs]</a><span class="k">def</span> <span class="nf">reflections</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">e_zH</span><span class="p">,</span> <span class="n">Gam</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Rp, Rm.</span>
+
+<span class="sd">    .. math:: R^\pm_n, \\bar{R}^\pm_n</span>
+
+<span class="sd">    This function corresponds to equations 64/65 and A-11/A-12 in</span>
+<span class="sd">    [Hunziker_et_al_2015]_, and loosely to the corresponding files `Rmin.F90`</span>
+<span class="sd">    and `Rplus.F90`.</span>
+
+<span class="sd">    This function is called from the function :mod:`kernel.greenfct`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Loop over Rp, Rm</span>
+    <span class="k">for</span> <span class="n">plus</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]:</span>
+
+        <span class="c1"># Switches depending if plus or minus</span>
+        <span class="k">if</span> <span class="n">plus</span><span class="p">:</span>
+            <span class="n">pm</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">layer_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">depth</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">lrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">izout</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lsrc</span><span class="o">-</span><span class="n">lrec</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pm</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">layer_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">lrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">izout</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># If rec in last  and rec below src (plus) or</span>
+        <span class="c1"># if rec in first and rec above src (minus), shift izout</span>
+        <span class="n">shiftplus</span> <span class="o">=</span> <span class="n">lrec</span> <span class="o">&lt;</span> <span class="n">lsrc</span> <span class="ow">and</span> <span class="n">lrec</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">plus</span>
+        <span class="n">shiftminus</span> <span class="o">=</span> <span class="n">lrec</span> <span class="o">&gt;</span> <span class="n">lsrc</span> <span class="ow">and</span> <span class="n">lrec</span> <span class="o">==</span> <span class="n">depth</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">plus</span>
+        <span class="k">if</span> <span class="n">shiftplus</span> <span class="ow">or</span> <span class="n">shiftminus</span><span class="p">:</span>
+            <span class="n">izout</span> <span class="o">-=</span> <span class="n">pm</span>
+
+        <span class="c1"># Pre-allocate Ref</span>
+        <span class="n">Ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Gam</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Gam</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lsrc</span><span class="o">-</span><span class="n">lrec</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">Gam</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the reflection</span>
+        <span class="k">for</span> <span class="n">iz</span> <span class="ow">in</span> <span class="n">layer_count</span><span class="p">:</span>
+
+            <span class="c1"># Eqs 65, A-12</span>
+            <span class="n">e_zHa</span> <span class="o">=</span> <span class="n">e_zH</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">iz</span><span class="o">+</span><span class="n">pm</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">Gama</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">iz</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">e_zHb</span> <span class="o">=</span> <span class="n">e_zH</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">iz</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">Gamb</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">iz</span><span class="o">+</span><span class="n">pm</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                <span class="n">rlocstr</span> <span class="o">=</span> <span class="s2">&quot;(e_zHa*Gama - e_zHb*Gamb)/(e_zHa*Gama + e_zHb*Gamb)&quot;</span>
+                <span class="n">rloc</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="n">rlocstr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rloca</span> <span class="o">=</span> <span class="n">e_zHa</span><span class="o">*</span><span class="n">Gama</span>
+                <span class="n">rlocb</span> <span class="o">=</span> <span class="n">e_zHb</span><span class="o">*</span><span class="n">Gamb</span>
+                <span class="n">rloc</span> <span class="o">=</span> <span class="p">(</span><span class="n">rloca</span> <span class="o">-</span> <span class="n">rlocb</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">rloca</span> <span class="o">+</span> <span class="n">rlocb</span><span class="p">)</span>
+
+            <span class="c1"># In first layer term = 0</span>
+            <span class="k">if</span> <span class="n">iz</span> <span class="o">==</span> <span class="n">layer_count</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">term</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">rloc</span><span class="p">,</span> <span class="mi">0</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ddepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">iz</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">pm</span><span class="p">]</span><span class="o">-</span><span class="n">depth</span><span class="p">[</span><span class="n">iz</span><span class="o">+</span><span class="n">pm</span><span class="p">]</span>
+                <span class="n">iGam</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">iz</span><span class="o">+</span><span class="n">pm</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                    <span class="n">term</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;tRef*exp(-2*iGam*ddepth)&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">term</span> <span class="o">=</span> <span class="n">tRef</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">iGam</span><span class="o">*</span><span class="n">ddepth</span><span class="p">)</span>  <span class="c1"># NOQA</span>
+
+            <span class="c1"># Eqs 64, A-11</span>
+            <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                <span class="n">tRef</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;(rloc + term)/(1 + rloc*term)&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tRef</span> <span class="o">=</span> <span class="p">(</span><span class="n">rloc</span> <span class="o">+</span> <span class="n">term</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">rloc</span><span class="o">*</span><span class="n">term</span><span class="p">)</span>
+
+            <span class="c1"># The global reflection coefficient is given back for all layers</span>
+            <span class="c1"># between and including src- and rec-layer</span>
+            <span class="k">if</span> <span class="n">lrec</span> <span class="o">!=</span> <span class="n">lsrc</span><span class="p">:</span>
+                <span class="n">goRp</span> <span class="o">=</span> <span class="n">plus</span> <span class="ow">and</span> <span class="n">iz</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">)</span>
+                <span class="n">goRm</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">plus</span> <span class="ow">and</span> <span class="n">iz</span> <span class="o">&gt;=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">goRm</span> <span class="ow">or</span> <span class="n">goRp</span><span class="p">:</span>
+                    <span class="n">Ref</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">izout</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">tRef</span><span class="p">[:]</span>
+                    <span class="n">izout</span> <span class="o">-=</span> <span class="n">pm</span>
+
+        <span class="c1"># If lsrc = lrec, we just store the last values</span>
+        <span class="k">if</span> <span class="n">lsrc</span> <span class="o">==</span> <span class="n">lrec</span> <span class="ow">and</span> <span class="n">layer_count</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Ref</span> <span class="o">=</span> <span class="n">tRef</span>
+
+        <span class="c1"># Store Ref in Rm/Rp</span>
+        <span class="k">if</span> <span class="n">plus</span><span class="p">:</span>
+            <span class="n">Rm</span> <span class="o">=</span> <span class="n">Ref</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Rp</span> <span class="o">=</span> <span class="n">Ref</span>
+
+    <span class="c1"># Return reflections (minus and plus)</span>
+    <span class="k">return</span> <span class="n">Rm</span><span class="p">,</span> <span class="n">Rp</span></div>
+
+
+<div class="viewcode-block" id="fields"><a class="viewcode-back" href="../../empymod.html#empymod.kernel.fields">[docs]</a><span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">Rp</span><span class="p">,</span> <span class="n">Rm</span><span class="p">,</span> <span class="n">Gam</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">TM</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Pu+, Pu-, Pd+, Pd-.</span>
+
+<span class="sd">    .. math:: P^{u\pm}_s, P^{d\pm}_s, \\bar{P}^{u\pm}_s, \\bar{P}^{d\pm}_s;</span>
+<span class="sd">          P^{u\pm}_{s-1}, P^{u\pm}_n, \\bar{P}^{u\pm}_{s-1}, \\bar{P}^{u\pm}_n;</span>
+<span class="sd">          P^{d\pm}_{s+1}, P^{d\pm}_n, \\bar{P}^{d\pm}_{s+1}, \\bar{P}^{d\pm}_n</span>
+
+<span class="sd">    This function corresponds to equations 81/82, 95/96, 103/104, A-8/A-9,</span>
+<span class="sd">    A-24/A-25, and A-32/A-33 in [Hunziker_et_al_2015]_, and loosely to the</span>
+<span class="sd">    corresponding files `Pdownmin.F90`, `Pdownplus.F90`, `Pupmin.F90`, and</span>
+<span class="sd">    `Pdownmin.F90`.</span>
+
+<span class="sd">    This function is called from the function :mod:`kernel.greenfct`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Variables</span>
+    <span class="n">nlsr</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lsrc</span><span class="o">-</span><span class="n">lrec</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>  <span class="c1"># nr of layers btw and incl. src and rec layer</span>
+    <span class="n">rsrcl</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># src-layer in reflection (Rp/Rm), first if down</span>
+    <span class="n">izrange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">nlsr</span><span class="p">)</span>
+    <span class="n">isr</span> <span class="o">=</span> <span class="n">lsrc</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">depth</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># Booleans if src in first or last layer; swapped if up=True</span>
+    <span class="n">first_layer</span> <span class="o">=</span> <span class="n">lsrc</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="n">last_layer</span> <span class="o">=</span> <span class="n">lsrc</span> <span class="o">==</span> <span class="n">depth</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># Depths; dp and dm are swapped if up=True</span>
+    <span class="k">if</span> <span class="n">lsrc</span> <span class="o">!=</span> <span class="n">depth</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">lsrc</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">depth</span><span class="p">[</span><span class="n">lsrc</span><span class="p">]</span>
+        <span class="n">dp</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">lsrc</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">zsrc</span>
+    <span class="n">dm</span> <span class="o">=</span> <span class="n">zsrc</span><span class="o">-</span><span class="n">depth</span><span class="p">[</span><span class="n">lsrc</span><span class="p">]</span>
+
+    <span class="c1"># Rm and Rp; swapped if up=True</span>
+    <span class="n">Rmp</span> <span class="o">=</span> <span class="n">Rm</span>
+    <span class="n">Rpm</span> <span class="o">=</span> <span class="n">Rp</span>
+
+    <span class="c1"># Boolean if plus or minus has to be calculated</span>
+    <span class="n">plusset</span> <span class="o">=</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">35</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">TM</span><span class="p">:</span>
+        <span class="n">plus</span> <span class="o">=</span> <span class="n">ab</span> <span class="ow">in</span> <span class="n">plusset</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plus</span> <span class="o">=</span> <span class="n">ab</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">plusset</span>
+
+    <span class="c1"># Sign-switches</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="mi">1</span>     <span class="c1"># + if plus=True, - if plus=False</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plus</span><span class="p">:</span>
+        <span class="n">pm</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">pup</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c1"># + if up=True,   - if up=False</span>
+    <span class="n">mupm</span> <span class="o">=</span> <span class="mi">1</span>   <span class="c1"># + except if up=True and plus=False</span>
+
+    <span class="c1"># Calculate down- and up-going fields</span>
+    <span class="k">for</span> <span class="n">up</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]:</span>
+
+        <span class="c1"># No upgoing field if rec is in last layer or below src</span>
+        <span class="k">if</span> <span class="n">up</span> <span class="ow">and</span> <span class="p">(</span><span class="n">lrec</span> <span class="o">==</span> <span class="n">depth</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">lrec</span> <span class="o">&gt;</span> <span class="n">lsrc</span><span class="p">):</span>
+            <span class="n">Pu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">0</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="c1"># No downgoing field if rec is in first layer or above src</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">up</span> <span class="ow">and</span> <span class="p">(</span><span class="n">lrec</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">lrec</span> <span class="o">&lt;</span> <span class="n">lsrc</span><span class="p">):</span>
+            <span class="n">Pd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">0</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Swaps if up=True</span>
+        <span class="k">if</span> <span class="n">up</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">last_layer</span><span class="p">:</span>
+                <span class="n">dp</span><span class="p">,</span> <span class="n">dm</span> <span class="o">=</span> <span class="n">dm</span><span class="p">,</span> <span class="n">dp</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dp</span> <span class="o">=</span> <span class="n">dm</span>
+            <span class="n">Rmp</span><span class="p">,</span> <span class="n">Rpm</span> <span class="o">=</span> <span class="n">Rpm</span><span class="p">,</span> <span class="n">Rmp</span>
+            <span class="n">first_layer</span><span class="p">,</span> <span class="n">last_layer</span> <span class="o">=</span> <span class="n">last_layer</span><span class="p">,</span> <span class="n">first_layer</span>
+            <span class="n">rsrcl</span> <span class="o">=</span> <span class="n">nlsr</span><span class="o">-</span><span class="mi">1</span>  <span class="c1"># src-layer in refl. (Rp/Rm), last (nlsr-1) if up</span>
+            <span class="n">izrange</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">nlsr</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">isr</span> <span class="o">=</span> <span class="n">lrec</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">pup</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">plus</span><span class="p">:</span>
+                <span class="n">mupm</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># Calculate Pu+, Pu-, Pd+, Pd-</span>
+        <span class="k">if</span> <span class="n">lsrc</span> <span class="o">==</span> <span class="n">lrec</span><span class="p">:</span>  <span class="c1"># rec in src layer; Eqs  81/82, A-8/A-9</span>
+            <span class="n">iGam</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">last_layer</span><span class="p">:</span>  <span class="c1"># If src/rec are in top (up) or bottom (down) layer</span>
+                <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                    <span class="n">P</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;Rmp*exp(-iGam*dm)&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">P</span> <span class="o">=</span> <span class="n">Rmp</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">iGam</span><span class="o">*</span><span class="n">dm</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>           <span class="c1"># If src and rec are in any layer in between</span>
+                <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                    <span class="n">Ms</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;1-Rmp*Rpm*exp(-2*iGam*ds)&quot;</span><span class="p">)</span>
+                    <span class="n">P</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;Rmp/Ms*(exp(-iGam*dm) + &quot;</span> <span class="o">+</span>
+                                <span class="s2">&quot;pm*Rpm*exp(-iGam*(ds+dp)))&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">Ms</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">Rmp</span><span class="o">*</span><span class="n">Rpm</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">iGam</span><span class="o">*</span><span class="n">ds</span><span class="p">)</span>
+                    <span class="n">P</span> <span class="o">=</span> <span class="n">Rmp</span><span class="o">/</span><span class="n">Ms</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">iGam</span><span class="o">*</span><span class="n">dm</span><span class="p">)</span> <span class="o">+</span>
+                                <span class="n">pm</span><span class="o">*</span><span class="n">Rpm</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">iGam</span><span class="o">*</span><span class="p">(</span><span class="n">ds</span><span class="o">+</span><span class="n">dp</span><span class="p">)))</span>
+
+        <span class="k">else</span><span class="p">:</span>           <span class="c1"># rec above (up) / below (down) src layer</span>
+                        <span class="c1"># Eqs  95/96,  A-24/A-25 for rec above src layer</span>
+                        <span class="c1"># Eqs 103/104, A-32/A-33 for rec below src layer</span>
+
+            <span class="c1"># First compute P_{s-1} (up) / P_{s+1} (down)</span>
+            <span class="n">iRpm</span> <span class="o">=</span> <span class="n">Rpm</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">rsrcl</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">iGam</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">first_layer</span><span class="p">:</span>  <span class="c1"># If src is in bottom (up) / top (down) layer</span>
+                <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                    <span class="n">P</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;(1 + iRpm)*mupm*exp(-iGam*dp)&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">P</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">iRpm</span><span class="p">)</span><span class="o">*</span><span class="n">mupm</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">iGam</span><span class="o">*</span><span class="n">dp</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">iRmp</span> <span class="o">=</span> <span class="n">Rmp</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">rsrcl</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                    <span class="n">Ms</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;(1 - iRmp*iRpm * exp(-2*iGam*ds))&quot;</span><span class="p">)</span>
+                    <span class="n">P</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;((1 + iRpm)*(mupm*exp(-iGam*dp) + &quot;</span> <span class="o">+</span>
+                                <span class="s2">&quot;pm*mupm*iRmp*exp(-iGam * (ds+dm))))/Ms&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">Ms</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">iRmp</span><span class="o">*</span><span class="n">iRpm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">iGam</span><span class="o">*</span><span class="n">ds</span><span class="p">)</span>
+                    <span class="n">P</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">iRpm</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">mupm</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">iGam</span><span class="o">*</span><span class="n">dp</span><span class="p">)</span> <span class="o">+</span>
+                         <span class="n">pm</span><span class="o">*</span><span class="n">mupm</span><span class="o">*</span><span class="n">iRmp</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">iGam</span> <span class="o">*</span> <span class="p">(</span><span class="n">ds</span><span class="o">+</span><span class="n">dm</span><span class="p">))))</span><span class="o">/</span><span class="n">Ms</span>
+
+            <span class="c1"># If up or down and src is in last but one layer</span>
+            <span class="k">if</span> <span class="n">up</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">up</span> <span class="ow">and</span> <span class="n">lsrc</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">ddepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">lsrc</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">pup</span><span class="p">]</span><span class="o">-</span><span class="n">depth</span><span class="p">[</span><span class="n">lsrc</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">pup</span><span class="p">]</span>
+                <span class="n">iRpm</span> <span class="o">=</span> <span class="n">Rpm</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">rsrcl</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">pup</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">iGam</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">lsrc</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">pup</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                    <span class="n">P</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;P/(1 + iRpm*exp(-2*iGam * ddepth))&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">P</span> <span class="o">/=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">iRpm</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">iGam</span> <span class="o">*</span> <span class="n">ddepth</span><span class="p">))</span>
+
+            <span class="c1"># Second compute P for all other layers</span>
+            <span class="k">if</span> <span class="n">nlsr</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">iz</span> <span class="ow">in</span> <span class="n">izrange</span><span class="p">:</span>
+                    <span class="n">ddepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">isr</span><span class="o">+</span><span class="n">iz</span><span class="o">+</span><span class="n">pup</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">depth</span><span class="p">[</span><span class="n">isr</span><span class="o">+</span><span class="n">iz</span><span class="o">+</span><span class="n">pup</span><span class="p">]</span>
+                    <span class="n">iRpm</span> <span class="o">=</span> <span class="n">Rpm</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">iz</span><span class="o">+</span><span class="n">pup</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">iGam</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">isr</span><span class="o">+</span><span class="n">iz</span><span class="o">+</span><span class="n">pup</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                        <span class="n">P</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;P*(1 + iRpm)*exp(-iGam * ddepth)&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">P</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">iRpm</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">iGam</span> <span class="o">*</span> <span class="n">ddepth</span><span class="p">)</span>
+
+                    <span class="c1"># If rec/src NOT in first/last layer (up/down)</span>
+                    <span class="k">if</span> <span class="n">isr</span><span class="o">+</span><span class="n">iz</span> <span class="o">!=</span> <span class="n">last</span><span class="p">:</span>
+                        <span class="n">ddepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">[</span><span class="n">isr</span><span class="o">+</span><span class="n">iz</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">depth</span><span class="p">[</span><span class="n">isr</span><span class="o">+</span><span class="n">iz</span><span class="p">]</span>
+                        <span class="n">iRpm</span> <span class="o">=</span> <span class="n">Rpm</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">iz</span><span class="p">,</span> <span class="p">:]</span>
+                        <span class="n">iGam</span> <span class="o">=</span> <span class="n">Gam</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">isr</span><span class="o">+</span><span class="n">iz</span><span class="p">,</span> <span class="p">:]</span>
+                        <span class="k">if</span> <span class="n">use_ne_eval</span><span class="p">:</span>
+                            <span class="n">P</span> <span class="o">=</span> <span class="n">ne_eval</span><span class="p">(</span><span class="s2">&quot;P/(1 + iRpm*exp(-2*iGam * ddepth))&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">P</span> <span class="o">/=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">iRpm</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">iGam</span> <span class="o">*</span> <span class="n">ddepth</span><span class="p">)</span>
+
+        <span class="c1"># Store P in Pu/Pd</span>
+        <span class="k">if</span> <span class="n">up</span><span class="p">:</span>
+            <span class="n">Pu</span> <span class="o">=</span> <span class="n">P</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Pd</span> <span class="o">=</span> <span class="n">P</span>
+
+    <span class="c1"># Return fields (up- and downgoing)</span>
+    <span class="k">return</span> <span class="n">Pu</span><span class="p">,</span> <span class="n">Pd</span></div>
+
+
+<div class="viewcode-block" id="halfspace"><a class="viewcode-back" href="../../empymod.html#empymod.kernel.halfspace">[docs]</a><span class="k">def</span> <span class="nf">halfspace</span><span class="p">(</span><span class="n">xco</span><span class="p">,</span> <span class="n">yco</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">aniso</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ab</span><span class="o">=</span><span class="mi">11</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return frequency-space domain VTI half-space solution.</span>
+
+<span class="sd">    Calculates the frequency-space domain electromagnetic response for a</span>
+<span class="sd">    half-space below air using the diffusive approximation, as given in</span>
+<span class="sd">    [Slob_et_al_2010]_.</span>
+
+<span class="sd">    This routine is not strictly part of `empymod` and not used by it.</span>
+<span class="sd">    However, it can be useful to compare the code to the analytical solution.</span>
+
+<span class="sd">    There are a few known typos in the equations of [Slob_et_al_2010]_. Write</span>
+<span class="sd">    the authors to receive an updated version!</span>
+
+<span class="sd">    This could be integrated into `empymod` by checking if the top-layer is a</span>
+<span class="sd">    very resistive layer, hence air, and the rest is a half-space, and then</span>
+<span class="sd">    calling this function instead of `wavenumber`. (Similar to the way</span>
+<span class="sd">    `fullspace` is incorporated if all layer parameters are identical.) The</span>
+<span class="sd">    time-space domain solution could be implemented as well.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xco, yco : array</span>
+<span class="sd">        Inline and crossline coordinates (m)</span>
+<span class="sd">    zsrc, zrec : float</span>
+<span class="sd">        Source and receiver depth (m)</span>
+<span class="sd">    res : float or array</span>
+<span class="sd">        Half-space resistivity (Ohm.m)</span>
+<span class="sd">    freq : float</span>
+<span class="sd">        Frequency (Hz)</span>
+<span class="sd">    aniso : float, optional</span>
+<span class="sd">       Anisotropy (-), default = 1</span>
+<span class="sd">    ab : int, optional</span>
+<span class="sd">       Src-Rec config, default = 11; {11, 12, 13, 21, 22, 23, 31, 32, 33}</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    EM half-space solution</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from empymod.kernel import halfspace</span>
+<span class="sd">    &gt;&gt;&gt; EM = halfspace(1000, 0, 10, 1, 10, 1)</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;HS response : &#39;, EM)</span>
+<span class="sd">    HS response :  (3.02186073352e-09-3.87322421836e-10j)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># As `halfspace` is not strictly part of `empymod`, module imports are</span>
+    <span class="c1"># here, so they are only imported if needed</span>
+    <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">ive</span><span class="p">,</span> <span class="n">kve</span>  <span class="c1"># Modified Bessel functions</span>
+    <span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="k">import</span> <span class="n">mu_0</span>    <span class="c1"># Magn. perm.y of free space  [H/m]</span>
+
+    <span class="c1"># Cast input</span>
+    <span class="n">xco</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xco</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">yco</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">yco</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">zsrc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">zrec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">zrec</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">aniso</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">aniso</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">ab</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ab</span><span class="p">)</span>
+
+    <span class="c1"># Defined parameters</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="mi">2</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">freq</span>  <span class="c1"># Laplace parameter</span>
+    <span class="c1">#</span>
+    <span class="n">zeta</span> <span class="o">=</span> <span class="n">s</span><span class="o">*</span><span class="n">mu_0</span>
+    <span class="n">gamH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">zeta</span><span class="o">/</span><span class="n">res</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="n">rh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xco</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">yco</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># Horizontal distance in space</span>
+    <span class="n">hp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">zrec</span> <span class="o">+</span> <span class="n">zsrc</span><span class="p">)</span>       <span class="c1"># Physical vertical distance</span>
+    <span class="n">hm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">zrec</span> <span class="o">-</span> <span class="n">zsrc</span><span class="p">)</span>
+    <span class="n">hsp</span> <span class="o">=</span> <span class="n">hp</span><span class="o">*</span><span class="n">aniso</span>                 <span class="c1"># Scaled vertical distance</span>
+    <span class="n">hsm</span> <span class="o">=</span> <span class="n">hm</span><span class="o">*</span><span class="n">aniso</span>
+    <span class="n">rp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xco</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">yco</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">hp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>    <span class="c1"># Physical distance</span>
+    <span class="n">rm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xco</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">yco</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">hm</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">rsp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xco</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">yco</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">hsp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># Scaled distance</span>
+    <span class="n">rsm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xco</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">yco</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">hsm</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="n">mu_0</span><span class="o">*</span><span class="n">rp</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">res</span><span class="o">*</span><span class="mi">4</span><span class="p">)</span>             <span class="c1"># Diffusion time</span>
+    <span class="n">tm</span> <span class="o">=</span> <span class="n">mu_0</span><span class="o">*</span><span class="n">rm</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">res</span><span class="o">*</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">tsp</span> <span class="o">=</span> <span class="n">mu_0</span><span class="o">*</span><span class="n">rsp</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">res</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># Scaled diffusion time</span>
+    <span class="n">tsm</span> <span class="o">=</span> <span class="n">mu_0</span><span class="o">*</span><span class="n">rsm</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">res</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="mi">4</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="n">xip</span> <span class="o">=</span> <span class="n">gamH</span><span class="o">*</span><span class="p">(</span><span class="n">rp</span> <span class="o">+</span> <span class="n">hp</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">xim</span> <span class="o">=</span> <span class="n">gamH</span><span class="o">*</span><span class="p">(</span><span class="n">rp</span> <span class="o">-</span> <span class="n">hp</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+
+    <span class="c1"># delta-fct delta_\alpha\beta</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">33</span><span class="p">]:</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># src-rec type</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="o">==</span> <span class="mi">33</span><span class="p">:</span>
+        <span class="n">srcrec</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">]:</span>
+        <span class="n">srcrec</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">srcrec</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Define alpha/beta; swap if necessary</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">xco</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">yco</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="o">==</span> <span class="mi">11</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">32</span><span class="p">]:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">y</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="o">==</span> <span class="mi">21</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span>
+
+    <span class="c1"># Define rev for 3\alpha-&gt;\alpha3 reciprocity</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">23</span><span class="p">]:</span>
+        <span class="n">rev</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">]:</span>
+        <span class="n">rev</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Exponential diffusion functions for m=0,1,2</span>
+    <span class="n">f0p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">tp</span><span class="p">))</span>
+    <span class="n">f0m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">tm</span><span class="p">))</span>
+    <span class="n">fs0p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">tsp</span><span class="p">))</span>
+    <span class="n">fs0m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">tsm</span><span class="p">))</span>
+    <span class="n">f1p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">*</span><span class="n">f0p</span>
+    <span class="n">f1m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">*</span><span class="n">f0m</span>
+    <span class="n">fs1p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">*</span><span class="n">fs0p</span>
+    <span class="n">fs1m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">*</span><span class="n">fs0m</span>
+    <span class="n">f2p</span> <span class="o">=</span> <span class="n">s</span><span class="o">*</span><span class="n">f0p</span>
+    <span class="n">f2m</span> <span class="o">=</span> <span class="n">s</span><span class="o">*</span><span class="n">f0m</span>
+    <span class="n">fs2p</span> <span class="o">=</span> <span class="n">s</span><span class="o">*</span><span class="n">fs0p</span>
+    <span class="n">fs2m</span> <span class="o">=</span> <span class="n">s</span><span class="o">*</span><span class="n">fs0m</span>
+
+    <span class="c1"># Bessel functions</span>
+    <span class="n">BI0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">gamH</span><span class="p">)</span><span class="o">*</span><span class="n">hp</span><span class="p">)</span><span class="o">*</span><span class="n">ive</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xim</span><span class="p">)</span>
+    <span class="n">BI1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">gamH</span><span class="p">)</span><span class="o">*</span><span class="n">hp</span><span class="p">)</span><span class="o">*</span><span class="n">ive</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xim</span><span class="p">)</span>
+    <span class="n">BI2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">gamH</span><span class="p">)</span><span class="o">*</span><span class="n">hp</span><span class="p">)</span><span class="o">*</span><span class="n">ive</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">xim</span><span class="p">)</span>
+    <span class="n">BK0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">xip</span><span class="p">))</span><span class="o">*</span><span class="n">kve</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xip</span><span class="p">)</span>
+    <span class="n">BK1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">xip</span><span class="p">))</span><span class="o">*</span><span class="n">kve</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xip</span><span class="p">)</span>
+
+    <span class="c1"># Pre-allocate arrays</span>
+    <span class="n">gs0m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">gs0p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">gs1m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">gs1p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">gs2m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">gs2p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">g0p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">g1m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">g1p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">g2m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">g2p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+    <span class="n">outP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">srcrec</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># 1. {alpha, beta}</span>
+        <span class="c1"># Get indices for singularities</span>
+        <span class="n">izr</span> <span class="o">=</span> <span class="n">rh</span> <span class="o">==</span> <span class="mi">0</span>         <span class="c1"># index where rh = 0</span>
+        <span class="n">iir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">izr</span><span class="p">)</span>  <span class="c1"># invert of izr</span>
+        <span class="n">izh</span> <span class="o">=</span> <span class="n">hm</span> <span class="o">==</span> <span class="mi">0</span>         <span class="c1"># index where hm = 0</span>
+        <span class="n">iih</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">izh</span><span class="p">)</span>  <span class="c1"># invert of izh</span>
+
+        <span class="c1"># fab</span>
+        <span class="n">fab</span> <span class="o">=</span> <span class="n">rh</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="o">-</span><span class="n">x</span><span class="o">*</span><span class="n">y</span>
+
+        <span class="c1"># TM-mode coefficients</span>
+        <span class="n">gs0p</span> <span class="o">=</span> <span class="n">res</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">y</span> <span class="o">-</span> <span class="n">rsp</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsp</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">gs0m</span> <span class="o">=</span> <span class="n">res</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">y</span> <span class="o">-</span> <span class="n">rsm</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsm</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">gs1p</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">=</span> <span class="p">(((</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">-</span> <span class="n">rsp</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span><span class="o">/</span><span class="n">rsp</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span> <span class="o">-</span>
+                     <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">-</span> <span class="n">fab</span><span class="p">[</span><span class="n">iir</span><span class="p">])</span><span class="o">/</span><span class="n">rh</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span> <span class="o">*</span>
+                     <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+        <span class="n">gs1m</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">=</span> <span class="p">(((</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">-</span> <span class="n">rsm</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span><span class="o">/</span><span class="n">rsm</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span> <span class="o">-</span>
+                     <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">-</span> <span class="n">fab</span><span class="p">[</span><span class="n">iir</span><span class="p">])</span><span class="o">/</span><span class="n">rh</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span> <span class="o">*</span>
+                     <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+        <span class="n">gs2p</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">mu_0</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">iir</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="n">rsp</span><span class="p">[</span><span class="n">iir</span><span class="p">])</span> <span class="o">*</span>
+                     <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">rsp</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="n">rh</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">gs2m</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">mu_0</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">iir</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="n">rsm</span><span class="p">[</span><span class="n">iir</span><span class="p">])</span> <span class="o">*</span>
+                     <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">rsm</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="n">rh</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="c1"># TM-mode for numerical singularities rh=0 (hm!=0)</span>
+        <span class="n">gs1p</span><span class="p">[</span><span class="n">izr</span><span class="o">*</span><span class="n">iih</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">hsp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">gs1m</span><span class="p">[</span><span class="n">izr</span><span class="o">*</span><span class="n">iih</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">hsm</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">gs2p</span><span class="p">[</span><span class="n">izr</span><span class="o">*</span><span class="n">iih</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu_0</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="n">hsp</span><span class="p">)</span>
+        <span class="n">gs2m</span><span class="p">[</span><span class="n">izr</span><span class="o">*</span><span class="n">iih</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu_0</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="n">hsm</span><span class="p">)</span>
+
+        <span class="c1"># TE-mode coefficients</span>
+        <span class="n">g0p</span> <span class="o">=</span> <span class="n">res</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">fab</span> <span class="o">-</span> <span class="n">rp</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rp</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">g1m</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">-</span> <span class="n">fab</span><span class="p">[</span><span class="n">iir</span><span class="p">])</span> <span class="o">/</span>
+                    <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rh</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">g1p</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">g1m</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">fab</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">-</span>
+                    <span class="n">rp</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rp</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">g2p</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu_0</span><span class="o">*</span><span class="n">fab</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rp</span><span class="p">[</span><span class="n">iir</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="n">rp</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span>
+                                                    <span class="mi">1</span><span class="o">/</span><span class="n">rh</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">g2m</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu_0</span><span class="o">*</span><span class="n">fab</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rh</span><span class="p">[</span><span class="n">iir</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">rm</span><span class="p">[</span><span class="n">iir</span><span class="p">])</span>
+
+        <span class="c1"># TE-mode for numerical singularities rh=0 (hm!=0)</span>
+        <span class="n">g1m</span><span class="p">[</span><span class="n">izr</span><span class="o">*</span><span class="n">iih</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">g1m</span><span class="p">[</span><span class="n">izr</span><span class="o">*</span><span class="n">iih</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="n">g1p</span><span class="p">[</span><span class="n">izr</span><span class="o">*</span><span class="n">iih</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">hp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">g2m</span><span class="p">[</span><span class="n">izr</span><span class="o">*</span><span class="n">iih</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu_0</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">hm</span><span class="p">)</span>
+        <span class="n">g2p</span><span class="p">[</span><span class="n">izr</span><span class="o">*</span><span class="n">iih</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu_0</span><span class="o">*</span><span class="n">delta</span><span class="o">/</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">hp</span><span class="p">)</span>
+
+        <span class="c1"># Airwave (eq. 35)</span>
+        <span class="n">P1</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">mu_0</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">fab</span><span class="o">*</span><span class="n">hp</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
+        <span class="n">P2</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">BI1</span><span class="o">*</span><span class="n">BK0</span> <span class="o">-</span> <span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">BI0</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="n">BI1</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">mu_0</span><span class="p">)</span> <span class="o">*</span>
+                          <span class="p">(</span><span class="n">rp</span> <span class="o">+</span> <span class="n">hp</span><span class="p">))</span> <span class="o">+</span> <span class="n">BI2</span><span class="p">)</span><span class="o">*</span><span class="n">BK1</span>
+        <span class="n">P3</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">fab</span><span class="o">/</span><span class="n">rp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">delta</span>
+        <span class="n">P4</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="n">mu_0</span><span class="o">*</span><span class="n">hp</span><span class="o">*</span><span class="n">rp</span><span class="o">*</span><span class="p">(</span><span class="n">BI0</span><span class="o">*</span><span class="n">BK0</span> <span class="o">-</span> <span class="n">BI1</span><span class="o">*</span><span class="n">BK1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">res</span><span class="o">*</span><span class="n">s</span><span class="o">*</span><span class="n">mu_0</span><span class="p">)</span><span class="o">*</span><span class="n">BI0</span><span class="o">*</span><span class="n">BK1</span> <span class="o">*</span>
+              <span class="p">(</span><span class="n">rp</span> <span class="o">+</span> <span class="n">hp</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">res</span><span class="o">*</span><span class="n">s</span><span class="o">*</span><span class="n">mu_0</span><span class="p">)</span><span class="o">*</span><span class="n">BI1</span><span class="o">*</span><span class="n">BK0</span><span class="o">*</span><span class="p">(</span><span class="n">rp</span> <span class="o">-</span> <span class="n">hp</span><span class="p">))</span>
+
+        <span class="n">outP</span> <span class="o">=</span> <span class="p">(</span><span class="n">P1</span><span class="o">*</span><span class="n">P2</span> <span class="o">-</span> <span class="n">P3</span><span class="o">*</span><span class="n">P4</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rp</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">srcrec</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># 2. {3, alpha}, {alpha, 3}</span>
+        <span class="c1"># TM-mode</span>
+        <span class="n">gs0m</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">res</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">zrec</span> <span class="o">-</span> <span class="n">zsrc</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsm</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">gs0p</span> <span class="o">=</span> <span class="n">rev</span><span class="o">*</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">res</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="n">hp</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsp</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">gs1m</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="p">(</span><span class="n">zrec</span> <span class="o">-</span> <span class="n">zsrc</span><span class="p">)</span> <span class="o">/</span>
+                <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsm</span><span class="o">**</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">gs1p</span> <span class="o">=</span> <span class="n">rev</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">hp</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsp</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">gs2m</span> <span class="o">=</span> <span class="n">mu_0</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="p">(</span><span class="n">zrec</span> <span class="o">-</span> <span class="n">zsrc</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsm</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">gs2p</span> <span class="o">=</span> <span class="n">rev</span><span class="o">*</span><span class="n">mu_0</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="n">hp</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsp</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">srcrec</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># 3. {3, 3}</span>
+        <span class="c1"># TM-mode</span>
+        <span class="n">gs0m</span> <span class="o">=</span> <span class="n">res</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">hsm</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">rsm</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsm</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">gs0p</span> <span class="o">=</span> <span class="o">-</span><span class="n">res</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">hsp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">rsp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsp</span><span class="o">**</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">gs1m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">hsm</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">rsm</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsm</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">gs1p</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mu_0</span><span class="o">*</span><span class="n">res</span><span class="p">)</span><span class="o">*</span><span class="n">aniso</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">hsp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">rsp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsp</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">gs2m</span> <span class="o">=</span> <span class="n">mu_0</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="p">(</span><span class="n">hsm</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">rsm</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsm</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">gs2p</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu_0</span><span class="o">*</span><span class="n">aniso</span><span class="o">*</span><span class="p">(</span><span class="n">hsp</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">rsp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rsp</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">outTM</span> <span class="o">=</span> <span class="p">(</span><span class="n">gs0m</span><span class="o">*</span><span class="n">fs0m</span> <span class="o">+</span> <span class="n">gs0p</span><span class="o">*</span><span class="n">fs0p</span> <span class="o">+</span> <span class="n">gs1m</span><span class="o">*</span><span class="n">fs1m</span> <span class="o">+</span>
+             <span class="n">gs1p</span><span class="o">*</span><span class="n">fs1p</span> <span class="o">+</span> <span class="n">gs2m</span><span class="o">*</span><span class="n">fs2m</span> <span class="o">+</span> <span class="n">gs2p</span><span class="o">*</span><span class="n">fs2p</span><span class="p">)</span>
+    <span class="n">outTE</span> <span class="o">=</span> <span class="n">g0p</span><span class="o">*</span><span class="n">f0p</span> <span class="o">+</span> <span class="n">g1m</span><span class="o">*</span><span class="n">f1m</span> <span class="o">+</span> <span class="n">g1p</span><span class="o">*</span><span class="n">f1p</span> <span class="o">+</span> <span class="n">g2m</span><span class="o">*</span><span class="n">f2m</span> <span class="o">+</span> <span class="n">g2p</span><span class="o">*</span><span class="n">f2p</span>
+
+    <span class="k">return</span> <span class="n">outTE</span> <span class="o">+</span> <span class="n">outTM</span> <span class="o">+</span> <span class="n">outP</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Dieter Werthmüller.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

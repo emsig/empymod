@@ -1,0 +1,691 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>empymod.model &#8212; empymod 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="empymod 0.9 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for empymod.model</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">:mod:`model` -- Model EM-responses</span>
+<span class="sd">==================================</span>
+
+<span class="sd">EM-modelling routines. So far implemented:</span>
+<span class="sd">    - `frequency`:  Calculate the electromagnetic field for various frequencies</span>
+<span class="sd">                    and offsets.</span>
+<span class="sd">    - `time`:       Calculate the electromagnetic field for various times</span>
+<span class="sd">                    and offsets.</span>
+
+<span class="sd">The above routines make use of the two core routines:</span>
+<span class="sd">    - `fem`:        Calculate wavenumber-domain electromagnetic field and carry</span>
+<span class="sd">                    out the Hankel transform to the frequency domain.</span>
+<span class="sd">    - `tem`:        Calculate `fem` and carry out Fourier transform to time</span>
+<span class="sd">                    domain.</span>
+
+<span class="sd">Two more routines are more kind of examples and cannot be regarded stable:</span>
+<span class="sd">    - `gpr`:        Calculate the Ground-Penetrating Radar (GPR) response.</span>
+<span class="sd">    - `wavenumber`: Calculate the electromagnetic wavenumber-domain solution.</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Copyright 2016 Dieter Werthmüller</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of `empymod`.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not</span>
+<span class="c1"># use this file except in compliance with the License.  You may obtain a copy</span>
+<span class="c1"># of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT</span>
+<span class="c1"># WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the</span>
+<span class="c1"># License for the specific language governing permissions and limitations under</span>
+<span class="c1"># the License.</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">utils</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;gpr&#39;</span><span class="p">,</span> <span class="s1">&#39;wavenumber&#39;</span><span class="p">,</span> <span class="s1">&#39;fem&#39;</span><span class="p">,</span> <span class="s1">&#39;tem&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="frequency"><a class="viewcode-back" href="../../empymod.html#empymod.model.frequency">[docs]</a><span class="k">def</span> <span class="nf">frequency</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ab</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">aniso</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+              <span class="n">epermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ht</span><span class="o">=</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span>
+              <span class="n">htarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the electromagnetic frequency-domain field.</span>
+
+<span class="sd">    Calculate the electromagnetic field for various frequencies and offsets</span>
+<span class="sd">    (one src-rec-configuration).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    src : list of floats</span>
+<span class="sd">        Source coordinates (m): [src-x, src-y, src-z]. All single values (no</span>
+<span class="sd">        arrays)</span>
+
+<span class="sd">    rec : list of floats or arrays</span>
+<span class="sd">        Receiver coordinates (m): [rec-x, rec-y, rec-z].</span>
+<span class="sd">        The x- and y-coordinates can be arrays, z is a single value.</span>
+<span class="sd">        The x- and y-coordinates must have the same dimension.</span>
+
+<span class="sd">    depth : list</span>
+<span class="sd">        Absolute layer boundaries z (m); #depth = #res - 1</span>
+<span class="sd">        (excluding +/- infinity).</span>
+
+<span class="sd">    res : array_like</span>
+<span class="sd">        Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.</span>
+
+<span class="sd">    freq : array_like</span>
+<span class="sd">        Frequencies f (Hz)</span>
+
+<span class="sd">    ab : int, optional</span>
+<span class="sd">        Source-receiver configuration, defaults to 11.</span>
+
+<span class="sd">        +---------------+-------+------+------+------+------+------+------+</span>
+<span class="sd">        |                       | electric  source   | magnetic source    |</span>
+<span class="sd">        +===============+=======+======+======+======+======+======+======+</span>
+<span class="sd">        |                       | **x**| **y**| **z**| **x**| **y**| **z**|</span>
+<span class="sd">        +---------------+-------+------+------+------+------+------+------+</span>
+<span class="sd">        |               | **x** |  11  |  12  |  13  |  14  |  15  |  16  |</span>
+<span class="sd">        + **electric**  +-------+------+------+------+------+------+------+</span>
+<span class="sd">        |               | **y** |  21  |  22  |  23  |  24  |  25  |  26  |</span>
+<span class="sd">        + **receiver**  +-------+------+------+------+------+------+------+</span>
+<span class="sd">        |               | **z** |  31  |  32  |  33  |  34  |  35  |  36  |</span>
+<span class="sd">        +---------------+-------+------+------+------+------+------+------+</span>
+<span class="sd">        |               | **x** |  41  |  42  |  43  |  44  |  45  |  46  |</span>
+<span class="sd">        + **magnetic**  +-------+------+------+------+------+------+------+</span>
+<span class="sd">        |               | **y** |  51  |  52  |  53  |  54  |  55  |  56  |</span>
+<span class="sd">        + **receiver**  +-------+------+------+------+------+------+------+</span>
+<span class="sd">        |               | **z** |  61  |  62  |  63  |  64  |  65  |  66  |</span>
+<span class="sd">        +---------------+-------+------+------+------+------+------+------+</span>
+
+<span class="sd">    aniso : array_like, optional</span>
+<span class="sd">        Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    epermH : array_like, optional</span>
+<span class="sd">        Horizontal electric permittivities epsilon_h (-); #epermH = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    epermV : array_like, optional</span>
+<span class="sd">        Vertical electric permittivities epsilon_v (-); #epermV = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    mpermH : array_like, optional</span>
+<span class="sd">        Horizontal magnetic permeabilities mu_h (-); #mpermH = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    mpermV : array_like, optional</span>
+<span class="sd">        Vertical magnetic permeabilities mu_v (-); #mpermV = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    xdirect : bool, optional</span>
+<span class="sd">        If True and source and receiver are in the same layer, the direct field</span>
+<span class="sd">        is calculated analytically in the frequency domain, if False it is</span>
+<span class="sd">        calculated in the wavenumber domain.</span>
+<span class="sd">        Defaults to True.</span>
+
+<span class="sd">    ht : {&#39;fht&#39;, &#39;qwe&#39;}, optional</span>
+<span class="sd">        Flag to choose either the *Fast Hankel Transform* (FHT) or the</span>
+<span class="sd">        *Quadrature-With-Extrapolation* (QWE) for the Hankel transform.</span>
+<span class="sd">        Defaults to &#39;fht&#39;.</span>
+
+<span class="sd">    htarg : str or filter from empymod.filters or array_like, optional</span>
+<span class="sd">        Depends on the value for `ht`:</span>
+<span class="sd">            - If `ht` = &#39;fht&#39;: array containing:</span>
+<span class="sd">              [filter, pts_per_dec]:</span>
+
+<span class="sd">                - filter: string of filter name in `empymod.filters` or</span>
+<span class="sd">                          the filter method itself.</span>
+<span class="sd">                          (default: `empymod.filters.key_401_2009()`)</span>
+<span class="sd">                - pts_per_dec: points per decade (only relevant if spline=True)</span>
+<span class="sd">                               If none, standard lagged convolution is used.</span>
+<span class="sd">                                (default: None)</span>
+
+<span class="sd">            - If `ht` = &#39;qwe&#39;: array containing:</span>
+<span class="sd">              [rtol, atol, nquad, maxint, pts_per_dec]:</span>
+
+<span class="sd">                - rtol: relative tolerance (default: 1e-12)</span>
+<span class="sd">                - atol: absolute tolerance (default: 1e-30)</span>
+<span class="sd">                - nquad: order of Gaussian quadrature (default: 51)</span>
+<span class="sd">                - maxint: maximum number of partial integral intervals</span>
+<span class="sd">                  (default: 40)</span>
+<span class="sd">                - pts_per_dec: points per decade (only relevant if</span>
+<span class="sd">                  opt=&#39;spline&#39;) (default: 80)</span>
+
+<span class="sd">              All are optional, you only have to maintain the order. To only</span>
+<span class="sd">              change `nquad` to 11 and use the defaults otherwise, you can</span>
+<span class="sd">              provide htarg=[&#39;&#39;, &#39;&#39;, 11].</span>
+
+<span class="sd">    opt : {None, &#39;parallel&#39;, &#39;spline&#39;}, optional</span>
+<span class="sd">        Optimization flag. Defaults to None:</span>
+<span class="sd">            - None: Normal case, no parallelization nor interpolation is used.</span>
+<span class="sd">            - If &#39;parallel&#39;, the package `numexpr` is used to evaluate the most</span>
+<span class="sd">              expensive statements. Always check if it actually improves</span>
+<span class="sd">              performance for a specific problem. It can speed up the</span>
+<span class="sd">              calculation for big arrays, but will most likely be slower for</span>
+<span class="sd">              small arrays. It will use all available cores for these specific</span>
+<span class="sd">              statements, which all contain `Gamma` in one way or another,</span>
+<span class="sd">              which has dimensions (#frequencies, #offsets, #layers, #lambdas),</span>
+<span class="sd">              therefore can grow pretty big.</span>
+<span class="sd">            - If &#39;spline&#39;, the *lagged convolution* or *splined* variant of the</span>
+<span class="sd">              FHT or the *splined* version of the QWE are used. Use with</span>
+<span class="sd">              caution and check with the non-spline version for a specific</span>
+<span class="sd">              problem. (Can be faster, slower, or plainly wrong, as it uses</span>
+<span class="sd">              interpolation.) If spline is set it will make use of the</span>
+<span class="sd">              parameter pts_per_dec that can be defined in htarg. If</span>
+<span class="sd">              pts_per_dec is not set for FHT, then the *lagged* version is</span>
+<span class="sd">              used, else the *splined*.</span>
+
+<span class="sd">        The option &#39;parallel&#39; only affects speed and memory usage, whereas</span>
+<span class="sd">        &#39;spline&#39; also affects precision!  Please read the note in the *README*</span>
+<span class="sd">        documentation for more information.</span>
+
+<span class="sd">    loop : {None, &#39;freq&#39;, &#39;off&#39;}, optional</span>
+<span class="sd">        Define if to calculate everything vectorized or if to loop over</span>
+<span class="sd">        frequencies (&#39;freq&#39;) or over offsets (&#39;off&#39;), default is None. It</span>
+<span class="sd">        always loops over frequencies if ``ht = &#39;qwe&#39;`` or if ``opt =</span>
+<span class="sd">        &#39;spline&#39;``. Calculating everything vectorized is fast for few offsets</span>
+<span class="sd">        OR for few frequencies. However, if you calculate many frequencies for</span>
+<span class="sd">        many offsets, it might be faster to loop over frequencies. Only</span>
+<span class="sd">        comparing the different versions will yield the answer for your</span>
+<span class="sd">        specific problem at hand!</span>
+
+<span class="sd">    verb : {0, 1, 2}, optional</span>
+<span class="sd">        Level of verbosity, defaults to 1:</span>
+<span class="sd">            - 0: Print nothing.</span>
+<span class="sd">            - 1: Print warnings.</span>
+<span class="sd">            - 2: Print warnings and information.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fEM : ndarray</span>
+<span class="sd">        Frequency-domain electromagnetic field:</span>
+<span class="sd">            - If rec is electric, returns E [V/m].</span>
+<span class="sd">            - If rec is magnetic, returns B [T] (not H [A/m]!).</span>
+
+<span class="sd">        However, the source is normalised. So for instance in the electric case</span>
+<span class="sd">        the source strength is 1 A and its length is 1 m. So the electric field</span>
+<span class="sd">        could also be written as [V/(A.m2)].</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from empymod import frequency</span>
+<span class="sd">    &gt;&gt;&gt; src = [0, 0, 100]</span>
+<span class="sd">    &gt;&gt;&gt; rec = [np.arange(1,11)*500, np.zeros(10), 200]</span>
+<span class="sd">    &gt;&gt;&gt; depth = [0, 300, 1000, 1050]</span>
+<span class="sd">    &gt;&gt;&gt; res = [1e20, .3, 1, 50, 1]</span>
+<span class="sd">    &gt;&gt;&gt; EMfield = frequency(src, rec, depth, res, freq=1, verb=0)</span>
+<span class="sd">    &gt;&gt;&gt; print(EMfield)</span>
+<span class="sd">    [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j</span>
+<span class="sd">      -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j</span>
+<span class="sd">       1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j</span>
+<span class="sd">       1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j</span>
+<span class="sd">       6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># === 1.  LET&#39;S START ============</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+
+    <span class="c1"># === 2.  CHECK INPUT ============</span>
+    <span class="n">inpdata</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">fem_input</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span>
+                              <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span>
+                              <span class="n">loop</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+
+    <span class="c1"># === 3. EM-FIELD CALCULATION ============</span>
+    <span class="n">fEM</span> <span class="o">=</span> <span class="n">fem</span><span class="p">(</span><span class="o">*</span><span class="n">inpdata</span><span class="p">)</span>
+
+    <span class="c1"># If calc. is for only one frequency or one offset, return simple 1D array</span>
+    <span class="n">fEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">fEM</span><span class="p">)</span>
+
+    <span class="c1"># === 4.  FINISHED ============</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fEM</span></div>
+
+
+<div class="viewcode-block" id="time"><a class="viewcode-back" href="../../empymod.html#empymod.model.time">[docs]</a><span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">ab</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">signal</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">aniso</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+         <span class="n">epermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ht</span><span class="o">=</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span>
+         <span class="n">htarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ft</span><span class="o">=</span><span class="s1">&#39;sin&#39;</span><span class="p">,</span> <span class="n">ftarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the electromagnetic time-domain field.</span>
+
+<span class="sd">    Calculate the electromagnetic field for various times and offsets (one</span>
+<span class="sd">    src-rec-configuration).</span>
+
+<span class="sd">    This routine runs internally the `frequency`-routine, and transforms it</span>
+<span class="sd">    to the time domain with a Fourier transform. Most parameters are therefore</span>
+<span class="sd">    described in the modelling-routine `frequency`: *src*, *rec*, *depth*,</span>
+<span class="sd">    *res*, *freq*, *ab*, *aniso*, *epermH*, *epermV*, *mpermH*, *mpermV*,</span>
+<span class="sd">    *xdirect*, *ht*, *htarg*, *opt*, *loop*, and *verb*.</span>
+
+<span class="sd">    Here are only the time-domain specific input parameters described: *time*,</span>
+<span class="sd">    *signal*, *ft*, and *ftarg*.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    time : array_like</span>
+<span class="sd">        Times t (s)</span>
+
+<span class="sd">    signal : {0, 1, -1}, optional</span>
+<span class="sd">        Source signal, default is &#39;0&#39;:</span>
+<span class="sd">            - -1 : Switch-off response</span>
+<span class="sd">            - 0 : Impulse response (0 or anything that is not +/- 1)</span>
+<span class="sd">            - +1 : Switch-on response</span>
+
+<span class="sd">    ft : {&#39;sin&#39;, &#39;cos&#39;, &#39;qwe&#39;, &#39;fftlog&#39;}, optional</span>
+<span class="sd">        Flag to choose either the Sine- or Cosine-Filter, the</span>
+<span class="sd">        Quadrature-With-Extrapolation (QWE), or FFTLog for the Fourier</span>
+<span class="sd">        transform.  Defaults to &#39;sin&#39;.</span>
+
+<span class="sd">    ftarg : str or filter from empymod.filters or array_like, optional</span>
+<span class="sd">        Depends on the value for `ft`:</span>
+<span class="sd">            - If `ft` = &#39;sin&#39; or &#39;cos&#39;: array containing:</span>
+<span class="sd">              [filter, pts_per_dec]:</span>
+
+<span class="sd">                - filter: string of filter name in `empymod.filters` or</span>
+<span class="sd">                          the filter method itself.</span>
+<span class="sd">                          (Default: `empymod.filters.key_201_CosSin_2012()`)</span>
+<span class="sd">                - pts_per_dec: points per decade.  If none, standard lagged</span>
+<span class="sd">                               convolution is used. (Default: None)</span>
+
+<span class="sd">            - If `ft` = &#39;qwe&#39;: array containing:</span>
+<span class="sd">              [rtol, atol, nquad, maxint, pts_per_dec]:</span>
+
+<span class="sd">                - rtol: relative tolerance (default: 1e-8)</span>
+<span class="sd">                - atol: absolute tolerance (default: 1e-20)</span>
+<span class="sd">                - nquad: order of Gaussian quadrature (default: 21)</span>
+<span class="sd">                - maxint: maximum number of partial integral intervals</span>
+<span class="sd">                  (default: 200)</span>
+<span class="sd">                - pts_per_dec: points per decade (only relevant if spline=True)</span>
+<span class="sd">                  (default: 20)</span>
+
+<span class="sd">              All are optional, you only have to maintain the order. To only</span>
+<span class="sd">              change `nquad` to 11 and use the defaults otherwise, you can</span>
+<span class="sd">              provide ftarg=[&#39;&#39;, &#39;&#39;, 11].</span>
+
+<span class="sd">            - If `ft` = &#39;fftlog&#39;: array containing: [pts_per_dec, add_dec]:</span>
+
+<span class="sd">                - pts_per_dec: sampels per decade (default: 10)</span>
+<span class="sd">                - add_dec: additional decades [left, right] (default: [-2, 1])</span>
+
+<span class="sd">              All are optional, you only have to maintain the order. To only</span>
+<span class="sd">              change `add_dec` to [-1, 1] and use the defaults otherwise, you</span>
+<span class="sd">              can provide ftarg=[&#39;&#39;, [-1, 1]].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tEM : ndarray</span>
+<span class="sd">        Time-domain electromagnetic field:</span>
+<span class="sd">            - If rec is electric, returns E [V/m].</span>
+<span class="sd">            - If rec is magnetic, returns B [T] (not H [A/m]!).</span>
+
+<span class="sd">        In the case of the impulse response, the unit is further divided by</span>
+<span class="sd">        seconds [1/s].</span>
+
+<span class="sd">        However, the source is normalised. So for instance in the electric case</span>
+<span class="sd">        the source strength is 1 A and its length is 1 m. So the electric field</span>
+<span class="sd">        could also be written as [V/(A.m2)].</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from empymod import time</span>
+<span class="sd">    &gt;&gt;&gt; src = [0, 0, 100]</span>
+<span class="sd">    &gt;&gt;&gt; rec = [3000, 0, 200]</span>
+<span class="sd">    &gt;&gt;&gt; t = np.logspace(-1,1,21)</span>
+<span class="sd">    &gt;&gt;&gt; depth = [0, 300, 1000, 1050]</span>
+<span class="sd">    &gt;&gt;&gt; res = [1e20, .3, 1, 50, 1]</span>
+<span class="sd">    &gt;&gt;&gt; EMfield = time(src, rec, depth, res, t, verb=0)</span>
+<span class="sd">    &gt;&gt;&gt; print(EMfield)</span>
+<span class="sd">    [  4.19709394e-12   3.79932391e-12   3.36173519e-12   2.95469327e-12</span>
+<span class="sd">       2.64314626e-12   2.49550877e-12   2.56455245e-12   2.84250641e-12</span>
+<span class="sd">       3.22151484e-12   3.51422486e-12   3.54902799e-12   3.26936090e-12</span>
+<span class="sd">       2.74826378e-12   2.12471621e-12   1.52728547e-12   1.03310668e-12</span>
+<span class="sd">       6.65679090e-13   4.13283197e-13   2.49707666e-13   1.48016806e-13</span>
+<span class="sd">       8.66001149e-14]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># === 1.  LET&#39;S START ============</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+
+    <span class="c1"># === 2.  CHECK INPUT ============</span>
+    <span class="n">inpdata</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">tem_input</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span>
+                              <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span>
+                              <span class="n">htarg</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+
+    <span class="c1"># === 3. EM-FIELD CALCULATION AND t-&gt;f TRANSFORM ============</span>
+    <span class="n">tEM</span> <span class="o">=</span> <span class="n">tem</span><span class="p">(</span><span class="o">*</span><span class="n">inpdata</span><span class="p">)</span>
+
+    <span class="c1"># If calc. is for only one time or one offset, return simple 1D array</span>
+    <span class="n">tEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">tEM</span><span class="p">)</span>
+
+    <span class="c1"># === 4.  FINISHED ============</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tEM</span></div>
+
+
+<div class="viewcode-block" id="gpr"><a class="viewcode-back" href="../../empymod.html#empymod.model.gpr">[docs]</a><span class="k">def</span> <span class="nf">gpr</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">ab</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">aniso</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">epermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">ht</span><span class="o">=</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span> <span class="n">htarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the Ground-Penetrating Radar signal.</span>
+
+<span class="sd">    THIS FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION.</span>
+
+<span class="sd">    Or in other words it is merely an example how one could calculate the</span>
+<span class="sd">    GPR-response.  However, the currently included *FHT* and *QWE* struggle for</span>
+<span class="sd">    these high frequencies, and another Hankel transform has to be included to</span>
+<span class="sd">    make GPR work properly (e.g. `scipy.integrate.quad`).</span>
+
+<span class="sd">    - `QWE` is slow, but does a pretty good job except for very short offsets:</span>
+<span class="sd">      only direct wave for offset &lt; 0.1 m, triangle-like noise at later times.</span>
+<span class="sd">    - `FHT` is fast. Airwave, direct wave and first reflection are well</span>
+<span class="sd">      visible, but afterwards it is very noisy.</span>
+
+<span class="sd">    A lot is still hard-coded in this routine, for instance the frequency-range</span>
+<span class="sd">    used to calculate the response.</span>
+
+<span class="sd">    For input parameters see `frequency`, except for:</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fc : float</span>
+<span class="sd">        Centre frequency of GPR-signal (MHz). Sensible values are between</span>
+<span class="sd">        10 MHz and 3000 MHz.</span>
+
+<span class="sd">    gain : float</span>
+<span class="sd">        Power of gain function. If None, no gain is applied.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    t : array</span>
+<span class="sd">        Times (s)</span>
+<span class="sd">    gprEM : ndarray</span>
+<span class="sd">        GPR response</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;* WARNING :: GPR FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION&#39;</span><span class="p">)</span>
+
+    <span class="c1"># === 1.  LET&#39;S START ============</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+
+    <span class="c1"># === 2.  CHECK INPUT ============</span>
+
+    <span class="c1"># Frequency range from centre frequency</span>
+    <span class="n">fc</span> <span class="o">*=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">6</span>
+    <span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2048</span><span class="p">,</span> <span class="mi">2048</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span>
+
+    <span class="c1"># Check the normal frequency-calculation stuff</span>
+    <span class="n">fdata</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">fem_input</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span>
+                            <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span>
+                            <span class="n">loop</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+
+    <span class="c1"># === 3. GPR CALCULATION ============</span>
+
+    <span class="c1"># 1. Get fem responses</span>
+    <span class="n">fEM</span> <span class="o">=</span> <span class="n">fem</span><span class="p">(</span><span class="o">*</span><span class="n">fdata</span><span class="p">)</span>
+
+    <span class="c1"># 2. Multiply with ricker wavelet</span>
+    <span class="n">cfc</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">freq</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">/</span><span class="n">fc</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">fwave</span> <span class="o">=</span> <span class="n">cfc</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">cfc</span><span class="p">)</span>
+    <span class="n">fEM</span> <span class="o">*=</span> <span class="n">fwave</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="c1"># 3. Carry out FFT</span>
+    <span class="n">tempEM</span> <span class="o">=</span> <span class="n">fEM</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+    <span class="n">tempEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">tempEM</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span> <span class="n">tempEM</span><span class="p">]</span>
+    <span class="n">dtmpEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">tempEM</span><span class="p">,</span> <span class="n">fEM</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]]</span>
+    <span class="n">shftEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">dtmpEM</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">ifftEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">shftEM</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+    <span class="n">nfreq</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">freq</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">dfreq</span> <span class="o">=</span> <span class="n">freq</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">freq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">gprEM</span> <span class="o">=</span> <span class="n">nfreq</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">ifftEM</span><span class="o">*</span><span class="n">dfreq</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">nfreq</span><span class="o">*</span><span class="n">dfreq</span><span class="p">)</span>
+
+    <span class="c1"># 4. Apply gain</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">nfreq</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">nfreq</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nfreq</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span>
+    <span class="k">if</span> <span class="n">gain</span><span class="p">:</span>
+        <span class="n">gprEM</span> <span class="o">*=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">t</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span><span class="o">**</span><span class="n">gain</span><span class="p">))[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="c1"># === 4.  FINISHED ============</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">t</span><span class="p">[</span><span class="mi">2048</span><span class="p">:],</span> <span class="n">gprEM</span><span class="p">[</span><span class="mi">2048</span><span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">real</span></div>
+
+
+<div class="viewcode-block" id="wavenumber"><a class="viewcode-back" href="../../empymod.html#empymod.model.wavenumber">[docs]</a><span class="k">def</span> <span class="nf">wavenumber</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">wavenumber</span><span class="p">,</span> <span class="n">ab</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">aniso</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">epermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">xdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the electromagnetic wavenumber-domain field.</span>
+
+<span class="sd">    THIS FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION.</span>
+
+<span class="sd">    Or rather, it is for development purposes, to easily get the wavenumber</span>
+<span class="sd">    result with the required input checks.</span>
+
+<span class="sd">    For input parameters see `frequency`, except for:</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    wavenumber : array</span>
+<span class="sd">        Wavenumbers lambda (1/m)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    PJ0, PJ1, PJ0b : array</span>
+<span class="sd">        Wavenumber domain EM responses.</span>
+<span class="sd">        - PJ0 is angle independent, PJ1 and PJ0b depend on the angle.</span>
+<span class="sd">        - PJ0 and PJ0b are J_0 functions, PJ1 is a J_1 function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;* WARNING :: WAVENUMBER FUNCTION IS IN DEVELOPMENT, USE WITH &#39;</span> <span class="o">+</span>
+          <span class="s1">&#39;CAUTION&#39;</span><span class="p">)</span>
+
+    <span class="c1"># === 1.  LET&#39;S START ============</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+
+    <span class="c1"># === 2.  CHECK INPUT ============</span>
+    <span class="c1"># Check data with dummies for:</span>
+    <span class="c1"># =&gt; ht, htarg, opt, loop</span>
+    <span class="n">inpdata</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">fem_input</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span>
+                              <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">ht</span><span class="o">=</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span>
+                              <span class="n">htarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="n">verb</span><span class="p">)</span>
+
+    <span class="n">ab</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span> <span class="o">=</span> <span class="n">inpdata</span><span class="p">[:</span><span class="mi">7</span><span class="p">]</span>
+    <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span> <span class="o">=</span> <span class="n">inpdata</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span>
+    <span class="n">xdirect</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">inpdata</span><span class="p">[</span><span class="mi">15</span><span class="p">:]</span>
+
+    <span class="c1"># === 3. EM-FIELD CALCULATION ============</span>
+    <span class="n">PJ0</span><span class="p">,</span> <span class="n">PJ1</span><span class="p">,</span> <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">wavenumber</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span>
+                                       <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span>
+                                       <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">wavenumber</span><span class="p">),</span> <span class="n">ab</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span>
+                                       <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">PJ0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">PJ0</span><span class="p">)</span>
+    <span class="n">PJ1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">PJ1</span><span class="o">*</span><span class="n">wavenumber</span><span class="p">)</span>
+    <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">PJ0b</span><span class="p">)</span>
+
+    <span class="c1"># === 4.  FINISHED ============</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">PJ0</span><span class="p">,</span> <span class="n">PJ1</span><span class="p">,</span> <span class="n">PJ0b</span></div>
+
+
+<span class="c1"># Core modelling routines</span>
+
+<div class="viewcode-block" id="fem"><a class="viewcode-back" href="../../empymod.html#empymod.model.fem">[docs]</a><span class="k">def</span> <span class="nf">fem</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">xco</span><span class="p">,</span> <span class="n">yco</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span>
+        <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">isfullspace</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">use_spline</span><span class="p">,</span>
+        <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">loop_freq</span><span class="p">,</span> <span class="n">loop_off</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the electromagnetic frequency-domain response.</span>
+
+<span class="sd">    This function is called from one of the above modelling routines. No</span>
+<span class="sd">    input-check is carried out here. See the main description of :mod:`model`</span>
+<span class="sd">    for information regarding input and output parameters.</span>
+
+<span class="sd">    This function can be directly used if you are sure the provided input is in</span>
+<span class="sd">    the correct format. This is useful for inversion routines and similar, as</span>
+<span class="sd">    it can speed-up the calculation by omitting input-checks.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Preallocate array</span>
+    <span class="n">fEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">freq</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">off</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+
+    <span class="c1"># If &lt;ab&gt; = 36 (or 63), fEM-field is zero</span>
+    <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">36</span><span class="p">,</span> <span class="p">]:</span>
+        <span class="k">return</span> <span class="n">fEM</span>
+
+    <span class="c1"># Get full-space-solution if model is a full-space or</span>
+    <span class="c1"># if src and rec are in the same layer and xdirect=True.</span>
+    <span class="k">if</span> <span class="n">isfullspace</span> <span class="ow">or</span> <span class="p">(</span><span class="n">lsrc</span> <span class="o">==</span> <span class="n">lrec</span> <span class="ow">and</span> <span class="n">xdirect</span><span class="p">):</span>
+        <span class="n">fEM</span> <span class="o">+=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">fullspace</span><span class="p">(</span><span class="n">xco</span><span class="p">,</span> <span class="n">yco</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">etaH</span><span class="p">[:,</span> <span class="n">lrec</span><span class="p">],</span>
+                                <span class="n">etaV</span><span class="p">[:,</span> <span class="n">lrec</span><span class="p">],</span> <span class="n">zetaH</span><span class="p">[:,</span> <span class="n">lrec</span><span class="p">],</span> <span class="n">zetaV</span><span class="p">[:,</span> <span class="n">lrec</span><span class="p">],</span>
+                                <span class="n">ab</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">)</span>
+
+    <span class="c1"># If not full-space calculate fEM-field</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isfullspace</span><span class="p">:</span>
+        <span class="n">calc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">ht</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loop_freq</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">freq</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="n">fEM</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">calc</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span>
+                                        <span class="n">depth</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">etaH</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:],</span>
+                                        <span class="n">etaV</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">zetaH</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:],</span>
+                                        <span class="n">zetaV</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span>
+                                        <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">loop_off</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">off</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="n">fEM</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">calc</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">off</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span>
+                                        <span class="n">angle</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">depth</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span>
+                                        <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span>
+                                        <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fEM</span> <span class="o">+=</span> <span class="n">calc</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span>
+                        <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">use_spline</span><span class="p">,</span>
+                        <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fEM</span></div>
+
+
+<div class="viewcode-block" id="tem"><a class="viewcode-back" href="../../empymod.html#empymod.model.tem">[docs]</a><span class="k">def</span> <span class="nf">tem</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">xco</span><span class="p">,</span> <span class="n">yco</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span>
+        <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">isfullspace</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span>
+        <span class="n">ftarg</span><span class="p">,</span> <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">loop_freq</span><span class="p">,</span> <span class="n">loop_off</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the electromagnetic time-domain response.</span>
+
+<span class="sd">    This function is called from one of the above modelling routines. No</span>
+<span class="sd">    input-check is carried out here. See the main description of :mod:`model`</span>
+<span class="sd">    for information regarding input and output parameters.</span>
+
+<span class="sd">    This function can be directly used if you are sure the provided input is in</span>
+<span class="sd">    the correct format. This is useful for inversion routines and similar, as</span>
+<span class="sd">    it can speed-up the calculation by omitting input-checks.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># 1. Get fem responses</span>
+    <span class="n">fEM</span> <span class="o">=</span> <span class="n">fem</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">xco</span><span class="p">,</span> <span class="n">yco</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span>
+              <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">isfullspace</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span>
+              <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">loop_freq</span><span class="p">,</span> <span class="n">loop_off</span><span class="p">)</span>
+
+    <span class="c1"># 2. Scale frequencies if switch-on/off response</span>
+    <span class="c1"># Step function for causal times is like a unit fct, therefore an impulse</span>
+    <span class="c1"># in frequency domain</span>
+    <span class="k">if</span> <span class="n">signal</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+        <span class="n">fEM</span> <span class="o">*=</span> <span class="n">signal</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">freq</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span>
+
+    <span class="c1"># 3. f-&gt;t transform</span>
+    <span class="n">tEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">time</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">off</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">off</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">tEM</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">ft</span><span class="p">)(</span><span class="n">fEM</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">time</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ftarg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tEM</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>  <span class="c1"># Scaling from Fourier transform</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Dieter Werthmüller.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

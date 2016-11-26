@@ -1,0 +1,785 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>empymod.transform &#8212; empymod 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="empymod 0.9 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for empymod.transform</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">:mod:`transform` -- Hankel and Fourier Transforms</span>
+<span class="sd">=================================================</span>
+
+<span class="sd">Methods to carry out the required Hankel transform from wavenumber to</span>
+<span class="sd">frequency domain and Fourier transform from frequency to time domain.</span>
+
+<span class="sd">The functions for the QWE and FHT Hankel and Fourier transforms are based on</span>
+<span class="sd">source files (specified in each function) from the source code distributed with</span>
+<span class="sd">[Key_2012]_, which can be found at `software.seg.org/2012/0003</span>
+<span class="sd">&lt;http://software.seg.org/2012/0003&gt;`_. These functions are (c) 2012 by Kerry</span>
+<span class="sd">Key and the Society of Exploration Geophysicists,</span>
+<span class="sd">http://software.seg.org/disclaimer.txt. Please read the NOTICE-file in the root</span>
+<span class="sd">directory for more information regarding the involved licenses.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Copyright 2016 Dieter Werthmüller</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of `empymod`.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not</span>
+<span class="c1"># use this file except in compliance with the License.  You may obtain a copy</span>
+<span class="c1"># of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT</span>
+<span class="c1"># WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the</span>
+<span class="c1"># License for the specific language governing permissions and limitations under</span>
+<span class="c1"># the License.</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">jv</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="k">import</span> <span class="n">quad</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">InterpolatedUnivariateSpline</span> <span class="k">as</span> <span class="n">iuSpline</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kernel</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span> <span class="s1">&#39;hqwe&#39;</span><span class="p">,</span> <span class="s1">&#39;fft&#39;</span><span class="p">,</span> <span class="s1">&#39;fqwe&#39;</span><span class="p">,</span> <span class="s1">&#39;fftlog&#39;</span><span class="p">,</span> <span class="s1">&#39;qwe&#39;</span><span class="p">,</span> <span class="s1">&#39;get_Gauss_Weights&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;get_spline_values&#39;</span><span class="p">,</span> <span class="s1">&#39;fhti&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># 1. Hankel transforms (wavenumber -&gt; frequency)</span>
+
+
+<div class="viewcode-block" id="fht"><a class="viewcode-back" href="../../empymod.html#empymod.transform.fht">[docs]</a><span class="k">def</span> <span class="nf">fht</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span>
+        <span class="n">zetaV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">fhtarg</span><span class="p">,</span> <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Hankel Transform using the Fast Hankel Transform.</span>
+
+<span class="sd">    The *Fast Hankel Transform* is a *Digital Filter Method*, introduced to</span>
+<span class="sd">    geophysics by [Gosh_1971]_, and made popular and wide-spread by</span>
+<span class="sd">    [Anderson_1975]_, [Anderson_1979]_, [Anderson_1982]_.</span>
+
+<span class="sd">    This implementation of the FHT follows [Key_2012]_, equation 6.  Without</span>
+<span class="sd">    going into the mathematical details (which can be found in any of the above</span>
+<span class="sd">    papers) and following [Key_2012]_, the FHT method rewrites the Hankel</span>
+<span class="sd">    transform of the form</span>
+
+<span class="sd">    .. math:: F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)\</span>
+<span class="sd">            \mathrm{d}\lambda</span>
+
+<span class="sd">    as</span>
+
+<span class="sd">    .. math::   F(r)   = \sum^n_{i=1} f(b_i/r)h_i/r \ ,</span>
+
+<span class="sd">    where :math:`h` is the digital filter.The Filter abscissae b is given by</span>
+
+<span class="sd">    .. math:: b_i = \lambda_ir = e^{ai}, \qquad i = -l, -l+1, \cdots, l \ ,</span>
+
+<span class="sd">    with :math:`l=(n-1)/2`, and :math:`a` is the spacing coefficient.</span>
+
+<span class="sd">    This function is loosely based on `get_CSEM1D_FD_FHT.m` from the source</span>
+<span class="sd">    code distributed with [Key_2012]_.</span>
+
+<span class="sd">    The function is called from one of the modelling routines in :mod:`model`.</span>
+<span class="sd">    Consult these modelling routines for a description of the input and output</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fEM : array</span>
+<span class="sd">        Returns frequency-domain EM response.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get fhtargs</span>
+    <span class="n">fhtfilt</span> <span class="o">=</span> <span class="n">fhtarg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ndec</span> <span class="o">=</span> <span class="n">fhtarg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># For FHT, spline for one offset is equals no spline</span>
+    <span class="k">if</span> <span class="n">use_spline</span> <span class="ow">and</span> <span class="n">off</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">use_spline</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># 1. COMPUTE REQUIRED LAMBDAS for given hankel-filter-base</span>
+    <span class="k">if</span> <span class="n">use_spline</span><span class="p">:</span>           <span class="c1"># Use interpolation</span>
+        <span class="c1"># Get lambda from offset and filter</span>
+        <span class="n">lambd</span><span class="p">,</span> <span class="n">ioff</span> <span class="o">=</span> <span class="n">get_spline_values</span><span class="p">(</span><span class="n">fhtfilt</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">ndec</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># df.base/off</span>
+        <span class="n">lambd</span> <span class="o">=</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">base</span><span class="o">/</span><span class="n">off</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="c1"># 2. CALL THE KERNEL</span>
+    <span class="n">PJ0</span><span class="p">,</span> <span class="n">PJ1</span><span class="p">,</span> <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">wavenumber</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span>
+                                       <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">lambd</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span>
+                                       <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">use_spline</span> <span class="ow">and</span> <span class="n">ndec</span><span class="p">:</span>  <span class="c1"># If spline in wavenumber domain, interpolate PJ&#39;s</span>
+        <span class="c1"># Interpolate in wavenumber domain</span>
+        <span class="n">PJ0real</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">),</span> <span class="n">PJ0</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="n">PJ0imag</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">),</span> <span class="n">PJ0</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+        <span class="n">PJ1real</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">),</span> <span class="n">PJ1</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="n">PJ1imag</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">),</span> <span class="n">PJ1</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+        <span class="n">PJ0breal</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">),</span> <span class="n">PJ0b</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="n">PJ0bimag</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">),</span> <span class="n">PJ0b</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+
+        <span class="c1"># Overwrite lambd with non-spline lambd</span>
+        <span class="n">lambd</span> <span class="o">=</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">base</span><span class="o">/</span><span class="n">off</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="c1"># Get fEM-field at required non-spline lambdas</span>
+        <span class="n">PJ0</span> <span class="o">=</span> <span class="n">PJ0real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">PJ0imag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span>
+        <span class="n">PJ1</span> <span class="o">=</span> <span class="n">PJ1real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">PJ1imag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span>
+        <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">PJ0breal</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">PJ0bimag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span>
+
+        <span class="c1"># Set spline to false</span>
+        <span class="n">use_spline</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">elif</span> <span class="n">use_spline</span><span class="p">:</span>  <span class="c1"># If spline in frequency domain, re-arrange PJ&#39;s</span>
+        <span class="k">def</span> <span class="nf">rearrange_PJ</span><span class="p">(</span><span class="n">PJ</span><span class="p">,</span> <span class="n">noff</span><span class="p">,</span> <span class="n">nfilt</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return re-arranged PJ with shape (noff, nlambd).</span>
+<span class="sd">               Each row starts one &#39;lambda&#39; higher.&quot;&quot;&quot;</span>
+            <span class="n">outarr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">PJ</span><span class="p">,</span> <span class="n">noff</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span>
+                                    <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">noff</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="n">outarr</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">noff</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">nfilt</span><span class="p">]</span>
+
+        <span class="n">PJ0</span> <span class="o">=</span> <span class="n">rearrange_PJ</span><span class="p">(</span><span class="n">PJ0</span><span class="p">,</span> <span class="n">ioff</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">PJ1</span> <span class="o">=</span> <span class="n">rearrange_PJ</span><span class="p">(</span><span class="n">PJ1</span><span class="p">,</span> <span class="n">ioff</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">rearrange_PJ</span><span class="p">(</span><span class="n">PJ0b</span><span class="p">,</span> <span class="n">ioff</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1"># 3. ANGLE DEPENDENT FACTORS</span>
+    <span class="n">factAng</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">angle_factor</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">)</span>
+    <span class="n">one_angle</span> <span class="o">=</span> <span class="p">(</span><span class="n">factAng</span> <span class="o">-</span> <span class="n">factAng</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="c1"># 4. CARRY OUT THE FHT</span>
+    <span class="k">if</span> <span class="n">use_spline</span> <span class="ow">and</span> <span class="n">one_angle</span><span class="p">:</span>  <span class="c1"># SPLINE, ALL ANGLES ARE EQUAL</span>
+        <span class="c1"># If all offsets are in one line from the source, hence have the same</span>
+        <span class="c1"># angle, we can combine PJ0 and PJ0b and save one FHT, and combine both</span>
+        <span class="c1"># into one function to interpolate.</span>
+
+        <span class="c1"># 1. FHT</span>
+        <span class="n">EM_int</span> <span class="o">=</span> <span class="n">factAng</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ1</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">j1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>  <span class="c1"># Because of J2</span>
+            <span class="c1"># J2(kr) = 2/(kr)*J1(kr) - J0(kr)</span>
+            <span class="n">EM_int</span> <span class="o">/=</span> <span class="n">ioff</span>
+        <span class="n">EM_int</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ0</span> <span class="o">+</span> <span class="n">factAng</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">PJ0b</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">j0</span><span class="p">)</span>
+
+        <span class="c1"># 2. Interpolation</span>
+        <span class="n">real_EM</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ioff</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">EM_int</span><span class="o">.</span><span class="n">real</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">imag_EM</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ioff</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">EM_int</span><span class="o">.</span><span class="n">imag</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">fEM</span> <span class="o">=</span> <span class="n">real_EM</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">off</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">imag_EM</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">off</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">use_spline</span><span class="p">:</span>  <span class="c1"># SPLINE, VARYING ANGLES</span>
+        <span class="c1"># If not all offsets are in one line from the source, hence do not have</span>
+        <span class="c1"># the same angle, the whole process has to be done separately for</span>
+        <span class="c1"># angle-dependent and angle-independent parts. This means one FHT more,</span>
+        <span class="c1"># and two (instead of one) functions to interpolate.</span>
+
+        <span class="c1"># 1. FHT</span>
+        <span class="c1"># Separated in an angle-dependent and a non-dependent part</span>
+        <span class="n">EM_noang</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ0</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">j0</span><span class="p">)</span>
+        <span class="n">EM_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ1</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">j1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>  <span class="c1"># Because of J2</span>
+            <span class="c1"># J2(kr) = 2/(kr)*J1(kr) - J0(kr)</span>
+            <span class="n">EM_angle</span> <span class="o">/=</span> <span class="n">ioff</span>
+        <span class="n">EM_angle</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ0b</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">j0</span><span class="p">)</span>
+
+        <span class="c1"># 2. Interpolation</span>
+        <span class="c1"># Separately on EM_noang and EM_angle</span>
+        <span class="n">real_noang</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ioff</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">EM_noang</span><span class="o">.</span><span class="n">real</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">imag_noang</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ioff</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">EM_noang</span><span class="o">.</span><span class="n">imag</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">real_angle</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ioff</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">EM_angle</span><span class="o">.</span><span class="n">real</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">imag_angle</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ioff</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">EM_angle</span><span class="o">.</span><span class="n">imag</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Get fEM-field at required offsets</span>
+        <span class="n">EM_noang</span> <span class="o">=</span> <span class="n">real_noang</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">off</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">imag_noang</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">off</span><span class="p">))</span>
+        <span class="n">EM_angle</span> <span class="o">=</span> <span class="n">real_angle</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">off</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">imag_angle</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">off</span><span class="p">))</span>
+
+        <span class="c1"># Angle dependency</span>
+        <span class="n">fEM</span> <span class="o">=</span> <span class="p">(</span><span class="n">factAng</span><span class="o">*</span><span class="n">EM_angle</span> <span class="o">+</span> <span class="n">EM_noang</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># NO SPLINE</span>
+        <span class="c1"># Without spline, we can combine PJ0 and PJ0b to save one FHT, even if</span>
+        <span class="c1"># all offsets have a different angle.</span>
+        <span class="n">fEM</span> <span class="o">=</span> <span class="n">factAng</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ1</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">j1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>  <span class="c1"># Because of J2</span>
+            <span class="c1"># J2(kr) = 2/(kr)*J1(kr) - J0(kr)</span>
+            <span class="n">fEM</span> <span class="o">/=</span> <span class="n">off</span>
+        <span class="n">fEM</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ0</span> <span class="o">+</span> <span class="n">factAng</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span><span class="o">*</span><span class="n">PJ0b</span><span class="p">,</span> <span class="n">fhtfilt</span><span class="o">.</span><span class="n">j0</span><span class="p">)</span>
+
+    <span class="c1"># Return the electromagnetic field, normalize by offset</span>
+    <span class="k">return</span> <span class="n">fEM</span><span class="o">/</span><span class="n">off</span></div>
+
+
+<div class="viewcode-block" id="hqwe"><a class="viewcode-back" href="../../empymod.html#empymod.transform.hqwe">[docs]</a><span class="k">def</span> <span class="nf">hqwe</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span>
+         <span class="n">zetaV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">qweargs</span><span class="p">,</span> <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Hankel Transform using Quadrature-With-Extrapolation.</span>
+
+<span class="sd">    *Quadrature-With-Extrapolation* was introduced to geophysics by</span>
+<span class="sd">    [Key_2012]_. It is one of many so-called *ISE* methods to solve Hankel</span>
+<span class="sd">    Transforms, where *ISE* stands for Integration, Summation, and</span>
+<span class="sd">    Extrapolation.</span>
+
+<span class="sd">    Following [Key_2012]_, but without going into the mathematical details</span>
+<span class="sd">    here, the QWE method rewrites the Hankel transform of the form</span>
+
+<span class="sd">    .. math:: F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)\</span>
+<span class="sd">            \mathrm{d}\lambda</span>
+
+<span class="sd">    as a quadrature sum which form is similar to the FHT (equation 15),</span>
+
+<span class="sd">    .. math::   F_i   \\approx \sum^m_{j=1} f(x_j/r)w_j g(x_j) =</span>
+<span class="sd">                \sum^m_{j=1} f(x_j/r)\hat{g}(x_j) \ ,</span>
+
+<span class="sd">    but with various bells and whistles applied (using the so-called Shanks</span>
+<span class="sd">    transformation in the form of a routine called :math:`\epsilon`-algorithm</span>
+<span class="sd">    ([Shanks_1955]_, [Wynn_1956]_; implemented with algorithms from</span>
+<span class="sd">    [Trefethen_2000]_ and [Weniger_1989]_).</span>
+
+<span class="sd">    This function is based on `get_CSEM1D_FD_QWE.m`, `qwe.m`,</span>
+<span class="sd">    `getGaussQuadWeights.m`, and `getBesselWeights.m` from the source code</span>
+<span class="sd">    distributed with [Key_2012]_.</span>
+
+<span class="sd">    The function is called from one of the modelling routines in :mod:`model`.</span>
+<span class="sd">    Consult these modelling routines for a description of the input and output</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    fEM : array</span>
+<span class="sd">        Returns frequency-domain EM response.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Input params have an additional dimension for frequency, reduce here</span>
+    <span class="n">etaH</span> <span class="o">=</span> <span class="n">etaH</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">etaV</span> <span class="o">=</span> <span class="n">etaV</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">zetaH</span> <span class="o">=</span> <span class="n">zetaH</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">zetaV</span> <span class="o">=</span> <span class="n">zetaV</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="c1"># Get rtol, atol, nquad, maxint, and pts_per_dec</span>
+    <span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">nquad</span><span class="p">,</span> <span class="n">maxint</span><span class="p">,</span> <span class="n">pts_per_dec</span> <span class="o">=</span> <span class="n">qweargs</span>
+
+    <span class="c1"># ** 1. PRE-COMPUTE THE BESSEL FUNCTIONS</span>
+    <span class="c1">#    at fixed quadrature points for each interval and multiply by the</span>
+    <span class="c1">#    corresponding Gauss quadrature weights</span>
+
+    <span class="c1"># ** 1.a COMPUTE GAUSS QUADRATURE WEIGHTS</span>
+    <span class="n">g_x</span><span class="p">,</span> <span class="n">g_w</span> <span class="o">=</span> <span class="n">get_Gauss_Weights</span><span class="p">(</span><span class="n">nquad</span><span class="p">)</span>
+
+    <span class="c1"># ** 1.b COMPUTES N ZEROS OF THE BESSEL FUNCTION OF THE FIRST KIND</span>
+    <span class="c1">#    of order 1 using the Newton-Raphson method, which is fast enough for</span>
+    <span class="c1">#    our purposes.</span>
+
+    <span class="c1"># Initial guess using asymptotic zeros</span>
+    <span class="n">b_zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1.25</span><span class="p">,</span> <span class="n">maxint</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Newton-Raphson iterations</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>   <span class="c1"># 10 is more than enough, usually stops in 5</span>
+
+        <span class="c1"># Evaluate</span>
+        <span class="n">b_x0</span> <span class="o">=</span> <span class="n">jv</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">b_zero</span><span class="p">)</span>
+        <span class="n">b_x1</span> <span class="o">=</span> <span class="n">jv</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">b_zero</span><span class="p">)</span>
+
+        <span class="c1"># The step length</span>
+        <span class="n">b_h</span> <span class="o">=</span> <span class="o">-</span><span class="n">b_x0</span><span class="o">/</span><span class="p">(</span><span class="n">b_x0</span><span class="o">/</span><span class="n">b_zero</span> <span class="o">-</span> <span class="n">b_x1</span><span class="p">)</span>
+
+        <span class="c1"># Take the step</span>
+        <span class="n">b_zero</span> <span class="o">+=</span> <span class="n">b_h</span>
+
+        <span class="c1"># Check for convergence</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">b_h</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="o">*</span><span class="n">b_zero</span><span class="p">):</span>
+            <span class="k">break</span>
+
+    <span class="c1"># ** 1.c COMPUTES THE QUADRATURE INTERVALS AND BESSEL FUNCTION WEIGHTS</span>
+
+    <span class="c1"># Lower limit of integrand, a small but non-zero value</span>
+    <span class="n">xint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">20</span><span class="p">]),</span> <span class="n">b_zero</span><span class="p">))</span>
+
+    <span class="c1"># Assemble the output arrays</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xint</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">nquad</span><span class="p">)</span>
+    <span class="n">Bx</span> <span class="o">=</span> <span class="n">dx</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_x</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">xint</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">nquad</span><span class="p">)</span>
+    <span class="n">BJ0</span> <span class="o">=</span> <span class="n">jv</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Bx</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_w</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span>
+    <span class="n">BJ1</span> <span class="o">=</span> <span class="n">jv</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Bx</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_w</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span>
+
+    <span class="c1"># ** 2. START QWE</span>
+
+    <span class="c1"># Intervals and lambdas for all offset</span>
+    <span class="n">intervals</span> <span class="o">=</span> <span class="n">xint</span><span class="o">/</span><span class="n">off</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">lambd</span> <span class="o">=</span> <span class="n">Bx</span><span class="o">/</span><span class="n">off</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="c1"># Angle dependent factors</span>
+    <span class="n">factAng</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">angle_factor</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">)</span>
+
+    <span class="c1"># Call and return QWE, depending if spline or not</span>
+    <span class="k">if</span> <span class="n">use_spline</span><span class="p">:</span>  <span class="c1"># If spline, we calculate all kernels here</span>
+        <span class="c1"># New lambda, from min to max required lambda with pts_per_dec</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="n">ilambd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">start</span><span class="p">)</span><span class="o">*</span><span class="n">pts_per_dec</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+        <span class="c1"># Call the kernel</span>
+        <span class="n">PJ0</span><span class="p">,</span> <span class="n">PJ1</span><span class="p">,</span> <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">wavenumber</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span>
+                                           <span class="n">etaH</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">etaV</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span>
+                                           <span class="n">zetaH</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">zetaV</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span>
+                                           <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">ilambd</span><span class="p">),</span> <span class="n">ab</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span>
+                                           <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">)</span>
+
+        <span class="c1"># Interpolation : Has to be done separately on each PJ,</span>
+        <span class="c1"># in order to work with multiple offsets which have different angles.</span>
+        <span class="n">si_PJ0r</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ilambd</span><span class="p">),</span> <span class="n">PJ0</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="n">si_PJ0i</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ilambd</span><span class="p">),</span> <span class="n">PJ0</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+        <span class="n">si_PJ1r</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ilambd</span><span class="p">),</span> <span class="n">PJ1</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="n">si_PJ1i</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ilambd</span><span class="p">),</span> <span class="n">PJ1</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+        <span class="n">si_PJ0br</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ilambd</span><span class="p">),</span> <span class="n">PJ0b</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="n">si_PJ0bi</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ilambd</span><span class="p">),</span> <span class="n">PJ0b</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+
+        <span class="c1"># Get EM-field at required offsets</span>
+        <span class="n">sPJ0</span> <span class="o">=</span> <span class="n">si_PJ0r</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">si_PJ0i</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span>
+        <span class="n">sPJ1</span> <span class="o">=</span> <span class="n">si_PJ1r</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">si_PJ1i</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span>
+        <span class="n">sPJ0b</span> <span class="o">=</span> <span class="n">si_PJ0br</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">si_PJ0bi</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lambd</span><span class="p">))</span>
+
+        <span class="c1"># Carry out and return the Hankel transform for this interval</span>
+        <span class="n">sEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sPJ1</span><span class="o">*</span><span class="n">BJ1</span><span class="p">,</span> <span class="p">(</span><span class="n">off</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">nquad</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>  <span class="c1"># Because of J2</span>
+            <span class="c1"># J2(kr) = 2/(kr)*J1(kr) - J0(kr)</span>
+            <span class="n">sEM</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">off</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+        <span class="n">sEM</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sPJ0b</span><span class="o">*</span><span class="n">BJ0</span><span class="p">,</span> <span class="p">(</span><span class="n">off</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">nquad</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                                 <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">sEM</span> <span class="o">*=</span> <span class="n">factAng</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">sEM</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sPJ0</span><span class="o">*</span><span class="n">BJ0</span><span class="p">,</span> <span class="p">(</span><span class="n">off</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">nquad</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                                 <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">getkernel</span> <span class="o">=</span> <span class="n">sEM</span>
+        <span class="c1"># Parameters not used if spline</span>
+        <span class="n">lambd</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">off</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">factAng</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># If not spline, we define the wavenumber-kernel here</span>
+        <span class="k">def</span> <span class="nf">getkernel</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">inplambd</span><span class="p">,</span> <span class="n">inpoff</span><span class="p">,</span> <span class="n">inpfang</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return wavenumber-domain-kernel as a fct of interval i.&quot;&quot;&quot;</span>
+
+            <span class="c1"># Indices and factor for this interval</span>
+            <span class="n">iB</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="n">nquad</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nquad</span><span class="p">)</span>
+
+            <span class="c1"># PJ0 and PJ1 for this interval</span>
+            <span class="n">PJ0</span><span class="p">,</span> <span class="n">PJ1</span><span class="p">,</span> <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">wavenumber</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span>
+                                               <span class="n">etaH</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">etaV</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span>
+                                               <span class="n">zetaH</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">zetaV</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span>
+                                               <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">inplambd</span><span class="p">)[:,</span> <span class="n">iB</span><span class="p">],</span>
+                                               <span class="n">ab</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span>
+                                               <span class="n">use_ne_eval</span><span class="p">)</span>
+
+            <span class="c1"># Carry out and return the Hankel transform for this interval</span>
+            <span class="n">fEM</span> <span class="o">=</span> <span class="n">inpfang</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ1</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">BJ1</span><span class="p">[</span><span class="n">iB</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">ab</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">]:</span>  <span class="c1"># Because of J2</span>
+                <span class="c1"># J2(kr) = 2/(kr)*J1(kr) - J0(kr)</span>
+                <span class="n">fEM</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">inpoff</span><span class="p">)</span>
+            <span class="n">fEM</span> <span class="o">+=</span> <span class="n">inpfang</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ0b</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">BJ0</span><span class="p">[</span><span class="n">iB</span><span class="p">])</span>
+            <span class="n">fEM</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PJ0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">BJ0</span><span class="p">[</span><span class="n">iB</span><span class="p">])</span>
+
+            <span class="k">return</span> <span class="n">fEM</span>
+
+    <span class="c1"># Get QWE</span>
+    <span class="n">fEM</span> <span class="o">=</span> <span class="n">qwe</span><span class="p">(</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">maxint</span><span class="p">,</span> <span class="n">getkernel</span><span class="p">,</span> <span class="n">intervals</span><span class="p">,</span> <span class="s1">&#39;Hankel&#39;</span><span class="p">,</span> <span class="n">lambd</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span>
+              <span class="n">factAng</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fEM</span></div>
+
+
+<span class="c1"># 2. Fourier transforms (frequency -&gt; time)</span>
+
+<div class="viewcode-block" id="fft"><a class="viewcode-back" href="../../empymod.html#empymod.transform.fft">[docs]</a><span class="k">def</span> <span class="nf">fft</span><span class="p">(</span><span class="n">fEM</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ftarg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fourier Transform using a Cosine- or a Sine-filter.</span>
+
+<span class="sd">    It follows the Filter methodology [Anderson_1975]_, see `fht` for more</span>
+<span class="sd">    information.</span>
+
+<span class="sd">    The function is called from one of the modelling routines in :mod:`model`.</span>
+<span class="sd">    Consult these modelling routines for a description of the input and output</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    This function is based on `get_CSEM1D_TD_FHT.m` from the source code</span>
+<span class="sd">    distributed with [Key_2012]_.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tEM : array</span>
+<span class="sd">        Returns time-domain EM response of `fEM` for given `time`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get ftarg values</span>
+    <span class="n">fftfilt</span><span class="p">,</span> <span class="n">ftkind</span><span class="p">,</span> <span class="n">pts_per_dec</span> <span class="o">=</span> <span class="n">ftarg</span>
+
+    <span class="c1"># Settings depending if cos/sin plus scaling</span>
+    <span class="k">if</span> <span class="n">ftkind</span> <span class="o">==</span> <span class="s1">&#39;sin&#39;</span><span class="p">:</span>
+        <span class="n">fEM</span> <span class="o">=</span> <span class="o">-</span><span class="n">fEM</span><span class="o">.</span><span class="n">imag</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fEM</span> <span class="o">=</span> <span class="n">fEM</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="k">if</span> <span class="n">pts_per_dec</span><span class="p">:</span>  <span class="c1"># Use pts_per_dec frequencies per decade</span>
+        <span class="c1"># 1. Interpolate in frequency domain</span>
+        <span class="n">sfEM</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">freq</span><span class="p">),</span> <span class="n">fEM</span><span class="p">)</span>
+        <span class="n">ifEM</span> <span class="o">=</span> <span class="n">sfEM</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">fftfilt</span><span class="o">.</span><span class="n">base</span><span class="o">/</span><span class="n">time</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]))</span>
+
+        <span class="c1"># 2. Filter</span>
+        <span class="n">tEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">ifEM</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fftfilt</span><span class="p">,</span> <span class="n">ftkind</span><span class="p">))</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Standard FHT procedure</span>
+        <span class="c1"># Get new times in frequency domain</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">itime</span> <span class="o">=</span> <span class="n">get_spline_values</span><span class="p">(</span><span class="n">fftfilt</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+
+        <span class="c1"># Re-arranged fEM with shape (ntime, nfreq).  Each row starts one</span>
+        <span class="c1"># &#39;freq&#39; higher.</span>
+        <span class="n">fEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">fEM</span><span class="p">,</span> <span class="n">itime</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">itime</span><span class="o">.</span><span class="n">size</span><span class="p">)))</span>
+        <span class="n">fEM</span> <span class="o">=</span> <span class="n">fEM</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">itime</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">fftfilt</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">size</span><span class="p">]</span>
+
+        <span class="c1"># 1. Filter</span>
+        <span class="n">stEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">fEM</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fftfilt</span><span class="p">,</span> <span class="n">ftkind</span><span class="p">))</span>
+
+        <span class="c1"># 2. Interpolate in time domain</span>
+        <span class="n">itEM</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">itime</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">stEM</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">tEM</span> <span class="o">=</span> <span class="n">itEM</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+
+    <span class="c1"># Return the electromagnetic time domain field</span>
+    <span class="k">return</span> <span class="n">tEM</span><span class="o">/</span><span class="n">time</span></div>
+
+
+<div class="viewcode-block" id="fqwe"><a class="viewcode-back" href="../../empymod.html#empymod.transform.fqwe">[docs]</a><span class="k">def</span> <span class="nf">fqwe</span><span class="p">(</span><span class="n">fEM</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">qweargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fourier Transform using Quadrature-With-Extrapolation.</span>
+
+<span class="sd">    It follows the QWE methodology [Key_2012]_ for the Hankel transform, see</span>
+<span class="sd">    `hqwe` for more information.</span>
+
+<span class="sd">    The function is called from one of the modelling routines in :mod:`model`.</span>
+<span class="sd">    Consult these modelling routines for a description of the input and output</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    This function is based on `get_CSEM1D_TD_QWE.m` from the source code</span>
+<span class="sd">    distributed with [Key_2012]_.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tEM : array</span>
+<span class="sd">        Returns time-domain EM response of `fEM` for given `time`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get rtol, atol, nquad, and maxint</span>
+    <span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">nquad</span><span class="p">,</span> <span class="n">maxint</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">qweargs</span>
+
+    <span class="c1"># Calculate quadrature intervals for all offset</span>
+    <span class="n">xint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">20</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxint</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+    <span class="n">intervals</span> <span class="o">=</span> <span class="n">xint</span><span class="o">/</span><span class="n">time</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="c1"># Get Gauss Quadrature Weights</span>
+    <span class="n">g_x</span><span class="p">,</span> <span class="n">g_w</span> <span class="o">=</span> <span class="n">get_Gauss_Weights</span><span class="p">(</span><span class="n">nquad</span><span class="p">)</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xint</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">nquad</span><span class="p">)</span>
+    <span class="n">Bx</span> <span class="o">=</span> <span class="n">dx</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_x</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">xint</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">nquad</span><span class="p">)</span>
+    <span class="n">SS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Bx</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_w</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span>
+
+    <span class="c1"># Interpolate in frequency domain</span>
+    <span class="n">tEM_rint</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">freq</span><span class="p">),</span> <span class="n">fEM</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+    <span class="n">tEM_iint</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">freq</span><span class="p">),</span> <span class="n">fEM</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+
+    <span class="c1"># Check if we use QWE or SciPy&#39;s Quad</span>
+    <span class="n">check</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">intervals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">doqwe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fEM</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">tEM_rint</span><span class="p">(</span><span class="n">check</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">tEM_iint</span><span class="p">(</span><span class="n">check</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">100</span>
+
+    <span class="c1"># Pre-allocate output array</span>
+    <span class="n">tEM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1"># Carry out SciPy&#39;s Quad if required</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">~</span><span class="n">doqwe</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">sEMquad</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Return scaled, interpolated value of tEM_iint for `w`.&quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">tEM_iint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">w</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="c1"># Loop over times that require Quad</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">doqwe</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">tEM</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span><span class="n">sEMquad</span><span class="p">,</span> <span class="n">intervals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">intervals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                             <span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="n">i</span><span class="p">],),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">rtol</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+    <span class="c1"># Carry out QWE if required</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">doqwe</span><span class="p">):</span>
+        <span class="n">sEM</span> <span class="o">=</span> <span class="n">tEM_iint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Bx</span><span class="o">/</span><span class="n">time</span><span class="p">[</span><span class="n">doqwe</span><span class="p">,</span> <span class="kc">None</span><span class="p">]))</span><span class="o">*</span><span class="n">SS</span>
+        <span class="n">tEM</span><span class="p">[</span><span class="n">doqwe</span><span class="p">]</span> <span class="o">=</span> <span class="n">qwe</span><span class="p">(</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">maxint</span><span class="p">,</span> <span class="n">sEM</span><span class="p">,</span> <span class="n">intervals</span><span class="p">[</span><span class="n">doqwe</span><span class="p">,</span> <span class="p">:],</span>
+                         <span class="s1">&#39;Fourier&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="o">-</span><span class="n">tEM</span></div>
+
+
+<div class="viewcode-block" id="fftlog"><a class="viewcode-back" href="../../empymod.html#empymod.transform.fftlog">[docs]</a><span class="k">def</span> <span class="nf">fftlog</span><span class="p">(</span><span class="n">fEM</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ftarg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fourier Transform using FFTLog.</span>
+
+<span class="sd">    FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT.</span>
+<span class="sd">    FFTLog was presented in Appendix B of [Hamilton_2000]_ and published at</span>
+<span class="sd">    &lt;http://casa.colorado.edu/~ajsh/FFTLog&gt;.</span>
+
+<span class="sd">    This function uses the python module `fftlog`, which is a simple</span>
+<span class="sd">    `f2py`-wrapper for the Fortran code `FFTLog`. You need to install `fftlog`</span>
+<span class="sd">    separately on your system in order to use it, see</span>
+<span class="sd">    &lt;https://github.com/prisae/fftlog&gt;.</span>
+
+<span class="sd">    The function is called from one of the modelling routines in :mod:`model`.</span>
+<span class="sd">    Consult these modelling routines for a description of the input and output</span>
+<span class="sd">    parameters.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tEM : array</span>
+<span class="sd">        Returns time-domain EM response of `fEM` for given `time`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get r, rk, wsave, fftlog</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">rk</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">fftlog</span> <span class="o">=</span> <span class="n">ftarg</span>
+
+    <span class="c1"># Carry out FFTLog</span>
+    <span class="n">ttEM</span> <span class="o">=</span> <span class="n">fftlog</span><span class="o">.</span><span class="n">fftl</span><span class="p">(</span><span class="o">-</span><span class="n">fEM</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">rk</span><span class="p">)</span>
+
+    <span class="c1"># Interpolate for the desired times</span>
+    <span class="n">int_tEM</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">r</span><span class="p">),</span> <span class="n">ttEM</span><span class="p">)</span>
+    <span class="n">tEM</span> <span class="o">=</span> <span class="n">int_tEM</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">tEM</span></div>
+
+
+<span class="c1"># 3. Utilities</span>
+
+<div class="viewcode-block" id="qwe"><a class="viewcode-back" href="../../empymod.html#empymod.transform.qwe">[docs]</a><span class="k">def</span> <span class="nf">qwe</span><span class="p">(</span><span class="n">rtol</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">maxint</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">intervals</span><span class="p">,</span> <span class="n">hfstr</span><span class="p">,</span> <span class="n">lambd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">off</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">factAng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Quadrature-With-Extrapolation.</span>
+
+<span class="sd">    This is the kernel of the QWE method, used for the Hankel (`hqwe`) and the</span>
+<span class="sd">    Fourier (`fqwe`) Transforms. See `hqwe` for an extensive description.</span>
+
+<span class="sd">    This function is based on `qwe.m` from the source code distributed with</span>
+<span class="sd">    [Key_2012]_.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">getweights</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">inpint</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return weights for this interval.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">inpint</span><span class="p">)[:,</span>  <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">inpint</span><span class="p">)[:,</span> <span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+
+    <span class="c1"># 2.a Calculate the first interval for all offsets</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="s1">&#39;__call__&#39;</span><span class="p">):</span>  <span class="c1"># Hankel and not spline</span>
+        <span class="n">EM0</span> <span class="o">=</span> <span class="n">inp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">lambd</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">factAng</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>                         <span class="c1"># Fourier or Hankel with spline</span>
+        <span class="n">EM0</span> <span class="o">=</span> <span class="n">inp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">EM0</span> <span class="o">*=</span> <span class="n">getweights</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">intervals</span><span class="p">)</span>
+
+    <span class="c1"># 2.b pre-allocate arrays</span>
+    <span class="n">EM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">EM0</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">EM0</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">om</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">EM0</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">EM0</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">maxint</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">EM0</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">relErr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">EM0</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">maxint</span><span class="p">))</span>
+    <span class="n">extrap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">EM0</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">maxint</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">EM0</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1"># 2.c the extrapolation transformation loop</span>
+    <span class="n">old_settings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="nb">all</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxint</span><span class="p">):</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># 2.c.1. calculate the field for this interval</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="s1">&#39;__call__&#39;</span><span class="p">):</span>  <span class="c1"># Hankel and not spline</span>
+            <span class="n">EMi</span> <span class="o">=</span> <span class="n">inp</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">lambd</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="p">:],</span> <span class="n">off</span><span class="p">[</span><span class="n">om</span><span class="p">],</span> <span class="n">factAng</span><span class="p">[</span><span class="n">om</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>                         <span class="c1"># Fourier or Hankel with spline</span>
+            <span class="n">EMi</span> <span class="o">=</span> <span class="n">inp</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">EMi</span> <span class="o">*=</span> <span class="n">getweights</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">intervals</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="p">:])</span>
+
+        <span class="c1"># 2.c.2. compute shanks transformation</span>
+        <span class="c1"># using the epsilon algorithm; structured after [weniger_1989]_, p26.</span>
+        <span class="n">S</span><span class="p">[:,</span> <span class="n">i</span><span class="p">][</span><span class="n">om</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="p">[:,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">om</span><span class="p">]</span> <span class="o">+</span> <span class="n">EMi</span>  <span class="c1"># working array for transformation</span>
+
+        <span class="c1"># recursive loop</span>
+        <span class="n">aux2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">om</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">EM0</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">aux1</span><span class="p">,</span> <span class="n">aux2</span> <span class="o">=</span> <span class="n">aux2</span><span class="p">,</span> <span class="n">S</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">ddff</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">aux2</span>
+            <span class="n">S</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ddff</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span><span class="o">.</span><span class="n">tiny</span><span class="p">,</span>
+                                  <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">aux1</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="n">ddff</span><span class="p">)</span>
+
+        <span class="c1"># the extrapolated result plus the first interval term</span>
+        <span class="n">extrap</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">im</span><span class="p">]</span> <span class="o">+</span> <span class="n">EM0</span><span class="p">[</span><span class="n">om</span><span class="p">]</span>
+
+        <span class="c1"># 2.c.3. analyze for convergence</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Calculate relative and absolute error</span>
+            <span class="n">rErr</span> <span class="o">=</span> <span class="p">(</span><span class="n">extrap</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extrap</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span><span class="o">/</span><span class="n">extrap</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">relErr</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rErr</span><span class="p">)</span>
+            <span class="n">abserr</span> <span class="o">=</span> <span class="n">atol</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">extrap</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># Update booleans</span>
+            <span class="n">om</span><span class="p">[</span><span class="n">om</span><span class="p">]</span> <span class="o">*=</span> <span class="n">relErr</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">rtol</span> <span class="o">+</span> <span class="n">abserr</span>
+
+            <span class="c1"># Store in EM</span>
+            <span class="n">EM</span><span class="p">[</span><span class="n">om</span><span class="p">]</span> <span class="o">=</span> <span class="n">extrap</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">om</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">break</span>
+
+    <span class="c1"># Warning if maxint is potentially too small</span>
+    <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span> <span class="o">==</span> <span class="n">maxint</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;* WARNING :: &#39;</span> <span class="o">+</span> <span class="n">hfstr</span> <span class="o">+</span> <span class="s1">&#39;-QWE used all &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">maxint</span><span class="p">)</span> <span class="o">+</span>
+              <span class="s1">&#39; intervals; set `maxint` higher.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Catch the ones that did not converge</span>
+    <span class="n">EM</span><span class="p">[</span><span class="n">om</span><span class="p">]</span> <span class="o">=</span> <span class="n">extrap</span><span class="p">[</span><span class="n">om</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="o">**</span><span class="n">old_settings</span><span class="p">)</span>
+
+    <span class="c1"># Set np.finfo(np.double).max to 0</span>
+    <span class="n">EM</span><span class="o">.</span><span class="n">real</span><span class="p">[</span><span class="n">EM</span><span class="o">.</span><span class="n">real</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">EM</span></div>
+
+
+<div class="viewcode-block" id="get_Gauss_Weights"><a class="viewcode-back" href="../../empymod.html#empymod.transform.get_Gauss_Weights">[docs]</a><span class="k">def</span> <span class="nf">get_Gauss_Weights</span><span class="p">(</span><span class="n">nquad</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return Gauss Quadrature Weights of order nquad on the interval [-1, 1].</span>
+
+<span class="sd">    Algorithm from page 129 in [Trefethen_2000]_.</span>
+
+<span class="sd">    This function is based on `getGaussQuadWeights.m` from the source code</span>
+<span class="sd">    distributed with [Key_2012]_.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">g_beta</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nquad</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nquad</span><span class="p">)))</span>
+    <span class="n">g_d</span><span class="p">,</span> <span class="n">g_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">g_beta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">g_beta</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">g_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">g_d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">g_x</span> <span class="o">=</span> <span class="n">g_d</span><span class="p">[</span><span class="n">g_i</span><span class="p">]</span>
+    <span class="n">g_w</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">g_v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">g_i</span><span class="p">]</span><span class="o">*</span><span class="n">g_v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">g_i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">g_x</span><span class="p">,</span> <span class="n">g_w</span></div>
+
+
+<div class="viewcode-block" id="get_spline_values"><a class="viewcode-back" href="../../empymod.html#empymod.transform.get_spline_values">[docs]</a><span class="k">def</span> <span class="nf">get_spline_values</span><span class="p">(</span><span class="n">filt</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">nr_per_dec</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return required calculation points.&quot;&quot;&quot;</span>
+
+    <span class="c1"># If number per decade (nr_per_dec) is not provided, filter.factor is used</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nr_per_dec</span><span class="p">:</span>
+        <span class="n">nr_per_dec</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">filt</span><span class="o">.</span><span class="n">factor</span><span class="p">)</span>
+
+    <span class="c1"># Get min and max required out-values (depends on filter and inp-value)</span>
+    <span class="n">outmax</span> <span class="o">=</span> <span class="n">filt</span><span class="o">.</span><span class="n">base</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">inp</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">outmin</span> <span class="o">=</span> <span class="n">filt</span><span class="o">.</span><span class="n">base</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">inp</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="c1"># Number of out-values</span>
+    <span class="n">nout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">outmax</span><span class="o">/</span><span class="n">outmin</span><span class="p">)</span><span class="o">*</span><span class="n">nr_per_dec</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Calculate output values</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">outmin</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">outmin</span><span class="p">)</span> <span class="o">+</span> <span class="n">nout</span><span class="o">/</span><span class="n">nr_per_dec</span><span class="p">,</span>
+                           <span class="mi">1</span><span class="o">/</span><span class="n">nr_per_dec</span><span class="p">))</span>
+
+    <span class="c1"># Only necessary if standard spline is used. We need to calculate the new</span>
+    <span class="c1"># input values, as spline is carried out in the input domain. Else spline</span>
+    <span class="c1"># is carried out in output domain and the new input values are not used.</span>
+    <span class="n">new_inp</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nout</span> <span class="o">-</span> <span class="n">filt</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span>
+                               <span class="n">nr_per_dec</span><span class="p">)</span>
+
+    <span class="c1"># Return output values</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="n">new_inp</span></div>
+
+
+<div class="viewcode-block" id="fhti"><a class="viewcode-back" href="../../empymod.html#empymod.transform.fhti">[docs]</a><span class="k">def</span> <span class="nf">fhti</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">rmin</span><span class="p">,</span> <span class="n">rmax</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">fftlog</span><span class="p">,</span> <span class="n">kr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kropt</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return parameters required for FFTLog.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Central point log10(r_c) of periodic interval</span>
+    <span class="n">logrc</span> <span class="o">=</span> <span class="p">(</span><span class="n">rmin</span> <span class="o">+</span> <span class="n">rmax</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+
+    <span class="c1"># Central index (1/2 integral if n is even)</span>
+    <span class="n">nc</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span>
+
+    <span class="c1"># Log spacing of points</span>
+    <span class="n">dlogr</span> <span class="o">=</span> <span class="p">(</span><span class="n">rmax</span> <span class="o">-</span> <span class="n">rmin</span><span class="p">)</span><span class="o">/</span><span class="n">n</span>
+    <span class="n">dlnr</span> <span class="o">=</span> <span class="n">dlogr</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
+
+    <span class="c1"># Get optimal kr and wsave</span>
+    <span class="n">kr</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">fftlog</span><span class="o">.</span><span class="n">fhti</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">dlnr</span><span class="p">,</span> <span class="n">kr</span><span class="o">=</span><span class="n">kr</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">kropt</span><span class="o">=</span><span class="n">kropt</span><span class="p">)</span>
+
+    <span class="c1"># Calculate required input x-values (r)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">logrc</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">nc</span><span class="p">)</span><span class="o">*</span><span class="n">dlogr</span><span class="p">)</span>
+
+    <span class="c1"># Calculate k with adjusted kr</span>
+    <span class="n">logkc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">kr</span><span class="p">)</span> <span class="o">-</span> <span class="n">logrc</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">logkc</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">nc</span><span class="p">)</span><span class="o">*</span><span class="n">dlogr</span><span class="p">)</span>
+
+    <span class="c1"># rk = r_c/k_r</span>
+    <span class="n">rk</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">logrc</span> <span class="o">-</span> <span class="n">logkc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">rk</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Dieter Werthmüller.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

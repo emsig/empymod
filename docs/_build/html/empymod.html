@@ -1,0 +1,1995 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>empymod – EM Python modeller &#8212; empymod 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="empymod 0.9 documentation" href="index.html" />
+    <link rel="prev" title="Manual of empymod" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-empymod"></span><div class="section" id="empymod-em-python-modeller">
+<h1><cite>empymod</cite> &#8211; EM Python modeller<a class="headerlink" href="#empymod-em-python-modeller" title="Permalink to this headline">¶</a></h1>
+<p>· Version: 0.9 · Nov 26, 2016 · <a class="reference internal" href="index.html#empymod-manual"><span class="std std-ref">Manual of empymod</span></a> ·</p>
+<p>The <strong>e</strong>lectro<strong>m</strong>agnetic <strong>py</strong>thon <strong>mod</strong>eller <cite>empymod</cite> can
+model electric or magnetic responses due to a three-dimensional electric or
+magnetic source in a layered-earth model with electric anisotropy
+(<span class="math">\(\rho_h, \lambda\)</span>), electric permittivity (<span class="math">\(\epsilon_h,
+\epsilon_v\)</span>), and magnetic permeability (<span class="math">\(\mu_h, \mu_v\)</span>), from very low
+frequencies (<span class="math">\(f\to 0\)</span> Hz) to very high frequencies (<span class="math">\(f\to\)</span> GHz).</p>
+<div class="section" id="notice">
+<h2>Notice<a class="headerlink" href="#notice" title="Permalink to this headline">¶</a></h2>
+<p>This product includes software developed at
+<em>The Mexican Institute of Petroleum IMP</em>
+(<em>Instituto Mexicano del Petróleo</em>, <a class="reference external" href="http://www.imp.mx">http://www.imp.mx</a>).</p>
+<p>The project was funded through
+<em>The Mexican National Council of Science and Technology</em>
+(<em>Consejo Nacional de Ciencia y Tecnología</em>, <a class="reference external" href="http://www.conacyt.mx">http://www.conacyt.mx</a>).</p>
+<p>This product is a derivative work of <a class="reference internal" href="#hunziker-et-al-2015" id="id1">[Hunziker_et_al_2015]</a> and <a class="reference internal" href="#key-2012" id="id2">[Key_2012]</a>,
+and their publicly available software:</p>
+<ol class="arabic simple">
+<li>Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response
+in a layered vertical transverse isotropic medium: A new look at an old
+problem: Geophysics, 80, F1-F18; DOI: <a class="reference external" href="http://dx.doi.org/10.1190/geo2013-0411.1">10.1190/geo2013-0411.1</a>; Software:
+<a class="reference external" href="http://software.seg.org/2015/0001">software.seg.org/2015/0001</a>.</li>
+<li>Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
+Geophysics, 77, F21-F30; DOI: <a class="reference external" href="http://dx.doi.org/10.1190/GEO2011-0237.1">10.1190/GEO2011-0237.1</a>; Software:
+<a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.</li>
+</ol>
+<p>Both pieces of software are published under the <em>SEG disclaimer</em>. Parts of the
+modeller <cite>emmod</cite> from Hunziker et al, 2015, is furthermore released under the
+<em>Common Public License Version 1.0 (CPL)</em>. See the <em>NOTICE</em>-file in the root
+directory for more information and a reprint of the SEG disclaimer and the CPL.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<ul class="last">
+<li><p class="first">Include <cite>scipy.integrate.quad</cite> as an additional Hankel transform.
+There are cases when both <cite>QWE</cite> and <cite>FHT</cite> struggle, e.g. at very short
+offsets with very high frequencies (GPR).</p>
+</li>
+<li><dl class="first docutils">
+<dt>More modelling routines:</dt>
+<dd><ul class="first last simple">
+<li>convolution with a wavelet for GPR (proper version of <cite>model.gpr</cite>)</li>
+<li>arbitrary source and receiver dipole lengths</li>
+<li>arbitrary source and receiver rotations</li>
+<li>variable receiver depths within one calculation</li>
+<li>various source-receiver arrangements (loops etc)</li>
+<li>multiple sources</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Pure wavenumber output-routine (proper version of <cite>model.wavenumber</cite>)</p>
+</li>
+<li><p class="first">Improve tests and benchmarks</p>
+</li>
+<li><p class="first">GUIs</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="installation-requirements">
+<h2>Installation &amp; requirements<a class="headerlink" href="#installation-requirements" title="Permalink to this headline">¶</a></h2>
+<p>Just add the path to <cite>empymod</cite> to your python-path variable.</p>
+<p>Alternatively, to install it in your python distribution (linux), run:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Required are python version 3 or higher and the modules <cite>NumPy</cite>, <cite>SciPy</cite>,
+<cite>numexpr</cite>, <cite>timeit</cite>, and <cite>datetime</cite>.</p>
+</div>
+<div class="section" id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h2>
+<p>I am in the process of publishing a paper regarding <cite>empymod</cite>, and I will put
+the info here once it is reality. If you publish results for which you used
+<cite>empymod</cite>, please consider citing this paper. Also consider citing
+<a class="reference internal" href="#hunziker-et-al-2015" id="id3">[Hunziker_et_al_2015]</a> and <a class="reference internal" href="#key-2012" id="id4">[Key_2012]</a>, without which <cite>empymod</cite> would not
+exist.</p>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>Copyright 2016 Dieter Werthmüller</p>
+<p>Licensed under the Apache License, Version 2.0 (the &#8220;License&#8221;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<blockquote>
+<div><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></div></blockquote>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &#8220;AS IS&#8221; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+<p>See the <em>LICENSE</em>-file in the root directory for a full reprint of the Apache
+License.</p>
+</div>
+<div class="section" id="notes-on-usage">
+<h2>Notes on usage<a class="headerlink" href="#notes-on-usage" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="note-on-speed-memory-and-accuracy">
+<h3>Note on speed, memory, and accuracy<a class="headerlink" href="#note-on-speed-memory-and-accuracy" title="Permalink to this headline">¶</a></h3>
+<p>There is the usual trade-off between speed, memory, and accuracy. Very
+generally speaking we can say that the <em>FHT</em> is faster than <em>QWE</em>, but <em>QWE</em> is
+much easier on memory usage. I doubt you will ever run into memory issues with
+<em>QWE</em>, whereas for <em>FHT</em> you might for ten thousands of offsets or hundreds of
+layers. Furthermore, <em>QWE</em> allows you to control the accuracy.</p>
+<p>There are two optimisation possibilities included via the <code class="docutils literal"><span class="pre">opt</span></code>-flag:
+parallelisation (<code class="docutils literal"><span class="pre">opt='parallel'</span></code>) and spline interpolation
+(<code class="docutils literal"><span class="pre">opt='spline'</span></code>).  They are switched off by default. The optimization
+<code class="docutils literal"><span class="pre">opt='parallel'</span></code> only affects speed and memory usage, whereas
+<code class="docutils literal"><span class="pre">opt='spline'</span></code> also affects precision!</p>
+<p>I am sure <cite>empymod</cite> can be made even faster, for instance with the likes of
+<cite>cython</cite> or <cite>numba</cite>. Contributions are welcomed!</p>
+<div class="section" id="parallelisation">
+<h4>Parallelisation<a class="headerlink" href="#parallelisation" title="Permalink to this headline">¶</a></h4>
+<p>If <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span> <span class="pre">'parallel'</span></code>, a good dozen of the most time-consuming statements are
+calculated by using the <cite>numexpr</cite> package
+(<a class="reference external" href="https://github.com/pydata/numexpr/wiki/Numexpr-Users-Guide">https://github.com/pydata/numexpr/wiki/Numexpr-Users-Guide</a>).  These statements
+are all in the <cite>kernel</cite>-functions <cite>greenfct</cite>, <cite>reflections</cite>, and <cite>fields</cite>, and
+all involve <span class="math">\(\Gamma\)</span> in one way or another, often calculating square
+roots or exponentials. As <span class="math">\(\Gamma\)</span> has dimensions (#frequencies,
+#offsets, #layers, #lambdas), it can become fairly big.</p>
+<p>This parallelisation will make <cite>empymod</cite> faster if you calculate a lot of
+offsets/frequencies at once, but slower for few offsets/frequencies. Best
+practice is to check first which one is faster. (You can use the included
+<cite>jupyter notebook</cite>-benchmark.)</p>
+</div>
+<div class="section" id="spline-interpolation">
+<h4>Spline interpolation<a class="headerlink" href="#spline-interpolation" title="Permalink to this headline">¶</a></h4>
+<p>If <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span> <span class="pre">'spline'</span></code>, the so-called <em>lagged convolution</em> or <em>splined</em> variant
+of the <em>FHT</em> (depending on <code class="docutils literal"><span class="pre">htarg</span></code>) or the <em>splined</em> version of the <em>QWE</em> are
+applied. The spline option should be used with caution, as it is an
+interpolation and therefore less precise than the non-spline version. However,
+it significantly speeds up <em>QWE</em>, and massively speeds up <em>FHT</em>. (The
+<cite>numexpr</cite>-version of the spline option is slower than the pure spline one, and
+therefore it is only possible to have either <code class="docutils literal"><span class="pre">'parallel'</span></code> or <code class="docutils literal"><span class="pre">'spline'</span></code>
+on.)</p>
+<p>Setting <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span> <span class="pre">'spline'</span></code> is generally faster. Good speed-up is achieved for
+<em>QWE</em> by setting <code class="docutils literal"><span class="pre">maxint</span></code> as low as possible. Also, the higher <code class="docutils literal"><span class="pre">nquad</span></code> is,
+the higher the speed-up will be.  The variable <code class="docutils literal"><span class="pre">pts_per_dec</span></code> has also some
+influence. For <em>FHT</em>, big improvements are achieved for long FHT-filters and
+for many offsets/frequencies (thousands).  Additionally, spline minimizes
+memory requirements a lot.  Speed-up is greater if all source-receiver angles
+are identical.</p>
+<p><cite>FHT</cite>: Default for <code class="docutils literal"><span class="pre">pts_per_dec</span> <span class="pre">=</span> <span class="pre">None</span></code>, which is the original <em>lagged
+convolution</em>, where the spacing is defined by the filter-base, the transform is
+carried out first followed by spline-interpolation. You can set this parameter
+to an integer, which defines the number of points to evaluate per decade. In
+this case the spline-interpolation is carried out first, followed by the
+transformation. The original <em>lagged convolution</em> is generally the fastest for
+a very good precision. However, by setting <code class="docutils literal"><span class="pre">pts_per_dec</span></code> appropriately one
+can achieve higher precision, normally at the cost of speed.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Keep in mind that it uses interpolation, and is therefore not as
+accurate as the non-spline version.  Use with caution and always compare
+with the non-spline version if you can apply the spline-version to your
+problem at hand!</p>
+</div>
+<p>Be aware that the <cite>QWE</cite>- and the <cite>FHT</cite>-Versions for the frequency-to-time
+transformation <em>always</em> use the splined version and <em>always</em> loop over
+offsets.</p>
+</div>
+<div class="section" id="looping">
+<h4>Looping<a class="headerlink" href="#looping" title="Permalink to this headline">¶</a></h4>
+<p>By default, you can calculate many offsets and many frequencies all in one go,
+vectorized (for the <em>FHT</em>), which is the default. The <code class="docutils literal"><span class="pre">loop</span></code> parameter gives
+you the possibility to force looping over frequencies or offsets. This
+parameter can have severe effects on both runtime and memory usage. Play around
+with this factor to find the fastest version for your problem at hand. It
+ALWAYS loops over frequencies if <code class="docutils literal"><span class="pre">ht</span> <span class="pre">=</span> <span class="pre">'QWE'</span></code> or if <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span> <span class="pre">'spline'</span></code>.  All
+vectorized is very fast if there are few offsets or few frequencies. If there
+are many offsets and many frequencies, looping over the smaller of the two will
+be faster. Choosing the right looping together with <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span> <span class="pre">'parallel'</span></code> can
+have a huge influence.</p>
+</div>
+<div class="section" id="vertical-components">
+<h4>Vertical components<a class="headerlink" href="#vertical-components" title="Permalink to this headline">¶</a></h4>
+<p>It is advised to use <code class="docutils literal"><span class="pre">xdirect</span> <span class="pre">=</span> <span class="pre">True</span></code> (the default) if source and receiver
+are in the same layer to calculate</p>
+<blockquote>
+<div><ul class="simple">
+<li>the vertical electric field due to a vertical electric source,</li>
+<li>configurations that involve vertical magnetic components (source or
+receiver),</li>
+<li>all configurations when source and receiver depth are exactly the same.</li>
+</ul>
+</div></blockquote>
+<p>The Hankel transforms methods are having sometimes difficulties transforming
+these functions.</p>
+</div>
+</div>
+<div class="section" id="fftlog">
+<h3>FFTLog<a class="headerlink" href="#fftlog" title="Permalink to this headline">¶</a></h3>
+<p>FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT originally
+proposed by <a class="reference internal" href="#talman-1978" id="id5">[Talman_1978]</a>. The code used by <cite>empymod</cite> was published in
+Appendix B of <a class="reference internal" href="#hamilton-2000" id="id6">[Hamilton_2000]</a> and is publicly available at
+<a class="reference external" href="http://casa.colorado.edu/~ajsh/FFTLog">casa.colorado.edu/~ajsh/FFTLog</a>.
+From the <cite>FFTLog</cite>-website:</p>
+<p><em>FFTLog is a set of fortran subroutines that compute the fast Fourier or Hankel
+(= Fourier-Bessel) transform of a periodic sequence of logarithmically spaced
+points.</em></p>
+<p>FFTlog can be used for the Hankel as well as for the Fourier Transform, and
+<cite>empymod</cite> uses a simple python-wrapper in order to use the Fortran FFTLog code.
+However, it does not come pre-installed with <cite>empymod</cite>, as it has to be
+compiled on your system. You can download it from <a class="reference external" href="https://github.com/prisae/fftlog">github.com/prisae/fftlog</a> and install it into your python
+distribution (you need a Fortran compiler for this) by running the
+setup-script:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>I am currently working with <cite>SciPy</cite>-developers in this regard and hope that
+<cite>FFTLog</cite> will be included directly in <cite>SciPy</cite> in the not so distant future.</p>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References&nbsp;<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils citation" frame="void" id="anderson-1975" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Anderson_1975]</td><td><em>(<a class="fn-backref" href="#id29">1</a>, <a class="fn-backref" href="#id42">2</a>, <a class="fn-backref" href="#id51">3</a>)</em> Anderson, W.L., 1975, Improved digital filters for
+evaluating Fourier and Hankel transform integrals:
+USGS Unnumbered Series;
+<a class="reference external" href="http://pubs.usgs.gov/unnumbered/70045426/report.pdf">http://pubs.usgs.gov/unnumbered/70045426/report.pdf</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="anderson-1979" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id30">[Anderson_1979]</a></td><td>Anderson, W. L., 1979, Numerical integration of related
+Hankel transforms of orders 0 and 1 by adaptive digital filtering:
+Geophysics, 44, 1287&#8211;1305; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1190/1.1441007">10.1190/1.1441007</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="anderson-1982" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Anderson_1982]</td><td><em>(<a class="fn-backref" href="#id31">1</a>, <a class="fn-backref" href="#id50">2</a>, <a class="fn-backref" href="#id56">3</a>, <a class="fn-backref" href="#id60">4</a>, <a class="fn-backref" href="#id61">5</a>)</em> Anderson, W. L., 1982, Fast Hankel transforms using
+related and lagged convolutions: ACM Trans. on Math. Softw. (TOMS), 8,
+344&#8211;368; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1145/356012.356014">10.1145/356012.356014</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="gosh-1971" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id28">[Gosh_1971]</a></td><td>Ghosh, D. P., 1971, The application of linear filter theory to
+the direct interpretation of geoelectrical resistivity sounding
+measurements: Geophysical Prospecting, 19, 192&#8211;217;
+DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1111/j.1365-2478.1971.tb00593.x">10.1111/j.1365-2478.1971.tb00593.x</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="hamilton-2000" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Hamilton_2000]</td><td><em>(<a class="fn-backref" href="#id6">1</a>, <a class="fn-backref" href="#id46">2</a>)</em> Hamilton, A. J. S., 2000, Uncorrelated modes of the
+non-linear power spectrum: Monthly Notices of the Royal Astronomical
+Society, 312, pages 257-284; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1046/j.1365-8711.2000.03071.x">10.1046/j.1365-8711.2000.03071.x</a>; Website of FFTLog:
+<a class="reference external" href="http://casa.colorado.edu/~ajsh/FFTLog">casa.colorado.edu/~ajsh/FFTLog</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="hunziker-et-al-2015" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Hunziker_et_al_2015]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id16">3</a>, <a class="fn-backref" href="#id18">4</a>, <a class="fn-backref" href="#id19">5</a>, <a class="fn-backref" href="#id20">6</a>, <a class="fn-backref" href="#id21">7</a>, <a class="fn-backref" href="#id22">8</a>, <a class="fn-backref" href="#id23">9</a>)</em> Hunziker, J., J. Thorbecke, and E. Slob, 2015, The
+electromagnetic response in a layered vertical transverse isotropic medium:
+A new look at an old problem: Geophysics, 80, F1&#8211;F18;
+DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1190/geo2013-0411.1">10.1190/geo2013-0411.1</a>;
+Software: <a class="reference external" href="http://software.seg.org/2015/0001">software.seg.org/2015/0001</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="key-2009" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Key_2009]</td><td><em>(<a class="fn-backref" href="#id53">1</a>, <a class="fn-backref" href="#id54">2</a>, <a class="fn-backref" href="#id64">3</a>, <a class="fn-backref" href="#id65">4</a>, <a class="fn-backref" href="#id66">5</a>, <a class="fn-backref" href="#id74">6</a>, <a class="fn-backref" href="#id75">7</a>, <a class="fn-backref" href="#id76">8</a>, <a class="fn-backref" href="#id84">9</a>, <a class="fn-backref" href="#id85">10</a>, <a class="fn-backref" href="#id86">11</a>, <a class="fn-backref" href="#id93">12</a>, <a class="fn-backref" href="#id97">13</a>)</em> Key, K., 2009, 1D inversion of multicomponent, multifrequency
+marine CSEM data: Methodology and synthetic studies for resolving thin
+resistive layers: Geophysics, 74, F9&#8211;F20; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1190/1.3058434">10.1190/1.3058434</a>.
+Software: <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="key-2012" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Key_2012]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id4">2</a>, <a class="fn-backref" href="#id26">3</a>, <a class="fn-backref" href="#id32">4</a>, <a class="fn-backref" href="#id33">5</a>, <a class="fn-backref" href="#id34">6</a>, <a class="fn-backref" href="#id35">7</a>, <a class="fn-backref" href="#id36">8</a>, <a class="fn-backref" href="#id41">9</a>, <a class="fn-backref" href="#id43">10</a>, <a class="fn-backref" href="#id44">11</a>, <a class="fn-backref" href="#id45">12</a>, <a class="fn-backref" href="#id47">13</a>, <a class="fn-backref" href="#id49">14</a>, <a class="fn-backref" href="#id57">15</a>, <a class="fn-backref" href="#id58">16</a>, <a class="fn-backref" href="#id62">17</a>, <a class="fn-backref" href="#id68">18</a>, <a class="fn-backref" href="#id69">19</a>, <a class="fn-backref" href="#id71">20</a>, <a class="fn-backref" href="#id72">21</a>, <a class="fn-backref" href="#id78">22</a>, <a class="fn-backref" href="#id79">23</a>, <a class="fn-backref" href="#id81">24</a>, <a class="fn-backref" href="#id82">25</a>, <a class="fn-backref" href="#id88">26</a>, <a class="fn-backref" href="#id89">27</a>)</em> Key, K., 2012, Is the fast Hankel transform faster than
+quadrature?: Geophysics, 77, F21&#8211;F30; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1190/GEO2011-0237.1">10.1190/GEO2011-0237.1</a>;
+Software: <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="kong-2007" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Kong_2007]</td><td><em>(<a class="fn-backref" href="#id52">1</a>, <a class="fn-backref" href="#id91">2</a>, <a class="fn-backref" href="#id92">3</a>, <a class="fn-backref" href="#id95">4</a>, <a class="fn-backref" href="#id96">5</a>)</em> Kong, F. N., 2007, Hankel transform filters for dipole antenna
+radiation in a conductive medium: Geophysical Prospecting, 55, 83&#8211;89;
+DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1111/j.1365-2478.2006.00585.x">10.1111/j.1365-2478.2006.00585.x</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="shanks-1955" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id37">[Shanks_1955]</a></td><td>Shanks, D., 1955, Non-linear transformations of divergent and
+slowly convergent sequences: Journal of Mathematics and Physics, 34, 1&#8211;42;
+DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1002/sapm19553411">10.1002/sapm19553411</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="slob-et-al-2010" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Slob_et_al_2010]</td><td><em>(<a class="fn-backref" href="#id24">1</a>, <a class="fn-backref" href="#id25">2</a>)</em> Slob, E., J. Hunziker, and W. A. Mulder, 2010, Green&#8217;s
+tensors for the diffusive electric field in a VTI half-space: PIER, 107,
+1&#8211;20: DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.2528/PIER10052807">10.2528/PIER10052807</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="talman-1978" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[Talman_1978]</a></td><td>Talman, J. D., 1978, Numerical Fourier and Bessel transforms
+in logarithmic variables: Journal of Computational Physics, 29, pages
+35-48; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1016/0021-9991(78)90107-9">10.1016/0021-9991(78)90107-9</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="trefethen-2000" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Trefethen_2000]</td><td><em>(<a class="fn-backref" href="#id39">1</a>, <a class="fn-backref" href="#id48">2</a>)</em> Trefethen, L. N., 2000, Spectral methods in MATLAB: Society
+for Industrial and Applied Mathematics (SIAM), volume 10 of Software,
+Environments, and Tools, chapter 12, page 129;
+DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1137/1.9780898719598.ch12">10.1137/1.9780898719598.ch12</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="weniger-1989" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id40">[Weniger_1989]</a></td><td>Weniger, E. J., 1989, Nonlinear sequence transformations for
+the acceleration of convergence and the summation of divergent series:
+Computer Physics Reports, 10, 189&#8211;371;
+arXiv:&nbsp;<a class="reference external" href="https://arxiv.org/abs/math/0306302">abs/math/0306302</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="wynn-1956" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id38">[Wynn_1956]</a></td><td>Wynn, P., 1956, On a device for computing the
+<span class="math">\(e_m(S_n)\)</span> tranformation: Math. Comput., 10, 91&#8211;96;
+DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1090/S0025-5718-1956-0084056-6">10.1090/S0025-5718-1956-0084056-6</a>.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<span class="target" id="module-empymod.model"></span><div class="section" id="model-model-em-responses">
+<h1><code class="xref py py-mod docutils literal"><span class="pre">model</span></code> &#8211; Model EM-responses<a class="headerlink" href="#model-model-em-responses" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>EM-modelling routines. So far implemented:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><cite>frequency</cite>:  Calculate the electromagnetic field for various frequencies</dt>
+<dd><p class="first last">and offsets.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><cite>time</cite>:       Calculate the electromagnetic field for various times</dt>
+<dd><p class="first last">and offsets.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>The above routines make use of the two core routines:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt><cite>fem</cite>:        Calculate wavenumber-domain electromagnetic field and carry</dt>
+<dd><p class="first last">out the Hankel transform to the frequency domain.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><cite>tem</cite>:        Calculate <cite>fem</cite> and carry out Fourier transform to time</dt>
+<dd><p class="first last">domain.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Two more routines are more kind of examples and cannot be regarded stable:</dt>
+<dd><ul class="first last simple">
+<li><cite>gpr</cite>:        Calculate the Ground-Penetrating Radar (GPR) response.</li>
+<li><cite>wavenumber</cite>: Calculate the electromagnetic wavenumber-domain solution.</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="empymod.model.frequency">
+<code class="descclassname">empymod.model.</code><code class="descname">frequency</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>res</em>, <em>freq</em>, <em>ab=11</em>, <em>aniso=None</em>, <em>epermH=None</em>, <em>epermV=None</em>, <em>mpermH=None</em>, <em>mpermV=None</em>, <em>xdirect=True</em>, <em>ht='fht'</em>, <em>htarg=None</em>, <em>opt=None</em>, <em>loop=None</em>, <em>verb=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/model.html#frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.model.frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the electromagnetic frequency-domain field.</p>
+<p>Calculate the electromagnetic field for various frequencies and offsets
+(one src-rec-configuration).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>src</strong> : list of floats</p>
+<blockquote>
+<div><p>Source coordinates (m): [src-x, src-y, src-z]. All single values (no
+arrays)</p>
+</div></blockquote>
+<p><strong>rec</strong> : list of floats or arrays</p>
+<blockquote>
+<div><p>Receiver coordinates (m): [rec-x, rec-y, rec-z].
+The x- and y-coordinates can be arrays, z is a single value.
+The x- and y-coordinates must have the same dimension.</p>
+</div></blockquote>
+<p><strong>depth</strong> : list</p>
+<blockquote>
+<div><p>Absolute layer boundaries z (m); #depth = #res - 1
+(excluding +/- infinity).</p>
+</div></blockquote>
+<p><strong>res</strong> : array_like</p>
+<blockquote>
+<div><p>Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.</p>
+</div></blockquote>
+<p><strong>freq</strong> : array_like</p>
+<blockquote>
+<div><p>Frequencies f (Hz)</p>
+</div></blockquote>
+<p><strong>ab</strong> : int, optional</p>
+<blockquote>
+<div><p>Source-receiver configuration, defaults to 11.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="12%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head" colspan="2">&nbsp;</th>
+<th class="head" colspan="3">electric  source</th>
+<th class="head" colspan="3">magnetic source</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td colspan="2">&nbsp;</td>
+<td><strong>x</strong></td>
+<td><strong>y</strong></td>
+<td><strong>z</strong></td>
+<td><strong>x</strong></td>
+<td><strong>y</strong></td>
+<td><strong>z</strong></td>
+</tr>
+<tr class="row-odd"><td rowspan="3"><p class="first"><strong>electric</strong></p>
+<p class="last"><strong>receiver</strong></p>
+</td>
+<td><strong>x</strong></td>
+<td>11</td>
+<td>12</td>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+</tr>
+<tr class="row-even"><td><strong>y</strong></td>
+<td>21</td>
+<td>22</td>
+<td>23</td>
+<td>24</td>
+<td>25</td>
+<td>26</td>
+</tr>
+<tr class="row-odd"><td><strong>z</strong></td>
+<td>31</td>
+<td>32</td>
+<td>33</td>
+<td>34</td>
+<td>35</td>
+<td>36</td>
+</tr>
+<tr class="row-even"><td rowspan="3"><p class="first"><strong>magnetic</strong></p>
+<p class="last"><strong>receiver</strong></p>
+</td>
+<td><strong>x</strong></td>
+<td>41</td>
+<td>42</td>
+<td>43</td>
+<td>44</td>
+<td>45</td>
+<td>46</td>
+</tr>
+<tr class="row-odd"><td><strong>y</strong></td>
+<td>51</td>
+<td>52</td>
+<td>53</td>
+<td>54</td>
+<td>55</td>
+<td>56</td>
+</tr>
+<tr class="row-even"><td><strong>z</strong></td>
+<td>61</td>
+<td>62</td>
+<td>63</td>
+<td>64</td>
+<td>65</td>
+<td>66</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><strong>aniso</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>epermH</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Horizontal electric permittivities epsilon_h (-); #epermH = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>epermV</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Vertical electric permittivities epsilon_v (-); #epermV = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>mpermH</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Horizontal magnetic permeabilities mu_h (-); #mpermH = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>mpermV</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Vertical magnetic permeabilities mu_v (-); #mpermV = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>xdirect</strong> : bool, optional</p>
+<blockquote>
+<div><p>If True and source and receiver are in the same layer, the direct field
+is calculated analytically in the frequency domain, if False it is
+calculated in the wavenumber domain.
+Defaults to True.</p>
+</div></blockquote>
+<p><strong>ht</strong> : {&#8216;fht&#8217;, &#8216;qwe&#8217;}, optional</p>
+<blockquote>
+<div><p>Flag to choose either the <em>Fast Hankel Transform</em> (FHT) or the
+<em>Quadrature-With-Extrapolation</em> (QWE) for the Hankel transform.
+Defaults to &#8216;fht&#8217;.</p>
+</div></blockquote>
+<p><strong>htarg</strong> : str or filter from empymod.filters or array_like, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Depends on the value for <cite>ht</cite>:</dt>
+<dd><ul class="first last">
+<li><p class="first">If <cite>ht</cite> = &#8216;fht&#8217;: array containing:
+[filter, pts_per_dec]:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>filter: string of filter name in <cite>empymod.filters</cite> or</dt>
+<dd><p class="first last">the filter method itself.
+(default: <cite>empymod.filters.key_401_2009()</cite>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>pts_per_dec: points per decade (only relevant if spline=True)</dt>
+<dd><dl class="first last docutils">
+<dt>If none, standard lagged convolution is used.</dt>
+<dd><p class="first last">(default: None)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">If <cite>ht</cite> = &#8216;qwe&#8217;: array containing:
+[rtol, atol, nquad, maxint, pts_per_dec]:</p>
+<blockquote>
+<div><ul class="simple">
+<li>rtol: relative tolerance (default: 1e-12)</li>
+<li>atol: absolute tolerance (default: 1e-30)</li>
+<li>nquad: order of Gaussian quadrature (default: 51)</li>
+<li>maxint: maximum number of partial integral intervals
+(default: 40)</li>
+<li>pts_per_dec: points per decade (only relevant if
+opt=&#8217;spline&#8217;) (default: 80)</li>
+</ul>
+</div></blockquote>
+<p>All are optional, you only have to maintain the order. To only
+change <cite>nquad</cite> to 11 and use the defaults otherwise, you can
+provide htarg=[&#8216;&#8217;, &#8216;&#8217;, 11].</p>
+</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>opt</strong> : {None, &#8216;parallel&#8217;, &#8216;spline&#8217;}, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Optimization flag. Defaults to None:</dt>
+<dd><ul class="first last simple">
+<li>None: Normal case, no parallelization nor interpolation is used.</li>
+<li>If &#8216;parallel&#8217;, the package <cite>numexpr</cite> is used to evaluate the most
+expensive statements. Always check if it actually improves
+performance for a specific problem. It can speed up the
+calculation for big arrays, but will most likely be slower for
+small arrays. It will use all available cores for these specific
+statements, which all contain <cite>Gamma</cite> in one way or another,
+which has dimensions (#frequencies, #offsets, #layers, #lambdas),
+therefore can grow pretty big.</li>
+<li>If &#8216;spline&#8217;, the <em>lagged convolution</em> or <em>splined</em> variant of the
+FHT or the <em>splined</em> version of the QWE are used. Use with
+caution and check with the non-spline version for a specific
+problem. (Can be faster, slower, or plainly wrong, as it uses
+interpolation.) If spline is set it will make use of the
+parameter pts_per_dec that can be defined in htarg. If
+pts_per_dec is not set for FHT, then the <em>lagged</em> version is
+used, else the <em>splined</em>.</li>
+</ul>
+</dd>
+</dl>
+<p>The option &#8216;parallel&#8217; only affects speed and memory usage, whereas
+&#8216;spline&#8217; also affects precision!  Please read the note in the <em>README</em>
+documentation for more information.</p>
+</div></blockquote>
+<p><strong>loop</strong> : {None, &#8216;freq&#8217;, &#8216;off&#8217;}, optional</p>
+<blockquote>
+<div><p>Define if to calculate everything vectorized or if to loop over
+frequencies (&#8216;freq&#8217;) or over offsets (&#8216;off&#8217;), default is None. It
+always loops over frequencies if <code class="docutils literal"><span class="pre">ht</span> <span class="pre">=</span> <span class="pre">'qwe'</span></code> or if <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span>
+<span class="pre">'spline'</span></code>. Calculating everything vectorized is fast for few offsets
+OR for few frequencies. However, if you calculate many frequencies for
+many offsets, it might be faster to loop over frequencies. Only
+comparing the different versions will yield the answer for your
+specific problem at hand!</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Level of verbosity, defaults to 1:</dt>
+<dd><ul class="first last simple">
+<li>0: Print nothing.</li>
+<li>1: Print warnings.</li>
+<li>2: Print warnings and information.</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>fEM</strong> : ndarray</p>
+<blockquote class="last">
+<div><dl class="docutils">
+<dt>Frequency-domain electromagnetic field:</dt>
+<dd><ul class="first last simple">
+<li>If rec is electric, returns E [V/m].</li>
+<li>If rec is magnetic, returns B [T] (not H [A/m]!).</li>
+</ul>
+</dd>
+</dl>
+<p>However, the source is normalised. So for instance in the electric case
+the source strength is 1 A and its length is 1 m. So the electric field
+could also be written as [V/(A.m2)].</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">empymod</span> <span class="k">import</span> <span class="n">frequency</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">src</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span><span class="o">*</span><span class="mi">500</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">200</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">depth</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1050</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="n">e20</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">EMfield</span> <span class="o">=</span> <span class="n">frequency</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">EMfield</span><span class="p">)</span>
+<span class="go">[  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j</span>
+<span class="go">  -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j</span>
+<span class="go">   1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j</span>
+<span class="go">   1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j</span>
+<span class="go">   6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.model.time">
+<code class="descclassname">empymod.model.</code><code class="descname">time</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>res</em>, <em>time</em>, <em>ab=11</em>, <em>signal=0</em>, <em>aniso=None</em>, <em>epermH=None</em>, <em>epermV=None</em>, <em>mpermH=None</em>, <em>mpermV=None</em>, <em>xdirect=True</em>, <em>ht='fht'</em>, <em>htarg=None</em>, <em>ft='sin'</em>, <em>ftarg=None</em>, <em>opt=None</em>, <em>loop='off'</em>, <em>verb=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/model.html#time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.model.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the electromagnetic time-domain field.</p>
+<p>Calculate the electromagnetic field for various times and offsets (one
+src-rec-configuration).</p>
+<p>This routine runs internally the <cite>frequency</cite>-routine, and transforms it
+to the time domain with a Fourier transform. Most parameters are therefore
+described in the modelling-routine <cite>frequency</cite>: <em>src</em>, <em>rec</em>, <em>depth</em>,
+<em>res</em>, <em>freq</em>, <em>ab</em>, <em>aniso</em>, <em>epermH</em>, <em>epermV</em>, <em>mpermH</em>, <em>mpermV</em>,
+<em>xdirect</em>, <em>ht</em>, <em>htarg</em>, <em>opt</em>, <em>loop</em>, and <em>verb</em>.</p>
+<p>Here are only the time-domain specific input parameters described: <em>time</em>,
+<em>signal</em>, <em>ft</em>, and <em>ftarg</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>time</strong> : array_like</p>
+<blockquote>
+<div><p>Times t (s)</p>
+</div></blockquote>
+<p><strong>signal</strong> : {0, 1, -1}, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Source signal, default is &#8216;0&#8217;:</dt>
+<dd><ul class="first last simple">
+<li>-1 : Switch-off response</li>
+<li>0 : Impulse response (0 or anything that is not +/- 1)</li>
+<li>+1 : Switch-on response</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>ft</strong> : {&#8216;sin&#8217;, &#8216;cos&#8217;, &#8216;qwe&#8217;, &#8216;fftlog&#8217;}, optional</p>
+<blockquote>
+<div><p>Flag to choose either the Sine- or Cosine-Filter, the
+Quadrature-With-Extrapolation (QWE), or FFTLog for the Fourier
+transform.  Defaults to &#8216;sin&#8217;.</p>
+</div></blockquote>
+<p><strong>ftarg</strong> : str or filter from empymod.filters or array_like, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Depends on the value for <cite>ft</cite>:</dt>
+<dd><ul class="first last">
+<li><p class="first">If <cite>ft</cite> = &#8216;sin&#8217; or &#8216;cos&#8217;: array containing:
+[filter, pts_per_dec]:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>filter: string of filter name in <cite>empymod.filters</cite> or</dt>
+<dd><p class="first last">the filter method itself.
+(Default: <cite>empymod.filters.key_201_CosSin_2012()</cite>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>pts_per_dec: points per decade.  If none, standard lagged</dt>
+<dd><p class="first last">convolution is used. (Default: None)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">If <cite>ft</cite> = &#8216;qwe&#8217;: array containing:
+[rtol, atol, nquad, maxint, pts_per_dec]:</p>
+<blockquote>
+<div><ul class="simple">
+<li>rtol: relative tolerance (default: 1e-8)</li>
+<li>atol: absolute tolerance (default: 1e-20)</li>
+<li>nquad: order of Gaussian quadrature (default: 21)</li>
+<li>maxint: maximum number of partial integral intervals
+(default: 200)</li>
+<li>pts_per_dec: points per decade (only relevant if spline=True)
+(default: 20)</li>
+</ul>
+</div></blockquote>
+<p>All are optional, you only have to maintain the order. To only
+change <cite>nquad</cite> to 11 and use the defaults otherwise, you can
+provide ftarg=[&#8216;&#8217;, &#8216;&#8217;, 11].</p>
+</li>
+<li><p class="first">If <cite>ft</cite> = &#8216;fftlog&#8217;: array containing: [pts_per_dec, add_dec]:</p>
+<blockquote>
+<div><ul class="simple">
+<li>pts_per_dec: sampels per decade (default: 10)</li>
+<li>add_dec: additional decades [left, right] (default: [-2, 1])</li>
+</ul>
+</div></blockquote>
+<p>All are optional, you only have to maintain the order. To only
+change <cite>add_dec</cite> to [-1, 1] and use the defaults otherwise, you
+can provide ftarg=[&#8216;&#8217;, [-1, 1]].</p>
+</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>tEM</strong> : ndarray</p>
+<blockquote class="last">
+<div><dl class="docutils">
+<dt>Time-domain electromagnetic field:</dt>
+<dd><ul class="first last simple">
+<li>If rec is electric, returns E [V/m].</li>
+<li>If rec is magnetic, returns B [T] (not H [A/m]!).</li>
+</ul>
+</dd>
+</dl>
+<p>In the case of the impulse response, the unit is further divided by
+seconds [1/s].</p>
+<p>However, the source is normalised. So for instance in the electric case
+the source strength is 1 A and its length is 1 m. So the electric field
+could also be written as [V/(A.m2)].</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">empymod</span> <span class="k">import</span> <span class="n">time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">src</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3000</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">21</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">depth</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1050</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="n">e20</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">EMfield</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">EMfield</span><span class="p">)</span>
+<span class="go">[  4.19709394e-12   3.79932391e-12   3.36173519e-12   2.95469327e-12</span>
+<span class="go">   2.64314626e-12   2.49550877e-12   2.56455245e-12   2.84250641e-12</span>
+<span class="go">   3.22151484e-12   3.51422486e-12   3.54902799e-12   3.26936090e-12</span>
+<span class="go">   2.74826378e-12   2.12471621e-12   1.52728547e-12   1.03310668e-12</span>
+<span class="go">   6.65679090e-13   4.13283197e-13   2.49707666e-13   1.48016806e-13</span>
+<span class="go">   8.66001149e-14]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.model.gpr">
+<code class="descclassname">empymod.model.</code><code class="descname">gpr</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>res</em>, <em>fc=250</em>, <em>ab=11</em>, <em>gain=None</em>, <em>aniso=None</em>, <em>epermH=None</em>, <em>epermV=None</em>, <em>mpermH=None</em>, <em>mpermV=None</em>, <em>xdirect=True</em>, <em>ht='fht'</em>, <em>htarg=None</em>, <em>opt=None</em>, <em>loop='off'</em>, <em>verb=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/model.html#gpr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.model.gpr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Ground-Penetrating Radar signal.</p>
+<p>THIS FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION.</p>
+<p>Or in other words it is merely an example how one could calculate the
+GPR-response.  However, the currently included <em>FHT</em> and <em>QWE</em> struggle for
+these high frequencies, and another Hankel transform has to be included to
+make GPR work properly (e.g. <cite>scipy.integrate.quad</cite>).</p>
+<ul class="simple">
+<li><cite>QWE</cite> is slow, but does a pretty good job except for very short offsets:
+only direct wave for offset &lt; 0.1 m, triangle-like noise at later times.</li>
+<li><cite>FHT</cite> is fast. Airwave, direct wave and first reflection are well
+visible, but afterwards it is very noisy.</li>
+</ul>
+<p>A lot is still hard-coded in this routine, for instance the frequency-range
+used to calculate the response.</p>
+<p>For input parameters see <cite>frequency</cite>, except for:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fc</strong> : float</p>
+<blockquote>
+<div><p>Centre frequency of GPR-signal (MHz). Sensible values are between
+10 MHz and 3000 MHz.</p>
+</div></blockquote>
+<p><strong>gain</strong> : float</p>
+<blockquote>
+<div><p>Power of gain function. If None, no gain is applied.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>t</strong> : array</p>
+<blockquote>
+<div><p>Times (s)</p>
+</div></blockquote>
+<p><strong>gprEM</strong> : ndarray</p>
+<blockquote class="last">
+<div><p>GPR response</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.model.wavenumber">
+<code class="descclassname">empymod.model.</code><code class="descname">wavenumber</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>res</em>, <em>freq</em>, <em>wavenumber</em>, <em>ab=11</em>, <em>aniso=None</em>, <em>epermH=None</em>, <em>epermV=None</em>, <em>mpermH=None</em>, <em>mpermV=None</em>, <em>xdirect=True</em>, <em>verb=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/model.html#wavenumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.model.wavenumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the electromagnetic wavenumber-domain field.</p>
+<p>THIS FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION.</p>
+<p>Or rather, it is for development purposes, to easily get the wavenumber
+result with the required input checks.</p>
+<p>For input parameters see <cite>frequency</cite>, except for:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>wavenumber</strong> : array</p>
+<blockquote>
+<div><p>Wavenumbers lambda (1/m)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>PJ0, PJ1, PJ0b</strong> : array</p>
+<blockquote class="last">
+<div><p>Wavenumber domain EM responses.
+- PJ0 is angle independent, PJ1 and PJ0b depend on the angle.
+- PJ0 and PJ0b are J_0 functions, PJ1 is a J_1 function.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.model.fem">
+<code class="descclassname">empymod.model.</code><code class="descname">fem</code><span class="sig-paren">(</span><em>ab</em>, <em>xco</em>, <em>yco</em>, <em>off</em>, <em>angle</em>, <em>zsrc</em>, <em>zrec</em>, <em>lsrc</em>, <em>lrec</em>, <em>depth</em>, <em>freq</em>, <em>etaH</em>, <em>etaV</em>, <em>zetaH</em>, <em>zetaV</em>, <em>xdirect</em>, <em>isfullspace</em>, <em>ht</em>, <em>htarg</em>, <em>use_spline</em>, <em>use_ne_eval</em>, <em>msrc</em>, <em>mrec</em>, <em>loop_freq</em>, <em>loop_off</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/model.html#fem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.model.fem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the electromagnetic frequency-domain response.</p>
+<p>This function is called from one of the above modelling routines. No
+input-check is carried out here. See the main description of <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>
+for information regarding input and output parameters.</p>
+<p>This function can be directly used if you are sure the provided input is in
+the correct format. This is useful for inversion routines and similar, as
+it can speed-up the calculation by omitting input-checks.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.model.tem">
+<code class="descclassname">empymod.model.</code><code class="descname">tem</code><span class="sig-paren">(</span><em>ab</em>, <em>xco</em>, <em>yco</em>, <em>off</em>, <em>angle</em>, <em>zsrc</em>, <em>zrec</em>, <em>lsrc</em>, <em>lrec</em>, <em>depth</em>, <em>freq</em>, <em>etaH</em>, <em>etaV</em>, <em>zetaH</em>, <em>zetaV</em>, <em>xdirect</em>, <em>isfullspace</em>, <em>ht</em>, <em>htarg</em>, <em>time</em>, <em>signal</em>, <em>ft</em>, <em>ftarg</em>, <em>use_spline</em>, <em>use_ne_eval</em>, <em>msrc</em>, <em>mrec</em>, <em>loop_freq</em>, <em>loop_off</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/model.html#tem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.model.tem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the electromagnetic time-domain response.</p>
+<p>This function is called from one of the above modelling routines. No
+input-check is carried out here. See the main description of <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>
+for information regarding input and output parameters.</p>
+<p>This function can be directly used if you are sure the provided input is in
+the correct format. This is useful for inversion routines and similar, as
+it can speed-up the calculation by omitting input-checks.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-empymod.kernel"></span><div class="section" id="kernel-kernel-calculation">
+<h1><code class="xref py py-mod docutils literal"><span class="pre">kernel</span></code> &#8211; Kernel calculation<a class="headerlink" href="#kernel-kernel-calculation" title="Permalink to this headline">¶</a></h1>
+<p>Kernel of <cite>empymod</cite>, calculates the wavenumber-domain electromagnetic response.</p>
+<p>The functions &#8216;wavenumber&#8217;, &#8216;angle_factor&#8217;, &#8216;fullspace&#8217;, &#8216;greenfct&#8217;,
+&#8216;reflections&#8217;, and &#8216;fields&#8217; are based on source files (specified in each
+function) from the source code distributed with <a class="reference internal" href="#hunziker-et-al-2015" id="id16">[Hunziker_et_al_2015]</a>, which
+can be found at <a class="reference external" href="http://software.seg.org/2015/0001">software.seg.org/2015/0001</a>.  These functions are (c) 2015 by
+Hunziker et al. and the Society of Exploration Geophysicists,
+<a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.  Please read the NOTICE-file in the
+root directory for more information regarding the involved licenses.</p>
+<dl class="function">
+<dt id="empymod.kernel.wavenumber">
+<code class="descclassname">empymod.kernel.</code><code class="descname">wavenumber</code><span class="sig-paren">(</span><em>zsrc</em>, <em>zrec</em>, <em>lsrc</em>, <em>lrec</em>, <em>depth</em>, <em>etaH</em>, <em>etaV</em>, <em>zetaH</em>, <em>zetaV</em>, <em>lambd</em>, <em>ab</em>, <em>xdirect</em>, <em>msrc</em>, <em>mrec</em>, <em>use_ne_eval</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/kernel.html#wavenumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.kernel.wavenumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate wavenumber domain solution.</p>
+<p>Return the wavenumber domain solutions <cite>PJ0</cite>, <cite>PJ1</cite>, and <cite>PJ0b</cite>, which have
+to be transformed with a Hankel transform to the frequency domain.
+<cite>PJ0</cite>/<cite>PJ0b</cite> and <cite>PJ1</cite> have to be transformed with Bessel functions of
+order 0 (<span class="math">\(J_0\)</span>) and 1 (<span class="math">\(J_1\)</span>), respectively.</p>
+<p>This function corresponds loosely to equations 105&#8211;107, 111&#8211;116,
+119&#8211;121, and 123&#8211;128 in <a class="reference internal" href="#hunziker-et-al-2015" id="id18">[Hunziker_et_al_2015]</a>, and equally loosely to
+the file <cite>kxwmod.c</cite>.</p>
+<p><a class="reference internal" href="#hunziker-et-al-2015" id="id19">[Hunziker_et_al_2015]</a> uses Bessel functions of orders 0, 1, and 2
+(<span class="math">\(J_0, J_1, J_2\)</span>). The implementations of the <em>Fast Hankel Transform</em>
+and the <em>Quadrature-with-Extrapolation</em> in <cite>transform</cite> are set-up with
+Bessel functions of order 0 and 1 only. This is achieved by applying the
+recurrence formula</p>
+<div class="math">
+\[J_2(kr) = \frac{2}{kr} J_1(kr) - J_0(kr) \ .\]</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><cite>PJ0</cite> and <cite>PJ0b</cite> could theoretically be added here into one,
+and then be transformed in one go.  However, <cite>PJ0b</cite> has to be
+multiplied by <cite>factAng</cite> later. This has to be done after the Hankel
+transform for methods which make use of spline interpolation, in order
+to work for offsets that are not in line with each other.</p>
+</div>
+<p>This function is called from one of the Hankel functions in
+<code class="xref py py-mod docutils literal"><span class="pre">transform</span></code>.  Consult the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code> for a
+description of the input and output parameters.</p>
+<p>If you are solely interested in the wavenumber-domain solution you can call
+this function directly. However, you have to make sure all input arguments
+are correct, as no checks are carried out here.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.kernel.angle_factor">
+<code class="descclassname">empymod.kernel.</code><code class="descname">angle_factor</code><span class="sig-paren">(</span><em>angle</em>, <em>ab</em>, <em>msrc</em>, <em>mrec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/kernel.html#angle_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.kernel.angle_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the angle-dependent factor.</p>
+<p>The whole calculation in the wavenumber domain is only a function of the
+distance between the source and the receiver, it is independent of the
+angel. The angle-dependency is this factor, which can be applied to the
+corresponding parts in the wavenumber or in the frequency domain.</p>
+<p>The <cite>angle_factor</cite> corresponds to the sine and cosine-functions in Eqs
+105-107, 111-116, 119-121, 123-128.</p>
+<p>This function is called from one of the Hankel functions in
+<code class="xref py py-mod docutils literal"><span class="pre">transform</span></code>.  Consult the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code> for a
+description of the input and output parameters.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.kernel.fullspace">
+<code class="descclassname">empymod.kernel.</code><code class="descname">fullspace</code><span class="sig-paren">(</span><em>xco</em>, <em>yco</em>, <em>off</em>, <em>zsrc</em>, <em>zrec</em>, <em>etaH</em>, <em>etaV</em>, <em>zetaH</em>, <em>zetaV</em>, <em>ab</em>, <em>msrc</em>, <em>mrec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/kernel.html#fullspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.kernel.fullspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analytical full-space solutions in the frequency domain.</p>
+<div class="math">
+\[\hat{G}^{ee}_{\alpha\beta}, \hat{G}^{ee}_{3\alpha},
+\hat{G}^{ee}_{33}, \hat{G}^{em}_{\alpha\beta},
+\hat{G}^{em}_{\alpha 3}\]</div>
+<p>This function corresponds to equations 45&#8211;50 in <a class="reference internal" href="#hunziker-et-al-2015" id="id20">[Hunziker_et_al_2015]</a>,
+and loosely to the corresponding files <cite>Gin11.F90</cite>, <cite>Gin12.F90</cite>,
+<cite>Gin13.F90</cite>, <cite>Gin22.F90</cite>, <cite>Gin23.F90</cite>, <cite>Gin31.F90</cite>, <cite>Gin32.F90</cite>,
+<cite>Gin33.F90</cite>, <cite>Gin41.F90</cite>, <cite>Gin42.F90</cite>, <cite>Gin43.F90</cite>, <cite>Gin51.F90</cite>,
+<cite>Gin52.F90</cite>, <cite>Gin53.F90</cite>, <cite>Gin61.F90</cite>, and <cite>Gin62.F90</cite>.</p>
+<p>This function is called from one of the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.
+Consult these modelling routines for a description of the input and output
+parameters.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.kernel.greenfct">
+<code class="descclassname">empymod.kernel.</code><code class="descname">greenfct</code><span class="sig-paren">(</span><em>zsrc</em>, <em>zrec</em>, <em>lsrc</em>, <em>lrec</em>, <em>depth</em>, <em>etaH</em>, <em>etaV</em>, <em>zetaH</em>, <em>zetaV</em>, <em>lambd</em>, <em>ab</em>, <em>xdirect</em>, <em>msrc</em>, <em>mrec</em>, <em>use_ne_eval</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/kernel.html#greenfct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.kernel.greenfct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Green&#8217;s function for TM and TE.</p>
+<div class="math">
+\[\tilde{g}^{tm}_{hh}, \tilde{g}^{tm}_{hz},
+\tilde{g}^{tm}_{zh}, \tilde{g}^{tm}_{zz},
+\tilde{g}^{te}_{hh}, \tilde{g}^{te}_{zz}\]</div>
+<p>This function corresponds to equations 108&#8211;110, 117/118, 122; 89&#8211;94,
+A18&#8211;A23, B13&#8211;B15; 97&#8211;102 A26&#8211;A31, and B16&#8211;B18 in
+<a class="reference internal" href="#hunziker-et-al-2015" id="id21">[Hunziker_et_al_2015]</a>, and loosely to the corresponding files <cite>Gamma.F90</cite>,
+<cite>Wprop.F90</cite>, <cite>Ptotalx.F90</cite>, <cite>Ptotalxm.F90</cite>, <cite>Ptotaly.F90</cite>, <cite>Ptotalym.F90</cite>,
+<cite>Ptotalz.F90</cite>, and <cite>Ptotalzm.F90</cite>.</p>
+<p>The Green&#8217;s functions are multiplied according to Eqs 105-107, 111-116,
+119-121, 123-128; with the factors inside the integrals.</p>
+<p>This function is called from the function <code class="xref py py-mod docutils literal"><span class="pre">kernel.wavenumber</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.kernel.reflections">
+<code class="descclassname">empymod.kernel.</code><code class="descname">reflections</code><span class="sig-paren">(</span><em>depth</em>, <em>e_zH</em>, <em>Gam</em>, <em>lrec</em>, <em>lsrc</em>, <em>use_ne_eval</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/kernel.html#reflections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.kernel.reflections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Rp, Rm.</p>
+<div class="math">
+\[R^\pm_n, \bar{R}^\pm_n\]</div>
+<p>This function corresponds to equations 64/65 and A-11/A-12 in
+<a class="reference internal" href="#hunziker-et-al-2015" id="id22">[Hunziker_et_al_2015]</a>, and loosely to the corresponding files <cite>Rmin.F90</cite>
+and <cite>Rplus.F90</cite>.</p>
+<p>This function is called from the function <code class="xref py py-mod docutils literal"><span class="pre">kernel.greenfct</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.kernel.fields">
+<code class="descclassname">empymod.kernel.</code><code class="descname">fields</code><span class="sig-paren">(</span><em>depth</em>, <em>Rp</em>, <em>Rm</em>, <em>Gam</em>, <em>lrec</em>, <em>lsrc</em>, <em>zsrc</em>, <em>ab</em>, <em>TM</em>, <em>use_ne_eval</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/kernel.html#fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.kernel.fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Pu+, Pu-, Pd+, Pd-.</p>
+<div class="math">
+\[P^{u\pm}_s, P^{d\pm}_s, \bar{P}^{u\pm}_s, \bar{P}^{d\pm}_s;
+P^{u\pm}_{s-1}, P^{u\pm}_n, \bar{P}^{u\pm}_{s-1}, \bar{P}^{u\pm}_n;
+P^{d\pm}_{s+1}, P^{d\pm}_n, \bar{P}^{d\pm}_{s+1}, \bar{P}^{d\pm}_n\]</div>
+<p>This function corresponds to equations 81/82, 95/96, 103/104, A-8/A-9,
+A-24/A-25, and A-32/A-33 in <a class="reference internal" href="#hunziker-et-al-2015" id="id23">[Hunziker_et_al_2015]</a>, and loosely to the
+corresponding files <cite>Pdownmin.F90</cite>, <cite>Pdownplus.F90</cite>, <cite>Pupmin.F90</cite>, and
+<cite>Pdownmin.F90</cite>.</p>
+<p>This function is called from the function <code class="xref py py-mod docutils literal"><span class="pre">kernel.greenfct</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.kernel.halfspace">
+<code class="descclassname">empymod.kernel.</code><code class="descname">halfspace</code><span class="sig-paren">(</span><em>xco</em>, <em>yco</em>, <em>zsrc</em>, <em>zrec</em>, <em>res</em>, <em>freq</em>, <em>aniso=1</em>, <em>ab=11</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/kernel.html#halfspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.kernel.halfspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return frequency-space domain VTI half-space solution.</p>
+<p>Calculates the frequency-space domain electromagnetic response for a
+half-space below air using the diffusive approximation, as given in
+<a class="reference internal" href="#slob-et-al-2010" id="id24">[Slob_et_al_2010]</a>.</p>
+<p>This routine is not strictly part of <cite>empymod</cite> and not used by it.
+However, it can be useful to compare the code to the analytical solution.</p>
+<p>There are a few known typos in the equations of <a class="reference internal" href="#slob-et-al-2010" id="id25">[Slob_et_al_2010]</a>. Write
+the authors to receive an updated version!</p>
+<p>This could be integrated into <cite>empymod</cite> by checking if the top-layer is a
+very resistive layer, hence air, and the rest is a half-space, and then
+calling this function instead of <cite>wavenumber</cite>. (Similar to the way
+<cite>fullspace</cite> is incorporated if all layer parameters are identical.) The
+time-space domain solution could be implemented as well.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>xco, yco</strong> : array</p>
+<blockquote>
+<div><p>Inline and crossline coordinates (m)</p>
+</div></blockquote>
+<p><strong>zsrc, zrec</strong> : float</p>
+<blockquote>
+<div><p>Source and receiver depth (m)</p>
+</div></blockquote>
+<p><strong>res</strong> : float or array</p>
+<blockquote>
+<div><p>Half-space resistivity (Ohm.m)</p>
+</div></blockquote>
+<p><strong>freq</strong> : float</p>
+<blockquote>
+<div><p>Frequency (Hz)</p>
+</div></blockquote>
+<p><strong>aniso</strong> : float, optional</p>
+<blockquote>
+<div><p>Anisotropy (-), default = 1</p>
+</div></blockquote>
+<p><strong>ab</strong> : int, optional</p>
+<blockquote>
+<div><p>Src-Rec config, default = 11; {11, 12, 13, 21, 22, 23, 31, 32, 33}</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">EM half-space solution</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">empymod.kernel</span> <span class="k">import</span> <span class="n">halfspace</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">EM</span> <span class="o">=</span> <span class="n">halfspace</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;HS response : &#39;</span><span class="p">,</span> <span class="n">EM</span><span class="p">)</span>
+<span class="go">HS response :  (3.02186073352e-09-3.87322421836e-10j)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<span class="target" id="module-empymod.transform"></span><div class="section" id="transform-hankel-and-fourier-transforms">
+<h1><code class="xref py py-mod docutils literal"><span class="pre">transform</span></code> &#8211; Hankel and Fourier Transforms<a class="headerlink" href="#transform-hankel-and-fourier-transforms" title="Permalink to this headline">¶</a></h1>
+<p>Methods to carry out the required Hankel transform from wavenumber to
+frequency domain and Fourier transform from frequency to time domain.</p>
+<p>The functions for the QWE and FHT Hankel and Fourier transforms are based on
+source files (specified in each function) from the source code distributed with
+<a class="reference internal" href="#key-2012" id="id26">[Key_2012]</a>, which can be found at <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>. These functions are (c) 2012 by Kerry
+Key and the Society of Exploration Geophysicists,
+<a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>. Please read the NOTICE-file in the root
+directory for more information regarding the involved licenses.</p>
+<dl class="function">
+<dt id="empymod.transform.fht">
+<code class="descclassname">empymod.transform.</code><code class="descname">fht</code><span class="sig-paren">(</span><em>zsrc</em>, <em>zrec</em>, <em>lsrc</em>, <em>lrec</em>, <em>off</em>, <em>angle</em>, <em>depth</em>, <em>ab</em>, <em>etaH</em>, <em>etaV</em>, <em>zetaH</em>, <em>zetaV</em>, <em>xdirect</em>, <em>fhtarg</em>, <em>use_spline</em>, <em>use_ne_eval</em>, <em>msrc</em>, <em>mrec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#fht"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.fht" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hankel Transform using the Fast Hankel Transform.</p>
+<p>The <em>Fast Hankel Transform</em> is a <em>Digital Filter Method</em>, introduced to
+geophysics by <a class="reference internal" href="#gosh-1971" id="id28">[Gosh_1971]</a>, and made popular and wide-spread by
+<a class="reference internal" href="#anderson-1975" id="id29">[Anderson_1975]</a>, <a class="reference internal" href="#anderson-1979" id="id30">[Anderson_1979]</a>, <a class="reference internal" href="#anderson-1982" id="id31">[Anderson_1982]</a>.</p>
+<p>This implementation of the FHT follows <a class="reference internal" href="#key-2012" id="id32">[Key_2012]</a>, equation 6.  Without
+going into the mathematical details (which can be found in any of the above
+papers) and following <a class="reference internal" href="#key-2012" id="id33">[Key_2012]</a>, the FHT method rewrites the Hankel
+transform of the form</p>
+<div class="math">
+\[F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)            \mathrm{d}\lambda\]</div>
+<p>as</p>
+<div class="math">
+\[F(r)   = \sum^n_{i=1} f(b_i/r)h_i/r \ ,\]</div>
+<p>where <span class="math">\(h\)</span> is the digital filter.The Filter abscissae b is given by</p>
+<div class="math">
+\[b_i = \lambda_ir = e^{ai}, \qquad i = -l, -l+1, \cdots, l \ ,\]</div>
+<p>with <span class="math">\(l=(n-1)/2\)</span>, and <span class="math">\(a\)</span> is the spacing coefficient.</p>
+<p>This function is loosely based on <cite>get_CSEM1D_FD_FHT.m</cite> from the source
+code distributed with <a class="reference internal" href="#key-2012" id="id34">[Key_2012]</a>.</p>
+<p>The function is called from one of the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.
+Consult these modelling routines for a description of the input and output
+parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>fEM</strong> : array</p>
+<blockquote class="last">
+<div><p>Returns frequency-domain EM response.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.transform.hqwe">
+<code class="descclassname">empymod.transform.</code><code class="descname">hqwe</code><span class="sig-paren">(</span><em>zsrc</em>, <em>zrec</em>, <em>lsrc</em>, <em>lrec</em>, <em>off</em>, <em>angle</em>, <em>depth</em>, <em>ab</em>, <em>etaH</em>, <em>etaV</em>, <em>zetaH</em>, <em>zetaV</em>, <em>xdirect</em>, <em>qweargs</em>, <em>use_spline</em>, <em>use_ne_eval</em>, <em>msrc</em>, <em>mrec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#hqwe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.hqwe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hankel Transform using Quadrature-With-Extrapolation.</p>
+<p><em>Quadrature-With-Extrapolation</em> was introduced to geophysics by
+<a class="reference internal" href="#key-2012" id="id35">[Key_2012]</a>. It is one of many so-called <em>ISE</em> methods to solve Hankel
+Transforms, where <em>ISE</em> stands for Integration, Summation, and
+Extrapolation.</p>
+<p>Following <a class="reference internal" href="#key-2012" id="id36">[Key_2012]</a>, but without going into the mathematical details
+here, the QWE method rewrites the Hankel transform of the form</p>
+<div class="math">
+\[F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)            \mathrm{d}\lambda\]</div>
+<p>as a quadrature sum which form is similar to the FHT (equation 15),</p>
+<div class="math">
+\[F_i   \approx \sum^m_{j=1} f(x_j/r)w_j g(x_j) =
+\sum^m_{j=1} f(x_j/r)\hat{g}(x_j) \ ,\]</div>
+<p>but with various bells and whistles applied (using the so-called Shanks
+transformation in the form of a routine called <span class="math">\(\epsilon\)</span>-algorithm
+(<a class="reference internal" href="#shanks-1955" id="id37">[Shanks_1955]</a>, <a class="reference internal" href="#wynn-1956" id="id38">[Wynn_1956]</a>; implemented with algorithms from
+<a class="reference internal" href="#trefethen-2000" id="id39">[Trefethen_2000]</a> and <a class="reference internal" href="#weniger-1989" id="id40">[Weniger_1989]</a>).</p>
+<p>This function is based on <cite>get_CSEM1D_FD_QWE.m</cite>, <cite>qwe.m</cite>,
+<cite>getGaussQuadWeights.m</cite>, and <cite>getBesselWeights.m</cite> from the source code
+distributed with <a class="reference internal" href="#key-2012" id="id41">[Key_2012]</a>.</p>
+<p>The function is called from one of the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.
+Consult these modelling routines for a description of the input and output
+parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>fEM</strong> : array</p>
+<blockquote class="last">
+<div><p>Returns frequency-domain EM response.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.transform.fft">
+<code class="descclassname">empymod.transform.</code><code class="descname">fft</code><span class="sig-paren">(</span><em>fEM</em>, <em>time</em>, <em>freq</em>, <em>ftarg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#fft"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.fft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fourier Transform using a Cosine- or a Sine-filter.</p>
+<p>It follows the Filter methodology <a class="reference internal" href="#anderson-1975" id="id42">[Anderson_1975]</a>, see <cite>fht</cite> for more
+information.</p>
+<p>The function is called from one of the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.
+Consult these modelling routines for a description of the input and output
+parameters.</p>
+<p>This function is based on <cite>get_CSEM1D_TD_FHT.m</cite> from the source code
+distributed with <a class="reference internal" href="#key-2012" id="id43">[Key_2012]</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>tEM</strong> : array</p>
+<blockquote class="last">
+<div><p>Returns time-domain EM response of <cite>fEM</cite> for given <cite>time</cite>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.transform.fqwe">
+<code class="descclassname">empymod.transform.</code><code class="descname">fqwe</code><span class="sig-paren">(</span><em>fEM</em>, <em>time</em>, <em>freq</em>, <em>qweargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#fqwe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.fqwe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fourier Transform using Quadrature-With-Extrapolation.</p>
+<p>It follows the QWE methodology <a class="reference internal" href="#key-2012" id="id44">[Key_2012]</a> for the Hankel transform, see
+<cite>hqwe</cite> for more information.</p>
+<p>The function is called from one of the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.
+Consult these modelling routines for a description of the input and output
+parameters.</p>
+<p>This function is based on <cite>get_CSEM1D_TD_QWE.m</cite> from the source code
+distributed with <a class="reference internal" href="#key-2012" id="id45">[Key_2012]</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>tEM</strong> : array</p>
+<blockquote class="last">
+<div><p>Returns time-domain EM response of <cite>fEM</cite> for given <cite>time</cite>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.transform.fftlog">
+<code class="descclassname">empymod.transform.</code><code class="descname">fftlog</code><span class="sig-paren">(</span><em>fEM</em>, <em>time</em>, <em>freq</em>, <em>ftarg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#fftlog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.fftlog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fourier Transform using FFTLog.</p>
+<p>FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT.
+FFTLog was presented in Appendix B of <a class="reference internal" href="#hamilton-2000" id="id46">[Hamilton_2000]</a> and published at
+&lt;<a class="reference external" href="http://casa.colorado.edu/~ajsh/FFTLog">http://casa.colorado.edu/~ajsh/FFTLog</a>&gt;.</p>
+<p>This function uses the python module <cite>fftlog</cite>, which is a simple
+<cite>f2py</cite>-wrapper for the Fortran code <cite>FFTLog</cite>. You need to install <cite>fftlog</cite>
+separately on your system in order to use it, see
+&lt;<a class="reference external" href="https://github.com/prisae/fftlog">https://github.com/prisae/fftlog</a>&gt;.</p>
+<p>The function is called from one of the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.
+Consult these modelling routines for a description of the input and output
+parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>tEM</strong> : array</p>
+<blockquote class="last">
+<div><p>Returns time-domain EM response of <cite>fEM</cite> for given <cite>time</cite>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.transform.qwe">
+<code class="descclassname">empymod.transform.</code><code class="descname">qwe</code><span class="sig-paren">(</span><em>rtol</em>, <em>atol</em>, <em>maxint</em>, <em>inp</em>, <em>intervals</em>, <em>hfstr</em>, <em>lambd=None</em>, <em>off=None</em>, <em>factAng=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#qwe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.qwe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quadrature-With-Extrapolation.</p>
+<p>This is the kernel of the QWE method, used for the Hankel (<cite>hqwe</cite>) and the
+Fourier (<cite>fqwe</cite>) Transforms. See <cite>hqwe</cite> for an extensive description.</p>
+<p>This function is based on <cite>qwe.m</cite> from the source code distributed with
+<a class="reference internal" href="#key-2012" id="id47">[Key_2012]</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.transform.get_Gauss_Weights">
+<code class="descclassname">empymod.transform.</code><code class="descname">get_Gauss_Weights</code><span class="sig-paren">(</span><em>nquad</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#get_Gauss_Weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.get_Gauss_Weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Gauss Quadrature Weights of order nquad on the interval [-1, 1].</p>
+<p>Algorithm from page 129 in <a class="reference internal" href="#trefethen-2000" id="id48">[Trefethen_2000]</a>.</p>
+<p>This function is based on <cite>getGaussQuadWeights.m</cite> from the source code
+distributed with <a class="reference internal" href="#key-2012" id="id49">[Key_2012]</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.transform.get_spline_values">
+<code class="descclassname">empymod.transform.</code><code class="descname">get_spline_values</code><span class="sig-paren">(</span><em>filt</em>, <em>inp</em>, <em>nr_per_dec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#get_spline_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.get_spline_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return required calculation points.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.transform.fhti">
+<code class="descclassname">empymod.transform.</code><code class="descname">fhti</code><span class="sig-paren">(</span><em>mu</em>, <em>rmin</em>, <em>rmax</em>, <em>n</em>, <em>fftlog</em>, <em>kr=1</em>, <em>q=0</em>, <em>kropt=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#fhti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.fhti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return parameters required for FFTLog.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-empymod.filters"></span><div class="section" id="filters-digital-filters-for-fht">
+<h1><code class="xref py py-mod docutils literal"><span class="pre">filters</span></code> &#8211; Digital Filters for FHT<a class="headerlink" href="#filters-digital-filters-for-fht" title="Permalink to this headline">¶</a></h1>
+<p>Filters for the <em>Fast Hankel Transform</em> (FHT, <a class="reference internal" href="#anderson-1982" id="id50">[Anderson_1982]</a>) and the
+<em>Fourier Sine and Cosine Transforms</em> <a class="reference internal" href="#anderson-1975" id="id51">[Anderson_1975]</a>.</p>
+<p>To calculate the <cite>fhtfilter.factor</cite> I used</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">fhtfilter</span><span class="o">.</span><span class="n">base</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">/</span><span class="n">fhtfilter</span><span class="o">.</span><span class="n">base</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The filters <cite>kong_61_2007</cite> and <cite>kong_241_2007</cite> from <a class="reference internal" href="#kong-2007" id="id52">[Kong_2007]</a>, and
+<cite>key_101_2009</cite>, <cite>key_201_2009</cite>, and <cite>key_401_2009</cite> from <a class="reference internal" href="#key-2009" id="id53">[Key_2009]</a> are taken
+from <em>DIPOLE1D</em>, <a class="reference internal" href="#key-2009" id="id54">[Key_2009]</a>, which can be downloaded at
+<a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>. <em>DIPOLE1D</em> is
+distributed under the license GNU GPL version 3 or later. Kerry Key gave his
+written permission to re-distribute the filters under the Apache License,
+Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November 2016).</p>
+<p>The filters <cite>anderson_801_1982</cite> from <a class="reference internal" href="#anderson-1982" id="id56">[Anderson_1982]</a> and
+<cite>key_51_2012</cite>, <cite>key_101_2012</cite>, <cite>key_201_2012</cite>, <cite>key_101_CosSin_2012</cite>, and
+<cite>key_201_CosSin_2012</cite>, all from <a class="reference internal" href="#key-2012" id="id57">[Key_2012]</a>, are taken from the software
+distributed with <a class="reference internal" href="#key-2012" id="id58">[Key_2012]</a> and available at
+<a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
+These filters are distributed under the SEG license.</p>
+<dl class="class">
+<dt id="empymod.filters.DigitalFilter">
+<em class="property">class </em><code class="descclassname">empymod.filters.</code><code class="descname">DigitalFilter</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#DigitalFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.DigitalFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple Class for Digital Filters.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.anderson_801_1982">
+<code class="descclassname">empymod.filters.</code><code class="descname">anderson_801_1982</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#anderson_801_1982"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.anderson_801_1982" title="Permalink to this definition">¶</a></dt>
+<dd><p>Anderson 801: <a class="reference internal" href="#anderson-1982" id="id60">[Anderson_1982]</a>.</p>
+<p>Anderson 801 pt filter, as published in <a class="reference internal" href="#anderson-1982" id="id61">[Anderson_1982]</a>; taken from
+file <em>wa801Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id62">[Key_2012]</a>, published by the Society of
+Exploration Geophysicists; <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
+License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.key_101_2009">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_101_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_101_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_101_2009" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 101 2009: <a class="reference internal" href="#key-2009" id="id64">[Key_2009]</a>.</p>
+<p>Key 101 pt filter, as published in <a class="reference internal" href="#key-2009" id="id65">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id66">[Key_2009]</a>, available on
+<a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
+License: Apache License, Version 2.0,
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.key_101_2012">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_101_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_101_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_101_2012" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 101 2012: <a class="reference internal" href="#key-2012" id="id68">[Key_2012]</a>.</p>
+<p>Key 101 pt filter, taken from file <em>kk101Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id69">[Key_2012]</a>,
+published by the Society of Exploration Geophysicists;
+<a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
+License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.key_101_CosSin_2012">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_101_CosSin_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_101_CosSin_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_101_CosSin_2012" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 101 CosSin 2012: <a class="reference internal" href="#key-2012" id="id71">[Key_2012]</a>.</p>
+<p>Key 101 pt filter, taken from file <em>kk101CosSin.txt</em> from <a class="reference internal" href="#key-2012" id="id72">[Key_2012]</a>,
+published by the Society of Exploration Geophysicists;
+<a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
+License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.key_201_2009">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_201_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_201_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_201_2009" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 201 2009: <a class="reference internal" href="#key-2009" id="id74">[Key_2009]</a>.</p>
+<p>Key 201 pt filter, as published in <a class="reference internal" href="#key-2009" id="id75">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id76">[Key_2009]</a>, available on
+<a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
+License: Apache License, Version 2.0,
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.key_201_2012">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_201_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_201_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_201_2012" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 201 2012: <a class="reference internal" href="#key-2012" id="id78">[Key_2012]</a>.</p>
+<p>Key 201 pt filter, taken from file <em>kk201Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id79">[Key_2012]</a>,
+published by the Society of Exploration Geophysicists;
+<a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
+License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.key_201_CosSin_2012">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_201_CosSin_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_201_CosSin_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_201_CosSin_2012" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 201 CosSin 2012: <a class="reference internal" href="#key-2012" id="id81">[Key_2012]</a>.</p>
+<p>Key 201 pt filter, taken from file <em>kk201CosSin.txt</em> from <a class="reference internal" href="#key-2012" id="id82">[Key_2012]</a>,
+published by the Society of Exploration Geophysicists;
+<a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
+License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.key_401_2009">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_401_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_401_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_401_2009" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 401 2009: <a class="reference internal" href="#key-2009" id="id84">[Key_2009]</a>.</p>
+<p>Key 401 pt filter, as published in <a class="reference internal" href="#key-2009" id="id85">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id86">[Key_2009]</a>, available on
+<a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
+License: Apache License, Version 2.0,
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.key_51_2012">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_51_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_51_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_51_2012" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 51 2012: <a class="reference internal" href="#key-2012" id="id88">[Key_2012]</a>.</p>
+<p>Key 51 pt filter, taken from file <em>kk51Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id89">[Key_2012]</a>,
+published by the Society of Exploration Geophysicists;
+<a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
+License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.kong_241_2007">
+<code class="descclassname">empymod.filters.</code><code class="descname">kong_241_2007</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#kong_241_2007"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.kong_241_2007" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kong 241: <a class="reference internal" href="#kong-2007" id="id91">[Kong_2007]</a>.</p>
+<p>Kong 241 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id92">[Kong_2007]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id93">[Key_2009]</a>, available on
+<a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
+License: Apache License, Version 2.0,
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.kong_61_2007">
+<code class="descclassname">empymod.filters.</code><code class="descname">kong_61_2007</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#kong_61_2007"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.kong_61_2007" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kong 61: <a class="reference internal" href="#kong-2007" id="id95">[Kong_2007]</a>.</p>
+<p>Kong 61 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id96">[Kong_2007]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id97">[Key_2009]</a>, available on
+<a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
+License: Apache License, Version 2.0,
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-empymod.utils"></span><div class="section" id="utils-utilites">
+<h1><code class="xref py py-mod docutils literal"><span class="pre">utils</span></code> &#8211; Utilites<a class="headerlink" href="#utils-utilites" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>This module consists of four groups of functions:</dt>
+<dd><ol class="first last arabic simple" start="0">
+<li>General Settings</li>
+<li>Class EMArray</li>
+<li>Input parameter checks for modelling</li>
+<li>General utilities</li>
+</ol>
+</dd>
+</dl>
+<p>Group 0 is to set minimum offset, frequency and time for calculation (in order
+to avoid divisions by zero).  Group 2 are checks organised in modules. So if
+you create for instance a modelling-routine in which you loop over frequencies,
+you have to call <cite>check_ab</cite>, <cite>check_param</cite>, <cite>check_spatial</cite>, and <cite>check_hankel</cite>
+only once, but <cite>check_frequency</cite> in each loop. You do not have to run these
+checks if you are sure your input parameters are in the correct format.</p>
+<dl class="class">
+<dt id="empymod.utils.EMArray">
+<em class="property">class </em><code class="descclassname">empymod.utils.</code><code class="descname">EMArray</code><a class="reference internal" href="_modules/empymod/utils.html#EMArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.EMArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subclassing an ndarray: add <em>Amplitude</em> &lt;amp&gt; and <em>Phase</em> &lt;pha&gt;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>realpart</strong> : array</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Real part of input, if input is real or complex.</li>
+<li>Imaginary part of input, if input is pure imaginary.</li>
+<li>Complex input.</li>
+</ol>
+<p>In cases 2 and 3, <cite>imagpart</cite> must be None.</p>
+</div></blockquote>
+<p><strong>imagpart: array, optional</strong></p>
+<blockquote class="last">
+<div><p>Imaginary part of input. Defaults to None.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">empymod.utils</span> <span class="k">import</span> <span class="n">EMArray</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">emvalues</span> <span class="o">=</span> <span class="n">EMArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Amplitude : &#39;</span><span class="p">,</span> <span class="n">emvalues</span><span class="o">.</span><span class="n">amp</span><span class="p">)</span>
+<span class="go">Amplitude :  [ 1.41421356  2.          3.16227766]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Phase     : &#39;</span><span class="p">,</span> <span class="n">emvalues</span><span class="o">.</span><span class="n">pha</span><span class="p">)</span>
+<span class="go">Phase     :  [ 45.           0.         -18.43494882]</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="2%" />
+<col width="98%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>amp</td>
+<td>(ndarray) Amplitude of the input data.</td>
+</tr>
+<tr class="row-even"><td>pha</td>
+<td>(ndarray) Phase of the input data, in degrees, lag-defined (increasing with increasing offset.) To get lead-defined phases, multiply <cite>imagpart</cite> by -1 before passing through this function.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.fem_input">
+<code class="descclassname">empymod.utils.</code><code class="descname">fem_input</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>res</em>, <em>freq</em>, <em>ab</em>, <em>aniso</em>, <em>epermH</em>, <em>epermV</em>, <em>mpermH</em>, <em>mpermV</em>, <em>xdirect</em>, <em>ht</em>, <em>htarg</em>, <em>opt</em>, <em>loop</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#fem_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.fem_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide correct input for frequency-domain EM calculation.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
+input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>outdata</strong> : tuple</p>
+<blockquote class="last">
+<div><p>Tuple containing the correct input format for <code class="xref py py-mod docutils literal"><span class="pre">model.fem</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.tem_input">
+<code class="descclassname">empymod.utils.</code><code class="descname">tem_input</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>res</em>, <em>time</em>, <em>ab</em>, <em>signal</em>, <em>aniso</em>, <em>epermH</em>, <em>epermV</em>, <em>mpermH</em>, <em>mpermV</em>, <em>xdirect</em>, <em>ht</em>, <em>htarg</em>, <em>ft</em>, <em>ftarg</em>, <em>opt</em>, <em>loop</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#tem_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.tem_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide correct input for time-domain EM calculation.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
+input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>outdata</strong> : tuple</p>
+<blockquote class="last">
+<div><p>Tuple containing the correct input format for <code class="xref py py-mod docutils literal"><span class="pre">model.tem</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.check_ab">
+<code class="descclassname">empymod.utils.</code><code class="descname">check_ab</code><span class="sig-paren">(</span><em>ab</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_ab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_ab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check source-receiver configuration.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
+input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ab_calc</strong> : int</p>
+<blockquote>
+<div><p>Adjusted configuration using reciprocity.</p>
+</div></blockquote>
+<p><strong>msrc</strong> : bool</p>
+<blockquote>
+<div><p>If True, src is magnetic; if False, src is electric.</p>
+</div></blockquote>
+<p><strong>mrec</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, rec is magnetic; if False, rec is electric.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.check_param">
+<code class="descclassname">empymod.utils.</code><code class="descname">check_param</code><span class="sig-paren">(</span><em>depth</em>, <em>res</em>, <em>aniso</em>, <em>epermH</em>, <em>epermV</em>, <em>mpermH</em>, <em>mpermV</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check depth and corresponding layer parameters.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
+input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>depth</strong> : array</p>
+<blockquote>
+<div><p>Depths of layer interfaces, adds -infty at beginning if not present.</p>
+</div></blockquote>
+<p><strong>res</strong> : array</p>
+<blockquote>
+<div><p>Resistivities as provided, checked for size.</p>
+</div></blockquote>
+<p><strong>aniso, epermH, epermV, mpermH, mpermV</strong> : array</p>
+<blockquote>
+<div><p>Parameters as provided, checked for size. If None provided, defaults to
+an array of ones.</p>
+</div></blockquote>
+<p><strong>isfullspace</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, the model is a fullspace (res, aniso, epermH, epermV, mpermM,
+and mpermV are in all layers the same).</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.check_spatial">
+<code class="descclassname">empymod.utils.</code><code class="descname">check_spatial</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_spatial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_spatial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check spatial input parameters.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
+input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>zsrc</strong> : float</p>
+<blockquote>
+<div><p>Depth of src.</p>
+</div></blockquote>
+<p><strong>zrec</strong> : float</p>
+<blockquote>
+<div><p>Depth of rec.</p>
+</div></blockquote>
+<p><strong>lsrc</strong> : int</p>
+<blockquote>
+<div><p>Layer number in which src resides.</p>
+</div></blockquote>
+<p><strong>lrec</strong> : int</p>
+<blockquote>
+<div><p>Layer number in which rec resides.</p>
+</div></blockquote>
+<p><strong>xco</strong> : array of floats</p>
+<blockquote>
+<div><p>x-coordinates</p>
+</div></blockquote>
+<p><strong>yco</strong> : array of floats</p>
+<blockquote>
+<div><p>y-coordinates</p>
+</div></blockquote>
+<p><strong>off</strong> : array of floats</p>
+<blockquote>
+<div><p>Offsets</p>
+</div></blockquote>
+<p><strong>angle</strong> : array of floats</p>
+<blockquote class="last">
+<div><p>Angles</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.check_hankel">
+<code class="descclassname">empymod.utils.</code><code class="descname">check_hankel</code><span class="sig-paren">(</span><em>ht</em>, <em>htarg</em>, <em>ab</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_hankel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_hankel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check Hankel transform parameters.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
+input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ht, htarg</p>
+<blockquote class="last">
+<div><p>Checked if valid and set to defaults if not provided.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.check_frequency">
+<code class="descclassname">empymod.utils.</code><code class="descname">check_frequency</code><span class="sig-paren">(</span><em>freq</em>, <em>res</em>, <em>aniso</em>, <em>epermH</em>, <em>epermV</em>, <em>mpermH</em>, <em>mpermV</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate frequency-dependent parameters.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
+input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>freq</strong> : float</p>
+<blockquote>
+<div><p>Frequency, checked for size and assured min_freq.</p>
+</div></blockquote>
+<p><strong>etaH, etaV, zetaH, zetaV</strong> : array</p>
+<blockquote class="last">
+<div><p>Parameters etaH, etaV, zetaH, and zetaV, same size as provided
+resistivity.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.check_opt">
+<code class="descclassname">empymod.utils.</code><code class="descname">check_opt</code><span class="sig-paren">(</span><em>opt</em>, <em>off</em>, <em>freq</em>, <em>loop</em>, <em>ht</em>, <em>htarg</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_opt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_opt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check optimization parameters.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
+input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>use_spline</strong> : bool</p>
+<blockquote>
+<div><p>Boolean if to use spline interpolation.</p>
+</div></blockquote>
+<p><strong>use_ne_eval</strong> : bool</p>
+<blockquote>
+<div><p>Boolean if to use <cite>numexpr</cite>.</p>
+</div></blockquote>
+<p><strong>loop_freq</strong> : bool</p>
+<blockquote>
+<div><p>Boolean if to loop over frequencies.</p>
+</div></blockquote>
+<p><strong>loop_off</strong> : bool</p>
+<blockquote class="last">
+<div><p>Boolean if to loop over offsets.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.check_time">
+<code class="descclassname">empymod.utils.</code><code class="descname">check_time</code><span class="sig-paren">(</span><em>time</em>, <em>signal</em>, <em>ft</em>, <em>ftarg</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check time domain specific input parameters.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
+input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>time</strong> : float</p>
+<blockquote>
+<div><p>Time, checked for size and assured min_time.</p>
+</div></blockquote>
+<p><strong>freq</strong> : float</p>
+<blockquote>
+<div><p>Frequencies required for given times and ft-settings.</p>
+</div></blockquote>
+<p>ft, ftarg</p>
+<blockquote class="last">
+<div><p>Checked if valid and set to defaults if not provided,
+checked with signal.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.strvar">
+<code class="descclassname">empymod.utils.</code><code class="descname">strvar</code><span class="sig-paren">(</span><em>a</em>, <em>prec='{:G}'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#strvar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.strvar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return variable as a string to print, with given precision.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>a</strong> : array_like</p>
+<blockquote>
+<div><p>Variable to be printed.</p>
+</div></blockquote>
+<p><strong>prec</strong> : format-str, optional</p>
+<blockquote class="last">
+<div><p>Precision for variable; defaults to &#8216;{:G}&#8217;.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">empymod.utils</span> <span class="k">import</span> <span class="n">strvar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Example : &#39;</span> <span class="o">+</span> <span class="n">strvar</span><span class="p">(</span><span class="mf">1.23456789</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">6</span><span class="p">)))</span>
+<span class="go">Example : 0 1.23457 2.46914 3.7037 4.93827 6.17284</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.param_shape">
+<code class="descclassname">empymod.utils.</code><code class="descname">param_shape</code><span class="sig-paren">(</span><em>a</em>, <em>shape=None</em>, <em>name='inp-var'</em>, <em>datatype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#param_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.param_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert input variable to array and check its shape.</p>
+<p>Ensures one-dimensionality except if datatype is list or tuple.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>a</strong> : array_like</p>
+<blockquote>
+<div><p>Input array.</p>
+</div></blockquote>
+<p><strong>shape</strong> : tuple, optional</p>
+<blockquote>
+<div><p>Tuple of dimension that the variable should have.</p>
+</div></blockquote>
+<p><strong>name</strong> : str, optional</p>
+<blockquote>
+<div><p>String describing variable, defaults to &#8216;inp-var&#8217;.</p>
+</div></blockquote>
+<p><strong>datatype</strong> : type, optional</p>
+<blockquote>
+<div><p>Type of array.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>a</strong> : array</p>
+<blockquote class="last">
+<div><p>Returns a as an array if np.shape(a) = shape; else raise error.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">empymod.utils</span> <span class="k">import</span> <span class="n">param_shape</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">param_shape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="s1">&#39;test-A&#39;</span><span class="p">)</span>
+<span class="go">array([1, 2, 3])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">param_shape</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="s1">&#39;test-B&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">test-B</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.printstartfinish">
+<code class="descclassname">empymod.utils.</code><code class="descname">printstartfinish</code><span class="sig-paren">(</span><em>verb</em>, <em>inp=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#printstartfinish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.printstartfinish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print start and finish with time measure.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><cite>empymod</cite> &#8211; EM Python modeller</a><ul>
+<li><a class="reference internal" href="#notice">Notice</a></li>
+<li><a class="reference internal" href="#installation-requirements">Installation &amp; requirements</a></li>
+<li><a class="reference internal" href="#citation">Citation</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#notes-on-usage">Notes on usage</a><ul>
+<li><a class="reference internal" href="#note-on-speed-memory-and-accuracy">Note on speed, memory, and accuracy</a><ul>
+<li><a class="reference internal" href="#parallelisation">Parallelisation</a></li>
+<li><a class="reference internal" href="#spline-interpolation">Spline interpolation</a></li>
+<li><a class="reference internal" href="#looping">Looping</a></li>
+<li><a class="reference internal" href="#vertical-components">Vertical components</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fftlog">FFTLog</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#references">References&nbsp;</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#model-model-em-responses"><code class="docutils literal"><span class="pre">model</span></code> &#8211; Model EM-responses</a></li>
+<li><a class="reference internal" href="#kernel-kernel-calculation"><code class="docutils literal"><span class="pre">kernel</span></code> &#8211; Kernel calculation</a></li>
+<li><a class="reference internal" href="#transform-hankel-and-fourier-transforms"><code class="docutils literal"><span class="pre">transform</span></code> &#8211; Hankel and Fourier Transforms</a></li>
+<li><a class="reference internal" href="#filters-digital-filters-for-fht"><code class="docutils literal"><span class="pre">filters</span></code> &#8211; Digital Filters for FHT</a></li>
+<li><a class="reference internal" href="#utils-utilites"><code class="docutils literal"><span class="pre">utils</span></code> &#8211; Utilites</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Manual of empymod</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/empymod.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Dieter Werthmüller.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/empymod.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
