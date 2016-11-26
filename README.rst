@@ -1,8 +1,7 @@
 `empymod` -- EM Python modeller
 ===============================
 
-
-|release| |docs|
+|docs|
 
 The **e**\ lectro\ **m**\ agnetic **py**\ thon **mod**\ eller `empymod` can
 model electric or magnetic responses due to a three-dimensional electric or
@@ -235,3 +234,8 @@ setup-script:
 I am currently working with `SciPy`-developers in this regard and hope that
 `FFTLog` will be included directly in `SciPy` in the not so distant future.
 
+
+.. |docs| image:: https://readthedocs.org/projects/empymod/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://empymod.readthedocs.io/en/latest/?badge=latest
