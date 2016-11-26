@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Manual of empymod &#8212; empymod 0.9 documentation</title>
+    <title>empymod &#8212; empymod 0.9 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="empymod 0.9 documentation" href="#" />
-    <link rel="next" title="empymod – EM Python modeller" href="empymod.html" />
+    <link rel="next" title="Info" href="empymod.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -41,37 +41,43 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="manual-of-empymod">
-<span id="empymod-manual"></span><h1>Manual of empymod<a class="headerlink" href="#manual-of-empymod" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="empymod">
+<span id="empymod-manual"></span><h1>empymod<a class="headerlink" href="#empymod" title="Permalink to this headline">¶</a></h1>
 <p>Manual for <a class="reference internal" href="empymod.html#module-empymod" title="empymod"><code class="xref py py-mod docutils literal"><span class="pre">empymod</span></code></a>, a one-dimensional, electromagnetic forward modeller
-in Python. The whole documentation is simply stripped out of the Python-files.</p>
+in Python.</p>
+<p>The <strong>e</strong>lectro<strong>m</strong>agnetic <strong>py</strong>thon <strong>mod</strong>eller <cite>empymod</cite> can
+model electric or magnetic responses due to a three-dimensional electric or
+magnetic source in a layered-earth model with electric vertical isotropy
+(<span class="math">\(\rho_h, \lambda\)</span>), electric permittivity (<span class="math">\(\epsilon_h,
+\epsilon_v\)</span>), and magnetic permeability (<span class="math">\(\mu_h, \mu_v\)</span>), from very low
+frequencies (<span class="math">\(f \to 0\)</span> Hz) to very high frequencies (<span class="math">\(f \to\)</span> GHz).</p>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="empymod.html"><cite>empymod</cite> &#8211; EM Python modeller</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="empymod.html#notice">Notice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="empymod.html">Info</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="empymod.html#installation-requirements">Installation &amp; requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="empymod.html#citation">Citation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="empymod.html#license">License</a></li>
-<li class="toctree-l2"><a class="reference internal" href="empymod.html#notes-on-usage">Notes on usage</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="empymod.html#note-on-speed-memory-and-accuracy">Note on speed, memory, and accuracy</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="empymod.html#parallelisation">Parallelisation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="empymod.html#spline-interpolation">Spline interpolation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="empymod.html#looping">Looping</a></li>
-<li class="toctree-l4"><a class="reference internal" href="empymod.html#vertical-components">Vertical components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="empymod.html#notice">Notice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="empymod.html#note-on-speed-memory-and-accuracy">Note on speed, memory, and accuracy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="empymod.html#parallelisation">Parallelisation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="empymod.html#spline-interpolation">Spline interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="empymod.html#looping">Looping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="empymod.html#vertical-components">Vertical components</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="empymod.html#fftlog">FFTLog</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="empymod.html#fftlog">FFTLog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="empymod.html#references">References&nbsp;</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="empymod.html#model-model-em-responses"><code class="docutils literal"><span class="pre">model</span></code> &#8211; Model EM-responses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="empymod.html#kernel-kernel-calculation"><code class="docutils literal"><span class="pre">kernel</span></code> &#8211; Kernel calculation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="empymod.html#transform-hankel-and-fourier-transforms"><code class="docutils literal"><span class="pre">transform</span></code> &#8211; Hankel and Fourier Transforms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="empymod.html#filters-digital-filters-for-fht"><code class="docutils literal"><span class="pre">filters</span></code> &#8211; Digital Filters for FHT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="empymod.html#utils-utilites"><code class="docutils literal"><span class="pre">utils</span></code> &#8211; Utilites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="empymod.html#module-empymod.model">Code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="empymod.html#model-model-em-responses"><code class="docutils literal"><span class="pre">model</span></code> &#8211; Model EM-responses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="empymod.html#kernel-kernel-calculation"><code class="docutils literal"><span class="pre">kernel</span></code> &#8211; Kernel calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="empymod.html#transform-hankel-and-fourier-transforms"><code class="docutils literal"><span class="pre">transform</span></code> &#8211; Hankel and Fourier Transforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="empymod.html#filters-digital-filters-for-fht"><code class="docutils literal"><span class="pre">filters</span></code> &#8211; Digital Filters for FHT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="empymod.html#utils-utilites"><code class="docutils literal"><span class="pre">utils</span></code> &#8211; Utilites</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -92,14 +98,14 @@ in Python. The whole documentation is simply stripped out of the Python-files.</
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Manual of empymod</a></li>
+<li><a class="reference internal" href="#">empymod</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="empymod.html" title="next chapter"><cite>empymod</cite> &#8211; EM Python modeller</a></li>
+      <li>Next: <a href="empymod.html" title="next chapter">Info</a></li>
   </ul></li>
 </ul>
 </div>

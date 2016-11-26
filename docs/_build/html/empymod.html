@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>empymod – EM Python modeller &#8212; empymod 0.9 documentation</title>
+    <title>Info &#8212; empymod 0.9 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="empymod 0.9 documentation" href="index.html" />
-    <link rel="prev" title="Manual of empymod" href="index.html" />
+    <link rel="prev" title="empymod" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -41,15 +41,42 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <span class="target" id="module-empymod"></span><div class="section" id="empymod-em-python-modeller">
-<h1><cite>empymod</cite> &#8211; EM Python modeller<a class="headerlink" href="#empymod-em-python-modeller" title="Permalink to this headline">¶</a></h1>
-<p>· Version: 0.9 · Nov 26, 2016 · <a class="reference internal" href="index.html#empymod-manual"><span class="std std-ref">Manual of empymod</span></a> ·</p>
-<p>The <strong>e</strong>lectro<strong>m</strong>agnetic <strong>py</strong>thon <strong>mod</strong>eller <cite>empymod</cite> can
-model electric or magnetic responses due to a three-dimensional electric or
-magnetic source in a layered-earth model with electric anisotropy
-(<span class="math">\(\rho_h, \lambda\)</span>), electric permittivity (<span class="math">\(\epsilon_h,
-\epsilon_v\)</span>), and magnetic permeability (<span class="math">\(\mu_h, \mu_v\)</span>), from very low
-frequencies (<span class="math">\(f\to 0\)</span> Hz) to very high frequencies (<span class="math">\(f\to\)</span> GHz).</p>
+  <div class="section" id="module-empymod">
+<span id="info"></span><h1>Info<a class="headerlink" href="#module-empymod" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation-requirements">
+<h2>Installation &amp; requirements<a class="headerlink" href="#installation-requirements" title="Permalink to this headline">¶</a></h2>
+<p>Just add the path to <cite>empymod</cite> to your python-path variable.</p>
+<p>Alternatively, to install it in your python distribution (linux), run:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Required are python version 3 or higher and the modules <cite>NumPy</cite>, <cite>SciPy</cite>, and
+<cite>numexpr</cite>.</p>
+</div>
+<div class="section" id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h2>
+<p>I am in the process of publishing an article regarding <cite>empymod</cite>, and I will
+put the info here once it is reality. If you publish results for which you used
+<cite>empymod</cite>, please consider citing this article. Also consider citing
+<a class="reference internal" href="#hunziker-et-al-2015" id="id1">[Hunziker_et_al_2015]</a> and <a class="reference internal" href="#key-2012" id="id2">[Key_2012]</a>, without which <cite>empymod</cite> would not
+exist.</p>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>Copyright 2016 Dieter Werthmüller</p>
+<p>Licensed under the Apache License, Version 2.0 (the &#8220;License&#8221;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<blockquote>
+<div><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></div></blockquote>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &#8220;AS IS&#8221; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+<p>See the <em>LICENSE</em>-file in the root directory for a full reprint of the Apache
+License.</p>
+</div>
 <div class="section" id="notice">
 <h2>Notice<a class="headerlink" href="#notice" title="Permalink to this headline">¶</a></h2>
 <p>This product includes software developed at
@@ -58,7 +85,7 @@ frequencies (<span class="math">\(f\to 0\)</span> Hz) to very high frequencies (
 <p>The project was funded through
 <em>The Mexican National Council of Science and Technology</em>
 (<em>Consejo Nacional de Ciencia y Tecnología</em>, <a class="reference external" href="http://www.conacyt.mx">http://www.conacyt.mx</a>).</p>
-<p>This product is a derivative work of <a class="reference internal" href="#hunziker-et-al-2015" id="id1">[Hunziker_et_al_2015]</a> and <a class="reference internal" href="#key-2012" id="id2">[Key_2012]</a>,
+<p>This product is a derivative work of <a class="reference internal" href="#hunziker-et-al-2015" id="id3">[Hunziker_et_al_2015]</a> and <a class="reference internal" href="#key-2012" id="id4">[Key_2012]</a>,
 and their publicly available software:</p>
 <ol class="arabic simple">
 <li>Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response
@@ -97,49 +124,15 @@ offsets with very high frequencies (GPR).</p>
 </li>
 <li><p class="first">Improve tests and benchmarks</p>
 </li>
+<li><p class="first">Automated testing with Travis</p>
+</li>
 <li><p class="first">GUIs</p>
 </li>
 </ul>
 </div>
 </div>
-<div class="section" id="installation-requirements">
-<h2>Installation &amp; requirements<a class="headerlink" href="#installation-requirements" title="Permalink to this headline">¶</a></h2>
-<p>Just add the path to <cite>empymod</cite> to your python-path variable.</p>
-<p>Alternatively, to install it in your python distribution (linux), run:</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
-</pre></div>
-</div>
-<p>Required are python version 3 or higher and the modules <cite>NumPy</cite>, <cite>SciPy</cite>,
-<cite>numexpr</cite>, <cite>timeit</cite>, and <cite>datetime</cite>.</p>
-</div>
-<div class="section" id="citation">
-<h2>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h2>
-<p>I am in the process of publishing a paper regarding <cite>empymod</cite>, and I will put
-the info here once it is reality. If you publish results for which you used
-<cite>empymod</cite>, please consider citing this paper. Also consider citing
-<a class="reference internal" href="#hunziker-et-al-2015" id="id3">[Hunziker_et_al_2015]</a> and <a class="reference internal" href="#key-2012" id="id4">[Key_2012]</a>, without which <cite>empymod</cite> would not
-exist.</p>
-</div>
-<div class="section" id="license">
-<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
-<p>Copyright 2016 Dieter Werthmüller</p>
-<p>Licensed under the Apache License, Version 2.0 (the &#8220;License&#8221;);
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at</p>
-<blockquote>
-<div><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></div></blockquote>
-<p>Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an &#8220;AS IS&#8221; BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.</p>
-<p>See the <em>LICENSE</em>-file in the root directory for a full reprint of the Apache
-License.</p>
-</div>
-<div class="section" id="notes-on-usage">
-<h2>Notes on usage<a class="headerlink" href="#notes-on-usage" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="note-on-speed-memory-and-accuracy">
-<h3>Note on speed, memory, and accuracy<a class="headerlink" href="#note-on-speed-memory-and-accuracy" title="Permalink to this headline">¶</a></h3>
+<h2>Note on speed, memory, and accuracy<a class="headerlink" href="#note-on-speed-memory-and-accuracy" title="Permalink to this headline">¶</a></h2>
 <p>There is the usual trade-off between speed, memory, and accuracy. Very
 generally speaking we can say that the <em>FHT</em> is faster than <em>QWE</em>, but <em>QWE</em> is
 much easier on memory usage. I doubt you will ever run into memory issues with
@@ -153,7 +146,7 @@ parallelisation (<code class="docutils literal"><span class="pre">opt='parallel'
 <p>I am sure <cite>empymod</cite> can be made even faster, for instance with the likes of
 <cite>cython</cite> or <cite>numba</cite>. Contributions are welcomed!</p>
 <div class="section" id="parallelisation">
-<h4>Parallelisation<a class="headerlink" href="#parallelisation" title="Permalink to this headline">¶</a></h4>
+<h3>Parallelisation<a class="headerlink" href="#parallelisation" title="Permalink to this headline">¶</a></h3>
 <p>If <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span> <span class="pre">'parallel'</span></code>, a good dozen of the most time-consuming statements are
 calculated by using the <cite>numexpr</cite> package
 (<a class="reference external" href="https://github.com/pydata/numexpr/wiki/Numexpr-Users-Guide">https://github.com/pydata/numexpr/wiki/Numexpr-Users-Guide</a>).  These statements
@@ -167,7 +160,7 @@ practice is to check first which one is faster. (You can use the included
 <cite>jupyter notebook</cite>-benchmark.)</p>
 </div>
 <div class="section" id="spline-interpolation">
-<h4>Spline interpolation<a class="headerlink" href="#spline-interpolation" title="Permalink to this headline">¶</a></h4>
+<h3>Spline interpolation<a class="headerlink" href="#spline-interpolation" title="Permalink to this headline">¶</a></h3>
 <p>If <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span> <span class="pre">'spline'</span></code>, the so-called <em>lagged convolution</em> or <em>splined</em> variant
 of the <em>FHT</em> (depending on <code class="docutils literal"><span class="pre">htarg</span></code>) or the <em>splined</em> version of the <em>QWE</em> are
 applied. The spline option should be used with caution, as it is an
@@ -203,7 +196,7 @@ transformation <em>always</em> use the splined version and <em>always</em> loop 
 offsets.</p>
 </div>
 <div class="section" id="looping">
-<h4>Looping<a class="headerlink" href="#looping" title="Permalink to this headline">¶</a></h4>
+<h3>Looping<a class="headerlink" href="#looping" title="Permalink to this headline">¶</a></h3>
 <p>By default, you can calculate many offsets and many frequencies all in one go,
 vectorized (for the <em>FHT</em>), which is the default. The <code class="docutils literal"><span class="pre">loop</span></code> parameter gives
 you the possibility to force looping over frequencies or offsets. This
@@ -216,7 +209,7 @@ be faster. Choosing the right looping together with <code class="docutils litera
 have a huge influence.</p>
 </div>
 <div class="section" id="vertical-components">
-<h4>Vertical components<a class="headerlink" href="#vertical-components" title="Permalink to this headline">¶</a></h4>
+<h3>Vertical components<a class="headerlink" href="#vertical-components" title="Permalink to this headline">¶</a></h3>
 <p>It is advised to use <code class="docutils literal"><span class="pre">xdirect</span> <span class="pre">=</span> <span class="pre">True</span></code> (the default) if source and receiver
 are in the same layer to calculate</p>
 <blockquote>
@@ -232,7 +225,7 @@ these functions.</p>
 </div>
 </div>
 <div class="section" id="fftlog">
-<h3>FFTLog<a class="headerlink" href="#fftlog" title="Permalink to this headline">¶</a></h3>
+<h2>FFTLog<a class="headerlink" href="#fftlog" title="Permalink to this headline">¶</a></h2>
 <p>FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT originally
 proposed by <a class="reference internal" href="#talman-1978" id="id5">[Talman_1978]</a>. The code used by <cite>empymod</cite> was published in
 Appendix B of <a class="reference internal" href="#hamilton-2000" id="id6">[Hamilton_2000]</a> and is publicly available at
@@ -252,7 +245,6 @@ setup-script:</p>
 </div>
 <p>I am currently working with <cite>SciPy</cite>-developers in this regard and hope that
 <cite>FFTLog</cite> will be included directly in <cite>SciPy</cite> in the not so distant future.</p>
-</div>
 </div>
 <div class="section" id="references">
 <h2>References&nbsp;<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
@@ -386,8 +378,10 @@ DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1090/S0025-57
 </table>
 </div>
 </div>
-<span class="target" id="module-empymod.model"></span><div class="section" id="model-model-em-responses">
-<h1><code class="xref py py-mod docutils literal"><span class="pre">model</span></code> &#8211; Model EM-responses<a class="headerlink" href="#model-model-em-responses" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-empymod.model">
+<span id="code"></span><h1>Code<a class="headerlink" href="#module-empymod.model" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="model-model-em-responses">
+<h2><code class="xref py py-mod docutils literal"><span class="pre">model</span></code> &#8211; Model EM-responses<a class="headerlink" href="#model-model-em-responses" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt>EM-modelling routines. So far implemented:</dt>
 <dd><ul class="first last">
@@ -967,7 +961,7 @@ it can speed-up the calculation by omitting input-checks.</p>
 
 </div>
 <span class="target" id="module-empymod.kernel"></span><div class="section" id="kernel-kernel-calculation">
-<h1><code class="xref py py-mod docutils literal"><span class="pre">kernel</span></code> &#8211; Kernel calculation<a class="headerlink" href="#kernel-kernel-calculation" title="Permalink to this headline">¶</a></h1>
+<h2><code class="xref py py-mod docutils literal"><span class="pre">kernel</span></code> &#8211; Kernel calculation<a class="headerlink" href="#kernel-kernel-calculation" title="Permalink to this headline">¶</a></h2>
 <p>Kernel of <cite>empymod</cite>, calculates the wavenumber-domain electromagnetic response.</p>
 <p>The functions &#8216;wavenumber&#8217;, &#8216;angle_factor&#8217;, &#8216;fullspace&#8217;, &#8216;greenfct&#8217;,
 &#8216;reflections&#8217;, and &#8216;fields&#8217; are based on source files (specified in each
@@ -1150,7 +1144,7 @@ time-space domain solution could be implemented as well.</p>
 
 </div>
 <span class="target" id="module-empymod.transform"></span><div class="section" id="transform-hankel-and-fourier-transforms">
-<h1><code class="xref py py-mod docutils literal"><span class="pre">transform</span></code> &#8211; Hankel and Fourier Transforms<a class="headerlink" href="#transform-hankel-and-fourier-transforms" title="Permalink to this headline">¶</a></h1>
+<h2><code class="xref py py-mod docutils literal"><span class="pre">transform</span></code> &#8211; Hankel and Fourier Transforms<a class="headerlink" href="#transform-hankel-and-fourier-transforms" title="Permalink to this headline">¶</a></h2>
 <p>Methods to carry out the required Hankel transform from wavenumber to
 frequency domain and Fourier transform from frequency to time domain.</p>
 <p>The functions for the QWE and FHT Hankel and Fourier transforms are based on
@@ -1349,7 +1343,7 @@ distributed with <a class="reference internal" href="#key-2012" id="id49">[Key_2
 
 </div>
 <span class="target" id="module-empymod.filters"></span><div class="section" id="filters-digital-filters-for-fht">
-<h1><code class="xref py py-mod docutils literal"><span class="pre">filters</span></code> &#8211; Digital Filters for FHT<a class="headerlink" href="#filters-digital-filters-for-fht" title="Permalink to this headline">¶</a></h1>
+<h2><code class="xref py py-mod docutils literal"><span class="pre">filters</span></code> &#8211; Digital Filters for FHT<a class="headerlink" href="#filters-digital-filters-for-fht" title="Permalink to this headline">¶</a></h2>
 <p>Filters for the <em>Fast Hankel Transform</em> (FHT, <a class="reference internal" href="#anderson-1982" id="id50">[Anderson_1982]</a>) and the
 <em>Fourier Sine and Cosine Transforms</em> <a class="reference internal" href="#anderson-1975" id="id51">[Anderson_1975]</a>.</p>
 <p>To calculate the <cite>fhtfilter.factor</cite> I used</p>
@@ -1492,7 +1486,7 @@ License: Apache License, Version 2.0,
 
 </div>
 <span class="target" id="module-empymod.utils"></span><div class="section" id="utils-utilites">
-<h1><code class="xref py py-mod docutils literal"><span class="pre">utils</span></code> &#8211; Utilites<a class="headerlink" href="#utils-utilites" title="Permalink to this headline">¶</a></h1>
+<h2><code class="xref py py-mod docutils literal"><span class="pre">utils</span></code> &#8211; Utilites<a class="headerlink" href="#utils-utilites" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt>This module consists of four groups of functions:</dt>
 <dd><ol class="first last arabic simple" start="0">
@@ -1913,6 +1907,7 @@ checked with signal.</p>
 </dd></dl>
 
 </div>
+</div>
 
 
           </div>
@@ -1922,12 +1917,11 @@ checked with signal.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#"><cite>empymod</cite> &#8211; EM Python modeller</a><ul>
-<li><a class="reference internal" href="#notice">Notice</a></li>
+<li><a class="reference internal" href="#">Info</a><ul>
 <li><a class="reference internal" href="#installation-requirements">Installation &amp; requirements</a></li>
 <li><a class="reference internal" href="#citation">Citation</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
-<li><a class="reference internal" href="#notes-on-usage">Notes on usage</a><ul>
+<li><a class="reference internal" href="#notice">Notice</a></li>
 <li><a class="reference internal" href="#note-on-speed-memory-and-accuracy">Note on speed, memory, and accuracy</a><ul>
 <li><a class="reference internal" href="#parallelisation">Parallelisation</a></li>
 <li><a class="reference internal" href="#spline-interpolation">Spline interpolation</a></li>
@@ -1936,22 +1930,23 @@ checked with signal.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#fftlog">FFTLog</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#references">References&nbsp;</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#module-empymod.model">Code</a><ul>
 <li><a class="reference internal" href="#model-model-em-responses"><code class="docutils literal"><span class="pre">model</span></code> &#8211; Model EM-responses</a></li>
 <li><a class="reference internal" href="#kernel-kernel-calculation"><code class="docutils literal"><span class="pre">kernel</span></code> &#8211; Kernel calculation</a></li>
 <li><a class="reference internal" href="#transform-hankel-and-fourier-transforms"><code class="docutils literal"><span class="pre">transform</span></code> &#8211; Hankel and Fourier Transforms</a></li>
 <li><a class="reference internal" href="#filters-digital-filters-for-fht"><code class="docutils literal"><span class="pre">filters</span></code> &#8211; Digital Filters for FHT</a></li>
 <li><a class="reference internal" href="#utils-utilites"><code class="docutils literal"><span class="pre">utils</span></code> &#8211; Utilites</a></li>
 </ul>
+</li>
+</ul>
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Manual of empymod</a></li>
+      <li>Previous: <a href="index.html" title="previous chapter">empymod</a></li>
   </ul></li>
 </ul>
 </div>
