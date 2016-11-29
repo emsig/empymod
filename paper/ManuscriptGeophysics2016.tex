@@ -1,0 +1,891 @@
+\documentclass[manuscript]{geophysics}
+% \documentclass[paper,twocolumn,twoside]{geophysics}
+% \documentclass[paper]{geophysics}
+% \documentclass[manuscript,revised]{geophysics}
+%%fakesection ===    PACKAGES & DEFINITIONS    ===
+
+% \usepackage{draftwatermark}
+% \SetWatermarkLightness{.95}
+% \SetWatermarkFontSize{2cm}
+% % \SetWatermarkText{\shortstack[c]{Submitted to \texttt{Geophysics}\\23 Oct 2012}}
+% \SetWatermarkText{\shortstack[c]{Re-submitted to \texttt{Geophysics}\\05 Feb 2013}}
+
+%% ~ ADDITIONAL PACKAGES TO GEOPHYSICS.CLS
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\usepackage{color}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{booktabs}
+\usepackage[USenglish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{amssymb, amsmath, amsfonts}
+% \usepackage[pdftex, draft]{hyperref}
+\usepackage{xspace}                 % For spaces after \newcommand-strings
+\usepackage{upquote}
+
+% vvv STUFF NOT FOR SUBMISSION
+\usepackage[pdftex, final]{hyperref}
+\definecolor{myblue}{rgb}{0,0,.5}
+\hypersetup{allcolors=myblue, allbordercolors={0 0 .5},
+            pdfborderstyle={/S/U/W .5}, colorlinks=true,}
+% ^^^ STUFF NOT FOR SUBMISSION
+
+% Figure directory
+\renewcommand{\figdir}{figures}
+\usepackage[strings]{underscore}
+
+% \newcommand{\tnt}[1]{\texttt{#1}}
+\newcommand{\tnt}[1]{#1}
+\newcommand{\fortran}{\tnt{Fortran}\xspace}
+\newcommand{\python}{\tnt{Python}\xspace}
+\newcommand{\matlab}{\tnt{Matlab}\xspace}
+\newcommand{\cc}{\tnt{C}\xspace}
+\newcommand{\emmod}{\tnt{EMmod}\xspace}
+\newcommand{\iemmod}{\tnt{iEMmod}\xspace}
+\newcommand{\empymod}{\tnt{empymod}\xspace}
+\newcommand{\fftlog}{\tnt{FFTLog}\xspace}
+\newcommand{\dipole}{\tnt{Dipole1D}\xspace}
+\newcommand{\green}{\tnt{Green3D}\xspace}
+%
+% Figure and table widths
+%   SEGTex               column width = 250 pt
+%   Geophysics           column width = 240 pt (3.33 in)
+%   Geophysics       1.3 column width = 312 pt ( 4.33 in)
+% \plot[btp]{figure1}{width=240pt}{Diff porosities higher than roughly 40~\%.}
+% \plot*[btp]{figure11}{width=\textwidth}{(a) i horizontal resistivities.}
+%
+\definecolor{MyGray}{gray}{0.85}
+\newcolumntype{Y}{>{\columncolor{MyGray}\raggedleft\arraybackslash}r}
+\newcolumntype{W}{>{\raggedleft\arraybackslash}r}
+\newcolumntype{A}{>{\columncolor{MyGray}\raggedleft\arraybackslash}X}
+\newcolumntype{B}{>{\raggedleft\arraybackslash}X}
+
+\hyphenation{iso-tro-pic pe-ne-tra-ting}
+
+\begin{document}
+
+\title{An open-source electromagnetic modeler in Python: empymod}
+
+\renewcommand{\thefootnote}{1}% \fnsymbol{footnote}}
+
+\ms{GEO-2016-????}
+
+\address{Instituto Mexicano del Petróleo,
+         Eje Central Lázaro Cárdenas Norte 152,
+         Col. San Bartolo Atepehuacan C.P. 07730,
+         Ciudad de México, México.
+         E-mail: \href{mailto:dieter@werthmuller.org}{Dieter@Werthmuller.org}.}
+
+\author{Dieter Werthmüller\footnotemark[1]}
+
+\footer{}
+\lefthead{Werthmüller}
+\righthead{Open-source EM modeler in Python}
+
+\maketitle
+
+%%fakesection ===    ABSTRACT    ===
+\begin{abstract} % 1-2 sentence(s) each
+% 1. Principal objectives and scope of the work
+  The free software \empymod combines two earlier presented algorithms in this
+  journal, creating a new code written in \python that is faster and leaner.
+% 2. Methodology
+  The main objective is to present a three-dimensional layered-earth
+  electromagnetic modeler with vertical transverse isotropy in an easy
+  accessible programming language, both in terms of costs and learning curve,
+  and in a collaborative way. The code is hosted in a web-based Git repository
+  under a lax permissive license, allowing anyone to use it, even for
+  commercial purposes, as well as to contribute to its development.
+% 3. Results
+  Comparisons show that this code is as precise and faster than the codes it is
+  based upon, thanks to the use of different Hankel transforms and the
+  throughout vectorization of the calculation.
+% 4. Conclusions
+  This code might certainly be useful for professionals in the electromagnetic
+  area, but I specifically hope this code to be useful for educational
+  purposes.
+\end{abstract}
+
+\section{Introduction}
+
+% 1.1 CSEM in hydrocarbon exploration
+The potential of electromagnetic methods for the detection of hydrocarbon
+reservoirs is known for some decades, see for instance \cite{PIEEE.89.Nekut} or
+\cite{B.SEG.91.Chave}. More recent, good overviews of the methodology and its
+applications are give by \cite{SG.05.Edwards} and \cite{IEEE.12.Ziolkowksi}.
+Whereas in the early days everything happened in idealized, isotropic one
+dimensional (1D) earth models, it is generally agreed that the often complex
+geology of hydrocarbon reservoirs requires two dimensional (2D) and three
+dimensional (3D), anisotropic forward modelers. However, 1D models are still
+very important, not last because they are very fast. Many problems can be
+simplified to and henceforth solved with 1D models. More importantly, 1D allows
+to study single, isolated effects to the electromagnetic field, which is a
+crucial foundation in understanding the electromagnetic field behaviour and a
+necessity for understanding the phenomena at higher dimensions. 1D models are
+furthermore often used in inversion routines of higher dimensions, for instance
+to generate a starting model or embed a 3D body in a 1D background.
+
+% 1.2 Existing 1D solutions
+Solutions for the electromagnetic fields in a layered-earth model have been
+solved and published extensively using different approaches. The importance and
+wide\-spread use of 1D models is shown in the continuous stream of publications
+in this area, even in recent years. \cite{GJI.07.Loseth} solved the problem
+with the scattering matrix formulation for a 1D earth with general anisotropy,
+spanning the frequency range from controlled-source electromagnetics (CSEM) to
+ground-pe\-ne\-tra\-ting radar (GPR).  \cite{GJI.09.Chave} presented a solution
+in terms of independent and unique transverse electric (TE) and tangential
+magnetic (TM) modes for the electrical isotropic case using the diffusive
+approximation (without displacement currents, valid for low frequencies such as
+in CSEM). \cite{GEO.09.Key} demonstrated why 1D models still matter by testing,
+for instance, the benefit of additional frequencies in an inversion routine.
+Key follows and extends the magnetic vector potential approach by
+\cite{B.AP.82.Wait} for forward modeling, using the isotropic, diffusive
+low-frequency approach.  \cite{GEO.15.Hunziker} obtained the electromagnetic
+field in a layered earth with vertical transverse iso\-tro\-py (VTI) by solving
+two equivalent scalar equations with a scalar global reflection coefficient.
+All of the four citations regarding 1D solutions have quite extensive reference
+lists about the history of 1D forward modeling, the last one featuring an
+interesting review of the history of 1D electromagnetic derivations spanning
+almost 200 years.
+
+% 1.3 Hankel transform
+A crucial as well as very interesting part of electromagnetic modeling is,
+once one moves from the theoretical derivation to the numerical implementation,
+the Hankel transform involved in the transformation from the
+wave\-num\-ber-fre\-que\-ncy domain to the space-frequency domain. The use of
+digital filters is quite common in geophysics, known as the fast Hankel
+transform method (FHT), as introduced by \cite{GP.71.Gosh}, and popularized by
+\cite{TRP.75.Anderson, GEO.79.Anderson, TMS.82.Anderson} thanks to his freely
+available \fortran routines. Naturally, standard quadrature can be used as well
+for the Hankel transform, see for instance \cite{GEO.83.Chave}, and hybrid
+routines using both methods were published by \cite{GEO.84.Anderson,
+GEO.89.Anderson}. The topic got picked up again recently with new filters being
+published by \cite{GP.07.Kong} and \cite{GEO.12.Key}.
+
+% 1.4 1D codes and licenses
+In terms of freely available and open-source code there are a few examples.
+\cite{GEO.09.Key} published his forward modeling and inversion code \dipole,
+written in \fortran. The dipole can be placed anywhere in the stack of layers
+and can have arbitrary orientation and dip. \dipole computes the electric and
+magnetic fields to an electric source, using the FHT method. \cite{GEO.12.Key}
+published additional code with his introduction of the
+qua\-dra\-ture-with-ex\-tra\-po\-la\-tion method (QWE) and its comparison to
+the FHT method, for which he translated some of the \dipole-\fortran code to
+\matlab. \cite{GEO.15.Hunziker} published their code \emmod (\fortran and \cc),
+in which the source and receiver can also be placed anywhere in the stack of
+layers. They use a 61\,pt Gauss-Kronrod quadrature for the Hankel transform.
+
+% 1.5 Claim
+With \empymod I present a 1D forward modeling code that is based on
+\cite{GEO.15.Hunziker} for the wavenumber-frequency domain calculation, and on
+\cite{GEO.12.Key} for the Hankel and Fourier transforms. As I will therefore
+refer to these publications quite a lot, I use the name Hun15 to denote
+\cite{GEO.15.Hunziker}, and the names Key09 and Key12 to denote
+\cite{GEO.09.Key, GEO.12.Key}. To denote the FHT filters as published by Key09
+and Key12 I will add the corresponding filter-size, e.g. Key09-401.
+In addition, \empymod includes the logarithmic fast Fourier transform \fftlog
+of \cite{RAS.00.Hamilton} as a third Fourier transform possibility to FHT and
+QWE for the frequency-to-time transformation.
+
+To my knowledge, \empymod is the first code that is freely available which
+calculates the full wavefield for a layered-earth model with vertical isotropy
+and has both quadrature and filters built in. This makes \empymod ideal not
+just for comparison studies of the two methods, but also to build hybrid
+inversion schemes.  Further advantages of \empymod are:
+
+\textbf{(1) \python:} \python is a modern, cross-platform, free and open-source
+programming language. With its scientific libraries, mainly the numeric and
+scientific modules \texttt{NumPy} and \texttt{SciPy}, it creates an extremely
+powerful numerical calculation stack.
+
+\textbf{(2) Libre (free and open-source):} The code is published under the lax
+permissive \emph{Apache Version 2.0 license}, which makes it available to
+everyone, even for commercial purposes. It therefore might prove to be valuable
+for students and professionals alike. Not only the code is free, but also the
+underlying platform (\python), contrary to, for instance, \matlab. As such it
+is ideal for reproducible research.
+
+\textbf{(3) Lean:} The codebase is very lean. It is built from scratch, and it
+therefore does not suffer the problems that sometimes come with the organic
+growth of a codebase. The code follows as much as possible the \emph{DRY}
+coding paradigm, \emph{Don't Repeat Yourself}.
+
+\textbf{(4) Fast:} The code is vectorized as much as possible, which improves
+computation. The most time-consuming calculations have furthermore a flag to
+run parallelized. However, on a larger scale such as an inversion routine one
+would probably want to parallelize the kernel calls instead of the kernel
+itself. Even though \python is an interpreted language it can be very fast, as
+the underlying routines are in \fortran or in \cc (using for instance the
+BLAS/Lapack libraries), and \python is merely the glue. The comparisons show
+that \empymod is as fast as the existing codes.
+
+\textbf{(5) Community:} The code is hosted on GitHub, which makes it easy for
+anyone to improve and contribute to the code, and will allow \empymod to
+grow:\\
+\url{https://github.com/prisae/empymod}.
+
+\textbf{(6) Well documented:} The code is extensively documented, and large
+parts of it are extracted using automated tools (Sphinx) to create a manual:\\
+\url{https://empymod.readthedocs.io}.
+
+These points make this a worthwhile extension to the existing codes from Hun15
+and Key12. The existing codes are written in \fortran, which requires much more
+time than \python to get started for students or to develop for anyone, or
+\matlab, which is a proprietary language. And the existing codes are in static
+repositories where one can only download the code, which makes interaction,
+contribution, or bug filing more difficult.
+
+After introducing the code in the first part I will present some comparisons by
+reproducing results from the publications this code is based upon: First a
+comparison to the analytical half-space solution, followed by a comparison to
+\emmod by Hun15, and finally a comparison to some results presented by Key12.
+
+% Add a note about the outcome? Speed/Precision?
+
+\section{About the code}
+
+The code consists of 5 files; these are 3 core modules plus \emph{utils}, which
+contains input checks and other utilities, and \emph{filters}, containing the
+FHT filter coefficients. The three core routines are: (1) \emph{kernel}, where
+the wavenumber-domain calculation is carried out; (2) \emph{transform}, where
+the Hankel and Fourier transforms are computed; and (3) \emph{model}, which
+contains the actual modeling routines for end users. As of now there are two
+main modeling routines implemented, \emph{frequency} and \emph{time}, with
+which one can calculate the frequency- and time-domain responses for electric
+or magnetic point sources and receivers, directed along the three principal
+axis $x, y,$ and $z$. More modeling routines can easily be added to
+\emph{model}, such as finite bipoles or arbitrary source and receiver
+directions, as they do not affect the core of the calculation, hence not
+\emph{kernel} nor \emph{transform}.
+
+The wavenumber-domain calculation in \emph{kernel} follows Hun15, and
+calculates as such the complete wavefield for a layered VTI model, where the
+code makes no assumptions about the model. Source and receiver can be placed
+anywhere in the model. Depths, frequencies, and source-receiver configuration
+have to be defined, and each layer is characterized with its horizontal
+resistivity $\rho_h$, its electrical anisotropy $\lambda$, where $\lambda =
+\sqrt{\rho_v/\rho_h}$, its horizontal and vertical magnetic permeabilities
+$\mu_h$ and $\mu_v$, and the horizontal and vertical electric permittivities
+$\epsilon_h$ and $\epsilon_v$. The main differences between \emmod and \empymod
+are the programming language and the Hankel transform, and a few additional
+fundamental differences: \emmod uses 2nd order Bessel functions of the first
+kind $J_2$. Published FHT filters generally provide coefficients for 0th and
+1st order Bessel functions $J_0, J_1$ only. Therefore, the recurrence relation
+%
+\begin{equation}
+  J_2(kr) = \frac{2}{kr}J_1(kr) - J_0(kr)
+  \label{eq:j2}
+\end{equation}
+%
+is used, where $k$ and $r$ are the wavenumber and space-domain parameters,
+respectively. Another difference is vectorization: \emmod carries out the
+calculation in the wavenumber-domain by looping over frequencies, offsets, and
+wavenumbers. This is carried out in a single calculation without looping in
+\empymod. Another difference is that \empymod is much leaner than \emmod.
+\emmod grew organically, as confirmed by the author, adding more and more
+features, where \empymod was designed with all 36 source-receiver
+configurations from the beginning. As an example, the full-space solution in
+\empymod is one function (107 lines of code) for all source-receiver
+configurations, whereas in \emmod it is split into no less than 16 functions
+(364 lines of code). This should help to maintain the code easier, and it
+should also be easier for new contributors to read into the code.
+
+The Hankel and Fourier transforms in \emph{transform} follow Key12, with a few
+changes. The most important ones regarding speed is vectorization and a splined
+version for the filter method, in addition to the traditional lagged version:
+The lagged version samples the wavenumber from the minimum to the maximum
+required wavenumber given the required offsets and the chosen filter base with
+the spacing as defined by the filter. It subsequently carries out the Hankel
+transform, and interpolates for the required offsets in the space domain. The
+splined version, on the other hand, uses a user-specified number of values per
+decade from the minimum to the maximum wavenumber. It then interpolates for the
+required wavenumber values, and does the Hankel transform afterwards. The
+lagged version is \emph{very} fast. However, with the splined version a
+speed-up can be achieved in comparison with the original FHT at higher
+precision if compared with the lagged version. All filters published by Key09
+and Key12 are included in \empymod, which includes Key's own filters as well as
+the filters by \cite{TMS.82.Anderson} and by \cite{GP.07.Kong}.
+
+The most import part of Key12 is the introduction of a new quadrature algorithm
+to geophysics, named qua\-dra\-ture-with-ex\-tra\-po\-la\-tion (QWE). QWE is a
+fast quadrature method using the Shanks transformation \citep{JMP.55.Shanks}
+computed with Wynn's epsilon algorithm \citep{MC.56.Wynn}. The advantage of
+quadrature over filters is the ability to estimate the error. QWE continues
+until the absolute error, estimated by the difference of subsequent iterations
+$n$, satisfies the inequality
+%
+\begin{equation}
+  |S^*_n-S^*_{n-1}| \le \varepsilon_r|S^*_n| + \varepsilon_a\ ,
+  \label{eq:err}
+\end{equation}
+%
+where $S^*$ is the extrapolated result, and $\varepsilon_r, \varepsilon_a$ are
+the relative and absolute tolerance, respectively.
+
+Whereas for the Hankel transform the two methods QWE and FHT are implemented,
+for the Fourier transform there are three methods implemented: QWE, FHT with
+the sine and cosine filters, and \fftlog \citep{RAS.00.Hamilton}. The
+logarithmic fast Fourier transform \fftlog is ideal for this operation, as
+generally a wide range of frequencies is required to go from frequency to time
+domain. The \fftlog can yield faster results than the QWE method and more
+precise than the FHT results, specifically for land impulse responses at early
+times.
+
+In addition to the splined version of the QWE and the splined and lagged
+versions of the FHT, all time-consuming calculations are set up to be able to
+run in parallel, with the help of the \python-module \tnt{numexpr}.  This can
+significantly speed up calculations if you run big models with many layers and
+for many offsets and frequencies. However, if you include \empymod in an
+inversion scheme then it might be better to parallelize the calls to \empymod,
+instead of \empymod itself.
+
+It is important to note that calculations in the wavenumber domain depend
+\emph{only} on offset $r = \sqrt{x^2+y^2}$; the scaling factor, which depends
+on the angle $\varphi = \rm{atan2}(y, x)$, is multiplied afterwards. In order
+to calculate for instance a circle around the source, the kernel has to be
+called only once, and subsequently scaled by the angle-dependent factor for
+each source-receiver pair. This makes the splined version very powerful, as it
+can be used for irregularly distributed data.
+
+The code distributed on GitHub contains \tnt{Jupyter Notebooks} to reproduce
+the results in this article, as well as some basic tests and benchmarks, and
+the \LaTeX-source of the article itself.
+
+The run-time comparisons tests were run on a Lenovo ThinkCentre running Ubuntu
+16.04 64-bit, with 8\,GB of memory and an Intel Core i7-4770 CPU @ 3.40GHz x 8
+(4 cores with hyper-threading). Comparing run times is always a difficult task,
+and between different languages even more, here between \python, \fortran, and
+\matlab. However, they do serve as comparison.  I used the
+\matlab-\texttt{timing} and \python-\texttt{timeit} functions, which behave
+very similar. It is probably expected today, but still worth mentioning, that
+the calculation is carried out in double precision.
+
+\section{Comparison to analytical half-space solution}
+
+\cite{PIER.10.Slob} published analytical frequency- and time-domain solutions
+for the diffusive electric field in a VTI half-space. As an example, I use the
+same model as Hun15 in their Figures~1 and~2: A half-space with horizontal
+resistivity $\rho_h = 1/3\,\Omega$\,m, anisotropy $\lambda = \sqrt{10}$, and
+for frequency $f = 0.5\,$Hz. The source is located horizontally at the origin
+at a depth of 150\,m, and the depth of the receivers is 200\,m. The field is
+calculated on a regular grid with a spacing of 10\,m.
+Figure~\ref{fig:analytical} shows the analytical amplitude and phase results
+for the first quadrant (the other quadrants are simply symmetric copies of it).
+%
+\plot*[btp]{analytical}{width=\textwidth}{Analytical solution for a
+  half-space with $\rho_h = 1/3\,\Omega$\,m, $\lambda = \sqrt{10}$, $f =
+  0.5\,$Hz, $z_s = 150\,$m, and $z_r = 200\,$m, calculated on a regular grid
+  with a spacing of 10 meters; (a) amplitude and (b) phase.}
+%
+The figure shows the result for x-directed electric source and receiver
+dipoles ($G^\mathrm{ee}_{xx}$), other configurations yield similar results (the
+choice is based on the insight that this is the most interesting of all
+electric source to electric receiver fields, as can be seen in Hun15 Figures~1
+and~2).
+
+The error of the amplitude is shown in Figure~\ref{fig:onederror-amplitude} for
+different settings regarding the Hankel transform: (a) for a 51\,pt QWE with
+relative tolerance $\varepsilon_r$ and absolute tolerance $\varepsilon_a$ of
+$10^{-12}$ and $10^{-30}$, respectively; (b) for a 21\,pt QWE with
+$\varepsilon_r = 10^{-8}$ and $\varepsilon_a = 10^{-30}$; (c) for a 15\,pt QWE
+with $\varepsilon_r = 10^{-8}$ and $\varepsilon_a = 10^{-18}$; (d) using the
+standard FHT method with the filter Key09-401; (e) using the splined FHT of the
+same filter with 40 points per decade; and (f) using the lagged FHT of the same
+filter.
+%
+\plot*[btp]{onederror-amplitude}{width=.92\textwidth}{Error levels for different
+  Hankel transform settings, compared with the analytical solution in Figure~1.
+  The high precision QWE (a) and the standard FHT (d) have very low error
+  levels, generally in the order of $10^{-6}$\,\% or less. The lagged FHT has
+  much higher error levels, and the effects of interpolation can be seen
+  clearly in the ring-like structure. However, almost the entire error is below
+  0.1\,\% ($10^{-1}$\,\%), only the dark black parts have an error of 1\,\% or
+  slightly more.}
+%
+The results from the high precision QWE (a) and the standard FHT (d) are almost
+identical, even though they use completely different Hankel transforms. This
+can be seen better in Figure~\ref{fig:onederror-amp1d}, which shows a
+cross-section through subplots (a), (c), (d), and (f) of
+Figure~\ref{fig:onederror-amplitude} at a crossline offset of 4\,km.
+%
+\plot[btp]{onederror-amp1d}{width=.5\textwidth}{Relative percentage error for
+  crossline offset of 4\,km as shown in Figure~\ref{fig:onederror-amplitude}
+  (a), (c), (d), and (f).}
+%
+The error is, in this case, not due to the method used for the Hankel transform,
+but rather to the limitations in computation: either because we reach the
+numerical noise level, or because of distinct differences between the
+analytical solution, which uses the diffusive approximation, and the numerical
+code, which calculates the complete field. If the QWE is calculated for lower
+tolerance levels, as shown in (b) and (c), or the FHT is used with
+interpolation as in (e) and (f), artefacts seem to arise from the Hankel
+transform and the interpolation.
+
+The error of the phase is shown in Figure~\ref{fig:onederror-phase}, with the
+same conclusion.
+%
+\plot*[btp]{onederror-phase}{width=.92\textwidth}{Same as
+  Figure~\ref{fig:onederror-amplitude}, but for the phase. Interesting is to
+  see that interpolation in the wavenumber domain (e) yields slightly different
+  patterns than interpolation in space domain (f).}
+%
+
+\section{Comparison to Hunziker et al. (2015)}
+
+Hun15 derive the electromagnetic fields in astoundingly simple equations for
+all 36 possible source-receiver combinations (electric and magnetic sources and
+receivers in three directions $x,y,z$) by finding the solution for the
+vertical electric field and then applying the duality principle and reciprocity
+to derive all components. The corresponding code \emmod is published on the SEG
+website, and in \cite{GEO.16.Hunziker} they published with \iemmod an inversion
+routine for it.
+
+\emmod is written in \fortran and \cc. On execution, all parameters are
+provided in an input file, and the resulting responses are written to an output
+file.  The calculation is carried out for a regular grid in the space domain,
+with at least two points in each direction. The code calculates in loops the
+solution for all wavenumbers for the first quadrant, carries out the
+wavenumber-to-space transformation, and then copies the result for the other
+four quadrants, writing everything to the output file. This approach works very
+well and even for millions of cells. However, the usage is probably more
+academic. When it comes to actual measurements one deals with dozens to at most
+hundreds of offsets, and usually on an irregular grid. \dipole and \empymod
+work more along the practical approach.
+
+Figure~\ref{fig:emmod-HS} shows the error of amplitude and phase for \emmod.
+On the left side with a colorscale from $10^0$ to $10^2$\,\% as used in Hun15,
+on the right side with a colorscale from $10^{-8}$ to $10^0$\,\% as used in
+Figures~\ref{fig:onederror-amplitude} and~\ref{fig:onederror-phase}. Note that
+the error calculation in Hun15 was done slightly different. Here I show the
+relative error between the analytical result and the result from \emmod, where
+Hun15 shows the relative error between $\log_{10}$(analytical result) and
+$\log_{10}$(result from \emmod).
+%
+\plot*[btp]{emmod-HS}{width=.7\textwidth}{Error of \emmod for the half-space
+  model in Figure~1. On the left side with the same colorscale as in Hun15, on
+  the right side with the colorscale as in Figures~2 and~3.}
+%
+Figure~\ref{fig:emmod-HS} shows a few interesting points. The responses from
+\emmod in this example have significantly less precision than the results from
+\empymod. This does not mean in any way that \emmod is less precise, as \emmod
+can be adjusted to yield much preciser results. However, this would
+significantly increase the run time, so it has to be kept in mind for the run
+time comparison. The important point is that \emmod does \emph{always} do an
+interpolation in the space-frequency domain, by default, a linear
+interpolation.  No interpolation is used in \empymod, unless one specifies it
+to speed up the calculations (splined QWE or splined and lagged FHT options),
+which will therefore yield preciser results. This can be seen very nicely in
+the results.  Figures~\ref{fig:emmod-HS} (b) and (d) show white circles where
+the result is very precise. These are the offsets close to those where the
+fields were actually calculated. The black bands in-between are the areas where
+the result was interpolated. It also shows that the spacing between calculated
+offsets increases with increasing offsets. The error patterns from \empymod in
+Figures~\ref{fig:onederror-amplitude} and \ref{fig:onederror-phase} show
+generally a different pattern, displaying where the code hits the numerical
+accuracy or differences between the analytical, diffusive solution and the
+numerical, full wavefield solution. It is only for the splined and lagged
+versions that one sees the same, circular pattern appearing, which are due to
+interpolation.
+
+Table~\ref{tbl:analytical} shows run times for these models. A few notes worth
+mentioning: \empymod carries out a lot of input checks, as it is quite
+forgiving in what you input. \emmod, on the other hand, reads the input file
+and writes the result to an output file, and copies the first quadrant to the
+other three. Both have therefore some overhead, and the comparison is not
+strictly 1:1. For the comparison the same model was used as shown above, on a
+regular grid with a spacing of 100\,m.  On the test-machine the standard,
+vectorized, QWE and FHT \empymod would run into memory issues for denser
+spacing, hence arrays of more than some 10'000s of offsets.  The splined and
+lagged versions of \emmod could handle it, however.
+%
+\tabl[btp]{analytical}{Run times for the half-space model shown in Figure~1, on
+  a regular grid with spacing of 100\,m, for \emmod and different Hankel
+  transform settings of \empymod (times in milliseconds).}{
+  \centering
+  \begin{tabularx}{240pt}{rAAABBB}
+  \toprule%
+  EMmod & \multicolumn{3}{c}{QWE} & \multicolumn{3}{c}{FHT} \\
+        & 1 & 2 & 3               & 1 & 2 & 3 \\
+  \midrule%
+   5030 & 7920 & 2380 & 1180 & 3030 & 1640 & 6 \\
+  \bottomrule%
+  \end{tabularx}
+}
+%
+QWE becomes faster for decreasing precision, not surprisingly, and the splined
+and lagged version of FHT are faster than the standard version. The lagged FHT
+is the fastest by quite a margin, and about 1/3 of that time is from the input
+checks, so it takes only about 4\,ms to calculate the 11'025 offsets.
+What is interesting here is that the lagged FHT is still more precise than
+\emmod with the given settings, which means a speed-up of a factor 1000 for the
+same result.
+
+Many 1D CSEM codes use the diffusive approximation that is valid for low
+frequencies. The appealing part of the derivation of Hun15 is that it models
+the complete wavefield, hence it is valid for high frequencies and therefore
+wave-phenomena. As an extreme case, Hun15 show a 1D example for
+ground-penetrating radar with a center frequency of 250\,MHz. To do so, 2048
+frequencies in the range of 1\,MHz to 2048\,MHz are calculated for the Fast
+Fourier transform from frequency to time domain.  Figure~\ref{fig:gpr} shows
+the three results for \emmod, \empymod with a 21\,pt QWE and relative and
+absolute tolerance of $10^{-10}$ and $10^{-18}$, respectively, and \empymod
+with FHT with the filter Key09-401, together with the analytical solution for
+the arrival of the direct wave (red), the wave refracted at the surface (cyan),
+and the wave reflected at the subsurface interface (magenta). For the results
+with \empymod I used the regular FFT as Hun15, not \fftlog.
+
+\emmod does clearly do the best job. QWE has troubles at very short offsets (<
+0.1\,m), and a \emph{noisy triangle} expanding from the origin. This triangle
+could be narrowed by increasing the precision of the QWE, at the cost of
+computation time. However, I was not able to completely get rid of it with QWE.
+FHT shows the first arrivals well, however, afterwards the result becomes
+extremely noisy.
+%
+\plot*[btp]{gpr}{width=1\textwidth}{GPR example for (a) \emmod, (b) \empymod
+  with 21\,pt QWE for relative and absolute tolerance of $10^{-10}$ and
+  $10^{-18}$, respectively, and (c) \empymod with FHT (Key09-401); run times
+  are given in the subplot titles.}
+%
+Interesting are the calculation times for these three results. \emmod took more
+than 32 hours to calculate, \empymod with QWE about 34 minutes, and \empymod
+with FHT a bit over 4 minutes. Surprising is how good the FHT result is, given
+that the filter was designed for CSEM data, hence frequencies 6 to 9 orders of
+magnitudes smaller. One could implement the Gauss-Kronrod quadrature into
+\empymod, and see how this would compare to \emmod for GPR data in terms of
+speed and precision. But, in any case, \emmod/\empymod are not optimized for
+nor intended to model GPR data, and calculations in time-domain will be much
+faster and more precise. It is nevertheless an interesting proof of concept and
+shows that \emmod/\empymod model the entire EM field.
+
+\section{Comparison to Key (2009, 2012)}
+
+Key12 not only introduces QWE to geophysics, but also compares QWE to FHT for
+various filters, some of which were specifically created for the comparison. In
+order to calculate the models he translates parts of \dipole (Key09) from
+\fortran to \matlab. The models are therefore isotropic and use the diffusive
+approximation. He summarizes succinct and clear the FHT method and outlines the
+QWE method, and made the codes available from the SEG website.
+
+The inclusion of the filter method FHT and the quadrature method QWE in
+\empymod follows Key12, with one important exception: vectorization. The
+\matlab code of Key12 loops over frequencies, offsets, and wavenumbers; the
+code was developed to compare the different hankel transforms, not with speed
+in mind.  In \empymod both methods are vectorized, hence various frequencies
+and offsets can be calculated for all required wavenumbers in one calculation,
+which changes the conclusion drawn in Key12 comparing the speed of QWE and FHT.
+The vectorized approach is much faster but is limited by the memory of the
+computer. If the model becomes too big, which depends on numbers of layers,
+frequencies, offsets, and wavenumbers, the calculation has to be carried out by
+looping over frequencies or offsets or both; the code never loops over
+wavenumbers.
+
+In Key12, the standard QWE is always faster than the standard FHT. In the
+vectorized version of \empymod, the standard QWE \emph{can} be faster than the
+standard FHT if the model is big and many offsets are required, but often it is
+slower. Furthermore, the lagged FHT is generally much faster than the QWE
+method, splined or not.
+
+Table~\ref{tbl:runtimes} lists the run times for exactly the same models as
+Key12 compared in his Table~1. In this comparison, a 9\,pt QWE is compared to a
+201\,pt (Key12-201) and a 801\,pt filter (Key12-801), where the absolute and
+relative tolerance are set so that the QWE achieves a similar error-level as
+the filters ($\varepsilon_r = 10^{-6}$ for the standard QWE and $10^{-2}$ for
+the splined version, $\varepsilon_a = 10^{-24}$ in both cases). In order to
+make a fair comparison I re-run the script from Key12, and the run times on the
+test-machine are roughly twice as fast as in the original paper. Next to it are
+the results from \empymod. It can be seen from the results that \empymod is
+significantly faster.%
+%
+\tabl[btp]{runtimes}%
+  {Run times comparing Key12 (Key) and \empymod (Wer) for the same cases as in
+  Key12, Table~1 (in milliseconds).}{
+  \centering
+\begin{tabularx}{1.05\textwidth}{ccYYWWYYWWYYWW}
+  \toprule
+  %
+  & & \multicolumn{4}{c}{QWE: 9\,pt}&\multicolumn{4}{c}{FHT: 201\,pt filter}&
+  \multicolumn{4}{c}{FHT: 801\,pt filter} \\
+  %
+  \cmidrule(rl){3-6} \cmidrule(rl){7-10} \cmidrule(rl){11-14}
+  %
+  & &
+  \multicolumn{2}{>{\columncolor{MyGray}\arraybackslash}c}{Normal} &
+  \multicolumn{2}{c}{Splined} &
+  \multicolumn{2}{>{\columncolor{MyGray}\arraybackslash}c}{Normal} &
+  \multicolumn{2}{c}{Lagged} &
+  \multicolumn{2}{>{\columncolor{MyGray}\arraybackslash}c}{Normal} &
+  \multicolumn{2}{c}{Lagged} \\
+  %
+  Lay& Off& Wer& Key& Wer& Key& Wer&  Key& Wer& Key& Wer&  Key& Wer& Key\\
+  \midrule
+  %
+    5&   1&   7&  16&   3&  27&   1&   19&   1&  19&   2&   75&   2&  75\\
+    5&   5&  14&  69&   5&  29&   3&   92&   2&  24&   7&  364&   3&  81\\
+    5&  21&  20& 302&   7&  37&   8&  383&   2&  25&  25& 1520&   3&  83\\
+    5&  81&  39&1152&  15&  61&  29& 1475&   2&  28&  97& 5813&   3&  85\\
+    5& 321& 104&4559&  49& 163& 122& 5817&   2&  40& 428&22966&   3&  98\\
+  \midrule
+  100&  21& 136& 458&  18&  50&  91&  602&   9&  37& 301& 2377&  19& 125\\
+  100&  81& 325&1769&  25&  75& 339& 2300&   9&  40&1211& 9084&  19& 128\\
+  100& 321&1041&7084&  59& 175&1380& 9093&   9&  52&5338&36102&  19& 142\\
+  %
+  \bottomrule
+\end{tabularx}}%
+%
+Important to note is, however, not the absolute speed of \empymod, but the
+difference between the various Hankel transform methods. The standard QWE
+method, for a similar error level as FHT, is faster than the standard FHT mode
+only for many offsets. More importantly, the lagged FHT is generally much
+faster than any QWE. QWE is very useful to check the error level of a result.
+If many kernel evaluations have to be carried out, and speed is of importance,
+the lagged FHT is the preferred method. As Key12 loops over each wavenumber,
+the difference between the vectorized and non-vectorized version can be best
+seen in the long 801\,pt filter.
+
+These results regarding speed of calculation do not change the fact that the
+advantage of the QWE method is to have an estimate of the error. However, the
+filters designed for CSEM problems seem to be very good at solving them, as can
+be seen in the low error levels in Figures~\ref{fig:onederror-amplitude}
+and~\ref{fig:onederror-phase} or in Key12.
+
+
+Table~\ref{tbl:runtimes2} lists the run times for the same model as before,
+but for \empymod and \dipole using the FHT method with the filter Key09-201,
+the default filter in \dipole. For the regular versions (-) \empymod and
+\dipole perform very similar; \empymod is a little faster for the smaller
+tests, \dipole is slightly faster for the bigger tests. It can be seen from the
+results that the parallel optimisation (par) in \empymod can result in a
+significant speed-up.  If the lagged convolution optimisation is chosen,
+\empymod is significantly faster than \dipole. In \empymod, additional offsets
+come at basically no cost in the lagged version, whereas \dipole still uses
+more time to calculate more offsets. This is most likely due to the writing of
+the output file, that becomes bigger with bigger offsets.
+%
+\tabl[btp]{runtimes2}
+  {Run times comparing \dipole (Key09) and \empymod, using the filter Key09-201
+  (default in \dipole; times in milliseconds). Optimisation: [-] None,
+  [par] parallel, [spl] lagged FHT.}{ \centering
+  \begin{tabularx}{.5\textwidth}{ccAAABB}
+  \toprule
+  %
+     &    & \multicolumn{3}{c}{\empymod} & \multicolumn{2}{c}{\dipole}\\
+  %
+  \cmidrule(rl){3-5} \cmidrule(rl){6-7}
+  %
+  Lay& Off&  - & par & spl &   - & spl\\
+  \midrule
+  %
+    5&   1&    1&   2& 1&    4&  4\\
+    5&   5&    3&   3& 2&    6&  5\\
+    5&  21&    8&   5& 2&   12&  8\\
+    5&  81&   30&  10& 2&   36& 18\\
+    5& 321&  123&  34& 2&  128& 56\\
+  \midrule
+  100&  21&   90&  53& 9&   90& 14\\
+  100&  81&  340& 107& 9&  331& 23\\
+  100& 321& 1423& 312& 9& 1303& 61\\
+  %
+  \bottomrule
+\end{tabularx}}%
+%
+\dipole was compiled using the free and open-source \emph{gfortran} compiler.
+Compiling it with the (proprietary) \emph{ifort} compiler might result in
+slightly faster run times.
+
+\section{Conclusions}
+
+The presented code \empymod is a fast, lean, open-source electromagnetic
+modeler, well documented and hosted in a way that makes collaboration easy.
+It can model the full wavefield of a 3D source in a VTI layered-earth.
+Additional to the obvious application of modeling and inversion of
+electromagnetic data, \empymod can be used to investigate into the differences
+between filters and quadrature for full-wavefield electromagnetic calculations
+over a wide range of frequencies. There are not many full-wavefield codes
+openly available and, as such, \empymod with QWE and FHT is an important
+addition to \emmod, which uses a 61\,pt Gauss-Kronrod quadrature.
+
+Outside of the traditional scope I think \empymod can be very educative for
+someone who is just starting to get interested in electromagnetic modeling or
+even just in Hankel transforms, hence for educational purpose: it is brilliant
+for students, specifically as \python is becoming more and more widespread in
+academia, and the number of Universities that teach geophysicist \python
+(mostly instead of \matlab) is growing annually. \python, like \matlab, has the
+advantage of very fast developing times, and considerably lower entry barriers
+than \cc or \fortran for beginners.
+
+There are many possibilities to improve \empymod, or to add additional
+functionalities, as in any software (this is why it is important to keep
+open-source code in version-controlled repositories such as GitHub instead in
+static repositories). Possible additions are more modeling routines, such as
+arbitrary source and receiver dipole lengths, arbitrary source and receiver
+rotations, or variable receiver depths within one calculation. Other features
+to include could be further Hankel and Fourier transforms, such as the
+Gauss-Kronrod as in \emmod. The benchmarks and tests included in the code could
+also be improved and extended. By the time this article is published some of
+them might already be implemented by me or by the community.
+
+\section{Acknowledgment}
+
+I would like to thank the \emph{Consejo Nacional de Ciencia y Tecnología},
+México (CONACYT) for funding this postdoc, the \emph{Instituto Mexicano del
+Petróleo} (IMP) for allowing me to publish the code under a free software
+license, and the entire electromagnetic research group of Aleksandr Mousatov at
+the IMP for fruitful discussions.  I owe a special thanks to Jürg Hunziker for
+answering all my questions regarding his code and publication, and to both Jürg
+Hunziker and Kerry Key for feedback regarding this manuscript that greatly
+improved the article.
+
+% REFERENCES
+\bibliographystyle{seg}
+\begin{thebibliography}{}
+\itemsep0pt
+
+\bibitem[Anderson, 1975]{TRP.75.Anderson}
+Anderson, W.~L.,  1975, Improved digital filters for evaluating {F}ourier and
+  {H}ankel transform integrals: Technical report, U.S. Geological Survey.
+\newblock
+  (\href{https://pubs.er.usgs.gov/publication/70045426}{https://pubs.er.usgs.gov/publication/70045426}).
+
+\bibitem[Anderson, 1979]{GEO.79.Anderson}
+--------, 1979, Numerical integration of related {H}ankel transforms of orders
+  0 and 1 by adaptive digital filtering: Geophysics, {\bf 44}, 1287--1305.
+\newblock (\href{http://dx.doi.org/10.1190/1.1441007}{doi: 10.1190/1.1441007}).
+
+\bibitem[Anderson, 1982]{TMS.82.Anderson}
+--------, 1982, Fast {H}ankel transforms using related and lagged convolutions:
+  ACM Trans. Math. Softw., {\bf 8}, 344--368.
+\newblock (\href{http://doi.acm.org/10.1145/356012.356014}{doi:
+  10.1145/356012.356014}).
+
+\bibitem[Anderson, 1984]{GEO.84.Anderson}
+--------, 1984, {On: “Numerical integration of related Hankel transforms by
+  quadrature and continued fraction expansion” by \cite{GEO.83.Chave}}:
+  Geophysics, {\bf 49}, 1811--1812.
+\newblock (\href{http://dx.doi.org/10.1190/1.1441595}{doi: 10.1190/1.1441595}).
+
+\bibitem[Anderson, 1989]{GEO.89.Anderson}
+--------, 1989, A hybrid fast {H}ankel transform algorithm for electromagnetic
+  modeling: Geophysics, {\bf 54}, 263--266.
+\newblock (\href{http://dx.doi.org/10.1190/1.1442650}{doi: 10.1190/1.1442650}).
+
+\bibitem[Chave, 1983]{GEO.83.Chave}
+Chave, A.~D.,  1983, Numerical integration of related {H}ankel transforms by
+  quadrature and continued fraction expansion: Geophysics, {\bf 48},
+  1671--1686.
+\newblock (\href{http://dx.doi.org/10.1190/1.1441448}{doi: 10.1190/1.1441448}).
+
+\bibitem[Chave, 2009]{GJI.09.Chave}
+--------, 2009, On the electromagnetic fields produced by marine frequency
+  domain controlled sources: Geophysical Journal International, {\bf 179},
+  1429--1457.
+\newblock (\href{http://dx.doi.org/10.1111/j.1365-246X.2009.04367.x}{doi:
+  10.1111/j.1365-246X.2009.04367.x}).
+
+\bibitem[Chave et~al., 1991]{B.SEG.91.Chave}
+Chave, A.~D., S.~C. Constable, and R.~N. Edwards,  1991, Electrical exploration
+  methods for the seafloor, {\it in} Electromagnetic Methods In Applied
+  Geophysics Vol.\ 2: SEG, Investigations in Geophysics, No.~3, 12,  931--966.
+\newblock (\href{http://dx.doi.org/10.1190/1.9781560802686}{doi:
+  10.1190/1.9781560802686}).
+
+\bibitem[Edwards, 2005]{SG.05.Edwards}
+Edwards, R.~N.,  2005, Marine controlled source electromagnetics: principles,
+  methodologies, future commercial applications: Surveys in Geophysics, {\bf
+  26}, 675--700.
+\newblock (\href{http://dx.doi.org/10.1007/s10712-005-1830-3}{doi:
+  10.1007/s10712-005-1830-3}).
+
+\bibitem[Ghosh, 1971]{GP.71.Gosh}
+Ghosh, D.~P.,  1971, The application of linear filter theory to the direct
+  interpretation of geoelectrical resistivity sounding measurements:
+  Geophysical Prospecting, {\bf 19}, 192--217.
+\newblock (\href{http://dx.doi.org/10.1111/j.1365-2478.1971.tb00593.x}{doi:
+  10.1111/j.1365-2478.1971.tb00593.x}).
+
+\bibitem[Hamilton, 2000]{RAS.00.Hamilton}
+Hamilton, A. J.~S.,  2000, Uncorrelated modes of the non-linear power spectrum:
+  Monthly Notices of the Royal Astronomical Society, {\bf 312}, 257--284.
+\newblock (\href{http://dx.doi.org/10.1046/j.1365-8711.2000.03071.x}{doi:
+  10.1046/j.1365-8711.2000.03071.x}).
+
+\bibitem[Hunziker et~al., 2016]{GEO.16.Hunziker}
+Hunziker, J., J. Thorbecke, J. Brackenhoff, and E. Slob,  2016, Inversion of
+  controlled-source electromagnetic reflection responses: Geophysics, {\bf 81},
+  F49--F57.
+\newblock (\href{http://dx.doi.org/10.1190/geo2015-0320.1}{doi:
+  10.1190/geo2015-0320.1}).
+
+\bibitem[Hunziker et~al., 2015]{GEO.15.Hunziker}
+Hunziker, J., J. Thorbecke, and E. Slob,  2015, The electromagnetic response in
+  a layered vertical transverse isotropic medium: {A} new look at an old
+  problem: Geophysics, {\bf 80}, F1--F18.
+\newblock (\href{http://dx.doi.org/10.1190/geo2013-0411.1}{doi:
+  10.1190/geo2013-0411.1}).
+
+\bibitem[Key, 2009]{GEO.09.Key}
+Key, K.,  2009, {1D} inversion of multicomponent, multifrequency marine {CSEM}
+  data: {M}ethodology and synthetic studies for resolving thin resistive
+  layers: Geophysics, {\bf 74}, F9--F20.
+\newblock (\href{http://dx.doi.org/10.1190/1.3058434}{doi: 10.1190/1.3058434}).
+
+\bibitem[Key, 2012]{GEO.12.Key}
+--------, 2012, Is the fast {H}ankel transform faster than quadrature?:
+  Geophysics, {\bf 77}, F21--F30.
+\newblock (\href{http://dx.doi.org/10.1190/GEO2011-0237.1}{doi:
+  10.1190/GEO2011-0237.1}).
+
+\bibitem[Kong, 2007]{GP.07.Kong}
+Kong, F.~N.,  2007, Hankel transform filters for dipole antenna radiation in a
+  conductive medium: Geophysical Prospecting, {\bf 55}, 83--89.
+\newblock (\href{http://dx.doi.org/10.1111/j.1365-2478.2006.00585.x}{doi:
+  10.1111/j.1365-2478.2006.00585.x}).
+
+\bibitem[Løseth and Ursin, 2007]{GJI.07.Loseth}
+Løseth, L.~O., and B. Ursin,  2007, Electromagnetic fields in planarly layered
+  anisotropic media: Geophysical Journal International, {\bf 170}, 44--80.
+\newblock (\href{http://dx.doi.org/10.1111/j.1365-246X.2007.03390.x}{doi:
+  10.1111/j.1365-246X.2007.03390.x}).
+
+\bibitem[Nekut and Spies, 1989]{PIEEE.89.Nekut}
+Nekut, A.~G., and B.~R. Spies,  1989, Petroleum exploration using
+  controlled-source electromagnetic methods: Proceedings of the IEEE, {\bf 77},
+  338--362.
+\newblock
+  (\href{http://ieeexplore.ieee.org/lpdocs/epic03/wrapper.htm?arnumber=18630}{doi:
+  10.1109/5.18630}).
+
+\bibitem[Shanks, 1955]{JMP.55.Shanks}
+Shanks, D.,  1955, Non-linear transformations of divergent and slowly
+  convergent sequences: Journal of Mathematics and Physics, {\bf 34}, 1--42.
+\newblock (\href{http://dx.doi.org/10.1002/sapm19553411}{doi:
+  10.1002/sapm19553411}).
+
+\bibitem[Slob et~al., 2010]{PIER.10.Slob}
+Slob, E., J. Hunziker, and W.~A. Mulder,  2010, Green's tensors for the
+  diffusive electric field in a {VTI} half-space: PIER, {\bf 107}, 1--20.
+\newblock (\href{http://dx.doi.org/10.2528/PIER10052807}{doi:
+  10.2528/PIER10052807}).
+
+\bibitem[Wait, 1982]{B.AP.82.Wait}
+Wait, J.~R.,  1982, Geo-{E}lectromagnetism: Academic Press Inc.
+\newblock ({I}SBN: 978-0127308807).
+
+\bibitem[Wynn, 1956]{MC.56.Wynn}
+Wynn, P.,  1956, {On a device for computing the $e_m(S_n)$ tranformation}:
+  Math. Comput., {\bf 10}, 91--96.
+\newblock (\href{http://dx.doi.org/10.1090/S0025-5718-1956-0084056-6}{doi:
+  10.1090/S0025-5718-1956-0084056-6}).
+
+\bibitem[Ziolkowski and Wright, 2012]{IEEE.12.Ziolkowksi}
+Ziolkowski, A., and D. Wright,  2012, The potential of the controlled source
+  electromagnetic method: A powerful tool for hydrocarbon exploration,
+  appraisal, and reservoir characterization: Signal Processing Magazine, IEEE,
+  {\bf 29}, 36--52.
+\newblock (\href{http://dx.doi.org/10.1109/MSP.2012.2192529}{doi:
+  10.1109/MSP.2012.2192529}).
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+emmod \
+	freq=0.5 \
+    file_out=halfspacemod_11_10m.out \
+	writebin=0 \
+	nx=2020 \
+	ny=2020 \
+	zsrc=150 \
+	zrcv=200 \
+	dx=10 \
+	dy=10 \
+	z=-1,0 \
+	econdV=0,0.3 \
+	econdH=0,3 \
+	epermV=1,80 \
+	epermH=1,80 \
+	mpermV=1,1 \
+	mpermH=1,1 \
+	verbose=0 \
+	component=11 \
+        nd=1000 \
+        startlogx=-6 \
+        deltalogx=0.8 \
+        nlogx=16 \
+	kmax=0.628625 \
+	c1=-0.00041667 \
+	c2=-0.0014583 \
+	maxpt=1000 \
+	dopchip=0 \
+	xdirect=0

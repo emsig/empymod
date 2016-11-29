@@ -1,0 +1,97 @@
+
+Subject:
+Re: Paper/code based on your geophysics-papers from 2012/2009
+From:
+Kerry Key <kkey@ucsd.edu>
+Date:
+21/11/16 18:47
+To:
+Dieter Werthmüller <dwerthmuller@imp.mx>
+
+Hi Dieter,
+
+Sorry for the slow reply. I've not yet had a chance to look through your paper but from glancing through it looks really nice, way to go!  I've got a long flight tomorrow and will plan to read through it and get you some feedback. 
+
+
+> > I do have one question or rather favour I would like to ask you: I
+> > planned to include all the FHT-filters you published with Key 2012 and
+> > Key 2009. However, I will license my code under the lax permissive
+> > Apache Licence V2 (the lax permissive license recommended by the FSF,
+> > http://www.gnu.org/licenses/license-list.html#apache2). This is no
+> > problem for the filters licensed under the SEG license, hence Key 2012.
+> > But the filters from your Key 2009 paper, that I got from your website,
+> > are licensed under the GNU GPL V3 or later. This means I cannot include
+> > them, as the GPL is not compatible with Apache (and it wouldn't be with
+> > the SEG either, I think; Apache is compatible with the GPL, but not the
+> > other way around). So I'd like to ask you if you would be willing to
+> > give me written permission to use these filters under another license?
+> > E.g. the SEG license, the Apache License, or any MIT/BSD-style licenses
+> > that is compatible with the Apache License.
+
+
+No problem at all with switching the license. I am fully supportive of giving you permissions to use the filters under another open license such as the SEG, Aparch or MIT/BSD flavor of licenses that are compatible with the Apache license.  My goal is to see the codes and filters in use, so i'm happy that you would like to distribute them with your new code.
+
+One comment that I can make on the paper after glancing through is that the MATLAB codes in Key (2012) weren't meant to replace Dipole1D. They are very limited in functionality and model complexity. I created them in MALTAB simply because that was the easiest way to test the various methods and do relative speed comparisons. Obviously, for absolute speed they should be coded in a compiled language and preferably with vector or parallel constructs. I have no problem with you including comparisons of the run time between your new code and the MATLAB codes, but you might want to preface those with the noting that the MATLAB code was never intended to be the fastest implementation. I'm sure a Fortran or C implementation would win the absolute speed battle, yet those codes would be more inaccessible to understand for many people, hence why I choose MATLAB (although nowadays python is getting pretty easy to read, although still slightly more complicated than MATLAB).
+
+
+Cheers,
+Kerry  
+
+
+> > On Nov 17, 2016, at 6:15 PM, Dieter Werthmüller <dwerthmuller@imp.mx> wrote:
+> > 
+> > Dear Kerry Key,
+> > 
+> > I developed a 1D electromagnetic modeller during my current postdoc at
+> > the Mexican Petroleum Institute IMP. Fortunate enough I could convince
+> > my boss to open-source the code.
+> > 
+> > The code is based on Hunziker et al, 2015, for the wavenumber-domain
+> > calculation, and on your publication, Key 2012, for the Hankel and
+> > Fourier transforms, using QWE and FHT.
+> > 
+> > I plan to submit the paper by the end of next week to Geophysics, for
+> > their Call for Papers for "Reproducible research: Geophysics papers of
+> > the future".
+> > 
+> > I took care to cite yours and Hunziker et al's contribution adequately
+> > in the code as well as in the paper. I would appreciate any feedback if
+> > you have the time to glance through the paper over the next few days. I
+> > am specifically interested in case you think I misinterpreted or
+> > misrepresented any of your work from Key 2012 (or Key 2009).
+> > 
+> > The code is not yet on GitHub, nor the documentation on ReadTheDocs, as
+> > written in the code. I plan to do that in the next few days. Meanwhile I
+> > added the code and the documentation as a zip file; for the
+> > documentation just open the index.html in the folder "documentation" in
+> > a web browser.
+> > 
+> > I do have one question or rather favour I would like to ask you: I
+> > planned to include all the FHT-filters you published with Key 2012 and
+> > Key 2009. However, I will license my code under the lax permissive
+> > Apache Licence V2 (the lax permissive license recommended by the FSF,
+> > http://www.gnu.org/licenses/license-list.html#apache2). This is no
+> > problem for the filters licensed under the SEG license, hence Key 2012.
+> > But the filters from your Key 2009 paper, that I got from your website,
+> > are licensed under the GNU GPL V3 or later. This means I cannot include
+> > them, as the GPL is not compatible with Apache (and it wouldn't be with
+> > the SEG either, I think; Apache is compatible with the GPL, but not the
+> > other way around). So I'd like to ask you if you would be willing to
+> > give me written permission to use these filters under another license?
+> > E.g. the SEG license, the Apache License, or any MIT/BSD-style licenses
+> > that is compatible with the Apache License.
+> > 
+> > Alternatively I will outsource them into another file, and distribute
+> > them separately. Interested users will have to download them then extra,
+> > and add them manually to the code. This would be possible, but it would
+> > be much easier if I could include everything in the same package.
+> > 
+> > Thanks a lot for publishing your codes, without them empymod would not
+> > exist (or would have taken much much longer). And thanks in advance for
+> > any feedback.
+> > 
+> > Best regards and all the best,
+> > Dieter
+> > 
+> > <Geophysics2016.pdf><empymod.zip>
+

@@ -29,8 +29,8 @@ Required are python version 3 or higher and the modules `NumPy`, `SciPy`, and
 Documentation
 -------------
 
-The manual for `empymod` can be found at
-http://empymod.readthedocs.io/en/latest. Consult the manual for further information and a list of TODOs.
+The manual for `empymod` can be found at http://empymod.readthedocs.io. Consult
+the manual for further information and a list of TODOs.
 
 
 License
