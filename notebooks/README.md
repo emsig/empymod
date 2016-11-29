@@ -1,6 +1,6 @@
 # Examples, tests, benchmarks and profiling of `empymod`.
 
-More examples can be found in [./paper/notebooks](./paper/notebooks).
+More examples can be found in [../paper/notebooks](./paper/notebooks).
 
 ## Examples
 
