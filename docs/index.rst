@@ -3,6 +3,8 @@
 empymod
 =======
 
+Version: |version|; Date: |today|
+
 Manual for :mod:`empymod`, a one-dimensional, electromagnetic forward modeller
 in Python.
 
