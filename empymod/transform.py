@@ -507,10 +507,28 @@ def fftlog(fEM, time, freq, ftarg):
     FFTLog was presented in Appendix B of [Hamilton_2000]_ and published at
     <http://casa.colorado.edu/~ajsh/FFTLog>.
 
-    This function uses the python module `fftlog`, which is a simple
-    `f2py`-wrapper for the Fortran code `FFTLog`. You need to install `fftlog`
-    separately on your system in order to use it, see
-    <https://github.com/prisae/fftlog>.
+    This function uses a condensed version of `pyfftlog`, which is a
+    python-version of `FFTLog`. For more details regarding `pyfftlog` see
+    <https://github.com/prisae/pyfftlog>.
+
+    If installed, it will make use of the python module `fftlog`, which is a
+    simple `f2py`-wrapper for the Fortran code `FFTLog`. You need to install
+    `fftlog` separately on your system in order to use it, see
+    <https://github.com/prisae/fftlog>. The module `fftlog` will be a tad
+    faster than the implemented condensed version of `pyfftlog`.
+
+    Not the full flexibility of `FFTLog` is available here: Only the
+    logarithmic FFT (`fftl` in `FFTLog`), not the Hankel transform (`fht` in
+    `FFTLog`). Furthermore, the following parameters are fixed:
+
+       - `q` = 0 (unbiased transform)
+       - `mu` = 0.5 (sine-transform)
+       - `kr` = 1 (initial value)
+       - `kropt` = 1 (silently adjusts `kr`)
+       - `dir` = 1 (forward)
+
+    I am trying to get `FFTLog` into `scipy`. If this happens, both of the
+    above methods will be replaced by the full `scipy.fftpack.fftlog`-version.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -526,7 +544,46 @@ def fftlog(fEM, time, freq, ftarg):
     r, rk, wsave, fftlog = ftarg
 
     # Carry out FFTLog
-    ttEM = fftlog.fftl(-fEM.imag, 1, wsave, rk)
+    if fftlog:  # Using fftlog
+        ttEM = fftlog.fftl(-fEM.imag, 1, wsave, rk)
+
+    else:       # Using condensed version of pyfftlog
+        from scipy.fftpack import rfft, irfft
+
+        a = -fEM.imag
+        dlnr = wsave[0]
+        xsave = wsave[1:]
+
+        # 1. Centre point of array
+        jc = np.array((a.size + 1)/2.0)
+        j = np.arange(1, a.size+1)
+        lnrk = np.log(rk)
+
+        # 2. a(r) = A(r) (r/rc)^[-dir*(q-.5)]
+        a *= np.exp((j - jc)*dlnr/2.0)
+
+        # 3. transform a(r) -> ã(k)
+
+        #   3.a normal FFT forwards
+        a = rfft(a)
+
+        #   3.b
+        m = np.arange(1, a.size/2, dtype=int)
+        ar = a[2*m-1]
+        ai = a[2*m]
+        a[2*m-1] = ar*xsave[2*m-2] - ai*xsave[2*m-1]
+        a[2*m] = ar*xsave[2*m-1] + ai*xsave[2*m-2]
+        # problematical last element, for even n
+        if np.mod(a.size, 2) == 0:
+            ar = xsave[-2]
+            a[-1] *= ar
+
+        #   3.3 normal FFT backwards
+        a = irfft(a)
+
+        # 4. Ã(k) = ã(k) k^[-dir*(q+.5)] rc^[-dir*(q-.5)]
+        #         = ã(k) (k/kc)^[-dir*(q+.5)] (kc rc)^(-dir*q) (rc/kc)^(dir*.5)
+        ttEM = a[::-1]*np.exp(-((j - jc)*dlnr - lnrk)/2.0)
 
     # Interpolate for the desired times
     int_tEM = iuSpline(np.log10(r), ttEM)
@@ -669,7 +726,7 @@ def get_spline_values(filt, inp, nr_per_dec=None):
     return np.atleast_2d(out), new_inp
 
 
-def fhti(mu, rmin, rmax, n, fftlog, kr=1, q=0, kropt=1):
+def fhti(rmin, rmax, n, fftlog):
     """Return parameters required for FFTLog."""
 
     # Central point log10(r_c) of periodic interval
@@ -683,7 +740,24 @@ def fhti(mu, rmin, rmax, n, fftlog, kr=1, q=0, kropt=1):
     dlnr = dlogr*np.log(10.)
 
     # Get optimal kr and wsave
-    kr, wsave, _ = fftlog.fhti(n, mu, dlnr, kr=kr, q=q, kropt=kropt)
+    if fftlog:  # Using fftlog
+        kr, wsave, _ = fftlog.fhti(n, 0.5, dlnr, 1, 0, 1)
+
+    else:       # Using condensed version of pyfftlog
+        from scipy.special import loggamma
+
+        # 1. Adjust kr
+        zpm = loggamma(0.75 + 1j*np.pi/(2.0*dlnr))
+        krarg = np.log(2.0)/dlnr + 2*zpm.imag/np.pi
+        kr = np.exp((krarg - np.round(krarg))*dlnr)
+
+        # 2. Get arg
+        y = np.arange(1, (n+1)/2)*np.pi/(n*dlnr)
+        zp = loggamma(np.array(np.ones(y.size)*0.75 + 1j*y))
+        arg = 2.0*(np.log(2.0/kr)*y + zp.imag)
+
+        # 3. Collect wsave
+        wsave = np.r_[dlnr, np.stack((np.cos(arg), np.sin(arg)), -1).ravel()]
 
     # Calculate required input x-values (r)
     r = 10**(logrc + (np.arange(1, n+1) - nc)*dlogr)

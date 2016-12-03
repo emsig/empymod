@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>empymod.transform &#8212; empymod 1.0.0 documentation</title>
+    <title>empymod.transform &#8212; empymod 1.0.dev documentation</title>
     
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0',
+        VERSION:     '1.0.dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="empymod 1.0.0 documentation" href="../../index.html" />
+    <link rel="top" title="empymod 1.0.dev documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -551,10 +551,28 @@
 <span class="sd">    FFTLog was presented in Appendix B of [Hamilton_2000]_ and published at</span>
 <span class="sd">    &lt;http://casa.colorado.edu/~ajsh/FFTLog&gt;.</span>
 
-<span class="sd">    This function uses the python module `fftlog`, which is a simple</span>
-<span class="sd">    `f2py`-wrapper for the Fortran code `FFTLog`. You need to install `fftlog`</span>
-<span class="sd">    separately on your system in order to use it, see</span>
-<span class="sd">    &lt;https://github.com/prisae/fftlog&gt;.</span>
+<span class="sd">    This function uses a condensed version of `pyfftlog`, which is a</span>
+<span class="sd">    python-version of `FFTLog`. For more details regarding `pyfftlog` see</span>
+<span class="sd">    &lt;https://github.com/prisae/pyfftlog&gt;.</span>
+
+<span class="sd">    If installed, it will make use of the python module `fftlog`, which is a</span>
+<span class="sd">    simple `f2py`-wrapper for the Fortran code `FFTLog`. You need to install</span>
+<span class="sd">    `fftlog` separately on your system in order to use it, see</span>
+<span class="sd">    &lt;https://github.com/prisae/fftlog&gt;. The module `fftlog` will be a tad</span>
+<span class="sd">    faster than the implemented condensed version of `pyfftlog`.</span>
+
+<span class="sd">    Not the full flexibility of `FFTLog` is available here: Only the</span>
+<span class="sd">    logarithmic FFT (`fftl` in `FFTLog`), not the Hankel transform (`fht` in</span>
+<span class="sd">    `FFTLog`). Furthermore, the following parameters are fixed:</span>
+
+<span class="sd">       - `q` = 0 (unbiased transform)</span>
+<span class="sd">       - `mu` = 0.5 (sine-transform)</span>
+<span class="sd">       - `kr` = 1 (initial value)</span>
+<span class="sd">       - `kropt` = 1 (silently adjusts `kr`)</span>
+<span class="sd">       - `dir` = 1 (forward)</span>
+
+<span class="sd">    I am trying to get `FFTLog` into `scipy`. If this happens, both of the</span>
+<span class="sd">    above methods will be replaced by the full `scipy.fftpack.fftlog`-version.</span>
 
 <span class="sd">    The function is called from one of the modelling routines in :mod:`model`.</span>
 <span class="sd">    Consult these modelling routines for a description of the input and output</span>
@@ -570,7 +588,46 @@
     <span class="n">r</span><span class="p">,</span> <span class="n">rk</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">fftlog</span> <span class="o">=</span> <span class="n">ftarg</span>
 
     <span class="c1"># Carry out FFTLog</span>
-    <span class="n">ttEM</span> <span class="o">=</span> <span class="n">fftlog</span><span class="o">.</span><span class="n">fftl</span><span class="p">(</span><span class="o">-</span><span class="n">fEM</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">rk</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fftlog</span><span class="p">:</span>  <span class="c1"># Using fftlog</span>
+        <span class="n">ttEM</span> <span class="o">=</span> <span class="n">fftlog</span><span class="o">.</span><span class="n">fftl</span><span class="p">(</span><span class="o">-</span><span class="n">fEM</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">rk</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>       <span class="c1"># Using condensed version of pyfftlog</span>
+        <span class="kn">from</span> <span class="nn">scipy.fftpack</span> <span class="k">import</span> <span class="n">rfft</span><span class="p">,</span> <span class="n">irfft</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="n">fEM</span><span class="o">.</span><span class="n">imag</span>
+        <span class="n">dlnr</span> <span class="o">=</span> <span class="n">wsave</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xsave</span> <span class="o">=</span> <span class="n">wsave</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="c1"># 1. Centre point of array</span>
+        <span class="n">jc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">a</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">size</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">lnrk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">rk</span><span class="p">)</span>
+
+        <span class="c1"># 2. a(r) = A(r) (r/rc)^[-dir*(q-.5)]</span>
+        <span class="n">a</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">j</span> <span class="o">-</span> <span class="n">jc</span><span class="p">)</span><span class="o">*</span><span class="n">dlnr</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
+
+        <span class="c1"># 3. transform a(r) -&gt; ã(k)</span>
+
+        <span class="c1">#   3.a normal FFT forwards</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">rfft</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c1">#   3.b</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">ar</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ai</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">]</span>
+        <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ar</span><span class="o">*</span><span class="n">xsave</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ai</span><span class="o">*</span><span class="n">xsave</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">ar</span><span class="o">*</span><span class="n">xsave</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ai</span><span class="o">*</span><span class="n">xsave</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># problematical last element, for even n</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ar</span> <span class="o">=</span> <span class="n">xsave</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">a</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="n">ar</span>
+
+        <span class="c1">#   3.3 normal FFT backwards</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">irfft</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c1"># 4. Ã(k) = ã(k) k^[-dir*(q+.5)] rc^[-dir*(q-.5)]</span>
+        <span class="c1">#         = ã(k) (k/kc)^[-dir*(q+.5)] (kc rc)^(-dir*q) (rc/kc)^(dir*.5)</span>
+        <span class="n">ttEM</span> <span class="o">=</span> <span class="n">a</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">j</span> <span class="o">-</span> <span class="n">jc</span><span class="p">)</span><span class="o">*</span><span class="n">dlnr</span> <span class="o">-</span> <span class="n">lnrk</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
 
     <span class="c1"># Interpolate for the desired times</span>
     <span class="n">int_tEM</span> <span class="o">=</span> <span class="n">iuSpline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">r</span><span class="p">),</span> <span class="n">ttEM</span><span class="p">)</span>
@@ -713,7 +770,7 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="n">new_inp</span></div>
 
 
-<div class="viewcode-block" id="fhti"><a class="viewcode-back" href="../../empymod.html#empymod.transform.fhti">[docs]</a><span class="k">def</span> <span class="nf">fhti</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">rmin</span><span class="p">,</span> <span class="n">rmax</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">fftlog</span><span class="p">,</span> <span class="n">kr</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kropt</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="fhti"><a class="viewcode-back" href="../../empymod.html#empymod.transform.fhti">[docs]</a><span class="k">def</span> <span class="nf">fhti</span><span class="p">(</span><span class="n">rmin</span><span class="p">,</span> <span class="n">rmax</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">fftlog</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return parameters required for FFTLog.&quot;&quot;&quot;</span>
 
     <span class="c1"># Central point log10(r_c) of periodic interval</span>
@@ -727,7 +784,24 @@
     <span class="n">dlnr</span> <span class="o">=</span> <span class="n">dlogr</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span>
 
     <span class="c1"># Get optimal kr and wsave</span>
-    <span class="n">kr</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">fftlog</span><span class="o">.</span><span class="n">fhti</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">dlnr</span><span class="p">,</span> <span class="n">kr</span><span class="o">=</span><span class="n">kr</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">kropt</span><span class="o">=</span><span class="n">kropt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fftlog</span><span class="p">:</span>  <span class="c1"># Using fftlog</span>
+        <span class="n">kr</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">fftlog</span><span class="o">.</span><span class="n">fhti</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">dlnr</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>       <span class="c1"># Using condensed version of pyfftlog</span>
+        <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">loggamma</span>
+
+        <span class="c1"># 1. Adjust kr</span>
+        <span class="n">zpm</span> <span class="o">=</span> <span class="n">loggamma</span><span class="p">(</span><span class="mf">0.75</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">dlnr</span><span class="p">))</span>
+        <span class="n">krarg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">/</span><span class="n">dlnr</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">zpm</span><span class="o">.</span><span class="n">imag</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="n">kr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">krarg</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">krarg</span><span class="p">))</span><span class="o">*</span><span class="n">dlnr</span><span class="p">)</span>
+
+        <span class="c1"># 2. Get arg</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">dlnr</span><span class="p">)</span>
+        <span class="n">zp</span> <span class="o">=</span> <span class="n">loggamma</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">*</span><span class="mf">0.75</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">y</span><span class="p">))</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="o">/</span><span class="n">kr</span><span class="p">)</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">zp</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+
+        <span class="c1"># 3. Collect wsave</span>
+        <span class="n">wsave</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dlnr</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">arg</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">arg</span><span class="p">)),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()]</span>
 
     <span class="c1"># Calculate required input x-values (r)</span>
     <span class="n">r</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">logrc</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">nc</span><span class="p">)</span><span class="o">*</span><span class="n">dlogr</span><span class="p">)</span>

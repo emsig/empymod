@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>empymod.utils &#8212; empymod 1.0.0 documentation</title>
+    <title>empymod.utils &#8212; empymod 1.0.dev documentation</title>
     
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0',
+        VERSION:     '1.0.dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="empymod 1.0.0 documentation" href="../../index.html" />
+    <link rel="top" title="empymod 1.0.dev documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -841,13 +841,14 @@
         <span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">minf</span><span class="p">,</span> <span class="n">maxf</span><span class="p">,</span> <span class="p">(</span><span class="n">maxf</span><span class="o">-</span><span class="n">minf</span><span class="p">)</span><span class="o">*</span><span class="n">ftarg</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">ft</span> <span class="o">==</span> <span class="s1">&#39;fftlog&#39;</span><span class="p">:</span>    <span class="c1"># FFTLog</span>
-        <span class="c1"># Import fftlog if installed, otherwise notify user.</span>
+
+        <span class="c1"># Import fftlog if installed, otherwise use pyfftlog.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">fftlog</span>
+            <span class="n">fftlogprnt</span> <span class="o">=</span> <span class="s1">&#39;(fftlog)&#39;</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;* ERROR   :: `fftlog` is not installed. See manual for &quot;</span> <span class="o">+</span>
-                  <span class="s2">&quot;instructions on how to install it or go directly to &quot;</span> <span class="o">+</span>
-                  <span class="s2">&quot;https://github.com/prisae/fftlog .&quot;</span><span class="p">)</span>
+            <span class="n">fftlog</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">fftlogprnt</span> <span class="o">=</span> <span class="s1">&#39;(pyfftlog)&#39;</span>
 
         <span class="c1"># Get and check input or set defaults</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ftarg</span><span class="p">:</span>  <span class="c1"># Default values</span>
@@ -865,7 +866,7 @@
 
         <span class="c1"># If verbose, print Fourier transform information</span>
         <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Fourier      :  FFTLog&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Fourier      :  FFTLog &quot;</span> <span class="o">+</span> <span class="n">fftlogprnt</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     &gt; pts/dec  :  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">pts_per_dec</span><span class="p">))</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     &gt; add_dec  :  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">add_dec</span><span class="p">))</span>
 
@@ -875,7 +876,7 @@
         <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">maxf</span> <span class="o">-</span> <span class="n">minf</span><span class="p">)</span><span class="o">*</span><span class="n">pts_per_dec</span>
 
         <span class="c1"># Initialize FFTLog, get required parameters</span>
-        <span class="n">freq</span><span class="p">,</span> <span class="n">tcalc</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">rk</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">fhti</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">minf</span><span class="p">,</span> <span class="n">maxf</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">fftlog</span><span class="p">)</span>
+        <span class="n">freq</span><span class="p">,</span> <span class="n">tcalc</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">rk</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">fhti</span><span class="p">(</span><span class="n">minf</span><span class="p">,</span> <span class="n">maxf</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">fftlog</span><span class="p">)</span>
 
         <span class="n">freq</span> <span class="o">/=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>  <span class="c1"># returned freq from fhti is angular freq</span>
         <span class="n">rk</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span>  <span class="c1"># Because of Fourier transform scaling in model.tem</span>

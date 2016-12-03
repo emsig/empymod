@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Info &#8212; empymod 1.0.0 documentation</title>
+    <title>Info &#8212; empymod 1.0.dev documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.0',
+        VERSION:     '1.0.dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="empymod 1.0.0 documentation" href="index.html" />
+    <link rel="top" title="empymod 1.0.dev documentation" href="index.html" />
     <link rel="prev" title="empymod" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -143,8 +143,9 @@ parallelisation (<code class="docutils literal"><span class="pre">opt='parallel'
 (<code class="docutils literal"><span class="pre">opt='spline'</span></code>).  They are switched off by default. The optimization
 <code class="docutils literal"><span class="pre">opt='parallel'</span></code> only affects speed and memory usage, whereas
 <code class="docutils literal"><span class="pre">opt='spline'</span></code> also affects precision!</p>
-<p>I am sure <cite>empymod</cite> can be made even faster, for instance with the likes of
-<cite>cython</cite> or <cite>numba</cite>. Contributions are welcomed!</p>
+<p>I am sure <cite>empymod</cite> could be made much faster with cleverer coding style or
+with the likes of <cite>cython</cite> or <cite>numba</cite>. Suggestions and contributions are
+welcomed!</p>
 <div class="section" id="parallelisation">
 <h3>Parallelisation<a class="headerlink" href="#parallelisation" title="Permalink to this headline">¶</a></h3>
 <p>If <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span> <span class="pre">'parallel'</span></code>, a good dozen of the most time-consuming statements are
@@ -234,17 +235,21 @@ From the <cite>FFTLog</cite>-website:</p>
 <p><em>FFTLog is a set of fortran subroutines that compute the fast Fourier or Hankel
 (= Fourier-Bessel) transform of a periodic sequence of logarithmically spaced
 points.</em></p>
-<p>FFTlog can be used for the Hankel as well as for the Fourier Transform, and
-<cite>empymod</cite> uses a simple python-wrapper in order to use the Fortran FFTLog code.
-However, it does not come pre-installed with <cite>empymod</cite>, as it has to be
-compiled on your system. You can download it from <a class="reference external" href="https://github.com/prisae/fftlog">github.com/prisae/fftlog</a> and install it into your python
+<p>FFTlog can be used for the Hankel as well as for the Fourier Transform, but
+currently <cite>empymod</cite> uses it only for the Fourier transform. By default it uses
+a condensed version of <cite>pyfftlog</cite> (<a class="reference external" href="https://github.com/prisae/pyfftlog">github.com/prisae/pyfftlog</a>). You might get a small speed-up if you
+use <cite>fftlog</cite>, a simple python-wrapper of Fortran FFTLog code. However, it does
+not come pre-installed with <cite>empymod</cite>, as it has to be compiled on your system.
+You can download it from <a class="reference external" href="https://github.com/prisae/fftlog">github.com/prisae/fftlog</a> and install it into your python
 distribution (you need a Fortran compiler for this) by running the
 setup-script:</p>
 <div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
 <p>I am currently working with <cite>SciPy</cite>-developers in this regard and hope that
-<cite>FFTLog</cite> will be included directly in <cite>SciPy</cite> in the not so distant future.</p>
+<cite>FFTLog</cite> will be included directly in <cite>SciPy</cite> in the not so distant future;
+this will then replace both of the above methods, the default <cite>pyfftlog</cite> or the
+optional <cite>fftlog</cite>, with <cite>scipy.fftpack.fftlog</cite>.</p>
 </div>
 <div class="section" id="references">
 <h2>References&nbsp;<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
@@ -304,7 +309,7 @@ Software: <a class="reference external" href="http://software.seg.org/2015/0001"
 <table class="docutils citation" frame="void" id="key-2009" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[Key_2009]</td><td><em>(<a class="fn-backref" href="#id53">1</a>, <a class="fn-backref" href="#id54">2</a>, <a class="fn-backref" href="#id64">3</a>, <a class="fn-backref" href="#id65">4</a>, <a class="fn-backref" href="#id66">5</a>, <a class="fn-backref" href="#id74">6</a>, <a class="fn-backref" href="#id75">7</a>, <a class="fn-backref" href="#id76">8</a>, <a class="fn-backref" href="#id84">9</a>, <a class="fn-backref" href="#id85">10</a>, <a class="fn-backref" href="#id86">11</a>, <a class="fn-backref" href="#id93">12</a>, <a class="fn-backref" href="#id97">13</a>)</em> Key, K., 2009, 1D inversion of multicomponent, multifrequency
+<tr><td class="label">[Key_2009]</td><td><em>(<a class="fn-backref" href="#id53">1</a>, <a class="fn-backref" href="#id54">2</a>, <a class="fn-backref" href="#id64">3</a>, <a class="fn-backref" href="#id65">4</a>, <a class="fn-backref" href="#id66">5</a>, <a class="fn-backref" href="#id74">6</a>, <a class="fn-backref" href="#id75">7</a>, <a class="fn-backref" href="#id76">8</a>, <a class="fn-backref" href="#id84">9</a>, <a class="fn-backref" href="#id85">10</a>, <a class="fn-backref" href="#id86">11</a>, <a class="fn-backref" href="#id88">12</a>, <a class="fn-backref" href="#id89">13</a>, <a class="fn-backref" href="#id90">14</a>, <a class="fn-backref" href="#id95">15</a>, <a class="fn-backref" href="#id96">16</a>, <a class="fn-backref" href="#id97">17</a>, <a class="fn-backref" href="#id99">18</a>, <a class="fn-backref" href="#id100">19</a>, <a class="fn-backref" href="#id101">20</a>, <a class="fn-backref" href="#id105">21</a>, <a class="fn-backref" href="#id109">22</a>)</em> Key, K., 2009, 1D inversion of multicomponent, multifrequency
 marine CSEM data: Methodology and synthetic studies for resolving thin
 resistive layers: Geophysics, 74, F9&#8211;F20; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1190/1.3058434">10.1190/1.3058434</a>.
 Software: <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.</td></tr>
@@ -313,7 +318,7 @@ Software: <a class="reference external" href="http://marineemlab.ucsd.edu/Projec
 <table class="docutils citation" frame="void" id="key-2012" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[Key_2012]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id4">2</a>, <a class="fn-backref" href="#id26">3</a>, <a class="fn-backref" href="#id32">4</a>, <a class="fn-backref" href="#id33">5</a>, <a class="fn-backref" href="#id34">6</a>, <a class="fn-backref" href="#id35">7</a>, <a class="fn-backref" href="#id36">8</a>, <a class="fn-backref" href="#id41">9</a>, <a class="fn-backref" href="#id43">10</a>, <a class="fn-backref" href="#id44">11</a>, <a class="fn-backref" href="#id45">12</a>, <a class="fn-backref" href="#id47">13</a>, <a class="fn-backref" href="#id49">14</a>, <a class="fn-backref" href="#id57">15</a>, <a class="fn-backref" href="#id58">16</a>, <a class="fn-backref" href="#id62">17</a>, <a class="fn-backref" href="#id68">18</a>, <a class="fn-backref" href="#id69">19</a>, <a class="fn-backref" href="#id71">20</a>, <a class="fn-backref" href="#id72">21</a>, <a class="fn-backref" href="#id78">22</a>, <a class="fn-backref" href="#id79">23</a>, <a class="fn-backref" href="#id81">24</a>, <a class="fn-backref" href="#id82">25</a>, <a class="fn-backref" href="#id88">26</a>, <a class="fn-backref" href="#id89">27</a>)</em> Key, K., 2012, Is the fast Hankel transform faster than
+<tr><td class="label">[Key_2012]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id4">2</a>, <a class="fn-backref" href="#id26">3</a>, <a class="fn-backref" href="#id32">4</a>, <a class="fn-backref" href="#id33">5</a>, <a class="fn-backref" href="#id34">6</a>, <a class="fn-backref" href="#id35">7</a>, <a class="fn-backref" href="#id36">8</a>, <a class="fn-backref" href="#id41">9</a>, <a class="fn-backref" href="#id43">10</a>, <a class="fn-backref" href="#id44">11</a>, <a class="fn-backref" href="#id45">12</a>, <a class="fn-backref" href="#id47">13</a>, <a class="fn-backref" href="#id49">14</a>, <a class="fn-backref" href="#id57">15</a>, <a class="fn-backref" href="#id58">16</a>, <a class="fn-backref" href="#id62">17</a>, <a class="fn-backref" href="#id68">18</a>, <a class="fn-backref" href="#id69">19</a>, <a class="fn-backref" href="#id71">20</a>, <a class="fn-backref" href="#id72">21</a>, <a class="fn-backref" href="#id78">22</a>, <a class="fn-backref" href="#id79">23</a>, <a class="fn-backref" href="#id81">24</a>, <a class="fn-backref" href="#id82">25</a>, <a class="fn-backref" href="#id92">26</a>, <a class="fn-backref" href="#id93">27</a>)</em> Key, K., 2012, Is the fast Hankel transform faster than
 quadrature?: Geophysics, 77, F21&#8211;F30; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1190/GEO2011-0237.1">10.1190/GEO2011-0237.1</a>;
 Software: <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.</td></tr>
 </tbody>
@@ -321,7 +326,7 @@ Software: <a class="reference external" href="http://software.seg.org/2012/0003"
 <table class="docutils citation" frame="void" id="kong-2007" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[Kong_2007]</td><td><em>(<a class="fn-backref" href="#id52">1</a>, <a class="fn-backref" href="#id91">2</a>, <a class="fn-backref" href="#id92">3</a>, <a class="fn-backref" href="#id95">4</a>, <a class="fn-backref" href="#id96">5</a>)</em> Kong, F. N., 2007, Hankel transform filters for dipole antenna
+<tr><td class="label">[Kong_2007]</td><td><em>(<a class="fn-backref" href="#id52">1</a>, <a class="fn-backref" href="#id103">2</a>, <a class="fn-backref" href="#id104">3</a>, <a class="fn-backref" href="#id107">4</a>, <a class="fn-backref" href="#id108">5</a>)</em> Kong, F. N., 2007, Hankel transform filters for dipole antenna
 radiation in a conductive medium: Geophysical Prospecting, 55, 83&#8211;89;
 DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1111/j.1365-2478.2006.00585.x">10.1111/j.1365-2478.2006.00585.x</a>.</td></tr>
 </tbody>
@@ -1289,10 +1294,28 @@ distributed with <a class="reference internal" href="#key-2012" id="id45">[Key_2
 <p>FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT.
 FFTLog was presented in Appendix B of <a class="reference internal" href="#hamilton-2000" id="id46">[Hamilton_2000]</a> and published at
 &lt;<a class="reference external" href="http://casa.colorado.edu/~ajsh/FFTLog">http://casa.colorado.edu/~ajsh/FFTLog</a>&gt;.</p>
-<p>This function uses the python module <cite>fftlog</cite>, which is a simple
-<cite>f2py</cite>-wrapper for the Fortran code <cite>FFTLog</cite>. You need to install <cite>fftlog</cite>
-separately on your system in order to use it, see
-&lt;<a class="reference external" href="https://github.com/prisae/fftlog">https://github.com/prisae/fftlog</a>&gt;.</p>
+<p>This function uses a condensed version of <cite>pyfftlog</cite>, which is a
+python-version of <cite>FFTLog</cite>. For more details regarding <cite>pyfftlog</cite> see
+&lt;<a class="reference external" href="https://github.com/prisae/pyfftlog">https://github.com/prisae/pyfftlog</a>&gt;.</p>
+<p>If installed, it will make use of the python module <cite>fftlog</cite>, which is a
+simple <cite>f2py</cite>-wrapper for the Fortran code <cite>FFTLog</cite>. You need to install
+<cite>fftlog</cite> separately on your system in order to use it, see
+&lt;<a class="reference external" href="https://github.com/prisae/fftlog">https://github.com/prisae/fftlog</a>&gt;. The module <cite>fftlog</cite> will be a tad
+faster than the implemented condensed version of <cite>pyfftlog</cite>.</p>
+<p>Not the full flexibility of <cite>FFTLog</cite> is available here: Only the
+logarithmic FFT (<cite>fftl</cite> in <cite>FFTLog</cite>), not the Hankel transform (<cite>fht</cite> in
+<cite>FFTLog</cite>). Furthermore, the following parameters are fixed:</p>
+<blockquote>
+<div><ul class="simple">
+<li><cite>q</cite> = 0 (unbiased transform)</li>
+<li><cite>mu</cite> = 0.5 (sine-transform)</li>
+<li><cite>kr</cite> = 1 (initial value)</li>
+<li><cite>kropt</cite> = 1 (silently adjusts <cite>kr</cite>)</li>
+<li><cite>dir</cite> = 1 (forward)</li>
+</ul>
+</div></blockquote>
+<p>I am trying to get <cite>FFTLog</cite> into <cite>scipy</cite>. If this happens, both of the
+above methods will be replaced by the full <cite>scipy.fftpack.fftlog</cite>-version.</p>
 <p>The function is called from one of the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.
 Consult these modelling routines for a description of the input and output
 parameters.</p>
@@ -1337,7 +1360,7 @@ distributed with <a class="reference internal" href="#key-2012" id="id49">[Key_2
 
 <dl class="function">
 <dt id="empymod.transform.fhti">
-<code class="descclassname">empymod.transform.</code><code class="descname">fhti</code><span class="sig-paren">(</span><em>mu</em>, <em>rmin</em>, <em>rmax</em>, <em>n</em>, <em>fftlog</em>, <em>kr=1</em>, <em>q=0</em>, <em>kropt=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#fhti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.fhti" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">empymod.transform.</code><code class="descname">fhti</code><span class="sig-paren">(</span><em>rmin</em>, <em>rmax</em>, <em>n</em>, <em>fftlog</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#fhti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.fhti" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return parameters required for FFTLog.</p>
 </dd></dl>
 
@@ -1351,7 +1374,8 @@ distributed with <a class="reference internal" href="#key-2012" id="id49">[Key_2
 </pre></div>
 </div>
 <p>The filters <cite>kong_61_2007</cite> and <cite>kong_241_2007</cite> from <a class="reference internal" href="#kong-2007" id="id52">[Kong_2007]</a>, and
-<cite>key_101_2009</cite>, <cite>key_201_2009</cite>, and <cite>key_401_2009</cite> from <a class="reference internal" href="#key-2009" id="id53">[Key_2009]</a> are taken
+<cite>key_101_2009</cite>, <cite>key_201_2009</cite>, <cite>key_401_2009</cite>, <cite>key_81_CosSin_2009</cite>,
+<cite>key_241_CosSin_2009</cite>, and <cite>key_601_CosSin_2009</cite> from <a class="reference internal" href="#key-2009" id="id53">[Key_2009]</a> are taken
 from <em>DIPOLE1D</em>, <a class="reference internal" href="#key-2009" id="id54">[Key_2009]</a>, which can be downloaded at
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>. <em>DIPOLE1D</em> is
 distributed under the license GNU GPL version 3 or later. Kerry Key gave his
@@ -1442,11 +1466,22 @@ License: <a class="reference external" href="http://software.seg.org/disclaimer.
 </dd></dl>
 
 <dl class="function">
+<dt id="empymod.filters.key_241_CosSin_2009">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_241_CosSin_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_241_CosSin_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_241_CosSin_2009" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 241 CosSin 2009: <a class="reference internal" href="#key-2009" id="id84">[Key_2009]</a>.</p>
+<p>Key 241 pt filter, as published in <a class="reference internal" href="#key-2009" id="id85">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id86">[Key_2009]</a>, available on
+<a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
+License: Apache License, Version 2.0,
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="empymod.filters.key_401_2009">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_401_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_401_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_401_2009" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 401 2009: <a class="reference internal" href="#key-2009" id="id84">[Key_2009]</a>.</p>
-<p>Key 401 pt filter, as published in <a class="reference internal" href="#key-2009" id="id85">[Key_2009]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id86">[Key_2009]</a>, available on
+<dd><p>Key 401 2009: <a class="reference internal" href="#key-2009" id="id88">[Key_2009]</a>.</p>
+<p>Key 401 pt filter, as published in <a class="reference internal" href="#key-2009" id="id89">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id90">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1455,19 +1490,41 @@ License: Apache License, Version 2.0,
 <dl class="function">
 <dt id="empymod.filters.key_51_2012">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_51_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_51_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_51_2012" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 51 2012: <a class="reference internal" href="#key-2012" id="id88">[Key_2012]</a>.</p>
-<p>Key 51 pt filter, taken from file <em>kk51Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id89">[Key_2012]</a>,
+<dd><p>Key 51 2012: <a class="reference internal" href="#key-2012" id="id92">[Key_2012]</a>.</p>
+<p>Key 51 pt filter, taken from file <em>kk51Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id93">[Key_2012]</a>,
 published by the Society of Exploration Geophysicists;
 <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
 License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="empymod.filters.key_601_CosSin_2009">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_601_CosSin_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_601_CosSin_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_601_CosSin_2009" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 601 CosSin 2009: <a class="reference internal" href="#key-2009" id="id95">[Key_2009]</a>.</p>
+<p>Key 601 pt filter, as published in <a class="reference internal" href="#key-2009" id="id96">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id97">[Key_2009]</a>, available on
+<a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
+License: Apache License, Version 2.0,
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.filters.key_81_CosSin_2009">
+<code class="descclassname">empymod.filters.</code><code class="descname">key_81_CosSin_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_81_CosSin_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_81_CosSin_2009" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key 81 CosSin 2009: <a class="reference internal" href="#key-2009" id="id99">[Key_2009]</a>.</p>
+<p>Key 81 pt filter, as published in <a class="reference internal" href="#key-2009" id="id100">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id101">[Key_2009]</a>, available on
+<a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
+License: Apache License, Version 2.0,
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="empymod.filters.kong_241_2007">
 <code class="descclassname">empymod.filters.</code><code class="descname">kong_241_2007</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#kong_241_2007"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.kong_241_2007" title="Permalink to this definition">¶</a></dt>
-<dd><p>Kong 241: <a class="reference internal" href="#kong-2007" id="id91">[Kong_2007]</a>.</p>
-<p>Kong 241 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id92">[Kong_2007]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id93">[Key_2009]</a>, available on
+<dd><p>Kong 241: <a class="reference internal" href="#kong-2007" id="id103">[Kong_2007]</a>.</p>
+<p>Kong 241 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id104">[Kong_2007]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id105">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1476,9 +1533,9 @@ License: Apache License, Version 2.0,
 <dl class="function">
 <dt id="empymod.filters.kong_61_2007">
 <code class="descclassname">empymod.filters.</code><code class="descname">kong_61_2007</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#kong_61_2007"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.kong_61_2007" title="Permalink to this definition">¶</a></dt>
-<dd><p>Kong 61: <a class="reference internal" href="#kong-2007" id="id95">[Kong_2007]</a>.</p>
-<p>Kong 61 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id96">[Kong_2007]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id97">[Key_2009]</a>, available on
+<dd><p>Kong 61: <a class="reference internal" href="#kong-2007" id="id107">[Kong_2007]</a>.</p>
+<p>Kong 61 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id108">[Kong_2007]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id109">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>

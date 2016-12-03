@@ -797,13 +797,14 @@ def check_time(time, signal, ft, ftarg, verb):
         freq = np.logspace(minf, maxf, (maxf-minf)*ftarg[4] + 1)
 
     elif ft == 'fftlog':    # FFTLog
-        # Import fftlog if installed, otherwise notify user.
+
+        # Import fftlog if installed, otherwise use pyfftlog.
         try:
             import fftlog
+            fftlogprnt = '(fftlog)'
         except:
-            print("* ERROR   :: `fftlog` is not installed. See manual for " +
-                  "instructions on how to install it or go directly to " +
-                  "https://github.com/prisae/fftlog .")
+            fftlog = None
+            fftlogprnt = '(pyfftlog)'
 
         # Get and check input or set defaults
         if not ftarg:  # Default values
@@ -821,7 +822,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # If verbose, print Fourier transform information
         if verb > 1:
-            print("   Fourier      :  FFTLog")
+            print("   Fourier      :  FFTLog " + fftlogprnt)
             print("     > pts/dec  :  " + str(pts_per_dec))
             print("     > add_dec  :  " + str(add_dec))
 
@@ -831,7 +832,7 @@ def check_time(time, signal, ft, ftarg, verb):
         n = np.int(maxf - minf)*pts_per_dec
 
         # Initialize FFTLog, get required parameters
-        freq, tcalc, wsave, rk = transform.fhti(0.5, minf, maxf, n, fftlog)
+        freq, tcalc, wsave, rk = transform.fhti(minf, maxf, n, fftlog)
 
         freq /= 2*np.pi  # returned freq from fhti is angular freq
         rk *= np.pi/2  # Because of Fourier transform scaling in model.tem
