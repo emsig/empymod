@@ -109,8 +109,9 @@ parallelisation (``opt='parallel'``) and spline interpolation
 ``opt='parallel'`` only affects speed and memory usage, whereas
 ``opt='spline'`` also affects precision!
 
-I am sure `empymod` can be made even faster, for instance with the likes of
-`cython` or `numba`. Contributions are welcomed!
+I am sure `empymod` could be made much faster with cleverer coding style or
+with the likes of `cython` or `numba`. Suggestions and contributions are
+welcomed!
 
 
 Parallelisation
@@ -207,10 +208,13 @@ From the `FFTLog`-website:
 (= Fourier-Bessel) transform of a periodic sequence of logarithmically spaced
 points.*
 
-FFTlog can be used for the Hankel as well as for the Fourier Transform, and
-`empymod` uses a simple python-wrapper in order to use the Fortran FFTLog code.
-However, it does not come pre-installed with `empymod`, as it has to be
-compiled on your system. You can download it from `github.com/prisae/fftlog
+FFTlog can be used for the Hankel as well as for the Fourier Transform, but
+currently `empymod` uses it only for the Fourier transform. By default it uses
+a condensed version of `pyfftlog` (`github.com/prisae/pyfftlog
+<https://github.com/prisae/pyfftlog>`_). You might get a small speed-up if you
+use `fftlog`, a simple python-wrapper of Fortran FFTLog code. However, it does
+not come pre-installed with `empymod`, as it has to be compiled on your system.
+You can download it from `github.com/prisae/fftlog
 <https://github.com/prisae/fftlog>`_ and install it into your python
 distribution (you need a Fortran compiler for this) by running the
 setup-script:
@@ -220,7 +224,9 @@ setup-script:
    python setup.py install
 
 I am currently working with `SciPy`-developers in this regard and hope that
-`FFTLog` will be included directly in `SciPy` in the not so distant future.
+`FFTLog` will be included directly in `SciPy` in the not so distant future;
+this will then replace both of the above methods, the default `pyfftlog` or the
+optional `fftlog`, with `scipy.fftpack.fftlog`.
 
 
 

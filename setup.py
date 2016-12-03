@@ -10,7 +10,7 @@ with open('LICENSE') as f:
 
 setup(
     name='empymod',
-    version='1.0.0',
+    version='1.0.dev',
     description='ElectroMagnetic Python forward MODeller (1D)',
     long_description=readme,
     author='Dieter Werthmüller',
