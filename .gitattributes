@@ -1,3 +1,5 @@
 *.ipynb linguist-vendored
+*.m linguist-vendored
+*.tex linguist-vendored
 notebooks/* linguist-vendored
 paper/* linguist-vendored
