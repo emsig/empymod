@@ -545,7 +545,7 @@ def fftlog(fEM, time, freq, ftarg):
 
     # Carry out FFTLog
     if fftlog:  # Using fftlog
-        ttEM = fftlog.fftl(-fEM.imag, 1, wsave, rk)
+        ttEM = fftlog.fftl(-fEM.imag, wsave, rk, 1)
 
     else:       # Using condensed version of pyfftlog
         from scipy.fftpack import rfft, irfft
@@ -741,7 +741,7 @@ def fhti(rmin, rmax, n, fftlog):
 
     # Get optimal kr and wsave
     if fftlog:  # Using fftlog
-        kr, wsave, _ = fftlog.fhti(n, 0.5, dlnr, 1, 0, 1)
+        kr, wsave, _ = fftlog.fhti(n, 0.5, dlnr, 0, 1, 1)
 
     else:       # Using condensed version of pyfftlog
         from scipy.special import loggamma
