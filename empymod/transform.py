@@ -33,7 +33,8 @@ directory for more information regarding the involved licenses.
 
 
 import numpy as np
-from scipy.special import jv
+from scipy.special import jv, loggamma
+from scipy.fftpack import rfft, irfft
 from scipy.integrate import quad
 from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
@@ -507,28 +508,23 @@ def fftlog(fEM, time, freq, ftarg):
     FFTLog was presented in Appendix B of [Hamilton_2000]_ and published at
     <http://casa.colorado.edu/~ajsh/FFTLog>.
 
-    This function uses a condensed version of `pyfftlog`, which is a
+    This function uses a simplified version of `pyfftlog`, which is a
     python-version of `FFTLog`. For more details regarding `pyfftlog` see
     <https://github.com/prisae/pyfftlog>.
-
-    If installed, it will make use of the python module `fftlog`, which is a
-    simple `f2py`-wrapper for the Fortran code `FFTLog`. You need to install
-    `fftlog` separately on your system in order to use it, see
-    <https://github.com/prisae/fftlog>. The module `fftlog` will be a tad
-    faster than the implemented condensed version of `pyfftlog`.
 
     Not the full flexibility of `FFTLog` is available here: Only the
     logarithmic FFT (`fftl` in `FFTLog`), not the Hankel transform (`fht` in
     `FFTLog`). Furthermore, the following parameters are fixed:
 
-       - `q` = 0 (unbiased transform)
        - `mu` = 0.5 (sine-transform)
        - `kr` = 1 (initial value)
        - `kropt` = 1 (silently adjusts `kr`)
        - `dir` = 1 (forward)
 
-    I am trying to get `FFTLog` into `scipy`. If this happens, both of the
-    above methods will be replaced by the full `scipy.fftpack.fftlog`-version.
+    Furthermore, `q` is restricted to -1 <= q <= 1.
+
+    I am trying to get `FFTLog` into `scipy`. If this happens the current
+    implementation will be replaced by the `scipy.fftpack.fftlog`-version.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -540,54 +536,100 @@ def fftlog(fEM, time, freq, ftarg):
         Returns time-domain EM response of `fEM` for given `time`.
 
     """
-    # Get r, rk, wsave, fftlog
-    r, rk, wsave, fftlog = ftarg
+    # Get tcalc, dlnr, kr, rk, q; a and n
+    tcalc, dlnr, kr, rk, q = ftarg
+    a = -fEM.imag
+    n = a.size
 
-    # Carry out FFTLog
-    if fftlog:  # Using fftlog
-        ttEM = fftlog.fftl(-fEM.imag, wsave, rk, 1)
+    # 1. Amplitude and Argument of kr^(-2 i y) U_mu(q + 2 i y)
+    ln2kr = np.log(2.0/kr)
+    d = np.pi/(n*dlnr)
+    m = np.arange(1, (n+1)/2)
+    y = m*d  # y = m*pi/(n*dlnr)
 
-    else:       # Using condensed version of pyfftlog
-        from scipy.fftpack import rfft, irfft
+    if q == 0:  # unbiased case (q = 0)
+        zp = loggamma(0.75 + 1j*y)
+        arg = 2.0*(ln2kr*y + zp.imag)
 
-        a = -fEM.imag
-        dlnr = wsave[0]
-        xsave = wsave[1:]
+    else:       # biased case (q != 0)
+        xp = (1.5 + q)/2.0
+        xm = (1.5 - q)/2.0
 
-        # 1. Centre point of array
-        jc = np.array((a.size + 1)/2.0)
-        j = np.arange(1, a.size+1)
-        lnrk = np.log(rk)
+        zp = loggamma(xp + 0j)
+        zm = loggamma(xm + 0j)
 
-        # 2. a(r) = A(r) (r/rc)^[-dir*(q-.5)]
-        a *= np.exp((j - jc)*dlnr/2.0)
+        # Amplitude and Argument of U_mu(q)
+        amp = np.exp(np.log(2.0)*q + zp.real - zm.real)
+        # note +Im(zm) to get conjugate value below real axis
+        arg = zp.imag + zm.imag
 
-        # 3. transform a(r) -> ã(k)
+        # first element: cos(arg) = ±1, sin(arg) = 0
+        argcos1 = amp*np.cos(arg)
 
-        #   3.a normal FFT forwards
-        a = rfft(a)
+        # remaining elements
+        zp = loggamma(xp + 1j*y)
+        zm = loggamma(xm + 1j*y)
 
-        #   3.b
-        m = np.arange(1, a.size/2, dtype=int)
+        argamp = np.exp(np.log(2.0)*q + zp.real - zm.real)
+        arg = 2*ln2kr*y + zp.imag + zm.imag
+
+    argcos = np.cos(arg)
+    argsin = np.sin(arg)
+
+    # 2. Centre point of array
+    jc = np.array((n + 1)/2.0)
+    j = np.arange(n)+1
+
+    # 3. a(r) = A(r) (r/rc)^[-dir*(q-.5)]
+    a *= np.exp(-(q - 0.5)*(j - jc)*dlnr)
+
+    # 4. transform a(r) -> ã(k)
+
+    # 4.a normal FFT
+    a = rfft(a)
+
+    # 4.b
+    m = np.arange(1, n/2, dtype=int)  # index variable
+    if q == 0:  # unbiased (q = 0) transform
+        # multiply by (kr)^[- i 2 m pi/(n dlnr)] U_mu[i 2 m pi/(n dlnr)]
         ar = a[2*m-1]
         ai = a[2*m]
-        a[2*m-1] = ar*xsave[2*m-2] - ai*xsave[2*m-1]
-        a[2*m] = ar*xsave[2*m-1] + ai*xsave[2*m-2]
-        # problematical last element, for even n
-        if np.mod(a.size, 2) == 0:
-            ar = xsave[-2]
+        a[2*m-1] = ar*argcos[:-1] - ai*argsin[:-1]
+        a[2*m] = ar*argsin[:-1] + ai*argcos[:-1]
+        # problem(2*m)atical last element, for even n
+        if np.mod(n, 2) == 0:
+            ar = argcos[-1]
             a[-1] *= ar
 
-        #   3.3 normal FFT backwards
-        a = irfft(a)
+    else:  # biased (q != 0) transform
+        # multiply by (kr)^[- i 2 m pi/(n dlnr)] U_mu[q + i 2 m pi/(n dlnr)]
+        # phase
+        ar = a[2*m-1]
+        ai = a[2*m]
+        a[2*m-1] = ar*argcos[:-1] - ai*argsin[:-1]
+        a[2*m] = ar*argsin[:-1] + ai*argcos[:-1]
 
-        # 4. Ã(k) = ã(k) k^[-dir*(q+.5)] rc^[-dir*(q-.5)]
-        #         = ã(k) (k/kc)^[-dir*(q+.5)] (kc rc)^(-dir*q) (rc/kc)^(dir*.5)
-        ttEM = a[::-1]*np.exp(-((j - jc)*dlnr - lnrk)/2.0)
+        a[0] *= argcos1
+        a[2*m-1] *= argamp[:-1]
+        a[2*m] *= argamp[:-1]
+
+        # problematical last element, for even n
+        if np.mod(n, 2) == 0:
+            m = int(n/2)-3
+            ar = argcos[m-1]*argamp[m-1]
+            a[-1] *= ar
+
+    # 4.c normal FFT back
+    a = irfft(a)
+
+    # Ã(k) = ã(k) k^[-dir*(q+.5)] rc^[-dir*(q-.5)]
+    #      = ã(k) (k/kc)^[-dir*(q+.5)] (kc rc)^(-dir*q) (rc/kc)^(dir*.5)
+    a = a[::-1]*np.exp(-((q + 0.5)*(j - jc)*dlnr + q*np.log(kr) -
+                       np.log(rk)/2.0))
 
     # Interpolate for the desired times
-    int_tEM = iuSpline(np.log10(r), ttEM)
-    tEM = int_tEM(np.log10(time))
+    ttEM = iuSpline(np.log10(tcalc), a)
+    tEM = ttEM(np.log10(time))
 
     return tEM
 
@@ -726,7 +768,7 @@ def get_spline_values(filt, inp, nr_per_dec=None):
     return np.atleast_2d(out), new_inp
 
 
-def fhti(rmin, rmax, n, fftlog):
+def fhti(rmin, rmax, n, q):
     """Return parameters required for FFTLog."""
 
     # Central point log10(r_c) of periodic interval
@@ -739,34 +781,21 @@ def fhti(rmin, rmax, n, fftlog):
     dlogr = (rmax - rmin)/n
     dlnr = dlogr*np.log(10.)
 
-    # Get optimal kr and wsave
-    if fftlog:  # Using fftlog
-        kr, wsave, _ = fftlog.fhti(n, 0.5, dlnr, 0, 1, 1)
+    # Get low-ringing kr
+    y = 1j*np.pi/(2.0*dlnr)
+    zp = loggamma((1.5 + q)/2.0 + y)
+    zm = loggamma((1.5 - q)/2.0 + y)
+    arg = np.log(2.0)/dlnr + (zp.imag + zm.imag)/np.pi
+    kr = np.exp((arg - np.round(arg))*dlnr)
 
-    else:       # Using condensed version of pyfftlog
-        from scipy.special import loggamma
+    # Calculate required input x-values (freq); angular freq -> freq
+    freq = 10**(logrc + (np.arange(1, n+1) - nc)*dlogr)/(2*np.pi)
 
-        # 1. Adjust kr
-        zpm = loggamma(0.75 + 1j*np.pi/(2.0*dlnr))
-        krarg = np.log(2.0)/dlnr + 2*zpm.imag/np.pi
-        kr = np.exp((krarg - np.round(krarg))*dlnr)
-
-        # 2. Get arg
-        y = np.arange(1, (n+1)/2)*np.pi/(n*dlnr)
-        zp = loggamma(np.array(np.ones(y.size)*0.75 + 1j*y))
-        arg = 2.0*(np.log(2.0/kr)*y + zp.imag)
-
-        # 3. Collect wsave
-        wsave = np.r_[dlnr, np.stack((np.cos(arg), np.sin(arg)), -1).ravel()]
-
-    # Calculate required input x-values (r)
-    r = 10**(logrc + (np.arange(1, n+1) - nc)*dlogr)
-
-    # Calculate k with adjusted kr
+    # Calculate tcalc with adjusted kr
     logkc = np.log10(kr) - logrc
-    k = 10**(logkc + (np.arange(1, n+1) - nc)*dlogr)
+    tcalc = 10**(logkc + (np.arange(1, n+1) - nc)*dlogr)
 
-    # rk = r_c/k_r
-    rk = 10**(logrc - logkc)
+    # rk = r_c/k_r; adjust for Fourier transform scaling
+    rk = 10**(logrc - logkc)*np.pi/2
 
-    return r, k, wsave, rk
+    return freq, tcalc, dlnr, kr, rk

@@ -347,10 +347,11 @@
 <span class="sd">              change `nquad` to 11 and use the defaults otherwise, you can</span>
 <span class="sd">              provide ftarg=[&#39;&#39;, &#39;&#39;, 11].</span>
 
-<span class="sd">            - If `ft` = &#39;fftlog&#39;: array containing: [pts_per_dec, add_dec]:</span>
+<span class="sd">            - If `ft` = &#39;fftlog&#39;: array containing: [pts_per_dec, add_dec, q]:</span>
 
 <span class="sd">                - pts_per_dec: sampels per decade (default: 10)</span>
 <span class="sd">                - add_dec: additional decades [left, right] (default: [-2, 1])</span>
+<span class="sd">                - q: exponent of power law bias (default: 0); -1 &lt;= q &lt;= 1</span>
 
 <span class="sd">              All are optional, you only have to maintain the order. To only</span>
 <span class="sd">              change `add_dec` to [-1, 1] and use the defaults otherwise, you</span>

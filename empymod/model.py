@@ -303,10 +303,11 @@ def time(src, rec, depth, res, time, ab=11, signal=0, aniso=None, epermH=None,
               change `nquad` to 11 and use the defaults otherwise, you can
               provide ftarg=['', '', 11].
 
-            - If `ft` = 'fftlog': array containing: [pts_per_dec, add_dec]:
+            - If `ft` = 'fftlog': array containing: [pts_per_dec, add_dec, q]:
 
                 - pts_per_dec: sampels per decade (default: 10)
                 - add_dec: additional decades [left, right] (default: [-2, 1])
+                - q: exponent of power law bias (default: 0); -1 <= q <= 1
 
               All are optional, you only have to maintain the order. To only
               change `add_dec` to [-1, 1] and use the defaults otherwise, you

@@ -236,20 +236,9 @@ From the <cite>FFTLog</cite>-website:</p>
 (= Fourier-Bessel) transform of a periodic sequence of logarithmically spaced
 points.</em></p>
 <p>FFTlog can be used for the Hankel as well as for the Fourier Transform, but
-currently <cite>empymod</cite> uses it only for the Fourier transform. By default it uses
-a condensed version of <cite>pyfftlog</cite> (<a class="reference external" href="https://github.com/prisae/pyfftlog">github.com/prisae/pyfftlog</a>). You might get a small speed-up if you
-use <cite>fftlog</cite>, a simple python-wrapper of Fortran FFTLog code. However, it does
-not come pre-installed with <cite>empymod</cite>, as it has to be compiled on your system.
-You can download it from <a class="reference external" href="https://github.com/prisae/fftlog">github.com/prisae/fftlog</a> and install it into your python
-distribution (you need a Fortran compiler for this) by running the
-setup-script:</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
-</pre></div>
-</div>
-<p>I am currently working with <cite>SciPy</cite>-developers in this regard and hope that
-<cite>FFTLog</cite> will be included directly in <cite>SciPy</cite> in the not so distant future;
-this will then replace both of the above methods, the default <cite>pyfftlog</cite> or the
-optional <cite>fftlog</cite>, with <cite>scipy.fftpack.fftlog</cite>.</p>
+currently <cite>empymod</cite> uses it only for the Fourier transform. It uses a
+simplified version of the python implementation of FFTLog, <cite>pyfftlog</cite>
+(<a class="reference external" href="https://github.com/prisae/pyfftlog">github.com/prisae/pyfftlog</a>).</p>
 </div>
 <div class="section" id="references">
 <h2>References&nbsp;<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
@@ -806,11 +795,12 @@ transform.  Defaults to &#8216;sin&#8217;.</p>
 change <cite>nquad</cite> to 11 and use the defaults otherwise, you can
 provide ftarg=[&#8216;&#8217;, &#8216;&#8217;, 11].</p>
 </li>
-<li><p class="first">If <cite>ft</cite> = &#8216;fftlog&#8217;: array containing: [pts_per_dec, add_dec]:</p>
+<li><p class="first">If <cite>ft</cite> = &#8216;fftlog&#8217;: array containing: [pts_per_dec, add_dec, q]:</p>
 <blockquote>
 <div><ul class="simple">
 <li>pts_per_dec: sampels per decade (default: 10)</li>
 <li>add_dec: additional decades [left, right] (default: [-2, 1])</li>
+<li>q: exponent of power law bias (default: 0); -1 &lt;= q &lt;= 1</li>
 </ul>
 </div></blockquote>
 <p>All are optional, you only have to maintain the order. To only
@@ -1294,28 +1284,23 @@ distributed with <a class="reference internal" href="#key-2012" id="id45">[Key_2
 <p>FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT.
 FFTLog was presented in Appendix B of <a class="reference internal" href="#hamilton-2000" id="id46">[Hamilton_2000]</a> and published at
 &lt;<a class="reference external" href="http://casa.colorado.edu/~ajsh/FFTLog">http://casa.colorado.edu/~ajsh/FFTLog</a>&gt;.</p>
-<p>This function uses a condensed version of <cite>pyfftlog</cite>, which is a
+<p>This function uses a simplified version of <cite>pyfftlog</cite>, which is a
 python-version of <cite>FFTLog</cite>. For more details regarding <cite>pyfftlog</cite> see
 &lt;<a class="reference external" href="https://github.com/prisae/pyfftlog">https://github.com/prisae/pyfftlog</a>&gt;.</p>
-<p>If installed, it will make use of the python module <cite>fftlog</cite>, which is a
-simple <cite>f2py</cite>-wrapper for the Fortran code <cite>FFTLog</cite>. You need to install
-<cite>fftlog</cite> separately on your system in order to use it, see
-&lt;<a class="reference external" href="https://github.com/prisae/fftlog">https://github.com/prisae/fftlog</a>&gt;. The module <cite>fftlog</cite> will be a tad
-faster than the implemented condensed version of <cite>pyfftlog</cite>.</p>
 <p>Not the full flexibility of <cite>FFTLog</cite> is available here: Only the
 logarithmic FFT (<cite>fftl</cite> in <cite>FFTLog</cite>), not the Hankel transform (<cite>fht</cite> in
 <cite>FFTLog</cite>). Furthermore, the following parameters are fixed:</p>
 <blockquote>
 <div><ul class="simple">
-<li><cite>q</cite> = 0 (unbiased transform)</li>
 <li><cite>mu</cite> = 0.5 (sine-transform)</li>
 <li><cite>kr</cite> = 1 (initial value)</li>
 <li><cite>kropt</cite> = 1 (silently adjusts <cite>kr</cite>)</li>
 <li><cite>dir</cite> = 1 (forward)</li>
 </ul>
 </div></blockquote>
-<p>I am trying to get <cite>FFTLog</cite> into <cite>scipy</cite>. If this happens, both of the
-above methods will be replaced by the full <cite>scipy.fftpack.fftlog</cite>-version.</p>
+<p>Furthermore, <cite>q</cite> is restricted to -1 &lt;= q &lt;= 1.</p>
+<p>I am trying to get <cite>FFTLog</cite> into <cite>scipy</cite>. If this happens the current
+implementation will be replaced by the <cite>scipy.fftpack.fftlog</cite>-version.</p>
 <p>The function is called from one of the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.
 Consult these modelling routines for a description of the input and output
 parameters.</p>
@@ -1360,7 +1345,7 @@ distributed with <a class="reference internal" href="#key-2012" id="id49">[Key_2
 
 <dl class="function">
 <dt id="empymod.transform.fhti">
-<code class="descclassname">empymod.transform.</code><code class="descname">fhti</code><span class="sig-paren">(</span><em>rmin</em>, <em>rmax</em>, <em>n</em>, <em>fftlog</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#fhti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.fhti" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">empymod.transform.</code><code class="descname">fhti</code><span class="sig-paren">(</span><em>rmin</em>, <em>rmax</em>, <em>n</em>, <em>q</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#fhti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.fhti" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return parameters required for FFTLog.</p>
 </dd></dl>
 

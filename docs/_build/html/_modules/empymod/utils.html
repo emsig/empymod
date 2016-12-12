@@ -842,14 +842,6 @@
 
     <span class="k">elif</span> <span class="n">ft</span> <span class="o">==</span> <span class="s1">&#39;fftlog&#39;</span><span class="p">:</span>    <span class="c1"># FFTLog</span>
 
-        <span class="c1"># Import fftlog if installed, otherwise use pyfftlog.</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">fftlog</span>
-            <span class="n">fftlogprnt</span> <span class="o">=</span> <span class="s1">&#39;(fftlog)&#39;</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">fftlog</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">fftlogprnt</span> <span class="o">=</span> <span class="s1">&#39;(pyfftlog)&#39;</span>
-
         <span class="c1"># Get and check input or set defaults</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ftarg</span><span class="p">:</span>  <span class="c1"># Default values</span>
             <span class="n">ftarg</span> <span class="o">=</span> <span class="p">[]</span>
@@ -864,11 +856,20 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">add_dec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 
+        <span class="k">try</span><span class="p">:</span>  <span class="c1"># q</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">param_shape</span><span class="p">(</span><span class="n">ftarg</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">(),</span> <span class="s1">&#39;fftlog: q&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+            <span class="c1"># Restrict q to +/- 1</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
         <span class="c1"># If verbose, print Fourier transform information</span>
         <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Fourier      :  FFTLog &quot;</span> <span class="o">+</span> <span class="n">fftlogprnt</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Fourier      :  FFTLog &quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     &gt; pts/dec  :  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">pts_per_dec</span><span class="p">))</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     &gt; add_dec  :  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">add_dec</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     &gt; q        :  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
 
         <span class="c1"># Calculate minimum and maximum required frequency</span>
         <span class="n">minf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">time</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">+</span> <span class="n">add_dec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -876,13 +877,10 @@
         <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">maxf</span> <span class="o">-</span> <span class="n">minf</span><span class="p">)</span><span class="o">*</span><span class="n">pts_per_dec</span>
 
         <span class="c1"># Initialize FFTLog, get required parameters</span>
-        <span class="n">freq</span><span class="p">,</span> <span class="n">tcalc</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">rk</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">fhti</span><span class="p">(</span><span class="n">minf</span><span class="p">,</span> <span class="n">maxf</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">fftlog</span><span class="p">)</span>
-
-        <span class="n">freq</span> <span class="o">/=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>  <span class="c1"># returned freq from fhti is angular freq</span>
-        <span class="n">rk</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span>  <span class="c1"># Because of Fourier transform scaling in model.tem</span>
+        <span class="n">freq</span><span class="p">,</span> <span class="n">tcalc</span><span class="p">,</span> <span class="n">dlnr</span><span class="p">,</span> <span class="n">kr</span><span class="p">,</span> <span class="n">rk</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">fhti</span><span class="p">(</span><span class="n">minf</span><span class="p">,</span> <span class="n">maxf</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
 
         <span class="c1"># Assemble ftarg</span>
-        <span class="n">ftarg</span> <span class="o">=</span> <span class="p">(</span><span class="n">tcalc</span><span class="p">,</span> <span class="n">rk</span><span class="p">,</span> <span class="n">wsave</span><span class="p">,</span> <span class="n">fftlog</span><span class="p">)</span>
+        <span class="n">ftarg</span> <span class="o">=</span> <span class="p">(</span><span class="n">tcalc</span><span class="p">,</span> <span class="n">dlnr</span><span class="p">,</span> <span class="n">kr</span><span class="p">,</span> <span class="n">rk</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;* ERROR   :: &lt;ft&gt; must be one of: [&#39;cos&#39;, &#39;sin&#39;, &#39;qwe&#39;, &quot;</span> <span class="o">+</span>

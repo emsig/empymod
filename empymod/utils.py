@@ -798,14 +798,6 @@ def check_time(time, signal, ft, ftarg, verb):
 
     elif ft == 'fftlog':    # FFTLog
 
-        # Import fftlog if installed, otherwise use pyfftlog.
-        try:
-            import fftlog
-            fftlogprnt = '(fftlog)'
-        except:
-            fftlog = None
-            fftlogprnt = '(pyfftlog)'
-
         # Get and check input or set defaults
         if not ftarg:  # Default values
             ftarg = []
@@ -820,11 +812,20 @@ def check_time(time, signal, ft, ftarg, verb):
         except:
             add_dec = np.array([-2, 1])
 
+        try:  # q
+            q = param_shape(ftarg[2], (), 'fftlog: q', float)
+            # Restrict q to +/- 1
+            if np.abs(q) > 1:
+                q = np.sign(q)
+        except:
+            q = np.array(0)
+
         # If verbose, print Fourier transform information
         if verb > 1:
-            print("   Fourier      :  FFTLog " + fftlogprnt)
+            print("   Fourier      :  FFTLog ")
             print("     > pts/dec  :  " + str(pts_per_dec))
             print("     > add_dec  :  " + str(add_dec))
+            print("     > q        :  " + str(q))
 
         # Calculate minimum and maximum required frequency
         minf = np.log10(1/time.max()) + add_dec[0]
@@ -832,13 +833,10 @@ def check_time(time, signal, ft, ftarg, verb):
         n = np.int(maxf - minf)*pts_per_dec
 
         # Initialize FFTLog, get required parameters
-        freq, tcalc, wsave, rk = transform.fhti(minf, maxf, n, fftlog)
-
-        freq /= 2*np.pi  # returned freq from fhti is angular freq
-        rk *= np.pi/2  # Because of Fourier transform scaling in model.tem
+        freq, tcalc, dlnr, kr, rk = transform.fhti(minf, maxf, n, q)
 
         # Assemble ftarg
-        ftarg = (tcalc, rk, wsave, fftlog)
+        ftarg = (tcalc, dlnr, kr, rk, q)
 
     else:
         print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +
