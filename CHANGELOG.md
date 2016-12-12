@@ -2,6 +2,8 @@
 
 ## latest
 
+* [2016-12-12] Completely replace `fftlog` with in-built, customized version
+  of `pyfftlog`.
 * [2016-12-03] Inclusion of condensed version of `pyfftlog`, so `fftlog` with
   compilation is not necessary anymore.
 * [2016-11-30] Additional sine-/cosine-filters: `key_81_CosSin_2009`,
