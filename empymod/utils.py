@@ -872,7 +872,7 @@ def strvar(a, prec='{:G}'):
 def param_shape(a, shape=None, name='inp-var', datatype=None):
     """Convert input variable to array and check its shape.
 
-    Ensures one-dimensionality except if datatype is list or tuple.
+    Ensures one-dimensionality except if datatype is list.
 
     Parameters
     ----------
@@ -882,7 +882,7 @@ def param_shape(a, shape=None, name='inp-var', datatype=None):
         Tuple of dimension that the variable should have.
     name : str, optional
         String describing variable, defaults to 'inp-var'.
-    datatype : type, optional
+    datatype : {float, int, list}, optional
         Type of array.
 
     Returns
@@ -907,20 +907,19 @@ def param_shape(a, shape=None, name='inp-var', datatype=None):
     """
 
     # Convert input to an array
-    if datatype == int:
-        a = int(a)
-    else:
-        a = np.squeeze(np.asarray(a, datatype))
+    a = np.squeeze(np.asarray(a, datatype))
 
     # Ensure one-dimensionality except if datatype is int, list, or tuple
-    if not isinstance(a, (int, list, tuple)):
-        a = np.atleast_1d(a)
+    a = np.atleast_1d(a)
 
     # Ensure a.shape is equal to shape, raise error if not
     if shape and not np.array_equal(np.shape(a), shape):
         print('* ERROR   :: Parameter ' + name + ' has wrong shape! : ' +
-              str(a.shape) + ' instead of ' + str(shape) + '.')
+            str(np.shape(a)) + ' instead of ' + str(shape) + '.')
         raise ValueError(name)
+
+    if datatype == int and shape == ():
+        a = int(a)
 
     return a
 
