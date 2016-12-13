@@ -37,6 +37,7 @@ checks if you are sure your input parameters are in the correct format.
 import numpy as np
 from datetime import timedelta
 from timeit import default_timer
+from scipy import special
 from scipy.constants import mu_0       # Magn. permeability of free space [H/m]
 from scipy.constants import epsilon_0  # Elec. permittivity of free space [F/m]
 
@@ -791,7 +792,7 @@ def check_time(time, signal, ft, ftarg, verb):
             print("     > pts/dec :  " + str(ftarg[4]))
 
         # Get required frequencies
-        g_x, _ = transform.get_Gauss_Weights(ftarg[2])
+        g_x, _ = special.p_roots(ftarg[2])
         minf = np.floor(10*np.log10((g_x.min() + 1)*np.pi/2/time.max()))/10
         maxf = np.ceil(10*np.log10(ftarg[3]*np.pi/time.min()))/10
         freq = np.logspace(minf, maxf, (maxf-minf)*ftarg[4] + 1)
