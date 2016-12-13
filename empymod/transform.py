@@ -259,6 +259,9 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # ** 1.b COMPUTES N ZEROS OF THE BESSEL FUNCTION OF THE FIRST KIND
     #    of order 1 using the Newton-Raphson method, which is fast enough for
     #    our purposes.
+    #    Could be done with a loop for:
+    #        b_zero[i] = optimize.newton(special.j1, b_zero[i])
+    #    but it is slower.
 
     # Initial guess using asymptotic zeros
     b_zero = np.pi*np.arange(1.25, maxint+1)
@@ -267,8 +270,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     for i in range(10):   # 10 is more than enough, usually stops in 5
 
         # Evaluate
-        b_x0 = special.jv(1, b_zero)
-        b_x1 = special.jv(2, b_zero)
+        b_x0 = special.j1(b_zero)    # j0 and j1 have faster versions
+        b_x1 = special.jv(2, b_zero) # j2 does not have a faster version
 
         # The step length
         b_h = -b_x0/(b_x0/b_zero - b_x1)
@@ -288,8 +291,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # Assemble the output arrays
     dx = np.repeat(np.diff(xint)/2, nquad)
     Bx = dx*(np.tile(g_x, maxint) + 1) + np.repeat(xint[:-1], nquad)
-    BJ0 = special.jv(0, Bx)*np.tile(g_w, maxint)
-    BJ1 = special.jv(1, Bx)*np.tile(g_w, maxint)
+    BJ0 = special.j0(Bx)*np.tile(g_w, maxint)
+    BJ1 = special.j1(Bx)*np.tile(g_w, maxint)
 
     # ** 2. START QWE
 
