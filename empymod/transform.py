@@ -33,15 +33,13 @@ directory for more information regarding the involved licenses.
 
 
 import numpy as np
-from scipy.special import jv, loggamma
-from scipy.fftpack import rfft, irfft
-from scipy.integrate import quad
+from scipy import special, fftpack, integrate
 from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
 from . import kernel
 
-__all__ = ['fht', 'hqwe', 'fft', 'fqwe', 'fftlog', 'qwe', 'get_Gauss_Weights',
-           'get_spline_values', 'fhti']
+__all__ = ['fht', 'hqwe', 'fft', 'fqwe', 'fftlog', 'qwe', 'get_spline_values',
+           'fhti']
 
 
 # 1. Hankel transforms (wavenumber -> frequency)
@@ -256,7 +254,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     #    corresponding Gauss quadrature weights
 
     # ** 1.a COMPUTE GAUSS QUADRATURE WEIGHTS
-    g_x, g_w = get_Gauss_Weights(nquad)
+    g_x, g_w = special.p_roots(nquad)
 
     # ** 1.b COMPUTES N ZEROS OF THE BESSEL FUNCTION OF THE FIRST KIND
     #    of order 1 using the Newton-Raphson method, which is fast enough for
@@ -269,8 +267,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     for i in range(10):   # 10 is more than enough, usually stops in 5
 
         # Evaluate
-        b_x0 = jv(1, b_zero)
-        b_x1 = jv(2, b_zero)
+        b_x0 = special.jv(1, b_zero)
+        b_x1 = special.jv(2, b_zero)
 
         # The step length
         b_h = -b_x0/(b_x0/b_zero - b_x1)
@@ -290,8 +288,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # Assemble the output arrays
     dx = np.repeat(np.diff(xint)/2, nquad)
     Bx = dx*(np.tile(g_x, maxint) + 1) + np.repeat(xint[:-1], nquad)
-    BJ0 = jv(0, Bx)*np.tile(g_w, maxint)
-    BJ1 = jv(1, Bx)*np.tile(g_w, maxint)
+    BJ0 = special.jv(0, Bx)*np.tile(g_w, maxint)
+    BJ1 = special.jv(1, Bx)*np.tile(g_w, maxint)
 
     # ** 2. START QWE
 
@@ -465,7 +463,7 @@ def fqwe(fEM, time, freq, qweargs):
     intervals = xint/time[:, None]
 
     # Get Gauss Quadrature Weights
-    g_x, g_w = get_Gauss_Weights(nquad)
+    g_x, g_w = special.p_roots(nquad)
     dx = np.repeat(np.diff(xint)/2, nquad)
     Bx = dx*(np.tile(g_x, maxint) + 1) + np.repeat(xint[:-1], nquad)
     SS = np.sin(Bx)*np.tile(g_w, maxint)
@@ -489,8 +487,9 @@ def fqwe(fEM, time, freq, qweargs):
 
         # Loop over times that require Quad
         for i in np.where(~doqwe)[0]:
-            tEM[i], _ = quad(sEMquad, intervals[i, 0], intervals[i, -1],
-                             (time[i],), 0, atol, rtol, limit=500)
+            tEM[i], _ = integrate.quad(sEMquad, intervals[i, 0],
+                                       intervals[i, -1], (time[i],),
+                                       0, atol, rtol, limit=500)
 
     # Carry out QWE if required
     if np.any(doqwe):
@@ -548,15 +547,15 @@ def fftlog(fEM, time, freq, ftarg):
     y = m*d  # y = m*pi/(n*dlnr)
 
     if q == 0:  # unbiased case (q = 0)
-        zp = loggamma(0.75 + 1j*y)
+        zp = special.loggamma(0.75 + 1j*y)
         arg = 2.0*(ln2kr*y + zp.imag)
 
     else:       # biased case (q != 0)
         xp = (1.5 + q)/2.0
         xm = (1.5 - q)/2.0
 
-        zp = loggamma(xp + 0j)
-        zm = loggamma(xm + 0j)
+        zp = special.loggamma(xp + 0j)
+        zm = special.loggamma(xm + 0j)
 
         # Amplitude and Argument of U_mu(q)
         amp = np.exp(np.log(2.0)*q + zp.real - zm.real)
@@ -567,8 +566,8 @@ def fftlog(fEM, time, freq, ftarg):
         argcos1 = amp*np.cos(arg)
 
         # remaining elements
-        zp = loggamma(xp + 1j*y)
-        zm = loggamma(xm + 1j*y)
+        zp = special.loggamma(xp + 1j*y)
+        zm = special.loggamma(xm + 1j*y)
 
         argamp = np.exp(np.log(2.0)*q + zp.real - zm.real)
         arg = 2*ln2kr*y + zp.imag + zm.imag
@@ -586,7 +585,7 @@ def fftlog(fEM, time, freq, ftarg):
     # 4. transform a(r) -> ã(k)
 
     # 4.a normal FFT
-    a = rfft(a)
+    a = fftpack.rfft(a)
 
     # 4.b
     m = np.arange(1, n/2, dtype=int)  # index variable
@@ -620,7 +619,7 @@ def fftlog(fEM, time, freq, ftarg):
             a[-1] *= ar
 
     # 4.c normal FFT back
-    a = irfft(a)
+    a = fftpack.irfft(a)
 
     # Ã(k) = ã(k) k^[-dir*(q+.5)] rc^[-dir*(q-.5)]
     #      = ã(k) (k/kc)^[-dir*(q+.5)] (kc rc)^(-dir*q) (rc/kc)^(dir*.5)
@@ -723,23 +722,6 @@ def qwe(rtol, atol, maxint, inp, intervals, hfstr, lambd=None, off=None,
     return EM
 
 
-def get_Gauss_Weights(nquad):
-    """Return Gauss Quadrature Weights of order nquad on the interval [-1, 1].
-
-    Algorithm from page 129 in [Trefethen_2000]_.
-
-    This function is based on `getGaussQuadWeights.m` from the source code
-    distributed with [Key_2012]_.
-
-    """
-    g_beta = 1/np.sqrt(4 - 1/(np.arange(1, nquad)*np.arange(1, nquad)))
-    g_d, g_v = np.linalg.eig(np.diag(g_beta, 1) + np.diag(g_beta, -1))
-    g_i = np.argsort(g_d, axis=0)
-    g_x = g_d[g_i]
-    g_w = 2*g_v[0, g_i]*g_v[0, g_i]
-    return g_x, g_w
-
-
 def get_spline_values(filt, inp, nr_per_dec=None):
     """Return required calculation points."""
 
@@ -783,8 +765,8 @@ def fhti(rmin, rmax, n, q):
 
     # Get low-ringing kr
     y = 1j*np.pi/(2.0*dlnr)
-    zp = loggamma((1.5 + q)/2.0 + y)
-    zm = loggamma((1.5 - q)/2.0 + y)
+    zp = special.loggamma((1.5 + q)/2.0 + y)
+    zm = special.loggamma((1.5 - q)/2.0 + y)
     arg = np.log(2.0)/dlnr + (zp.imag + zm.imag)/np.pi
     kr = np.exp((arg - np.round(arg))*dlnr)
 
