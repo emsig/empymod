@@ -46,6 +46,47 @@ See the *LICENSE*-file in the root directory for a full reprint of the Apache
 License.
 
 
+Missing features
+----------------
+
+A list of things that should or could be added and improved, in decreasing
+priority:
+
+    - **Tests**, **tests**, and **more tests**: The modeller `empymod` is
+      lacking an extensive testing suite. But it should have one.  This would
+      ideally be combined with automated testing by, for instance, Travis. It
+      should also include some proper benchmarks.
+
+    - Rewrite `model` and `utils` in order to provide the survey and model
+      parameters as well as the modelling options as *structured
+      array*/*dict*/*class* (which one is suited best?), so that the main
+      (potentially only) calculation routine would be `empymod(survey, model,
+      options)`. Improved abstraction of the calling part.
+
+    - More modelling routines:
+        - arbitrary source and receiver dipole lengths
+        - arbitrary source and receiver rotations
+        - convolution with a wavelet for GPR (proper version of `model.gpr`)
+        - pure wavenumber output-routine (proper version of `model.wavenumber`)
+        - variable receiver depths within one calculation
+        - various source-receiver arrangements (loops etc)
+        - multiple sources within one calculation
+        - Load and Save functions to store and load model, together with all
+          information.
+
+    - Kernel
+        - Include `scipy.integrate.quad` as an additional Hankel transform.
+          There are cases when both `QWE` and `FHT` struggle, e.g. at very
+          short offsets with very high frequencies (GPR).
+        - A `cython` or `numba` (pure C?) implementation of the `kernel` and
+          the `transform` modules. Maybe not worth it, as it may improve speed,
+          but decrease accessibility. Both at the same time would be nice. A
+          fast C-version for calculations (inversions), and a Python-version to
+          tinker with for interested folks.
+
+    - GUI frontend
+
+
 Notice
 ------
 
@@ -77,22 +118,6 @@ Both pieces of software are published under the *SEG disclaimer*. Parts of the
 modeller `emmod` from Hunziker et al, 2015, is furthermore released under the
 *Common Public License Version 1.0 (CPL)*. See the *NOTICE*-file in the root
 directory for more information and a reprint of the SEG disclaimer and the CPL.
-
-.. todo::
-    - Include `scipy.integrate.quad` as an additional Hankel transform.
-      There are cases when both `QWE` and `FHT` struggle, e.g. at very short
-      offsets with very high frequencies (GPR).
-    - More modelling routines:
-        - convolution with a wavelet for GPR (proper version of `model.gpr`)
-        - arbitrary source and receiver dipole lengths
-        - arbitrary source and receiver rotations
-        - variable receiver depths within one calculation
-        - various source-receiver arrangements (loops etc)
-        - multiple sources
-    - Pure wavenumber output-routine (proper version of `model.wavenumber`)
-    - Improve tests and benchmarks
-    - Automated testing with Travis
-    - GUIs
 
 
 Note on speed, memory, and accuracy
