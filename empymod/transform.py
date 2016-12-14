@@ -226,9 +226,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     ([Shanks_1955]_, [Wynn_1956]_; implemented with algorithms from
     [Trefethen_2000]_ and [Weniger_1989]_).
 
-    This function is based on `get_CSEM1D_FD_QWE.m`, `qwe.m`,
-    `getGaussQuadWeights.m`, and `getBesselWeights.m` from the source code
-    distributed with [Key_2012]_.
+    This function is based on `get_CSEM1D_FD_QWE.m`, `qwe.m`, and
+    `getBesselWeights.m` from the source code distributed with [Key_2012]_.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
