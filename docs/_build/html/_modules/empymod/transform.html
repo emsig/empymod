@@ -77,15 +77,13 @@
 
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">jv</span><span class="p">,</span> <span class="n">loggamma</span>
-<span class="kn">from</span> <span class="nn">scipy.fftpack</span> <span class="k">import</span> <span class="n">rfft</span><span class="p">,</span> <span class="n">irfft</span>
-<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="k">import</span> <span class="n">quad</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">special</span><span class="p">,</span> <span class="n">fftpack</span><span class="p">,</span> <span class="n">integrate</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">InterpolatedUnivariateSpline</span> <span class="k">as</span> <span class="n">iuSpline</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kernel</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span> <span class="s1">&#39;hqwe&#39;</span><span class="p">,</span> <span class="s1">&#39;fft&#39;</span><span class="p">,</span> <span class="s1">&#39;fqwe&#39;</span><span class="p">,</span> <span class="s1">&#39;fftlog&#39;</span><span class="p">,</span> <span class="s1">&#39;qwe&#39;</span><span class="p">,</span> <span class="s1">&#39;get_Gauss_Weights&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;get_spline_values&#39;</span><span class="p">,</span> <span class="s1">&#39;fhti&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span> <span class="s1">&#39;hqwe&#39;</span><span class="p">,</span> <span class="s1">&#39;fft&#39;</span><span class="p">,</span> <span class="s1">&#39;fqwe&#39;</span><span class="p">,</span> <span class="s1">&#39;fftlog&#39;</span><span class="p">,</span> <span class="s1">&#39;qwe&#39;</span><span class="p">,</span> <span class="s1">&#39;get_spline_values&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;fhti&#39;</span><span class="p">]</span>
 
 
 <span class="c1"># 1. Hankel transforms (wavenumber -&gt; frequency)</span>
@@ -272,9 +270,8 @@
 <span class="sd">    ([Shanks_1955]_, [Wynn_1956]_; implemented with algorithms from</span>
 <span class="sd">    [Trefethen_2000]_ and [Weniger_1989]_).</span>
 
-<span class="sd">    This function is based on `get_CSEM1D_FD_QWE.m`, `qwe.m`,</span>
-<span class="sd">    `getGaussQuadWeights.m`, and `getBesselWeights.m` from the source code</span>
-<span class="sd">    distributed with [Key_2012]_.</span>
+<span class="sd">    This function is based on `get_CSEM1D_FD_QWE.m`, `qwe.m`, and</span>
+<span class="sd">    `getBesselWeights.m` from the source code distributed with [Key_2012]_.</span>
 
 <span class="sd">    The function is called from one of the modelling routines in :mod:`model`.</span>
 <span class="sd">    Consult these modelling routines for a description of the input and output</span>
@@ -300,11 +297,14 @@
     <span class="c1">#    corresponding Gauss quadrature weights</span>
 
     <span class="c1"># ** 1.a COMPUTE GAUSS QUADRATURE WEIGHTS</span>
-    <span class="n">g_x</span><span class="p">,</span> <span class="n">g_w</span> <span class="o">=</span> <span class="n">get_Gauss_Weights</span><span class="p">(</span><span class="n">nquad</span><span class="p">)</span>
+    <span class="n">g_x</span><span class="p">,</span> <span class="n">g_w</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">p_roots</span><span class="p">(</span><span class="n">nquad</span><span class="p">)</span>
 
     <span class="c1"># ** 1.b COMPUTES N ZEROS OF THE BESSEL FUNCTION OF THE FIRST KIND</span>
     <span class="c1">#    of order 1 using the Newton-Raphson method, which is fast enough for</span>
     <span class="c1">#    our purposes.</span>
+    <span class="c1">#    Could be done with a loop for:</span>
+    <span class="c1">#        b_zero[i] = optimize.newton(special.j1, b_zero[i])</span>
+    <span class="c1">#    but it is slower.</span>
 
     <span class="c1"># Initial guess using asymptotic zeros</span>
     <span class="n">b_zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1.25</span><span class="p">,</span> <span class="n">maxint</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -313,8 +313,8 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>   <span class="c1"># 10 is more than enough, usually stops in 5</span>
 
         <span class="c1"># Evaluate</span>
-        <span class="n">b_x0</span> <span class="o">=</span> <span class="n">jv</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">b_zero</span><span class="p">)</span>
-        <span class="n">b_x1</span> <span class="o">=</span> <span class="n">jv</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">b_zero</span><span class="p">)</span>
+        <span class="n">b_x0</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">j1</span><span class="p">(</span><span class="n">b_zero</span><span class="p">)</span>    <span class="c1"># j0 and j1 have faster versions</span>
+        <span class="n">b_x1</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">jv</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">b_zero</span><span class="p">)</span> <span class="c1"># j2 does not have a faster version</span>
 
         <span class="c1"># The step length</span>
         <span class="n">b_h</span> <span class="o">=</span> <span class="o">-</span><span class="n">b_x0</span><span class="o">/</span><span class="p">(</span><span class="n">b_x0</span><span class="o">/</span><span class="n">b_zero</span> <span class="o">-</span> <span class="n">b_x1</span><span class="p">)</span>
@@ -334,8 +334,8 @@
     <span class="c1"># Assemble the output arrays</span>
     <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xint</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">nquad</span><span class="p">)</span>
     <span class="n">Bx</span> <span class="o">=</span> <span class="n">dx</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_x</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">xint</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">nquad</span><span class="p">)</span>
-    <span class="n">BJ0</span> <span class="o">=</span> <span class="n">jv</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Bx</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_w</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span>
-    <span class="n">BJ1</span> <span class="o">=</span> <span class="n">jv</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Bx</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_w</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span>
+    <span class="n">BJ0</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">j0</span><span class="p">(</span><span class="n">Bx</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_w</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span>
+    <span class="n">BJ1</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">j1</span><span class="p">(</span><span class="n">Bx</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_w</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span>
 
     <span class="c1"># ** 2. START QWE</span>
 
@@ -509,7 +509,7 @@
     <span class="n">intervals</span> <span class="o">=</span> <span class="n">xint</span><span class="o">/</span><span class="n">time</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
 
     <span class="c1"># Get Gauss Quadrature Weights</span>
-    <span class="n">g_x</span><span class="p">,</span> <span class="n">g_w</span> <span class="o">=</span> <span class="n">get_Gauss_Weights</span><span class="p">(</span><span class="n">nquad</span><span class="p">)</span>
+    <span class="n">g_x</span><span class="p">,</span> <span class="n">g_w</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">p_roots</span><span class="p">(</span><span class="n">nquad</span><span class="p">)</span>
     <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xint</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">nquad</span><span class="p">)</span>
     <span class="n">Bx</span> <span class="o">=</span> <span class="n">dx</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_x</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">xint</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">nquad</span><span class="p">)</span>
     <span class="n">SS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Bx</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">g_w</span><span class="p">,</span> <span class="n">maxint</span><span class="p">)</span>
@@ -533,8 +533,9 @@
 
         <span class="c1"># Loop over times that require Quad</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">doqwe</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="n">tEM</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span><span class="n">sEMquad</span><span class="p">,</span> <span class="n">intervals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">intervals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-                             <span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="n">i</span><span class="p">],),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">rtol</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+            <span class="n">tEM</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">sEMquad</span><span class="p">,</span> <span class="n">intervals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                       <span class="n">intervals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="n">i</span><span class="p">],),</span>
+                                       <span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="p">,</span> <span class="n">rtol</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
 
     <span class="c1"># Carry out QWE if required</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">doqwe</span><span class="p">):</span>
@@ -592,15 +593,15 @@
     <span class="n">y</span> <span class="o">=</span> <span class="n">m</span><span class="o">*</span><span class="n">d</span>  <span class="c1"># y = m*pi/(n*dlnr)</span>
 
     <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># unbiased case (q = 0)</span>
-        <span class="n">zp</span> <span class="o">=</span> <span class="n">loggamma</span><span class="p">(</span><span class="mf">0.75</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">zp</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="mf">0.75</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
         <span class="n">arg</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="p">(</span><span class="n">ln2kr</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">zp</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>       <span class="c1"># biased case (q != 0)</span>
         <span class="n">xp</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.5</span> <span class="o">+</span> <span class="n">q</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
         <span class="n">xm</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.5</span> <span class="o">-</span> <span class="n">q</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
 
-        <span class="n">zp</span> <span class="o">=</span> <span class="n">loggamma</span><span class="p">(</span><span class="n">xp</span> <span class="o">+</span> <span class="mi">0</span><span class="n">j</span><span class="p">)</span>
-        <span class="n">zm</span> <span class="o">=</span> <span class="n">loggamma</span><span class="p">(</span><span class="n">xm</span> <span class="o">+</span> <span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+        <span class="n">zp</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">xp</span> <span class="o">+</span> <span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+        <span class="n">zm</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">xm</span> <span class="o">+</span> <span class="mi">0</span><span class="n">j</span><span class="p">)</span>
 
         <span class="c1"># Amplitude and Argument of U_mu(q)</span>
         <span class="n">amp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">*</span><span class="n">q</span> <span class="o">+</span> <span class="n">zp</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="n">zm</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
@@ -611,8 +612,8 @@
         <span class="n">argcos1</span> <span class="o">=</span> <span class="n">amp</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
 
         <span class="c1"># remaining elements</span>
-        <span class="n">zp</span> <span class="o">=</span> <span class="n">loggamma</span><span class="p">(</span><span class="n">xp</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
-        <span class="n">zm</span> <span class="o">=</span> <span class="n">loggamma</span><span class="p">(</span><span class="n">xm</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">zp</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">xp</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">zm</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">xm</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
 
         <span class="n">argamp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">*</span><span class="n">q</span> <span class="o">+</span> <span class="n">zp</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="n">zm</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
         <span class="n">arg</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">ln2kr</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">zp</span><span class="o">.</span><span class="n">imag</span> <span class="o">+</span> <span class="n">zm</span><span class="o">.</span><span class="n">imag</span>
@@ -630,7 +631,7 @@
     <span class="c1"># 4. transform a(r) -&gt; ã(k)</span>
 
     <span class="c1"># 4.a normal FFT</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">rfft</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">fftpack</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
     <span class="c1"># 4.b</span>
     <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># index variable</span>
@@ -664,7 +665,7 @@
             <span class="n">a</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="n">ar</span>
 
     <span class="c1"># 4.c normal FFT back</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">irfft</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">fftpack</span><span class="o">.</span><span class="n">irfft</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
     <span class="c1"># Ã(k) = ã(k) k^[-dir*(q+.5)] rc^[-dir*(q-.5)]</span>
     <span class="c1">#      = ã(k) (k/kc)^[-dir*(q+.5)] (kc rc)^(-dir*q) (rc/kc)^(dir*.5)</span>
@@ -767,23 +768,6 @@
     <span class="k">return</span> <span class="n">EM</span></div>
 
 
-<div class="viewcode-block" id="get_Gauss_Weights"><a class="viewcode-back" href="../../empymod.html#empymod.transform.get_Gauss_Weights">[docs]</a><span class="k">def</span> <span class="nf">get_Gauss_Weights</span><span class="p">(</span><span class="n">nquad</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return Gauss Quadrature Weights of order nquad on the interval [-1, 1].</span>
-
-<span class="sd">    Algorithm from page 129 in [Trefethen_2000]_.</span>
-
-<span class="sd">    This function is based on `getGaussQuadWeights.m` from the source code</span>
-<span class="sd">    distributed with [Key_2012]_.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">g_beta</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nquad</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nquad</span><span class="p">)))</span>
-    <span class="n">g_d</span><span class="p">,</span> <span class="n">g_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">g_beta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">g_beta</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">g_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">g_d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">g_x</span> <span class="o">=</span> <span class="n">g_d</span><span class="p">[</span><span class="n">g_i</span><span class="p">]</span>
-    <span class="n">g_w</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">g_v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">g_i</span><span class="p">]</span><span class="o">*</span><span class="n">g_v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">g_i</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">g_x</span><span class="p">,</span> <span class="n">g_w</span></div>
-
-
 <div class="viewcode-block" id="get_spline_values"><a class="viewcode-back" href="../../empymod.html#empymod.transform.get_spline_values">[docs]</a><span class="k">def</span> <span class="nf">get_spline_values</span><span class="p">(</span><span class="n">filt</span><span class="p">,</span> <span class="n">inp</span><span class="p">,</span> <span class="n">nr_per_dec</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return required calculation points.&quot;&quot;&quot;</span>
 
@@ -827,8 +811,8 @@
 
     <span class="c1"># Get low-ringing kr</span>
     <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">dlnr</span><span class="p">)</span>
-    <span class="n">zp</span> <span class="o">=</span> <span class="n">loggamma</span><span class="p">((</span><span class="mf">1.5</span> <span class="o">+</span> <span class="n">q</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
-    <span class="n">zm</span> <span class="o">=</span> <span class="n">loggamma</span><span class="p">((</span><span class="mf">1.5</span> <span class="o">-</span> <span class="n">q</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">zp</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">((</span><span class="mf">1.5</span> <span class="o">+</span> <span class="n">q</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">zm</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">((</span><span class="mf">1.5</span> <span class="o">-</span> <span class="n">q</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
     <span class="n">arg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">/</span><span class="n">dlnr</span> <span class="o">+</span> <span class="p">(</span><span class="n">zp</span><span class="o">.</span><span class="n">imag</span> <span class="o">+</span> <span class="n">zm</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
     <span class="n">kr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">arg</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span><span class="o">*</span><span class="n">dlnr</span><span class="p">)</span>
 

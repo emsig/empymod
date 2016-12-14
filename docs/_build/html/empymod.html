@@ -77,6 +77,59 @@ limitations under the License.</p>
 <p>See the <em>LICENSE</em>-file in the root directory for a full reprint of the Apache
 License.</p>
 </div>
+<div class="section" id="missing-features">
+<h2>Missing features<a class="headerlink" href="#missing-features" title="Permalink to this headline">¶</a></h2>
+<p>A list of things that should or could be added and improved, in decreasing
+priority:</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><strong>Tests</strong>, <strong>tests</strong>, and <strong>more tests</strong>: The modeller <cite>empymod</cite> is
+lacking an extensive testing suite. But it should have one.  This would
+ideally be combined with automated testing by, for instance, Travis. It
+should also include some proper benchmarks.</p>
+</li>
+<li><p class="first">Rewrite <cite>model</cite> and <cite>utils</cite> in order to provide the survey and model
+parameters as well as the modelling options as <em>structured
+array</em>/<em>dict</em>/<em>class</em> (which one is suited best?), so that the main
+(potentially only) calculation routine would be <cite>empymod(survey, model,
+options)</cite>. Improved abstraction of the calling part.</p>
+</li>
+<li><dl class="first docutils">
+<dt>More modelling routines:</dt>
+<dd><ul class="first last simple">
+<li>arbitrary source and receiver dipole lengths</li>
+<li>arbitrary source and receiver rotations</li>
+<li>convolution with a wavelet for GPR (proper version of <cite>model.gpr</cite>)</li>
+<li>pure wavenumber output-routine (proper version of <cite>model.wavenumber</cite>)</li>
+<li>variable receiver depths within one calculation</li>
+<li>various source-receiver arrangements (loops etc)</li>
+<li>multiple sources within one calculation</li>
+<li>Load and Save functions to store and load model, together with all
+information.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Kernel</dt>
+<dd><ul class="first last simple">
+<li>Include <cite>scipy.integrate.quad</cite> as an additional Hankel transform.
+There are cases when both <cite>QWE</cite> and <cite>FHT</cite> struggle, e.g. at very
+short offsets with very high frequencies (GPR).</li>
+<li>A <cite>cython</cite> or <cite>numba</cite> (pure C?) implementation of the <cite>kernel</cite> and
+the <cite>transform</cite> modules. Maybe not worth it, as it may improve speed,
+but decrease accessibility. Both at the same time would be nice. A
+fast C-version for calculations (inversions), and a Python-version to
+tinker with for interested folks.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">GUI frontend</p>
+</li>
+</ul>
+</div></blockquote>
+</div>
 <div class="section" id="notice">
 <h2>Notice<a class="headerlink" href="#notice" title="Permalink to this headline">¶</a></h2>
 <p>This product includes software developed at
@@ -100,36 +153,6 @@ Geophysics, 77, F21-F30; DOI: <a class="reference external" href="http://dx.doi.
 modeller <cite>emmod</cite> from Hunziker et al, 2015, is furthermore released under the
 <em>Common Public License Version 1.0 (CPL)</em>. See the <em>NOTICE</em>-file in the root
 directory for more information and a reprint of the SEG disclaimer and the CPL.</p>
-<div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<ul class="last">
-<li><p class="first">Include <cite>scipy.integrate.quad</cite> as an additional Hankel transform.
-There are cases when both <cite>QWE</cite> and <cite>FHT</cite> struggle, e.g. at very short
-offsets with very high frequencies (GPR).</p>
-</li>
-<li><dl class="first docutils">
-<dt>More modelling routines:</dt>
-<dd><ul class="first last simple">
-<li>convolution with a wavelet for GPR (proper version of <cite>model.gpr</cite>)</li>
-<li>arbitrary source and receiver dipole lengths</li>
-<li>arbitrary source and receiver rotations</li>
-<li>variable receiver depths within one calculation</li>
-<li>various source-receiver arrangements (loops etc)</li>
-<li>multiple sources</li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><p class="first">Pure wavenumber output-routine (proper version of <cite>model.wavenumber</cite>)</p>
-</li>
-<li><p class="first">Improve tests and benchmarks</p>
-</li>
-<li><p class="first">Automated testing with Travis</p>
-</li>
-<li><p class="first">GUIs</p>
-</li>
-</ul>
-</div>
 </div>
 <div class="section" id="note-on-speed-memory-and-accuracy">
 <h2>Note on speed, memory, and accuracy<a class="headerlink" href="#note-on-speed-memory-and-accuracy" title="Permalink to this headline">¶</a></h2>
@@ -245,7 +268,7 @@ simplified version of the python implementation of FFTLog, <cite>pyfftlog</cite>
 <table class="docutils citation" frame="void" id="anderson-1975" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[Anderson_1975]</td><td><em>(<a class="fn-backref" href="#id29">1</a>, <a class="fn-backref" href="#id42">2</a>, <a class="fn-backref" href="#id51">3</a>)</em> Anderson, W.L., 1975, Improved digital filters for
+<tr><td class="label">[Anderson_1975]</td><td><em>(<a class="fn-backref" href="#id29">1</a>, <a class="fn-backref" href="#id42">2</a>, <a class="fn-backref" href="#id49">3</a>)</em> Anderson, W.L., 1975, Improved digital filters for
 evaluating Fourier and Hankel transform integrals:
 USGS Unnumbered Series;
 <a class="reference external" href="http://pubs.usgs.gov/unnumbered/70045426/report.pdf">http://pubs.usgs.gov/unnumbered/70045426/report.pdf</a>.</td></tr>
@@ -262,7 +285,7 @@ Geophysics, 44, 1287&#8211;1305; DOI:&nbsp;<a class="reference external" href="h
 <table class="docutils citation" frame="void" id="anderson-1982" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[Anderson_1982]</td><td><em>(<a class="fn-backref" href="#id31">1</a>, <a class="fn-backref" href="#id50">2</a>, <a class="fn-backref" href="#id56">3</a>, <a class="fn-backref" href="#id60">4</a>, <a class="fn-backref" href="#id61">5</a>)</em> Anderson, W. L., 1982, Fast Hankel transforms using
+<tr><td class="label">[Anderson_1982]</td><td><em>(<a class="fn-backref" href="#id31">1</a>, <a class="fn-backref" href="#id48">2</a>, <a class="fn-backref" href="#id54">3</a>, <a class="fn-backref" href="#id58">4</a>, <a class="fn-backref" href="#id59">5</a>)</em> Anderson, W. L., 1982, Fast Hankel transforms using
 related and lagged convolutions: ACM Trans. on Math. Softw. (TOMS), 8,
 344&#8211;368; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1145/356012.356014">10.1145/356012.356014</a>.</td></tr>
 </tbody>
@@ -298,7 +321,7 @@ Software: <a class="reference external" href="http://software.seg.org/2015/0001"
 <table class="docutils citation" frame="void" id="key-2009" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[Key_2009]</td><td><em>(<a class="fn-backref" href="#id53">1</a>, <a class="fn-backref" href="#id54">2</a>, <a class="fn-backref" href="#id64">3</a>, <a class="fn-backref" href="#id65">4</a>, <a class="fn-backref" href="#id66">5</a>, <a class="fn-backref" href="#id74">6</a>, <a class="fn-backref" href="#id75">7</a>, <a class="fn-backref" href="#id76">8</a>, <a class="fn-backref" href="#id84">9</a>, <a class="fn-backref" href="#id85">10</a>, <a class="fn-backref" href="#id86">11</a>, <a class="fn-backref" href="#id88">12</a>, <a class="fn-backref" href="#id89">13</a>, <a class="fn-backref" href="#id90">14</a>, <a class="fn-backref" href="#id95">15</a>, <a class="fn-backref" href="#id96">16</a>, <a class="fn-backref" href="#id97">17</a>, <a class="fn-backref" href="#id99">18</a>, <a class="fn-backref" href="#id100">19</a>, <a class="fn-backref" href="#id101">20</a>, <a class="fn-backref" href="#id105">21</a>, <a class="fn-backref" href="#id109">22</a>)</em> Key, K., 2009, 1D inversion of multicomponent, multifrequency
+<tr><td class="label">[Key_2009]</td><td><em>(<a class="fn-backref" href="#id51">1</a>, <a class="fn-backref" href="#id52">2</a>, <a class="fn-backref" href="#id62">3</a>, <a class="fn-backref" href="#id63">4</a>, <a class="fn-backref" href="#id64">5</a>, <a class="fn-backref" href="#id72">6</a>, <a class="fn-backref" href="#id73">7</a>, <a class="fn-backref" href="#id74">8</a>, <a class="fn-backref" href="#id82">9</a>, <a class="fn-backref" href="#id83">10</a>, <a class="fn-backref" href="#id84">11</a>, <a class="fn-backref" href="#id86">12</a>, <a class="fn-backref" href="#id87">13</a>, <a class="fn-backref" href="#id88">14</a>, <a class="fn-backref" href="#id93">15</a>, <a class="fn-backref" href="#id94">16</a>, <a class="fn-backref" href="#id95">17</a>, <a class="fn-backref" href="#id97">18</a>, <a class="fn-backref" href="#id98">19</a>, <a class="fn-backref" href="#id99">20</a>, <a class="fn-backref" href="#id103">21</a>, <a class="fn-backref" href="#id107">22</a>)</em> Key, K., 2009, 1D inversion of multicomponent, multifrequency
 marine CSEM data: Methodology and synthetic studies for resolving thin
 resistive layers: Geophysics, 74, F9&#8211;F20; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1190/1.3058434">10.1190/1.3058434</a>.
 Software: <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.</td></tr>
@@ -307,7 +330,7 @@ Software: <a class="reference external" href="http://marineemlab.ucsd.edu/Projec
 <table class="docutils citation" frame="void" id="key-2012" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[Key_2012]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id4">2</a>, <a class="fn-backref" href="#id26">3</a>, <a class="fn-backref" href="#id32">4</a>, <a class="fn-backref" href="#id33">5</a>, <a class="fn-backref" href="#id34">6</a>, <a class="fn-backref" href="#id35">7</a>, <a class="fn-backref" href="#id36">8</a>, <a class="fn-backref" href="#id41">9</a>, <a class="fn-backref" href="#id43">10</a>, <a class="fn-backref" href="#id44">11</a>, <a class="fn-backref" href="#id45">12</a>, <a class="fn-backref" href="#id47">13</a>, <a class="fn-backref" href="#id49">14</a>, <a class="fn-backref" href="#id57">15</a>, <a class="fn-backref" href="#id58">16</a>, <a class="fn-backref" href="#id62">17</a>, <a class="fn-backref" href="#id68">18</a>, <a class="fn-backref" href="#id69">19</a>, <a class="fn-backref" href="#id71">20</a>, <a class="fn-backref" href="#id72">21</a>, <a class="fn-backref" href="#id78">22</a>, <a class="fn-backref" href="#id79">23</a>, <a class="fn-backref" href="#id81">24</a>, <a class="fn-backref" href="#id82">25</a>, <a class="fn-backref" href="#id92">26</a>, <a class="fn-backref" href="#id93">27</a>)</em> Key, K., 2012, Is the fast Hankel transform faster than
+<tr><td class="label">[Key_2012]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id4">2</a>, <a class="fn-backref" href="#id26">3</a>, <a class="fn-backref" href="#id32">4</a>, <a class="fn-backref" href="#id33">5</a>, <a class="fn-backref" href="#id34">6</a>, <a class="fn-backref" href="#id35">7</a>, <a class="fn-backref" href="#id36">8</a>, <a class="fn-backref" href="#id41">9</a>, <a class="fn-backref" href="#id43">10</a>, <a class="fn-backref" href="#id44">11</a>, <a class="fn-backref" href="#id45">12</a>, <a class="fn-backref" href="#id47">13</a>, <a class="fn-backref" href="#id55">14</a>, <a class="fn-backref" href="#id56">15</a>, <a class="fn-backref" href="#id60">16</a>, <a class="fn-backref" href="#id66">17</a>, <a class="fn-backref" href="#id67">18</a>, <a class="fn-backref" href="#id69">19</a>, <a class="fn-backref" href="#id70">20</a>, <a class="fn-backref" href="#id76">21</a>, <a class="fn-backref" href="#id77">22</a>, <a class="fn-backref" href="#id79">23</a>, <a class="fn-backref" href="#id80">24</a>, <a class="fn-backref" href="#id90">25</a>, <a class="fn-backref" href="#id91">26</a>)</em> Key, K., 2012, Is the fast Hankel transform faster than
 quadrature?: Geophysics, 77, F21&#8211;F30; DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1190/GEO2011-0237.1">10.1190/GEO2011-0237.1</a>;
 Software: <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.</td></tr>
 </tbody>
@@ -315,7 +338,7 @@ Software: <a class="reference external" href="http://software.seg.org/2012/0003"
 <table class="docutils citation" frame="void" id="kong-2007" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[Kong_2007]</td><td><em>(<a class="fn-backref" href="#id52">1</a>, <a class="fn-backref" href="#id103">2</a>, <a class="fn-backref" href="#id104">3</a>, <a class="fn-backref" href="#id107">4</a>, <a class="fn-backref" href="#id108">5</a>)</em> Kong, F. N., 2007, Hankel transform filters for dipole antenna
+<tr><td class="label">[Kong_2007]</td><td><em>(<a class="fn-backref" href="#id50">1</a>, <a class="fn-backref" href="#id101">2</a>, <a class="fn-backref" href="#id102">3</a>, <a class="fn-backref" href="#id105">4</a>, <a class="fn-backref" href="#id106">5</a>)</em> Kong, F. N., 2007, Hankel transform filters for dipole antenna
 radiation in a conductive medium: Geophysical Prospecting, 55, 83&#8211;89;
 DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1111/j.1365-2478.2006.00585.x">10.1111/j.1365-2478.2006.00585.x</a>.</td></tr>
 </tbody>
@@ -347,7 +370,7 @@ in logarithmic variables: Journal of Computational Physics, 29, pages
 <table class="docutils citation" frame="void" id="trefethen-2000" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[Trefethen_2000]</td><td><em>(<a class="fn-backref" href="#id39">1</a>, <a class="fn-backref" href="#id48">2</a>)</em> Trefethen, L. N., 2000, Spectral methods in MATLAB: Society
+<tr><td class="label"><a class="fn-backref" href="#id39">[Trefethen_2000]</a></td><td>Trefethen, L. N., 2000, Spectral methods in MATLAB: Society
 for Industrial and Applied Mathematics (SIAM), volume 10 of Software,
 Environments, and Tools, chapter 12, page 129;
 DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1137/1.9780898719598.ch12">10.1137/1.9780898719598.ch12</a>.</td></tr>
@@ -1207,9 +1230,8 @@ here, the QWE method rewrites the Hankel transform of the form</p>
 transformation in the form of a routine called <span class="math">\(\epsilon\)</span>-algorithm
 (<a class="reference internal" href="#shanks-1955" id="id37">[Shanks_1955]</a>, <a class="reference internal" href="#wynn-1956" id="id38">[Wynn_1956]</a>; implemented with algorithms from
 <a class="reference internal" href="#trefethen-2000" id="id39">[Trefethen_2000]</a> and <a class="reference internal" href="#weniger-1989" id="id40">[Weniger_1989]</a>).</p>
-<p>This function is based on <cite>get_CSEM1D_FD_QWE.m</cite>, <cite>qwe.m</cite>,
-<cite>getGaussQuadWeights.m</cite>, and <cite>getBesselWeights.m</cite> from the source code
-distributed with <a class="reference internal" href="#key-2012" id="id41">[Key_2012]</a>.</p>
+<p>This function is based on <cite>get_CSEM1D_FD_QWE.m</cite>, <cite>qwe.m</cite>, and
+<cite>getBesselWeights.m</cite> from the source code distributed with <a class="reference internal" href="#key-2012" id="id41">[Key_2012]</a>.</p>
 <p>The function is called from one of the modelling routines in <code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.
 Consult these modelling routines for a description of the input and output
 parameters.</p>
@@ -1329,15 +1351,6 @@ Fourier (<cite>fqwe</cite>) Transforms. See <cite>hqwe</cite> for an extensive d
 </dd></dl>
 
 <dl class="function">
-<dt id="empymod.transform.get_Gauss_Weights">
-<code class="descclassname">empymod.transform.</code><code class="descname">get_Gauss_Weights</code><span class="sig-paren">(</span><em>nquad</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#get_Gauss_Weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.get_Gauss_Weights" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return Gauss Quadrature Weights of order nquad on the interval [-1, 1].</p>
-<p>Algorithm from page 129 in <a class="reference internal" href="#trefethen-2000" id="id48">[Trefethen_2000]</a>.</p>
-<p>This function is based on <cite>getGaussQuadWeights.m</cite> from the source code
-distributed with <a class="reference internal" href="#key-2012" id="id49">[Key_2012]</a>.</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="empymod.transform.get_spline_values">
 <code class="descclassname">empymod.transform.</code><code class="descname">get_spline_values</code><span class="sig-paren">(</span><em>filt</em>, <em>inp</em>, <em>nr_per_dec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/transform.html#get_spline_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.transform.get_spline_values" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return required calculation points.</p>
@@ -1352,24 +1365,24 @@ distributed with <a class="reference internal" href="#key-2012" id="id49">[Key_2
 </div>
 <span class="target" id="module-empymod.filters"></span><div class="section" id="filters-digital-filters-for-fht">
 <h2><code class="xref py py-mod docutils literal"><span class="pre">filters</span></code> &#8211; Digital Filters for FHT<a class="headerlink" href="#filters-digital-filters-for-fht" title="Permalink to this headline">¶</a></h2>
-<p>Filters for the <em>Fast Hankel Transform</em> (FHT, <a class="reference internal" href="#anderson-1982" id="id50">[Anderson_1982]</a>) and the
-<em>Fourier Sine and Cosine Transforms</em> <a class="reference internal" href="#anderson-1975" id="id51">[Anderson_1975]</a>.</p>
+<p>Filters for the <em>Fast Hankel Transform</em> (FHT, <a class="reference internal" href="#anderson-1982" id="id48">[Anderson_1982]</a>) and the
+<em>Fourier Sine and Cosine Transforms</em> <a class="reference internal" href="#anderson-1975" id="id49">[Anderson_1975]</a>.</p>
 <p>To calculate the <cite>fhtfilter.factor</cite> I used</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">fhtfilter</span><span class="o">.</span><span class="n">base</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">/</span><span class="n">fhtfilter</span><span class="o">.</span><span class="n">base</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">15</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The filters <cite>kong_61_2007</cite> and <cite>kong_241_2007</cite> from <a class="reference internal" href="#kong-2007" id="id52">[Kong_2007]</a>, and
+<p>The filters <cite>kong_61_2007</cite> and <cite>kong_241_2007</cite> from <a class="reference internal" href="#kong-2007" id="id50">[Kong_2007]</a>, and
 <cite>key_101_2009</cite>, <cite>key_201_2009</cite>, <cite>key_401_2009</cite>, <cite>key_81_CosSin_2009</cite>,
-<cite>key_241_CosSin_2009</cite>, and <cite>key_601_CosSin_2009</cite> from <a class="reference internal" href="#key-2009" id="id53">[Key_2009]</a> are taken
-from <em>DIPOLE1D</em>, <a class="reference internal" href="#key-2009" id="id54">[Key_2009]</a>, which can be downloaded at
+<cite>key_241_CosSin_2009</cite>, and <cite>key_601_CosSin_2009</cite> from <a class="reference internal" href="#key-2009" id="id51">[Key_2009]</a> are taken
+from <em>DIPOLE1D</em>, <a class="reference internal" href="#key-2009" id="id52">[Key_2009]</a>, which can be downloaded at
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>. <em>DIPOLE1D</em> is
 distributed under the license GNU GPL version 3 or later. Kerry Key gave his
 written permission to re-distribute the filters under the Apache License,
 Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November 2016).</p>
-<p>The filters <cite>anderson_801_1982</cite> from <a class="reference internal" href="#anderson-1982" id="id56">[Anderson_1982]</a> and
+<p>The filters <cite>anderson_801_1982</cite> from <a class="reference internal" href="#anderson-1982" id="id54">[Anderson_1982]</a> and
 <cite>key_51_2012</cite>, <cite>key_101_2012</cite>, <cite>key_201_2012</cite>, <cite>key_101_CosSin_2012</cite>, and
-<cite>key_201_CosSin_2012</cite>, all from <a class="reference internal" href="#key-2012" id="id57">[Key_2012]</a>, are taken from the software
-distributed with <a class="reference internal" href="#key-2012" id="id58">[Key_2012]</a> and available at
+<cite>key_201_CosSin_2012</cite>, all from <a class="reference internal" href="#key-2012" id="id55">[Key_2012]</a>, are taken from the software
+distributed with <a class="reference internal" href="#key-2012" id="id56">[Key_2012]</a> and available at
 <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
 These filters are distributed under the SEG license.</p>
 <dl class="class">
@@ -1381,9 +1394,9 @@ These filters are distributed under the SEG license.</p>
 <dl class="function">
 <dt id="empymod.filters.anderson_801_1982">
 <code class="descclassname">empymod.filters.</code><code class="descname">anderson_801_1982</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#anderson_801_1982"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.anderson_801_1982" title="Permalink to this definition">¶</a></dt>
-<dd><p>Anderson 801: <a class="reference internal" href="#anderson-1982" id="id60">[Anderson_1982]</a>.</p>
-<p>Anderson 801 pt filter, as published in <a class="reference internal" href="#anderson-1982" id="id61">[Anderson_1982]</a>; taken from
-file <em>wa801Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id62">[Key_2012]</a>, published by the Society of
+<dd><p>Anderson 801: <a class="reference internal" href="#anderson-1982" id="id58">[Anderson_1982]</a>.</p>
+<p>Anderson 801 pt filter, as published in <a class="reference internal" href="#anderson-1982" id="id59">[Anderson_1982]</a>; taken from
+file <em>wa801Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id60">[Key_2012]</a>, published by the Society of
 Exploration Geophysicists; <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
 License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
 </dd></dl>
@@ -1391,9 +1404,9 @@ License: <a class="reference external" href="http://software.seg.org/disclaimer.
 <dl class="function">
 <dt id="empymod.filters.key_101_2009">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_101_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_101_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_101_2009" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 101 2009: <a class="reference internal" href="#key-2009" id="id64">[Key_2009]</a>.</p>
-<p>Key 101 pt filter, as published in <a class="reference internal" href="#key-2009" id="id65">[Key_2009]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id66">[Key_2009]</a>, available on
+<dd><p>Key 101 2009: <a class="reference internal" href="#key-2009" id="id62">[Key_2009]</a>.</p>
+<p>Key 101 pt filter, as published in <a class="reference internal" href="#key-2009" id="id63">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id64">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1402,8 +1415,8 @@ License: Apache License, Version 2.0,
 <dl class="function">
 <dt id="empymod.filters.key_101_2012">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_101_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_101_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_101_2012" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 101 2012: <a class="reference internal" href="#key-2012" id="id68">[Key_2012]</a>.</p>
-<p>Key 101 pt filter, taken from file <em>kk101Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id69">[Key_2012]</a>,
+<dd><p>Key 101 2012: <a class="reference internal" href="#key-2012" id="id66">[Key_2012]</a>.</p>
+<p>Key 101 pt filter, taken from file <em>kk101Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id67">[Key_2012]</a>,
 published by the Society of Exploration Geophysicists;
 <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
 License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
@@ -1412,8 +1425,8 @@ License: <a class="reference external" href="http://software.seg.org/disclaimer.
 <dl class="function">
 <dt id="empymod.filters.key_101_CosSin_2012">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_101_CosSin_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_101_CosSin_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_101_CosSin_2012" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 101 CosSin 2012: <a class="reference internal" href="#key-2012" id="id71">[Key_2012]</a>.</p>
-<p>Key 101 pt filter, taken from file <em>kk101CosSin.txt</em> from <a class="reference internal" href="#key-2012" id="id72">[Key_2012]</a>,
+<dd><p>Key 101 CosSin 2012: <a class="reference internal" href="#key-2012" id="id69">[Key_2012]</a>.</p>
+<p>Key 101 pt filter, taken from file <em>kk101CosSin.txt</em> from <a class="reference internal" href="#key-2012" id="id70">[Key_2012]</a>,
 published by the Society of Exploration Geophysicists;
 <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
 License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
@@ -1422,9 +1435,9 @@ License: <a class="reference external" href="http://software.seg.org/disclaimer.
 <dl class="function">
 <dt id="empymod.filters.key_201_2009">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_201_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_201_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_201_2009" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 201 2009: <a class="reference internal" href="#key-2009" id="id74">[Key_2009]</a>.</p>
-<p>Key 201 pt filter, as published in <a class="reference internal" href="#key-2009" id="id75">[Key_2009]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id76">[Key_2009]</a>, available on
+<dd><p>Key 201 2009: <a class="reference internal" href="#key-2009" id="id72">[Key_2009]</a>.</p>
+<p>Key 201 pt filter, as published in <a class="reference internal" href="#key-2009" id="id73">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id74">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1433,8 +1446,8 @@ License: Apache License, Version 2.0,
 <dl class="function">
 <dt id="empymod.filters.key_201_2012">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_201_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_201_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_201_2012" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 201 2012: <a class="reference internal" href="#key-2012" id="id78">[Key_2012]</a>.</p>
-<p>Key 201 pt filter, taken from file <em>kk201Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id79">[Key_2012]</a>,
+<dd><p>Key 201 2012: <a class="reference internal" href="#key-2012" id="id76">[Key_2012]</a>.</p>
+<p>Key 201 pt filter, taken from file <em>kk201Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id77">[Key_2012]</a>,
 published by the Society of Exploration Geophysicists;
 <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
 License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
@@ -1443,8 +1456,8 @@ License: <a class="reference external" href="http://software.seg.org/disclaimer.
 <dl class="function">
 <dt id="empymod.filters.key_201_CosSin_2012">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_201_CosSin_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_201_CosSin_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_201_CosSin_2012" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 201 CosSin 2012: <a class="reference internal" href="#key-2012" id="id81">[Key_2012]</a>.</p>
-<p>Key 201 pt filter, taken from file <em>kk201CosSin.txt</em> from <a class="reference internal" href="#key-2012" id="id82">[Key_2012]</a>,
+<dd><p>Key 201 CosSin 2012: <a class="reference internal" href="#key-2012" id="id79">[Key_2012]</a>.</p>
+<p>Key 201 pt filter, taken from file <em>kk201CosSin.txt</em> from <a class="reference internal" href="#key-2012" id="id80">[Key_2012]</a>,
 published by the Society of Exploration Geophysicists;
 <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
 License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
@@ -1453,9 +1466,9 @@ License: <a class="reference external" href="http://software.seg.org/disclaimer.
 <dl class="function">
 <dt id="empymod.filters.key_241_CosSin_2009">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_241_CosSin_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_241_CosSin_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_241_CosSin_2009" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 241 CosSin 2009: <a class="reference internal" href="#key-2009" id="id84">[Key_2009]</a>.</p>
-<p>Key 241 pt filter, as published in <a class="reference internal" href="#key-2009" id="id85">[Key_2009]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id86">[Key_2009]</a>, available on
+<dd><p>Key 241 CosSin 2009: <a class="reference internal" href="#key-2009" id="id82">[Key_2009]</a>.</p>
+<p>Key 241 pt filter, as published in <a class="reference internal" href="#key-2009" id="id83">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id84">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1464,9 +1477,9 @@ License: Apache License, Version 2.0,
 <dl class="function">
 <dt id="empymod.filters.key_401_2009">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_401_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_401_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_401_2009" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 401 2009: <a class="reference internal" href="#key-2009" id="id88">[Key_2009]</a>.</p>
-<p>Key 401 pt filter, as published in <a class="reference internal" href="#key-2009" id="id89">[Key_2009]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id90">[Key_2009]</a>, available on
+<dd><p>Key 401 2009: <a class="reference internal" href="#key-2009" id="id86">[Key_2009]</a>.</p>
+<p>Key 401 pt filter, as published in <a class="reference internal" href="#key-2009" id="id87">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id88">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1475,8 +1488,8 @@ License: Apache License, Version 2.0,
 <dl class="function">
 <dt id="empymod.filters.key_51_2012">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_51_2012</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_51_2012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_51_2012" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 51 2012: <a class="reference internal" href="#key-2012" id="id92">[Key_2012]</a>.</p>
-<p>Key 51 pt filter, taken from file <em>kk51Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id93">[Key_2012]</a>,
+<dd><p>Key 51 2012: <a class="reference internal" href="#key-2012" id="id90">[Key_2012]</a>.</p>
+<p>Key 51 pt filter, taken from file <em>kk51Hankel.txt</em> from <a class="reference internal" href="#key-2012" id="id91">[Key_2012]</a>,
 published by the Society of Exploration Geophysicists;
 <a class="reference external" href="http://software.seg.org/2012/0003">software.seg.org/2012/0003</a>.
 License: <a class="reference external" href="http://software.seg.org/disclaimer.txt">http://software.seg.org/disclaimer.txt</a>.</p>
@@ -1485,9 +1498,9 @@ License: <a class="reference external" href="http://software.seg.org/disclaimer.
 <dl class="function">
 <dt id="empymod.filters.key_601_CosSin_2009">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_601_CosSin_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_601_CosSin_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_601_CosSin_2009" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 601 CosSin 2009: <a class="reference internal" href="#key-2009" id="id95">[Key_2009]</a>.</p>
-<p>Key 601 pt filter, as published in <a class="reference internal" href="#key-2009" id="id96">[Key_2009]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id97">[Key_2009]</a>, available on
+<dd><p>Key 601 CosSin 2009: <a class="reference internal" href="#key-2009" id="id93">[Key_2009]</a>.</p>
+<p>Key 601 pt filter, as published in <a class="reference internal" href="#key-2009" id="id94">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id95">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1496,9 +1509,9 @@ License: Apache License, Version 2.0,
 <dl class="function">
 <dt id="empymod.filters.key_81_CosSin_2009">
 <code class="descclassname">empymod.filters.</code><code class="descname">key_81_CosSin_2009</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#key_81_CosSin_2009"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.key_81_CosSin_2009" title="Permalink to this definition">¶</a></dt>
-<dd><p>Key 81 CosSin 2009: <a class="reference internal" href="#key-2009" id="id99">[Key_2009]</a>.</p>
-<p>Key 81 pt filter, as published in <a class="reference internal" href="#key-2009" id="id100">[Key_2009]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id101">[Key_2009]</a>, available on
+<dd><p>Key 81 CosSin 2009: <a class="reference internal" href="#key-2009" id="id97">[Key_2009]</a>.</p>
+<p>Key 81 pt filter, as published in <a class="reference internal" href="#key-2009" id="id98">[Key_2009]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id99">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1507,9 +1520,9 @@ License: Apache License, Version 2.0,
 <dl class="function">
 <dt id="empymod.filters.kong_241_2007">
 <code class="descclassname">empymod.filters.</code><code class="descname">kong_241_2007</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#kong_241_2007"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.kong_241_2007" title="Permalink to this definition">¶</a></dt>
-<dd><p>Kong 241: <a class="reference internal" href="#kong-2007" id="id103">[Kong_2007]</a>.</p>
-<p>Kong 241 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id104">[Kong_2007]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id105">[Key_2009]</a>, available on
+<dd><p>Kong 241: <a class="reference internal" href="#kong-2007" id="id101">[Kong_2007]</a>.</p>
+<p>Kong 241 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id102">[Kong_2007]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id103">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1518,9 +1531,9 @@ License: Apache License, Version 2.0,
 <dl class="function">
 <dt id="empymod.filters.kong_61_2007">
 <code class="descclassname">empymod.filters.</code><code class="descname">kong_61_2007</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/filters.html#kong_61_2007"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.filters.kong_61_2007" title="Permalink to this definition">¶</a></dt>
-<dd><p>Kong 61: <a class="reference internal" href="#kong-2007" id="id107">[Kong_2007]</a>.</p>
-<p>Kong 61 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id108">[Kong_2007]</a>; taken from file
-<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id109">[Key_2009]</a>, available on
+<dd><p>Kong 61: <a class="reference internal" href="#kong-2007" id="id105">[Kong_2007]</a>.</p>
+<p>Kong 61 pt filter, as published in <a class="reference internal" href="#kong-2007" id="id106">[Kong_2007]</a>; taken from file
+<em>FilterModules.f90</em> from <a class="reference internal" href="#key-2009" id="id107">[Key_2009]</a>, available on
 <a class="reference external" href="http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM">marineemlab.ucsd.edu/Projects/Occam/1DCSEM</a>.
 License: Apache License, Version 2.0,
 <a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
@@ -1895,7 +1908,7 @@ checked with signal.</p>
 <dt id="empymod.utils.param_shape">
 <code class="descclassname">empymod.utils.</code><code class="descname">param_shape</code><span class="sig-paren">(</span><em>a</em>, <em>shape=None</em>, <em>name='inp-var'</em>, <em>datatype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#param_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.param_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert input variable to array and check its shape.</p>
-<p>Ensures one-dimensionality except if datatype is list or tuple.</p>
+<p>Ensures one-dimensionality except if datatype is list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1912,7 +1925,7 @@ checked with signal.</p>
 <blockquote>
 <div><p>String describing variable, defaults to &#8216;inp-var&#8217;.</p>
 </div></blockquote>
-<p><strong>datatype</strong> : type, optional</p>
+<p><strong>datatype</strong> : {float, int, list}, optional</p>
 <blockquote>
 <div><p>Type of array.</p>
 </div></blockquote>
@@ -1963,6 +1976,7 @@ checked with signal.</p>
 <li><a class="reference internal" href="#installation-requirements">Installation &amp; requirements</a></li>
 <li><a class="reference internal" href="#citation">Citation</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#missing-features">Missing features</a></li>
 <li><a class="reference internal" href="#notice">Notice</a></li>
 <li><a class="reference internal" href="#note-on-speed-memory-and-accuracy">Note on speed, memory, and accuracy</a><ul>
 <li><a class="reference internal" href="#parallelisation">Parallelisation</a></li>
