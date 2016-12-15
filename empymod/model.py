@@ -519,9 +519,9 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
 # Core modelling routines
 
-def fem(ab, xco, yco, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
-        etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
-        use_ne_eval, msrc, mrec, loop_freq, loop_off):
+def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
+        zetaV, xdirect, isfullspace, ht, htarg, use_spline, use_ne_eval, msrc,
+        mrec, loop_freq, loop_off):
     """Return the electromagnetic frequency-domain response.
 
     This function is called from one of the above modelling routines. No
@@ -543,7 +543,7 @@ def fem(ab, xco, yco, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
     # Get full-space-solution if model is a full-space or
     # if src and rec are in the same layer and xdirect=True.
     if isfullspace or (lsrc == lrec and xdirect):
-        fEM += kernel.fullspace(xco, yco, off, zsrc, zrec, etaH[:, lrec],
+        fEM += kernel.fullspace(off, angle, zsrc, zrec, etaH[:, lrec],
                                 etaV[:, lrec], zetaH[:, lrec], zetaV[:, lrec],
                                 ab, msrc, mrec)
 
@@ -572,9 +572,9 @@ def fem(ab, xco, yco, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
     return fEM
 
 
-def tem(ab, xco, yco, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
-        etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, time, signal, ft,
-        ftarg, use_spline, use_ne_eval, msrc, mrec, loop_freq, loop_off):
+def tem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
+        zetaV, xdirect, isfullspace, ht, htarg, time, signal, ft, ftarg,
+        use_spline, use_ne_eval, msrc, mrec, loop_freq, loop_off):
     """Return the electromagnetic time-domain response.
 
     This function is called from one of the above modelling routines. No
@@ -587,9 +587,9 @@ def tem(ab, xco, yco, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
 
     """
     # 1. Get fem responses
-    fEM = fem(ab, xco, yco, off, angle, zsrc, zrec, lsrc, lrec, depth, freq,
-              etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg,
-              use_spline, use_ne_eval, msrc, mrec, loop_freq, loop_off)
+    fEM = fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV,
+              zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
+              use_ne_eval, msrc, mrec, loop_freq, loop_off)
 
     # 2. Scale frequencies if switch-on/off response
     # Step function for causal times is like a unit fct, therefore an impulse

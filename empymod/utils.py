@@ -142,9 +142,9 @@ def fem_input(src, rec, depth, res, freq, ab, aniso, epermH, epermV, mpermH,
     # Check src and rec
     # => Get source and receiver depths (zsrc, zrec)
     # => Get layer number in which src and rec reside (lsrc/lrec)
-    # => Get x- and y-coordinates, offsets, angles (xco, yco, off, angle)
+    # => Get offsets and angles (off, angle)
     spatial = check_spatial(src, rec, depth, verb)
-    zsrc, zrec, lsrc, lrec, xco, yco, off, angle = spatial
+    zsrc, zrec, lsrc, lrec, off, angle = spatial
 
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, ab, verb)
@@ -172,9 +172,9 @@ def fem_input(src, rec, depth, res, freq, ab, aniso, epermH, epermV, mpermH,
             print("\n>  CALCULATING MODEL")
 
     # Arrange outdata-tuple
-    outdata = (ab_calc, xco, yco, off, angle, zsrc, zrec, lsrc, lrec, depth,
-               freq, etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg,
-               use_spline, use_ne_eval, msrc, mrec, loop_freq, loop_off)
+    outdata = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
+               etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
+               use_ne_eval, msrc, mrec, loop_freq, loop_off)
 
     return outdata
 
@@ -205,7 +205,7 @@ def tem_input(src, rec, depth, res, time, ab, signal, aniso, epermH, epermV,
         print("\n>  f->t TRANSFORM")
 
     # Arrange outdata-tuple
-    outdata = fdata[:19] + (time, signal, ft, ftarg) + fdata[19:]
+    outdata = fdata[:17] + (time, signal, ft, ftarg) + fdata[17:]
 
     return outdata
 
@@ -371,10 +371,6 @@ def check_spatial(src, rec, depth, verb):
         Layer number in which src resides.
     lrec : int
         Layer number in which rec resides.
-    xco : array of floats
-        x-coordinates
-    yco : array of floats
-        y-coordinates
     off : array of floats
         Offsets
     angle : array of floats
@@ -432,7 +428,7 @@ def check_spatial(src, rec, depth, verb):
             print("               : ", strvar(rec[1]))
         print("   rec z   [m] : ", strvar(rec[2]))
 
-    return zsrc, zrec, lsrc, lrec, xco, yco, off, angle
+    return zsrc, zrec, lsrc, lrec, off, angle
 
 
 def check_hankel(ht, htarg, ab, verb):
