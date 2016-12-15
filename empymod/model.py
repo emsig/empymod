@@ -43,7 +43,8 @@ import numpy as np
 from . import kernel, transform, utils
 
 
-__all__ = ['frequency', 'time', 'gpr', 'wavenumber', 'fem', 'tem']
+__all__ = ['frequency', 'time', 'gpr', 'wavenumber', 'fem', 'tem',
+           'freqrotfin']
 
 
 def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
@@ -233,6 +234,102 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
 
     # === 3. EM-FIELD CALCULATION ============
     fEM = fem(*inpdata)
+
+    # If calc. is for only one frequency or one offset, return simple 1D array
+    fEM = np.squeeze(fEM)
+
+    # === 4.  FINISHED ============
+    if verb > 0:
+        utils.printstartfinish(verb, t0)
+
+    return fEM
+
+
+def freqrotfin(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
+              epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
+              htarg=None, opt=None, loop=None, verb=1):
+    """Working function for finite, rotated dipoles (T, R)."""
+
+    # === 1.  LET'S START ============
+    if verb > 0:
+        t0 = utils.printstartfinish(verb)
+
+    # === 1.2345 NEW STUFF ============
+
+    # src [x, y, z] => [[x1, x2], [y1, y2], [z1, z2]]
+    # => set fullspace = False, kernel.fullspace assumes point src in origin
+
+    dx = src[0][1]-src[0][0]
+    dy = src[1][1]-src[1][0]
+    dz = src[2][1]-src[2][0]
+
+    # Calculate the dipole positions; Coordinate system is left-handed,
+    # positive z downwards (END).
+    if dx == dy == 0:
+        rh = 1  # circumvent division by zero
+                # implement better with early exits by the print statements
+        if dz == 0:
+            print("point source, just check <ab>")
+        else:
+            print("vertical source")
+    else:
+        if dz == 0:
+            print("horizontal source")
+        rh = np.sqrt(dx**2 + dy**2)
+
+    # rh = np.sqrt(dx**2 + dy**2)    # horizontal length of source
+    r = np.sqrt(rh**2 + dz**2)       # length of source
+    theta = np.arctan2(dy, dx)     # horizontal deviation from x-axis
+    phi = np.pi/2-np.arccos(dz/r)  # vertical deviation from xy-plane down
+
+    # Gauss quadrature
+    from scipy import special
+    nint = 10 # number of integration points
+    g_x, g_w = special.p_roots(nint)
+    g_x *= r/2.0  # Adjust to source length
+    # g_w *= r/2.0/r  # Adjust to source length
+    g_w /= 2.0  # Adjust to source length
+
+    srcx = src[0][0] + dx/2 + g_x*np.sqrt(1-dz**2/r**2)*dx/rh
+         # x[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta))
+    srcy = src[1][0] + dy/2 + g_x*np.sqrt(1-dz**2/r**2)*dy/rh
+         # y[0] + dy/2 + g_x*np.cos(phi)*np.sin(theta))
+    srcz = src[2][0] + dz/2 + g_x*dz/r
+         # z[0] + dz/2 + g_x*np.sin(phi))
+
+    print(np.rad2deg(theta), np.rad2deg(phi), r)
+
+    for i in range(nint):
+
+        src = [srcx[i], srcy[i], srcz[i]]
+
+        # === 2.  CHECK INPUT ============
+
+        for ab in [11, 12, 13]:
+
+            inpdata = utils.fem_input(src, rec, depth, res, freq, ab, aniso,
+                                      epermH, epermV, mpermH, mpermV, xdirect,
+                                      ht, htarg, opt, loop, verb)
+
+            if ab == 11:
+                if i == 0:
+                    x = fem(*inpdata)*g_w[i]
+                else:
+                    x += fem(*inpdata)*g_w[i]
+            elif ab == 12:
+                if i == 0:
+                    y = fem(*inpdata)*g_w[i]
+                else:
+                    y += fem(*inpdata)*g_w[i]
+            else:
+                if i == 0:
+                    z = fem(*inpdata)*g_w[i]
+                else:
+                    z += fem(*inpdata)*g_w[i]
+
+        # === 3. EM-FIELD CALCULATION ============
+        fEM = (x*np.cos(theta)+y*np.sin(theta))*np.cos(phi)+z*np.sin(phi)  # x
+        # fEM = -x*np.sin(theta)+y*np.cos(theta) # y
 
     # If calc. is for only one frequency or one offset, return simple 1D array
     fEM = np.squeeze(fEM)
