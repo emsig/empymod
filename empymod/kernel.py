@@ -189,7 +189,7 @@ def angle_factor(angle, ab, msrc, mrec):
     return factAng
 
 
-def fullspace(xco, yco, off, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
+def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
               mrec):
     """Analytical full-space solutions in the frequency domain.
 
@@ -208,6 +208,8 @@ def fullspace(xco, yco, off, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
     parameters.
 
     """
+    xco = np.cos(angle)*off
+    yco = np.sin(angle)*off
 
     # Reciprocity switches for magnetic receivers
     if mrec:
