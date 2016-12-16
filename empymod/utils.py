@@ -46,7 +46,7 @@ from . import filters, transform
 
 __all__ = ['EMArray', 'fem_input', 'tem_input', 'check_ab', 'check_param',
            'check_spatial', 'check_hankel', 'check_frequency', 'check_opt',
-           'check_time', 'strvar', 'param_shape', 'printstartfinish', ]
+           'check_time', 'printstartfinish', ]
 
 # 0. Settings
 
@@ -294,32 +294,28 @@ def check_param(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     """
 
     # Check depth
-    depth = param_shape(depth, None, 'depth', float)
+    depth = _check_var(depth, float, 1, 'depth')
+
+    # Add -infinity at the beginning
+    # => The top-layer (-infinity to first interface) is layer 0.
+    depth = np.insert(depth, 0, -np.infty)
 
     # Ensure depth is increasing
     if np.any(depth[1:] - depth[:-1] < 0):
         print('* ERROR   :: <depth> must be increasing;' +
-              ' <depth> provided: ' + strvar(depth))
+              ' <depth> provided: ' + _strvar(depth))
         raise ValueError('ab')
 
-    # Add -infty at start, if not present yet
-    # => The top-layer (-infty to first interface) is layer 0.
-    if depth.size == 0:
-        depth = np.array([-np.infty, ])
-    elif depth[0] != -np.infty:
-        depth = np.concatenate((np.array([-np.infty]), depth))
-
-    # Check resistivity
-    res = param_shape(res, depth.shape, 'res', float)
+    # Cast and check resistivity
+    res = _check_var(res, float, 1, 'res', depth.shape)
 
     # Check anisotropy, electric permittivity, and magnetic permeability
-    # => They all default to ones if not provided
     def check_inp(var, name):
-        """Param-check function."""
+        """Param-check function. Default to ones if not provided"""
         if not np.any(var):
             return np.ones(depth.size)
         else:
-            return param_shape(var, depth.shape, name, float)
+            return _check_var(var, float, 1, name, depth.shape)
 
     aniso = check_inp(aniso, 'aniso')
     epermH = check_inp(epermH, 'epermH')
@@ -329,13 +325,13 @@ def check_param(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
     # Print model parameters
     if verb > 1:
-        print("   depth   [m] : ", strvar(depth[1:]))
-        print("   res [Ohm.m] : ", strvar(res))
-        print("   aniso   [-] : ", strvar(aniso))
-        print("   epermH  [-] : ", strvar(epermH))
-        print("   epermV  [-] : ", strvar(epermV))
-        print("   mpermH  [-] : ", strvar(mpermH))
-        print("   mpermV  [-] : ", strvar(mpermV))
+        print("   depth   [m] : ", _strvar(depth[1:]))
+        print("   res [Ohm.m] : ", _strvar(res))
+        print("   aniso   [-] : ", _strvar(aniso))
+        print("   epermH  [-] : ", _strvar(epermH))
+        print("   epermV  [-] : ", _strvar(epermV))
+        print("   mpermH  [-] : ", _strvar(mpermH))
+        print("   mpermV  [-] : ", _strvar(mpermV))
 
     # Check if medium is a homogeneous full-space. If that is the case, the
     # EM-field is computed analytically directly in the frequency-domain.
@@ -379,17 +375,17 @@ def check_spatial(src, rec, depth, verb):
     """
 
     # Check src
-    src = param_shape(src, (3,), 'src', list)
-    src[0] = param_shape(src[0], (1,), 'src-x', float)
-    src[1] = param_shape(src[1], (1,), 'src-y', float)
-    src[2] = param_shape(src[2], (), 'src-z', float)
+    _check_shape(src, 'src', (3,))
+    src[0] = _check_var(src[0], float, 1, 'src-x', (1,))
+    src[1] = _check_var(src[1], float, 1, 'src-y', (1,))
+    src[2] = _check_var(src[2], float, 0, 'src-z', ())
     zsrc = np.squeeze(src[2])
 
     # Check rec
-    rec = param_shape(rec, (3,), 'rec', list)
-    rec[0] = param_shape(rec[0], None, 'rec-x', float)
-    rec[1] = param_shape(rec[1], rec[0].shape, 'rec-y', float)
-    rec[2] = param_shape(rec[2], (), 'rec-z', float)
+    _check_shape(rec, 'src', (3,))
+    rec[0] = _check_var(rec[0], float, 1, 'rec-x')
+    rec[1] = _check_var(rec[1], float, 1, 'rec-y', rec[0].shape)
+    rec[2] = _check_var(rec[2], float, 0, 'rec-z', ())
     zrec = np.squeeze(rec[2])
 
     # Determine layers in which src and rec reside.
@@ -415,18 +411,18 @@ def check_spatial(src, rec, depth, verb):
 
     # Print spatial parameters
     if verb > 1:
-        print("   src x   [m] : ", strvar(src[0]))
-        print("   src y   [m] : ", strvar(src[1]))
-        print("   src z   [m] : ", strvar(src[2]))
+        print("   src x   [m] : ", _strvar(src[0]))
+        print("   src y   [m] : ", _strvar(src[1]))
+        print("   src z   [m] : ", _strvar(src[2]))
         print("   rec x   [m] : ", str(rec[0].min()), "-", str(rec[0].max()),
               ";", str(rec[0].size), " [min-max; #]")
         if verb > 2:
-            print("               : ", strvar(rec[0]))
+            print("               : ", _strvar(rec[0]))
         print("   rec y   [m] : ", str(rec[1].min()), "-", str(rec[1].max()),
               ";", str(rec[1].size), " [min-max; #]")
         if verb > 2:
-            print("               : ", strvar(rec[1]))
-        print("   rec z   [m] : ", strvar(rec[2]))
+            print("               : ", _strvar(rec[1]))
+        print("   rec z   [m] : ", _strvar(rec[2]))
 
     return zsrc, zrec, lsrc, lrec, off, angle
 
@@ -473,8 +469,8 @@ def check_hankel(ht, htarg, ab, verb):
             pts_per_dec = None
         else:
             if pts_per_dec:  # Check pts_per_dec
-                pts_per_dec = param_shape(pts_per_dec, (),
-                                          'fht: pts_per_dec', int)
+                pts_per_dec = _check_var(pts_per_dec, int, 0,
+                                         'fht: pts_per_dec', ())
 
         # Assemble htarg
         htarg = (fhtfilt, pts_per_dec)
@@ -494,19 +490,19 @@ def check_hankel(ht, htarg, ab, verb):
 
         # rtol : 1e-12 is low for accurate results
         try:
-            rtol = param_shape(htarg[0], (), 'qwe: rtol', float)
+            rtol = _check_var(htarg[0], float, 0, 'qwe: rtol', ())
         except:
             rtol = float(1e-12)
 
         # atol : 1e-30 is low for accurate results
         try:
-            atol = param_shape(htarg[1], (), 'qwe: atol', float)
+            atol = _check_var(htarg[1], float, 0, 'qwe: atol', ())
         except:
             atol = float(1e-30)
 
         # nquad : 51 is relatively high
         try:
-            nquad = param_shape(htarg[2], (), 'qwe: nquad', int)
+            nquad = _check_var(htarg[2], int, 0, 'qwe: nquad', ())
         except:
             nquad = int(51)
 
@@ -514,7 +510,7 @@ def check_hankel(ht, htarg, ab, verb):
         #             40 : 11-15, 21-25, 33-35, 41-45, 51-55
         #            100 : 16/26, 31/32, 46/56, 61-66
         try:
-            maxint = param_shape(htarg[3], (), 'qwe: maxint', int)
+            maxint = _check_var(htarg[3], int, 0, 'qwe: maxint', ())
         except:
             if ab in [16, 26, 31, 32, 46, 56, 61, 62, 64, 65, 66]:
                 maxint = int(100)
@@ -523,7 +519,7 @@ def check_hankel(ht, htarg, ab, verb):
 
         # pts_per_dec : 80 is relatively high
         try:
-            pts_per_dec = param_shape(htarg[4], (), 'qwe: pts_per_dec', int)
+            pts_per_dec = _check_var(htarg[4], int, 0, 'qwe: pts_per_dec', ())
         except:
             pts_per_dec = int(80)
 
@@ -564,7 +560,7 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     """
 
     # Check frequency
-    freq = param_shape(freq, None, 'freq', float)
+    freq = _check_var(freq, float, 1, 'freq')
 
     # Minimum frequency to avoid division by zero at freq = 0 Hz.
     # => min_freq is defined at the start of this file
@@ -577,7 +573,7 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         print("   freq   [Hz] : ", str(freq.min()), "-", str(freq.max()), ";",
               str(freq.size), " [min-max; #]")
         if verb > 2:
-            print("               : ", strvar(freq))
+            print("               : ", _strvar(freq))
 
     # Calculate eta and zeta (horizontal and vertical)
     etaH = 1/res + np.outer(2j*np.pi*freq, epermH*epsilon_0)
@@ -669,7 +665,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
     """
     # Check time
-    time = param_shape(time, None, 'time', float)
+    time = _check_var(time, float, 1, 'time')
 
     # Minimum time to avoid division by zero  at time = 0 s.
     # => min_time is defined at the start of this file
@@ -681,7 +677,7 @@ def check_time(time, signal, ft, ftarg, verb):
         print("   time    [s] : ", str(time.min()), "-", str(time.max()), ";",
               str(time.size), " [min-max; #]")
         if verb > 2:
-            print("               : ", strvar(time))
+            print("               : ", _strvar(time))
 
     # Ensure ft is all lowercase
     ft = ft.lower()
@@ -716,8 +712,8 @@ def check_time(time, signal, ft, ftarg, verb):
             pts_per_dec = None
         else:
             if pts_per_dec:  # Check pts_per_dec
-                pts_per_dec = param_shape(pts_per_dec, (),
-                                          ft + ': pts_per_dec', int)
+                pts_per_dec = _check_var(pts_per_dec, int, 0,
+                                         ft + ' pts_per_dec', ())
 
         # Assemble ftarg
         ftarg = (fftfilt, ft, pts_per_dec)
@@ -738,6 +734,7 @@ def check_time(time, signal, ft, ftarg, verb):
         # Get required frequencies
         # (multiply time by 2Pi, as calculation is done in angular frequencies)
         freq, _ = transform.get_spline_values(ftarg[0], 2*np.pi*time, ftarg[2])
+        freq = np.squeeze(freq)
 
         # Rename ft
         ft = 'fft'
@@ -751,27 +748,27 @@ def check_time(time, signal, ft, ftarg, verb):
             ftarg = []
 
         try:  # rtol
-            rtol = param_shape(ftarg[0], (), 'qwe: rtol', float)
+            rtol = _check_var(ftarg[0], float, 0, 'qwe: rtol', ())
         except:
             rtol = float(1e-8)
 
         try:  # atol
-            atol = param_shape(ftarg[1], (), 'qwe: atol', float)
+            atol = _check_var(ftarg[1], float, 0, 'qwe: atol', ())
         except:
             atol = float(1e-20)
 
         try:  # nquad
-            nquad = param_shape(ftarg[2], (), 'qwe: nquad', int)
+            nquad = _check_var(ftarg[2], int, 0, 'qwe: nquad', ())
         except:
             nquad = int(21)
 
         try:  # maxint
-            maxint = param_shape(ftarg[3], (), 'qwe: maxint', int)
+            maxint = _check_var(ftarg[3], int, 0, 'qwe: maxint', ())
         except:
             maxint = int(200)
 
         try:  # pts_per_dec
-            pts_per_dec = param_shape(ftarg[4], (), 'qwe: pts_per_dec', int)
+            pts_per_dec = _check_var(ftarg[4], int, 0, 'qwe: pts_per_dec', ())
         except:
             pts_per_dec = int(20)
 
@@ -800,17 +797,18 @@ def check_time(time, signal, ft, ftarg, verb):
             ftarg = []
 
         try:  # pts_per_dec
-            pts_per_dec = param_shape(ftarg[0], (), 'fftlog: pts_per_dec', int)
+            pts_per_dec = _check_var(ftarg[0], int, 0,
+                                     'fftlog: pts_per_dec', ())
         except:
             pts_per_dec = 10
 
         try:  # add_dec
-            add_dec = param_shape(ftarg[1], (2,), 'fftlog: add_dec', float)
+            add_dec = _check_var(ftarg[1], float, 1, 'fftlog: add_dec', (2,))
         except:
             add_dec = np.array([-2, 1])
 
         try:  # q
-            q = param_shape(ftarg[2], (), 'fftlog: q', float)
+            q = _check_var(ftarg[2], float, 0, 'fftlog: q', ())
             # Restrict q to +/- 1
             if np.abs(q) > 1:
                 q = np.sign(q)
@@ -843,82 +841,27 @@ def check_time(time, signal, ft, ftarg, verb):
     return time, signal, freq, ft, ftarg
 
 
-# 3. General utilities
+# 3. Internal utilities
 
-def strvar(a, prec='{:G}'):
-    """Return variable as a string to print, with given precision.
-
-    Parameters
-    ----------
-    a : array_like
-        Variable to be printed.
-    prec : format-str, optional
-        Precision for variable; defaults to '{:G}'.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from empymod.utils import strvar
-    >>> print('Example : ' + strvar(1.23456789*np.arange(6)))
-    Example : 0 1.23457 2.46914 3.7037 4.93827 6.17284
-
-    """
+def _strvar(a, prec='{:G}'):
+    """Return variable as a string to print, with given precision."""
     return ' '.join([prec.format(i) for i in np.atleast_1d(a)])
 
 
-def param_shape(a, shape=None, name='inp-var', datatype=None):
-    """Convert input variable to array and check its shape.
+def _check_var(var, dtype, ndmin, name, shape=None):
+    var = np.array(var, dtype=dtype, copy=True, ndmin=ndmin)
+    if shape:
+        _check_shape(var, name, shape)
+    return var
 
-    Ensures one-dimensionality except if datatype is list.
 
-    Parameters
-    ----------
-    a : array_like
-        Input array.
-    shape : tuple, optional
-        Tuple of dimension that the variable should have.
-    name : str, optional
-        String describing variable, defaults to 'inp-var'.
-    datatype : {float, int, list}, optional
-        Type of array.
-
-    Returns
-    -------
-    a : array
-        Returns a as an array if np.shape(a) = shape; else raise error.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from empymod.utils import param_shape
-    >>> a = [1, 2, 3]
-    >>> b = [1, 2]
-    >>> c = np.asarray(a).shape
-    >>> param_shape(a, c, 'test-A')
-    array([1, 2, 3])
-    >>> param_shape(b, c, 'test-B')
-    Traceback (most recent call last):
-        ...
-    ValueError: test-B
-
-    """
-
-    # Convert input to an array
-    a = np.squeeze(np.asarray(a, datatype))
-
-    # Ensure one-dimensionality except if datatype is int, list, or tuple
-    a = np.atleast_1d(a)
-
-    # Ensure a.shape is equal to shape, raise error if not
-    if shape and not np.array_equal(np.shape(a), shape):
+def _check_shape(var, name, shape):
+    """Check that <var> has shape <shape>; if false raise ValueError(name)"""
+    varshape = np.shape(var)
+    if shape != varshape:
         print('* ERROR   :: Parameter ' + name + ' has wrong shape! : ' +
-            str(np.shape(a)) + ' instead of ' + str(shape) + '.')
+              str(varshape) + ' instead of ' + str(shape) + '.')
         raise ValueError(name)
-
-    if datatype == int and shape == ():
-        a = int(a)
-
-    return a
 
 
 def printstartfinish(verb, inp=None):

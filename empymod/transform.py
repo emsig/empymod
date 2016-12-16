@@ -269,8 +269,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     for i in range(10):   # 10 is more than enough, usually stops in 5
 
         # Evaluate
-        b_x0 = special.j1(b_zero)    # j0 and j1 have faster versions
-        b_x1 = special.jv(2, b_zero) # j2 does not have a faster version
+        b_x0 = special.j1(b_zero)     # j0 and j1 have faster versions
+        b_x1 = special.jv(2, b_zero)  # j2 does not have a faster version
 
         # The step length
         b_h = -b_x0/(b_x0/b_zero - b_x1)
