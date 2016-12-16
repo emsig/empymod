@@ -67,7 +67,7 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
         The x- and y-coordinates must have the same dimension.
 
     depth : list
-        Absolute layer boundaries z (m); #depth = #res - 1
+        Absolute layer interfaces z (m); #depth = #res - 1
         (excluding +/- infinity).
 
     res : array_like
@@ -246,8 +246,8 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
 
 
 def freqrotfin(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
-              epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
-              htarg=None, opt=None, loop=None, verb=1):
+               epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
+               htarg=None, opt=None, loop=None, verb=1):
     """Working function for finite, rotated dipoles (T, R)."""
 
     # === 1.  LET'S START ============
@@ -267,7 +267,7 @@ def freqrotfin(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
     # positive z downwards (END).
     if dx == dy == 0:
         rh = 1  # circumvent division by zero
-                # implement better with early exits by the print statements
+        #       # implement better with early exits by the print statements
         if dz == 0:
             print("point source, just check <ab>")
         else:
@@ -284,18 +284,18 @@ def freqrotfin(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
 
     # Gauss quadrature
     from scipy import special
-    nint = 10 # number of integration points
+    nint = 10  # number of integration points
     g_x, g_w = special.p_roots(nint)
     g_x *= r/2.0  # Adjust to source length
     # g_w *= r/2.0/r  # Adjust to source length
     g_w /= 2.0  # Adjust to source length
 
     srcx = src[0][0] + dx/2 + g_x*np.sqrt(1-dz**2/r**2)*dx/rh
-         # x[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta))
+    #    # x[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta))
     srcy = src[1][0] + dy/2 + g_x*np.sqrt(1-dz**2/r**2)*dy/rh
-         # y[0] + dy/2 + g_x*np.cos(phi)*np.sin(theta))
+    #    # y[0] + dy/2 + g_x*np.cos(phi)*np.sin(theta))
     srcz = src[2][0] + dz/2 + g_x*dz/r
-         # z[0] + dz/2 + g_x*np.sin(phi))
+    #    # z[0] + dz/2 + g_x*np.sin(phi))
 
     print(np.rad2deg(theta), np.rad2deg(phi), r)
 
