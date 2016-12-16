@@ -375,14 +375,14 @@ def check_spatial(src, rec, depth, verb):
     """
 
     # Check src
-    _check_shape(src, 'src', (3,))
+    _check_shape(np.squeeze(src), 'src', (3,))
     src[0] = _check_var(src[0], float, 1, 'src-x', (1,))
     src[1] = _check_var(src[1], float, 1, 'src-y', (1,))
     src[2] = _check_var(src[2], float, 0, 'src-z', ())
     zsrc = np.squeeze(src[2])
 
     # Check rec
-    _check_shape(rec, 'src', (3,))
+    _check_shape(np.squeeze(rec), 'rec', (3,))
     rec[0] = _check_var(rec[0], float, 1, 'rec-x')
     rec[1] = _check_var(rec[1], float, 1, 'rec-y', rec[0].shape)
     rec[2] = _check_var(rec[2], float, 0, 'rec-z', ())
@@ -842,6 +842,8 @@ def check_time(time, signal, ft, ftarg, verb):
 
 
 # 3. Internal utilities
+
+# TODO : ab to msrc/mrec/xyz/xyz
 
 def _strvar(a, prec='{:G}'):
     """Return variable as a string to print, with given precision."""
