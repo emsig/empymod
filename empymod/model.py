@@ -43,17 +43,22 @@ import numpy as np
 from . import kernel, transform, utils
 
 
-__all__ = ['frequency', 'time', 'gpr', 'wavenumber', 'fem', 'tem',
-           'freqrotfin']
+__all__ = ['dipole', 'bipole', 'gpr', 'wavenumber', 'fem', 'tem']
 
 
-def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
-              epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
-              htarg=None, opt=None, loop=None, verb=1):
-    """Return the electromagnetic frequency-domain field.
+def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
+           epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=True,
+           ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
+           verb=1):
+    """Return the electromagnetic field due to a dipole source.
 
-    Calculate the electromagnetic field for various frequencies and offsets
-    (one src-rec-configuration).
+    Calculate the electromagnetic frequency- or time-domain field due to an
+    infinitesimal small electric or magnetic dipole source, measured by
+    infinitesimal small electric or magnetic dipole receivers; source and
+    receivers are directed along the principal directions x, y, or z.
+
+    To calculate bipoles of finite length or arbitrary source and receiver
+    angles, use the function `bipole`.
 
     Parameters
     ----------
@@ -73,8 +78,15 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
     res : array_like
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
-    freq : array_like
-        Frequencies f (Hz)
+    freqtime : array_like
+        Frequencies f (Hz) if `signal` == None, else times t (s).
+
+    signal : {None, 0, 1, -1}, optional
+        Source signal, default is None:
+            - None: Frequency-domain response
+            - -1 : Switch-off time-domain response
+            - 0 : Impulse time-domain response
+            - +1 : Switch-on time-domain response
 
     ab : int, optional
         Source-receiver configuration, defaults to 11.
@@ -155,6 +167,47 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
               change `nquad` to 11 and use the defaults otherwise, you can
               provide htarg=['', '', 11].
 
+    ft : {'sin', 'cos', 'qwe', 'fftlog'}, optional
+        Only used if `signal` != None. Flag to choose either the Sine- or
+        Cosine-Filter, the Quadrature-With-Extrapolation (QWE), or FFTLog for
+        the Fourier transform.  Defaults to 'sin'.
+
+    ftarg : str or filter from empymod.filters or array_like, optional
+        Only used if `signal` !=None. Depends on the value for `ft`:
+            - If `ft` = 'sin' or 'cos': array containing:
+              [filter, pts_per_dec]:
+
+                - filter: string of filter name in `empymod.filters` or
+                          the filter method itself.
+                          (Default: `empymod.filters.key_201_CosSin_2012()`)
+                - pts_per_dec: points per decade.  If none, standard lagged
+                               convolution is used. (Default: None)
+
+            - If `ft` = 'qwe': array containing:
+              [rtol, atol, nquad, maxint, pts_per_dec]:
+
+                - rtol: relative tolerance (default: 1e-8)
+                - atol: absolute tolerance (default: 1e-20)
+                - nquad: order of Gaussian quadrature (default: 21)
+                - maxint: maximum number of partial integral intervals
+                  (default: 200)
+                - pts_per_dec: points per decade (only relevant if spline=True)
+                  (default: 20)
+
+              All are optional, you only have to maintain the order. To only
+              change `nquad` to 11 and use the defaults otherwise, you can
+              provide ftarg=['', '', 11].
+
+            - If `ft` = 'fftlog': array containing: [pts_per_dec, add_dec, q]:
+
+                - pts_per_dec: sampels per decade (default: 10)
+                - add_dec: additional decades [left, right] (default: [-2, 1])
+                - q: exponent of power law bias (default: 0); -1 <= q <= 1
+
+              All are optional, you only have to maintain the order. To only
+              change `add_dec` to [-1, 1] and use the defaults otherwise, you
+              can provide ftarg=['', [-1, 1]].
+
     opt : {None, 'parallel', 'spline'}, optional
         Optimization flag. Defaults to None:
             - None: Normal case, no parallelization nor interpolation is used.
@@ -195,26 +248,31 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
             - 1: Print warnings.
             - 2: Print warnings and information.
 
+
     Returns
     -------
-    fEM : ndarray
-        Frequency-domain electromagnetic field:
+    EM : ndarray
+        Frequency- or time-domain EM field (depending on `signal`):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns B [T] (not H [A/m]!).
 
-        However, the source is normalised. So for instance in the electric case
-        the source strength is 1 A and its length is 1 m. So the electric field
-        could also be written as [V/(A.m2)].
+        In the case of the impulse time-domain response, the unit is further
+        divided by seconds [1/s].
+
+        However, source and receiver are normalised. So for instance in the
+        electric case the source strength is 1 A and its length is 1 m. So the
+        electric field could also be written as [V/(A.m2)].
+
 
     Examples
     --------
     >>> import numpy as np
-    >>> from empymod import frequency
+    >>> from empymod import dipole
     >>> src = [0, 0, 100]
     >>> rec = [np.arange(1,11)*500, np.zeros(10), 200]
     >>> depth = [0, 300, 1000, 1050]
     >>> res = [1e20, .3, 1, 50, 1]
-    >>> EMfield = frequency(src, rec, depth, res, freq=1, verb=0)
+    >>> EMfield = dipole(src, rec, depth, res, freqtime=1, verb=0)
     >>> print(EMfield)
     [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
       -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
@@ -228,26 +286,29 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
         t0 = utils.printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
-    inpdata = utils.fem_input(src, rec, depth, res, freq, ab, aniso, epermH,
-                              epermV, mpermH, mpermV, xdirect, ht, htarg, opt,
-                              loop, verb)
+    finp, tinp = utils.ftem_input(src, rec, depth, res, freqtime, signal, ab,
+                                  aniso, epermH, epermV, mpermH, mpermV,
+                                  xdirect, ht, htarg, ft, ftarg, opt, loop,
+                                  verb)
 
     # === 3. EM-FIELD CALCULATION ============
-    fEM = fem(*inpdata)
+    EM = fem(*finp)
+    if signal != None:
+        EM = tem(EM, *tinp)
 
     # If calc. is for only one frequency or one offset, return simple 1D array
-    fEM = np.squeeze(fEM)
+    EM = np.squeeze(EM)
 
     # === 4.  FINISHED ============
     if verb > 0:
         utils.printstartfinish(verb, t0)
 
-    return fEM
+    return EM
 
 
-def freqrotfin(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
-               epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
-               htarg=None, opt=None, loop=None, verb=1):
+def bipole(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
+           epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
+           htarg=None, opt=None, loop=None, verb=1):
     """Working function for finite, rotated dipoles (T, R)."""
 
     # === 1.  LET'S START ============
@@ -281,6 +342,10 @@ def freqrotfin(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
     r = np.sqrt(rh**2 + dz**2)       # length of source
     theta = np.arctan2(dy, dx)     # horizontal deviation from x-axis
     phi = np.pi/2-np.arccos(dz/r)  # vertical deviation from xy-plane down
+    cosphi = np.cos(phi)
+    sinphi = np.sin(phi)
+    costheta = np.cos(theta)
+    sintheta = np.sin(theta)
 
     # Gauss quadrature
     from scipy import special
@@ -290,12 +355,12 @@ def freqrotfin(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
     # g_w *= r/2.0/r  # Adjust to source length
     g_w /= 2.0  # Adjust to source length
 
-    srcx = src[0][0] + dx/2 + g_x*np.sqrt(1-dz**2/r**2)*dx/rh
-    #    # x[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta))
-    srcy = src[1][0] + dy/2 + g_x*np.sqrt(1-dz**2/r**2)*dy/rh
-    #    # y[0] + dy/2 + g_x*np.cos(phi)*np.sin(theta))
-    srcz = src[2][0] + dz/2 + g_x*dz/r
-    #    # z[0] + dz/2 + g_x*np.sin(phi))
+    # srcx = src[0][0] + dx/2 + g_x*np.sqrt(1-dz**2/r**2)*dx/rh
+    srcx = src[0][0] + dx/2 + g_x*cosphi*costheta
+    # srcy = src[1][0] + dy/2 + g_x*np.sqrt(1-dz**2/r**2)*dy/rh
+    srcy = src[1][0] + dy/2 + g_x*cosphi*sintheta
+    # srcz = src[2][0] + dz/2 + g_x*dz/r
+    srcz = src[2][0] + dz/2 + g_x*sinphi
 
     print(np.rad2deg(theta), np.rad2deg(phi), r)
 
@@ -328,8 +393,8 @@ def freqrotfin(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
                     z += fem(*inpdata)*g_w[i]
 
         # === 3. EM-FIELD CALCULATION ============
-        fEM = (x*np.cos(theta)+y*np.sin(theta))*np.cos(phi)+z*np.sin(phi)  # x
-        # fEM = -x*np.sin(theta)+y*np.cos(theta) # y
+        fEM = (x*costheta + y*sintheta)*cosphi + z*sinphi  # x
+        # fEM = -x*sintheta+y*costheta # y
 
     # If calc. is for only one frequency or one offset, return simple 1D array
     fEM = np.squeeze(fEM)
@@ -339,130 +404,6 @@ def freqrotfin(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
         utils.printstartfinish(verb, t0)
 
     return fEM
-
-
-def time(src, rec, depth, res, time, ab=11, signal=0, aniso=None, epermH=None,
-         epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
-         htarg=None, ft='sin', ftarg=None, opt=None, loop='off', verb=1):
-    """Return the electromagnetic time-domain field.
-
-    Calculate the electromagnetic field for various times and offsets (one
-    src-rec-configuration).
-
-    This routine runs internally the `frequency`-routine, and transforms it
-    to the time domain with a Fourier transform. Most parameters are therefore
-    described in the modelling-routine `frequency`: *src*, *rec*, *depth*,
-    *res*, *freq*, *ab*, *aniso*, *epermH*, *epermV*, *mpermH*, *mpermV*,
-    *xdirect*, *ht*, *htarg*, *opt*, *loop*, and *verb*.
-
-    Here are only the time-domain specific input parameters described: *time*,
-    *signal*, *ft*, and *ftarg*.
-
-    Parameters
-    ----------
-    time : array_like
-        Times t (s)
-
-    signal : {0, 1, -1}, optional
-        Source signal, default is '0':
-            - -1 : Switch-off response
-            - 0 : Impulse response (0 or anything that is not +/- 1)
-            - +1 : Switch-on response
-
-    ft : {'sin', 'cos', 'qwe', 'fftlog'}, optional
-        Flag to choose either the Sine- or Cosine-Filter, the
-        Quadrature-With-Extrapolation (QWE), or FFTLog for the Fourier
-        transform.  Defaults to 'sin'.
-
-    ftarg : str or filter from empymod.filters or array_like, optional
-        Depends on the value for `ft`:
-            - If `ft` = 'sin' or 'cos': array containing:
-              [filter, pts_per_dec]:
-
-                - filter: string of filter name in `empymod.filters` or
-                          the filter method itself.
-                          (Default: `empymod.filters.key_201_CosSin_2012()`)
-                - pts_per_dec: points per decade.  If none, standard lagged
-                               convolution is used. (Default: None)
-
-            - If `ft` = 'qwe': array containing:
-              [rtol, atol, nquad, maxint, pts_per_dec]:
-
-                - rtol: relative tolerance (default: 1e-8)
-                - atol: absolute tolerance (default: 1e-20)
-                - nquad: order of Gaussian quadrature (default: 21)
-                - maxint: maximum number of partial integral intervals
-                  (default: 200)
-                - pts_per_dec: points per decade (only relevant if spline=True)
-                  (default: 20)
-
-              All are optional, you only have to maintain the order. To only
-              change `nquad` to 11 and use the defaults otherwise, you can
-              provide ftarg=['', '', 11].
-
-            - If `ft` = 'fftlog': array containing: [pts_per_dec, add_dec, q]:
-
-                - pts_per_dec: sampels per decade (default: 10)
-                - add_dec: additional decades [left, right] (default: [-2, 1])
-                - q: exponent of power law bias (default: 0); -1 <= q <= 1
-
-              All are optional, you only have to maintain the order. To only
-              change `add_dec` to [-1, 1] and use the defaults otherwise, you
-              can provide ftarg=['', [-1, 1]].
-
-    Returns
-    -------
-    tEM : ndarray
-        Time-domain electromagnetic field:
-            - If rec is electric, returns E [V/m].
-            - If rec is magnetic, returns B [T] (not H [A/m]!).
-
-        In the case of the impulse response, the unit is further divided by
-        seconds [1/s].
-
-        However, the source is normalised. So for instance in the electric case
-        the source strength is 1 A and its length is 1 m. So the electric field
-        could also be written as [V/(A.m2)].
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from empymod import time
-    >>> src = [0, 0, 100]
-    >>> rec = [3000, 0, 200]
-    >>> t = np.logspace(-1,1,21)
-    >>> depth = [0, 300, 1000, 1050]
-    >>> res = [1e20, .3, 1, 50, 1]
-    >>> EMfield = time(src, rec, depth, res, t, verb=0)
-    >>> print(EMfield)
-    [  4.19709394e-12   3.79932391e-12   3.36173519e-12   2.95469327e-12
-       2.64314626e-12   2.49550877e-12   2.56455245e-12   2.84250641e-12
-       3.22151484e-12   3.51422486e-12   3.54902799e-12   3.26936090e-12
-       2.74826378e-12   2.12471621e-12   1.52728547e-12   1.03310668e-12
-       6.65679090e-13   4.13283197e-13   2.49707666e-13   1.48016806e-13
-       8.66001149e-14]
-    """
-
-    # === 1.  LET'S START ============
-    if verb > 0:
-        t0 = utils.printstartfinish(verb)
-
-    # === 2.  CHECK INPUT ============
-    inpdata = utils.tem_input(src, rec, depth, res, time, ab, signal, aniso,
-                              epermH, epermV, mpermH, mpermV, xdirect, ht,
-                              htarg, ft, ftarg, opt, loop, verb)
-
-    # === 3. EM-FIELD CALCULATION AND t->f TRANSFORM ============
-    tEM = tem(*inpdata)
-
-    # If calc. is for only one time or one offset, return simple 1D array
-    tEM = np.squeeze(tEM)
-
-    # === 4.  FINISHED ============
-    if verb > 0:
-        utils.printstartfinish(verb, t0)
-
-    return tEM
 
 
 def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
@@ -669,10 +610,8 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
     return fEM
 
 
-def tem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
-        zetaV, xdirect, isfullspace, ht, htarg, time, signal, ft, ftarg,
-        use_spline, use_ne_eval, msrc, mrec, loop_freq, loop_off):
-    """Return the electromagnetic time-domain response.
+def tem(fEM, off, freq, time, signal, ft, ftarg):
+    """Return the time-domain response of the frequency-domain response fEM.
 
     This function is called from one of the above modelling routines. No
     input-check is carried out here. See the main description of :mod:`model`
@@ -683,18 +622,13 @@ def tem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
     it can speed-up the calculation by omitting input-checks.
 
     """
-    # 1. Get fem responses
-    fEM = fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV,
-              zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
-              use_ne_eval, msrc, mrec, loop_freq, loop_off)
-
-    # 2. Scale frequencies if switch-on/off response
+    # 1. Scale frequencies if switch-on/off response
     # Step function for causal times is like a unit fct, therefore an impulse
     # in frequency domain
     if signal in [-1, 1]:
         fEM *= signal/(2j*np.pi*freq[:, None])
 
-    # 3. f->t transform
+    # 2. f->t transform
     tEM = np.zeros((time.size, off.size))
     for i in range(off.size):
         tEM[:, i] += getattr(transform, ft)(fEM[:, i], time, freq, ftarg)

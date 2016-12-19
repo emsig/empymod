@@ -12,7 +12,7 @@ This module consists of four groups of functions:
 Group 0 is to set minimum offset, frequency and time for calculation (in order
 to avoid divisions by zero).  Group 2 are checks organised in modules. So if
 you create for instance a modelling-routine in which you loop over frequencies,
-you have to call `check_ab`, `check_param`, `check_spatial`, and `check_hankel`
+you have to call `check_ab`, `check_model`, `check_survey`, and `check_hankel`
 only once, but `check_frequency` in each loop. You do not have to run these
 checks if you are sure your input parameters are in the correct format.
 
@@ -44,9 +44,9 @@ from scipy.constants import epsilon_0  # Elec. permittivity of free space [F/m]
 from . import filters, transform
 
 
-__all__ = ['EMArray', 'fem_input', 'tem_input', 'check_ab', 'check_param',
-           'check_spatial', 'check_hankel', 'check_frequency', 'check_opt',
-           'check_time', 'printstartfinish', ]
+__all__ = ['EMArray', 'ftem_input', 'check_ab', 'check_model', 'check_survey',
+           'check_hankel', 'check_frequency', 'check_opt', 'check_time',
+           'printstartfinish', ]
 
 # 0. Settings
 
@@ -116,9 +116,10 @@ class EMArray(np.ndarray):
 
 # 2. Input parameter checks for modelling
 
-def fem_input(src, rec, depth, res, freq, ab, aniso, epermH, epermV, mpermH,
-              mpermV, xdirect, ht, htarg, opt, loop, verb):
-    """Provide correct input for frequency-domain EM calculation.
+def ftem_input(src, rec, depth, res, freqtime, signal, ab, aniso, epermH,
+               epermV, mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt,
+               loop, verb):
+    """Provide correct input for frequency- and time-domain EM calculation.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a description of the
@@ -126,16 +127,26 @@ def fem_input(src, rec, depth, res, freq, ab, aniso, epermH, epermV, mpermH,
 
     Returns
     -------
-    outdata : tuple
+    finp : tuple
         Tuple containing the correct input format for :mod:`model.fem`.
+    tinp : tuple
+        Tuple containing the correct input format for :mod:`model.tem`, if
+        `signal` != None; else None.
 
     """
+    # Check times and Fourier Transform arguments, get required frequencies
+    if signal != None:
+        time, signal, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg,
+                                                   verb)
+    else:
+        freq = freqtime
+
     # Check src-rec configuration
     # => Get flags if src or rec or both are magnetic (msrc, mrec)
     ab_calc, msrc, mrec = check_ab(ab, verb)
 
     # Check layer parameters
-    param = check_param(depth, res, aniso, epermH, epermV, mpermH, mpermV,
+    param = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
                         verb)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = param
 
@@ -143,8 +154,8 @@ def fem_input(src, rec, depth, res, freq, ab, aniso, epermH, epermV, mpermH,
     # => Get source and receiver depths (zsrc, zrec)
     # => Get layer number in which src and rec reside (lsrc/lrec)
     # => Get offsets and angles (off, angle)
-    spatial = check_spatial(src, rec, depth, verb)
-    zsrc, zrec, lsrc, lrec, off, angle = spatial
+    zsrc, zrec, off, angle = check_survey(src, rec, verb)
+    lsrc, lrec = get_survey(zsrc, zrec, depth)
 
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, ab, verb)
@@ -171,43 +182,20 @@ def fem_input(src, rec, depth, res, freq, ab, aniso, epermH, epermV, mpermH,
         elif not isfullspace:
             print("\n>  CALCULATING MODEL")
 
-    # Arrange outdata-tuple
-    outdata = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
-               etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
-               use_ne_eval, msrc, mrec, loop_freq, loop_off)
-
-    return outdata
-
-
-def tem_input(src, rec, depth, res, time, ab, signal, aniso, epermH, epermV,
-              mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt, loop, verb):
-    """Provide correct input for time-domain EM calculation.
-
-    This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a description of the
-    input parameters.
-
-    Returns
-    -------
-    outdata : tuple
-        Tuple containing the correct input format for :mod:`model.tem`.
-
-    """
-    # Check times and Fourier Transform arguments, get required frequencies
-    time, signal, freq, ft, ftarg = check_time(time, signal, ft, ftarg, verb)
-
-    # Check the normal frequency-calculation stuff
-    fdata = fem_input(src, rec, depth, res, freq, ab, aniso, epermH, epermV,
-                      mpermH, mpermV, xdirect, ht, htarg, opt, loop, verb)
-
     # If verbose, indicate f->t transform
-    if verb > 1:
+    if signal != None and verb > 1:
         print("\n>  f->t TRANSFORM")
 
     # Arrange outdata-tuple
-    outdata = fdata[:17] + (time, signal, ft, ftarg) + fdata[17:]
+    finp = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
+            etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
+            use_ne_eval, msrc, mrec, loop_freq, loop_off)
+    if signal != None:
+        tinp = (off, freq, time, signal, ft, ftarg)
+    else:
+        tinp = None
 
-    return outdata
+    return finp, tinp
 
 
 def check_ab(ab, verb):
@@ -271,8 +259,8 @@ def check_ab(ab, verb):
     return ab_calc, msrc, mrec
 
 
-def check_param(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
-    """Check depth and corresponding layer parameters.
+def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
+    """Check the model: depth and corresponding layer parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a description of the
@@ -298,7 +286,10 @@ def check_param(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
     # Add -infinity at the beginning
     # => The top-layer (-infinity to first interface) is layer 0.
-    depth = np.insert(depth, 0, -np.infty)
+    if depth.size == 0:
+        depth = np.array([-np.infty, ])
+    elif depth[0] != -np.infty:
+        depth = np.insert(depth, 0, -np.infty)
 
     # Ensure depth is increasing
     if np.any(depth[1:] - depth[:-1] < 0):
@@ -350,8 +341,8 @@ def check_param(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
 
 
-def check_spatial(src, rec, depth, verb):
-    """Check spatial input parameters.
+def check_survey(src, rec, verb):
+    """Check survey, hence spatial input parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a description of the
@@ -363,10 +354,6 @@ def check_spatial(src, rec, depth, verb):
         Depth of src.
     zrec : float
         Depth of rec.
-    lsrc : int
-        Layer number in which src resides.
-    lrec : int
-        Layer number in which rec resides.
     off : array of floats
         Offsets
     angle : array of floats
@@ -387,13 +374,6 @@ def check_spatial(src, rec, depth, verb):
     rec[1] = _check_var(rec[1], float, 1, 'rec-y', rec[0].shape)
     rec[2] = _check_var(rec[2], float, 0, 'rec-z', ())
     zrec = np.squeeze(rec[2])
-
-    # Determine layers in which src and rec reside.
-    # Note: If src[2] or rec[2] are on a layer interface, the layer above the
-    #       interface is chosen.
-    depthinfty = np.concatenate((depth[1:], np.array([np.infty])))
-    lsrc = np.where((depth < src[2])*(depthinfty >= src[2]))[0][0]
-    lrec = np.where((depth < rec[2])*(depthinfty >= rec[2]))[0][0]
 
     # Coordinates
     xco = rec[0] - src[0]             # X-coordinates  [m]
@@ -424,7 +404,33 @@ def check_spatial(src, rec, depth, verb):
             print("               : ", _strvar(rec[1]))
         print("   rec z   [m] : ", _strvar(rec[2]))
 
-    return zsrc, zrec, lsrc, lrec, off, angle
+    return zsrc, zrec, off, angle
+
+
+def get_survey(zsrc, zrec, depth):
+    """Check spatial input parameters.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a description of the
+    input parameters.
+
+    Returns
+    -------
+    lsrc : int
+        Layer number in which src resides.
+    lrec : int
+        Layer number in which rec resides.
+
+    """
+
+    # Determine layers in which src and rec reside.
+    # Note: If zsrc or zrec are on a layer interface, the layer above the
+    #       interface is chosen.
+    depthinfty = np.concatenate((depth[1:], np.array([np.infty])))
+    lsrc = np.where((depth < zsrc)*(depthinfty >= zsrc))[0][0]
+    lrec = np.where((depth < zrec)*(depthinfty >= zrec))[0][0]
+
+    return lsrc, lrec
 
 
 def check_hankel(ht, htarg, ab, verb):
