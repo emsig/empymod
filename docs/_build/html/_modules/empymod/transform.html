@@ -313,8 +313,8 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>   <span class="c1"># 10 is more than enough, usually stops in 5</span>
 
         <span class="c1"># Evaluate</span>
-        <span class="n">b_x0</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">j1</span><span class="p">(</span><span class="n">b_zero</span><span class="p">)</span>    <span class="c1"># j0 and j1 have faster versions</span>
-        <span class="n">b_x1</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">jv</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">b_zero</span><span class="p">)</span> <span class="c1"># j2 does not have a faster version</span>
+        <span class="n">b_x0</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">j1</span><span class="p">(</span><span class="n">b_zero</span><span class="p">)</span>     <span class="c1"># j0 and j1 have faster versions</span>
+        <span class="n">b_x1</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">jv</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">b_zero</span><span class="p">)</span>  <span class="c1"># j2 does not have a faster version</span>
 
         <span class="c1"># The step length</span>
         <span class="n">b_h</span> <span class="o">=</span> <span class="o">-</span><span class="n">b_x0</span><span class="o">/</span><span class="p">(</span><span class="n">b_x0</span><span class="o">/</span><span class="n">b_zero</span> <span class="o">-</span> <span class="n">b_x1</span><span class="p">)</span>
@@ -781,6 +781,9 @@
 
     <span class="c1"># Number of out-values</span>
     <span class="n">nout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">outmax</span><span class="o">/</span><span class="n">outmin</span><span class="p">)</span><span class="o">*</span><span class="n">nr_per_dec</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># The cubic InterpolatedUnivariateSpline needs at least 4 points</span>
+    <span class="k">if</span> <span class="n">nout</span><span class="o">-</span><span class="n">filt</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">nout</span> <span class="o">=</span> <span class="n">filt</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">size</span><span class="o">+</span><span class="mi">3</span>
 
     <span class="c1"># Calculate output values</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">outmin</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">outmin</span><span class="p">)</span> <span class="o">+</span> <span class="n">nout</span><span class="o">/</span><span class="n">nr_per_dec</span><span class="p">,</span>

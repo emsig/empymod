@@ -737,6 +737,9 @@ def get_spline_values(filt, inp, nr_per_dec=None):
 
     # Number of out-values
     nout = int(np.ceil(np.log(outmax/outmin)*nr_per_dec) + 1)
+    # The cubic InterpolatedUnivariateSpline needs at least 4 points
+    if nout-filt.base.size < 3:
+        nout = filt.base.size+3
 
     # Calculate output values
     out = np.exp(np.arange(np.log(outmin), np.log(outmin) + nout/nr_per_dec,

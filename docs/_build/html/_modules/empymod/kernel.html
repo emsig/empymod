@@ -233,7 +233,7 @@
     <span class="k">return</span> <span class="n">factAng</span></div>
 
 
-<div class="viewcode-block" id="fullspace"><a class="viewcode-back" href="../../empymod.html#empymod.kernel.fullspace">[docs]</a><span class="k">def</span> <span class="nf">fullspace</span><span class="p">(</span><span class="n">xco</span><span class="p">,</span> <span class="n">yco</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span>
+<div class="viewcode-block" id="fullspace"><a class="viewcode-back" href="../../empymod.html#empymod.kernel.fullspace">[docs]</a><span class="k">def</span> <span class="nf">fullspace</span><span class="p">(</span><span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span>
               <span class="n">mrec</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Analytical full-space solutions in the frequency domain.</span>
 
@@ -252,6 +252,8 @@
 <span class="sd">    parameters.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xco</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="o">*</span><span class="n">off</span>
+    <span class="n">yco</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="o">*</span><span class="n">off</span>
 
     <span class="c1"># Reciprocity switches for magnetic receivers</span>
     <span class="k">if</span> <span class="n">mrec</span><span class="p">:</span>
