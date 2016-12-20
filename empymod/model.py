@@ -286,15 +286,50 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         t0 = utils.printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
-    finp, tinp = utils.ftem_input(src, rec, depth, res, freqtime, signal, ab,
-                                  aniso, epermH, epermV, mpermH, mpermV,
-                                  xdirect, ht, htarg, ft, ftarg, opt, loop,
-                                  verb)
+
+    # Check times and Fourier Transform arguments, get required frequencies
+    # (freq = freqtime if `signal=None`)
+    time, freq, ft, ftarg = utils.check_time(freqtime, signal, ft, ftarg, verb)
+
+    # Check layer parameters
+    model = utils.check_model(depth, res, aniso, epermH, epermV, mpermH,
+                              mpermV, verb)
+    depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
+
+    # Check frequency => get etaH, etaV, zetaH, and zetaV
+    frequency = utils.check_frequency(freq, res, aniso, epermH, epermV, mpermH,
+                                      mpermV, verb)
+    freq, etaH, etaV, zetaH, zetaV = frequency
+
+    # Check Hankel transform parameters
+    ht, htarg = utils.check_hankel(ht, htarg, verb)
+
+    # Check optimization
+    optimization = utils.check_opt(opt, loop, ht, htarg, verb)
+    use_spline, use_ne_eval, loop_freq, loop_off = optimization
+
+    # Check src-rec configuration
+    # => Get flags if src or rec or both are magnetic (msrc, mrec)
+    ab_calc, msrc, mrec = utils.check_ab(ab, verb)
+
+    # Check src and rec
+    # => Get source and receiver depths (zsrc, zrec)
+    # => Get layer number in which src and rec reside (lsrc/lrec)
+    # => Get offsets and angles (off, angle)
+    zsrc, zrec, off, angle = utils.check_dipole(src, rec, verb)
+    lsrc, lrec = utils.check_depth(zsrc, zrec, depth)
 
     # === 3. EM-FIELD CALCULATION ============
-    EM = fem(*finp)
-    if signal != None:
-        EM = tem(EM, *tinp)
+
+    # Collect variables for fem
+    inp = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
+           etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
+           use_ne_eval, msrc, mrec, loop_freq, loop_off)
+    EM = fem(*inp)
+
+    # Do f->t transform if required
+    if signal is not None:
+        EM = tem(EM, off, freq, time, signal, ft, ftarg)
 
     # If calc. is for only one frequency or one offset, return simple 1D array
     EM = np.squeeze(EM)
@@ -306,95 +341,80 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     return EM
 
 
-def bipole(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
-           epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
-           htarg=None, opt=None, loop=None, verb=1):
-    """Working function for finite, rotated dipoles (T, R)."""
+def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
+           epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
+           mrec=False, intpts=10, xdirect=True, ht='fht', htarg=None, ft='sin',
+           ftarg=None, opt=None, loop=None, verb=1):
+    """Working function for finite, rotated dipoles (T, R).
+
+     AB DELETED
+     MSRC, MREC
+     INTPTS : IF 0, JUST ANGLE IS CONSIDERED, AT CENTER
+     NORMALIZED
+
+    """
 
     # === 1.  LET'S START ============
     if verb > 0:
         t0 = utils.printstartfinish(verb)
 
-    # === 1.2345 NEW STUFF ============
+    # === 2.  CHECK INPUT ============
 
-    # src [x, y, z] => [[x1, x2], [y1, y2], [z1, z2]]
-    # => set fullspace = False, kernel.fullspace assumes point src in origin
+    # Check times and Fourier Transform arguments, get required frequencies
+    # (freq = freqtime if `signal=None`)
+    time, freq, ft, ftarg = utils.check_time(freqtime, signal, ft, ftarg, verb)
 
-    dx = src[0][1]-src[0][0]
-    dy = src[1][1]-src[1][0]
-    dz = src[2][1]-src[2][0]
+    # Check layer parameters
+    model = utils.check_model(depth, res, aniso, epermH, epermV, mpermH,
+                              mpermV, verb)
+    depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
 
-    # Calculate the dipole positions; Coordinate system is left-handed,
-    # positive z downwards (END).
-    if dx == dy == 0:
-        rh = 1  # circumvent division by zero
-        #       # implement better with early exits by the print statements
-        if dz == 0:
-            print("point source, just check <ab>")
-        else:
-            print("vertical source")
-    else:
-        if dz == 0:
-            print("horizontal source")
-        rh = np.sqrt(dx**2 + dy**2)
+    # Check frequency => get etaH, etaV, zetaH, and zetaV
+    frequency = utils.check_frequency(freq, res, aniso, epermH, epermV, mpermH,
+                                      mpermV, verb)
+    freq, etaH, etaV, zetaH, zetaV = frequency
 
-    # rh = np.sqrt(dx**2 + dy**2)    # horizontal length of source
-    r = np.sqrt(rh**2 + dz**2)       # length of source
-    theta = np.arctan2(dy, dx)     # horizontal deviation from x-axis
-    phi = np.pi/2-np.arccos(dz/r)  # vertical deviation from xy-plane down
-    cosphi = np.cos(phi)
-    sinphi = np.sin(phi)
-    costheta = np.cos(theta)
-    sintheta = np.sin(theta)
+    # Check Hankel transform parameters
+    ht, htarg = utils.check_hankel(ht, htarg, verb)
 
-    # Gauss quadrature
-    from scipy import special
-    nint = 10  # number of integration points
-    g_x, g_w = special.p_roots(nint)
-    g_x *= r/2.0  # Adjust to source length
-    # g_w *= r/2.0/r  # Adjust to source length
-    g_w /= 2.0  # Adjust to source length
+    # Check optimization
+    optimization = utils.check_opt(opt, loop, ht, htarg, verb)
+    use_spline, use_ne_eval, loop_freq, loop_off = optimization
 
-    # srcx = src[0][0] + dx/2 + g_x*np.sqrt(1-dz**2/r**2)*dx/rh
-    srcx = src[0][0] + dx/2 + g_x*cosphi*costheta
-    # srcy = src[1][0] + dy/2 + g_x*np.sqrt(1-dz**2/r**2)*dy/rh
-    srcy = src[1][0] + dy/2 + g_x*cosphi*sintheta
-    # srcz = src[2][0] + dz/2 + g_x*dz/r
-    srcz = src[2][0] + dz/2 + g_x*sinphi
+    # Check src and rec
+    # => Get source and receiver depths (zsrc, zrec)
+    # => Get layer number in which src and rec reside (lsrc/lrec)
+    # => Get offsets and angles (off, angle)
+    survey = utils.check_bipole(src, rec, intpts, verb)
+    zsrc, zrec, off, angle, theta, phi, intpts, g_w, hor_vert = survey
+    lsrc, lrec = utils.check_depth(zsrc, zrec, depth)
 
-    print(np.rad2deg(theta), np.rad2deg(phi), r)
+    # === 3. EM-FIELD CALCULATION ============
 
-    for i in range(nint):
+    # Loop over source-elements
+    for i in range(intpts):
 
-        src = [srcx[i], srcy[i], srcz[i]]
+        # Loop over the different fields
 
-        # === 2.  CHECK INPUT ============
+        # Check src-rec configuration
+        # => Get required ab's for given msrc, mrec, theta, phi
+        # ab_calc, msrc, mrec = utils.check_ab(ab, verb)
 
-        for ab in [11, 12, 13]:
+        ab_calc = [11, 12, 13]
+        fact = [np.cos(theta)*np.cos(phi), np.sin(theta)*np.cos(phi),
+                np.sin(phi)]
 
-            inpdata = utils.fem_input(src, rec, depth, res, freq, ab, aniso,
-                                      epermH, epermV, mpermH, mpermV, xdirect,
-                                      ht, htarg, opt, loop, verb)
+        for ii in range(np.size(ab_calc)):
 
-            if ab == 11:
-                if i == 0:
-                    x = fem(*inpdata)*g_w[i]
-                else:
-                    x += fem(*inpdata)*g_w[i]
-            elif ab == 12:
-                if i == 0:
-                    y = fem(*inpdata)*g_w[i]
-                else:
-                    y += fem(*inpdata)*g_w[i]
+            finp = (ab_calc[ii], off[:, i], angle[:, i], zsrc[i], zrec,
+                    lsrc[i], lrec, depth, freq, etaH, etaV, zetaH, zetaV,
+                    xdirect, isfullspace, ht, htarg, use_spline, use_ne_eval,
+                    msrc, mrec, loop_freq, loop_off)
+
+            if i == 0:
+                fEM = fem(*finp)*g_w[i]*fact[ii]
             else:
-                if i == 0:
-                    z = fem(*inpdata)*g_w[i]
-                else:
-                    z += fem(*inpdata)*g_w[i]
-
-        # === 3. EM-FIELD CALCULATION ============
-        fEM = (x*costheta + y*sintheta)*cosphi + z*sinphi  # x
-        # fEM = -x*sintheta+y*costheta # y
+                fEM += fem(*finp)*g_w[i]*fact[ii]
 
     # If calc. is for only one frequency or one offset, return simple 1D array
     fEM = np.squeeze(fEM)
@@ -457,10 +477,38 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
     fc *= 10**6
     freq = np.linspace(1, 2048, 2048)*10**6
 
-    # Check the normal frequency-calculation stuff
-    fdata = utils.fem_input(src, rec, depth, res, freq, ab, aniso, epermH,
-                            epermV, mpermH, mpermV, xdirect, ht, htarg, opt,
-                            loop, verb)
+    # Check layer parameters
+    model = utils.check_model(depth, res, aniso, epermH, epermV, mpermH,
+                              mpermV, verb)
+    depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
+
+    # Check frequency => get etaH, etaV, zetaH, and zetaV
+    frequency = utils.check_frequency(freq, res, aniso, epermH, epermV, mpermH,
+                                      mpermV, verb)
+    freq, etaH, etaV, zetaH, zetaV = frequency
+
+    # Check Hankel transform parameters
+    ht, htarg = utils.check_hankel(ht, htarg, verb)
+
+    # Check optimization
+    optimization = utils.check_opt(opt, loop, ht, htarg, verb)
+    use_spline, use_ne_eval, loop_freq, loop_off = optimization
+
+    # Check src-rec configuration
+    # => Get flags if src or rec or both are magnetic (msrc, mrec)
+    ab_calc, msrc, mrec = utils.check_ab(ab, verb)
+
+    # Check src and rec
+    # => Get source and receiver depths (zsrc, zrec)
+    # => Get layer number in which src and rec reside (lsrc/lrec)
+    # => Get offsets and angles (off, angle)
+    zsrc, zrec, off, angle = utils.check_dipole(src, rec, verb)
+    lsrc, lrec = utils.check_depth(zsrc, zrec, depth)
+
+    # Collect variables for fem
+    fdata = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
+             etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
+             use_ne_eval, msrc, mrec, loop_freq, loop_off)
 
     # === 3. GPR CALCULATION ============
 
@@ -528,21 +576,33 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
         t0 = utils.printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
-    # Check data with dummies for:
-    # => ht, htarg, opt, loop
-    inpdata = utils.fem_input(src, rec, depth, res, freq, ab, aniso, epermH,
-                              epermV, mpermH, mpermV, xdirect, ht='fht',
-                              htarg=None, opt=None, loop=None, verb=verb)
 
-    ab, _, _, _, angle, zsrc, zrec = inpdata[:7]
-    lsrc, lrec, depth, _, etaH, etaV, zetaH, zetaV = inpdata[7:15]
-    xdirect, _, _, _, _, _, msrc, mrec, _, _ = inpdata[15:]
+    # Check layer parameters
+    model = utils.check_model(depth, res, aniso, epermH, epermV, mpermH,
+                              mpermV, verb)
+    depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = model
+
+    # Check frequency => get etaH, etaV, zetaH, and zetaV
+    frequency = utils.check_frequency(freq, res, aniso, epermH, epermV, mpermH,
+                                      mpermV, verb)
+    _, etaH, etaV, zetaH, zetaV = frequency
+
+    # Check src-rec configuration
+    # => Get flags if src or rec or both are magnetic (msrc, mrec)
+    ab_calc, msrc, mrec = utils.check_ab(ab, verb)
+
+    # Check src and rec
+    # => Get source and receiver depths (zsrc, zrec)
+    # => Get layer number in which src and rec reside (lsrc/lrec)
+    # => Get offsets and angles (off, angle)
+    zsrc, zrec, _, _ = utils.check_dipole(src, rec, verb)
+    lsrc, lrec = utils.check_depth(zsrc, zrec, depth)
 
     # === 3. EM-FIELD CALCULATION ============
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
                                        etaV, zetaH, zetaV,
-                                       np.atleast_2d(wavenumber), ab, xdirect,
-                                       msrc, mrec, False)
+                                       np.atleast_2d(wavenumber), ab_calc,
+                                       xdirect, msrc, mrec, False)
 
     PJ0 = np.squeeze(PJ0)
     PJ1 = np.squeeze(PJ1*wavenumber)

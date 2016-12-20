@@ -401,7 +401,7 @@ def fft(fEM, time, freq, ftarg):
 
     """
     # Get ftarg values
-    fftfilt, ftkind, pts_per_dec = ftarg
+    fftfilt, pts_per_dec, ftkind = ftarg
 
     # Settings depending if cos/sin plus scaling
     if ftkind == 'sin':
@@ -538,7 +538,7 @@ def fftlog(fEM, time, freq, ftarg):
 
     """
     # Get tcalc, dlnr, kr, rk, q; a and n
-    tcalc, dlnr, kr, rk, q = ftarg
+    _, _, _, tcalc, dlnr, kr, rk, q = ftarg
     a = -fEM.imag
     n = a.size
 
