@@ -4,26 +4,38 @@
 ==================================
 
 EM-modelling routines. The implemented routines might not be the fastest
-solution to your problem. Use these routines as template to create your own,
-problem-specific modelling routine!
+solution to your specific problem. Use these routines as template to create
+your own, problem-specific modelling routine!
 
-So far implemented:
-    - `dipole`:  Calculate the electromagnetic field due to a point dipole
-                 source along the principal axes x/y/z for various frequencies
-                 or times for several sources (at the same depth) and several
-                 receivers (at the same depth).
-    - `bipole`:  Calculate the electromagnetic field due to a finite bipole
-                 source along the principal axes x/y/z for various frequencies
-                 or times for several sources (at the same depth) and several
-                 receivers (at the same depth).
+So far implemented are three routines, all of them for:
+    - frequency or time
+    - source and receiver can be either electric or magnetic
+
+The routines are
+    - `dipole`:
+        - Point dipole source(s) in direction x, y, or z, all sources at the
+          same depth.
+        - Point dipole receivers(s) in direction x, y, or z, all receivers at
+          the same depth.
+        - Various frequencies or times.
+    - `bipole`:
+        - Arbitrary bipole source.
+        - Arbitrary bipole receiver.
+        - Various frequencies or times.
+    - `srcbipole`:
+        - Arbitrary bipole source.
+        - Point dipole receivers(s) in direction x, y, or z, all receivers at
+          the same depth.
+        - Various frequencies or times.
 
 The above routines make use of the two core routines:
-    - `fem`:        Calculate wavenumber-domain electromagnetic field and carry
-                    out the Hankel transform to the frequency domain.
-    - `tem`:        Carry out the Fourier transform to time domain after `fem`.
+    - `fem`: Calculate wavenumber-domain electromagnetic field and carry out
+             the Hankel transform to the frequency domain.
+    - `tem`: Carry out the Fourier transform to time domain after `fem`.
 
 Two more routines are more kind of examples and cannot be regarded stable;
 they can serve as template to create your own routines:
+
     - `gpr`:        Calculate the Ground-Penetrating Radar (GPR) response.
     - `wavenumber`: Calculate the electromagnetic wavenumber-domain solution.
 
@@ -50,7 +62,7 @@ import numpy as np
 from . import kernel, transform, utils
 
 
-__all__ = ['dipole', 'bipole', 'gpr', 'wavenumber', 'fem', 'tem']
+__all__ = ['dipole', 'srcbipole', 'gpr', 'wavenumber', 'fem', 'tem']
 
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
@@ -62,10 +74,12 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     Calculate the electromagnetic frequency- or time-domain field due to an
     infinitesimal small electric or magnetic dipole source, measured by
     infinitesimal small electric or magnetic dipole receivers; source and
-    receivers are directed along the principal directions x, y, or z.
+    receivers are directed along the principal directions x, y, or z, and all
+    sources are at the same depth, as well as all receivers are at the same
+    depth.
 
-    To calculate bipoles of finite length or arbitrary source and receiver
-    angles, use the function `bipole`.
+    Use the functions `bipole` or `srcbipole` to calculate bipoles of finite
+    length and arbitrary angle.
 
     Parameters
     ----------
@@ -353,16 +367,18 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     return EM
 
 
-def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
-           epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
-           mrec=False, intpts=10, xdirect=True, ht='fht', htarg=None, ft='sin',
-           ftarg=None, opt=None, loop=None, verb=1):
+def srcbipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
+              epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
+              recdir=1, intpts=10, xdirect=True, ht='fht', htarg=None,
+              ft='sin', ftarg=None, opt=None, loop=None, verb=1):
     """Working function for finite, rotated dipoles (T, R).
 
      AB DELETED
-     MSRC, MREC
+     MSRC, RECDIR
      INTPTS : IF 0, JUST ANGLE IS CONSIDERED, AT CENTER
      NORMALIZED
+
+     Difference between Dipole1D and emymod for msrc=False, recdir=6, dx!=0
 
     """
 
@@ -397,45 +413,50 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # => Get source and receiver depths (zsrc, zrec)
     # => Get layer number in which src and rec reside (lsrc/lrec)
     # => Get offsets and angles (off, angle)
-    survey = utils.check_bipole(src, rec, intpts, verb)
-    zsrc, zrec, off, angle, theta, phi, intpts, g_w, hor_vert = survey
+    survey = utils.get_coords(src, rec, verb, intpts, True)
+    zsrc, zrec, off, angle, nsrc, nrec, srcbp = survey
+    theta, phi, g_w = srcbp
     lsrc, lrec = utils.check_depth(zsrc, zrec, depth)
+
+    # Required ab's and geometrical scaling factors
+    # => Get required ab's and mrec for given msrc, recdir
+    ab_calc, mrec = utils.get_abs_bipole(msrc, recdir, verb)
+    # => Geometrical scaling
+    fact = [np.cos(theta)*np.cos(phi), np.sin(theta)*np.cos(phi), np.sin(phi)]
 
     # === 3. EM-FIELD CALCULATION ============
 
+    # Pre-allocate output EM
+    EM = np.zeros((freq.size, nrec), dtype=complex)
+
     # Loop over source-elements
-    for i in range(intpts):
+    for i in range(nsrc):
+        si = i*nrec      # start index for this source element
+        ei = (i+1)*nrec  # start index for this source element
 
-        # Loop over the different fields
-
-        # Check src-rec configuration
-        # => Get required ab's for given msrc, mrec, theta, phi
-        # ab_calc, msrc, mrec = utils.check_ab(ab, verb)
-
-        ab_calc = [11, 12, 13]
-        fact = [np.cos(theta)*np.cos(phi), np.sin(theta)*np.cos(phi),
-                np.sin(phi)]
-
+        # Loop over the required fields
         for ii in range(np.size(ab_calc)):
 
-            finp = (ab_calc[ii], off[:, i], angle[:, i], zsrc[i], zrec,
+            finp = (ab_calc[ii], off[si:ei], angle[si:ei], zsrc[i], zrec,
                     lsrc[i], lrec, depth, freq, etaH, etaV, zetaH, zetaV,
                     xdirect, isfullspace, ht, htarg, use_spline, use_ne_eval,
                     msrc, mrec, loop_freq, loop_off)
 
-            if i == 0:
-                fEM = fem(*finp)*g_w[i]*fact[ii]
-            else:
-                fEM += fem(*finp)*g_w[i]*fact[ii]
+            # Add field to EM with weight `g_w` and geometrical factor `fact`
+            EM += fem(*finp)*g_w[i]*fact[ii]
 
-    # If calc. is for only one frequency or one offset, return simple 1D array
-    fEM = np.squeeze(fEM)
+    # Do f->t transform if required
+    if signal is not None:
+        EM = tem(EM, off[:nrec], freq, time, signal, ft, ftarg)
+
+    # If only one freq/time or one offset, reduce dimensions
+    EM = np.squeeze(EM)
 
     # === 4.  FINISHED ============
     if verb > 0:
         utils.printstartfinish(verb, t0)
 
-    return fEM
+    return EM
 
 
 def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,

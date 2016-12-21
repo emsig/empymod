@@ -134,6 +134,10 @@ parallelisation (``opt='parallel'``) and spline interpolation
 ``opt='parallel'`` only affects speed and memory usage, whereas
 ``opt='spline'`` also affects precision!
 
+Calculation of many source and receiver positions is fastest if they remain at
+the same depth, as they can be calculated in one kernel-call. If depths do
+change, one has to loop over them.
+
 I am sure `empymod` could be made much faster with cleverer coding style or
 with the likes of `cython` or `numba`. Suggestions and contributions are
 welcomed!
@@ -332,5 +336,5 @@ References |_|
 # the License.
 
 # Import main modelling routines to make them available as primary functions
-from .model import dipole, bipole
-__all__ = ['dipole', 'bipole']
+from .model import dipole, srcbipole
+__all__ = ['dipole', 'srcbipole']
