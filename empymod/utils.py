@@ -181,6 +181,75 @@ def check_ab(ab, verb):
     return ab_calc, msrc, mrec
 
 
+def get_abs_bipole(msrc, recdir, verb):
+    """Check source-receiver configuration.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a description of the
+    input parameters.
+
+    Returns
+    -------
+    ab_calc : array of int
+        ab's to calculate for this bipole.
+        Adjusted configuration using reciprocity.
+    msrc : bool
+        Adjusted configuration using reciprocity.
+    mrec : bool
+        From recdir, adjusted using reciprocity.
+
+    """
+
+    # Try to cast recdir into an integer
+    try:
+        int(recdir)
+    except(TypeError, ValueError):
+        print('* ERROR   :: <recdir> must be an integer')
+        raise
+
+    # Check src and rec orientation (<ab> for alpha-beta)
+    # pab: all possible values that <ab> can take
+    pab = [1, 2, 3, 4, 5, 6]
+    if recdir not in pab:
+        print('* ERROR   :: <recdir> must be one of: ' + str(pab) + ';' +
+              ' <recdir> provided: ' + str(recdir))
+        raise ValueError('recdir')
+
+    # Print input <ab>
+    if verb > 1:
+        if msrc:
+            print("   Input source  :  magnetic")
+        else:
+            print("   Input source  :  electric")
+        print("   Input recdir  : ", recdir)
+
+    # If rec is magnetic, swap source and 
+    if recdir < 4:
+        if msrc:
+            ab_calc = 10*recdir + np.arange(4, 7)
+        else:
+            ab_calc = 10*recdir + np.arange(1, 4)
+        mrec = False
+    else:
+        if msrc:
+            ab_calc = recdir + np.arange(4, 7)*10
+        else:
+            ab_calc = recdir + np.arange(1, 4)*10
+        mrec = True
+
+    # ab 36 is zero
+    if 36 in ab_calc:
+        ab_calc = list(ab_calc)
+        ab_calc.remove(36)
+        ab_calc = np.asarray(ab_calc)
+
+    # Print actual calculated <ab>
+    if verb > 1:
+        print("   Calc. ab's    : ", _strvar(ab_calc))
+
+    return ab_calc, mrec
+
+
 def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     """Check the model: depth and corresponding layer parameters.
 
@@ -268,7 +337,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
 
 
-def check_dipole(inp, shortname, longname, verb):
+def check_dipole(inp, name, verb):
     """Check dipole parameters.
 
     This check-function is called from one of the modelling routines in
@@ -283,28 +352,114 @@ def check_dipole(inp, shortname, longname, verb):
     """
 
     # Check inp
-    _check_shape(np.squeeze(inp), shortname, (3,))
-    inp[0] = _check_var(inp[0], float, 1, shortname+'-x')
-    inp[1] = _check_var(inp[1], float, 1, shortname+'-y', inp[0].shape)
-    inp[2] = _check_var(inp[2], float, 1, shortname+'-z', (1,))
+    _check_shape(np.squeeze(inp), name, (3,))
+    inp[0] = _check_var(inp[0], float, 1, name+'-x')
+    inp[1] = _check_var(inp[1], float, 1, name+'-y', inp[0].shape)
+    inp[2] = _check_var(inp[2], float, 1, name+'-z', (1,))
 
     # Print spatial parameters
     if verb > 1:
-        print(longname, str(inp[0].size))
-        tname = ['x', 'y', 'z']
+        # dipole-type: src or rec
+        if name == 'src':
+            longname = '   Source(s)     : '
+        else:
+            longname = '   Receiver(s)   : '
+
+        print(longname, str(inp[0].size), 'dipole(s)')
+        tname = ['x  ', 'y  ', 'z  ']
         for i in range(3):
             if inp[i].size > 1:
-                print("     > "+tname[i]+"     [m] : ", str(inp[i].min()), "-",
+                print("     > "+tname[i]+"   [m] : ", str(inp[i].min()), "-",
                     str(inp[i].max()), " [min - max]")
                 if verb > 2:
                     print("                 : ", _strvar(inp[i]))
             else:
-                print("     > "+tname[i]+"     [m] : ", _strvar(inp[i]))
+                print("     > "+tname[i]+"   [m] : ", _strvar(inp[i]))
 
     return inp
 
 
-def get_coords(src, rec, verb):
+def check_bipole(inp, name, intpts, verb):
+    """Check dipole parameters.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a description of the
+    input parameters.
+
+    Returns
+    -------
+    inp : list
+        Same as input, checked.
+
+    """
+
+    # Check inp
+    _check_shape(np.squeeze(inp), name, (6,))
+    inp[0] = _check_var(inp[0], float, 1, name+'-x0')
+    inp[1] = _check_var(inp[1], float, 1, name+'-x1', inp[0].shape)
+    inp[2] = _check_var(inp[2], float, 1, name+'-y0', inp[0].shape)
+    inp[3] = _check_var(inp[3], float, 1, name+'-y1', inp[0].shape)
+    inp[4] = _check_var(inp[4], float, 1, name+'-z0', inp[0].shape)
+    inp[5] = _check_var(inp[5], float, 1, name+'-z1', inp[0].shape)
+
+    # Get lengths in x/y/z-direction
+    dx = np.squeeze(inp[1] - inp[0])
+    dy = np.squeeze(inp[3] - inp[2])
+    dz = np.squeeze(inp[5] - inp[4])
+
+    # Check if inp is a dipole (problem, as we would not no the angles then)
+    if dx == dy == dz == 0:
+        print("* ERROR   :: <"+name+"> is a point dipole, use `dipole` " +
+              "instead of `bipole`/`srcbipole`.")
+        raise ValueError('Bipole: dipole-'+name)
+
+    # Get inp length and angles
+    r = np.linalg.norm([dx, dy, dz])  # length of inp
+    theta = np.arctan2(dy, dx)        # horizontal deviation from x-axis
+    phi = np.pi/2-np.arccos(dz/r)     # vertical deviation from xy-plane down
+
+    # Gauss quadrature, if intpts > 2; else set to center of inp
+    intpts = _check_var(intpts, int, 0, 'intpts', ())
+
+    if intpts > 2:  # Calculate the dipole positions
+        g_x, g_w = special.p_roots(intpts)
+        g_x *= r/2.0  # Adjust to inp length
+        g_w /= 2.0    # Adjust to inp length (r/2), normalize (1/r)
+
+        # Coordinate system is left-handed, positive z down (Est-North-Depth).
+        xinp = inp[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta)
+        yinp = inp[2] + dy/2 + g_x*np.cos(phi)*np.sin(theta)
+        zinp = inp[4] + dz/2 + g_x*np.sin(phi)
+
+    else:  # If intpts < 3: Calculate bipole at inp-centre for phi/theta
+        xinp = np.array([inp[0] + dx/2])
+        yinp = np.array([inp[2] + dy/2])
+        zinp = np.array([inp[4] + dz/2])
+        g_w = np.array([1])
+
+    out = [xinp, yinp, zinp]
+
+    # Print spatial parameters
+    if verb > 1:
+        # Pole-type: src or rec
+        if name == 'src':
+            longname = '   Source(s)     : '
+        else:
+            longname = '   Receiver(s)   : '
+        tname = ['x_c', 'y_c', 'z_c']
+
+        print(longname, str(inp[0].size), 'bipole(s)')
+        print("     > theta [°] : ", np.rad2deg(theta))
+        print("     > phi   [°] : ", np.rad2deg(phi))
+        print("     > length[m] : ", r)
+        print("     > x_c   [m] : ", _strvar(inp[0][0] + dx/2))
+        print("     > y_c   [m] : ", _strvar(inp[2][0] + dy/2))
+        print("     > z_c   [m] : ", _strvar(inp[4][0] + dz/2))
+
+    return out, (theta, phi, g_w)
+
+
+def get_coords(src, rec, verb, intpts=10, srcbipole=False, recbipole=False):
     """Check survey, hence spatial input parameters.
 
     This check-function is called from one of the modelling routines in
@@ -324,10 +479,18 @@ def get_coords(src, rec, verb):
 
     """
 
-    # Check src and rec
-    src = check_dipole(src, 'src', '   Source(s)     : ', verb)
-    rec = check_dipole(rec, 'rec', '   Receiver(s)   : ', verb)
+    # Check source(s)
+    if srcbipole:
+        src, srcbp = check_bipole(src, 'src', intpts, verb)
+    else:
+        src = check_dipole(src, 'src', verb)
     nsrc = src[0].size
+
+    # Check receiver(s)
+    if recbipole:
+        rec, recbp = check_bipole(rec, 'rec', intpts, verb)
+    else:
+        rec = check_dipole(rec, 'rec', verb)
     nrec = rec[0].size
 
     # Pre-allocate off and angle
@@ -353,130 +516,10 @@ def get_coords(src, rec, verb):
     if np.size(ioff) != 0 and verb > 0:
         print('* WARNING :: Offsets <', min_off, 'm are set to', min_off, 'm!')
 
-    return src[2], rec[2], off, angle, src[0].size, rec[0].size
-
-
-def check_bipole(src, rec, intpts, verb):
-    """Check survey, hence spatial input parameters.
-
-    This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a description of the
-    input parameters.
-
-    Returns
-    -------
-    zsrc : float
-        Depth of src.
-    zrec : float
-        Depth of rec.
-    off : array of floats
-        Offsets
-    angle : array of floats
-        Angles
-
-    return zsrc, rec[2], off, angle, theta, phi, intpts, g_w, hor_vert
-    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-
-    """
-    # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-
-    # Check src
-    _check_shape(np.squeeze(src), 'src', (6,))
-    src[0] = _check_var(src[0], float, 1, 'src-x0', (1,))
-    src[1] = _check_var(src[1], float, 1, 'src-x1', (1,))
-    src[2] = _check_var(src[2], float, 1, 'src-y0', (1,))
-    src[3] = _check_var(src[3], float, 1, 'src-y1', (1,))
-    src[4] = _check_var(src[4], float, 1, 'src-z0', (1,))
-    src[5] = _check_var(src[5], float, 1, 'src-z1', (1,))
-
-    # Get source lengths in x/y/z-direction
-    dx = src[1] - src[0]
-    dy = src[3] - src[2]
-    dz = src[5] - src[4]
-
-    # Check if source is a dipole, purely horizontal or purely vertical.
-    if dx == dy == 0:
-        if dz == 0:
-            print("* ERROR   :: <src> is a point source, use `dipole` " +
-                  "instead of `bipole`.")
-            raise ValueError('Dipole source')
-        hor_vert = 1
-    elif dz == 0:
-        hor_vert = 2
+    if srcbipole:
+        return src[2], rec[2], off, angle, nsrc, nrec, srcbp
     else:
-        hor_vert = 0
-
-    # Get source length and angles
-    r = np.linalg.norm([dx, dy, dz])  # length of source
-    theta = np.arctan2(dy, dx)        # horizontal deviation from x-axis
-    phi = np.pi/2-np.arccos(dz/r)     # vertical deviation from xy-plane down
-
-    # Gauss quadrature, if intpts > 2; else set to center of src
-    intpts = _check_var(intpts, int, 0, 'intpts', ())
-
-    if intpts > 2:  # Calculate the dipole positions
-        g_x, g_w = special.p_roots(intpts)
-        g_x *= r/2.0  # Adjust to source length
-        g_w /= 2.0    # Adjust to source length (r/2), normalize (1/r)
-
-        # Coordinate system is left-handed, positive z down (Est-North-Depth).
-        xsrc = src[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta)
-        ysrc = src[2] + dy/2 + g_x*np.cos(phi)*np.sin(theta)
-        zsrc = src[4] + dz/2 + g_x*np.sin(phi)
-    else:  # If intpts < 3: Calculate bipole at src-centre for phi/theta
-        intpts = 1
-        xsrc = np.array([src[0] + dx/2])
-        ysrc = np.array([src[2] + dy/2])
-        zsrc = np.array([src[4] + dz/2])
-        g_w = np.array([1])
-
-    # Check rec
-    _check_shape(np.squeeze(rec), 'rec', (3,))
-    rec[0] = _check_var(rec[0], float, 1, 'rec-x')
-    rec[1] = _check_var(rec[1], float, 1, 'rec-y', rec[0].shape)
-    rec[2] = _check_var(rec[2], float, 1, 'rec-z', (1,))
-
-    # Coordinates
-    xco = rec[0][:, None] - xsrc[None, :]  # X-coordinates  [m]
-    yco = rec[1][:, None] - ysrc[None, :]  # Y-coordinates  [m]
-    off = np.sqrt(xco*xco + yco*yco)       # Offset         [m]
-    angle = np.arctan2(yco, xco)           # Angle        [rad]
-
-    # Minimum offset to avoid singularities at off = 0 m.
-    # => min_off is defined at the start of this file
-    ioff = np.where(off < min_off)
-    off[ioff] = min_off
-    angle[ioff] = np.nan
-    if np.size(ioff) != 0 and verb > 0:
-        print('* WARNING :: Offsets <', min_off, 'm are set to', min_off, 'm!')
-
-    # Print spatial parameters
-    if verb > 1:
-        if hor_vert == 1:
-            print("   Source        :  Vertical bipole")
-        elif hor_vert == 2:
-            print("   Source        :  Horizontal bipole")
-        else:
-            print("   Source      :")
-        print("     > theta [°] : ", np.rad2deg(theta))
-        print("     > phi   [°] : ", np.rad2deg(phi))
-        print("     > length[m] : ", r)
-        print("     > x_c   [m] : ", _strvar(src[0]))
-        print("     > y_c   [m] : ", _strvar(src[1]))
-        print("     > z_c   [m] : ", _strvar(src[2]))
-
-        print("   Receiver      :  Restricted to dipole at the moment")
-        print("     > x_c   [m] : ", str(rec[0].min()), "-", str(rec[0].max()),
-              ";", str(rec[0].size), " [min-max; #]")
-        if verb > 2:
-            print("                 : ", _strvar(rec[0]))
-        print("     > y_c   [m] : ", str(rec[1].min()), "-", str(rec[1].max()),
-              ";", str(rec[1].size), " [min-max; #]")
-        if verb > 2:
-            print("                 : ", _strvar(rec[1]))
-        print("     > z_c   [m] : ", _strvar(rec[2]))
-
-    return zsrc, rec[2], off, angle, theta, phi, intpts, g_w, hor_vert
+        return src[2], rec[2], off, angle, nsrc, nrec
 
 
 def check_depth(zsrc, zrec, depth):
