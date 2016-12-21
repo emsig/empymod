@@ -3,22 +3,29 @@
 :mod:`model` -- Model EM-responses
 ==================================
 
-EM-modelling routines. So far implemented:
-    - `frequency`:  Calculate the electromagnetic field for various frequencies
-                    and offsets.
-    - `time`:       Calculate the electromagnetic field for various times
-                    and offsets.
+EM-modelling routines. The implemented routines might not be the fastest
+solution to your problem. Use these routines as template to create your own,
+problem-specific modelling routine!
+
+So far implemented:
+    - `dipole`:  Calculate the electromagnetic field due to a point dipole
+                 source along the principal axes x/y/z for various frequencies
+                 or times for several sources (at the same depth) and several
+                 receivers (at the same depth).
+    - `bipole`:  Calculate the electromagnetic field due to a finite bipole
+                 source along the principal axes x/y/z for various frequencies
+                 or times for several sources (at the same depth) and several
+                 receivers (at the same depth).
 
 The above routines make use of the two core routines:
     - `fem`:        Calculate wavenumber-domain electromagnetic field and carry
                     out the Hankel transform to the frequency domain.
-    - `tem`:        Calculate `fem` and carry out Fourier transform to time
-                    domain.
+    - `tem`:        Carry out the Fourier transform to time domain after `fem`.
 
-Two more routines are more kind of examples and cannot be regarded stable:
+Two more routines are more kind of examples and cannot be regarded stable;
+they can serve as template to create your own routines:
     - `gpr`:        Calculate the Ground-Penetrating Radar (GPR) response.
     - `wavenumber`: Calculate the electromagnetic wavenumber-domain solution.
-
 
 """
 # Copyright 2016 Dieter Werthmüller
@@ -62,9 +69,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     Parameters
     ----------
-    src : list of floats
-        Source coordinates (m): [src-x, src-y, src-z]. All single values (no
-        arrays)
+    src : list of floats or arrays
+        Source coordinates (m): [src-x, src-y, src-z].
+        The x- and y-coordinates can be arrays, z is a single value.
+        The x- and y-coordinates must have the same dimension.
 
     rec : list of floats or arrays
         Receiver coordinates (m): [rec-x, rec-y, rec-z].
@@ -251,7 +259,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     Returns
     -------
-    EM : ndarray
+    EM : ndarray, (nfreq, nrec, nsrc)
         Frequency- or time-domain EM field (depending on `signal`):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns B [T] (not H [A/m]!).
@@ -262,6 +270,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         However, source and receiver are normalised. So for instance in the
         electric case the source strength is 1 A and its length is 1 m. So the
         electric field could also be written as [V/(A.m2)].
+
+        The shape of EM is (nfreq, nrec, nsrc). However, single dimensions
+        are removed.
 
 
     Examples
@@ -279,6 +290,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
        1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j
        1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
+
     """
 
     # === 1.  LET'S START ============
@@ -316,7 +328,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     # => Get source and receiver depths (zsrc, zrec)
     # => Get layer number in which src and rec reside (lsrc/lrec)
     # => Get offsets and angles (off, angle)
-    zsrc, zrec, off, angle = utils.check_dipole(src, rec, verb)
+    zsrc, zrec, off, angle, nsrc, nrec = utils.get_coords(src, rec, verb)
     lsrc, lrec = utils.check_depth(zsrc, zrec, depth)
 
     # === 3. EM-FIELD CALCULATION ============
@@ -331,8 +343,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     if signal is not None:
         EM = tem(EM, off, freq, time, signal, ft, ftarg)
 
-    # If calc. is for only one frequency or one offset, return simple 1D array
-    EM = np.squeeze(EM)
+    # Reshape for number of sources
+    EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
 
     # === 4.  FINISHED ============
     if verb > 0:
@@ -502,7 +514,7 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
     # => Get source and receiver depths (zsrc, zrec)
     # => Get layer number in which src and rec reside (lsrc/lrec)
     # => Get offsets and angles (off, angle)
-    zsrc, zrec, off, angle = utils.check_dipole(src, rec, verb)
+    zsrc, zrec, off, angle, nsrc, nrec = utils.get_coords(src, rec, verb)
     lsrc, lrec = utils.check_depth(zsrc, zrec, depth)
 
     # Collect variables for fem
@@ -595,7 +607,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     # => Get source and receiver depths (zsrc, zrec)
     # => Get layer number in which src and rec reside (lsrc/lrec)
     # => Get offsets and angles (off, angle)
-    zsrc, zrec, _, _ = utils.check_dipole(src, rec, verb)
+    zsrc, zrec, _, _, _, _ = utils.get_coords(src, rec, verb)
     lsrc, lrec = utils.check_depth(zsrc, zrec, depth)
 
     # === 3. EM-FIELD CALCULATION ============

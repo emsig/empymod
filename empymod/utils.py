@@ -268,7 +268,43 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
 
 
-def check_dipole(src, rec, verb):
+def check_dipole(inp, shortname, longname, verb):
+    """Check dipole parameters.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a description of the
+    input parameters.
+
+    Returns
+    -------
+    inp : list
+        Same as input, checked.
+
+    """
+
+    # Check inp
+    _check_shape(np.squeeze(inp), shortname, (3,))
+    inp[0] = _check_var(inp[0], float, 1, shortname+'-x')
+    inp[1] = _check_var(inp[1], float, 1, shortname+'-y', inp[0].shape)
+    inp[2] = _check_var(inp[2], float, 1, shortname+'-z', (1,))
+
+    # Print spatial parameters
+    if verb > 1:
+        print(longname, str(inp[0].size))
+        tname = ['x', 'y', 'z']
+        for i in range(3):
+            if inp[i].size > 1:
+                print("     > "+tname[i]+"     [m] : ", str(inp[i].min()), "-",
+                    str(inp[i].max()), " [min - max]")
+                if verb > 2:
+                    print("                 : ", _strvar(inp[i]))
+            else:
+                print("     > "+tname[i]+"     [m] : ", _strvar(inp[i]))
+
+    return inp
+
+
+def get_coords(src, rec, verb):
     """Check survey, hence spatial input parameters.
 
     This check-function is called from one of the modelling routines in
@@ -288,23 +324,26 @@ def check_dipole(src, rec, verb):
 
     """
 
-    # Check src
-    _check_shape(np.squeeze(src), 'src', (3,))
-    src[0] = _check_var(src[0], float, 1, 'src-x', (1,))
-    src[1] = _check_var(src[1], float, 1, 'src-y', (1,))
-    src[2] = _check_var(src[2], float, 1, 'src-z', (1,))
+    # Check src and rec
+    src = check_dipole(src, 'src', '   Source(s)     : ', verb)
+    rec = check_dipole(rec, 'rec', '   Receiver(s)   : ', verb)
+    nsrc = src[0].size
+    nrec = rec[0].size
 
-    # Check rec
-    _check_shape(np.squeeze(rec), 'rec', (3,))
-    rec[0] = _check_var(rec[0], float, 1, 'rec-x')
-    rec[1] = _check_var(rec[1], float, 1, 'rec-y', rec[0].shape)
-    rec[2] = _check_var(rec[2], float, 1, 'rec-z', (1,))
+    # Pre-allocate off and angle
+    off = np.empty((nrec*nsrc,))
+    angle = np.empty((nrec*nsrc,))
 
     # Coordinates
-    xco = rec[0] - src[0]             # X-coordinates  [m]
-    yco = rec[1] - src[1]             # Y-coordinates  [m]
-    off = np.sqrt(xco*xco + yco*yco)  # Offset         [m]
-    angle = np.arctan2(yco, xco)      # Angle        [rad]
+    # Loop over sources, append them one after another.
+    for i in range(nsrc):
+        xco = rec[0] - src[0][i]  # X-coordinates  [m]
+        yco = rec[1] - src[1][i]  # Y-coordinates  [m]
+        off[i*nrec:(i+1)*nrec] = np.sqrt(xco*xco + yco*yco)  # Offset   [m]
+        angle[i*nrec:(i+1)*nrec] = np.arctan2(yco, xco)      # Angle  [rad]
+
+    # Note: One could achieve a potential speed-up using np.unique to sort out
+    # src-rec configurations that have the same offset and angle.
 
     # Minimum offset to avoid singularities at off = 0 m.
     # => min_off is defined at the start of this file
@@ -314,22 +353,7 @@ def check_dipole(src, rec, verb):
     if np.size(ioff) != 0 and verb > 0:
         print('* WARNING :: Offsets <', min_off, 'm are set to', min_off, 'm!')
 
-    # Print spatial parameters
-    if verb > 1:
-        print("   src x     [m] : ", _strvar(src[0]))
-        print("   src y     [m] : ", _strvar(src[1]))
-        print("   src z     [m] : ", _strvar(src[2]))
-        print("   rec x     [m] : ", str(rec[0].min()), "-", str(rec[0].max()),
-              ";", str(rec[0].size), " [min-max; #]")
-        if verb > 2:
-            print("                 : ", _strvar(rec[0]))
-        print("   rec y     [m] : ", str(rec[1].min()), "-", str(rec[1].max()),
-              ";", str(rec[1].size), " [min-max; #]")
-        if verb > 2:
-            print("                 : ", _strvar(rec[1]))
-        print("   rec z     [m] : ", _strvar(rec[2]))
-
-    return src[2], rec[2], off, angle
+    return src[2], rec[2], off, angle, src[0].size, rec[0].size
 
 
 def check_bipole(src, rec, intpts, verb):
@@ -349,9 +373,9 @@ def check_bipole(src, rec, intpts, verb):
         Offsets
     angle : array of floats
         Angles
-    return zsrc, rec[2], off, angle, theta, phi, intpts, g_w, hor_vert
 
-    TODO
+    return zsrc, rec[2], off, angle, theta, phi, intpts, g_w, hor_vert
+    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 
     """
     # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
@@ -413,10 +437,10 @@ def check_bipole(src, rec, intpts, verb):
     rec[2] = _check_var(rec[2], float, 1, 'rec-z', (1,))
 
     # Coordinates
-    xco = rec[0][:, None] - xsrc[None, :]               # X-coordinates  [m]
-    yco = rec[1][:, None] - ysrc[None, :]               # Y-coordinates  [m]
-    off = np.sqrt(xco*xco + yco*yco)  # Offset         [m]
-    angle = np.arctan2(yco, xco)      # Angle        [rad]
+    xco = rec[0][:, None] - xsrc[None, :]  # X-coordinates  [m]
+    yco = rec[1][:, None] - ysrc[None, :]  # Y-coordinates  [m]
+    off = np.sqrt(xco*xco + yco*yco)       # Offset         [m]
+    angle = np.arctan2(yco, xco)           # Angle        [rad]
 
     # Minimum offset to avoid singularities at off = 0 m.
     # => min_off is defined at the start of this file
