@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Info &#8212; empymod 1.0.dev documentation</title>
+    <title>Info &#8212; empymod 1.1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.dev',
+        VERSION:     '1.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="empymod 1.0.dev documentation" href="index.html" />
+    <link rel="top" title="empymod 1.1.0 documentation" href="index.html" />
     <link rel="prev" title="empymod" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -406,7 +406,7 @@ DOI:&nbsp;<a class="reference external" href="http://dx.doi.org/10.1090/S0025-57
 solution to your specific problem. Use these routines as template to create
 your own, problem-specific modelling routine!</p>
 <dl class="docutils">
-<dt>So far implemented are three routines, all of them for:</dt>
+<dt>So far implemented are two routines, both of them for:</dt>
 <dd><ul class="first last simple">
 <li>frequency or time</li>
 <li>source and receiver can be either electric or magnetic</li>
@@ -427,16 +427,6 @@ the same depth.</li>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><cite>bipole</cite>:</dt>
-<dd><ul class="first last simple">
-<li>Arbitrary bipole source.</li>
-<li>Arbitrary bipole receiver.</li>
-<li>Various frequencies or times.</li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
 <dt><cite>srcbipole</cite>:</dt>
 <dd><ul class="first last simple">
 <li>Arbitrary bipole source.</li>
@@ -446,6 +436,9 @@ the same depth.</li>
 </ul>
 </dd>
 </dl>
+</li>
+<li><p class="first"><cite>bipole</cite>: <cite>srcbipole</cite> will be superseded eventually by <cite>bipole</cite>, a
+general source- and receiver-bipole routine.</p>
 </li>
 </ul>
 </dd>
@@ -462,6 +455,14 @@ the same depth.</li>
 </ul>
 </dd>
 </dl>
+<p>Two routines are shortcuts for frequency- and time-domain dipoles,
+respectively, and mainly in for legacy reasons:</p>
+<blockquote>
+<div><ul class="simple">
+<li><cite>frequency</cite>: Shortcut of <cite>dipole</cite> for frequency-domain calculation.</li>
+<li><cite>time</cite>: Shortcut of <cite>dipole</cite> for time-domain calculation.</li>
+</ul>
+</div></blockquote>
 <p>Two more routines are more kind of examples and cannot be regarded stable;
 they can serve as template to create your own routines:</p>
 <blockquote>
@@ -842,7 +843,7 @@ are removed.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">empymod</span> <span class="k">import</span> <span class="n">dipole</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">src</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span><span class="o">*</span><span class="mi">500</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">200</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span><span class="o">*</span><span class="mi">500</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">200</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">depth</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1050</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="n">e20</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">EMfield</span> <span class="o">=</span> <span class="n">dipole</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freqtime</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -859,12 +860,339 @@ are removed.</p>
 <dl class="function">
 <dt id="empymod.model.srcbipole">
 <code class="descclassname">empymod.model.</code><code class="descname">srcbipole</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>res</em>, <em>freqtime</em>, <em>signal=None</em>, <em>aniso=None</em>, <em>epermH=None</em>, <em>epermV=None</em>, <em>mpermH=None</em>, <em>mpermV=None</em>, <em>msrc=False</em>, <em>recdir=1</em>, <em>intpts=10</em>, <em>xdirect=True</em>, <em>ht='fht'</em>, <em>htarg=None</em>, <em>ft='sin'</em>, <em>ftarg=None</em>, <em>opt=None</em>, <em>loop=None</em>, <em>verb=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/model.html#srcbipole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.model.srcbipole" title="Permalink to this definition">¶</a></dt>
-<dd><p>Working function for finite, rotated dipoles (T, R).</p>
-<p>AB DELETED
-MSRC, RECDIR
-INTPTS : IF 0, JUST ANGLE IS CONSIDERED, AT CENTER
-NORMALIZED</p>
-<p>Difference between Dipole1D and emymod for msrc=False, recdir=6, dx!=0</p>
+<dd><p>Return the electromagnetic field due to a bipole source.</p>
+<p>Calculate the electromagnetic frequency- or time-domain field due to an
+arbitrary finite electric or magnetic bipole source, measured by
+infinitesimal small electric or magnetic dipole receivers; receivers are
+directed along the principal directions x, y, or z, and all receivers are
+at the same depth.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>src</strong> : list of floats</p>
+<blockquote>
+<div><p>Source coordinates (m):
+[src-x0, src-x1, src-y0, src-y1, src-z0, src-z1].</p>
+</div></blockquote>
+<p><strong>rec</strong> : list of floats or arrays</p>
+<blockquote>
+<div><p>Receiver coordinates (m): [rec-x, rec-y, rec-z].
+The x- and y-coordinates can be arrays, z is a single value.
+The x- and y-coordinates must have the same dimension.</p>
+</div></blockquote>
+<p><strong>depth</strong> : list</p>
+<blockquote>
+<div><p>Absolute layer interfaces z (m); #depth = #res - 1
+(excluding +/- infinity).</p>
+</div></blockquote>
+<p><strong>res</strong> : array_like</p>
+<blockquote>
+<div><p>Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.</p>
+</div></blockquote>
+<p><strong>freqtime</strong> : array_like</p>
+<blockquote>
+<div><p>Frequencies f (Hz) if <cite>signal</cite> == None, else times t (s).</p>
+</div></blockquote>
+<p><strong>signal</strong> : {None, 0, 1, -1}, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Source signal, default is None:</dt>
+<dd><ul class="first last simple">
+<li>None: Frequency-domain response</li>
+<li>-1 : Switch-off time-domain response</li>
+<li>0 : Impulse time-domain response</li>
+<li>+1 : Switch-on time-domain response</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>aniso</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>epermH</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Horizontal electric permittivities epsilon_h (-); #epermH = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>epermV</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Vertical electric permittivities epsilon_v (-); #epermV = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>mpermH</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Horizontal magnetic permeabilities mu_h (-); #mpermH = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>mpermV</strong> : array_like, optional</p>
+<blockquote>
+<div><p>Vertical magnetic permeabilities mu_v (-); #mpermV = #res.
+Defaults to ones.</p>
+</div></blockquote>
+<p><strong>msrc</strong> : boolean, optional</p>
+<blockquote>
+<div><p>If True, source is magnetic.</p>
+</div></blockquote>
+<p><strong>recdir</strong> : int, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Receiver direction, defaults to 1:</dt>
+<dd><ul class="first last simple">
+<li>1 : Ex</li>
+<li>2 : Ey</li>
+<li>3 : Ez</li>
+<li>4 : Hx</li>
+<li>5 : Hy</li>
+<li>6 : Hz</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>intpts</strong> : int, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Number of integration points for bipole source, defaults to 10:</dt>
+<dd><ul class="first last simple">
+<li>nr &lt; 3  : bipole, but calculated as dipole at centerpoint</li>
+<li>nr &gt;= 3 : bipole</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>xdirect</strong> : bool, optional</p>
+<blockquote>
+<div><p>If True and source and receiver are in the same layer, the direct field
+is calculated analytically in the frequency domain, if False it is
+calculated in the wavenumber domain.
+Defaults to True.</p>
+</div></blockquote>
+<p><strong>ht</strong> : {&#8216;fht&#8217;, &#8216;qwe&#8217;}, optional</p>
+<blockquote>
+<div><p>Flag to choose either the <em>Fast Hankel Transform</em> (FHT) or the
+<em>Quadrature-With-Extrapolation</em> (QWE) for the Hankel transform.
+Defaults to &#8216;fht&#8217;.</p>
+</div></blockquote>
+<p><strong>htarg</strong> : str or filter from empymod.filters or array_like, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Depends on the value for <cite>ht</cite>:</dt>
+<dd><ul class="first last">
+<li><p class="first">If <cite>ht</cite> = &#8216;fht&#8217;: array containing:
+[filter, pts_per_dec]:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>filter: string of filter name in <cite>empymod.filters</cite> or</dt>
+<dd><p class="first last">the filter method itself.
+(default: <cite>empymod.filters.key_401_2009()</cite>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>pts_per_dec: points per decade (only relevant if spline=True)</dt>
+<dd><dl class="first last docutils">
+<dt>If none, standard lagged convolution is used.</dt>
+<dd><p class="first last">(default: None)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">If <cite>ht</cite> = &#8216;qwe&#8217;: array containing:
+[rtol, atol, nquad, maxint, pts_per_dec]:</p>
+<blockquote>
+<div><ul class="simple">
+<li>rtol: relative tolerance (default: 1e-12)</li>
+<li>atol: absolute tolerance (default: 1e-30)</li>
+<li>nquad: order of Gaussian quadrature (default: 51)</li>
+<li>maxint: maximum number of partial integral intervals
+(default: 40)</li>
+<li>pts_per_dec: points per decade (only relevant if
+opt=&#8217;spline&#8217;) (default: 80)</li>
+</ul>
+</div></blockquote>
+<p>All are optional, you only have to maintain the order. To only
+change <cite>nquad</cite> to 11 and use the defaults otherwise, you can
+provide htarg=[&#8216;&#8217;, &#8216;&#8217;, 11].</p>
+</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>ft</strong> : {&#8216;sin&#8217;, &#8216;cos&#8217;, &#8216;qwe&#8217;, &#8216;fftlog&#8217;}, optional</p>
+<blockquote>
+<div><p>Only used if <cite>signal</cite> != None. Flag to choose either the Sine- or
+Cosine-Filter, the Quadrature-With-Extrapolation (QWE), or FFTLog for
+the Fourier transform.  Defaults to &#8216;sin&#8217;.</p>
+</div></blockquote>
+<p><strong>ftarg</strong> : str or filter from empymod.filters or array_like, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Only used if <cite>signal</cite> !=None. Depends on the value for <cite>ft</cite>:</dt>
+<dd><ul class="first last">
+<li><p class="first">If <cite>ft</cite> = &#8216;sin&#8217; or &#8216;cos&#8217;: array containing:
+[filter, pts_per_dec]:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>filter: string of filter name in <cite>empymod.filters</cite> or</dt>
+<dd><p class="first last">the filter method itself.
+(Default: <cite>empymod.filters.key_201_CosSin_2012()</cite>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>pts_per_dec: points per decade.  If none, standard lagged</dt>
+<dd><p class="first last">convolution is used. (Default: None)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">If <cite>ft</cite> = &#8216;qwe&#8217;: array containing:
+[rtol, atol, nquad, maxint, pts_per_dec]:</p>
+<blockquote>
+<div><ul class="simple">
+<li>rtol: relative tolerance (default: 1e-8)</li>
+<li>atol: absolute tolerance (default: 1e-20)</li>
+<li>nquad: order of Gaussian quadrature (default: 21)</li>
+<li>maxint: maximum number of partial integral intervals
+(default: 200)</li>
+<li>pts_per_dec: points per decade (only relevant if spline=True)
+(default: 20)</li>
+</ul>
+</div></blockquote>
+<p>All are optional, you only have to maintain the order. To only
+change <cite>nquad</cite> to 11 and use the defaults otherwise, you can
+provide ftarg=[&#8216;&#8217;, &#8216;&#8217;, 11].</p>
+</li>
+<li><p class="first">If <cite>ft</cite> = &#8216;fftlog&#8217;: array containing: [pts_per_dec, add_dec, q]:</p>
+<blockquote>
+<div><ul class="simple">
+<li>pts_per_dec: sampels per decade (default: 10)</li>
+<li>add_dec: additional decades [left, right] (default: [-2, 1])</li>
+<li>q: exponent of power law bias (default: 0); -1 &lt;= q &lt;= 1</li>
+</ul>
+</div></blockquote>
+<p>All are optional, you only have to maintain the order. To only
+change <cite>add_dec</cite> to [-1, 1] and use the defaults otherwise, you
+can provide ftarg=[&#8216;&#8217;, [-1, 1]].</p>
+</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>opt</strong> : {None, &#8216;parallel&#8217;, &#8216;spline&#8217;}, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Optimization flag. Defaults to None:</dt>
+<dd><ul class="first last simple">
+<li>None: Normal case, no parallelization nor interpolation is used.</li>
+<li>If &#8216;parallel&#8217;, the package <cite>numexpr</cite> is used to evaluate the most
+expensive statements. Always check if it actually improves
+performance for a specific problem. It can speed up the
+calculation for big arrays, but will most likely be slower for
+small arrays. It will use all available cores for these specific
+statements, which all contain <cite>Gamma</cite> in one way or another,
+which has dimensions (#frequencies, #offsets, #layers, #lambdas),
+therefore can grow pretty big.</li>
+<li>If &#8216;spline&#8217;, the <em>lagged convolution</em> or <em>splined</em> variant of the
+FHT or the <em>splined</em> version of the QWE are used. Use with
+caution and check with the non-spline version for a specific
+problem. (Can be faster, slower, or plainly wrong, as it uses
+interpolation.) If spline is set it will make use of the
+parameter pts_per_dec that can be defined in htarg. If
+pts_per_dec is not set for FHT, then the <em>lagged</em> version is
+used, else the <em>splined</em>.</li>
+</ul>
+</dd>
+</dl>
+<p>The option &#8216;parallel&#8217; only affects speed and memory usage, whereas
+&#8216;spline&#8217; also affects precision!  Please read the note in the <em>README</em>
+documentation for more information.</p>
+</div></blockquote>
+<p><strong>loop</strong> : {None, &#8216;freq&#8217;, &#8216;off&#8217;}, optional</p>
+<blockquote>
+<div><p>Define if to calculate everything vectorized or if to loop over
+frequencies (&#8216;freq&#8217;) or over offsets (&#8216;off&#8217;), default is None. It
+always loops over frequencies if <code class="docutils literal"><span class="pre">ht</span> <span class="pre">=</span> <span class="pre">'qwe'</span></code> or if <code class="docutils literal"><span class="pre">opt</span> <span class="pre">=</span>
+<span class="pre">'spline'</span></code>. Calculating everything vectorized is fast for few offsets
+OR for few frequencies. However, if you calculate many frequencies for
+many offsets, it might be faster to loop over frequencies. Only
+comparing the different versions will yield the answer for your
+specific problem at hand!</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}, optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Level of verbosity, defaults to 1:</dt>
+<dd><ul class="first last simple">
+<li>0: Print nothing.</li>
+<li>1: Print warnings.</li>
+<li>2: Print warnings and information.</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>EM</strong> : ndarray, (nfreq, nrec, nsrc)</p>
+<blockquote class="last">
+<div><dl class="docutils">
+<dt>Frequency- or time-domain EM field (depending on <cite>signal</cite>):</dt>
+<dd><ul class="first last simple">
+<li>If rec is electric, returns E [V/m].</li>
+<li>If rec is magnetic, returns B [T] (not H [A/m]!).</li>
+</ul>
+</dd>
+</dl>
+<p>In the case of the impulse time-domain response, the unit is further
+divided by seconds [1/s].</p>
+<p>However, source and receiver are normalised. So for instance in the
+electric case the source strength is 1 A and its length is 1 m. So the
+electric field could also be written as [V/(A.m2)].</p>
+<p>The shape of EM is (nfreq, nrec, nsrc). However, single dimensions
+are removed.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">empymod</span> <span class="k">import</span> <span class="n">srcbipole</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">src</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rec</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span><span class="o">*</span><span class="mi">500</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">200</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">depth</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1050</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="n">e20</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">EMfield</span> <span class="o">=</span> <span class="n">srcbipole</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freqtime</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">EMfield</span><span class="p">)</span>
+<span class="go">[  1.14061401e-10 -2.07836149e-10j  -5.38410978e-12 -2.53976216e-11j</span>
+<span class="go">  -2.06275951e-12 -3.33525423e-12j  -1.10983809e-13 -8.09426365e-13j</span>
+<span class="go">   1.92903597e-13 -4.55252836e-13j   1.69353850e-13 -3.19059245e-13j</span>
+<span class="go">   1.18960468e-13 -2.29643807e-13j   8.09247406e-14 -1.68298859e-13j</span>
+<span class="go">   5.50535020e-14 -1.25316192e-13j   3.80049013e-14 -9.44840453e-14j]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.model.frequency">
+<code class="descclassname">empymod.model.</code><code class="descname">frequency</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>res</em>, <em>freq</em>, <em>ab=11</em>, <em>aniso=None</em>, <em>epermH=None</em>, <em>epermV=None</em>, <em>mpermH=None</em>, <em>mpermV=None</em>, <em>xdirect=True</em>, <em>ht='fht'</em>, <em>htarg=None</em>, <em>opt=None</em>, <em>loop=None</em>, <em>verb=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/model.html#frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.model.frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut for frequency-domain <cite>dipole</cite>. See <cite>dipole</cite> for info.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.model.time">
+<code class="descclassname">empymod.model.</code><code class="descname">time</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>depth</em>, <em>res</em>, <em>time</em>, <em>ab=11</em>, <em>signal=0</em>, <em>aniso=None</em>, <em>epermH=None</em>, <em>epermV=None</em>, <em>mpermH=None</em>, <em>mpermV=None</em>, <em>xdirect=True</em>, <em>ht='fht'</em>, <em>htarg=None</em>, <em>ft='sin'</em>, <em>ftarg=None</em>, <em>opt=None</em>, <em>loop='off'</em>, <em>verb=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/model.html#time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.model.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut for time-domain <cite>dipole</cite>. See <cite>dipole</cite> for info.</p>
 </dd></dl>
 
 <dl class="function">
@@ -1546,7 +1874,7 @@ License: Apache License, Version 2.0,
 <p>Group 0 is to set minimum offset, frequency and time for calculation (in order
 to avoid divisions by zero).  Group 2 are checks organised in modules. So if
 you create for instance a modelling-routine in which you loop over frequencies,
-you have to call <cite>check_ab</cite>, <cite>check_model</cite>, <cite>check_dipole</cite>, <cite>check_depth</cite> and
+you have to call <cite>check_ab</cite>, <cite>check_model</cite>, <cite>get_coords</cite>, <cite>check_depth</cite> and
 <cite>check_hankel</cite> only once, but <cite>check_frequency</cite> in each loop. You do not have
 to run these checks if you are sure your input parameters are in the correct
 format.</p>
@@ -1607,15 +1935,25 @@ format.</p>
 <code class="descclassname">empymod.utils.</code><code class="descname">check_ab</code><span class="sig-paren">(</span><em>ab</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_ab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_ab" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check source-receiver configuration.</p>
 <p>This check-function is called from one of the modelling routines in
-<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
-input parameters.</p>
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ab_calc</strong> : int</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ab</strong> : int</p>
 <blockquote>
-<div><p>Adjusted configuration using reciprocity.</p>
+<div><p>Source-receiver configuration.</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}</p>
+<blockquote>
+<div><p>Level of verbosity.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ab_calc</strong> : int</p>
+<blockquote>
+<div><p>Adjusted source-receiver configuration using reciprocity.</p>
 </div></blockquote>
 <p><strong>msrc</strong> : bool</p>
 <blockquote>
@@ -1632,28 +1970,129 @@ input parameters.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="empymod.utils.check_model">
-<code class="descclassname">empymod.utils.</code><code class="descname">check_model</code><span class="sig-paren">(</span><em>depth</em>, <em>res</em>, <em>aniso</em>, <em>epermH</em>, <em>epermV</em>, <em>mpermH</em>, <em>mpermV</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check the model: depth and corresponding layer parameters.</p>
+<dt id="empymod.utils.get_abs_srcbipole">
+<code class="descclassname">empymod.utils.</code><code class="descname">get_abs_srcbipole</code><span class="sig-paren">(</span><em>msrc</em>, <em>recdir</em>, <em>theta</em>, <em>phi</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#get_abs_srcbipole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.get_abs_srcbipole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check source-receiver configuration.</p>
 <p>This check-function is called from one of the modelling routines in
-<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
-input parameters.</p>
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>depth</strong> : array</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>msrc</strong> : bool</p>
+<blockquote>
+<div><p>True if src is magnetic, else False.</p>
+</div></blockquote>
+<p><strong>recdir</strong> : {1, 2, 3, 4, 5, 6}</p>
+<blockquote>
+<div><p>Receiver direction.</p>
+</div></blockquote>
+<p><strong>theta</strong> : float</p>
+<blockquote>
+<div><p>Horizontal source angle.</p>
+</div></blockquote>
+<p><strong>phi</strong> : float</p>
+<blockquote>
+<div><p>Vertical source angle.</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}</p>
+<blockquote>
+<div><p>Level of verbosity.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ab</strong> : array of int</p>
+<blockquote>
+<div><p>ab&#8217;s to calculate for this bipole.</p>
+</div></blockquote>
+<p><strong>mrec</strong> : bool</p>
+<blockquote>
+<div><p>Deduced from recdir. Receiver is magnetic if True.</p>
+</div></blockquote>
+<p><strong>fact</strong> : array</p>
+<blockquote class="last">
+<div><p>Geometrical spreading factors for ab&#8217;s.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="empymod.utils.check_model">
+<code class="descclassname">empymod.utils.</code><code class="descname">check_model</code><span class="sig-paren">(</span><em>depth</em>, <em>res</em>, <em>aniso</em>, <em>epermH</em>, <em>epermV</em>, <em>mpermH</em>, <em>mpermV</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the model: depth and corresponding layer parameters.</p>
+<p>This check-function is called from one of the modelling routines in
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>depth</strong> : list</p>
+<blockquote>
+<div><p>Absolute layer interfaces z (m); #depth = #res - 1
+(excluding +/- infinity).</p>
+</div></blockquote>
+<p><strong>res</strong> : array_like</p>
+<blockquote>
+<div><p>Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.</p>
+</div></blockquote>
+<p><strong>aniso</strong> : array_like</p>
+<blockquote>
+<div><p>Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.</p>
+</div></blockquote>
+<p><strong>epermH</strong> : array_like</p>
+<blockquote>
+<div><p>Horizontal electric permittivities epsilon_h (-); #epermH = #res.</p>
+</div></blockquote>
+<p><strong>epermV</strong> : array_like</p>
+<blockquote>
+<div><p>Vertical electric permittivities epsilon_v (-); #epermV = #res.</p>
+</div></blockquote>
+<p><strong>mpermH</strong> : array_like</p>
+<blockquote>
+<div><p>Horizontal magnetic permeabilities mu_h (-); #mpermH = #res.</p>
+</div></blockquote>
+<p><strong>mpermV</strong> : array_like</p>
+<blockquote>
+<div><p>Vertical magnetic permeabilities mu_v (-); #mpermV = #res.</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}</p>
+<blockquote>
+<div><p>Level of verbosity.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>depth</strong> : array</p>
 <blockquote>
 <div><p>Depths of layer interfaces, adds -infty at beginning if not present.</p>
 </div></blockquote>
 <p><strong>res</strong> : array</p>
 <blockquote>
-<div><p>Resistivities as provided, checked for size.</p>
+<div><p>As input, checked for size.</p>
 </div></blockquote>
-<p><strong>aniso, epermH, epermV, mpermH, mpermV</strong> : array</p>
+<p><strong>aniso</strong> : array</p>
 <blockquote>
-<div><p>Parameters as provided, checked for size. If None provided, defaults to
-an array of ones.</p>
+<div><p>As input, checked for size. If None, defaults to an array of ones.</p>
+</div></blockquote>
+<p><strong>epermH</strong> : array</p>
+<blockquote>
+<div><p>As input, checked for size. If None, defaults to an array of ones.</p>
+</div></blockquote>
+<p><strong>epermV</strong> : array</p>
+<blockquote>
+<div><p>As input, checked for size. If None, defaults to an array of ones.</p>
+</div></blockquote>
+<p><strong>mpermH</strong> : array</p>
+<blockquote>
+<div><p>As input, checked for size. If None, defaults to an array of ones.</p>
+</div></blockquote>
+<p><strong>mpermV</strong> : array</p>
+<blockquote>
+<div><p>As input, checked for size. If None, defaults to an array of ones.</p>
 </div></blockquote>
 <p><strong>isfullspace</strong> : bool</p>
 <blockquote class="last">
@@ -1667,19 +2106,54 @@ and mpermV are in all layers the same).</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="empymod.utils.check_dipole">
-<code class="descclassname">empymod.utils.</code><code class="descname">check_dipole</code><span class="sig-paren">(</span><em>inp</em>, <em>name</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_dipole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_dipole" title="Permalink to this definition">¶</a></dt>
+<dt id="empymod.utils.check_pole">
+<code class="descclassname">empymod.utils.</code><code class="descname">check_pole</code><span class="sig-paren">(</span><em>inp</em>, <em>name</em>, <em>verb</em>, <em>intpts=-1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_pole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_pole" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check dipole parameters.</p>
 <p>This check-function is called from one of the modelling routines in
-<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
-input parameters.</p>
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>inp</strong> : list</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>inp</strong> : list of floats or arrays</p>
+<blockquote>
+<div><p>Pole coordinates (m): [pole-x, pole-y, pole-z].</p>
+</div></blockquote>
+<p><strong>name</strong> : str, {&#8216;src&#8217;, &#8216;rec&#8217;}</p>
+<blockquote>
+<div><p>Pole-type.</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}</p>
+<blockquote>
+<div><p>Level of verbosity.</p>
+</div></blockquote>
+<p><strong>intpts</strong> : int</p>
+<blockquote>
+<div><p>Number of integration points for bipole.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> : list</p>
+<blockquote>
+<div><p>List of pole coordinates [x, y, z].</p>
+</div></blockquote>
+<p><strong>outbp</strong> : {tuple, None}</p>
 <blockquote class="last">
-<div><p>Same as input, checked.</p>
+<div><ul>
+<li><p class="first">If pole is a dipole, None.</p>
+</li>
+<li><dl class="first docutils">
+<dt>If pole is a bipole, (theta, phi, g_w):</dt>
+<dd><ul class="first last simple">
+<li>theta : Horizontal pole angle.</li>
+<li>phi : Vertical pole angle.</li>
+<li>g_w : Integration weights.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
 </div></blockquote>
 </td>
 </tr>
@@ -1688,19 +2162,85 @@ input parameters.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="empymod.utils.check_bipole">
-<code class="descclassname">empymod.utils.</code><code class="descname">check_bipole</code><span class="sig-paren">(</span><em>inp</em>, <em>name</em>, <em>intpts</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_bipole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_bipole" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check dipole parameters.</p>
+<dt id="empymod.utils.get_coords">
+<code class="descclassname">empymod.utils.</code><code class="descname">get_coords</code><span class="sig-paren">(</span><em>src</em>, <em>rec</em>, <em>verb</em>, <em>intpts=(-1</em>, <em>-1)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#get_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.get_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get depths, offsets, angles, hence spatial input parameters.</p>
 <p>This check-function is called from one of the modelling routines in
-<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
-input parameters.</p>
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>inp</strong> : list</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>src</strong> : list of floats or arrays</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Source coordinates (m):</dt>
+<dd><ul class="first last simple">
+<li>dipole: [src-x, src-y, src-z]</li>
+<li>bipole: [src-x0, src-x1, src-y0, src-y1, src-z0, src-z1]</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>rec</strong> : list of floats or arrays</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Receiver coordinates (m):</dt>
+<dd><ul class="first last simple">
+<li>dipole: [src-x, src-y, src-z]</li>
+<li>bipole: [src-x0, src-x1, src-y0, src-y1, src-z0, src-z1]</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}</p>
+<blockquote>
+<div><p>Level of verbosity.</p>
+</div></blockquote>
+<p><strong>intpts</strong> : tuple (int, int)</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Number of integration points for bipole for (src, rec).</dt>
+<dd><ul class="first last simple">
+<li>nr &lt; 0      : dipole</li>
+<li>0 &lt;= nr &lt; 3 : bipole, but calculated as dipole at centerpoint</li>
+<li>nr &gt;= 3     : bipole</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>zsrc</strong> : array of float</p>
+<blockquote>
+<div><p>Depth(s) of src (plural only if bipole).</p>
+</div></blockquote>
+<p><strong>zrec</strong> : array of float</p>
+<blockquote>
+<div><p>Depth(s) of rec (plural only if bipole).</p>
+</div></blockquote>
+<p><strong>off</strong> : array of floats</p>
+<blockquote>
+<div><p>Offsets</p>
+</div></blockquote>
+<p><strong>angle</strong> : array of floats</p>
+<blockquote>
+<div><p>Angles</p>
+</div></blockquote>
+<p>nsrc: int</p>
+<blockquote>
+<div><p>Number of bipole sources</p>
+</div></blockquote>
+<p>nrec: int</p>
+<blockquote>
+<div><p>Number of receivers</p>
+</div></blockquote>
+<p>srcrecbp: tuple</p>
 <blockquote class="last">
-<div><p>Same as input, checked.</p>
+<div><p>(srcbp, recbp)
+If src/rec is dipole: None
+If src/rec is bipole: tuple containing (theta, phi, g_w)</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1717,19 +2257,33 @@ input parameters.</p>
 <dd>interface is chosen.</dd>
 </dl>
 <p>This check-function is called from one of the modelling routines in
-<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
-input parameters.</p>
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>lsrc</strong> : int</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>zsrc</strong> : array of float</p>
 <blockquote>
-<div><p>Layer number in which src resides.</p>
+<div><p>Depth(s) of src (plural only if bipole).</p>
 </div></blockquote>
-<p><strong>lrec</strong> : int</p>
+<p><strong>zrec</strong> : array of float</p>
+<blockquote>
+<div><p>Depth(s) of rec (plural only if bipole).</p>
+</div></blockquote>
+<p><strong>depth</strong> : array</p>
+<blockquote>
+<div><p>Depths of layer interfaces.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>lsrc</strong> : int or array_like of int</p>
+<blockquote>
+<div><p>Layer number(s) in which src resides (plural only if bipole).</p>
+</div></blockquote>
+<p><strong>lrec</strong> : int or array_like of int</p>
 <blockquote class="last">
-<div><p>Layer number in which rec resides.</p>
+<div><p>Layer number(s) in which rec resides (plural only if bipole).</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1742,13 +2296,27 @@ input parameters.</p>
 <code class="descclassname">empymod.utils.</code><code class="descname">check_hankel</code><span class="sig-paren">(</span><em>ht</em>, <em>htarg</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_hankel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_hankel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check Hankel transform parameters.</p>
 <p>This check-function is called from one of the modelling routines in
-<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
-input parameters.</p>
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ht, htarg</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ht</strong> : {&#8216;fht&#8217;, &#8216;qwe&#8217;}</p>
+<blockquote>
+<div><p>Flag to choose the Hankel transform.</p>
+</div></blockquote>
+<p><strong>htarg</strong> : str or filter from empymod.filters or array_like,</p>
+<blockquote>
+<div><p>Depends on the value for <cite>ht</cite>.</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}</p>
+<blockquote>
+<div><p>Level of verbosity.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ht, htarg</p>
 <blockquote class="last">
 <div><p>Checked if valid and set to defaults if not provided.</p>
 </div></blockquote>
@@ -1763,20 +2331,65 @@ input parameters.</p>
 <code class="descclassname">empymod.utils.</code><code class="descname">check_frequency</code><span class="sig-paren">(</span><em>freq</em>, <em>res</em>, <em>aniso</em>, <em>epermH</em>, <em>epermV</em>, <em>mpermH</em>, <em>mpermV</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_frequency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate frequency-dependent parameters.</p>
 <p>This check-function is called from one of the modelling routines in
-<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
-input parameters.</p>
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>freq</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>freq</strong> : array_like</p>
+<blockquote>
+<div><p>Frequencies f (Hz).</p>
+</div></blockquote>
+<p><strong>res</strong> : array_like</p>
+<blockquote>
+<div><p>Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.</p>
+</div></blockquote>
+<p><strong>aniso</strong> : array_like</p>
+<blockquote>
+<div><p>Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.</p>
+</div></blockquote>
+<p><strong>epermH</strong> : array_like</p>
+<blockquote>
+<div><p>Horizontal electric permittivities epsilon_h (-); #epermH = #res.</p>
+</div></blockquote>
+<p><strong>epermV</strong> : array_like</p>
+<blockquote>
+<div><p>Vertical electric permittivities epsilon_v (-); #epermV = #res.</p>
+</div></blockquote>
+<p><strong>mpermH</strong> : array_like</p>
+<blockquote>
+<div><p>Horizontal magnetic permeabilities mu_h (-); #mpermH = #res.</p>
+</div></blockquote>
+<p><strong>mpermV</strong> : array_like</p>
+<blockquote>
+<div><p>Vertical magnetic permeabilities mu_v (-); #mpermV = #res.</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}</p>
+<blockquote>
+<div><p>Level of verbosity.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>freq</strong> : float</p>
 <blockquote>
 <div><p>Frequency, checked for size and assured min_freq.</p>
 </div></blockquote>
-<p><strong>etaH, etaV, zetaH, zetaV</strong> : array</p>
+<p><strong>etaH</strong> : array</p>
+<blockquote>
+<div><p>Parameters etaH, same size as provided resistivity.</p>
+</div></blockquote>
+<p><strong>etaV</strong> : array</p>
+<blockquote>
+<div><p>Parameters etaV, same size as provided resistivity.</p>
+</div></blockquote>
+<p><strong>zetaH</strong> : array</p>
+<blockquote>
+<div><p>Parameters zetaH, same size as provided resistivity.</p>
+</div></blockquote>
+<p><strong>zetaV</strong> : array</p>
 <blockquote class="last">
-<div><p>Parameters etaH, etaV, zetaH, and zetaV, same size as provided
-resistivity.</p>
+<div><p>Parameters zetaV, same size as provided resistivity.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1789,13 +2402,35 @@ resistivity.</p>
 <code class="descclassname">empymod.utils.</code><code class="descname">check_opt</code><span class="sig-paren">(</span><em>opt</em>, <em>loop</em>, <em>ht</em>, <em>htarg</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_opt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_opt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check optimization parameters.</p>
 <p>This check-function is called from one of the modelling routines in
-<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
-input parameters.</p>
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>use_spline</strong> : bool</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>opt</strong> : {None, &#8216;parallel&#8217;, &#8216;spline&#8217;}</p>
+<blockquote>
+<div><p>Optimization flag.</p>
+</div></blockquote>
+<p><strong>loop</strong> : {None, &#8216;freq&#8217;, &#8216;off&#8217;}</p>
+<blockquote>
+<div><p>Loop flag.</p>
+</div></blockquote>
+<p><strong>ht</strong> : str</p>
+<blockquote>
+<div><p>Flag to choose the Hankel transform.</p>
+</div></blockquote>
+<p><strong>htarg</strong> : array_like,</p>
+<blockquote>
+<div><p>Depends on the value for <cite>ht</cite>.</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}</p>
+<blockquote>
+<div><p>Level of verbosity.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>use_spline</strong> : bool</p>
 <blockquote>
 <div><p>Boolean if to use spline interpolation.</p>
 </div></blockquote>
@@ -1822,13 +2457,44 @@ input parameters.</p>
 <code class="descclassname">empymod.utils.</code><code class="descname">check_time</code><span class="sig-paren">(</span><em>freqtime</em>, <em>signal</em>, <em>ft</em>, <em>ftarg</em>, <em>verb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/empymod/utils.html#check_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#empymod.utils.check_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check time domain specific input parameters.</p>
 <p>This check-function is called from one of the modelling routines in
-<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a description of the
-input parameters.</p>
+<code class="xref py py-mod docutils literal"><span class="pre">model</span></code>.  Consult these modelling routines for a detailed description
+of the input parameters.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>time</strong> : float</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>freqtime</strong> : array_like</p>
+<blockquote>
+<div><p>Frequencies f (Hz) if <cite>signal</cite> == None, else times t (s).</p>
+</div></blockquote>
+<p><strong>signal</strong> : {None, 0, 1, -1}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Source signal:</dt>
+<dd><ul class="first last simple">
+<li>None: Frequency-domain response</li>
+<li>-1 : Switch-off time-domain response</li>
+<li>0 : Impulse time-domain response</li>
+<li>+1 : Switch-on time-domain response</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>ft</strong> : {&#8216;sin&#8217;, &#8216;cos&#8217;, &#8216;qwe&#8217;, &#8216;fftlog&#8217;}</p>
+<blockquote>
+<div><p>Flag for Fourier transform, only used if <cite>signal</cite> != None.</p>
+</div></blockquote>
+<p><strong>ftarg</strong> : str or filter from empymod.filters or array_like,</p>
+<blockquote>
+<div><p>Only used if <cite>signal</cite> !=None. Depends on the value for <cite>ft</cite>:</p>
+</div></blockquote>
+<p><strong>verb</strong> : {0, 1, 2}</p>
+<blockquote>
+<div><p>Level of verbosity.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>time</strong> : float</p>
 <blockquote>
 <div><p>Time, checked for size and assured min_time.</p>
 </div></blockquote>

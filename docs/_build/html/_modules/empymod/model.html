@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>empymod.model &#8212; empymod 1.0.dev documentation</title>
+    <title>empymod.model &#8212; empymod 1.1.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.dev',
+        VERSION:     '1.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="empymod 1.0.dev documentation" href="../../index.html" />
+    <link rel="top" title="empymod 1.1.0 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -51,7 +51,7 @@
 <span class="sd">solution to your specific problem. Use these routines as template to create</span>
 <span class="sd">your own, problem-specific modelling routine!</span>
 
-<span class="sd">So far implemented are three routines, all of them for:</span>
+<span class="sd">So far implemented are two routines, both of them for:</span>
 <span class="sd">    - frequency or time</span>
 <span class="sd">    - source and receiver can be either electric or magnetic</span>
 
@@ -62,20 +62,24 @@
 <span class="sd">        - Point dipole receivers(s) in direction x, y, or z, all receivers at</span>
 <span class="sd">          the same depth.</span>
 <span class="sd">        - Various frequencies or times.</span>
-<span class="sd">    - `bipole`:</span>
-<span class="sd">        - Arbitrary bipole source.</span>
-<span class="sd">        - Arbitrary bipole receiver.</span>
-<span class="sd">        - Various frequencies or times.</span>
 <span class="sd">    - `srcbipole`:</span>
 <span class="sd">        - Arbitrary bipole source.</span>
 <span class="sd">        - Point dipole receivers(s) in direction x, y, or z, all receivers at</span>
 <span class="sd">          the same depth.</span>
 <span class="sd">        - Various frequencies or times.</span>
+<span class="sd">    - `bipole`: `srcbipole` will be superseded eventually by `bipole`, a</span>
+<span class="sd">      general source- and receiver-bipole routine.</span>
 
 <span class="sd">The above routines make use of the two core routines:</span>
 <span class="sd">    - `fem`: Calculate wavenumber-domain electromagnetic field and carry out</span>
 <span class="sd">             the Hankel transform to the frequency domain.</span>
 <span class="sd">    - `tem`: Carry out the Fourier transform to time domain after `fem`.</span>
+
+<span class="sd">Two routines are shortcuts for frequency- and time-domain dipoles,</span>
+<span class="sd">respectively, and mainly in for legacy reasons:</span>
+
+<span class="sd">    - `frequency`: Shortcut of `dipole` for frequency-domain calculation.</span>
+<span class="sd">    - `time`: Shortcut of `dipole` for time-domain calculation.</span>
 
 <span class="sd">Two more routines are more kind of examples and cannot be regarded stable;</span>
 <span class="sd">they can serve as template to create your own routines:</span>
@@ -103,10 +107,14 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">transform</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="p">(</span><span class="n">check_ab</span><span class="p">,</span> <span class="n">get_abs_srcbipole</span><span class="p">,</span> <span class="n">check_model</span><span class="p">,</span> <span class="n">get_coords</span><span class="p">,</span>
+                    <span class="n">check_depth</span><span class="p">,</span> <span class="n">check_hankel</span><span class="p">,</span> <span class="n">check_frequency</span><span class="p">,</span> <span class="n">check_opt</span><span class="p">,</span>
+                    <span class="n">check_time</span><span class="p">,</span> <span class="n">printstartfinish</span><span class="p">)</span>
 
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dipole&#39;</span><span class="p">,</span> <span class="s1">&#39;srcbipole&#39;</span><span class="p">,</span> <span class="s1">&#39;gpr&#39;</span><span class="p">,</span> <span class="s1">&#39;wavenumber&#39;</span><span class="p">,</span> <span class="s1">&#39;fem&#39;</span><span class="p">,</span> <span class="s1">&#39;tem&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dipole&#39;</span><span class="p">,</span> <span class="s1">&#39;srcbipole&#39;</span><span class="p">,</span> <span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;gpr&#39;</span><span class="p">,</span> <span class="s1">&#39;wavenumber&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;fem&#39;</span><span class="p">,</span> <span class="s1">&#39;tem&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="dipole"><a class="viewcode-back" href="../../empymod.html#empymod.model.dipole">[docs]</a><span class="k">def</span> <span class="nf">dipole</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freqtime</span><span class="p">,</span> <span class="n">signal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ab</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">aniso</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -338,7 +346,7 @@
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">    &gt;&gt;&gt; from empymod import dipole</span>
 <span class="sd">    &gt;&gt;&gt; src = [0, 0, 100]</span>
-<span class="sd">    &gt;&gt;&gt; rec = [np.arange(1,11)*500, np.zeros(10), 200]</span>
+<span class="sd">    &gt;&gt;&gt; rec = [np.arange(1, 11)*500, np.zeros(10), 200]</span>
 <span class="sd">    &gt;&gt;&gt; depth = [0, 300, 1000, 1050]</span>
 <span class="sd">    &gt;&gt;&gt; res = [1e20, .3, 1, 50, 1]</span>
 <span class="sd">    &gt;&gt;&gt; EMfield = dipole(src, rec, depth, res, freqtime=1, verb=0)</span>
@@ -353,41 +361,41 @@
 
     <span class="c1"># === 1.  LET&#39;S START ============</span>
     <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">t0</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># === 2.  CHECK INPUT ============</span>
 
     <span class="c1"># Check times and Fourier Transform arguments, get required frequencies</span>
     <span class="c1"># (freq = freqtime if `signal=None`)</span>
-    <span class="n">time</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_time</span><span class="p">(</span><span class="n">freqtime</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">time</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span> <span class="o">=</span> <span class="n">check_time</span><span class="p">(</span><span class="n">freqtime</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># Check layer parameters</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_model</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
-                              <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">check_model</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span>
+                        <span class="n">verb</span><span class="p">)</span>
     <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">isfullspace</span> <span class="o">=</span> <span class="n">model</span>
 
     <span class="c1"># Check frequency =&gt; get etaH, etaV, zetaH, and zetaV</span>
-    <span class="n">frequency</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_frequency</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
-                                      <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">frequency</span> <span class="o">=</span> <span class="n">check_frequency</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
+                                <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
     <span class="n">freq</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span> <span class="o">=</span> <span class="n">frequency</span>
 
     <span class="c1"># Check Hankel transform parameters</span>
-    <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_hankel</span><span class="p">(</span><span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span> <span class="o">=</span> <span class="n">check_hankel</span><span class="p">(</span><span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># Check optimization</span>
-    <span class="n">optimization</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_opt</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">optimization</span> <span class="o">=</span> <span class="n">check_opt</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
     <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">loop_freq</span><span class="p">,</span> <span class="n">loop_off</span> <span class="o">=</span> <span class="n">optimization</span>
 
     <span class="c1"># Check src-rec configuration</span>
     <span class="c1"># =&gt; Get flags if src or rec or both are magnetic (msrc, mrec)</span>
-    <span class="n">ab_calc</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_ab</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">ab_calc</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span> <span class="o">=</span> <span class="n">check_ab</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># Check src and rec</span>
     <span class="c1"># =&gt; Get source and receiver depths (zsrc, zrec)</span>
     <span class="c1"># =&gt; Get layer number in which src and rec reside (lsrc/lrec)</span>
     <span class="c1"># =&gt; Get offsets and angles (off, angle)</span>
-    <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">nrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
-    <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_depth</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+    <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">nrec</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_coords</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span> <span class="o">=</span> <span class="n">check_depth</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
 
     <span class="c1"># === 3. EM-FIELD CALCULATION ============</span>
 
@@ -406,7 +414,7 @@
 
     <span class="c1"># === 4.  FINISHED ============</span>
     <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+        <span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">EM</span></div>
 
@@ -415,58 +423,274 @@
               <span class="n">epermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">msrc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
               <span class="n">recdir</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">intpts</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">xdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ht</span><span class="o">=</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span> <span class="n">htarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">ft</span><span class="o">=</span><span class="s1">&#39;sin&#39;</span><span class="p">,</span> <span class="n">ftarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Working function for finite, rotated dipoles (T, R).</span>
+    <span class="sd">&quot;&quot;&quot;Return the electromagnetic field due to a bipole source.</span>
 
-<span class="sd">     AB DELETED</span>
-<span class="sd">     MSRC, RECDIR</span>
-<span class="sd">     INTPTS : IF 0, JUST ANGLE IS CONSIDERED, AT CENTER</span>
-<span class="sd">     NORMALIZED</span>
+<span class="sd">    Calculate the electromagnetic frequency- or time-domain field due to an</span>
+<span class="sd">    arbitrary finite electric or magnetic bipole source, measured by</span>
+<span class="sd">    infinitesimal small electric or magnetic dipole receivers; receivers are</span>
+<span class="sd">    directed along the principal directions x, y, or z, and all receivers are</span>
+<span class="sd">    at the same depth.</span>
 
-<span class="sd">     Difference between Dipole1D and emymod for msrc=False, recdir=6, dx!=0</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    src : list of floats</span>
+<span class="sd">        Source coordinates (m):</span>
+<span class="sd">        [src-x0, src-x1, src-y0, src-y1, src-z0, src-z1].</span>
+
+<span class="sd">    rec : list of floats or arrays</span>
+<span class="sd">        Receiver coordinates (m): [rec-x, rec-y, rec-z].</span>
+<span class="sd">        The x- and y-coordinates can be arrays, z is a single value.</span>
+<span class="sd">        The x- and y-coordinates must have the same dimension.</span>
+
+<span class="sd">    depth : list</span>
+<span class="sd">        Absolute layer interfaces z (m); #depth = #res - 1</span>
+<span class="sd">        (excluding +/- infinity).</span>
+
+<span class="sd">    res : array_like</span>
+<span class="sd">        Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.</span>
+
+<span class="sd">    freqtime : array_like</span>
+<span class="sd">        Frequencies f (Hz) if `signal` == None, else times t (s).</span>
+
+<span class="sd">    signal : {None, 0, 1, -1}, optional</span>
+<span class="sd">        Source signal, default is None:</span>
+<span class="sd">            - None: Frequency-domain response</span>
+<span class="sd">            - -1 : Switch-off time-domain response</span>
+<span class="sd">            - 0 : Impulse time-domain response</span>
+<span class="sd">            - +1 : Switch-on time-domain response</span>
+
+<span class="sd">    aniso : array_like, optional</span>
+<span class="sd">        Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    epermH : array_like, optional</span>
+<span class="sd">        Horizontal electric permittivities epsilon_h (-); #epermH = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    epermV : array_like, optional</span>
+<span class="sd">        Vertical electric permittivities epsilon_v (-); #epermV = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    mpermH : array_like, optional</span>
+<span class="sd">        Horizontal magnetic permeabilities mu_h (-); #mpermH = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    mpermV : array_like, optional</span>
+<span class="sd">        Vertical magnetic permeabilities mu_v (-); #mpermV = #res.</span>
+<span class="sd">        Defaults to ones.</span>
+
+<span class="sd">    msrc : boolean, optional</span>
+<span class="sd">        If True, source is magnetic.</span>
+
+<span class="sd">    recdir : int, optional</span>
+<span class="sd">        Receiver direction, defaults to 1:</span>
+<span class="sd">            - 1 : Ex</span>
+<span class="sd">            - 2 : Ey</span>
+<span class="sd">            - 3 : Ez</span>
+<span class="sd">            - 4 : Hx</span>
+<span class="sd">            - 5 : Hy</span>
+<span class="sd">            - 6 : Hz</span>
+
+<span class="sd">    intpts : int, optional</span>
+<span class="sd">        Number of integration points for bipole source, defaults to 10:</span>
+<span class="sd">            - nr &lt; 3  : bipole, but calculated as dipole at centerpoint</span>
+<span class="sd">            - nr &gt;= 3 : bipole</span>
+
+<span class="sd">    xdirect : bool, optional</span>
+<span class="sd">        If True and source and receiver are in the same layer, the direct field</span>
+<span class="sd">        is calculated analytically in the frequency domain, if False it is</span>
+<span class="sd">        calculated in the wavenumber domain.</span>
+<span class="sd">        Defaults to True.</span>
+
+<span class="sd">    ht : {&#39;fht&#39;, &#39;qwe&#39;}, optional</span>
+<span class="sd">        Flag to choose either the *Fast Hankel Transform* (FHT) or the</span>
+<span class="sd">        *Quadrature-With-Extrapolation* (QWE) for the Hankel transform.</span>
+<span class="sd">        Defaults to &#39;fht&#39;.</span>
+
+<span class="sd">    htarg : str or filter from empymod.filters or array_like, optional</span>
+<span class="sd">        Depends on the value for `ht`:</span>
+<span class="sd">            - If `ht` = &#39;fht&#39;: array containing:</span>
+<span class="sd">              [filter, pts_per_dec]:</span>
+
+<span class="sd">                - filter: string of filter name in `empymod.filters` or</span>
+<span class="sd">                          the filter method itself.</span>
+<span class="sd">                          (default: `empymod.filters.key_401_2009()`)</span>
+<span class="sd">                - pts_per_dec: points per decade (only relevant if spline=True)</span>
+<span class="sd">                               If none, standard lagged convolution is used.</span>
+<span class="sd">                                (default: None)</span>
+
+<span class="sd">            - If `ht` = &#39;qwe&#39;: array containing:</span>
+<span class="sd">              [rtol, atol, nquad, maxint, pts_per_dec]:</span>
+
+<span class="sd">                - rtol: relative tolerance (default: 1e-12)</span>
+<span class="sd">                - atol: absolute tolerance (default: 1e-30)</span>
+<span class="sd">                - nquad: order of Gaussian quadrature (default: 51)</span>
+<span class="sd">                - maxint: maximum number of partial integral intervals</span>
+<span class="sd">                  (default: 40)</span>
+<span class="sd">                - pts_per_dec: points per decade (only relevant if</span>
+<span class="sd">                  opt=&#39;spline&#39;) (default: 80)</span>
+
+<span class="sd">              All are optional, you only have to maintain the order. To only</span>
+<span class="sd">              change `nquad` to 11 and use the defaults otherwise, you can</span>
+<span class="sd">              provide htarg=[&#39;&#39;, &#39;&#39;, 11].</span>
+
+<span class="sd">    ft : {&#39;sin&#39;, &#39;cos&#39;, &#39;qwe&#39;, &#39;fftlog&#39;}, optional</span>
+<span class="sd">        Only used if `signal` != None. Flag to choose either the Sine- or</span>
+<span class="sd">        Cosine-Filter, the Quadrature-With-Extrapolation (QWE), or FFTLog for</span>
+<span class="sd">        the Fourier transform.  Defaults to &#39;sin&#39;.</span>
+
+<span class="sd">    ftarg : str or filter from empymod.filters or array_like, optional</span>
+<span class="sd">        Only used if `signal` !=None. Depends on the value for `ft`:</span>
+<span class="sd">            - If `ft` = &#39;sin&#39; or &#39;cos&#39;: array containing:</span>
+<span class="sd">              [filter, pts_per_dec]:</span>
+
+<span class="sd">                - filter: string of filter name in `empymod.filters` or</span>
+<span class="sd">                          the filter method itself.</span>
+<span class="sd">                          (Default: `empymod.filters.key_201_CosSin_2012()`)</span>
+<span class="sd">                - pts_per_dec: points per decade.  If none, standard lagged</span>
+<span class="sd">                               convolution is used. (Default: None)</span>
+
+<span class="sd">            - If `ft` = &#39;qwe&#39;: array containing:</span>
+<span class="sd">              [rtol, atol, nquad, maxint, pts_per_dec]:</span>
+
+<span class="sd">                - rtol: relative tolerance (default: 1e-8)</span>
+<span class="sd">                - atol: absolute tolerance (default: 1e-20)</span>
+<span class="sd">                - nquad: order of Gaussian quadrature (default: 21)</span>
+<span class="sd">                - maxint: maximum number of partial integral intervals</span>
+<span class="sd">                  (default: 200)</span>
+<span class="sd">                - pts_per_dec: points per decade (only relevant if spline=True)</span>
+<span class="sd">                  (default: 20)</span>
+
+<span class="sd">              All are optional, you only have to maintain the order. To only</span>
+<span class="sd">              change `nquad` to 11 and use the defaults otherwise, you can</span>
+<span class="sd">              provide ftarg=[&#39;&#39;, &#39;&#39;, 11].</span>
+
+<span class="sd">            - If `ft` = &#39;fftlog&#39;: array containing: [pts_per_dec, add_dec, q]:</span>
+
+<span class="sd">                - pts_per_dec: sampels per decade (default: 10)</span>
+<span class="sd">                - add_dec: additional decades [left, right] (default: [-2, 1])</span>
+<span class="sd">                - q: exponent of power law bias (default: 0); -1 &lt;= q &lt;= 1</span>
+
+<span class="sd">              All are optional, you only have to maintain the order. To only</span>
+<span class="sd">              change `add_dec` to [-1, 1] and use the defaults otherwise, you</span>
+<span class="sd">              can provide ftarg=[&#39;&#39;, [-1, 1]].</span>
+
+<span class="sd">    opt : {None, &#39;parallel&#39;, &#39;spline&#39;}, optional</span>
+<span class="sd">        Optimization flag. Defaults to None:</span>
+<span class="sd">            - None: Normal case, no parallelization nor interpolation is used.</span>
+<span class="sd">            - If &#39;parallel&#39;, the package `numexpr` is used to evaluate the most</span>
+<span class="sd">              expensive statements. Always check if it actually improves</span>
+<span class="sd">              performance for a specific problem. It can speed up the</span>
+<span class="sd">              calculation for big arrays, but will most likely be slower for</span>
+<span class="sd">              small arrays. It will use all available cores for these specific</span>
+<span class="sd">              statements, which all contain `Gamma` in one way or another,</span>
+<span class="sd">              which has dimensions (#frequencies, #offsets, #layers, #lambdas),</span>
+<span class="sd">              therefore can grow pretty big.</span>
+<span class="sd">            - If &#39;spline&#39;, the *lagged convolution* or *splined* variant of the</span>
+<span class="sd">              FHT or the *splined* version of the QWE are used. Use with</span>
+<span class="sd">              caution and check with the non-spline version for a specific</span>
+<span class="sd">              problem. (Can be faster, slower, or plainly wrong, as it uses</span>
+<span class="sd">              interpolation.) If spline is set it will make use of the</span>
+<span class="sd">              parameter pts_per_dec that can be defined in htarg. If</span>
+<span class="sd">              pts_per_dec is not set for FHT, then the *lagged* version is</span>
+<span class="sd">              used, else the *splined*.</span>
+
+<span class="sd">        The option &#39;parallel&#39; only affects speed and memory usage, whereas</span>
+<span class="sd">        &#39;spline&#39; also affects precision!  Please read the note in the *README*</span>
+<span class="sd">        documentation for more information.</span>
+
+<span class="sd">    loop : {None, &#39;freq&#39;, &#39;off&#39;}, optional</span>
+<span class="sd">        Define if to calculate everything vectorized or if to loop over</span>
+<span class="sd">        frequencies (&#39;freq&#39;) or over offsets (&#39;off&#39;), default is None. It</span>
+<span class="sd">        always loops over frequencies if ``ht = &#39;qwe&#39;`` or if ``opt =</span>
+<span class="sd">        &#39;spline&#39;``. Calculating everything vectorized is fast for few offsets</span>
+<span class="sd">        OR for few frequencies. However, if you calculate many frequencies for</span>
+<span class="sd">        many offsets, it might be faster to loop over frequencies. Only</span>
+<span class="sd">        comparing the different versions will yield the answer for your</span>
+<span class="sd">        specific problem at hand!</span>
+
+<span class="sd">    verb : {0, 1, 2}, optional</span>
+<span class="sd">        Level of verbosity, defaults to 1:</span>
+<span class="sd">            - 0: Print nothing.</span>
+<span class="sd">            - 1: Print warnings.</span>
+<span class="sd">            - 2: Print warnings and information.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    EM : ndarray, (nfreq, nrec, nsrc)</span>
+<span class="sd">        Frequency- or time-domain EM field (depending on `signal`):</span>
+<span class="sd">            - If rec is electric, returns E [V/m].</span>
+<span class="sd">            - If rec is magnetic, returns B [T] (not H [A/m]!).</span>
+
+<span class="sd">        In the case of the impulse time-domain response, the unit is further</span>
+<span class="sd">        divided by seconds [1/s].</span>
+
+<span class="sd">        However, source and receiver are normalised. So for instance in the</span>
+<span class="sd">        electric case the source strength is 1 A and its length is 1 m. So the</span>
+<span class="sd">        electric field could also be written as [V/(A.m2)].</span>
+
+<span class="sd">        The shape of EM is (nfreq, nrec, nsrc). However, single dimensions</span>
+<span class="sd">        are removed.</span>
+
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from empymod import srcbipole</span>
+<span class="sd">    &gt;&gt;&gt; src = [-50, 50, -50, 50, 75, 100]</span>
+<span class="sd">    &gt;&gt;&gt; rec = [np.arange(1, 11)*500, np.zeros(10), 200]</span>
+<span class="sd">    &gt;&gt;&gt; depth = [0, 300, 1000, 1050]</span>
+<span class="sd">    &gt;&gt;&gt; res = [1e20, .3, 1, 50, 1]</span>
+<span class="sd">    &gt;&gt;&gt; EMfield = srcbipole(src, rec, depth, res, freqtime=1, verb=0)</span>
+<span class="sd">    &gt;&gt;&gt; print(EMfield)</span>
+<span class="sd">    [  1.14061401e-10 -2.07836149e-10j  -5.38410978e-12 -2.53976216e-11j</span>
+<span class="sd">      -2.06275951e-12 -3.33525423e-12j  -1.10983809e-13 -8.09426365e-13j</span>
+<span class="sd">       1.92903597e-13 -4.55252836e-13j   1.69353850e-13 -3.19059245e-13j</span>
+<span class="sd">       1.18960468e-13 -2.29643807e-13j   8.09247406e-14 -1.68298859e-13j</span>
+<span class="sd">       5.50535020e-14 -1.25316192e-13j   3.80049013e-14 -9.44840453e-14j]</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># === 1.  LET&#39;S START ============</span>
     <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">t0</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># === 2.  CHECK INPUT ============</span>
 
     <span class="c1"># Check times and Fourier Transform arguments, get required frequencies</span>
     <span class="c1"># (freq = freqtime if `signal=None`)</span>
-    <span class="n">time</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_time</span><span class="p">(</span><span class="n">freqtime</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">time</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span> <span class="o">=</span> <span class="n">check_time</span><span class="p">(</span><span class="n">freqtime</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># Check layer parameters</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_model</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
-                              <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">check_model</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span>
+                        <span class="n">verb</span><span class="p">)</span>
     <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">isfullspace</span> <span class="o">=</span> <span class="n">model</span>
 
     <span class="c1"># Check frequency =&gt; get etaH, etaV, zetaH, and zetaV</span>
-    <span class="n">frequency</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_frequency</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
-                                      <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">frequency</span> <span class="o">=</span> <span class="n">check_frequency</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
+                                <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
     <span class="n">freq</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span> <span class="o">=</span> <span class="n">frequency</span>
 
     <span class="c1"># Check Hankel transform parameters</span>
-    <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_hankel</span><span class="p">(</span><span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span> <span class="o">=</span> <span class="n">check_hankel</span><span class="p">(</span><span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># Check optimization</span>
-    <span class="n">optimization</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_opt</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">optimization</span> <span class="o">=</span> <span class="n">check_opt</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
     <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">loop_freq</span><span class="p">,</span> <span class="n">loop_off</span> <span class="o">=</span> <span class="n">optimization</span>
 
     <span class="c1"># Check src and rec</span>
     <span class="c1"># =&gt; Get source and receiver depths (zsrc, zrec)</span>
     <span class="c1"># =&gt; Get layer number in which src and rec reside (lsrc/lrec)</span>
     <span class="c1"># =&gt; Get offsets and angles (off, angle)</span>
-    <span class="n">survey</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="n">intpts</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">nrec</span><span class="p">,</span> <span class="n">srcbp</span> <span class="o">=</span> <span class="n">survey</span>
-    <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">g_w</span> <span class="o">=</span> <span class="n">srcbp</span>
-    <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_depth</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+    <span class="n">survey</span> <span class="o">=</span> <span class="n">get_coords</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verb</span><span class="p">,</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">intpts</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">nrec</span><span class="p">,</span> <span class="n">srcrecbp</span> <span class="o">=</span> <span class="n">survey</span>
+    <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">g_w</span> <span class="o">=</span> <span class="n">srcrecbp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span> <span class="o">=</span> <span class="n">check_depth</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
 
     <span class="c1"># Required ab&#39;s and geometrical scaling factors</span>
     <span class="c1"># =&gt; Get required ab&#39;s and mrec for given msrc, recdir</span>
-    <span class="n">ab_calc</span><span class="p">,</span> <span class="n">mrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_abs_bipole</span><span class="p">(</span><span class="n">msrc</span><span class="p">,</span> <span class="n">recdir</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
-    <span class="c1"># =&gt; Geometrical scaling</span>
-    <span class="n">fact</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)]</span>
+    <span class="n">ab_calc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">fact</span> <span class="o">=</span> <span class="n">get_abs_srcbipole</span><span class="p">(</span><span class="n">msrc</span><span class="p">,</span> <span class="n">recdir</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># === 3. EM-FIELD CALCULATION ============</span>
 
@@ -476,15 +700,16 @@
     <span class="c1"># Loop over source-elements</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsrc</span><span class="p">):</span>
         <span class="n">si</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="n">nrec</span>      <span class="c1"># start index for this source element</span>
-        <span class="n">ei</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nrec</span>  <span class="c1"># start index for this source element</span>
+        <span class="n">ei</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">nrec</span>  <span class="c1"># end index</span>
 
         <span class="c1"># Loop over the required fields</span>
         <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">ab_calc</span><span class="p">)):</span>
 
+            <span class="c1"># Gather variables</span>
             <span class="n">finp</span> <span class="o">=</span> <span class="p">(</span><span class="n">ab_calc</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">off</span><span class="p">[</span><span class="n">si</span><span class="p">:</span><span class="n">ei</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="n">si</span><span class="p">:</span><span class="n">ei</span><span class="p">],</span> <span class="n">zsrc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">zrec</span><span class="p">,</span>
-                    <span class="n">lsrc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span>
-                    <span class="n">xdirect</span><span class="p">,</span> <span class="n">isfullspace</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span>
-                    <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">loop_freq</span><span class="p">,</span> <span class="n">loop_off</span><span class="p">)</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">lsrc</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span>
+                    <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">isfullspace</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">use_spline</span><span class="p">,</span>
+                    <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span><span class="p">,</span> <span class="n">loop_freq</span><span class="p">,</span> <span class="n">loop_off</span><span class="p">)</span>
 
             <span class="c1"># Add field to EM with weight `g_w` and geometrical factor `fact`</span>
             <span class="n">EM</span> <span class="o">+=</span> <span class="n">fem</span><span class="p">(</span><span class="o">*</span><span class="n">finp</span><span class="p">)</span><span class="o">*</span><span class="n">g_w</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">fact</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
@@ -498,7 +723,7 @@
 
     <span class="c1"># === 4.  FINISHED ============</span>
     <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+        <span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">EM</span></div>
 
@@ -546,7 +771,7 @@
 
     <span class="c1"># === 1.  LET&#39;S START ============</span>
     <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">t0</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># === 2.  CHECK INPUT ============</span>
 
@@ -555,32 +780,32 @@
     <span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2048</span><span class="p">,</span> <span class="mi">2048</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span>
 
     <span class="c1"># Check layer parameters</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_model</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
-                              <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">check_model</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span>
+                        <span class="n">verb</span><span class="p">)</span>
     <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">isfullspace</span> <span class="o">=</span> <span class="n">model</span>
 
     <span class="c1"># Check frequency =&gt; get etaH, etaV, zetaH, and zetaV</span>
-    <span class="n">frequency</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_frequency</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
-                                      <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">frequency</span> <span class="o">=</span> <span class="n">check_frequency</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
+                                <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
     <span class="n">freq</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span> <span class="o">=</span> <span class="n">frequency</span>
 
     <span class="c1"># Check Hankel transform parameters</span>
-    <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_hankel</span><span class="p">(</span><span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span> <span class="o">=</span> <span class="n">check_hankel</span><span class="p">(</span><span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># Check optimization</span>
-    <span class="n">optimization</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_opt</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">optimization</span> <span class="o">=</span> <span class="n">check_opt</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
     <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">loop_freq</span><span class="p">,</span> <span class="n">loop_off</span> <span class="o">=</span> <span class="n">optimization</span>
 
     <span class="c1"># Check src-rec configuration</span>
     <span class="c1"># =&gt; Get flags if src or rec or both are magnetic (msrc, mrec)</span>
-    <span class="n">ab_calc</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_ab</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">ab_calc</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span> <span class="o">=</span> <span class="n">check_ab</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># Check src and rec</span>
     <span class="c1"># =&gt; Get source and receiver depths (zsrc, zrec)</span>
     <span class="c1"># =&gt; Get layer number in which src and rec reside (lsrc/lrec)</span>
     <span class="c1"># =&gt; Get offsets and angles (off, angle)</span>
-    <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">nrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
-    <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_depth</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+    <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">nsrc</span><span class="p">,</span> <span class="n">nrec</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_coords</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span> <span class="o">=</span> <span class="n">check_depth</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
 
     <span class="c1"># Collect variables for fem</span>
     <span class="n">fdata</span> <span class="o">=</span> <span class="p">(</span><span class="n">ab_calc</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span>
@@ -615,7 +840,7 @@
 
     <span class="c1"># === 4.  FINISHED ============</span>
     <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+        <span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">t</span><span class="p">[</span><span class="mi">2048</span><span class="p">:],</span> <span class="n">gprEM</span><span class="p">[</span><span class="mi">2048</span><span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">real</span></div>
 
@@ -650,30 +875,30 @@
 
     <span class="c1"># === 1.  LET&#39;S START ============</span>
     <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">t0</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># === 2.  CHECK INPUT ============</span>
 
     <span class="c1"># Check layer parameters</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_model</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
-                              <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">check_model</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span>
+                        <span class="n">verb</span><span class="p">)</span>
     <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">model</span>
 
     <span class="c1"># Check frequency =&gt; get etaH, etaV, zetaH, and zetaV</span>
-    <span class="n">frequency</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_frequency</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
-                                      <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">frequency</span> <span class="o">=</span> <span class="n">check_frequency</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span>
+                                <span class="n">mpermV</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span> <span class="n">zetaV</span> <span class="o">=</span> <span class="n">frequency</span>
 
     <span class="c1"># Check src-rec configuration</span>
     <span class="c1"># =&gt; Get flags if src or rec or both are magnetic (msrc, mrec)</span>
-    <span class="n">ab_calc</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_ab</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">ab_calc</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span> <span class="n">mrec</span> <span class="o">=</span> <span class="n">check_ab</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
 
     <span class="c1"># Check src and rec</span>
     <span class="c1"># =&gt; Get source and receiver depths (zsrc, zrec)</span>
     <span class="c1"># =&gt; Get layer number in which src and rec reside (lsrc/lrec)</span>
     <span class="c1"># =&gt; Get offsets and angles (off, angle)</span>
-    <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_coords</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
-    <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">check_depth</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+    <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_coords</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+    <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span> <span class="o">=</span> <span class="n">check_depth</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
 
     <span class="c1"># === 3. EM-FIELD CALCULATION ============</span>
     <span class="n">PJ0</span><span class="p">,</span> <span class="n">PJ1</span><span class="p">,</span> <span class="n">PJ0b</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">wavenumber</span><span class="p">(</span><span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span>
@@ -687,12 +912,32 @@
 
     <span class="c1"># === 4.  FINISHED ============</span>
     <span class="k">if</span> <span class="n">verb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+        <span class="n">printstartfinish</span><span class="p">(</span><span class="n">verb</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">PJ0</span><span class="p">,</span> <span class="n">PJ1</span><span class="p">,</span> <span class="n">PJ0b</span></div>
 
 
+<div class="viewcode-block" id="frequency"><a class="viewcode-back" href="../../empymod.html#empymod.model.frequency">[docs]</a><span class="k">def</span> <span class="nf">frequency</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">ab</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">aniso</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+              <span class="n">epermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ht</span><span class="o">=</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span>
+              <span class="n">htarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shortcut for frequency-domain `dipole`. See `dipole` for info.&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">dipole</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span> <span class="n">epermV</span><span class="p">,</span>
+                  <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span>
+                  <span class="n">verb</span><span class="o">=</span><span class="n">verb</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="time"><a class="viewcode-back" href="../../empymod.html#empymod.model.time">[docs]</a><span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">ab</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">signal</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">aniso</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+         <span class="n">epermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mpermV</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xdirect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ht</span><span class="o">=</span><span class="s1">&#39;fht&#39;</span><span class="p">,</span>
+         <span class="n">htarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ft</span><span class="o">=</span><span class="s1">&#39;sin&#39;</span><span class="p">,</span> <span class="n">ftarg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shortcut for time-domain `dipole`. See `dipole` for info.&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">dipole</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">aniso</span><span class="p">,</span> <span class="n">epermH</span><span class="p">,</span>
+                  <span class="n">epermV</span><span class="p">,</span> <span class="n">mpermH</span><span class="p">,</span> <span class="n">mpermV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">ft</span><span class="p">,</span> <span class="n">ftarg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span>
+                  <span class="n">loop</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span></div>
+
 <span class="c1"># Core modelling routines</span>
+
 
 <div class="viewcode-block" id="fem"><a class="viewcode-back" href="../../empymod.html#empymod.model.fem">[docs]</a><span class="k">def</span> <span class="nf">fem</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">off</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">zsrc</span><span class="p">,</span> <span class="n">zrec</span><span class="p">,</span> <span class="n">lsrc</span><span class="p">,</span> <span class="n">lrec</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">etaH</span><span class="p">,</span> <span class="n">etaV</span><span class="p">,</span> <span class="n">zetaH</span><span class="p">,</span>
         <span class="n">zetaV</span><span class="p">,</span> <span class="n">xdirect</span><span class="p">,</span> <span class="n">isfullspace</span><span class="p">,</span> <span class="n">ht</span><span class="p">,</span> <span class="n">htarg</span><span class="p">,</span> <span class="n">use_spline</span><span class="p">,</span> <span class="n">use_ne_eval</span><span class="p">,</span> <span class="n">msrc</span><span class="p">,</span>
