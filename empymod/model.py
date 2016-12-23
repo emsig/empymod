@@ -651,24 +651,37 @@ def srcbipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # === 3. EM-FIELD CALCULATION ============
 
     # Pre-allocate output EM
-    EM = np.zeros((freq.size, nrec), dtype=complex)
+    EM = np.zeros((freq.size, nrec*nsrc), dtype=complex)
+
+    # If phi=0, we can calculate all source elements in one go. This can speed
+    # up things a lot, specifically if `opt='spline'`.
+    if phi == 0:  # All source elements at same depth
+        nelm = 1
+        nind = nsrc*nrec
+    else:         # If phi!=0, we have to loop over the source elements
+        nelm = nsrc
+        nind = nrec
 
     # Loop over source-elements
-    for i in range(nsrc):
-        si = i*nrec      # start index for this source element
-        ei = (i+1)*nrec  # end index
+    for isrc in range(nelm):
+        si = isrc*nind      # start index for this source element
+        ei = (isrc+1)*nind  # end index
 
         # Loop over the required fields
-        for ii in range(np.size(ab_calc)):
+        for iab in range(np.size(ab_calc)):
 
             # Gather variables
-            finp = (ab_calc[ii], off[si:ei], angle[si:ei], zsrc[i], zrec,
-                    np.atleast_1d(lsrc)[i], lrec, depth, freq, etaH, etaV,
-                    zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
-                    use_ne_eval, msrc, mrec, loop_freq, loop_off)
+            finp = (ab_calc[iab], off[si:ei], angle[si:ei], zsrc[isrc],
+                    zrec, np.atleast_1d(lsrc)[isrc], lrec, depth, freq,
+                    etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht,
+                    htarg, use_spline, use_ne_eval, msrc, mrec, loop_freq,
+                    loop_off)
 
-            # Add field to EM with weight `g_w` and geometrical factor `fact`
-            EM += fem(*finp)*g_w[i]*fact[ii]
+            # Add field to EM with geometrical factor `fact`
+            EM[:, si:ei] += fem(*finp)*fact[iab]
+
+    # Reshape for number of source elements, add weights, sum up
+    EM = np.sum(EM.reshape((-1, nrec, nsrc), order='F')*g_w, axis=2)
 
     # Do f->t transform if required
     if signal is not None:
@@ -876,7 +889,16 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
               epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
               htarg=None, opt=None, loop=None, verb=1):
-    """Shortcut for frequency-domain `dipole`. See `dipole` for info."""
+    """Return the frequency-domain EM field due to a dipole source.
+
+    This is a shortcut for frequency-domain modelling using `dipole` (mainly
+    for legacy reasons).
+
+    See `dipole` for info and a description of input and output parameters.
+    Only difference is that `frequency` here corresponds to `freqtime` in
+    `dipole`.
+
+    """
 
     return dipole(src, rec, depth, res, freq, None, ab, aniso, epermH, epermV,
                   mpermH, mpermV, xdirect, ht, htarg, opt=opt, loop=loop,
@@ -886,7 +908,15 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
 def time(src, rec, depth, res, time, ab=11, signal=0, aniso=None, epermH=None,
          epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
          htarg=None, ft='sin', ftarg=None, opt=None, loop='off', verb=1):
-    """Shortcut for time-domain `dipole`. See `dipole` for info."""
+    """Return the time-domain EM field due to a dipole source.
+
+    This is a shortcut for time-domain modelling using `dipole` (mainly for
+    legacy reasons).
+
+    See `dipole` for info and a description of input and output parameters.
+    Only difference is that `time` here corresponds to `freqtime` in `dipole`.
+
+    """
 
     return dipole(src, rec, depth, res, time, signal, ab, aniso, epermH,
                   epermV, mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt,

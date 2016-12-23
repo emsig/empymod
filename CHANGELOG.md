@@ -2,6 +2,8 @@
 
 ## latest
 
+* [23/12/2016] Avoid loop in `bipole` if `phi=0`.
+
 ## v1.1.0 - *2016-12-22*
 
 * New routines:
