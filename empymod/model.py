@@ -69,8 +69,15 @@ from .utils import (check_ab, get_abs_srcbipole, check_model, get_coords,
                     check_time, printstartfinish)
 
 
-__all__ = ['dipole', 'srcbipole', 'frequency', 'time', 'gpr', 'wavenumber',
-           'fem', 'tem']
+__all__ = ['bipole', 'dipole', 'srcbipole', 'frequency', 'time', 'gpr',
+           'wavenumber', 'fem', 'tem']
+
+def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
+           epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
+           mrec=False, intpts=(10, 10), xdirect=True, ht='fht', htarg=None,
+           ft='sin', ftarg=None, opt=None, loop=None, verb=1):
+    """Return the electromagnetic field due to a bipole source."""
+    pass
 
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,

@@ -64,13 +64,10 @@ priority:
       options)`. Improved abstraction of the calling part.
 
     - More modelling routines:
-        - arbitrary source and receiver dipole lengths
-        - arbitrary source and receiver rotations
+        - **arbitrary receiver rotation and receiver dipole length**
         - convolution with a wavelet for GPR (proper version of `model.gpr`)
         - pure wavenumber output-routine (proper version of `model.wavenumber`)
-        - variable receiver depths within one calculation
         - various source-receiver arrangements (loops etc)
-        - multiple sources within one calculation
         - Load and Save functions to store and load model, together with all
           information.
 
@@ -85,6 +82,9 @@ priority:
           tinker with for interested folks.
 
     - GUI frontend
+
+    - Module to create Hankel filters (nice to have addition, mainly for
+      educational purposes).
 
 
 Notice
@@ -336,5 +336,5 @@ References |_|
 # the License.
 
 # Import main modelling routines to make them available as primary functions
-from .model import dipole, srcbipole, frequency, time
-__all__ = ['dipole', 'srcbipole']
+from .model import bipole, dipole, srcbipole, frequency, time
+__all__ = ['bipole', 'dipole', 'srcbipole', 'frequency', 'time']
