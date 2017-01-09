@@ -3,13 +3,18 @@ empymod
 
 |docs|
 
-**Electromagnetic modeller in Python**
+![](http://placehold.it/15/cc0000/000000?text=+)
+**This is the master branch. Check out the [latest
+release](https://github.com/prisae/empymod/releases/latest) if you are looking
+for a stable version.**
+
+Electromagnetic modeller in Python
+----------------------------------
 
 The electromagnetic modeller `empymod` can model electric or magnetic responses
 due to a three-dimensional electric or magnetic source in a layered-earth model
 with vertical transverse isotropy, electric permittivity, and magnetic
 permeability, from very low frequencies to very high frequencies.
-
 
 Installation & requirements
 ---------------------------

@@ -64,9 +64,12 @@ they can serve as template to create your own routines:
 import numpy as np
 
 from . import kernel, transform
-from .utils import (check_ab, get_abs_srcbipole, check_model, get_coords,
-                    check_depth, check_hankel, check_frequency, check_opt,
-                    check_time, printstartfinish)
+
+# TODO ADJUST!
+from .utils import *
+# from .utils import (check_ab, get_abs, get_abs_srcbipole, check_model,
+#                     get_coords, check_depth, check_hankel, check_frequency,
+#                     check_opt, check_time, printstartfinish)
 
 
 __all__ = ['bipole', 'dipole', 'srcbipole', 'frequency', 'time', 'gpr',
@@ -74,10 +77,179 @@ __all__ = ['bipole', 'dipole', 'srcbipole', 'frequency', 'time', 'gpr',
 
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
-           mrec=False, intpts=(10, 10), xdirect=True, ht='fht', htarg=None,
-           ft='sin', ftarg=None, opt=None, loop=None, verb=1):
-    """Return the electromagnetic field due to a bipole source."""
-    pass
+           mrec=False, intpts=(-1, -1), ab=False, xdirect=True, ht='fht',
+           htarg=None, ft='sin', ftarg=None, opt=None, loop=None, verb=1):
+    """Return the electromagnetic field due to a bipole source.
+
+    if ab, msrc/mrec will be overwritten!
+
+    """
+
+    # === 1.  LET'S START ============
+    if verb > 0:
+        t0 = printstartfinish(verb)
+
+    # === 2.  CHECK INPUT ============
+
+    # Check times and Fourier Transform arguments, get required frequencies
+    # (freq = freqtime if `signal=None`)
+    time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+
+    # Check layer parameters
+    model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
+                        verb)
+    depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
+
+    # Check frequency => get etaH, etaV, zetaH, and zetaV
+    frequency = check_frequency(freq, res, aniso, epermH, epermV, mpermH,
+                                mpermV, verb)
+    freq, etaH, etaV, zetaH, zetaV = frequency
+
+    # Check Hankel transform parameters
+    ht, htarg = check_hankel(ht, htarg, verb)
+
+    # Check optimization
+    optimization = check_opt(opt, loop, ht, htarg, verb)
+    use_spline, use_ne_eval, loop_freq, loop_off = optimization
+
+    # Check src and rec
+    src, nsrc, nsrcz, srcdipole = check_srcrec(src, 'src')
+    rec, nrec, nrecz, recdipole = check_srcrec(rec, 'rec')
+
+    # === 3. EM-FIELD CALCULATION ============
+
+    # Pre-allocate output EM
+    EM = np.zeros((freq.size, nrec*nsrc), dtype=complex)
+
+    # Initialize kernel count
+    # (how many times the wavenumber-domain kernel was calld)
+    kcount = 0
+
+    # The kernel handles only 1 ab with one srcz-recz combination at once.
+    # Hence we have to loop over every different depth of src or rec, and
+    # over all required ab's.
+
+    for isz in range(nsrcz):  # Loop over source depths
+        # Note, if receiver is a bipole, but horizontal (phi=0), then
+        # calculation could be sped up by not looping over the bipole
+        # elements, but calculate it all in one go.
+
+        # Get this source
+        srcthetaphi = get_thetaphi(src, isz, nsrcz, intpts[0], srcdipole,
+                                   'src', verb)
+        tsrc, srctheta, srcphi, srcg_w, srcintpts = srcthetaphi
+
+        for irz in range(nrecz):  # Loop over receiver depths
+            # Note, if receiver is a bipole, but horizontal (phi=0), then
+            # calculation could be sped up by not looping over the bipole
+            # elements, but calculate it all in one go.
+
+            # Get this source
+            recthetaphi = get_thetaphi(rec, irz, nrecz, intpts[1], recdipole,
+                                    'rec', verb)
+            trec, rectheta, recphi, recg_w, recintpts  = recthetaphi
+
+            for irg in range(recintpts):
+
+                for isg in range(srcintpts):
+
+                    # Get source and receiver depths (zsrc, zrec)
+                    # Get offsets and angles (off, angle)
+                    offang = get_coords_tmp(tsrc, trec, nsrc, nrec, verb)
+                    zsrc, zrec, off, angle = offang
+
+                    # Get layer numbers in which src and rec reside
+                    lsrc, lrec = check_depth(zsrc, zrec, depth)
+
+                    print('heeeeeeeeeeeeeeeeeeeeeeere')
+                    # Get ab
+                    for iab in range(len(ab_calc)):
+                        # Do the calculation!
+                        pass
+
+
+
+
+#     # Check src-rec configuration TODO this has to go into loop.
+#     # TODO move fact out from get_ab
+#     # TODO if not onetheta, onephi, calc. all
+#     if ab:
+#         # => Get flags if src or rec or both are magnetic (msrc, mrec)
+#         ab_calc, msrc, mrec = check_ab_tmp(ab, verb)
+# 
+#         # If ab, it is one dipole-dipole measurement; fact and g_w are 1
+#         fact = np.array([1])
+#         g_w = np.array([1])
+# 
+#         # The next four lines have to go into a new check_ab fct
+#         phi = 0
+# 
+#     else:
+#         srctheta, srcphi, srcg_w = srcrecbp[0]
+#         # rectheta, recphi, recg_w = srcrecbp[1]
+#         rectheta = 0
+#         recphi = 0
+# 
+#         # Required ab's and geometrical scaling factors
+#         # => Get required ab's and mrec for given msrc, recdir
+#         ab_calc, fact = get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi,
+#                                 verb)
+#         print(ab_calc)
+# 
+# 
+# 
+# 
+# 
+#     # If phi=0, we can calculate all source elements in one go. This can speed
+#     # up things a lot, specifically if `opt='spline'`.
+#     if phi == 0:  # All source elements at same depth
+#         nelm = 1
+#         nind = nsrc*nrec
+#     else:         # If phi!=0, we have to loop over the source elements
+#         nelm = nsrc
+#         nind = nrec
+# 
+#     # Loop over source-elements
+#     for isrc in range(nelm):
+#         si = isrc*nind      # start index for this source element
+#         ei = (isrc+1)*nind  # end index
+# 
+#         # Loop over the required fields
+#         for iab in range(np.size(ab_calc)):
+# 
+#             # Gather variables
+#             finp = (ab_calc[iab], off[si:ei], angle[si:ei], zsrc[isrc],
+#                     zrec, np.atleast_1d(lsrc)[isrc], lrec, depth, freq,
+#                     etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht,
+#                     htarg, use_spline, use_ne_eval, msrc, mrec, loop_freq,
+#                     loop_off)
+# 
+#             # Add field to EM with geometrical factor `fact`
+#             out == fem(*finp)
+#             EM[:, si:ei] += out[0]*fact[iab]
+#             kcount += out[1]  # Update kernel count
+# 
+#     # Reshape for number of source elements, add weights, sum up
+#     EM = np.sum(EM.reshape((-1, nrec, nsrc), order='F')*g_w, axis=2)
+# 
+# 
+# 
+# 
+# 
+    # TODO from here is good again
+
+    # Do f->t transform if required
+    if signal is not None:
+        EM = tem(EM, off, freq, time, signal, ft, ftarg)
+
+    # Reshape for number of sources
+    EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
+
+    # === 4.  FINISHED ============
+    if verb > 0:
+        printstartfinish(verb, t0, kcount)
+
+    return EM
 
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
@@ -366,7 +538,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     inp = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
            etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
            use_ne_eval, msrc, mrec, loop_freq, loop_off)
-    EM = fem(*inp)
+    EM, kcount = fem(*inp)
 
     # Do f->t transform if required
     if signal is not None:
@@ -377,7 +549,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # === 4.  FINISHED ============
     if verb > 0:
-        printstartfinish(verb, t0)
+        printstartfinish(verb, t0, kcount)
 
     return EM
 
@@ -660,6 +832,10 @@ def srcbipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # Pre-allocate output EM
     EM = np.zeros((freq.size, nrec*nsrc), dtype=complex)
 
+    # Initialize kernel count
+    # (how many times the wavenumber-domain kernel was calld)
+    kcount = 0
+
     # If phi=0, we can calculate all source elements in one go. This can speed
     # up things a lot, specifically if `opt='spline'`.
     if phi == 0:  # All source elements at same depth
@@ -685,7 +861,9 @@ def srcbipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     loop_off)
 
             # Add field to EM with geometrical factor `fact`
-            EM[:, si:ei] += fem(*finp)*fact[iab]
+            out = fem(*finp)
+            EM[:, si:ei] += out[0]*fact[iab]
+            kcount += out[1]  # Update kernel count
 
     # Reshape for number of source elements, add weights, sum up
     EM = np.sum(EM.reshape((-1, nrec, nsrc), order='F')*g_w, axis=2)
@@ -699,7 +877,7 @@ def srcbipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # === 4.  FINISHED ============
     if verb > 0:
-        printstartfinish(verb, t0)
+        printstartfinish(verb, t0, kcount)
 
     return EM
 
@@ -791,7 +969,7 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
     # === 3. GPR CALCULATION ============
 
     # 1. Get fem responses
-    fEM = fem(*fdata)
+    fEM, kcount = fem(*fdata)
 
     # 2. Multiply with ricker wavelet
     cfc = -(np.r_[0, freq[:-1]]/fc)**2
@@ -816,7 +994,7 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
 
     # === 4.  FINISHED ============
     if verb > 0:
-        printstartfinish(verb, t0)
+        printstartfinish(verb, t0, kcount)
 
     return t[2048:], gprEM[2048:, :].real
 
@@ -949,6 +1127,10 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
     # Preallocate array
     fEM = np.zeros((freq.size, off.size), dtype=complex)
 
+    # Initialize kernel count
+    # (how many times the wavenumber-domain kernel was calld)
+    kcount = 0
+
     # If <ab> = 36 (or 63), fEM-field is zero
     if ab in [36, ]:
         return fEM
@@ -966,23 +1148,28 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         if loop_freq:
 
             for i in range(freq.size):
-                fEM[None, i, :] += calc(zsrc, zrec, lsrc, lrec, off, angle,
-                                        depth, ab, etaH[None, i, :],
-                                        etaV[None, i, :], zetaH[None, i, :],
-                                        zetaV[None, i, :], xdirect, htarg,
-                                        use_spline, use_ne_eval, msrc, mrec)
+                out = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
+                           etaH[None, i, :], etaV[None, i, :],
+                           zetaH[None, i, :], zetaV[None, i, :], xdirect,
+                           htarg, use_spline, use_ne_eval, msrc, mrec)
+                fEM[None, i, :] += out[0]
+                kcount += out[1]
+
         elif loop_off:
             for i in range(off.size):
-                fEM[:, None, i] += calc(zsrc, zrec, lsrc, lrec, off[None, i],
-                                        angle[None, i], depth, ab, etaH, etaV,
-                                        zetaH, zetaV, xdirect, htarg,
-                                        use_spline, use_ne_eval, msrc, mrec)
+                out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
+                           angle[None, i], depth, ab, etaH, etaV, zetaH, zetaV,
+                           xdirect, htarg, use_spline, use_ne_eval, msrc, mrec)
+                fEM[:, None, i] += out[0]
+                kcount += out[1]
         else:
-            fEM += calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
-                        etaV, zetaH, zetaV, xdirect, htarg, use_spline,
-                        use_ne_eval, msrc, mrec)
+            out = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
+                       etaV, zetaH, zetaV, xdirect, htarg, use_spline,
+                       use_ne_eval, msrc, mrec)
+            fEM += out[0]
+            kcount += out[1]
 
-    return fEM
+    return fEM, kcount
 
 
 def tem(fEM, off, freq, time, signal, ft, ftarg):

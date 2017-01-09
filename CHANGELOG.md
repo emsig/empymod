@@ -2,7 +2,8 @@
 
 ## latest
 
-* [23/12/2016] Avoid loop in `bipole` if `phi=0`.
+* [09/01/2017] Add kernel count; printed if verb > 0.
+* [23/12/2016] Avoid loop in `srcbipole` if `phi=0`.
 
 ## v1.1.0 - *2016-12-22*
 

@@ -198,7 +198,8 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         fEM += np.dot(PJ0 + factAng[:, np.newaxis]*PJ0b, fhtfilt.j0)
 
     # Return the electromagnetic field, normalize by offset
-    return fEM/off
+    # Second argument (1) is the kernel count
+    return fEM/off, 1
 
 
 def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
@@ -373,10 +374,10 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
             return fEM
 
     # Get QWE
-    fEM = qwe(rtol, atol, maxint, getkernel, intervals, 'Hankel', lambd, off,
-              factAng)
+    fEM, kcount = qwe(rtol, atol, maxint, getkernel, intervals, 'Hankel',
+                      lambd, off, factAng)
 
-    return fEM
+    return fEM, kcount
 
 
 # 2. Fourier transforms (frequency -> time)
@@ -496,8 +497,8 @@ def fqwe(fEM, time, freq, qweargs):
     # Carry out QWE if required
     if np.any(doqwe):
         sEM = tEM_iint(np.log(Bx/time[doqwe, None]))*SS
-        tEM[doqwe] = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :],
-                         'Fourier')
+        tEM[doqwe], _ = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :],
+                            'Fourier')
 
     return -tEM
 
@@ -659,6 +660,9 @@ def qwe(rtol, atol, maxint, inp, intervals, hfstr, lambd=None, off=None,
         EM0 = inp[:, 0]
     EM0 *= getweights(0, intervals)
 
+    # Initialize kernel count (only important for Hankel)
+    kcount = 1
+
     # 2.b pre-allocate arrays
     EM = np.zeros(EM0.size, dtype=EM0.dtype)
     om = np.ones(EM0.size, dtype=bool)
@@ -674,6 +678,7 @@ def qwe(rtol, atol, maxint, inp, intervals, hfstr, lambd=None, off=None,
         # 2.c.1. calculate the field for this interval
         if hasattr(inp, '__call__'):  # Hankel and not spline
             EMi = inp(i, lambd[om, :], off[om], factAng[om])
+            kcount += 1  # Update count
         else:                         # Fourier or Hankel with spline
             EMi = inp[om, i]
         EMi *= getweights(i, intervals[om, :])
@@ -721,7 +726,7 @@ def qwe(rtol, atol, maxint, inp, intervals, hfstr, lambd=None, off=None,
     # Set np.finfo(np.double).max to 0
     EM.real[EM.real == np.finfo(np.double).max] = 0
 
-    return EM
+    return EM, kcount
 
 
 def get_spline_values(filt, inp, nr_per_dec=None):
