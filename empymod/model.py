@@ -66,22 +66,25 @@ import numpy as np
 from . import kernel, transform
 
 # TODO ADJUST!
-from .utils import *
-# from .utils import (check_ab, get_abs, get_abs_srcbipole, check_model,
-#                     get_coords, check_depth, check_hankel, check_frequency,
-#                     check_opt, check_time, printstartfinish)
+from .utils import (check_ab, get_abs, get_abs_srcbipole, check_model,
+                    get_coords, check_depth, check_hankel, check_frequency,
+                    check_opt, check_srcrec, get_thetaphi, check_time,
+                    printstartfinish, get_coords_tmp)
 
 
 __all__ = ['bipole', 'dipole', 'srcbipole', 'frequency', 'time', 'gpr',
            'wavenumber', 'fem', 'tem']
 
+
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
-           mrec=False, intpts=(-1, -1), ab=False, xdirect=True, ht='fht',
-           htarg=None, ft='sin', ftarg=None, opt=None, loop=None, verb=1):
+           mrec=False, intpts=(-1, -1), xdirect=True, ht='fht', htarg=None,
+           ft='sin', ftarg=None, opt=None, loop=None, verb=1):
     """Return the electromagnetic field due to a bipole source.
 
-    if ab, msrc/mrec will be overwritten!
+    src/rec
+    - [x0, x1, y0, y1, z0, z1]
+    - [x, y, z, theta, phi]
 
     """
 
@@ -130,113 +133,82 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # over all required ab's.
 
     for isz in range(nsrcz):  # Loop over source depths
-        # Note, if receiver is a bipole, but horizontal (phi=0), then
-        # calculation could be sped up by not looping over the bipole
-        # elements, but calculate it all in one go.
 
         # Get this source
         srcthetaphi = get_thetaphi(src, isz, nsrcz, intpts[0], srcdipole,
                                    'src', verb)
         tsrc, srctheta, srcphi, srcg_w, srcintpts = srcthetaphi
+        # print(' src-x ::', tsrc[0])
+        # print(' src-y ::', tsrc[1])
+        # print(' src-z ::', tsrc[2])
 
         for irz in range(nrecz):  # Loop over receiver depths
-            # Note, if receiver is a bipole, but horizontal (phi=0), then
-            # calculation could be sped up by not looping over the bipole
-            # elements, but calculate it all in one go.
 
             # Get this source
             recthetaphi = get_thetaphi(rec, irz, nrecz, intpts[1], recdipole,
-                                    'rec', verb)
-            trec, rectheta, recphi, recg_w, recintpts  = recthetaphi
+                                       'rec', verb)
+            trec, rectheta, recphi, recg_w, recintpts = recthetaphi
+            # print(' rec-x ::', trec[0])
+            # print(' rec-y ::', trec[1])
+            # print(' rec-z ::', trec[2])
 
-            for irg in range(recintpts):
+            # Required ab's and geometrical scaling factors
+            ab_calc, fact = get_abs(msrc, mrec, srctheta, srcphi, rectheta,
+                                    recphi, verb)
 
-                for isg in range(srcintpts):
+            # Pre-allocate output temporary EM-arrays for integration loops
+            isrz = int(nrec/nrecz*nsrc/nsrcz)
+            sEM = np.zeros((freq.size, isrz), dtype=complex)
+            for isg in range(srcintpts):  # Loop over src integration points
+
+                # Pre-allocate output temporary EM-arrays for integration loops
+                rEM = np.zeros((freq.size, isrz), dtype=complex)
+                for irg in range(recintpts):  # Loop over rec integration pts
+
+                    # Note, if source or receiver is a bipole, but horizontal
+                    # (phi=0), then calculation could be sped up by not looping
+                    # over the bipole elements, but calculate it all in one go.
 
                     # Get source and receiver depths (zsrc, zrec)
                     # Get offsets and angles (off, angle)
-                    offang = get_coords_tmp(tsrc, trec, nsrc, nrec, verb)
+                    tisrc = [tsrc[0][isg::srcintpts], tsrc[1][isg::srcintpts],
+                             tsrc[2][isg]]
+                    tirec = [trec[0][irg::recintpts], trec[1][irg::recintpts],
+                             trec[2][irg]]
+                    # print(' src-x ::', tisrc[0])
+                    # print(' src-y ::', tisrc[1])
+                    # print(' src-z ::', tisrc[2])
+                    offang = get_coords_tmp(tisrc, tirec, nsrc, nrec, verb)
                     zsrc, zrec, off, angle = offang
 
                     # Get layer numbers in which src and rec reside
                     lsrc, lrec = check_depth(zsrc, zrec, depth)
 
-                    print('heeeeeeeeeeeeeeeeeeeeeeere')
                     # Get ab
+                    # Pre-allocate output temporary EM-arrays for integration
+                    # loops
+                    abEM = np.zeros((freq.size, isrz), dtype=complex)
                     for iab in range(len(ab_calc)):
-                        # Do the calculation!
-                        pass
 
+                        # Gather variables
+                        # off, angle, zsrc, lsrc,
+                        finp = (ab_calc[iab], off, angle, zsrc, zrec, lsrc,
+                                lrec, depth, freq, etaH, etaV, zetaH, zetaV,
+                                xdirect, isfullspace, ht, htarg, use_spline,
+                                use_ne_eval, msrc, mrec, loop_freq, loop_off)
 
+                        # Add field to EM with geometrical factor `fact`
+                        out = fem(*finp)
+                        abEM += out[0]*fact[iab]
+                        kcount += out[1]  # Update kernel count
 
+                    rEM += abEM*recg_w[irg]
 
-#     # Check src-rec configuration TODO this has to go into loop.
-#     # TODO move fact out from get_ab
-#     # TODO if not onetheta, onephi, calc. all
-#     if ab:
-#         # => Get flags if src or rec or both are magnetic (msrc, mrec)
-#         ab_calc, msrc, mrec = check_ab_tmp(ab, verb)
-# 
-#         # If ab, it is one dipole-dipole measurement; fact and g_w are 1
-#         fact = np.array([1])
-#         g_w = np.array([1])
-# 
-#         # The next four lines have to go into a new check_ab fct
-#         phi = 0
-# 
-#     else:
-#         srctheta, srcphi, srcg_w = srcrecbp[0]
-#         # rectheta, recphi, recg_w = srcrecbp[1]
-#         rectheta = 0
-#         recphi = 0
-# 
-#         # Required ab's and geometrical scaling factors
-#         # => Get required ab's and mrec for given msrc, recdir
-#         ab_calc, fact = get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi,
-#                                 verb)
-#         print(ab_calc)
-# 
-# 
-# 
-# 
-# 
-#     # If phi=0, we can calculate all source elements in one go. This can speed
-#     # up things a lot, specifically if `opt='spline'`.
-#     if phi == 0:  # All source elements at same depth
-#         nelm = 1
-#         nind = nsrc*nrec
-#     else:         # If phi!=0, we have to loop over the source elements
-#         nelm = nsrc
-#         nind = nrec
-# 
-#     # Loop over source-elements
-#     for isrc in range(nelm):
-#         si = isrc*nind      # start index for this source element
-#         ei = (isrc+1)*nind  # end index
-# 
-#         # Loop over the required fields
-#         for iab in range(np.size(ab_calc)):
-# 
-#             # Gather variables
-#             finp = (ab_calc[iab], off[si:ei], angle[si:ei], zsrc[isrc],
-#                     zrec, np.atleast_1d(lsrc)[isrc], lrec, depth, freq,
-#                     etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht,
-#                     htarg, use_spline, use_ne_eval, msrc, mrec, loop_freq,
-#                     loop_off)
-# 
-#             # Add field to EM with geometrical factor `fact`
-#             out == fem(*finp)
-#             EM[:, si:ei] += out[0]*fact[iab]
-#             kcount += out[1]  # Update kernel count
-# 
-#     # Reshape for number of source elements, add weights, sum up
-#     EM = np.sum(EM.reshape((-1, nrec, nsrc), order='F')*g_w, axis=2)
-# 
-# 
-# 
-# 
-# 
-    # TODO from here is good again
+                sEM += rEM*srcg_w[isg]
+
+            print(sEM.shape, freq.shape, nsrc*nrec)
+            EM[:, :] = sEM
+
 
     # Do f->t transform if required
     if signal is not None:
@@ -493,6 +465,40 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
     """
+
+    # # This will be dipole
+    #
+    # # Check if src/rec are magnetic
+    # msrc = ab%10 > 3
+    # mrec = ab//10 > 3
+    #
+    # # Add source angles [theta, phi]
+    # if ab%10 in [1, 4]:
+    #     src += [0, 0]
+    # elif ab%10 in [2, 5]:
+    #     src += [90, 0]
+    # else:
+    #     src += [0, 90]
+    #
+    # # Add receiver angles [theta, phi]
+    # if ab//10 in [1, 4]:
+    #     rec += [0, 0]
+    # elif ab//10 in [2, 5]:
+    #     rec += [90, 0]
+    # else:
+    #     rec += [0, 90]
+    #
+    # # Define intpts
+    # intpts = (-1, -1)
+    #
+    # # Call bipole
+    # emfield = bipole(src, rec, depth, res, freqtime, signal, aniso, epermH,
+    #                  epermV, mpermH, mpermV, msrc, mrec, intpts, xdirect, ht,
+    #                  htarg, ft, ftarg, opt, loop, verb)
+    #
+    # # Return result
+    # return emfield
+    # #
 
     # === 1.  LET'S START ============
     if verb > 0:
@@ -787,6 +793,31 @@ def srcbipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     """
 
+    # # This will be srcbipole
+    #
+    # # Check if rec is magnetic
+    # mrec = recdir > 3
+    #
+    # # Add receiver angles [theta, phi]
+    # if recdir in [1, 4]:
+    #     rec += [0, 0]
+    # elif recdir in [2, 5]:
+    #     rec += [90, 0]
+    # else:
+    #     rec += [0, 90]
+    #
+    # # Define intpts
+    # intpts = (intpts, -1)
+    #
+    # # Call bipole
+    # emfield = bipole(src, rec, depth, res, freqtime, signal, aniso, epermH,
+    #                  epermV, mpermH, mpermV, msrc, mrec, intpts, xdirect, ht,
+    #                  htarg, ft, ftarg, opt, loop, verb)
+    #
+    # # Return result
+    # return emfield
+    # #
+
     # === 1.  LET'S START ============
     if verb > 0:
         t0 = printstartfinish(verb)
@@ -1071,6 +1102,8 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     return PJ0, PJ1, PJ0b
 
 
+# Shortcuts (legacy routines)
+
 def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
               epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
               htarg=None, opt=None, loop=None, verb=1):
@@ -1107,8 +1140,8 @@ def time(src, rec, depth, res, time, ab=11, signal=0, aniso=None, epermH=None,
                   epermV, mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt,
                   loop, verb)
 
-# Core modelling routines
 
+# Core modelling routines
 
 def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         zetaV, xdirect, isfullspace, ht, htarg, use_spline, use_ne_eval, msrc,

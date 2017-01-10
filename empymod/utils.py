@@ -48,14 +48,15 @@ from . import filters, transform
 # TODO make restrictions
 # __all__ = ['EMArray', 'check_ab', 'get_abs_srcbipole', 'check_model',
 #            'check_pole', 'get_coords', 'check_depth', 'check_hankel',
-#            'check_frequency', 'check_opt', 'check_time', 'printstartfinish', ]
+#            'check_frequency', 'check_opt', 'check_time', 'printstartfinish',
+#            ]
 
 # 0. Settings
 
 min_freq = 1e-20  # Minimum frequency  [Hz]
 min_time = 1e-20  # Minimum time       [s]
 min_off = 1e-3    # Minimum offset     [m]
-                  # > Also used to round src- and rec-coordinates (1e-3 => mm)
+#                 # > Also used to round src- & rec-coordinates (1e-3 => mm)
 
 
 # 1. Class EMArray
@@ -377,6 +378,7 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
         Geometrical spreading factors for ab's.
 
     """
+
     # Get required ab's
     ab_calc = np.array([[11, 12, 13], [21, 22, 23], [31, 32, 33]])
     if msrc:
@@ -394,41 +396,56 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
 
     # => Geometrical scaling
     srcfact = [np.cos(srctheta)*np.cos(srcphi),
-            np.sin(srctheta)*np.cos(srcphi), np.sin(srcphi)]
+               np.sin(srctheta)*np.cos(srcphi), np.sin(srcphi)]
     recfact = [np.cos(rectheta)*np.cos(recphi),
-            np.sin(rectheta)*np.cos(recphi), np.sin(recphi)]
-    fact = np.outer(srcfact, recfact)
+               np.sin(rectheta)*np.cos(recphi), np.sin(recphi)]
+    fact = np.outer(recfact, srcfact)
+    print('heeeeeeeere, in utils.get_abs')
+    print(fact)
+    fact = np.einsum('ac,bd->abcd', np.atleast_2d(srcfact),
+                     np.atleast_2d(recfact))
+    print(srcfact)
+    print(recfact)
+    print(fact)
+    print(np.shape(srcfact))
+    print(np.shape(recfact))
+    print(fact.shape)
 
     # Remove unnecessary ab's and fact's
     bab = np.asarray(ab_calc*0+1, dtype=bool)
 
     # Remove regarding source alignment
-    if np.any(np.isclose(srctheta, [0, np.pi])):  # x-directed, remove y
-        bab[:, 1] *= False
-    elif np.any(np.isclose(srctheta, [np.pi/2., 3*np.pi/2.])):  # y-dir, rem. x
-        bab[:, 0] *= False
-    if np.any(np.isclose(srcphi, [0, np.pi])):  # Horizontal, remove z
-        bab[:, 2] *= False
-    elif np.any(np.isclose(srcphi, [np.pi/2., 3*np.pi/2.])):  # Vert. rem. x/y
-        bab[:, :2] *= False
+    check = np.atleast_1d(srctheta)[0]
+    if np.allclose(srctheta, check):  # only if just 1 angle or all equal
+        if np.any(np.isclose(check, [0, np.pi])):
+            bab[:, 1] *= False  # x-directed source, remove y
+        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+            bab[:, 0] *= False  # y-directed source, remove x
+    check = np.atleast_1d(srcphi)[0]
+    if np.allclose(srcphi, check):  # only if just 1 angle or all equal
+        if np.any(np.isclose(check, [0, np.pi])):
+            bab[:, 2] *= False  # Horizontal, remove z
+        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+            bab[:, :2] *= False  # Vertical, remove x/y
 
     # Remove regarding receiver alignment
-    if np.any(np.isclose(rectheta, [0, np.pi])):  # x-directed rec, remove y
-        bab[1, :] *= False
-    elif np.any(np.isclose(rectheta, [np.pi/2., 3*np.pi/2.])):  # y-dir, rem. x
-        bab[0, :] *= False
-    if np.any(np.isclose(recphi, [0, np.pi])):  # Horizontal, remove z
-        bab[2, :] *= False
-    elif np.any(np.isclose(recphi, [np.pi/2., 3*np.pi/2.])):  # Vert. rem. x/y
-        bab[:2, :] *= False
+    check = np.atleast_1d(rectheta)[0]
+    if np.allclose(rectheta, check):  # only if just 1 angle or all equal
+        if np.any(np.isclose(check, [0, np.pi])):
+            bab[1, :] *= False  # x-directed receiver, remove y
+        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+            bab[0, :] *= False  # y-directed receiver, remove x
+    check = np.atleast_1d(recphi)[0]
+    if np.allclose(recphi, check):  # only if just 1 angle or all equal
+        if np.any(np.isclose(check, [0, np.pi])):
+            bab[2, :] *= False  # Horizontal, remove z
+        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+            bab[:2, :] *= False  # Vertical, remove x/y
 
     # Reduce
+    print(bab.shape)
     ab_calc = ab_calc[bab].ravel()
     fact = fact[bab].ravel()
-
-    print(ab_calc)
-    print(fact)
-    print(bab)
 
     # Print actual calculated <ab>
     if verb > 1:
@@ -712,7 +729,7 @@ def check_srcrec(inp, name):
     ----------
     inp : list of floats or arrays
         Coordinates of inp (m):
-        [dipole-x, dipole-y, dipole-z] or.
+        [dipole-x, dipole-y, dipole-z, theta, phi] or.
         [bipole-x0, bipole-x1, bipole-y0, bipole-y1, bipole-z0, bipole-z1].
 
     name : str, {'src', 'rec'}
@@ -755,23 +772,31 @@ def check_srcrec(inp, name):
                 inp[2] = np.array([inp[2][0]])
         else:
             print('* ERROR   :: Parameter ' + name + '-z has wrong shape! : ' +
-                str(zshape) + ' instead of ' + str(inp[0].shape) + ' or (1,).')
+                  str(zshape)+' instead of ' + str(inp[0].shape) + ' or (1,).')
             raise ValueError(name+'-z')
 
         return inp
 
     # Check length of inp.
     narr = len(inp)
-    if narr not in [3, 6]:
+    if narr not in [5, 6]:
         print('* ERROR   :: Parameter ' + name + ' has wrong length! : ' +
-            str(narr) + ' instead of 3 (dipole) or 6 (bipole).')
+              str(narr) + ' instead of 5 (dipole) or 6 (bipole).')
         raise ValueError(name)
 
     # Flag if it is a dipole or not
-    isdipole = narr == 3
+    isdipole = narr == 5
 
     if isdipole:
+        # Check x, y, and z
         inp = check_dipole(inp, name)
+
+        # Check theta and phi
+        inp[3] = _check_var(inp[3], float, 0, 'theta', ())
+        inp[4] = _check_var(inp[4], float, 0, 'phi', ())
+
+        # How many different depths
+        inpz = len(inp[2])
 
     else:
         inp0 = check_dipole(inp[::2], name+'-1')
@@ -789,7 +814,10 @@ def check_srcrec(inp, name):
         # Collect elements
         inp = [inp0[0], inp1[0], inp0[1], inp1[1], inp0[2], inp1[2]]
 
-    return inp, len(inp[0]), len(inp[2]), isdipole
+        # How many different depths
+        inpz = len(inp[4])
+
+    return inp, len(inp[0]), inpz, isdipole
 
 
 def get_coords(src, rec, verb, intpts=(-1, -1)):
@@ -965,7 +993,9 @@ def get_coords_tmp(src, rec, nsrc, nrec, verb):
 
 
 def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
-    """TODO"""
+    """TODO
+    ab only used if dipole
+    """
 
     # Get this bipole
     if nrinpz == 1:
@@ -980,8 +1010,8 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
     # Get number of integration points and angles for source
     if isdipole:
         intpts = 1
-        theta = None
-        phi = None
+        theta = np.deg2rad(inp[3])
+        phi = np.deg2rad(inp[4])
         g_w = np.array([1])
         tout = tinp
     else:
@@ -994,7 +1024,7 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
         # (This is a problem, as we would could not define the angles then.)
         if np.all(dx == 0) and np.all(dy == 0) and np.all(dz == 0):
             print("* ERROR   :: <"+name+"> is a point dipole, use `dipole` " +
-                    "instead of `bipole`/`srcbipole`.")
+                  "instead of `bipole`/`srcbipole`.")
             raise ValueError('Bipole: dipole-'+name)
 
         # Get bipole length length and angles
@@ -1015,6 +1045,8 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
             xinp = tinp[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta)
             yinp = tinp[2] + dy/2 + g_x*np.cos(phi)*np.sin(theta)
             zinp = tinp[4] + dz/2 + g_x*np.sin(phi)
+            if nrinpz == 1:
+                zinp = zinp[:,0]
 
         else:  # If intpts < 3: Calculate bipole at tinp-centre for phi/theta
             intpts = 1
@@ -1023,10 +1055,11 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
             zinp = np.array(tinp[4] + dz/2)
             g_w = np.array([1])/dl  # normalize for bipole length
 
-        # Collect output list; rounding coordinates to same precision as min_off
+        # Collect output list; rounding coord. to same precision as min_off
         rndco = int(np.round(np.log10(1/min_off)))
-        tout = [np.round(xinp, rndco), np.round(yinp, rndco), np.round(zinp,
-               rndco)]
+        tout = [np.round(xinp, rndco).ravel('F'),
+                np.round(yinp, rndco).ravel('F'),
+                np.round(zinp, rndco).ravel('F')]
 
     # Print spatial parameters
     if verb > 1:
@@ -1053,12 +1086,12 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
                 print("     > intpts    :  1 (as dipole)")
             else:
                 print("     > intpts    : ", intpts)
-            print("     > theta [°] : ", np.rad2deg(theta))
-            print("     > phi   [°] : ", np.rad2deg(phi))
             print("     > length[m] : ", dl)
             print("     > x_c   [m] : ", _strvar(tinp[0][0] + dx/2))
             print("     > y_c   [m] : ", _strvar(tinp[2][0] + dy/2))
             print("     > z_c   [m] : ", _strvar(tinp[4][0] + dz/2))
+        print("     > theta [°] : ", np.rad2deg(theta))
+        print("     > phi   [°] : ", np.rad2deg(phi))
 
     return tout, theta, phi, g_w, intpts
 
@@ -1102,8 +1135,8 @@ def check_depth(zsrc, zrec, depth):
     # Broadcast arrays
     b_depth = depth[None, :]
     b_pdepth = pdepth[None, :]
-    b_zsrc = zsrc[:, None]
-    b_zrec = zrec[:, None]
+    b_zsrc = np.atleast_1d(zsrc)[:, None]
+    b_zrec = np.atleast_1d(zrec)[:, None]
 
     # Get layers
     lsrc = np.where((b_depth < b_zsrc)*(b_pdepth >= b_zsrc))[1]
