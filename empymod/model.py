@@ -69,7 +69,7 @@ from . import kernel, transform
 from .utils import (check_ab, get_abs, get_abs_srcbipole, check_model,
                     get_coords, check_depth, check_hankel, check_frequency,
                     check_opt, check_srcrec, get_thetaphi, check_time,
-                    printstartfinish, get_coords_tmp)
+                    printstartfinish, get_coords_tmp, geometrical_scaling)
 
 
 __all__ = ['bipole', 'dipole', 'srcbipole', 'frequency', 'time', 'gpr',
@@ -95,8 +95,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # === 2.  CHECK INPUT ============
 
     # Check times and Fourier Transform arguments, get required frequencies
-    # (freq = freqtime if `signal=None`)
-    time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+    if signal is not None:
+        time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+    else:
+        freq = freqtime
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
@@ -116,8 +118,12 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     use_spline, use_ne_eval, loop_freq, loop_off = optimization
 
     # Check src and rec
+    # nsrcz/nrecz are number of unique src/rec-pole depths
     src, nsrc, nsrcz, srcdipole = check_srcrec(src, 'src')
     rec, nrec, nrecz, recdipole = check_srcrec(rec, 'rec')
+
+    # Get geometrical scaling dict
+    fact = geometrical_scaling()
 
     # === 3. EM-FIELD CALCULATION ============
 
@@ -132,15 +138,15 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # Hence we have to loop over every different depth of src or rec, and
     # over all required ab's.
 
+    isrc = int(nsrc/nsrcz)
+    irec = int(nrec/nrecz)
+    isrz = int(isrc*irec)
     for isz in range(nsrcz):  # Loop over source depths
 
         # Get this source
         srcthetaphi = get_thetaphi(src, isz, nsrcz, intpts[0], srcdipole,
                                    'src', verb)
         tsrc, srctheta, srcphi, srcg_w, srcintpts = srcthetaphi
-        # print(' src-x ::', tsrc[0])
-        # print(' src-y ::', tsrc[1])
-        # print(' src-z ::', tsrc[2])
 
         for irz in range(nrecz):  # Loop over receiver depths
 
@@ -148,23 +154,18 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             recthetaphi = get_thetaphi(rec, irz, nrecz, intpts[1], recdipole,
                                        'rec', verb)
             trec, rectheta, recphi, recg_w, recintpts = recthetaphi
-            # print(' rec-x ::', trec[0])
-            # print(' rec-y ::', trec[1])
-            # print(' rec-z ::', trec[2])
 
             # Required ab's and geometrical scaling factors
-            ab_calc, fact = get_abs(msrc, mrec, srctheta, srcphi, rectheta,
+            ab_calc  = get_abs(msrc, mrec, srctheta, srcphi, rectheta,
                                     recphi, verb)
 
             # Pre-allocate output temporary EM-arrays for integration loops
-            isrz = int(nrec/nrecz*nsrc/nsrcz)
             sEM = np.zeros((freq.size, isrz), dtype=complex)
             for isg in range(srcintpts):  # Loop over src integration points
 
                 # Pre-allocate output temporary EM-arrays for integration loops
                 rEM = np.zeros((freq.size, isrz), dtype=complex)
                 for irg in range(recintpts):  # Loop over rec integration pts
-
                     # Note, if source or receiver is a bipole, but horizontal
                     # (phi=0), then calculation could be sped up by not looping
                     # over the bipole elements, but calculate it all in one go.
@@ -175,10 +176,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                              tsrc[2][isg]]
                     tirec = [trec[0][irg::recintpts], trec[1][irg::recintpts],
                              trec[2][irg]]
-                    # print(' src-x ::', tisrc[0])
-                    # print(' src-y ::', tisrc[1])
-                    # print(' src-z ::', tisrc[2])
-                    offang = get_coords_tmp(tisrc, tirec, nsrc, nrec, verb)
+                    offang = get_coords_tmp(tisrc, tirec, isrc, irec, verb)
                     zsrc, zrec, off, angle = offang
 
                     # Get layer numbers in which src and rec reside
@@ -188,27 +186,46 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     # Pre-allocate output temporary EM-arrays for integration
                     # loops
                     abEM = np.zeros((freq.size, isrz), dtype=complex)
-                    for iab in range(len(ab_calc)):
+                    for iab in ab_calc:
 
                         # Gather variables
-                        # off, angle, zsrc, lsrc,
-                        finp = (ab_calc[iab], off, angle, zsrc, zrec, lsrc,
+                        finp = (iab, off, angle, zsrc, zrec, lsrc,
                                 lrec, depth, freq, etaH, etaV, zetaH, zetaV,
                                 xdirect, isfullspace, ht, htarg, use_spline,
                                 use_ne_eval, msrc, mrec, loop_freq, loop_off)
 
-                        # Add field to EM with geometrical factor `fact`
+                        # Carry-out the frequency-domain calculation
                         out = fem(*finp)
-                        abEM += out[0]*fact[iab]
-                        kcount += out[1]  # Update kernel count
 
+                        # Get geometrical scaling factors
+                        tfact = fact[iab](srctheta, srcphi, rectheta, recphi)
+
+                        # Add field to EM with geometrical factor
+                        abEM += out[0]*tfact
+
+                        # Update kernel count
+                        kcount += out[1]
+
+                    # Add this receiver element, with weight from integration
                     rEM += abEM*recg_w[irg]
 
+                # Add this source element, with weight from integration
                 sEM += rEM*srcg_w[isg]
 
-            print(sEM.shape, freq.shape, nsrc*nrec)
-            EM[:, :] = sEM
 
+            # Add this src-rec signal
+            if nrec == nrecz:
+                if nsrc == nsrcz:  # Looped over each src-rec pair
+                    si, ei, st = isz*irec + irz, isz*irec + irz + 1, 1
+                else:              # Looped over each rec, src in one go
+                    si, ei, st = irz, nsrc*nrec, nrec
+            else:
+                if nsrc == nsrcz:  # Looped over each src, rec in one go
+                    si, ei, st = isz*irec, (isz+1)*irec, 1
+                else:              # All in one go
+                    si, ei, st = 0, nsrc*nrec, 1
+
+            EM[:, si:ei:st] = sEM
 
     # Do f->t transform if required
     if signal is not None:
@@ -508,7 +525,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # Check times and Fourier Transform arguments, get required frequencies
     # (freq = freqtime if `signal=None`)
-    time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+    if signal is not None:
+        time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+    else:
+        freq = freqtime
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
@@ -826,7 +846,10 @@ def srcbipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Check times and Fourier Transform arguments, get required frequencies
     # (freq = freqtime if `signal=None`)
-    time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+    if signal is not None:
+        time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+    else:
+        freq = freqtime
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,

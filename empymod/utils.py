@@ -394,24 +394,7 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
             # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
             ab_calc = ab_calc % 10*10 + ab_calc // 10  # Swap alpha/beta
 
-    # => Geometrical scaling
-    srcfact = [np.cos(srctheta)*np.cos(srcphi),
-               np.sin(srctheta)*np.cos(srcphi), np.sin(srcphi)]
-    recfact = [np.cos(rectheta)*np.cos(recphi),
-               np.sin(rectheta)*np.cos(recphi), np.sin(recphi)]
-    fact = np.outer(recfact, srcfact)
-    print('heeeeeeeere, in utils.get_abs')
-    print(fact)
-    fact = np.einsum('ac,bd->abcd', np.atleast_2d(srcfact),
-                     np.atleast_2d(recfact))
-    print(srcfact)
-    print(recfact)
-    print(fact)
-    print(np.shape(srcfact))
-    print(np.shape(recfact))
-    print(fact.shape)
-
-    # Remove unnecessary ab's and fact's
+    # Remove unnecessary ab's
     bab = np.asarray(ab_calc*0+1, dtype=bool)
 
     # Remove regarding source alignment
@@ -443,15 +426,43 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
             bab[:2, :] *= False  # Vertical, remove x/y
 
     # Reduce
-    print(bab.shape)
     ab_calc = ab_calc[bab].ravel()
-    fact = fact[bab].ravel()
 
     # Print actual calculated <ab>
     if verb > 1:
         print("   Required ab's : ", _strvar(ab_calc))
 
-    return ab_calc, fact
+    return ab_calc
+
+
+def geometrical_scaling():
+
+    # w : srctheta
+    # x : srcphi
+    # y : rectheta
+    # z : recphi
+
+    # => Geometrical scaling
+    fact = dict()
+    fact[11] = lambda w, x, y, z: np.outer(np.cos(w)*np.cos(x),
+                                           np.cos(y)*np.cos(z)).ravel()
+    fact[21] = lambda w, x, y, z: np.outer(np.cos(w)*np.cos(x),
+                                           np.sin(y)*np.cos(z)).ravel()
+    fact[31] = lambda w, x, y, z: np.outer(np.cos(w)*np.cos(x),
+                                           np.sin(z)).ravel()
+    fact[12] = lambda w, x, y, z: np.outer(np.sin(w)*np.cos(x),
+                                           np.cos(y)*np.cos(z)).ravel()
+    fact[22] = lambda w, x, y, z: np.outer(np.sin(w)*np.cos(x),
+                                           np.sin(y)*np.cos(z)).ravel()
+    fact[32] = lambda w, x, y, z: np.outer(np.sin(w)*np.cos(x),
+                                           np.sin(z)).ravel()
+    fact[13] = lambda w, x, y, z: np.outer(np.sin(x),
+                                           np.cos(y)*np.cos(z)).ravel()
+    fact[23] = lambda w, x, y, z: np.outer(np.sin(x),
+                                           np.sin(y)*np.cos(z)).ravel()
+    fact[33] = lambda w, x, y, z: np.outer(np.sin(x), np.sin(z)).ravel()
+
+    return fact
 
 
 def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
@@ -992,13 +1003,13 @@ def get_coords_tmp(src, rec, nsrc, nrec, verb):
     return src[2], rec[2], off, angle
 
 
-def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
+def get_thetaphi(inp, iz, ninpz, intpts, isdipole, name, verb):
     """TODO
     ab only used if dipole
     """
 
     # Get this bipole
-    if nrinpz == 1:
+    if ninpz == 1:
         tinp = inp
     else:
         if isdipole:
@@ -1010,9 +1021,9 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
     # Get number of integration points and angles for source
     if isdipole:
         intpts = 1
-        theta = np.deg2rad(inp[3])
-        phi = np.deg2rad(inp[4])
-        g_w = np.array([1])
+        theta = np.ones(inp[0].shape)*np.deg2rad(inp[3])
+        phi = np.ones(inp[0].shape)*np.deg2rad(inp[4])
+        g_w = np.ones(inp[0].shape)*np.array([1])
         tout = tinp
     else:
         # Get lengths in each direction
@@ -1022,9 +1033,9 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
 
         # Check if tinp is a dipole
         # (This is a problem, as we would could not define the angles then.)
-        if np.all(dx == 0) and np.all(dy == 0) and np.all(dz == 0):
-            print("* ERROR   :: <"+name+"> is a point dipole, use `dipole` " +
-                  "instead of `bipole`/`srcbipole`.")
+        if np.any((dx == 0)*(dy == 0)*(dz == 0)):
+            print("* ERROR   :: At least one of <"+name+"> is a point dipole" +
+                  ", use `dipole` instead of `bipole`/`srcbipole`.")
             raise ValueError('Bipole: dipole-'+name)
 
         # Get bipole length length and angles
@@ -1045,7 +1056,7 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
             xinp = tinp[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta)
             yinp = tinp[2] + dy/2 + g_x*np.cos(phi)*np.sin(theta)
             zinp = tinp[4] + dz/2 + g_x*np.sin(phi)
-            if nrinpz == 1:
+            if ninpz == 1:
                 zinp = zinp[:,0]
 
         else:  # If intpts < 3: Calculate bipole at tinp-centre for phi/theta
@@ -1053,7 +1064,9 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
             xinp = np.array(tinp[0] + dx/2)
             yinp = np.array(tinp[2] + dy/2)
             zinp = np.array(tinp[4] + dz/2)
-            g_w = np.array([1])/dl  # normalize for bipole length
+            g_w = np.array([1])# /dl  # normalize for bipole length
+            if name == 'src':
+                g_w = g_w/dl
 
         # Collect output list; rounding coord. to same precision as min_off
         rndco = int(np.round(np.log10(1/min_off)))
@@ -1070,26 +1083,31 @@ def get_thetaphi(inp, iz, nrinpz, intpts, isdipole, name, verb):
             longname = '   Receiver(s)   : '
 
         if isdipole:
-            print(longname, str(tout[0].size), 'dipole(s)')
+            print(longname, str(len(tout[0])), 'dipole(s)')
             tname = ['x  ', 'y  ', 'z  ']
-            for i in range(3):
-                if tout[i].size > 1:
-                    print("     > "+tname[i]+"   [m] : ", str(tout[i].min()),
-                          "-", str(tout[i].max()), " [min - max]")
-                    if verb > 2:
-                        print("                 : ", _strvar(tout[i]))
-                else:
-                    print("     > "+tname[i]+"   [m] : ", _strvar(tout[i]))
+            prntinp = tout
         else:
-            print(longname, str(tout[0].size), 'bipole(s)')
+            print(longname, str(int(len(tout[0])/intpts)), 'bipole(s)')
+            tname = ['x_c', 'y_c', 'z_c']
             if intpts < 3:
                 print("     > intpts    :  1 (as dipole)")
+                prntinp = tout
             else:
                 print("     > intpts    : ", intpts)
+                prntinp = [np.atleast_1d(tinp[0])[0] + dx/2,
+                           np.atleast_1d(tinp[2])[0] + dy/2,
+                           np.atleast_1d(tinp[4])[0] + dz/2]
             print("     > length[m] : ", dl)
-            print("     > x_c   [m] : ", _strvar(tinp[0][0] + dx/2))
-            print("     > y_c   [m] : ", _strvar(tinp[2][0] + dy/2))
-            print("     > z_c   [m] : ", _strvar(tinp[4][0] + dz/2))
+
+        for i in range(3):
+            if tout[i].size > intpts:
+                print("     > "+tname[i]+"   [m] : ", str(prntinp[i].min()),
+                        "-", str(prntinp[i].max()), " [min - max]")
+                if verb > 2:
+                    print("                 : ", _strvar(prntinp[i]))
+            else:
+                print("     > "+tname[i]+"   [m] : ", _strvar(prntinp[i]))
+
         print("     > theta [°] : ", np.rad2deg(theta))
         print("     > phi   [°] : ", np.rad2deg(phi))
 
@@ -1431,7 +1449,7 @@ def check_opt(opt, loop, ht, htarg, verb):
     return use_spline, use_ne_eval, loop_freq, loop_off
 
 
-def check_time(freqtime, signal, ft, ftarg, verb):
+def check_time(time, signal, ft, ftarg, verb):
     """Check time domain specific input parameters.
 
     This check-function is called from one of the modelling routines in
@@ -1440,8 +1458,8 @@ def check_time(freqtime, signal, ft, ftarg, verb):
 
     Parameters
     ----------
-    freqtime : array_like
-        Frequencies f (Hz) if `signal` == None, else times t (s).
+    time : array_like
+        Times t (s).
 
     signal : {None, 0, 1, -1}
         Source signal:
@@ -1474,15 +1492,13 @@ def check_time(freqtime, signal, ft, ftarg, verb):
 
     """
 
-    if signal is None:
-        return None, freqtime, ft, ftarg
-    elif int(signal) not in [-1, 0, 1]:
+    if int(signal) not in [-1, 0, 1]:
         print("* ERROR   :: <signal> must be one of: [None, -1, 0, 1]; " +
               "<signal> provided: "+str(signal))
         raise ValueError('signal')
 
     # Check time
-    time = _check_var(freqtime, float, 1, 'time')
+    time = _check_var(time, float, 1, 'time')
 
     # Minimum time to avoid division by zero  at time = 0 s.
     # => min_time is defined at the start of this file

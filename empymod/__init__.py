@@ -57,18 +57,11 @@ priority:
       ideally be combined with automated testing by, for instance, Travis. It
       should also include some proper benchmarks.
 
-    - Rewrite `model` and `utils` in order to provide the survey and model
-      parameters as well as the modelling options as *structured
-      array*/*dict*/*class* (which one is suited best?), so that the main
-      (potentially only) calculation routine would be `empymod(survey, model,
-      options)`. Improved abstraction of the calling part.
-
     - More modelling routines:
-        - **arbitrary receiver rotation and receiver dipole length**
         - convolution with a wavelet for GPR (proper version of `model.gpr`)
         - pure wavenumber output-routine (proper version of `model.wavenumber`)
         - various source-receiver arrangements (loops etc)
-        - Load and Save functions to store and load model, together with all
+        - load and save functions to store and load model, together with all
           information.
 
     - Kernel
