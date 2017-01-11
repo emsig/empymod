@@ -691,7 +691,7 @@ def check_pole(inp, name, verb, intpts=-1):
             xinp = np.array(inp[0] + dx/2)
             yinp = np.array(inp[2] + dy/2)
             zinp = np.array(inp[4] + dz/2)
-            g_w = np.array([1])/r  # normalize for bipole length
+            g_w = np.array([1])
 
         # Collect output list
         out = [xinp, yinp, zinp]
@@ -1003,7 +1003,7 @@ def get_coords_tmp(src, rec, nsrc, nrec, verb):
     return src[2], rec[2], off, angle
 
 
-def get_thetaphi(inp, iz, ninpz, intpts, isdipole, name, verb):
+def get_thetaphi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     """TODO
     ab only used if dipole
     """
@@ -1018,12 +1018,27 @@ def get_thetaphi(inp, iz, ninpz, intpts, isdipole, name, verb):
             tinp = [inp[0][iz], inp[1][iz], inp[2][iz],
                     inp[3][iz], inp[4][iz], inp[5][iz]]
 
+    strength = _check_var(strength, float, 0, 'strength', ())
+
     # Get number of integration points and angles for source
     if isdipole:
         intpts = 1
-        theta = np.ones(inp[0].shape)*np.deg2rad(inp[3])
-        phi = np.ones(inp[0].shape)*np.deg2rad(inp[4])
+
+        theta = _check_var(np.deg2rad(inp[3]), float, 1, 'theta')
+        if len(theta) == 1:
+            theta = np.ones(inp[0].shape)*theta
+        _check_shape(theta, 'theta', tinp[0].shape)
+
+        phi = _check_var(np.deg2rad(inp[4]), float, 1, 'phi')
+        if len(phi) == 1:
+            phi = np.ones(inp[0].shape)*phi
+        _check_shape(phi, 'phi', tinp[0].shape)
+
         g_w = np.ones(inp[0].shape)*np.array([1])
+        inp_w = np.ones(len(g_w))
+        if name == 'src' and strength > 0:
+            inp_w *= strength
+
         tout = tinp
     else:
         # Get lengths in each direction
@@ -1049,7 +1064,13 @@ def get_thetaphi(inp, iz, ninpz, intpts, isdipole, name, verb):
             # Get integration positions and weights
             g_x, g_w = special.p_roots(intpts)
             g_x = np.outer(g_x, dl/2.0)  # Adjust to tinp length
-            g_w /= 2.0    # Adjust to tinp length (dl/2), normalize (1/dl)
+            g_w /= 2.0  # Adjust to tinp length (dl/2), normalize (1/dl)
+            if strength > 0:
+                inp_w = dl
+                if name == 'src':
+                    inp_w *= strength
+            else:
+                inp_w = np.ones(len(dl))
 
             # Coordinate system is left-handed, positive z down
             # (Est-North-Depth).
@@ -1064,9 +1085,13 @@ def get_thetaphi(inp, iz, ninpz, intpts, isdipole, name, verb):
             xinp = np.array(tinp[0] + dx/2)
             yinp = np.array(tinp[2] + dy/2)
             zinp = np.array(tinp[4] + dz/2)
-            g_w = np.array([1])# /dl  # normalize for bipole length
-            if name == 'src':
-                g_w = g_w/dl
+            g_w = np.array([1])
+            if strength > 0:
+                inp_w = dl
+                if name == 'src':
+                    inp_w *= strength
+            else:
+                inp_w = np.ones(len(dl))
 
         # Collect output list; rounding coord. to same precision as min_off
         rndco = int(np.round(np.log10(1/min_off)))
@@ -1111,7 +1136,7 @@ def get_thetaphi(inp, iz, ninpz, intpts, isdipole, name, verb):
         print("     > theta [°] : ", np.rad2deg(theta))
         print("     > phi   [°] : ", np.rad2deg(phi))
 
-    return tout, theta, phi, g_w, intpts
+    return tout, theta, phi, g_w, intpts, inp_w
 
 
 def check_depth(zsrc, zrec, depth):
