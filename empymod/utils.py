@@ -4,18 +4,10 @@
 ========================
 
 This module consists of four groups of functions:
-   0. General Settings
+   0. General settings
    1. Class EMArray
    2. Input parameter checks for modelling
-   3. General utilities
-
-Group 0 is to set minimum offset, frequency and time for calculation (in order
-to avoid divisions by zero).  Group 2 are checks organised in modules. So if
-you create for instance a modelling-routine in which you loop over frequencies,
-you have to call `check_ab`, `check_model`, `get_coords`, `check_depth` and
-`check_hankel` only once, but `check_frequency` in each loop. You do not have
-to run these checks if you are sure your input parameters are in the correct
-format.
+   3. Internal utilities
 
 """
 # Copyright 2016 Dieter Werthmüller
@@ -45,13 +37,12 @@ from scipy.constants import epsilon_0  # Elec. permittivity of free space [F/m]
 from . import filters, transform
 
 
-# TODO make restrictions
-# __all__ = ['EMArray', 'check_ab', 'get_abs_srcbipole', 'check_model',
-#            'check_pole', 'get_coords', 'check_depth', 'check_hankel',
-#            'check_frequency', 'check_opt', 'check_time', 'printstartfinish',
-#            ]
+__all__ = ['EMArray', 'check_time', 'check_model', 'check_frequency',
+           'check_hankel', 'check_opt', 'check_dipole', 'check_bipole',
+           'check_ab', 'get_abs', 'get_geo_fact', 'get_theta_phi',
+           'get_off_ang', 'get_layer_nr', 'printstartfinish']
 
-# 0. Settings
+# 0. General settings
 
 min_freq = 1e-20  # Minimum frequency  [Hz]
 min_time = 1e-20  # Minimum time       [s]
@@ -62,7 +53,7 @@ min_off = 1e-3    # Minimum offset     [m]
 # 1. Class EMArray
 
 class EMArray(np.ndarray):
-    """Subclassing an ndarray: add *Amplitude* <amp> and *Phase* <pha>.
+    """Subclassing an ndarray: add *amplitude* <amp> and *phase* <pha>.
 
     Parameters
     ----------
@@ -121,11 +112,13 @@ class EMArray(np.ndarray):
 
 # 2. Input parameter checks for modelling
 
+# 2.a <Check>s (alphabetically)
+
 def check_ab(ab, verb):
     """Check source-receiver configuration.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
+    :mod:`model`. Consult these modelling routines for a detailed description
     of the input parameters.
 
     Parameters
@@ -141,11 +134,8 @@ def check_ab(ab, verb):
     ab_calc : int
         Adjusted source-receiver configuration using reciprocity.
 
-    msrc : bool
-        If True, src is magnetic; if False, src is electric.
-
-    mrec : bool
-        If True, rec is magnetic; if False, rec is electric.
+    msrc, mrec : bool
+        If True, src/rec is magnetic; if False, src/rec is electric.
 
     """
 
@@ -178,7 +168,7 @@ def check_ab(ab, verb):
     if mrec:
         if msrc:
             # G^mm_ab(s, r, e, z) = -G^ee_ab(s, r, -z, -e)
-            ab_calc = ab-33  # -30 : mrec->erec; -3: msrc->esrc
+            ab_calc = ab - 33  # -30 : mrec->erec; -3: msrc->esrc
         else:
             # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
             ab_calc = ab % 10*10 + ab // 10  # Swap alpha/beta
@@ -195,541 +185,7 @@ def check_ab(ab, verb):
     return ab_calc, msrc, mrec
 
 
-def check_ab_tmp(ab, verb):
-    """Check source-receiver configuration.
-
-    This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
-
-    Parameters
-    ----------
-    ab : int
-        Source-receiver configuration.
-
-    verb : {0, 1, 2}
-        Level of verbosity.
-
-    Returns
-    -------
-    ab_calc : int
-        Adjusted source-receiver configuration using reciprocity.
-
-    msrc : bool
-        If True, src is magnetic; if False, src is electric.
-
-    mrec : bool
-        If True, rec is magnetic; if False, rec is electric.
-
-    """
-
-    # Try to cast ab into an integer
-    try:
-        int(ab)
-    except(TypeError, ValueError):
-        print('* ERROR   :: <ab> must be an integer')
-        raise
-
-    # Check src and rec orientation (<ab> for alpha-beta)
-    # pab: all possible values that <ab> can take
-    pab = [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26,
-           31, 32, 33, 34, 35, 36, 41, 42, 43, 44, 45, 46,
-           51, 52, 53, 54, 55, 56, 61, 62, 63, 64, 65, 66]
-    if ab not in pab:
-        print('* ERROR   :: <ab> must be one of: ' + str(pab) + ';' +
-              ' <ab> provided: ' + str(ab))
-        raise ValueError('ab')
-
-    # Print input <ab>
-    if verb > 1:
-        print("   Input ab      : ", ab)
-
-    # Check if src and rec are magnetic or electric
-    msrc = ab % 10 > 3   # If True: magnetic src
-    mrec = ab // 10 > 3  # If True: magnetic rec
-
-    # If rec is magnetic, switch <ab> using reciprocity.
-    if mrec:
-        if msrc:
-            # G^mm_ab(s, r, e, z) = -G^ee_ab(s, r, -z, -e)
-            ab_calc = ab-33  # -30 : mrec->erec; -3: msrc->esrc
-        else:
-            # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
-            ab_calc = ab % 10*10 + ab // 10  # Swap alpha/beta
-    else:
-        ab_calc = ab
-
-    # Print actual calculated <ab>
-    if verb > 1:
-        if ab_calc in [36, ]:
-            print("\n>  <ab> IS "+str(ab_calc)+" WHICH IS ZERO; returning")
-        else:
-            print("   Calc. ab      : ", ab_calc)
-
-    return np.array([ab_calc]), msrc, mrec
-
-
-def get_abs_srcbipole(msrc, recdir, theta, phi, verb):
-    """Check source-receiver configuration.
-
-    This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
-
-    Parameters
-    ----------
-    msrc : bool
-        True if src is magnetic, else False.
-    recdir : {1, 2, 3, 4, 5, 6}
-        Receiver direction.
-    theta : float
-        Horizontal source angle.
-    phi : float
-        Vertical source angle.
-    verb : {0, 1, 2}
-        Level of verbosity.
-
-
-    Returns
-    -------
-    ab : array of int
-        ab's to calculate for this bipole.
-    mrec : bool
-        Deduced from recdir. Receiver is magnetic if True.
-    fact : array
-        Geometrical spreading factors for ab's.
-
-    """
-    # Try to cast recdir into an integer
-    try:
-        int(recdir)
-    except(TypeError, ValueError):
-        print('* ERROR   :: <recdir> must be an integer')
-        raise
-
-    # Check src and rec orientation (<ab> for alpha-beta)
-    # pab: all possible values that <ab> can take
-    pab = [1, 2, 3, 4, 5, 6]
-    if recdir not in pab:
-        print('* ERROR   :: <recdir> must be one of: ' + str(pab) + ';' +
-              ' <recdir> provided: ' + str(recdir))
-        raise ValueError('recdir')
-
-    # Get required ab's
-    ab = 10*recdir + np.arange(1, 4)
-    if msrc:
-        ab += 3
-
-    # If rec is magnetic, change ab with reciprocity (see `check_ab`)
-    if recdir < 4:
-        mrec = False
-    else:
-        if msrc:
-            ab -= 33  # -30 : mrec->erec; -3: msrc->esrc
-        else:
-            ab = ab % 10*10 + ab // 10  # Swap alpha/beta
-        mrec = True
-
-    # => Geometrical scaling
-    fact = [np.cos(theta)*np.cos(phi), np.sin(theta)*np.cos(phi), np.sin(phi)]
-
-    # Remove unnecessary ab's
-    if np.any(np.isclose(theta, [0, np.pi])):  # x-directed source, remove y
-        ab = ab[::2]
-        fact = fact[::2]
-    elif np.any(np.isclose(theta, [np.pi/2., 3*np.pi/2.])):  # y-dir. src rem x
-        ab = ab[1:]
-        fact = fact[1:]
-    if np.isclose(phi, 0):  # Horizontal source, remove z
-        ab = ab[:-1]
-        fact = fact[:-1]
-
-    # Print actual calculated <ab>
-    if verb > 1:
-        print("   Required ab's : ", _strvar(ab))
-
-    return ab, mrec, fact
-
-
-def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
-    """Check source-receiver configuration.
-
-    This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
-
-    Parameters
-    ----------
-    msrc, mrec : bool
-        True if src/rec is magnetic, else False.
-    srctheta, rectheta : float
-        Horizontal source/receiver angle.
-    srcphi, recphi : float
-        Vertical source/receiver angle.
-    verb : {0, 1, 2}
-        Level of verbosity.
-
-
-    Returns
-    -------
-    ab_calc : array of int
-        ab's to calculate for this bipole.
-    fact : array
-        Geometrical spreading factors for ab's.
-
-    """
-
-    # Get required ab's
-    ab_calc = np.array([[11, 12, 13], [21, 22, 23], [31, 32, 33]])
-    if msrc:
-        ab_calc += 3
-    if mrec:
-        ab_calc += 30
-
-        # Switch <ab> using reciprocity.
-        if msrc:
-            # G^mm_ab(s, r, e, z) = -G^ee_ab(s, r, -z, -e)
-            ab_calc -= 33  # -30 : mrec->erec; -3: msrc->esrc
-        else:
-            # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
-            ab_calc = ab_calc % 10*10 + ab_calc // 10  # Swap alpha/beta
-
-    # Remove unnecessary ab's
-    bab = np.asarray(ab_calc*0+1, dtype=bool)
-
-    # Remove regarding source alignment
-    check = np.atleast_1d(srctheta)[0]
-    if np.allclose(srctheta, check):  # only if just 1 angle or all equal
-        if np.any(np.isclose(check, [0, np.pi])):
-            bab[:, 1] *= False  # x-directed source, remove y
-        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
-            bab[:, 0] *= False  # y-directed source, remove x
-    check = np.atleast_1d(srcphi)[0]
-    if np.allclose(srcphi, check):  # only if just 1 angle or all equal
-        if np.any(np.isclose(check, [0, np.pi])):
-            bab[:, 2] *= False  # Horizontal, remove z
-        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
-            bab[:, :2] *= False  # Vertical, remove x/y
-
-    # Remove regarding receiver alignment
-    check = np.atleast_1d(rectheta)[0]
-    if np.allclose(rectheta, check):  # only if just 1 angle or all equal
-        if np.any(np.isclose(check, [0, np.pi])):
-            bab[1, :] *= False  # x-directed receiver, remove y
-        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
-            bab[0, :] *= False  # y-directed receiver, remove x
-    check = np.atleast_1d(recphi)[0]
-    if np.allclose(recphi, check):  # only if just 1 angle or all equal
-        if np.any(np.isclose(check, [0, np.pi])):
-            bab[2, :] *= False  # Horizontal, remove z
-        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
-            bab[:2, :] *= False  # Vertical, remove x/y
-
-    # Reduce
-    ab_calc = ab_calc[bab].ravel()
-
-    # Print actual calculated <ab>
-    if verb > 1:
-        print("   Required ab's : ", _strvar(ab_calc))
-
-    return ab_calc
-
-
-def geometrical_scaling():
-
-    # w : srctheta
-    # x : srcphi
-    # y : rectheta
-    # z : recphi
-
-    # => Geometrical scaling
-    fact = dict()
-    fact[11] = lambda w, x, y, z: np.outer(np.cos(w)*np.cos(x),
-                                           np.cos(y)*np.cos(z)).ravel()
-    fact[21] = lambda w, x, y, z: np.outer(np.cos(w)*np.cos(x),
-                                           np.sin(y)*np.cos(z)).ravel()
-    fact[31] = lambda w, x, y, z: np.outer(np.cos(w)*np.cos(x),
-                                           np.sin(z)).ravel()
-    fact[12] = lambda w, x, y, z: np.outer(np.sin(w)*np.cos(x),
-                                           np.cos(y)*np.cos(z)).ravel()
-    fact[22] = lambda w, x, y, z: np.outer(np.sin(w)*np.cos(x),
-                                           np.sin(y)*np.cos(z)).ravel()
-    fact[32] = lambda w, x, y, z: np.outer(np.sin(w)*np.cos(x),
-                                           np.sin(z)).ravel()
-    fact[13] = lambda w, x, y, z: np.outer(np.sin(x),
-                                           np.cos(y)*np.cos(z)).ravel()
-    fact[23] = lambda w, x, y, z: np.outer(np.sin(x),
-                                           np.sin(y)*np.cos(z)).ravel()
-    fact[33] = lambda w, x, y, z: np.outer(np.sin(x), np.sin(z)).ravel()
-
-    return fact
-
-
-def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
-    """Check the model: depth and corresponding layer parameters.
-
-    This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
-
-    Parameters
-    ----------
-    depth : list
-        Absolute layer interfaces z (m); #depth = #res - 1
-        (excluding +/- infinity).
-
-    res : array_like
-        Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
-
-    aniso : array_like
-        Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
-
-    epermH : array_like
-        Horizontal electric permittivities epsilon_h (-); #epermH = #res.
-
-    epermV : array_like
-        Vertical electric permittivities epsilon_v (-); #epermV = #res.
-
-    mpermH : array_like
-        Horizontal magnetic permeabilities mu_h (-); #mpermH = #res.
-
-    mpermV : array_like
-        Vertical magnetic permeabilities mu_v (-); #mpermV = #res.
-
-    verb : {0, 1, 2}
-        Level of verbosity.
-
-
-    Returns
-    -------
-    depth : array
-        Depths of layer interfaces, adds -infty at beginning if not present.
-
-    res : array
-        As input, checked for size.
-
-    aniso : array
-        As input, checked for size. If None, defaults to an array of ones.
-
-    epermH : array
-        As input, checked for size. If None, defaults to an array of ones.
-
-    epermV : array
-        As input, checked for size. If None, defaults to an array of ones.
-
-    mpermH : array
-        As input, checked for size. If None, defaults to an array of ones.
-
-    mpermV : array
-        As input, checked for size. If None, defaults to an array of ones.
-
-    isfullspace : bool
-        If True, the model is a fullspace (res, aniso, epermH, epermV, mpermM,
-        and mpermV are in all layers the same).
-
-    """
-
-    # Check depth
-    depth = _check_var(depth, float, 1, 'depth')
-
-    # Add -infinity at the beginning
-    # => The top-layer (-infinity to first interface) is layer 0.
-    if depth.size == 0:
-        depth = np.array([-np.infty, ])
-    elif depth[0] != -np.infty:
-        depth = np.insert(depth, 0, -np.infty)
-
-    # Ensure depth is increasing
-    if np.any(depth[1:] - depth[:-1] < 0):
-        print('* ERROR   :: <depth> must be increasing;' +
-              ' <depth> provided: ' + _strvar(depth))
-        raise ValueError('ab')
-
-    # Cast and check resistivity
-    res = _check_var(res, float, 1, 'res', depth.shape)
-
-    # Check anisotropy, electric permittivity, and magnetic permeability
-    def check_inp(var, name):
-        """Param-check function. Default to ones if not provided"""
-        if not np.any(var):
-            return np.ones(depth.size)
-        else:
-            return _check_var(var, float, 1, name, depth.shape)
-
-    aniso = check_inp(aniso, 'aniso')
-    epermH = check_inp(epermH, 'epermH')
-    epermV = check_inp(epermV, 'epermV')
-    mpermH = check_inp(mpermH, 'mpermH')
-    mpermV = check_inp(mpermV, 'mpermV')
-
-    # Print model parameters
-    if verb > 1:
-        print("   depth     [m] : ", _strvar(depth[1:]))
-        print("   res   [Ohm.m] : ", _strvar(res))
-        print("   aniso     [-] : ", _strvar(aniso))
-        print("   epermH    [-] : ", _strvar(epermH))
-        print("   epermV    [-] : ", _strvar(epermV))
-        print("   mpermH    [-] : ", _strvar(mpermH))
-        print("   mpermV    [-] : ", _strvar(mpermV))
-
-    # Check if medium is a homogeneous full-space. If that is the case, the
-    # EM-field is computed analytically directly in the frequency-domain.
-    # Note: Also a stack of layers with the same material parameters is treated
-    #       as a homogeneous full-space.
-    if res.shape == ():
-        isfullspace = True
-    else:
-        isores = (res - res[0] == 0).all()*(aniso - aniso[0] == 0).all()
-        isoeph = (epermH - epermH[0] == 0).all()
-        isoepv = (epermV - epermV[0] == 0).all()
-        isomph = (mpermH - mpermH[0] == 0).all()
-        isompv = (mpermV - mpermV[0] == 0).all()
-        isfullspace = isores*isoeph*isoepv*isomph*isompv
-
-    # Print fullspace info
-    if verb > 1 and isfullspace:
-        print("\n>  MODEL IS A FULLSPACE; returning analytical " +
-              "frequency-domain solution")
-
-    return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
-
-
-def check_pole(inp, name, verb, intpts=-1):
-    """Check dipole parameters.
-
-    This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
-
-    Parameters
-    ----------
-    inp : list of floats or arrays
-        Pole coordinates (m): [pole-x, pole-y, pole-z].
-
-    name : str, {'src', 'rec'}
-        Pole-type.
-
-    verb : {0, 1, 2}
-        Level of verbosity.
-
-    intpts : int
-        Number of integration points for bipole.
-
-    Returns
-    -------
-    out : list
-        List of pole coordinates [x, y, z].
-
-    outbp : {tuple, None}
-        - If pole is a dipole, None.
-        - If pole is a bipole, (theta, phi, g_w):
-            - theta : Horizontal pole angle.
-            - phi : Vertical pole angle.
-            - g_w : Integration weights.
-
-    """
-
-    # Flags depending on dipole/bipole
-    isbipole = intpts >= 0
-    if isbipole:
-        narr = 6
-    else:
-        narr = 3
-
-    # Check inp
-    _check_shape(np.squeeze(inp), name, (narr,))
-    inp[0] = _check_var(inp[0], float, 1, name+'-x')
-
-    if not isbipole:  # z-value must be only one value if dipole
-        inp[1] = _check_var(inp[1], float, 1, name+'-y', inp[0].shape)
-        inp[2] = _check_var(inp[2], float, 1, name+'-z', (1,))
-        out = inp     # if dipole, return verified input
-        outbp = None  # if dipole, no outbp
-
-    if isbipole:
-        # Check inp
-        inp[1] = _check_var(inp[1], float, 1, name+'-x1', inp[0].shape)
-        inp[2] = _check_var(inp[2], float, 1, name+'-y', inp[0].shape)
-        inp[3] = _check_var(inp[3], float, 1, name+'-y1', inp[0].shape)
-        inp[4] = _check_var(inp[4], float, 1, name+'-z', inp[0].shape)
-        inp[5] = _check_var(inp[5], float, 1, name+'-z1', inp[0].shape)
-
-        # Get lengths in x/y/z-direction
-        dx = np.squeeze(inp[1] - inp[0])
-        dy = np.squeeze(inp[3] - inp[2])
-        dz = np.squeeze(inp[5] - inp[4])
-
-        # Check if inp is a dipole
-        # (This is a problem, as we would could not define the angles then.)
-        if dx == dy == dz == 0:
-            print("* ERROR   :: <"+name+"> is a point dipole, use `dipole` " +
-                  "instead of `bipole`/`srcbipole`.")
-            raise ValueError('Bipole: dipole-'+name)
-
-        # Get inp length and angles
-        r = np.linalg.norm([dx, dy, dz])  # length of inp
-        theta = np.arctan2(dy, dx)        # horizontal deviation from x-axis
-        phi = np.pi/2-np.arccos(dz/r)     # vertical dev. from xy-plane down
-
-        # Gauss quadrature, if intpts > 2; else set to center of inp
-        intpts = _check_var(intpts, int, 0, 'intpts', ())
-
-        if intpts > 2:  # Calculate the dipole positions
-            # Get integration positions and weights
-            g_x, g_w = special.p_roots(intpts)
-            g_x *= r/2.0  # Adjust to inp length
-            g_w /= 2.0    # Adjust to inp length (r/2), normalize (1/r)
-
-            # Coordinate system is left-handed, positive z down
-            # (Est-North-Depth).
-            xinp = inp[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta)
-            yinp = inp[2] + dy/2 + g_x*np.cos(phi)*np.sin(theta)
-            zinp = inp[4] + dz/2 + g_x*np.sin(phi)
-
-        else:  # If intpts < 3: Calculate bipole at inp-centre for phi/theta
-            intpts = 0
-            xinp = np.array(inp[0] + dx/2)
-            yinp = np.array(inp[2] + dy/2)
-            zinp = np.array(inp[4] + dz/2)
-            g_w = np.array([1])
-
-        # Collect output list
-        out = [xinp, yinp, zinp]
-        outbp = (theta, phi, g_w)
-
-    # Print spatial parameters
-    if verb > 1:
-        # Pole-type: src or rec
-        if name == 'src':
-            longname = '   Source(s)     : '
-        else:
-            longname = '   Receiver(s)   : '
-
-        if isbipole:
-            print(longname, str(inp[0].size), 'bipole(s)')
-            print("     > intpts    : ", intpts)
-            print("     > theta [°] : ", np.rad2deg(theta))
-            print("     > phi   [°] : ", np.rad2deg(phi))
-            print("     > length[m] : ", r)
-            print("     > x_c   [m] : ", _strvar(inp[0][0] + dx/2))
-            print("     > y_c   [m] : ", _strvar(inp[2][0] + dy/2))
-            print("     > z_c   [m] : ", _strvar(inp[4][0] + dz/2))
-        else:
-            print(longname, str(inp[0].size), 'dipole(s)')
-            tname = ['x  ', 'y  ', 'z  ']
-            for i in range(3):
-                if inp[i].size > 1:
-                    print("     > "+tname[i]+"   [m] : ", str(inp[i].min()),
-                          "-", str(inp[i].max()), " [min - max]")
-                    if verb > 2:
-                        print("                 : ", _strvar(inp[i]))
-                else:
-                    print("     > "+tname[i]+"   [m] : ", _strvar(inp[i]))
-
-    return out, outbp
-
-
-def check_srcrec(inp, name):
+def check_bipole(inp, name):
     """Check di-/bipole parameters.
 
     This check-function is called from one of the modelling routines in
@@ -752,10 +208,10 @@ def check_srcrec(inp, name):
         As input, checked for type and length.
 
     ninp : int
-        Number of sources/receivers
+        Number of inp.
 
     ninpz : int
-        Number of sources/receivers depths (ninpz is either 1 or ninp).
+        Number of inp depths (ninpz is either 1 or ninp).
 
     isdipole : bool
         True if inp is a dipole.
@@ -763,7 +219,7 @@ def check_srcrec(inp, name):
     """
 
     def check_dipole(inp, name):
-        """Check input for size and type."""
+        """Check inp for shape and type."""
         # Check x
         inp[0] = _check_var(inp[0], float, 1, name+'-x')
 
@@ -771,20 +227,11 @@ def check_srcrec(inp, name):
         inp[1] = _check_var(inp[1], float, 1, name+'-y', inp[0].shape)
 
         # Check z
-        inp[2] = _check_var(inp[2], float, 1, name+'-z')
+        inp[2] = _check_var(inp[2], float, 1, name+'-z', (1,), inp[0].shape)
 
-        # Check if z is one value or has dimension of x
-        zshape = inp[2].shape
-        if zshape == (1,):
-            pass
-        elif zshape == inp[0].shape:
-            # Check if all depths are the same, if so replace by one value
-            if np.all(np.isclose(inp[2]-inp[2][0], 0)):
-                inp[2] = np.array([inp[2][0]])
-        else:
-            print('* ERROR   :: Parameter ' + name + '-z has wrong shape! : ' +
-                  str(zshape)+' instead of ' + str(inp[0].shape) + ' or (1,).')
-            raise ValueError(name+'-z')
+        # Check if all depths are the same, if so replace by one value
+        if np.all(np.isclose(inp[2]-inp[2][0], 0)):
+            inp[2] = np.array([inp[2][0]])
 
         return inp
 
@@ -798,20 +245,21 @@ def check_srcrec(inp, name):
     # Flag if it is a dipole or not
     isdipole = narr == 5
 
-    if isdipole:
+    if isdipole:  # dipole checks
         # Check x, y, and z
         inp = check_dipole(inp, name)
 
-        # Check theta and phi
-        inp[3] = _check_var(inp[3], float, 0, 'theta', ())
-        inp[4] = _check_var(inp[4], float, 0, 'phi', ())
+        # Check theta and phi (must be floats or arrays like x/y)
+        inp[3] = _check_var(inp[3], float, 1, 'theta', (1,), inp[0].shape)
+        inp[4] = _check_var(inp[4], float, 1, 'phi', inp[3].shape)
 
         # How many different depths
-        inpz = len(inp[2])
+        inpz = inp[2].size
 
-    else:
-        inp0 = check_dipole(inp[::2], name+'-1')
-        inp1 = check_dipole(inp[1::2], name+'-2')
+    else:         # bipole checks
+        # Check each pole for x, y, and z
+        inp0 = check_dipole(inp[::2], name+'-1')   # [x0, y0, z0]
+        inp1 = check_dipole(inp[1::2], name+'-2')  # [x1, y1, z1]
 
         # If one pole has a single depth, but the other has various
         # depths, we have to repeat the single depth, as we will have
@@ -826,103 +274,13 @@ def check_srcrec(inp, name):
         inp = [inp0[0], inp1[0], inp0[1], inp1[1], inp0[2], inp1[2]]
 
         # How many different depths
-        inpz = len(inp[4])
+        inpz = inp[4].size
 
-    return inp, len(inp[0]), inpz, isdipole
-
-
-def get_coords(src, rec, verb, intpts=(-1, -1)):
-    """Get depths, offsets, angles, hence spatial input parameters.
-
-    This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
-
-    Parameters
-    ----------
-    src : list of floats or arrays
-        Source coordinates (m):
-            - dipole: [src-x, src-y, src-z]
-            - bipole: [src-x0, src-x1, src-y0, src-y1, src-z0, src-z1]
-
-    rec : list of floats or arrays
-        Receiver coordinates (m):
-            - dipole: [src-x, src-y, src-z]
-            - bipole: [src-x0, src-x1, src-y0, src-y1, src-z0, src-z1]
-
-    verb : {0, 1, 2}
-        Level of verbosity.
-
-    intpts : tuple (int, int)
-        Number of integration points for bipole for (src, rec).
-            - nr < 0      : dipole
-            - 0 <= nr < 3 : bipole, but calculated as dipole at centerpoint
-            - nr >= 3     : bipole
+    return inp, inp[0].size, inpz, isdipole
 
 
-    Returns
-    -------
-    zsrc : array of float
-        Depth(s) of src (plural only if bipole).
-
-    zrec : array of float
-        Depth(s) of rec (plural only if bipole).
-
-    off : array of floats
-        Offsets
-
-    angle : array of floats
-        Angles
-
-    nsrc: int
-        Number of bipole sources
-
-    nrec: int
-        Number of receivers
-
-    srcrecbp: tuple
-        (srcbp, recbp)
-        If src/rec is dipole: None
-        If src/rec is bipole: tuple containing (theta, phi, g_w)
-
-    """
-
-    # Check source(s)
-    src, srcbp = check_pole(src, 'src', verb, intpts[0])
-    nsrc = src[0].size
-
-    # Check receiver(s)
-    rec, recbp = check_pole(rec, 'rec', verb, intpts[1])
-    nrec = rec[0].size
-
-    # Pre-allocate off and angle
-    off = np.empty((nrec*nsrc,))
-    angle = np.empty((nrec*nsrc,))
-
-    # Coordinates
-    # Loop over sources, append them one after another.
-    for i in range(nsrc):
-        xco = rec[0] - src[0][i]  # X-coordinates  [m]
-        yco = rec[1] - src[1][i]  # Y-coordinates  [m]
-        off[i*nrec:(i+1)*nrec] = np.sqrt(xco*xco + yco*yco)  # Offset   [m]
-        angle[i*nrec:(i+1)*nrec] = np.arctan2(yco, xco)      # Angle  [rad]
-
-    # Note: One could achieve a potential speed-up using np.unique to sort out
-    # src-rec configurations that have the same offset and angle.
-
-    # Minimum offset to avoid singularities at off = 0 m.
-    # => min_off is defined at the start of this file
-    ioff = np.where(off < min_off)
-    off[ioff] = min_off
-    angle[ioff] = np.nan
-    if np.size(ioff) != 0 and verb > 0:
-        print('* WARNING :: Offsets <', min_off, 'm are set to', min_off, 'm!')
-
-    return src[2], rec[2], off, angle, nsrc, nrec, (srcbp, recbp)
-
-
-def get_coords_tmp(src, rec, nsrc, nrec, verb):
-    """Get depths, offsets, angles, hence spatial input parameters.
+def check_dipole(inp, name, verb):
+    """Check dipole parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -930,174 +288,30 @@ def get_coords_tmp(src, rec, nsrc, nrec, verb):
 
     Parameters
     ----------
-    src : list of floats or arrays
-        Source coordinates (m):
-            - dipole: [src-x, src-y, src-z]
-            - bipole: [src-x0, src-x1, src-y0, src-y1, src-z0, src-z1]
+    inp : list of floats or arrays
+        Pole coordinates (m): [pole-x, pole-y, pole-z].
 
-    rec : list of floats or arrays
-        Receiver coordinates (m):
-            - dipole: [src-x, src-y, src-z]
-            - bipole: [src-x0, src-x1, src-y0, src-y1, src-z0, src-z1]
+    name : str, {'src', 'rec'}
+        Pole-type.
 
     verb : {0, 1, 2}
         Level of verbosity.
 
-    intpts : tuple (int, int)
-        Number of integration points for bipole for (src, rec).
-            - nr < 0      : dipole
-            - 0 <= nr < 3 : bipole, but calculated as dipole at centerpoint
-            - nr >= 3     : bipole
-
-
     Returns
     -------
-    zsrc : array of float
-        Depth(s) of src (plural only if bipole).
+    inp : list
+        List of pole coordinates [x, y, z].
 
-    zrec : array of float
-        Depth(s) of rec (plural only if bipole).
-
-    off : array of floats
-        Offsets
-
-    angle : array of floats
-        Angles
-
-    nsrc: int
-        Number of bipole sources
-
-    nrec: int
-        Number of receivers
-
-    srcrecbp: tuple
-        (srcbp, recbp)
-        If src/rec is dipole: None
-        If src/rec is bipole: tuple containing (theta, phi, g_w)
+    ninp : int
+        Number of inp-elements
 
     """
 
-    # Pre-allocate off and angle
-    off = np.empty((nrec*nsrc,))
-    angle = np.empty((nrec*nsrc,))
-
-    # Coordinates
-    # Loop over sources, append them one after another.
-    for i in range(nsrc):
-        xco = rec[0] - src[0][i]  # X-coordinates  [m]
-        yco = rec[1] - src[1][i]  # Y-coordinates  [m]
-        off[i*nrec:(i+1)*nrec] = np.sqrt(xco*xco + yco*yco)  # Offset   [m]
-        angle[i*nrec:(i+1)*nrec] = np.arctan2(yco, xco)      # Angle  [rad]
-
-    # Note: One could achieve a potential speed-up using np.unique to sort out
-    # src-rec configurations that have the same offset and angle.
-
-    # Minimum offset to avoid singularities at off = 0 m.
-    # => min_off is defined at the start of this file
-    ioff = np.where(off < min_off)
-    off[ioff] = min_off
-    angle[ioff] = np.nan
-    if np.size(ioff) != 0 and verb > 0:
-        print('* WARNING :: Offsets <', min_off, 'm are set to', min_off, 'm!')
-
-    return src[2], rec[2], off, angle
-
-
-def get_thetaphi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
-    """TODO
-    ab only used if dipole
-    """
-
-    # Get this bipole
-    if ninpz == 1:
-        tinp = inp
-    else:
-        if isdipole:
-            tinp = [inp[0][iz], inp[1][iz], inp[2][iz]]
-        else:
-            tinp = [inp[0][iz], inp[1][iz], inp[2][iz],
-                    inp[3][iz], inp[4][iz], inp[5][iz]]
-
-    strength = _check_var(strength, float, 0, 'strength', ())
-
-    # Get number of integration points and angles for source
-    if isdipole:
-        intpts = 1
-
-        theta = _check_var(np.deg2rad(inp[3]), float, 1, 'theta')
-        if len(theta) == 1:
-            theta = np.ones(inp[0].shape)*theta
-        _check_shape(theta, 'theta', tinp[0].shape)
-
-        phi = _check_var(np.deg2rad(inp[4]), float, 1, 'phi')
-        if len(phi) == 1:
-            phi = np.ones(inp[0].shape)*phi
-        _check_shape(phi, 'phi', tinp[0].shape)
-
-        g_w = np.ones(inp[0].shape)*np.array([1])
-        inp_w = np.ones(len(g_w))
-        if name == 'src' and strength > 0:
-            inp_w *= strength
-
-        tout = tinp
-    else:
-        # Get lengths in each direction
-        dx = np.squeeze(tinp[1] - tinp[0])
-        dy = np.squeeze(tinp[3] - tinp[2])
-        dz = np.squeeze(tinp[5] - tinp[4])
-
-        # Check if tinp is a dipole
-        # (This is a problem, as we would could not define the angles then.)
-        if np.any((dx == 0)*(dy == 0)*(dz == 0)):
-            print("* ERROR   :: At least one of <"+name+"> is a point dipole" +
-                  ", use `dipole` instead of `bipole`/`srcbipole`.")
-            raise ValueError('Bipole: dipole-'+name)
-
-        # Get bipole length length and angles
-        dl = np.linalg.norm([dx, dy, dz], axis=0)  # length of tinp-bipole
-        theta = np.arctan2(dy, dx)      # horizontal deviation from x-axis
-        phi = np.pi/2-np.arccos(dz/dl)  # vertical deviation from xy-plane down
-
-        # Gauss quadrature, if intpts > 2; else set to center of tinp
-        intpts = _check_var(intpts, int, 0, 'intpts', ())
-        if intpts > 2:  # Calculate the dipole positions
-            # Get integration positions and weights
-            g_x, g_w = special.p_roots(intpts)
-            g_x = np.outer(g_x, dl/2.0)  # Adjust to tinp length
-            g_w /= 2.0  # Adjust to tinp length (dl/2), normalize (1/dl)
-            if strength > 0:
-                inp_w = dl
-                if name == 'src':
-                    inp_w *= strength
-            else:
-                inp_w = np.ones(len(dl))
-
-            # Coordinate system is left-handed, positive z down
-            # (Est-North-Depth).
-            xinp = tinp[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta)
-            yinp = tinp[2] + dy/2 + g_x*np.cos(phi)*np.sin(theta)
-            zinp = tinp[4] + dz/2 + g_x*np.sin(phi)
-            if ninpz == 1:
-                zinp = zinp[:,0]
-
-        else:  # If intpts < 3: Calculate bipole at tinp-centre for phi/theta
-            intpts = 1
-            xinp = np.array(tinp[0] + dx/2)
-            yinp = np.array(tinp[2] + dy/2)
-            zinp = np.array(tinp[4] + dz/2)
-            g_w = np.array([1])
-            if strength > 0:
-                inp_w = dl
-                if name == 'src':
-                    inp_w *= strength
-            else:
-                inp_w = np.ones(len(dl))
-
-        # Collect output list; rounding coord. to same precision as min_off
-        rndco = int(np.round(np.log10(1/min_off)))
-        tout = [np.round(xinp, rndco).ravel('F'),
-                np.round(yinp, rndco).ravel('F'),
-                np.round(zinp, rndco).ravel('F')]
+    # Check inp for x, y, and z; x & y must have same length, z is a float
+    _check_shape(np.squeeze(inp), name, (3,))
+    inp[0] = _check_var(inp[0], float, 1, name+'-x')
+    inp[1] = _check_var(inp[1], float, 1, name+'-y', inp[0].shape)
+    inp[2] = _check_var(inp[2], float, 1, name+'-z', (1,))
 
     # Print spatial parameters
     if verb > 1:
@@ -1107,43 +321,22 @@ def get_thetaphi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         else:
             longname = '   Receiver(s)   : '
 
-        if isdipole:
-            print(longname, str(len(tout[0])), 'dipole(s)')
-            tname = ['x  ', 'y  ', 'z  ']
-            prntinp = tout
-        else:
-            print(longname, str(int(len(tout[0])/intpts)), 'bipole(s)')
-            tname = ['x_c', 'y_c', 'z_c']
-            if intpts < 3:
-                print("     > intpts    :  1 (as dipole)")
-                prntinp = tout
-            else:
-                print("     > intpts    : ", intpts)
-                prntinp = [np.atleast_1d(tinp[0])[0] + dx/2,
-                           np.atleast_1d(tinp[2])[0] + dy/2,
-                           np.atleast_1d(tinp[4])[0] + dz/2]
-            print("     > length[m] : ", dl)
-
+        print(longname, str(inp[0].size), 'dipole(s)')
+        tname = ['x  ', 'y  ', 'z  ']
         for i in range(3):
-            if tout[i].size > intpts:
-                print("     > "+tname[i]+"   [m] : ", str(prntinp[i].min()),
-                        "-", str(prntinp[i].max()), " [min - max]")
+            if inp[i].size > 1:
+                print("     > "+tname[i]+"   [m] : ", str(inp[i].min()), "-",
+                      str(inp[i].max()), " [min - max]")
                 if verb > 2:
-                    print("                 : ", _strvar(prntinp[i]))
+                    print("                 : ", _strvar(inp[i]))
             else:
-                print("     > "+tname[i]+"   [m] : ", _strvar(prntinp[i]))
+                print("     > "+tname[i]+"   [m] : ", _strvar(inp[i]))
 
-        print("     > theta [°] : ", np.rad2deg(theta))
-        print("     > phi   [°] : ", np.rad2deg(phi))
-
-    return tout, theta, phi, g_w, intpts, inp_w
+    return inp, inp[0].size
 
 
-def check_depth(zsrc, zrec, depth):
-    """Check layer in which source/receiver reside.
-
-    Note: If zsrc or zrec are on a layer interface, the layer above the
-          interface is chosen.
+def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
+    """Calculate frequency-dependent parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -1151,42 +344,63 @@ def check_depth(zsrc, zrec, depth):
 
     Parameters
     ----------
-    zsrc : array of float
-        Depth(s) of src (plural only if bipole).
+    freq : array_like
+        Frequencies f (Hz).
 
-    zrec : array of float
-        Depth(s) of rec (plural only if bipole).
+    res : array_like
+        Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
-    depth : array
-        Depths of layer interfaces.
+    aniso : array_like
+        Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
+
+    epermH, epermV : array_like
+        Horizontal/vertical electric permittivities epsilon_h/epsilon_v (-);
+        #epermH = #epermV = #res.
+
+    mpermH, mpermV : array_like
+        Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
+        #mpermH = #mpermV = #res.
+
+    verb : {0, 1, 2}
+        Level of verbosity.
 
 
     Returns
     -------
-    lsrc : int or array_like of int
-        Layer number(s) in which src resides (plural only if bipole).
+    freq : float
+        Frequency, checked for size and assured min_freq.
 
-    lrec : int or array_like of int
-        Layer number(s) in which rec resides (plural only if bipole).
+    etaH, etaV : array
+        Parameters etaH/etaV, same size as provided resistivity.
+
+    zetaH, zetaV : array
+        Parameters zetaH/zetaV, same size as provided resistivity.
 
     """
 
-    #  depth = [-infty : last interface]; create additional depth-array
-    # pdepth = [fist interface : +infty]
-    pdepth = np.concatenate((depth[1:], np.array([np.infty])))
+    # Check frequency
+    freq = _check_var(freq, float, 1, 'freq')
 
-    # Broadcast arrays
-    b_depth = depth[None, :]
-    b_pdepth = pdepth[None, :]
-    b_zsrc = np.atleast_1d(zsrc)[:, None]
-    b_zrec = np.atleast_1d(zrec)[:, None]
+    # Minimum frequency to avoid division by zero at freq = 0 Hz.
+    # => min_freq is defined at the start of this file
+    ifreq = np.where(freq < min_freq)
+    freq[ifreq] = min_freq
+    if np.size(ifreq) != 0 and verb > 0:
+        print('* WARNING :: Frequencies <', min_freq, 'Hz are set to',
+              min_freq, 'Hz!')
+    if verb > 1:
+        print("   freq     [Hz] : ", str(freq.min()), "-", str(freq.max()),
+              ";", str(freq.size), " [min-max; #]")
+        if verb > 2:
+            print("                 : ", _strvar(freq))
 
-    # Get layers
-    lsrc = np.where((b_depth < b_zsrc)*(b_pdepth >= b_zsrc))[1]
-    lrec = np.where((b_depth < b_zrec)*(b_pdepth >= b_zrec))[1]
+    # Calculate eta and zeta (horizontal and vertical)
+    etaH = 1/res + np.outer(2j*np.pi*freq, epermH*epsilon_0)
+    etaV = 1/(res*aniso*aniso) + np.outer(2j*np.pi*freq, epermV*epsilon_0)
+    zetaH = np.outer(2j*np.pi*freq, mpermH*mu_0)
+    zetaV = np.outer(2j*np.pi*freq, mpermV*mu_0)
 
-    # Return; squeeze in case of only one src/rec-depth
-    return np.squeeze(lsrc), np.squeeze(lrec)
+    return freq, etaH, etaV, zetaH, zetaV
 
 
 def check_hankel(ht, htarg, verb):
@@ -1313,8 +527,8 @@ def check_hankel(ht, htarg, verb):
     return ht, htarg
 
 
-def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
-    """Calculate frequency-dependent parameters.
+def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
+    """Check the model: depth and corresponding layer parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -1322,8 +536,9 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
     Parameters
     ----------
-    freq : array_like
-        Frequencies f (Hz).
+    depth : list
+        Absolute layer interfaces z (m); #depth = #res - 1
+        (excluding +/- infinity).
 
     res : array_like
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
@@ -1331,17 +546,13 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     aniso : array_like
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
 
-    epermH : array_like
-        Horizontal electric permittivities epsilon_h (-); #epermH = #res.
+    epermH, epermV : array_like
+        Horizontal/vertical electric permittivities epsilon_h/epsilon_v (-);
+        #epermH = #epermV = #res.
 
-    epermV : array_like
-        Vertical electric permittivities epsilon_v (-); #epermV = #res.
-
-    mpermH : array_like
-        Horizontal magnetic permeabilities mu_h (-); #mpermH = #res.
-
-    mpermV : array_like
-        Vertical magnetic permeabilities mu_v (-); #mpermV = #res.
+    mpermH, mpermV : array_like
+        Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
+        #mpermH = #mpermV = #res.
 
     verb : {0, 1, 2}
         Level of verbosity.
@@ -1349,46 +560,90 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
     Returns
     -------
-    freq : float
-        Frequency, checked for size and assured min_freq.
+    depth : array
+        Depths of layer interfaces, adds -infty at beginning if not present.
 
-    etaH : array
-        Parameters etaH, same size as provided resistivity.
+    res : array
+        As input, checked for size.
 
-    etaV : array
-        Parameters etaV, same size as provided resistivity.
+    aniso : array
+        As input, checked for size. If None, defaults to an array of ones.
 
-    zetaH : array
-        Parameters zetaH, same size as provided resistivity.
+    epermH, epermV : array_like
+        As input, checked for size. If None, defaults to an array of ones.
 
-    zetaV : array
-        Parameters zetaV, same size as provided resistivity.
+    mpermH, mpermV : array_like
+        As input, checked for size. If None, defaults to an array of ones.
+
+    isfullspace : bool
+        If True, the model is a fullspace (res, aniso, epermH, epermV, mpermM,
+        and mpermV are in all layers the same).
 
     """
 
-    # Check frequency
-    freq = _check_var(freq, float, 1, 'freq')
+    # Check depth
+    depth = _check_var(depth, float, 1, 'depth')
 
-    # Minimum frequency to avoid division by zero at freq = 0 Hz.
-    # => min_freq is defined at the start of this file
-    ifreq = np.where(freq < min_freq)
-    freq[ifreq] = min_freq
-    if np.size(ifreq) != 0 and verb > 0:
-        print('* WARNING :: Frequencies <', min_freq, 'Hz are set to',
-              min_freq, 'Hz!')
+    # Add -infinity at the beginning
+    # => The top-layer (-infinity to first interface) is layer 0.
+    if depth.size == 0:
+        depth = np.array([-np.infty, ])
+    elif depth[0] != -np.infty:
+        depth = np.insert(depth, 0, -np.infty)
+
+    # Ensure depth is increasing
+    if np.any(depth[1:] - depth[:-1] < 0):
+        print('* ERROR   :: <depth> must be increasing;' +
+              ' <depth> provided: ' + _strvar(depth))
+        raise ValueError('ab')
+
+    # Cast and check resistivity
+    res = _check_var(res, float, 1, 'res', depth.shape)
+
+    # Check anisotropy, electric permittivity, and magnetic permeability
+    def check_inp(var, name):
+        """Param-check function. Default to ones if not provided"""
+        if not np.any(var):
+            return np.ones(depth.size)
+        else:
+            return _check_var(var, float, 1, name, depth.shape)
+
+    aniso = check_inp(aniso, 'aniso')
+    epermH = check_inp(epermH, 'epermH')
+    epermV = check_inp(epermV, 'epermV')
+    mpermH = check_inp(mpermH, 'mpermH')
+    mpermV = check_inp(mpermV, 'mpermV')
+
+    # Print model parameters
     if verb > 1:
-        print("   freq     [Hz] : ", str(freq.min()), "-", str(freq.max()),
-              ";", str(freq.size), " [min-max; #]")
-        if verb > 2:
-            print("                 : ", _strvar(freq))
+        print("   depth     [m] : ", _strvar(depth[1:]))
+        print("   res   [Ohm.m] : ", _strvar(res))
+        print("   aniso     [-] : ", _strvar(aniso))
+        print("   epermH    [-] : ", _strvar(epermH))
+        print("   epermV    [-] : ", _strvar(epermV))
+        print("   mpermH    [-] : ", _strvar(mpermH))
+        print("   mpermV    [-] : ", _strvar(mpermV))
 
-    # Calculate eta and zeta (horizontal and vertical)
-    etaH = 1/res + np.outer(2j*np.pi*freq, epermH*epsilon_0)
-    etaV = 1/(res*aniso*aniso) + np.outer(2j*np.pi*freq, epermV*epsilon_0)
-    zetaH = np.outer(2j*np.pi*freq, mpermH*mu_0)
-    zetaV = np.outer(2j*np.pi*freq, mpermV*mu_0)
+    # Check if medium is a homogeneous full-space. If that is the case, the
+    # EM-field is computed analytically directly in the frequency-domain.
+    # Note: Also a stack of layers with the same material parameters is treated
+    #       as a homogeneous full-space.
+    if res.shape == ():
+        isfullspace = True
+    else:
+        isores = (res - res[0] == 0).all()*(aniso - aniso[0] == 0).all()
+        isoeph = (epermH - epermH[0] == 0).all()
+        isoepv = (epermV - epermV[0] == 0).all()
+        isomph = (mpermH - mpermH[0] == 0).all()
+        isompv = (mpermV - mpermV[0] == 0).all()
+        isfullspace = isores*isoeph*isoepv*isomph*isompv
 
-    return freq, etaH, etaV, zetaH, zetaV
+    # Print fullspace info
+    if verb > 1 and isfullspace:
+        print("\n>  MODEL IS A FULLSPACE; returning analytical " +
+              "frequency-domain solution")
+
+    return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
 
 
 def check_opt(opt, loop, ht, htarg, verb):
@@ -1517,6 +772,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
     """
 
+    # Check input signal
     if int(signal) not in [-1, 0, 1]:
         print("* ERROR   :: <signal> must be one of: [None, -1, 0, 1]; " +
               "<signal> provided: "+str(signal))
@@ -1709,38 +965,488 @@ def check_time(time, signal, ft, ftarg, verb):
     return time, freq, ft, ftarg
 
 
-# 3. Internal utilities
+# 2.b <Get>s (alphabetically)
 
-def _strvar(a, prec='{:G}'):
-    """Return variable as a string to print, with given precision."""
-    return ' '.join([prec.format(i) for i in np.atleast_1d(a)])
+def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
+    """Get required ab's for given angles.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a detailed description
+    of the input parameters.
+
+    Parameters
+    ----------
+    msrc, mrec : bool
+        True if src/rec is magnetic, else False.
+
+    srctheta, rectheta : float
+        Horizontal source/receiver angle.
+
+    srcphi, recphi : float
+        Vertical source/receiver angle.
+
+    verb : {0, 1, 2}
+        Level of verbosity.
 
 
-def _check_var(var, dtype, ndmin, name, shape=None):
-    """Return variable as array of dtype, ndmin; shape-checked."""
-    var = np.array(var, dtype=dtype, copy=True, ndmin=ndmin)
-    if shape:
-        _check_shape(var, name, shape)
-    return var
+    Returns
+    -------
+    ab_calc : array of int
+        ab's to calculate for this bipole.
+
+    """
+
+    # Get required ab's (9 at most)
+    ab_calc = np.array([[11, 12, 13], [21, 22, 23], [31, 32, 33]])
+    if msrc:
+        ab_calc += 3
+    if mrec:
+        ab_calc += 30
+
+        # Switch <ab> using reciprocity.
+        if msrc:
+            # G^mm_ab(s, r, e, z) = -G^ee_ab(s, r, -z, -e)
+            ab_calc -= 33  # -30 : mrec->erec; -3: msrc->esrc
+        else:
+            # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
+            ab_calc = ab_calc % 10*10 + ab_calc // 10  # Swap alpha/beta
+
+    # Remove unnecessary ab's
+    bab = np.asarray(ab_calc*0+1, dtype=bool)
+
+    # Remove if source is x- or y-directed
+    check = np.atleast_1d(srctheta)[0]
+    if np.allclose(srctheta, check):  # only if just 1 angle or all equal
+        if np.any(np.isclose(check, [0, np.pi])):
+            bab[:, 1] *= False        # x-directed source, remove y
+        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+            bab[:, 0] *= False        # y-directed source, remove x
+
+    # Remove if source is vertical
+    check = np.atleast_1d(srcphi)[0]
+    if np.allclose(srcphi, check):    # only if just 1 angle or all equal
+        if np.any(np.isclose(check, [0, np.pi])):
+            bab[:, 2] *= False        # Horizontal, remove z
+        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+            bab[:, :2] *= False       # Vertical, remove x/y
+
+    # Remove if receiver is x- or y-directed
+    check = np.atleast_1d(rectheta)[0]
+    if np.allclose(rectheta, check):  # only if just 1 angle or all equal
+        if np.any(np.isclose(check, [0, np.pi])):
+            bab[1, :] *= False        # x-directed receiver, remove y
+        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+            bab[0, :] *= False        # y-directed receiver, remove x
+
+    # Remove if receiver is vertical
+    check = np.atleast_1d(recphi)[0]
+    if np.allclose(recphi, check):    # only if just 1 angle or all equal
+        if np.any(np.isclose(check, [0, np.pi])):
+            bab[2, :] *= False        # Horizontal, remove z
+        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+            bab[:2, :] *= False       # Vertical, remove x/y
+
+    # Reduce
+    ab_calc = ab_calc[bab].ravel()
+
+    # Print actual calculated <ab>
+    if verb > 1:
+        print("   Required ab's : ", _strvar(ab_calc))
+
+    return ab_calc
 
 
-def _check_shape(var, name, shape):
-    """Check that <var> has shape <shape>; if false raise ValueError(name)"""
-    varshape = np.shape(var)
-    if shape != varshape:
-        print('* ERROR   :: Parameter ' + name + ' has wrong shape! : ' +
-              str(varshape) + ' instead of ' + str(shape) + '.')
-        raise ValueError(name)
+def get_geo_fact(ab, srctheta, srcphi, rectheta, recphi):
+    """Get required geometrical scaling factor for given angles.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a detailed description
+    of the input parameters.
+
+    Parameters
+    ----------
+    ab : int
+        Source-receiver configuration.
+
+    srctheta, rectheta : float
+        Horizontal source/receiver angle.
+
+    srcphi, recphi : float
+        Vertical source/receiver angle.
 
 
-def printstartfinish(verb, inp=None, kcount=0):
-    """Print start and finish with time measure."""
+    Returns
+    -------
+    fact : float
+        Geometrical scaling factor.
+
+    """
+
+    # Geometrical factor from source
+    fis = ab % 10
+    if fis in [1, 4]:    # x-directed
+        fsrc = np.cos(srctheta)*np.cos(srcphi)
+    elif fis in [2, 5]:  # y-directed
+        fsrc = np.sin(srctheta)*np.cos(srcphi)
+    else:                # z-directed
+        fsrc = np.sin(srcphi)
+
+    # Geometrical factor from receiver
+    fir = ab//10
+    if fir == 1:    # x-directed
+        frec = np.cos(rectheta)*np.cos(recphi)
+    elif fir == 2:  # y-directed
+        frec = np.sin(rectheta)*np.cos(recphi)
+    else:           # z-directed
+        frec = np.sin(recphi)
+
+    return np.outer(fsrc, frec).ravel()
+
+
+def get_layer_nr(inp, depth):
+    """Get number of layer in which inp resides.
+
+    Note:
+    If zinp is on a layer interface, the layer above the interface is chosen.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a detailed description
+    of the input parameters.
+
+    Parameters
+    ----------
+    inp : list of floats or arrays
+        Dipole coordinates (m)
+
+    depth : array
+        Depths of layer interfaces.
+
+
+    Returns
+    -------
+    linp : int or array_like of int
+        Layer number(s) in which inp resides (plural only if bipole).
+
+    zinp : float or array
+        inp[2] (depths).
+
+    """
+    zinp = inp[2]
+
+    #  depth = [-infty : last interface]; create additional depth-array
+    # pdepth = [fist interface : +infty]
+    pdepth = np.concatenate((depth[1:], np.array([np.infty])))
+
+    # Broadcast arrays
+    b_zinp = np.atleast_1d(zinp)[:, None]
+
+    # Get layers
+    linp = np.where((depth[None, :] < b_zinp)*(pdepth[None, :] >= b_zinp))[1]
+
+    # Return; squeeze in case of only one inp-depth
+    return np.squeeze(linp), zinp
+
+
+def get_off_ang(src, rec, nsrc, nrec, verb):
+    """Get depths, offsets, angles, hence spatial input parameters.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a detailed description
+    of the input parameters.
+
+    Parameters
+    ----------
+    src, rec : list of floats or arrays
+        Source/receiver dipole coordinates x, y, and z (m).
+
+    nsrc, nrec : int
+        Number of sources/receivers (-).
+
+    verb : {0, 1, 2}
+        Level of verbosity.
+
+
+    Returns
+    -------
+    off : array of floats
+        Offsets
+
+    angle : array of floats
+        Angles
+
+    """
+
+    # Pre-allocate off and angle
+    off = np.empty((nrec*nsrc,))
+    angle = np.empty((nrec*nsrc,))
+
+    # Coordinates
+    # Loop over sources, append them one after another.
+    for i in range(nsrc):
+        xco = rec[0] - src[0][i]  # X-coordinates  [m]
+        yco = rec[1] - src[1][i]  # Y-coordinates  [m]
+        off[i*nrec:(i+1)*nrec] = np.sqrt(xco*xco + yco*yco)  # Offset   [m]
+        angle[i*nrec:(i+1)*nrec] = np.arctan2(yco, xco)      # Angle  [rad]
+
+    # Note: One could achieve a potential speed-up using np.unique to sort out
+    # src-rec configurations that have the same offset and angle. Very unlikely
+    # for real data.
+
+    # Minimum offset to avoid singularities at off = 0 m.
+    # => min_off is defined at the start of this file
+    ioff = np.where(off < min_off)
+    off[ioff] = min_off
+    angle[ioff] = np.nan
+    if np.size(ioff) != 0 and verb > 0:
+        print('* WARNING :: Offsets <', min_off, 'm are set to', min_off, 'm!')
+
+    return off, angle
+
+
+def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
+    """Get angles, interpolation weights and normalization weights.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a detailed description
+    of the input parameters.
+
+    Parameters
+    ----------
+    inp : list of floats or arrays
+        Input coordinates (m):
+            - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
+            - [x, y, z, theta, phi]    (dipole, infinitesimal small)
+
+    iz : int
+        Index of current di-/bipole depth (-).
+
+    ninpz : int
+        Total number of di-/bipole depths (ninpz = 1 or npinz = nsrc) (-).
+
+    intpts : int
+        Number of integration points for bipole (-).
+
+    isdipole : bool
+        Boolean if inp is a dipole.
+
+    strength : float, optional
+        Source strength (A):
+          - If 0, output is normalized to source and receiver of 1 m length,
+            and source strength of 1 A.
+          - If != 0, output is returned for given source and receiver length,
+            and source strength.
+
+    name : str, {'src', 'rec'}
+        Pole-type.
+
+    verb : {0, 1, 2}
+        Level of verbosity.
+
+
+    Returns
+    -------
+    tout : array of floats
+        Dipole coordinates x, y, and z (m).
+
+    theta : float
+        Horizontal angle.
+
+    phi : float
+        Vertical angle.
+
+    g_w :
+        Factors from Gaussian interpolation.
+
+    intpts : int
+        As input, checked.
+
+    inp_w : float or array of floats
+        Factors from source/receiver length and source strength.
+
+    """
+
+    # Get this di-/bipole
+    if ninpz == 1:  # If there is only one distinct depth, all at once
+        tinp = inp
+    else:  # If there are several depths, we take the current one
+        if isdipole:
+            tinp = [np.atleast_1d(inp[0][iz]), np.atleast_1d(inp[1][iz]),
+                    np.atleast_1d(inp[2][iz])]
+        else:
+            tinp = [inp[0][iz], inp[1][iz], inp[2][iz],
+                    inp[3][iz], inp[4][iz], inp[5][iz]]
+
+    # Check source strength variable
+    strength = _check_var(strength, float, 0, 'strength', ())
+
+    # Get number of integration points and angles for source
+    if isdipole:
+        intpts = 1  # If input is a dipole, set intpts to 1
+
+        # Check theta
+        theta = _check_var(np.deg2rad(inp[3]), float, 1, 'theta')
+        if ninpz == 1 and len(theta) == 1:
+            theta = np.ones(tinp[0].shape)*theta
+
+        # Check phi
+        phi = _check_var(np.deg2rad(inp[4]), float, 1, 'phi')
+        if ninpz == 1 and len(phi) == 1:
+            phi = np.ones(tinp[0].shape)*phi
+
+        # If dipole, g_w are ones
+        g_w = np.ones(len(inp[0]))
+
+        # If dipole, inp_w are once, unless there is a source strength
+        inp_w = np.ones(len(inp[0]))
+        if name == 'src' and strength > 0:
+            inp_w *= strength
+
+        # Collect output
+        tout = tinp
+
+    else:
+        print('heeeeeeeeeeeeeeeeeeeeere')
+        # Get lengths in each direction
+        dx = np.squeeze(tinp[1] - tinp[0])
+        dy = np.squeeze(tinp[3] - tinp[2])
+        dz = np.squeeze(tinp[5] - tinp[4])
+
+        # Check if tinp is a dipole
+        # (This is a problem, as we would could not define the angles then.)
+        if np.any((dx == 0)*(dy == 0)*(dz == 0)):
+            print("* ERROR   :: At least one of <"+name+"> is a point " +
+                  "dipole, use the format [x, y, z, theta, phi] instead " +
+                  "of [x0, x1, y0, y1, z0, z1].")
+            raise ValueError('Bipole: bipole-'+name)
+
+        # length of tinp-bipole
+        dl = np.atleast_1d(np.linalg.norm([dx, dy, dz], axis=0))
+        # horizontal deviation from x-axis
+        theta = np.atleast_1d(np.arctan2(dy, dx))
+        # vertical deviation from xy-plane down
+        phi = np.atleast_1d(np.pi/2-np.arccos(dz/dl))
+
+        # Gauss quadrature, if intpts > 2; else set to center of tinp
+        intpts = _check_var(intpts, int, 0, 'intpts', ())
+        if intpts > 2:  # Calculate the dipole positions
+            # Get integration positions and weights
+            g_x, g_w = special.p_roots(intpts)
+            g_x = np.outer(g_x, dl/2.0)  # Adjust to tinp length
+            g_w /= 2.0  # Adjust to tinp length (dl/2), normalize (1/dl)
+            if strength > 0:
+                inp_w = dl
+                if name == 'src':
+                    inp_w *= strength
+            else:
+                inp_w = np.ones(len(dl))
+
+            # Coordinate system is left-handed, positive z down
+            # (East-North-Depth).
+            xinp = tinp[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta)
+            yinp = tinp[2] + dy/2 + g_x*np.cos(phi)*np.sin(theta)
+            zinp = tinp[4] + dz/2 + g_x*np.sin(phi)
+            if ninpz == 1:
+                zinp = zinp[:, 0]
+
+        else:  # If intpts < 3: Calculate bipole at tinp-centre for phi/theta
+            intpts = 1
+            xinp = np.array(tinp[0] + dx/2)
+            yinp = np.array(tinp[2] + dy/2)
+            zinp = np.array(tinp[4] + dz/2)
+            g_w = np.array([1])
+            if strength > 0:
+                inp_w = dl
+                if name == 'src':
+                    inp_w *= strength
+            else:
+                inp_w = np.ones(len(dl))
+
+        # Collect output list; rounding coord. to same precision as min_off
+        rndco = int(np.round(np.log10(1/min_off)))
+        tout = [np.round(xinp, rndco).ravel('F'),
+                np.round(yinp, rndco).ravel('F'),
+                np.round(zinp, rndco).ravel('F')]
+
+    # Print spatial parameters
+    if verb > 1:
+        # Pole-type: src or rec
+        if name == 'src':
+            longname = '   Source(s)     : '
+        else:
+            longname = '   Receiver(s)   : '
+
+        if isdipole:
+            print(longname, str(len(tout[0])), 'dipole(s)')
+            tname = ['x  ', 'y  ', 'z  ']
+            prntinp = tout
+        else:
+            print(longname, str(int(len(tout[0])/intpts)), 'bipole(s)')
+            tname = ['x_c', 'y_c', 'z_c']
+            if intpts < 3:
+                print("     > intpts    :  1 (as dipole)")
+                prntinp = tout
+            else:
+                print("     > intpts    : ", intpts)
+                prntinp = [np.atleast_1d(tinp[0])[0] + dx/2,
+                           np.atleast_1d(tinp[2])[0] + dy/2,
+                           np.atleast_1d(tinp[4])[0] + dz/2]
+            print("     > length[m] : ", dl)
+
+        for i in range(3):
+            if tout[i].size > intpts:
+                print("     > "+tname[i]+"   [m] : ", str(prntinp[i].min()),
+                      "-", str(prntinp[i].max()), " [min - max]")
+                if verb > 2:
+                    print("                 : ", _strvar(prntinp[i]))
+            else:
+                print("     > "+tname[i]+"   [m] : ", _strvar(prntinp[i]))
+
+        print("     > theta [°] : ", np.rad2deg(theta))
+        print("     > phi   [°] : ", np.rad2deg(phi))
+
+    return tout, theta, phi, g_w, intpts, inp_w
+
+
+def printstartfinish(verb, inp=None, kcount=None):
+    """Print start and finish with time measure and kernel count."""
     if inp:
-        print('\n:: empymod END; runtime = ' +
-              str(timedelta(seconds=default_timer() - inp)) + ' :: ' +
-              str(kcount) + ' kernel call(s)\n')
+        ttxt = str(timedelta(seconds=default_timer() - inp))
+        if kcount:
+            ktxt = ' ' + str(kcount) + ' kernel call(s)'
+        print('\n:: empymod END; runtime = ' + ttxt + ' ::' + ktxt + '\n')
     else:
         t0 = default_timer()
         if verb > 1:
             print("\n:: empymod START  ::\n\n>  INPUT CHECK")
         return t0
+
+
+# 3. Internal utilities
+
+def _check_shape(var, name, shape, shape2=None):
+    """Check that <var> has shape <shape>; if false raise ValueError(name)"""
+    varshape = np.shape(var)
+    if shape != varshape:
+        if shape2:
+            if shape2 != varshape:
+                print('* ERROR   :: Parameter ' + name + ' has wrong shape!' +
+                      ' : ' + str(varshape) + ' instead of ' + str(shape) +
+                      'or' + str(shape2) + '.')
+                raise ValueError(name)
+        else:
+            print('* ERROR   :: Parameter ' + name + ' has wrong shape! : ' +
+                  str(varshape) + ' instead of ' + str(shape) + '.')
+            raise ValueError(name)
+
+
+def _check_var(var, dtype, ndmin, name, shape=None, shape2=None):
+    """Return variable as array of dtype, ndmin; shape-checked."""
+    var = np.array(var, dtype=dtype, copy=True, ndmin=ndmin)
+    if shape:
+        _check_shape(var, name, shape, shape2)
+    return var
+
+
+def _strvar(a, prec='{:G}'):
+    """Return variable as a string to print, with given precision."""
+    return ' '.join([prec.format(i) for i in np.atleast_1d(a)])

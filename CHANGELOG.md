@@ -2,8 +2,12 @@
 
 ## latest
 
-* [09/01/2017] Add kernel count; printed if verb > 0.
-* [23/12/2016] Avoid loop in `srcbipole` if `phi=0`.
+* [12/01/2017]
+    - General modelling routine `bipole` (replaces `srcbipole`): Model the
+      EM field for arbitrarily oriented, finite length bipole sources and
+      receivers.
+    - Some changes in `utils` with regard to the new routine `bipole`.
+    - Add kernel count (printed if verb > 0).
 
 ## v1.1.0 - *2016-12-22*
 

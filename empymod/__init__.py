@@ -329,5 +329,5 @@ References |_|
 # the License.
 
 # Import main modelling routines to make them available as primary functions
-from .model import bipole, dipole, srcbipole, frequency, time
-__all__ = ['bipole', 'dipole', 'srcbipole', 'frequency', 'time']
+from .model import bipole, dipole, frequency, time
+__all__ = ['bipole', 'dipole', 'frequency', 'time']
