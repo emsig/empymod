@@ -158,7 +158,7 @@ def check_ab(ab, verb):
 
     # Print input <ab>
     if verb > 1:
-        print("   Input ab      : ", ab)
+        print("   Input ab        : ", ab)
 
     # Check if src and rec are magnetic or electric
     msrc = ab % 10 > 3   # If True: magnetic src
@@ -180,7 +180,7 @@ def check_ab(ab, verb):
         if ab_calc in [36, ]:
             print("\n>  <ab> IS "+str(ab_calc)+" WHICH IS ZERO; returning")
         else:
-            print("   Calc. ab      : ", ab_calc)
+            print("   Calculated ab   : ", ab_calc)
 
     return ab_calc, msrc, mrec
 
@@ -317,20 +317,15 @@ def check_dipole(inp, name, verb):
     if verb > 1:
         # Pole-type: src or rec
         if name == 'src':
-            longname = '   Source(s)     : '
+            longname = '   Source(s)       : '
         else:
-            longname = '   Receiver(s)   : '
+            longname = '   Receiver(s)     : '
 
         print(longname, str(inp[0].size), 'dipole(s)')
         tname = ['x  ', 'y  ', 'z  ']
         for i in range(3):
-            if inp[i].size > 1:
-                print("     > "+tname[i]+"   [m] : ", str(inp[i].min()), "-",
-                      str(inp[i].max()), " [min - max]")
-                if verb > 2:
-                    print("                 : ", _strvar(inp[i]))
-            else:
-                print("     > "+tname[i]+"   [m] : ", _strvar(inp[i]))
+            text = "     > " + tname[i] + "     [m] : "
+            _prnt_min_max_val(inp[i], "     > "+tname[i]+"     [m] : ", verb)
 
     return inp, inp[0].size
 
@@ -389,10 +384,7 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         print('* WARNING :: Frequencies <', min_freq, 'Hz are set to',
               min_freq, 'Hz!')
     if verb > 1:
-        print("   freq     [Hz] : ", str(freq.min()), "-", str(freq.max()),
-              ";", str(freq.size), " [min-max; #]")
-        if verb > 2:
-            print("                 : ", _strvar(freq))
+        _prnt_min_max_val(freq, "   freq       [Hz] : ", verb)
 
     # Calculate eta and zeta (horizontal and vertical)
     etaH = 1/res + np.outer(2j*np.pi*freq, epermH*epsilon_0)
@@ -465,8 +457,8 @@ def check_hankel(ht, htarg, verb):
 
         # If verbose, print Hankel transform information
         if verb > 1:
-            print("   Hankel        :  Fast Hankel Transform")
-            print("     > Filter    :  " + fhtfilt.name)
+            print("   Hankel          :  Fast Hankel Transform")
+            print("     > Filter      :  " + fhtfilt.name)
 
     elif ht in ['qwe', 'hqwe']:
         # Rename ht
@@ -513,11 +505,11 @@ def check_hankel(ht, htarg, verb):
 
         # If verbose, print Hankel transform information
         if verb > 1:
-            print("   Hankel        :  Quadrature-with-Extrapolation")
-            print("     > rtol      :  " + str(htarg[0]))
-            print("     > atol      :  " + str(htarg[1]))
-            print("     > nquad     :  " + str(htarg[2]))
-            print("     > maxint    :  " + str(htarg[3]))
+            print("   Hankel          :  Quadrature-with-Extrapolation")
+            print("     > rtol        :  " + str(htarg[0]))
+            print("     > atol        :  " + str(htarg[1]))
+            print("     > nquad       :  " + str(htarg[2]))
+            print("     > maxint      :  " + str(htarg[3]))
 
     else:
         print("* ERROR   :: <ht> must be one of: ['fht', 'qwe'];" +
@@ -616,13 +608,13 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
     # Print model parameters
     if verb > 1:
-        print("   depth     [m] : ", _strvar(depth[1:]))
-        print("   res   [Ohm.m] : ", _strvar(res))
-        print("   aniso     [-] : ", _strvar(aniso))
-        print("   epermH    [-] : ", _strvar(epermH))
-        print("   epermV    [-] : ", _strvar(epermV))
-        print("   mpermH    [-] : ", _strvar(mpermH))
-        print("   mpermV    [-] : ", _strvar(mpermV))
+        print("   depth       [m] : ", _strvar(depth[1:]))
+        print("   res     [Ohm.m] : ", _strvar(res))
+        print("   aniso       [-] : ", _strvar(aniso))
+        print("   epermH      [-] : ", _strvar(epermH))
+        print("   epermV      [-] : ", _strvar(epermV))
+        print("   mpermH      [-] : ", _strvar(mpermH))
+        print("   mpermV      [-] : ", _strvar(mpermV))
 
     # Check if medium is a homogeneous full-space. If that is the case, the
     # EM-field is computed analytically directly in the frequency-domain.
@@ -705,8 +697,8 @@ def check_opt(opt, loop, ht, htarg, verb):
     # If verbose, print optimization information
     if verb > 1:
         if use_spline:
-            print("   Hankel Opt.   :  Use spline")
-            pstr = "     > pts/dec   :  "
+            print("   Hankel Opt.     :  Use spline")
+            pstr = "     > pts/dec     :  "
             if ht == 'hqwe':
                 print(pstr + str(htarg[4]))
             else:
@@ -715,16 +707,16 @@ def check_opt(opt, loop, ht, htarg, verb):
                 else:
                     print(pstr + 'Defined by filter (lagged)')
         elif use_ne_eval:
-            print("   Hankel Opt.   :  Use parallel")
+            print("   Hankel Opt.     :  Use parallel")
         else:
-            print("   Hankel Opt.   :  None")
+            print("   Hankel Opt.     :  None")
 
         if loop_off:
-            print("   Loop over     :  Offsets")
+            print("   Loop over       :  Offsets")
         elif loop_freq:
-            print("   Loop over     :  Frequencies")
+            print("   Loop over       :  Frequencies")
         else:
-            print("   Loop over     :  None (all vectorized)")
+            print("   Loop over       :  None (all vectorized)")
 
     return use_spline, use_ne_eval, loop_freq, loop_off
 
@@ -788,10 +780,7 @@ def check_time(time, signal, ft, ftarg, verb):
     if verb > 0 and np.size(itime) != 0:
         print('* WARNING :: Times <', min_time, 's are set to', min_time, 's!')
     if verb > 1:
-        print("   time      [s] : ", str(time.min()), "-", str(time.max()),
-              ";", str(time.size), " [min-max; #]")
-        if verb > 2:
-            print("                 : ", _strvar(time))
+        _prnt_min_max_val(time, "   time        [s] : ", verb)
 
     # Ensure ft is all lowercase
     ft = ft.lower()
@@ -844,11 +833,11 @@ def check_time(time, signal, ft, ftarg, verb):
         # If verbose, print Fourier transform information
         if verb > 1:
             if ft == 'sin':
-                print("   Fourier       :  Sine-Filter")
+                print("   Fourier         :  Sine-Filter")
             else:
-                print("   Fourier       :  Cosine-Filter")
-            print("     > Filter    :  " + ftarg[0].name)
-            pstr = "     > pts/dec   :  "
+                print("   Fourier         :  Cosine-Filter")
+            print("     > Filter      :  " + ftarg[0].name)
+            pstr = "     > pts/dec     :  "
             if ftarg[1]:
                 print(pstr + str(ftarg[1]))
             else:
@@ -900,12 +889,12 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # If verbose, print Fourier transform information
         if verb > 1:
-            print("   Fourier        :  Quadrature-with-Extrapolation")
-            print("     > rtol      :  " + str(ftarg[0]))
-            print("     > atol      :  " + str(ftarg[1]))
-            print("     > nquad     :  " + str(ftarg[2]))
-            print("     > maxint    :  " + str(ftarg[3]))
-            print("     > pts/dec   :  " + str(ftarg[4]))
+            print("   Fourier          :  Quadrature-with-Extrapolation")
+            print("     > rtol        :  " + str(ftarg[0]))
+            print("     > atol        :  " + str(ftarg[1]))
+            print("     > nquad       :  " + str(ftarg[2]))
+            print("     > maxint      :  " + str(ftarg[3]))
+            print("     > pts/dec     :  " + str(ftarg[4]))
 
         # Get required frequencies
         g_x, _ = special.p_roots(ftarg[2])
@@ -940,10 +929,10 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # If verbose, print Fourier transform information
         if verb > 1:
-            print("   Fourier        :  FFTLog ")
-            print("     > pts/dec    :  " + str(pts_per_dec))
-            print("     > add_dec    :  " + str(add_dec))
-            print("     > q          :  " + str(q))
+            print("   Fourier          :  FFTLog ")
+            print("     > pts/dec      :  " + str(pts_per_dec))
+            print("     > add_dec      :  " + str(add_dec))
+            print("     > q            :  " + str(q))
 
         # Calculate minimum and maximum required frequency
         minf = np.log10(1/time.max()) + add_dec[0]
@@ -1051,7 +1040,7 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
 
     # Print actual calculated <ab>
     if verb > 1:
-        print("   Required ab's : ", _strvar(ab_calc))
+        print("   Required ab's   : ", _strvar(ab_calc))
 
     return ab_calc
 
@@ -1245,16 +1234,16 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
     Returns
     -------
-    tout : array of floats
+    tout : list of floats or arrays
         Dipole coordinates x, y, and z (m).
 
-    theta : float
+    theta : float or array of floats
         Horizontal angle.
 
-    phi : float
+    phi : float or array of floats
         Vertical angle.
 
-    g_w :
+    g_w : float or array of floats
         Factors from Gaussian interpolation.
 
     intpts : int
@@ -1305,7 +1294,6 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         tout = tinp
 
     else:
-        print('heeeeeeeeeeeeeeeeeeeeere')
         # Get lengths in each direction
         dx = np.squeeze(tinp[1] - tinp[0])
         dy = np.squeeze(tinp[3] - tinp[2])
@@ -1371,9 +1359,9 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     if verb > 1:
         # Pole-type: src or rec
         if name == 'src':
-            longname = '   Source(s)     : '
+            longname = '   Source(s)       : '
         else:
-            longname = '   Receiver(s)   : '
+            longname = '   Receiver(s)     : '
 
         if isdipole:
             print(longname, str(len(tout[0])), 'dipole(s)')
@@ -1383,26 +1371,22 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
             print(longname, str(int(len(tout[0])/intpts)), 'bipole(s)')
             tname = ['x_c', 'y_c', 'z_c']
             if intpts < 3:
-                print("     > intpts    :  1 (as dipole)")
+                print("     > intpts      :  1 (as dipole)")
                 prntinp = tout
             else:
-                print("     > intpts    : ", intpts)
+                print("     > intpts      : ", intpts)
                 prntinp = [np.atleast_1d(tinp[0])[0] + dx/2,
                            np.atleast_1d(tinp[2])[0] + dy/2,
                            np.atleast_1d(tinp[4])[0] + dz/2]
-            print("     > length[m] : ", dl)
+
+            _prnt_min_max_val(dl, "     > length  [m] : ", verb)
 
         for i in range(3):
-            if tout[i].size > intpts:
-                print("     > "+tname[i]+"   [m] : ", str(prntinp[i].min()),
-                      "-", str(prntinp[i].max()), " [min - max]")
-                if verb > 2:
-                    print("                 : ", _strvar(prntinp[i]))
-            else:
-                print("     > "+tname[i]+"   [m] : ", _strvar(prntinp[i]))
+            text = "     > " + tname[i] + "     [m] : "
+            _prnt_min_max_val(prntinp[i], text, verb)
 
-        print("     > theta [°] : ", np.rad2deg(theta))
-        print("     > phi   [°] : ", np.rad2deg(phi))
+        _prnt_min_max_val(np.rad2deg(theta), "     > theta   [°] : ", verb)
+        _prnt_min_max_val(np.rad2deg(phi), "     > phi     [°] : ", verb)
 
     return tout, theta, phi, g_w, intpts, inp_w
 
@@ -1411,13 +1395,14 @@ def printstartfinish(verb, inp=None, kcount=None):
     """Print start and finish with time measure and kernel count."""
     if inp:
         ttxt = str(timedelta(seconds=default_timer() - inp))
+        ktxt = ':'
         if kcount:
-            ktxt = ' ' + str(kcount) + ' kernel call(s)'
+            ktxt += str(kcount) + ' kernel call(s)'
         print('\n:: empymod END; runtime = ' + ttxt + ' ::' + ktxt + '\n')
     else:
         t0 = default_timer()
         if verb > 1:
-            print("\n:: empymod START  ::\n\n>  INPUT CHECK")
+            print("\n:: empymod START  ::\n")
         return t0
 
 
@@ -1450,3 +1435,14 @@ def _check_var(var, dtype, ndmin, name, shape=None, shape2=None):
 def _strvar(a, prec='{:G}'):
     """Return variable as a string to print, with given precision."""
     return ' '.join([prec.format(i) for i in np.atleast_1d(a)])
+
+
+def _prnt_min_max_val(var, text, verb):
+    """Print variable; if more than one, just min and max, unless verb > 2."""
+    if var.size > 1:
+        print(text, str(var.min()), "-", str(var.max()),
+              ";", str(var.size), " [min-max; #]")
+        if verb > 2:
+            print("                   : ", _strvar(var))
+    else:
+        print(text, str(var[0]))
