@@ -10,7 +10,7 @@ This module consists of four groups of functions:
    3. Internal utilities
 
 """
-# Copyright 2016 Dieter Werthmüller
+# Copyright 2016-2017 Dieter Werthmüller
 #
 # This file is part of `empymod`.
 #
@@ -264,11 +264,11 @@ def check_bipole(inp, name):
         # If one pole has a single depth, but the other has various
         # depths, we have to repeat the single depth, as we will have
         # to loop over them.
-        if len(inp0[2]) != len(inp1[2]):
-            if len(inp0[2]) == 1:
-                inp0[2] = np.repeat(inp0[2], len(inp1[2]))
+        if inp0[2].size != inp1[2].size:
+            if inp0[2].size == 1:
+                inp0[2] = np.repeat(inp0[2], inp1[2].size)
             else:
-                inp1[2] = np.repeat(inp1[2], len(inp0[2]))
+                inp1[2] = np.repeat(inp1[2], inp0[2].size)
 
         # Collect elements
         inp = [inp0[0], inp1[0], inp0[1], inp1[1], inp0[2], inp1[2]]
@@ -325,7 +325,7 @@ def check_dipole(inp, name, verb):
         tname = ['x  ', 'y  ', 'z  ']
         for i in range(3):
             text = "     > " + tname[i] + "     [m] : "
-            _prnt_min_max_val(inp[i], "     > "+tname[i]+"     [m] : ", verb)
+            _prnt_min_max_val(inp[i], text, verb)
 
     return inp, inp[0].size
 
@@ -1268,25 +1268,27 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     # Check source strength variable
     strength = _check_var(strength, float, 0, 'strength', ())
 
-    # Get number of integration points and angles for source
+    # Dipole/Bipole specific
     if isdipole:
-        intpts = 1  # If input is a dipole, set intpts to 1
+
+        # If input is a dipole, set intpts to 1
+        intpts = 1
 
         # Check theta
         theta = _check_var(np.deg2rad(inp[3]), float, 1, 'theta')
-        if ninpz == 1 and len(theta) == 1:
+        if ninpz == 1 and theta.size == 1:
             theta = np.ones(tinp[0].shape)*theta
 
         # Check phi
         phi = _check_var(np.deg2rad(inp[4]), float, 1, 'phi')
-        if ninpz == 1 and len(phi) == 1:
+        if ninpz == 1 and phi.size == 1:
             phi = np.ones(tinp[0].shape)*phi
 
         # If dipole, g_w are ones
-        g_w = np.ones(len(inp[0]))
+        g_w = np.ones(inp[0].size)
 
-        # If dipole, inp_w are once, unless there is a source strength
-        inp_w = np.ones(len(inp[0]))
+        # If dipole, inp_w are once, unless strength > 0
+        inp_w = np.ones(inp[0].size)
         if name == 'src' and strength > 0:
             inp_w *= strength
 
@@ -1299,55 +1301,62 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         dy = np.squeeze(tinp[3] - tinp[2])
         dz = np.squeeze(tinp[5] - tinp[4])
 
-        # Check if tinp is a dipole
+        # Check if tinp is a dipole instead of a bipole
         # (This is a problem, as we would could not define the angles then.)
         if np.any((dx == 0)*(dy == 0)*(dz == 0)):
-            print("* ERROR   :: At least one of <"+name+"> is a point " +
+            print("* ERROR   :: At least one of <" + name + "> is a point " +
                   "dipole, use the format [x, y, z, theta, phi] instead " +
                   "of [x0, x1, y0, y1, z0, z1].")
-            raise ValueError('Bipole: bipole-'+name)
+            raise ValueError('Bipole: bipole-' + name)
 
-        # length of tinp-bipole
+        # Length of bipole
         dl = np.atleast_1d(np.linalg.norm([dx, dy, dz], axis=0))
-        # horizontal deviation from x-axis
+
+        # Horizontal deviation from x-axis
         theta = np.atleast_1d(np.arctan2(dy, dx))
-        # vertical deviation from xy-plane down
+
+        # Vertical deviation from xy-plane down
         phi = np.atleast_1d(np.pi/2-np.arccos(dz/dl))
 
-        # Gauss quadrature, if intpts > 2; else set to center of tinp
+        # Check intpts
         intpts = _check_var(intpts, int, 0, 'intpts', ())
+
+        # Gauss quadrature if intpts > 2; else set to center of tinp
         if intpts > 2:  # Calculate the dipole positions
             # Get integration positions and weights
             g_x, g_w = special.p_roots(intpts)
             g_x = np.outer(g_x, dl/2.0)  # Adjust to tinp length
             g_w /= 2.0  # Adjust to tinp length (dl/2), normalize (1/dl)
-            if strength > 0:
-                inp_w = dl
-                if name == 'src':
-                    inp_w *= strength
-            else:
-                inp_w = np.ones(len(dl))
 
             # Coordinate system is left-handed, positive z down
             # (East-North-Depth).
             xinp = tinp[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta)
             yinp = tinp[2] + dy/2 + g_x*np.cos(phi)*np.sin(theta)
             zinp = tinp[4] + dz/2 + g_x*np.sin(phi)
+
+            # Reduce zinp to one, if ninpz is 1 (as they are all the same then)
             if ninpz == 1:
                 zinp = zinp[:, 0]
 
         else:  # If intpts < 3: Calculate bipole at tinp-centre for phi/theta
+
+            # Set intpts to 1
             intpts = 1
+
+            # Get centre points
             xinp = np.array(tinp[0] + dx/2)
             yinp = np.array(tinp[2] + dy/2)
             zinp = np.array(tinp[4] + dz/2)
+
+            # Gaussian weights in this case are ones
             g_w = np.array([1])
-            if strength > 0:
-                inp_w = dl
-                if name == 'src':
-                    inp_w *= strength
-            else:
-                inp_w = np.ones(len(dl))
+
+        # Scaling
+        inp_w = np.ones(dl.size)
+        if strength > 0:  # If strength > 0, we scale it by bipole-length
+            inp_w *= dl
+            if name == 'src':  # If source, additionally by source strength
+                inp_w *= strength
 
         # Collect output list; rounding coord. to same precision as min_off
         rndco = int(np.round(np.log10(1/min_off)))
@@ -1363,14 +1372,15 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         else:
             longname = '   Receiver(s)     : '
 
+        # Print dipole/bipole information
         if isdipole:
-            print(longname, str(len(tout[0])), 'dipole(s)')
+            print(longname, str(tout[0].size), 'dipole(s)')
             tname = ['x  ', 'y  ', 'z  ']
             prntinp = tout
         else:
-            print(longname, str(int(len(tout[0])/intpts)), 'bipole(s)')
+            print(longname, str(int(tout[0].size/intpts)), 'bipole(s)')
             tname = ['x_c', 'y_c', 'z_c']
-            if intpts < 3:
+            if intpts == 1:
                 print("     > intpts      :  1 (as dipole)")
                 prntinp = tout
             else:
@@ -1379,12 +1389,15 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
                            np.atleast_1d(tinp[2])[0] + dy/2,
                            np.atleast_1d(tinp[4])[0] + dz/2]
 
+            # Print bipole length
             _prnt_min_max_val(dl, "     > length  [m] : ", verb)
 
+        # Print coordinates
         for i in range(3):
             text = "     > " + tname[i] + "     [m] : "
             _prnt_min_max_val(prntinp[i], text, verb)
 
+        # Print angles
         _prnt_min_max_val(np.rad2deg(theta), "     > theta   [°] : ", verb)
         _prnt_min_max_val(np.rad2deg(phi), "     > phi     [°] : ", verb)
 
@@ -1395,7 +1408,7 @@ def printstartfinish(verb, inp=None, kcount=None):
     """Print start and finish with time measure and kernel count."""
     if inp:
         ttxt = str(timedelta(seconds=default_timer() - inp))
-        ktxt = ':'
+        ktxt = ' '
         if kcount:
             ktxt += str(kcount) + ' kernel call(s)'
         print('\n:: empymod END; runtime = ' + ttxt + ' ::' + ktxt + '\n')
@@ -1445,4 +1458,4 @@ def _prnt_min_max_val(var, text, verb):
         if verb > 2:
             print("                   : ", _strvar(var))
     else:
-        print(text, str(var[0]))
+        print(text, str(np.atleast_1d(var)[0]))

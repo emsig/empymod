@@ -34,7 +34,7 @@ they can serve as template to create your own routines:
     - `wavenumber`: Calculate the electromagnetic wavenumber-domain solution.
 
 """
-# Copyright 2016 Dieter Werthmüller
+# Copyright 2016-2017 Dieter Werthmüller
 #
 # This file is part of `empymod`.
 #
@@ -311,6 +311,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
     """
+    print('**WARNING :: `bipole` is still in development')
 
     # === 1.  LET'S START ============
     if verb > 0:
@@ -343,6 +344,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Check src and rec, get flags if dipole or not
     # nsrcz/nrecz are number of unique src/rec-pole depths
+    if mrec:
+        # msrc, mrec = mrec, msrc
+        if msrc:
+            print('**WARNING** `bipole` with e-src and m-rec')
+            msrc, mrec = mrec, msrc
+            src, rec = rec, src
+
     src, nsrc, nsrcz, srcdipole = check_bipole(src, 'src')
     rec, nrec, nrecz, recdipole = check_bipole(rec, 'rec')
 
@@ -391,7 +399,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                          tsrc[2][isg]]
 
                 # Get layer number in which src resides
-                lsrc, zsrc = get_layer_nr(src, depth)
+                lsrc, zsrc = get_layer_nr(tisrc, depth)
 
                 # Pre-allocate temporary receiver EM arrays for integr. loop
                 rEM = np.zeros((freq.size, isrz), dtype=complex)
@@ -409,7 +417,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     off, angle = get_off_ang(tisrc, tirec, isrc, irec, verb)
 
                     # Get layer number in which rec resides
-                    lrec, zrec = get_layer_nr(rec, depth)
+                    lrec, zrec = get_layer_nr(tirec, depth)
 
                     # Gather variables
                     finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq,

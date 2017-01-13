@@ -31,7 +31,7 @@ distributed with [Key_2012]_ and available at
 These filters are distributed under the SEG license.
 
 """
-# Copyright 2016 Dieter Werthmüller
+# Copyright 2016-2017 Dieter Werthmüller
 #
 # This file is part of `empymod`.
 #

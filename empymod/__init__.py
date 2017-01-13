@@ -28,7 +28,7 @@ exist.
 License
 -------
 
-Copyright 2016 Dieter Werthmüller
+Copyright 2016-2017 Dieter Werthmüller
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -57,13 +57,6 @@ priority:
       ideally be combined with automated testing by, for instance, Travis. It
       should also include some proper benchmarks.
 
-    - More modelling routines:
-        - convolution with a wavelet for GPR (proper version of `model.gpr`)
-        - pure wavenumber output-routine (proper version of `model.wavenumber`)
-        - various source-receiver arrangements (loops etc)
-        - load and save functions to store and load model, together with all
-          information.
-
     - Kernel
         - Include `scipy.integrate.quad` as an additional Hankel transform.
           There are cases when both `QWE` and `FHT` struggle, e.g. at very
@@ -74,22 +67,27 @@ priority:
           fast C-version for calculations (inversions), and a Python-version to
           tinker with for interested folks.
 
-    - GUI frontend
+    - More modelling routines:
+        - convolution with a wavelet for GPR (proper version of `model.gpr`)
+        - pure wavenumber output-routine (proper version of `model.wavenumber`)
+        - various source-receiver arrangements (loops etc)
+        - load and save functions to store and load model, together with all
+          information.
 
     - Module to create Hankel filters (nice to have addition, mainly for
       educational purposes).
+
+    - GUI frontend
 
 
 Notice
 ------
 
-This product includes software developed at
-*The Mexican Institute of Petroleum IMP*
-(*Instituto Mexicano del Petróleo*, http://www.imp.mx).
-
-The project was funded through
-*The Mexican National Council of Science and Technology*
-(*Consejo Nacional de Ciencia y Tecnología*, http://www.conacyt.mx).
+This product includes software that was initially (till 01/2017) developed at
+*The Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
+http://www.imp.mx). The project was funded through *The Mexican National
+Council of Science and Technology* (*Consejo Nacional de Ciencia y Tecnología*,
+http://www.conacyt.mx).
 
 
 This product is a derivative work of [Hunziker_et_al_2015]_ and [Key_2012]_,
@@ -127,13 +125,62 @@ parallelisation (``opt='parallel'``) and spline interpolation
 ``opt='parallel'`` only affects speed and memory usage, whereas
 ``opt='spline'`` also affects precision!
 
-Calculation of many source and receiver positions is fastest if they remain at
-the same depth, as they can be calculated in one kernel-call. If depths do
-change, one has to loop over them.
-
 I am sure `empymod` could be made much faster with cleverer coding style or
 with the likes of `cython` or `numba`. Suggestions and contributions are
 welcomed!
+
+
+Depths, Rotation, and Bipole
+''''''''''''''''''''''''''''
+**Depths**: Calculation of many source and receiver positions is fastest if
+they remain at the same depth, as they can be calculated in one kernel-call. If
+depths do change, one has to loop over them.
+
+**Rotation**: Sources and receivers aligned along the principal axes x, y, and
+z can be calculated in one kernel call. For arbitrary aligned di- or bipoles,
+3 kernel calls are required. If source and receiver are arbitrary aligned,
+3x3 hence 9 kernel calls are required.
+
+**Bipole**: Bipole increase the calculation time by the amount of integration
+points used. For a source and a receiver bipole with each 5 integration points
+you need 5x5 hence 25 kernel calls. You can calculate it in 1 kernel call if
+you set both integration points to 1, and hence calculate the bipole as if they
+were dipoles at their centre.
+
+**Example**: For 1 source and 10 receivers, all at the same depth, 1 kernel
+call is required.  If all receivers are at different depths, 10 kernel calls
+are required. If you make source and receivers bipoles with 5 integration
+points, 250 kernel calls are required.  If you rotate the source arbitrary
+horizontally, 500 kernel calls are required. If you rotate the receivers too,
+in the horizontal plane, 1'000 kernel calls are required. If you rotate the
+receivers also vertically, 1'500 kernel calls are required. If you rotate the
+source vertically too, 2'250 kernel calls are required. So your calculation
+will take 2'250 times longer! No matter how fast the kernel is, this will take
+a long time. Therefore carefully plan how precise you want to define your
+source and receiver bipoles.
+
+.. table:: Example as a table for comparison: 1 source, 10 receiver (one or
+           many frequencies).
+
+    +----------------+--------+-------+------+-------+-------+------+---------+
+    |                |    source bipole      |        receiver bipole         |
+    +================+========+=======+======+=======+=======+======+=========+
+    |**kernel calls**| intpts | theta |  phi |intpts | theta |  phi | diff. z |
+    +----------------+--------+-------+------+-------+-------+------+---------+
+    |              1 |      1 |  0/90 | 0/90 |     1 |  0/90 | 0/90 |       1 |
+    +----------------+--------+-------+------+-------+-------+------+---------+
+    |             10 |      1 |  0/90 | 0/90 |     1 |  0/90 | 0/90 |      10 |
+    +----------------+--------+-------+------+-------+-------+------+---------+
+    |            250 |      5 |  0/90 | 0/90 |     5 |  0/90 | 0/90 |      10 |
+    +----------------+--------+-------+------+-------+-------+------+---------+
+    |            500 |      5 |  arb. | 0/90 |     5 |  0/90 | 0/90 |      10 |
+    +----------------+--------+-------+------+-------+-------+------+---------+
+    |           1000 |      5 |  arb. | 0/90 |     5 |  arb. | 0/90 |      10 |
+    +----------------+--------+-------+------+-------+-------+------+---------+
+    |           1500 |      5 |  arb. | 0/90 |     5 |  arb. | arb. |      10 |
+    +----------------+--------+-------+------+-------+-------+------+---------+
+    |           2250 |      5 |  arb. | arb. |     5 |  arb. | arb. |      10 |
+    +----------------+--------+-------+------+-------+-------+------+---------+
 
 
 Parallelisation
@@ -312,7 +359,7 @@ References |_|
    <http://dx.doi.org/10.1090/S0025-5718-1956-0084056-6>`_.
 
 """
-# Copyright 2016 Dieter Werthmüller
+# Copyright 2016-2017 Dieter Werthmüller
 #
 # This file is part of `empymod`.
 #

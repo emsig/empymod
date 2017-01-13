@@ -41,7 +41,7 @@ the manual for further information and a list of TODOs.
 License
 -------
 
-Copyright 2016 Dieter Werthmüller
+Copyright 2016-2017 Dieter Werthmüller
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -62,13 +62,11 @@ License.
 Notice
 ------
 
-This product includes software developed at
-*The Mexican Institute of Petroleum IMP*
-(*Instituto Mexicano del Petróleo*, http://www.imp.mx).
-
-The project was funded through
-*The Mexican National Council of Science and Technology*
-(*Consejo Nacional de Ciencia y Tecnología*, http://www.conacyt.mx).
+This product includes software that was initially (till 01/2017) developed at
+*The Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
+http://www.imp.mx). The project was funded through *The Mexican National
+Council of Science and Technology* (*Consejo Nacional de Ciencia y Tecnología*,
+http://www.conacyt.mx).
 
 
 This product is a derivative work of the following two publications and their
