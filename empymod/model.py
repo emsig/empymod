@@ -57,7 +57,7 @@ from . import kernel, transform
 from .utils import (check_time, check_model, check_frequency, check_hankel,
                     check_opt, check_dipole, check_bipole, check_ab, get_abs,
                     get_geo_fact, get_theta_phi, get_off_ang, get_layer_nr,
-                    printstartfinish)
+                    printstartfinish, conv_warning)
 
 __all__ = ['bipole', 'dipole', 'frequency', 'time', 'gpr', 'wavenumber', 'fem',
            'tem']
@@ -67,7 +67,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
            srcpts=1, mrec=False, recpts=1, strength=0, xdirect=True,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
-           verb=1):
+           verb=2):
     """Return the electromagnetic field due to an electromagnetic source.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -267,11 +267,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         comparing the different versions will yield the answer for your
         specific problem at hand!
 
-    verb : {0, 1, 2}, optional
-        Level of verbosity, defaults to 1:
+    verb : {0, 1, 2, 3, 4}, optional
+        Level of verbosity, default is 2:
             - 0: Print nothing.
             - 1: Print warnings.
-            - 2: Print warnings and information.
+            - 2: Print additional runtime and kernel calls
+            - 3: Print additional start/stop, condensed parameter information.
+            - 4: Print additional full parameter information
 
 
     Returns
@@ -316,11 +318,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
     """
-    print('**WARNING :: `bipole` is still in development')
 
     # === 1.  LET'S START ============
-    if verb > 0:
-        t0 = printstartfinish(verb)
+    t0 = printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
 
@@ -357,9 +357,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # Pre-allocate output EM array
     EM = np.zeros((freq.size, nrec*nsrc), dtype=complex)
 
-    # Initialize kernel count
+    # Initialize kernel count, conv (only for QWE)
     # (how many times the wavenumber-domain kernel was calld)
     kcount = 0
+    conv = True
 
     # Define some indeces
     isrc = int(nsrc/nsrcz)  # this is either 1 or nsrc
@@ -421,7 +422,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq,
                             etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht,
                             htarg, use_spline, use_ne_eval, msrc, mrec,
-                            loop_freq, loop_off)
+                            loop_freq, loop_off, conv)
 
                     # Pre-allocate temporary EM array for ab-loop
                     abEM = np.zeros((freq.size, isrz), dtype=complex)
@@ -440,6 +441,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
                         # Update kernel count
                         kcount += out[1]
+
+                        # Update conv (QWE convergence)
+                        conv *= out[2]
 
                     # Add this receiver element, with weight from integration
                     rEM += abEM*recg_w[irg]
@@ -478,16 +482,21 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             # Add this src-rec signal
             EM[:, si:ei:st] = sEM*src_rec_w
 
+    # In case of QWE, print Warning if not converged
+    conv_warning(conv, htarg, 'Hankel', verb)
+
     # Do f->t transform if required
     if signal is not None:
-        EM = tem(EM, off, freq, time, signal, ft, ftarg)
+        EM, conv = tem(EM, off, freq, time, signal, ft, ftarg)
+
+        # In case of QWE, print Warning if not converged
+        conv_warning(conv, ftarg, 'Fourier', verb)
 
     # Reshape for number of sources
     EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
 
     # === 4.  FINISHED ============
-    if verb > 0:
-        printstartfinish(verb, t0, kcount)
+    printstartfinish(verb, t0, kcount)
 
     return EM
 
@@ -495,7 +504,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=True,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
-           verb=1):
+           verb=2):
     """Return the electromagnetic field due to a dipole source.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -689,11 +698,13 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         comparing the different versions will yield the answer for your
         specific problem at hand!
 
-    verb : {0, 1, 2}, optional
-        Level of verbosity, defaults to 1:
+    verb : {0, 1, 2, 3, 4}, optional
+        Level of verbosity, default is 2:
             - 0: Print nothing.
             - 1: Print warnings.
-            - 2: Print warnings and information.
+            - 2: Print additional runtime and kernel calls
+            - 3: Print additional start/stop, condensed parameter information.
+            - 4: Print additional full parameter information
 
 
     Returns
@@ -733,8 +744,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     """
 
     # === 1.  LET'S START ============
-    if verb > 0:
-        t0 = printstartfinish(verb)
+    t0 = printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
 
@@ -783,25 +793,30 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     inp = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
            etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
            use_ne_eval, msrc, mrec, loop_freq, loop_off)
-    EM, kcount = fem(*inp)
+    EM, kcount, conv = fem(*inp)
+
+    # In case of QWE, print Warning if not converged
+    conv_warning(conv, htarg, 'Hankel', verb)
 
     # Do f->t transform if required
     if signal is not None:
-        EM = tem(EM, off, freq, time, signal, ft, ftarg)
+        EM, conv = tem(EM, off, freq, time, signal, ft, ftarg)
+
+        # In case of QWE, print Warning if not converged
+        conv_warning(conv, ftarg, 'Fourier', verb)
 
     # Reshape for number of sources
     EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
 
     # === 4.  FINISHED ============
-    if verb > 0:
-        printstartfinish(verb, t0, kcount)
+    printstartfinish(verb, t0, kcount)
 
     return EM
 
 
 def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
         epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=True,
-        ht='fht', htarg=None, opt=None, loop='off', verb=1):
+        ht='fht', htarg=None, opt=None, loop='off', verb=2):
     """Return the Ground-Penetrating Radar signal.
 
     THIS FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION.
@@ -841,8 +856,7 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
     print('* WARNING :: GPR FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION')
 
     # === 1.  LET'S START ============
-    if verb > 0:
-        t0 = printstartfinish(verb)
+    t0 = printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
 
@@ -890,7 +904,8 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
     # === 3. GPR CALCULATION ============
 
     # 1. Get fem responses
-    fEM, kcount = fem(*fdata)
+    fEM, kcount, conv = fem(*fdata)
+    conv_warning(conv, htarg, 'Hankel', verb)
 
     # 2. Multiply with ricker wavelet
     cfc = -(np.r_[0, freq[:-1]]/fc)**2
@@ -914,15 +929,14 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
         gprEM *= (1 + np.abs((t*10**9)**gain))[:, None]
 
     # === 4.  FINISHED ============
-    if verb > 0:
-        printstartfinish(verb, t0, kcount)
+    printstartfinish(verb, t0, kcount)
 
     return t[2048:], gprEM[2048:, :].real
 
 
 def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
                epermH=None, epermV=None, mpermH=None, mpermV=None,
-               xdirect=True, verb=1):
+               xdirect=True, verb=2):
     """Return the electromagnetic wavenumber-domain field.
 
     THIS FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION.
@@ -949,8 +963,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
           'CAUTION')
 
     # === 1.  LET'S START ============
-    if verb > 0:
-        t0 = printstartfinish(verb)
+    t0 = printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
 
@@ -987,8 +1000,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     PJ0b = np.squeeze(PJ0b)
 
     # === 4.  FINISHED ============
-    if verb > 0:
-        printstartfinish(verb, t0)
+    printstartfinish(verb, t0)
 
     return PJ0, PJ1, PJ0b
 
@@ -997,7 +1009,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
 def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
               epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
-              htarg=None, opt=None, loop=None, verb=1):
+              htarg=None, opt=None, loop=None, verb=2):
     """Return the frequency-domain EM field due to a dipole source.
 
     This is a shortcut for frequency-domain modelling using `dipole` (mainly
@@ -1037,7 +1049,7 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
 
 def time(src, rec, depth, res, time, ab=11, signal=0, aniso=None, epermH=None,
          epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
-         htarg=None, ft='sin', ftarg=None, opt=None, loop='off', verb=1):
+         htarg=None, ft='sin', ftarg=None, opt=None, loop='off', verb=2):
     """Return the time-domain EM field due to a dipole source.
 
     This is a shortcut for time-domain modelling using `dipole` (mainly for
@@ -1076,7 +1088,7 @@ def time(src, rec, depth, res, time, ab=11, signal=0, aniso=None, epermH=None,
 
 def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         zetaV, xdirect, isfullspace, ht, htarg, use_spline, use_ne_eval, msrc,
-        mrec, loop_freq, loop_off):
+        mrec, loop_freq, loop_off, conv=True):
     """Return the electromagnetic frequency-domain response.
 
     This function is called from one of the above modelling routines. No
@@ -1118,6 +1130,7 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
                            htarg, use_spline, use_ne_eval, msrc, mrec)
                 fEM[None, i, :] += out[0]
                 kcount += out[1]
+                conv *= out[2]
 
         elif loop_off:
             for i in range(off.size):
@@ -1126,17 +1139,19 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
                            xdirect, htarg, use_spline, use_ne_eval, msrc, mrec)
                 fEM[:, None, i] += out[0]
                 kcount += out[1]
+                conv *= out[2]
         else:
             out = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                        etaV, zetaH, zetaV, xdirect, htarg, use_spline,
                        use_ne_eval, msrc, mrec)
             fEM += out[0]
             kcount += out[1]
+            conv *= out[2]
 
-    return fEM, kcount
+    return fEM, kcount, conv
 
 
-def tem(fEM, off, freq, time, signal, ft, ftarg):
+def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
     """Return the time-domain response of the frequency-domain response fEM.
 
     This function is called from one of the above modelling routines. No
@@ -1157,6 +1172,8 @@ def tem(fEM, off, freq, time, signal, ft, ftarg):
     # 2. f->t transform
     tEM = np.zeros((time.size, off.size))
     for i in range(off.size):
-        tEM[:, i] += getattr(transform, ft)(fEM[:, i], time, freq, ftarg)
+        out = getattr(transform, ft)(fEM[:, i], time, freq, ftarg)
+        tEM[:, i] += out[0]
+        conv *= out[1]
 
-    return tEM*2/np.pi  # Scaling from Fourier transform
+    return tEM*2/np.pi, conv  # Scaling from Fourier transform

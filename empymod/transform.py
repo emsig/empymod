@@ -83,6 +83,12 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     fEM : array
         Returns frequency-domain EM response.
 
+    kcount : int
+        Kernel count. For FHT, this is 1.
+
+    conv : bool
+        Only relevant for QWE, not for FHT.
+
     """
     # Get fhtargs
     fhtfilt = fhtarg[0]
@@ -199,7 +205,8 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
     # Return the electromagnetic field, normalize by offset
     # Second argument (1) is the kernel count
-    return fEM/off, 1
+    # (Last argument is only for QWE)
+    return fEM/off, 1, True
 
 
 def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
@@ -238,6 +245,12 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     -------
     fEM : array
         Returns frequency-domain EM response.
+
+    kcount : int
+        Kernel count.
+
+    conv : bool
+        If true, QWE converged. If not, maxint might have to be set higher.
 
     """
     # Input params have an additional dimension for frequency, reduce here
@@ -374,10 +387,10 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
             return fEM
 
     # Get QWE
-    fEM, kcount = qwe(rtol, atol, maxint, getkernel, intervals, 'Hankel',
-                      lambd, off, factAng)
+    fEM, kcount, conv = qwe(rtol, atol, maxint, getkernel, intervals, lambd,
+                            off, factAng)
 
-    return fEM, kcount
+    return fEM, kcount, conv
 
 
 # 2. Fourier transforms (frequency -> time)
@@ -399,6 +412,9 @@ def fft(fEM, time, freq, ftarg):
     -------
     tEM : array
         Returns time-domain EM response of `fEM` for given `time`.
+
+    conv : bool
+        Only relevant for QWE, not for FFT.
 
     """
     # Get ftarg values
@@ -436,7 +452,8 @@ def fft(fEM, time, freq, ftarg):
         tEM = itEM(np.log(time))
 
     # Return the electromagnetic time domain field
-    return tEM/time
+    # (Second argument is only for QWE)
+    return tEM/time, True
 
 
 def fqwe(fEM, time, freq, qweargs):
@@ -456,6 +473,9 @@ def fqwe(fEM, time, freq, qweargs):
     -------
     tEM : array
         Returns time-domain EM response of `fEM` for given `time`.
+
+    conv : bool
+        If true, QWE converged. If not, maxint might have to be set higher.
 
     """
     # Get rtol, atol, nquad, and maxint
@@ -497,10 +517,9 @@ def fqwe(fEM, time, freq, qweargs):
     # Carry out QWE if required
     if np.any(doqwe):
         sEM = tEM_iint(np.log(Bx/time[doqwe, None]))*SS
-        tEM[doqwe], _ = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :],
-                            'Fourier')
+        tEM[doqwe], _, conv = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :])
 
-    return -tEM
+    return -tEM, conv
 
 
 def fftlog(fEM, time, freq, ftarg):
@@ -536,6 +555,9 @@ def fftlog(fEM, time, freq, ftarg):
     -------
     tEM : array
         Returns time-domain EM response of `fEM` for given `time`.
+
+    conv : bool
+        Only relevant for QWE, not for FFTLog.
 
     """
     # Get tcalc, dlnr, kr, rk, q; a and n
@@ -633,12 +655,13 @@ def fftlog(fEM, time, freq, ftarg):
     ttEM = iuSpline(np.log10(tcalc), a)
     tEM = ttEM(np.log10(time))
 
-    return tEM
+    # (Second argument is only for QWE)
+    return tEM, True
 
 
 # 3. Utilities
 
-def qwe(rtol, atol, maxint, inp, intervals, hfstr, lambd=None, off=None,
+def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         factAng=None):
     """Quadrature-With-Extrapolation.
 
@@ -715,9 +738,7 @@ def qwe(rtol, atol, maxint, inp, intervals, hfstr, lambd=None, off=None,
             break
 
     # Warning if maxint is potentially too small
-    if i+1 == maxint:
-        print('* WARNING :: ' + hfstr + '-QWE used all ' + str(maxint) +
-              ' intervals; set `maxint` higher.')
+    conv = i+1 != maxint
 
     # Catch the ones that did not converge
     EM[om] = extrap[om, i-1]
@@ -726,7 +747,7 @@ def qwe(rtol, atol, maxint, inp, intervals, hfstr, lambd=None, off=None,
     # Set np.finfo(np.double).max to 0
     EM.real[EM.real == np.finfo(np.double).max] = 0
 
-    return EM, kcount
+    return EM, kcount, conv
 
 
 def get_spline_values(filt, inp, nr_per_dec=None):

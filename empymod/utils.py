@@ -40,14 +40,15 @@ from . import filters, transform
 __all__ = ['EMArray', 'check_time', 'check_model', 'check_frequency',
            'check_hankel', 'check_opt', 'check_dipole', 'check_bipole',
            'check_ab', 'get_abs', 'get_geo_fact', 'get_theta_phi',
-           'get_off_ang', 'get_layer_nr', 'printstartfinish']
+           'get_off_ang', 'get_layer_nr', 'printstartfinish', 'conv_warning']
 
 # 0. General settings
 
-min_freq = 1e-20  # Minimum frequency  [Hz]
-min_time = 1e-20  # Minimum time       [s]
-min_off = 1e-3    # Minimum offset     [m]
-#                 # > Also used to round src- & rec-coordinates (1e-3 => mm)
+min_freq = 1e-20   # Minimum frequency  [Hz]
+min_time = 1e-20   # Minimum time       [s]
+min_off = 1e-3     # Minimum offset     [m]
+#                  # > Also used to round src- & rec-coordinates (1e-3 => mm)
+min_param = 1e-20  # Minimum model parameter (aniso, [m/e]perm[H/V]) to avoid 0
 
 
 # 1. Class EMArray
@@ -126,7 +127,7 @@ def check_ab(ab, verb):
     ab : int
         Source-receiver configuration.
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
     Returns
@@ -157,7 +158,7 @@ def check_ab(ab, verb):
         raise ValueError('ab')
 
     # Print input <ab>
-    if verb > 1:
+    if verb > 2:
         print("   Input ab        : ", ab)
 
     # Check if src and rec are magnetic or electric
@@ -176,7 +177,7 @@ def check_ab(ab, verb):
         ab_calc = ab
 
     # Print actual calculated <ab>
-    if verb > 1:
+    if verb > 2:
         if ab_calc in [36, ]:
             print("\n>  <ab> IS "+str(ab_calc)+" WHICH IS ZERO; returning")
         else:
@@ -294,7 +295,7 @@ def check_dipole(inp, name, verb):
     name : str, {'src', 'rec'}
         Pole-type.
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
     Returns
@@ -314,7 +315,7 @@ def check_dipole(inp, name, verb):
     inp[2] = _check_var(inp[2], float, 1, name+'-z', (1,))
 
     # Print spatial parameters
-    if verb > 1:
+    if verb > 2:
         # Pole-type: src or rec
         if name == 'src':
             longname = '   Source(s)       : '
@@ -356,7 +357,7 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res.
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
 
@@ -378,13 +379,7 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
     # Minimum frequency to avoid division by zero at freq = 0 Hz.
     # => min_freq is defined at the start of this file
-    ifreq = np.where(freq < min_freq)
-    freq[ifreq] = min_freq
-    if np.size(ifreq) != 0 and verb > 0:
-        print('* WARNING :: Frequencies <', min_freq, 'Hz are set to',
-              min_freq, 'Hz!')
-    if verb > 1:
-        _prnt_min_max_val(freq, "   freq       [Hz] : ", verb)
+    freq = _check_min(freq, min_freq, 'Frequencies', 'Hz', verb)
 
     # Calculate eta and zeta (horizontal and vertical)
     etaH = 1/res + np.outer(2j*np.pi*freq, epermH*epsilon_0)
@@ -410,7 +405,7 @@ def check_hankel(ht, htarg, verb):
     htarg : str or filter from empymod.filters or array_like,
         Depends on the value for `ht`.
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
 
@@ -456,7 +451,7 @@ def check_hankel(ht, htarg, verb):
         htarg = (fhtfilt, pts_per_dec)
 
         # If verbose, print Hankel transform information
-        if verb > 1:
+        if verb > 2:
             print("   Hankel          :  Fast Hankel Transform")
             print("     > Filter      :  " + fhtfilt.name)
 
@@ -504,7 +499,7 @@ def check_hankel(ht, htarg, verb):
         htarg = (rtol, atol, nquad, maxint, pts_per_dec)
 
         # If verbose, print Hankel transform information
-        if verb > 1:
+        if verb > 2:
             print("   Hankel          :  Quadrature-with-Extrapolation")
             print("     > rtol        :  " + str(htarg[0]))
             print("     > atol        :  " + str(htarg[1]))
@@ -546,7 +541,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res.
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
 
@@ -591,6 +586,8 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
     # Cast and check resistivity
     res = _check_var(res, float, 1, 'res', depth.shape)
+    # => min_param is defined at the start of this file
+    res = _check_min(res, min_param, 'Resistivities', 'Ohm.m', verb)
 
     # Check anisotropy, electric permittivity, and magnetic permeability
     def check_inp(var, name):
@@ -598,7 +595,10 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         if not np.any(var):
             return np.ones(depth.size)
         else:
-            return _check_var(var, float, 1, name, depth.shape)
+            param = _check_var(var, float, 1, name, depth.shape)
+            # => min_param is defined at the start of this file
+            param = _check_min(param, min_param, 'Parameter ' + name, '', verb)
+            return param
 
     aniso = check_inp(aniso, 'aniso')
     epermH = check_inp(epermH, 'epermH')
@@ -607,7 +607,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     mpermV = check_inp(mpermV, 'mpermV')
 
     # Print model parameters
-    if verb > 1:
+    if verb > 2:
         print("   depth       [m] : ", _strvar(depth[1:]))
         print("   res     [Ohm.m] : ", _strvar(res))
         print("   aniso       [-] : ", _strvar(aniso))
@@ -631,7 +631,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         isfullspace = isores*isoeph*isoepv*isomph*isompv
 
     # Print fullspace info
-    if verb > 1 and isfullspace:
+    if verb > 2 and isfullspace:
         print("\n>  MODEL IS A FULLSPACE; returning analytical " +
               "frequency-domain solution")
 
@@ -659,7 +659,7 @@ def check_opt(opt, loop, ht, htarg, verb):
     htarg : array_like,
         Depends on the value for `ht`.
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
 
@@ -695,7 +695,7 @@ def check_opt(opt, loop, ht, htarg, verb):
         loop_freq = loop == 'freq'
 
     # If verbose, print optimization information
-    if verb > 1:
+    if verb > 2:
         if use_spline:
             print("   Hankel Opt.     :  Use spline")
             pstr = "     > pts/dec     :  "
@@ -746,7 +746,7 @@ def check_time(time, signal, ft, ftarg, verb):
     ftarg : str or filter from empymod.filters or array_like,
         Only used if `signal` !=None. Depends on the value for `ft`:
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
 
@@ -775,11 +775,8 @@ def check_time(time, signal, ft, ftarg, verb):
 
     # Minimum time to avoid division by zero  at time = 0 s.
     # => min_time is defined at the start of this file
-    itime = np.where(time < min_time)
-    time[itime] = min_time
-    if verb > 0 and np.size(itime) != 0:
-        print('* WARNING :: Times <', min_time, 's are set to', min_time, 's!')
-    if verb > 1:
+    time = _check_min(time, min_time, 'Times', 's', verb)
+    if verb > 2:
         _prnt_min_max_val(time, "   time        [s] : ", verb)
 
     # Ensure ft is all lowercase
@@ -831,7 +828,7 @@ def check_time(time, signal, ft, ftarg, verb):
         ftarg = (fftfilt, pts_per_dec, ft)
 
         # If verbose, print Fourier transform information
-        if verb > 1:
+        if verb > 2:
             if ft == 'sin':
                 print("   Fourier         :  Sine-Filter")
             else:
@@ -888,7 +885,7 @@ def check_time(time, signal, ft, ftarg, verb):
         ftarg = (rtol, atol, nquad, maxint, pts_per_dec)
 
         # If verbose, print Fourier transform information
-        if verb > 1:
+        if verb > 2:
             print("   Fourier          :  Quadrature-with-Extrapolation")
             print("     > rtol        :  " + str(ftarg[0]))
             print("     > atol        :  " + str(ftarg[1]))
@@ -928,7 +925,7 @@ def check_time(time, signal, ft, ftarg, verb):
             q = np.array(0, dtype=float)
 
         # If verbose, print Fourier transform information
-        if verb > 1:
+        if verb > 2:
             print("   Fourier          :  FFTLog ")
             print("     > pts/dec      :  " + str(pts_per_dec))
             print("     > add_dec      :  " + str(add_dec))
@@ -974,7 +971,7 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
     srcphi, recphi : float
         Vertical source/receiver angle.
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
 
@@ -1039,7 +1036,7 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
     ab_calc = ab_calc[bab].ravel()
 
     # Print actual calculated <ab>
-    if verb > 1:
+    if verb > 2:
         print("   Required ab's   : ", _strvar(ab_calc))
 
     return ab_calc
@@ -1158,7 +1155,7 @@ def get_off_ang(src, rec, nsrc, nrec, verb):
     nsrc, nrec : int
         Number of sources/receivers (-).
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
 
@@ -1190,11 +1187,8 @@ def get_off_ang(src, rec, nsrc, nrec, verb):
 
     # Minimum offset to avoid singularities at off = 0 m.
     # => min_off is defined at the start of this file
-    ioff = np.where(off < min_off)
-    off[ioff] = min_off
-    angle[ioff] = np.nan
-    if np.size(ioff) != 0 and verb > 0:
-        print('* WARNING :: Offsets <', min_off, 'm are set to', min_off, 'm!')
+    angle[np.where(off < min_off)] = np.nan
+    off = _check_min(off, min_off, 'Offsets', 'm', verb)
 
     return off, angle
 
@@ -1235,7 +1229,7 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     name : str, {'src', 'rec'}
         Pole-type.
 
-    verb : {0, 1, 2}
+    verb : {0, 1, 2, 3, 4}
         Level of verbosity.
 
 
@@ -1372,7 +1366,7 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
                 np.round(zinp, rndco).ravel('F')]
 
     # Print spatial parameters
-    if verb > 1:
+    if verb > 2:
         # Pole-type: src or rec
         if name == 'src':
             longname = '   Source(s)       : '
@@ -1413,7 +1407,7 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
 def printstartfinish(verb, inp=None, kcount=None):
     """Print start and finish with time measure and kernel count."""
-    if inp:
+    if inp and verb > 1:
         ttxt = str(timedelta(seconds=default_timer() - inp))
         ktxt = ' '
         if kcount:
@@ -1421,9 +1415,16 @@ def printstartfinish(verb, inp=None, kcount=None):
         print('\n:: empymod END; runtime = ' + ttxt + ' ::' + ktxt + '\n')
     else:
         t0 = default_timer()
-        if verb > 1:
+        if verb > 2:
             print("\n:: empymod START  ::\n")
         return t0
+
+
+def conv_warning(conv, targ, name, verb):
+    """Print error if QWE did not converge at least once."""
+    if verb > 0 and not conv:
+        print('* WARNING :: ' + name + '-QWE used all ' + str(targ[3]) +
+              ' intervals; set `maxint` higher.')
 
 
 # 3. Internal utilities
@@ -1458,11 +1459,21 @@ def _strvar(a, prec='{:G}'):
 
 
 def _prnt_min_max_val(var, text, verb):
-    """Print variable; if more than one, just min and max, unless verb > 2."""
+    """Print variable; if more than one, just min and max, unless verb > 3."""
     if var.size > 1:
         print(text, str(var.min()), "-", str(var.max()),
               ";", str(var.size), " [min-max; #]")
-        if verb > 2:
+        if verb > 3:
             print("                   : ", _strvar(var))
     else:
         print(text, str(np.atleast_1d(var)[0]))
+
+
+def _check_min(par, minval, name, unit, verb):
+    """Check minimum value of parameter."""
+    ipar = np.where(par < minval)
+    par[ipar] = minval
+    if verb > 0 and np.size(ipar) != 0:
+        print('* WARNING :: ' + name + ' < ' + str(minval) + ' ' + unit +
+              ' are set to ' + str(minval) + ' ' + unit + '!')
+    return par
