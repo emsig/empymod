@@ -2,11 +2,13 @@
 
 ## latest
 
-* [12/01/2017]
+* [14/01/2017]
     - General modelling routine `bipole` (replaces `srcbipole`): Model the
       EM field for arbitrarily oriented, finite length bipole sources and
       receivers.
-    - Some changes in `utils` with regard to the new routine `bipole`.
+    - Loads of changes in `utils`, with regards to the new routine `bipole` and
+      with regards to verbosity. Moved all warnings out from `transform` and
+      `model` into `utils`.
     - Add kernel count (printed if verb > 0).
 
 ## v1.1.0 - *2016-12-22*
@@ -16,6 +18,7 @@
       length bipole source.
     * Merge `frequency` and `time` into `dipole`. (`frequency` and `time` are
       still available.)
+    * `dipole` now supports multiple sources.
 
 * Internal changes:
     * Replace `get_Gauss_Weights` with `scipy.special.p_roots`
