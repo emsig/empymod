@@ -3,10 +3,9 @@ empymod
 
 |docs|
 
-![](http://placehold.it/15/cc0000/000000?text=+)
-**This is the master branch. Check out the [latest
-release](https://github.com/prisae/empymod/releases/latest) if you are looking
-for a stable version.**
+**This is the master branch. Check out the
+`latest release <https://github.com/prisae/empymod/releases/latest>`_
+if you are looking for a stable version.**
 
 Electromagnetic modeller in Python
 ----------------------------------
