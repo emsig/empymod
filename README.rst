@@ -3,9 +3,9 @@ empymod
 
 |docs|
 
-**This is the master branch. Check out the
+**This is the master branch. Check out the**
 `latest release <https://github.com/prisae/empymod/releases/latest>`_
-if you are looking for a stable version.**
+**if you are looking for a stable version.**
 
 Electromagnetic modeller in Python
 ----------------------------------
