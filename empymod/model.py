@@ -86,11 +86,17 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
             - [x, y, z, theta, phi]    (dipole, infinitesimal small)
 
-        The coordinates and theta/phi can be single values or arrays.
-        The variables x and y (dipole) or x0, x1, y0, y1 (bipole) must have the
-        same dimensions. The variables z, theta, and phi (dipole) or z0 and z1
-        must either be single values or having the same dimension as the other
-        variables.
+        Dimensions:
+            - The coordinates x, y, and z (dipole) or x0, x1, y0, y1, z0, and
+              z1 (bipole) can be single values or arrays.
+            - The variables x and y (dipole) or x0, x1, y0, and y1 (bipole)
+              must have the same dimensions.
+            - The variable z (dipole) or z0 and z1 (bipole) must either be
+              single values or having the same dimension as the other
+              coordinates.
+            - The variables theta and phi must be single values. If they have
+              different angles, you have to use the bipole-method (with
+              srcpts/recpts = 1, so it is calculated as dipoles).
 
         Angles (coordinate system is left-handed, positive z down
         (East-North-Depth):
@@ -100,7 +106,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     srcphi, recphi : float
         Vertical source/receiver angle.
-
 
     depth : list
         Absolute layer interfaces z (m); #depth = #res - 1
@@ -344,13 +349,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Check src and rec, get flags if dipole or not
     # nsrcz/nrecz are number of unique src/rec-pole depths
-    if mrec:
-        # msrc, mrec = mrec, msrc
-        if msrc:
-            print('**WARNING** `bipole` with e-src and m-rec')
-            msrc, mrec = mrec, msrc
-            src, rec = rec, src
-
     src, nsrc, nsrcz, srcdipole = check_bipole(src, 'src')
     rec, nrec, nrecz, recdipole = check_bipole(rec, 'rec')
 
@@ -435,7 +433,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
                         # Get geometrical scaling factor
                         tfact = get_geo_fact(iab, srctheta, srcphi, rectheta,
-                                             recphi)
+                                             recphi, msrc, mrec)
 
                         # Add field to EM with geometrical factor
                         abEM += out[0]*tfact

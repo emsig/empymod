@@ -249,8 +249,8 @@ def check_bipole(inp, name):
         # Check x, y, and z
         inp = check_dipole(inp, name)
 
-        # Check theta and phi (must be floats or arrays like x/y)
-        inp[3] = _check_var(inp[3], float, 1, 'theta', (1,), inp[0].shape)
+        # Check theta and phi (must be floats, otherwise use `bipole`)
+        inp[3] = _check_var(inp[3], float, 1, 'theta', (1,))
         inp[4] = _check_var(inp[4], float, 1, 'phi', inp[3].shape)
 
         # How many different depths
@@ -1045,7 +1045,7 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
     return ab_calc
 
 
-def get_geo_fact(ab, srctheta, srcphi, rectheta, recphi):
+def get_geo_fact(ab, srctheta, srcphi, rectheta, recphi, msrc, mrec):
     """Get required geometrical scaling factor for given angles.
 
     This check-function is called from one of the modelling routines in
@@ -1071,8 +1071,16 @@ def get_geo_fact(ab, srctheta, srcphi, rectheta, recphi):
 
     """
 
-    # Geometrical factor from source
+    # Get current direction for source and receiver
     fis = ab % 10
+    fir = ab // 10
+
+    # If rec is magnetic and src not, swap directions (reciprocity).
+    # (They have been swapped in get_abs, but the original scaling applies.)
+    if mrec and not msrc:
+        fis, fir = fir, fis
+
+    # Geometrical factor from source
     if fis in [1, 4]:    # x-directed
         fsrc = np.cos(srctheta)*np.cos(srcphi)
     elif fis in [2, 5]:  # y-directed
@@ -1081,10 +1089,9 @@ def get_geo_fact(ab, srctheta, srcphi, rectheta, recphi):
         fsrc = np.sin(srcphi)
 
     # Geometrical factor from receiver
-    fir = ab//10
-    if fir == 1:    # x-directed
+    if fir in [1, 4]:    # x-directed
         frec = np.cos(rectheta)*np.cos(recphi)
-    elif fir == 2:  # y-directed
+    elif fir in [2, 5]:  # y-directed
         frec = np.sin(rectheta)*np.cos(recphi)
     else:           # z-directed
         frec = np.sin(recphi)
