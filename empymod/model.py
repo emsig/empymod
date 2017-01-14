@@ -1109,7 +1109,7 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
 
     # If <ab> = 36 (or 63), fEM-field is zero
     if ab in [36, ]:
-        return fEM
+        return fEM, kcount, conv
 
     # Get full-space-solution if model is a full-space or
     # if src and rec are in the same layer and xdirect=True.

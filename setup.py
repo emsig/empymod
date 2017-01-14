@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
-
+from distutils.core import setup
 
 with open('README.rst') as f:
     readme = f.read()
@@ -17,5 +16,5 @@ setup(
     author_email='dieter@werthmuller.org',
     url='https://github.com/prisae/empymod',
     license=license,
-    packages=find_packages(exclude=('notebook', 'docs'))
+    packages=['empymod']
 )

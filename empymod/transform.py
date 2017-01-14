@@ -514,6 +514,9 @@ def fqwe(fEM, time, freq, qweargs):
                                        intervals[i, -1], (time[i],),
                                        0, atol, rtol, limit=500)
 
+        # Required because of QWE
+        conv = True
+
     # Carry out QWE if required
     if np.any(doqwe):
         sEM = tEM_iint(np.log(Bx/time[doqwe, None]))*SS

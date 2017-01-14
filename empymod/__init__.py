@@ -49,13 +49,14 @@ License.
 Missing features
 ----------------
 
-A list of things that should or could be added and improved, in decreasing
-priority:
+A list of things that should or could be added and improved:
 
     - **Tests**, **tests**, and **more tests**: The modeller `empymod` is
-      lacking an extensive testing suite. But it should have one.  This would
+      lacking an extensive test suite. But it should have one.  This would
       ideally be combined with automated testing by, for instance, Travis. It
       should also include some proper benchmarks.
+
+    - Make it easier installable (PyPI, Anaconda, ...).
 
     - Kernel
         - Include `scipy.integrate.quad` as an additional Hankel transform.
@@ -65,19 +66,21 @@ priority:
           the `transform` modules. Maybe not worth it, as it may improve speed,
           but decrease accessibility. Both at the same time would be nice. A
           fast C-version for calculations (inversions), and a Python-version to
-          tinker with for interested folks.
+          tinker with for interested folks. (Probably combined with default
+          parallelisation, removing the `numexpr` variant.)
 
     - More modelling routines:
-        - convolution with a wavelet for GPR (proper version of `model.gpr`)
-        - pure wavenumber output-routine (proper version of `model.wavenumber`)
-        - various source-receiver arrangements (loops etc)
+        - convolution with a wavelet for GPR (proper version of `model.gpr`);
+        - pure wavenumber output-routine (proper version of
+          `model.wavenumber`);
+        - various source-receiver arrangements (loops etc);
         - load and save functions to store and load model, together with all
           information.
 
     - Module to create Hankel filters (nice to have addition, mainly for
       educational purposes).
 
-    - GUI frontend
+    - GUI frontend.
 
 
 Notice
