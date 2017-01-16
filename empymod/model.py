@@ -56,7 +56,7 @@ import numpy as np
 from . import kernel, transform
 from .utils import (check_time, check_model, check_frequency, check_hankel,
                     check_opt, check_dipole, check_bipole, check_ab, get_abs,
-                    get_geo_fact, get_theta_phi, get_off_ang, get_layer_nr,
+                    get_geo_fact, get_azm_dip, get_off_ang, get_layer_nr,
                     printstartfinish, conv_warning)
 
 __all__ = ['bipole', 'dipole', 'frequency', 'time', 'gpr', 'wavenumber', 'fem',
@@ -372,20 +372,19 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     for isz in range(nsrcz):  # Loop over source depths
 
         # Get this source
-        srcthetaphi = get_theta_phi(src, isz, nsrcz, srcpts, srcdipole,
-                                    strength, 'src', verb)
-        tsrc, srctheta, srcphi, srcg_w, srcpts, src_w = srcthetaphi
+        srcazmdip = get_azm_dip(src, isz, nsrcz, srcpts, srcdipole, strength,
+                                'src', verb)
+        tsrc, srcazm, srcdip, srcg_w, srcpts, src_w = srcazmdip
 
         for irz in range(nrecz):  # Loop over receiver depths
 
             # Get this receiver
-            recthetaphi = get_theta_phi(rec, irz, nrecz, recpts, recdipole,
-                                        strength, 'rec', verb)
-            trec, rectheta, recphi, recg_w, recpts, rec_w = recthetaphi
+            recazmdip = get_azm_dip(rec, irz, nrecz, recpts, recdipole,
+                                    strength, 'rec', verb)
+            trec, recazm, recdip, recg_w, recpts, rec_w = recazmdip
 
             # Get required ab's
-            ab_calc = get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi,
-                              verb)
+            ab_calc = get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb)
 
             # Pre-allocate temporary source-EM array for integration loop
             sEM = np.zeros((freq.size, isrz), dtype=complex)
@@ -404,7 +403,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
                 for irg in range(recpts):  # Loop over rec integration pts
                     # Note, if source or receiver is a bipole, but horizontal
-                    # (phi=0), then calculation could be sped up by not looping
+                    # (dip=0), then calculation could be sped up by not looping
                     # over the bipole elements, but calculate it all in one go.
 
                     # This integration receiver
@@ -432,8 +431,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                         out = fem(iab, *finp)
 
                         # Get geometrical scaling factor
-                        tfact = get_geo_fact(iab, srctheta, srcphi, rectheta,
-                                             recphi, msrc, mrec)
+                        tfact = get_geo_fact(iab, srcazm, srcdip, recazm,
+                                             recdip, msrc, mrec)
 
                         # Add field to EM with geometrical factor
                         abEM += out[0]*tfact

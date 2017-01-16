@@ -41,8 +41,8 @@ from . import filters, transform
 
 __all__ = ['EMArray', 'check_time', 'check_model', 'check_frequency',
            'check_hankel', 'check_opt', 'check_dipole', 'check_bipole',
-           'check_ab', 'get_abs', 'get_geo_fact', 'get_theta_phi',
-           'get_off_ang', 'get_layer_nr', 'printstartfinish', 'conv_warning']
+           'check_ab', 'get_abs', 'get_geo_fact', 'get_azm_dip', 'get_off_ang',
+           'get_layer_nr', 'printstartfinish', 'conv_warning']
 
 # 0. General settings
 
@@ -199,7 +199,7 @@ def check_bipole(inp, name):
     ----------
     inp : list of floats or arrays
         Coordinates of inp (m):
-        [dipole-x, dipole-y, dipole-z, theta, phi] or.
+        [dipole-x, dipole-y, dipole-z, azimuth, dip] or.
         [bipole-x0, bipole-x1, bipole-y0, bipole-y1, bipole-z0, bipole-z1].
 
     name : str, {'src', 'rec'}
@@ -252,9 +252,9 @@ def check_bipole(inp, name):
         # Check x, y, and z
         inp = check_dipole(inp, name)
 
-        # Check theta and phi (must be floats, otherwise use `bipole`)
-        inp[3] = _check_var(inp[3], float, 1, 'theta', (1,))
-        inp[4] = _check_var(inp[4], float, 1, 'phi', inp[3].shape)
+        # Check azimuth and dip (must be floats, otherwise use `bipole`)
+        inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,))
+        inp[4] = _check_var(inp[4], float, 1, 'dip', inp[3].shape)
 
         # How many different depths
         inpz = inp[2].size
@@ -955,7 +955,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
 # 2.b <Get>s (alphabetically)
 
-def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
+def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
     """Get required ab's for given angles.
 
     This check-function is called from one of the modelling routines in
@@ -967,11 +967,11 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
     msrc, mrec : bool
         True if src/rec is magnetic, else False.
 
-    srctheta, rectheta : float
-        Horizontal source/receiver angle.
+    srcazm, recazm : float
+        Horizontal source/receiver angle (azimuth).
 
-    srcphi, recphi : float
-        Vertical source/receiver angle.
+    srcdip, recdip : float
+        Vertical source/receiver angle (dip).
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -1003,32 +1003,32 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
     bab = np.asarray(ab_calc*0+1, dtype=bool)
 
     # Remove if source is x- or y-directed
-    check = np.atleast_1d(srctheta)[0]
-    if np.allclose(srctheta, check):  # only if just 1 angle or all equal
+    check = np.atleast_1d(srcazm)[0]
+    if np.allclose(srcazm, check):  # only if just 1 angle or all equal
         if np.any(np.isclose(np.abs(check), [0, np.pi])):
             bab[:, 1] *= False        # x-directed source, remove y
         elif np.any(np.isclose(np.abs(check), [np.pi/2., 3*np.pi/2.])):
             bab[:, 0] *= False        # y-directed source, remove x
 
     # Remove if source is vertical
-    check = np.atleast_1d(srcphi)[0]
-    if np.allclose(srcphi, check):    # only if just 1 angle or all equal
+    check = np.atleast_1d(srcdip)[0]
+    if np.allclose(srcdip, check):    # only if just 1 angle or all equal
         if np.any(np.isclose(np.abs(check), [0, np.pi])):
             bab[:, 2] *= False        # Horizontal, remove z
         elif np.any(np.isclose(np.abs(check), [np.pi/2., 3*np.pi/2.])):
             bab[:, :2] *= False       # Vertical, remove x/y
 
     # Remove if receiver is x- or y-directed
-    check = np.atleast_1d(rectheta)[0]
-    if np.allclose(rectheta, check):  # only if just 1 angle or all equal
+    check = np.atleast_1d(recazm)[0]
+    if np.allclose(recazm, check):  # only if just 1 angle or all equal
         if np.any(np.isclose(np.abs(check), [0, np.pi])):
             bab[1, :] *= False        # x-directed receiver, remove y
         elif np.any(np.isclose(np.abs(check), [np.pi/2., 3*np.pi/2.])):
             bab[0, :] *= False        # y-directed receiver, remove x
 
     # Remove if receiver is vertical
-    check = np.atleast_1d(recphi)[0]
-    if np.allclose(recphi, check):    # only if just 1 angle or all equal
+    check = np.atleast_1d(recdip)[0]
+    if np.allclose(recdip, check):    # only if just 1 angle or all equal
         if np.any(np.isclose(np.abs(check), [0, np.pi])):
             bab[2, :] *= False        # Horizontal, remove z
         elif np.any(np.isclose(np.abs(check), [np.pi/2., 3*np.pi/2.])):
@@ -1044,7 +1044,7 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
     return ab_calc
 
 
-def get_geo_fact(ab, srctheta, srcphi, rectheta, recphi, msrc, mrec):
+def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
     """Get required geometrical scaling factor for given angles.
 
     This check-function is called from one of the modelling routines in
@@ -1056,10 +1056,10 @@ def get_geo_fact(ab, srctheta, srcphi, rectheta, recphi, msrc, mrec):
     ab : int
         Source-receiver configuration.
 
-    srctheta, rectheta : float
+    srcazm, recazm : float
         Horizontal source/receiver angle.
 
-    srcphi, recphi : float
+    srcdip, recdip : float
         Vertical source/receiver angle.
 
 
@@ -1081,19 +1081,19 @@ def get_geo_fact(ab, srctheta, srcphi, rectheta, recphi, msrc, mrec):
 
     # Geometrical factor from source
     if fis in [1, 4]:    # x-directed
-        fsrc = np.cos(srctheta)*np.cos(srcphi)
+        fsrc = np.cos(srcazm)*np.cos(srcdip)
     elif fis in [2, 5]:  # y-directed
-        fsrc = np.sin(srctheta)*np.cos(srcphi)
+        fsrc = np.sin(srcazm)*np.cos(srcdip)
     else:                # z-directed
-        fsrc = np.sin(srcphi)
+        fsrc = np.sin(srcdip)
 
     # Geometrical factor from receiver
     if fir in [1, 4]:    # x-directed
-        frec = np.cos(rectheta)*np.cos(recphi)
+        frec = np.cos(recazm)*np.cos(recdip)
     elif fir in [2, 5]:  # y-directed
-        frec = np.sin(rectheta)*np.cos(recphi)
+        frec = np.sin(recazm)*np.cos(recdip)
     else:           # z-directed
-        frec = np.sin(recphi)
+        frec = np.sin(recdip)
 
     return np.outer(fsrc, frec).ravel()
 
@@ -1195,7 +1195,7 @@ def get_off_ang(src, rec, nsrc, nrec, verb):
     return off, angle
 
 
-def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
+def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     """Get angles, interpolation weights and normalization weights.
 
     This check-function is called from one of the modelling routines in
@@ -1207,7 +1207,7 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     inp : list of floats or arrays
         Input coordinates (m):
             - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
-            - [x, y, z, theta, phi]    (dipole, infinitesimal small)
+            - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
 
     iz : int
         Index of current di-/bipole depth (-).
@@ -1240,10 +1240,10 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     tout : list of floats or arrays
         Dipole coordinates x, y, and z (m).
 
-    theta : float or array of floats
+    azm : float or array of floats
         Horizontal angle (azimuth).
 
-    phi : float or array of floats
+    dip : float or array of floats
         Vertical angle (dip).
 
     g_w : float or array of floats
@@ -1277,15 +1277,15 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         # If input is a dipole, set intpts to 1
         intpts = 1
 
-        # Check theta
-        theta = _check_var(np.deg2rad(inp[3]), float, 1, 'theta')
-        if ninpz == 1 and theta.size == 1:
-            theta = np.ones(tinp[0].shape)*theta
+        # Check azm
+        azm = _check_var(np.deg2rad(inp[3]), float, 1, 'azimuth')
+        if ninpz == 1 and azm.size == 1:
+            azm = np.ones(tinp[0].shape)*azm
 
-        # Check phi
-        phi = _check_var(np.deg2rad(inp[4]), float, 1, 'phi')
-        if ninpz == 1 and phi.size == 1:
-            phi = np.ones(tinp[0].shape)*phi
+        # Check dip
+        dip = _check_var(np.deg2rad(inp[4]), float, 1, 'dip')
+        if ninpz == 1 and dip.size == 1:
+            dip = np.ones(tinp[0].shape)*dip
 
         # If dipole, g_w are ones
         g_w = np.ones(inp[0].size)
@@ -1308,7 +1308,7 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         # (This is a problem, as we would could not define the angles then.)
         if np.any((dx == 0)*(dy == 0)*(dz == 0)):
             print("* ERROR   :: At least one of <" + name + "> is a point " +
-                  "dipole, use the format [x, y, z, theta, phi] instead " +
+                  "dipole, use the format [x, y, z, azimuth, dip] instead " +
                   "of [x0, x1, y0, y1, z0, z1].")
             raise ValueError('Bipole: bipole-' + name)
 
@@ -1316,10 +1316,10 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         dl = np.atleast_1d(np.linalg.norm([dx, dy, dz], axis=0))
 
         # Horizontal deviation from x-axis
-        theta = np.atleast_1d(np.arctan2(dy, dx))
+        azm = np.atleast_1d(np.arctan2(dy, dx))
 
         # Vertical deviation from xy-plane down
-        phi = np.atleast_1d(np.pi/2-np.arccos(dz/dl))
+        dip = np.atleast_1d(np.pi/2-np.arccos(dz/dl))
 
         # Check intpts
         intpts = _check_var(intpts, int, 0, 'intpts', ())
@@ -1333,15 +1333,15 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
             # Coordinate system is left-handed, positive z down
             # (East-North-Depth).
-            xinp = tinp[0] + dx/2 + g_x*np.cos(phi)*np.cos(theta)
-            yinp = tinp[2] + dy/2 + g_x*np.cos(phi)*np.sin(theta)
-            zinp = tinp[4] + dz/2 + g_x*np.sin(phi)
+            xinp = tinp[0] + dx/2 + g_x*np.cos(dip)*np.cos(azm)
+            yinp = tinp[2] + dy/2 + g_x*np.cos(dip)*np.sin(azm)
+            zinp = tinp[4] + dz/2 + g_x*np.sin(dip)
 
             # Reduce zinp to one, if ninpz is 1 (as they are all the same then)
             if ninpz == 1:
                 zinp = zinp[:, 0]
 
-        else:  # If intpts < 3: Calculate bipole at tinp-centre for phi/theta
+        else:  # If intpts < 3: Calculate bipole at tinp-centre for dip/azm
 
             # Set intpts to 1
             intpts = 1
@@ -1401,10 +1401,10 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
             _prnt_min_max_val(prntinp[i], text, verb)
 
         # Print angles
-        _prnt_min_max_val(np.rad2deg(theta), "     > theta   [°] : ", verb)
-        _prnt_min_max_val(np.rad2deg(phi), "     > phi     [°] : ", verb)
+        _prnt_min_max_val(np.rad2deg(azm), "     > azimuth [°] : ", verb)
+        _prnt_min_max_val(np.rad2deg(dip), "     > dip     [°] : ", verb)
 
-    return tout, theta, phi, g_w, intpts, inp_w
+    return tout, azm, dip, g_w, intpts, inp_w
 
 
 def printstartfinish(verb, inp=None, kcount=None):

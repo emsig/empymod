@@ -35,7 +35,7 @@ default value:
     >>> from empymod import bipole
     >>> # x-directed bipole source: x0, x1, y0, y1, z0, z1
     >>> src = [-50, 50, 0, 0, 100, 100]
-    >>> # x-directed dipole source-array: x, y, z, theta, phi
+    >>> # x-directed dipole source-array: x, y, z, azimuth, dip
     >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 0]
     >>> # layer boundaries
     >>> depth = [0, 300, 1000, 1050]
@@ -227,7 +227,7 @@ source and receiver bipoles.
     +----------------+--------+-------+------+-------+-------+------+---------+
     |                |    source bipole      |        receiver bipole         |
     +================+========+=======+======+=======+=======+======+=========+
-    |**kernel calls**| intpts | theta |  phi |intpts | theta |  phi | diff. z |
+    |**kernel calls**| intpts |azimuth|  dip |intpts |azimuth|  dip | diff. z |
     +----------------+--------+-------+------+-------+-------+------+---------+
     |              1 |      1 |  0/90 | 0/90 |     1 |  0/90 | 0/90 |       1 |
     +----------------+--------+-------+------+-------+-------+------+---------+
