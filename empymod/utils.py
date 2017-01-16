@@ -3,6 +3,8 @@
 :mod:`utils` -- Utilites
 ========================
 
+Utilities for `model` such as checking input parameters.
+
 This module consists of four groups of functions:
    0. General settings
    1. Class EMArray

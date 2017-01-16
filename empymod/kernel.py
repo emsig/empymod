@@ -4,6 +4,7 @@
 ===================================
 
 Kernel of `empymod`, calculates the wavenumber-domain electromagnetic response.
+Plus analytical, frequency-domain full- and half-space solutions.
 
 The functions 'wavenumber', 'angle_factor', 'fullspace', 'greenfct',
 'reflections', and 'fields' are based on source files (specified in each

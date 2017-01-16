@@ -72,7 +72,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     Calculate the electromagnetic frequency- or time-domain field due to
     arbitrary finite electric or magnetic bipole sources, measured by arbitrary
-    finite electric or magnetic bipole receivers.
+    finite electric or magnetic bipole receivers. By default, the
+    electromagnetic response is normalized to to source and receiver of 1 m
+    length, and source strength of 1 A.
 
     See Also
     --------

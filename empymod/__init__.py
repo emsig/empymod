@@ -15,35 +15,63 @@ Required are python version 3 or higher and the modules `NumPy`, `SciPy`, and
 `numexpr`.
 
 
-Citation
---------
+Usage
+-----
 
-I am in the process of publishing an article regarding `empymod`, and I will
-put the info here once it is reality. If you publish results for which you used
-`empymod`, please consider citing this article. Also consider citing
-[Hunziker_et_al_2015]_ and [Key_2012]_, without which `empymod` would not
-exist.
+The main modelling routines is `bipole`, which can calculate the
+electromagnetic frequency- or time-domain field due to arbitrary finite
+electric or magnetic bipole sources, measured by arbitrary finite electric or
+magnetic bipole receivers. The model is defined by horizontal resistivity and
+anisotropy, horizontal and vertical electric permittivities and horizontal and
+vertical magnetic permeabilities. By default, the electromagnetic response is
+normalized to to source and receiver of 1 m length, and source strength of 1 A.
+
+A simple frequency-domain example, with most of the parameters left at the
+default value:
+
+.. code:: python
+
+    >>> import numpy as np
+    >>> from empymod import bipole
+    >>> # x-directed bipole source: x0, x1, y0, y1, z0, z1
+    >>> src = [-50, 50, 0, 0, 100, 100]
+    >>> # x-directed dipole source-array: x, y, z, theta, phi
+    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 0]
+    >>> # layer boundaries
+    >>> depth = [0, 300, 1000, 1050]
+    >>> # layer resistivities
+    >>> res = [1e20, .3, 1, 50, 1]
+    >>> # Frequency
+    >>> freq = 1
+    >>> # Calculate electric field due to an electric source at 1 Hz.
+    >>> # [msrc = mrec = True (default)]
+    >>> EMfield = bipole(src, rec, depth, res, freq)
+    :: empymod END; runtime = 0:00:00.008278 :: 1 kernel call(s)
+    >>> print(EMfield)
+    [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
+      -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
+       1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j
+       1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j
+       6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
+
+Have a look at the notebooks for more extensive examples including figures.
 
 
-License
--------
+Structure
+---------
 
-Copyright 2016-2017 Dieter Werthmüller
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-See the *LICENSE*-file in the root directory for a full reprint of the Apache
-License.
+    - **model.py**: EM modelling routines.
+    - **utils.py**: Utilities for `model` such as checking input parameters.
+    - **kernel.py**: Kernel of `empymod`, calculates the wavenumber-domain
+      electromagnetic response. Plus analytical, frequency-domain full- and
+      half-space solutions.
+    - **transform.py**: Methods to carry out the required Hankel transform from
+      wavenumber to frequency domain and Fourier transform from frequency to
+      time
+      domain.
+    - **filters.py**: Filters for the *Fast Hankel Transform* (FHT,
+      [Anderson_1982]_) and the *Fourier Sine and Cosine Transforms*
+      [Anderson_1975]_.
 
 
 Missing features
@@ -81,6 +109,37 @@ A list of things that should or could be added and improved:
       educational purposes).
 
     - GUI frontend.
+
+
+Citation
+--------
+
+I am in the process of publishing an article regarding `empymod`, and I will
+put the info here once it is reality. If you publish results for which you used
+`empymod`, please consider citing this article. Also consider citing
+[Hunziker_et_al_2015]_ and [Key_2012]_, without which `empymod` would not
+exist.
+
+
+License
+-------
+
+Copyright 2016-2017 Dieter Werthmüller
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+See the *LICENSE*-file in the root directory for a full reprint of the Apache
+License.
 
 
 Notice
