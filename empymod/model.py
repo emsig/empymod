@@ -86,7 +86,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     src, rec : list of floats or arrays
         Source and receiver coordinates (m):
             - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
-            - [x, y, z, theta, phi]    (dipole, infinitesimal small)
+            - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
 
         Dimensions:
             - The coordinates x, y, and z (dipole) or x0, x1, y0, y1, z0, and
@@ -96,18 +96,15 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             - The variable z (dipole) or z0 and z1 (bipole) must either be
               single values or having the same dimension as the other
               coordinates.
-            - The variables theta and phi must be single values. If they have
+            - The variables azimuth and dip must be single values. If they have
               different angles, you have to use the bipole-method (with
               srcpts/recpts = 1, so it is calculated as dipoles).
 
         Angles (coordinate system is left-handed, positive z down
         (East-North-Depth):
 
-            - theta (°): horizontal deviation from x-axis.
-            - phi (°): vertical deviation from xy-plane downwards.
-
-    srcphi, recphi : float
-        Vertical source/receiver angle.
+            - azimuth (°): horizontal deviation from x-axis, anti-clockwise.
+            - dip (°): vertical deviation from xy-plane downwards.
 
     depth : list
         Absolute layer interfaces z (m); #depth = #res - 1
@@ -520,7 +517,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     bipoles of finite length and arbitrary angle.
 
     The function `dipole` could be replaced by `bipole` (all there is to do is
-    translate `ab` into `msrc`, `mrec`, `theta`'s and `phi`'s). However,
+    translate `ab` into `msrc`, `mrec`, `azimuth`'s and `dip`'s). However,
     `dipole` is kept separately to serve as an example of a simple modelling
     routine that can serve as a template.
 

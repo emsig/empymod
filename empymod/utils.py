@@ -1005,33 +1005,33 @@ def get_abs(msrc, mrec, srctheta, srcphi, rectheta, recphi, verb):
     # Remove if source is x- or y-directed
     check = np.atleast_1d(srctheta)[0]
     if np.allclose(srctheta, check):  # only if just 1 angle or all equal
-        if np.any(np.isclose(check, [0, np.pi])):
+        if np.any(np.isclose(np.abs(check), [0, np.pi])):
             bab[:, 1] *= False        # x-directed source, remove y
-        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+        elif np.any(np.isclose(np.abs(check), [np.pi/2., 3*np.pi/2.])):
             bab[:, 0] *= False        # y-directed source, remove x
 
     # Remove if source is vertical
     check = np.atleast_1d(srcphi)[0]
     if np.allclose(srcphi, check):    # only if just 1 angle or all equal
-        if np.any(np.isclose(check, [0, np.pi])):
+        if np.any(np.isclose(np.abs(check), [0, np.pi])):
             bab[:, 2] *= False        # Horizontal, remove z
-        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+        elif np.any(np.isclose(np.abs(check), [np.pi/2., 3*np.pi/2.])):
             bab[:, :2] *= False       # Vertical, remove x/y
 
     # Remove if receiver is x- or y-directed
     check = np.atleast_1d(rectheta)[0]
     if np.allclose(rectheta, check):  # only if just 1 angle or all equal
-        if np.any(np.isclose(check, [0, np.pi])):
+        if np.any(np.isclose(np.abs(check), [0, np.pi])):
             bab[1, :] *= False        # x-directed receiver, remove y
-        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+        elif np.any(np.isclose(np.abs(check), [np.pi/2., 3*np.pi/2.])):
             bab[0, :] *= False        # y-directed receiver, remove x
 
     # Remove if receiver is vertical
     check = np.atleast_1d(recphi)[0]
     if np.allclose(recphi, check):    # only if just 1 angle or all equal
-        if np.any(np.isclose(check, [0, np.pi])):
+        if np.any(np.isclose(np.abs(check), [0, np.pi])):
             bab[2, :] *= False        # Horizontal, remove z
-        elif np.any(np.isclose(check, [np.pi/2., 3*np.pi/2.])):
+        elif np.any(np.isclose(np.abs(check), [np.pi/2., 3*np.pi/2.])):
             bab[:2, :] *= False       # Vertical, remove x/y
 
     # Reduce
@@ -1241,10 +1241,10 @@ def get_theta_phi(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         Dipole coordinates x, y, and z (m).
 
     theta : float or array of floats
-        Horizontal angle.
+        Horizontal angle (azimuth).
 
     phi : float or array of floats
-        Vertical angle.
+        Vertical angle (dip).
 
     g_w : float or array of floats
         Factors from Gaussian interpolation.
