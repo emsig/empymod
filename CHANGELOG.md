@@ -2,6 +2,11 @@
 
 ## latest
 
+* [17/01/2017]
+    - Cleaned-up wavenumber-domain routine.
+    - Initiated tests (Status 0/52).
+    - theta/phi -> azimuth/dip; easier to understand
+
 * [14/01/2017]
     - General modelling routine `bipole` (replaces `srcbipole`): Model the
       EM field for arbitrarily oriented, finite length bipole sources and

@@ -1,5 +1,8 @@
 """
 
+The latest version of this documentation can be found at
+https://empymod.readthedocs.io.
+
 Installation & requirements
 ---------------------------
 
@@ -7,9 +10,9 @@ Just add the path to `empymod` to your python-path variable.
 
 Alternatively, to install it in your python distribution (linux), run:
 
-.. code:: bash
+.. code-block:: console
 
-   python setup.py install
+   > python setup.py install
 
 Required are python version 3 or higher and the modules `NumPy`, `SciPy`, and
 `numexpr`.
@@ -29,7 +32,7 @@ normalized to to source and receiver of 1 m length, and source strength of 1 A.
 A simple frequency-domain example, with most of the parameters left at the
 default value:
 
-.. code:: python
+.. code-block:: python
 
     >>> import numpy as np
     >>> from empymod import bipole
@@ -79,11 +82,6 @@ Missing features
 
 A list of things that should or could be added and improved:
 
-    - **Tests**, **tests**, and **more tests**: The modeller `empymod` is
-      lacking an extensive test suite. But it should have one.  This would
-      ideally be combined with automated testing by, for instance, Travis. It
-      should also include some proper benchmarks.
-
     - Make it easier installable (PyPI, Anaconda, ...).
 
     - Kernel
@@ -98,17 +96,39 @@ A list of things that should or could be added and improved:
           parallelisation, removing the `numexpr` variant.)
 
     - More modelling routines:
-        - convolution with a wavelet for GPR (proper version of `model.gpr`);
-        - pure wavenumber output-routine (proper version of
-          `model.wavenumber`);
-        - various source-receiver arrangements (loops etc);
-        - load and save functions to store and load model, together with all
+        - Convolution with a wavelet for GPR (proper version of `model.gpr`,
+          needs another HT/FT).
+        - Various source-receiver arrangements (loops etc).
+        - Load and save functions to store and load model, together with all
           information.
 
     - Module to create Hankel filters (nice to have addition, mainly for
       educational purposes).
 
-    - GUI frontend.
+    - GUI.
+
+
+Testing
+-------
+
+The modeller comes with a test suite using `pytest`. If you want to run
+the tests, just install `pytest` and run it within the `empymod`-top-directory.
+
+.. code-block:: console
+
+    > conda install pytest
+    > # or
+    > pip install pytest
+    > # and then
+    > cd to/the/empymod/folder
+    > ls
+    CHANGELOG.md  empymod  notebooks  paper       requirements.txt  tests
+    docs          LICENSE  NOTICE     README.rst  setup.py          THANKS.md
+    > # pytest will find the tests, which are located in the tests-folder.
+    > # simply run
+    > pytest
+
+It should run all tests successfully. Please let me know if not!
 
 
 Citation

@@ -76,10 +76,12 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     electromagnetic response is normalized to to source and receiver of 1 m
     length, and source strength of 1 A.
 
+
     See Also
     --------
     fem : Electromagnetic frequency-domain response.
     tem : Electromagnetic time-domain response.
+
 
     Parameters
     ----------
@@ -520,11 +522,13 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     `dipole` is kept separately to serve as an example of a simple modelling
     routine that can serve as a template.
 
+
     See Also
     --------
     bipole : Electromagnetic field due to an electromagnetic source.
     fem : Electromagnetic frequency-domain response.
     tem : Electromagnetic time-domain response.
+
 
     Parameters
     ----------
@@ -834,6 +838,7 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
 
     For input parameters see `frequency`, except for:
 
+
     Parameters
     ----------
     fc : float
@@ -842,6 +847,7 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
 
     gain : float
         Power of gain function. If None, no gain is applied.
+
 
     Returns
     -------
@@ -937,70 +943,171 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
                xdirect=True, verb=2):
     """Return the electromagnetic wavenumber-domain field.
 
-    THIS FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION.
+    Calculate the electromagnetic wavenumber-domain field due to infinitesimal
+    small electric or magnetic dipole source(s), measured by infinitesimal
+    small electric or magnetic dipole receiver(s); sources and receivers are
+    directed along the principal directions x, y, or z, and all sources are at
+    the same depth, as well as all receivers are at the same depth.
 
-    Or rather, it is for development purposes, to easily get the wavenumber
-    result with the required input checks.
 
-    For input parameters see `frequency`, except for:
+    See Also
+    --------
+    dipole : Electromagnetic field due to an electromagnetic source (dipoles).
+    bipole : Electromagnetic field due to an electromagnetic source (bipoles).
+    fem : Electromagnetic frequency-domain response.
+    tem : Electromagnetic time-domain response.
+
 
     Parameters
     ----------
+    src, rec : list of floats or arrays
+        Source and receiver coordinates (m): [x, y, z].
+        The x- and y-coordinates can be arrays, z is a single value.
+        The x- and y-coordinates must have the same dimension.
+
+    depth : list
+        Absolute layer interfaces z (m); #depth = #res - 1
+        (excluding +/- infinity).
+
+    res : array_like
+        Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
+
+    freq : array_like
+        Frequencies f (Hz), used to calculate etaH/V and zetaH/V.
+
     wavenumber : array
         Wavenumbers lambda (1/m)
 
+    ab : int, optional
+        Source-receiver configuration, defaults to 11.
+
+        +---------------+-------+------+------+------+------+------+------+
+        |                       | electric  source   | magnetic source    |
+        +===============+=======+======+======+======+======+======+======+
+        |                       | **x**| **y**| **z**| **x**| **y**| **z**|
+        +---------------+-------+------+------+------+------+------+------+
+        |               | **x** |  11  |  12  |  13  |  14  |  15  |  16  |
+        + **electric**  +-------+------+------+------+------+------+------+
+        |               | **y** |  21  |  22  |  23  |  24  |  25  |  26  |
+        + **receiver**  +-------+------+------+------+------+------+------+
+        |               | **z** |  31  |  32  |  33  |  34  |  35  |  36  |
+        +---------------+-------+------+------+------+------+------+------+
+        |               | **x** |  41  |  42  |  43  |  44  |  45  |  46  |
+        + **magnetic**  +-------+------+------+------+------+------+------+
+        |               | **y** |  51  |  52  |  53  |  54  |  55  |  56  |
+        + **receiver**  +-------+------+------+------+------+------+------+
+        |               | **z** |  61  |  62  |  63  |  64  |  65  |  66  |
+        +---------------+-------+------+------+------+------+------+------+
+
+    aniso : array_like, optional
+        Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
+        Defaults to ones.
+
+    epermH, epermV : array_like, optional
+        Horizontal/vertical electric permittivities epsilon_h/epsilon_v (-);
+        #epermH = #epermV = #res. Default is ones.
+
+    mpermH, mpermV : array_like, optional
+        Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
+        #mpermH = #mpermV = #res. Default is ones.
+
+    xdirect : bool, optional
+        If True and source and receiver are in the same layer, the direct field
+        is calculated analytically in the frequency domain, if False it is
+        calculated in the wavenumber domain.
+        Defaults to True.
+
+    verb : {0, 1, 2, 3, 4}, optional
+        Level of verbosity, default is 2:
+            - 0: Print nothing.
+            - 1: Print warnings.
+            - 2: Print additional runtime and kernel calls
+            - 3: Print additional start/stop, condensed parameter information.
+            - 4: Print additional full parameter information
+
+
     Returns
     -------
-    PJ0, PJ1, PJ0b : array
-        Wavenumber domain EM responses.
-        - PJ0 is angle independent, PJ1 and PJ0b depend on the angle.
-        - PJ0 and PJ0b are J_0 functions, PJ1 is a J_1 function.
+    PJ0, PJ1 : array
+        Wavenumber-domain EM responses:
+            - PJ0: Wavenumber-domain solution for the kernel with a Bessel
+              function of the first kind of order zero.
+            - PJ1: Wavenumber-domain solution for the kernel with a Bessel
+              function of the first kind of order one.
 
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from empymod.model import wavenumber
+    >>> src = [0, 0, 100]
+    >>> rec = [5000, 0, 200]
+    >>> depth = [0, 300, 1000, 1050]
+    >>> res = [1e20, .3, 1, 50, 1]
+    >>> freq = 1
+    >>> wavenrs = np.logspace(-3.7, -3.6, 10)
+    >>> PJ0, PJ1 = wavenumber(src, rec, depth, res, freq, wavenrs, verb=0)
+    >>> print(PJ0)
+    [ -1.02638329e-08 +4.91531529e-09j  -1.05289724e-08 +5.04222413e-09j
+      -1.08009148e-08 +5.17238608e-09j  -1.10798310e-08 +5.30588284e-09j
+      -1.13658957e-08 +5.44279805e-09j  -1.16592877e-08 +5.58321732e-09j
+      -1.19601897e-08 +5.72722830e-09j  -1.22687889e-08 +5.87492067e-09j
+      -1.25852765e-08 +6.02638626e-09j  -1.29098481e-08 +6.18171904e-09j]
+    >>> print(PJ1)
+    [  1.79483705e-10 -6.59235332e-10j   1.88672497e-10 -6.93749344e-10j
+       1.98325814e-10 -7.30068377e-10j   2.08466693e-10 -7.68286748e-10j
+       2.19119282e-10 -8.08503709e-10j   2.30308887e-10 -8.50823701e-10j
+       2.42062030e-10 -8.95356636e-10j   2.54406501e-10 -9.42218177e-10j
+       2.67371420e-10 -9.91530051e-10j   2.80987292e-10 -1.04342036e-09j]
     """
-    print('* WARNING :: WAVENUMBER FUNCTION IS IN DEVELOPMENT, USE WITH ' +
-          'CAUTION')
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
 
-    # Check layer parameters
-    model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
-                        verb)
-    depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = model
+    # Check layer parameters (isfullspace not required)
+    modl = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb)
+    depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = modl
 
     # Check frequency => get etaH, etaV, zetaH, and zetaV
-    frequency = check_frequency(freq, res, aniso, epermH, epermV, mpermH,
-                                mpermV, verb)
-    _, etaH, etaV, zetaH, zetaV = frequency
+    f = check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb)
+    _, etaH, etaV, zetaH, zetaV = f  # (output freq not required)
 
     # Check src-rec configuration
     # => Get flags if src or rec or both are magnetic (msrc, mrec)
     ab_calc, msrc, mrec = check_ab(ab, verb)
 
     # Check src and rec
-    src, _ = check_dipole(src, 'src', verb)
-    rec, _ = check_dipole(rec, 'rec', verb)
+    src, nsrc = check_dipole(src, 'src', verb)
+    rec, nrec = check_dipole(rec, 'rec', verb)
+
+    # Get offsets and angles (off, angle)
+    off, angle = get_off_ang(src, rec, nsrc, nrec, verb)
 
     # Get layer number in which src and rec reside (lsrc/lrec)
     lsrc, zsrc = get_layer_nr(src, depth)
     lrec, zrec = get_layer_nr(rec, depth)
 
     # === 3. EM-FIELD CALCULATION ============
+
+    # Calculate wavenumber response
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
                                        etaV, zetaH, zetaV,
                                        np.atleast_2d(wavenumber), ab_calc,
                                        xdirect, msrc, mrec, False)
 
-    PJ0 = np.squeeze(PJ0)
-    PJ1 = np.squeeze(PJ1*wavenumber)
-    PJ0b = np.squeeze(PJ0b)
+    # Get angle-dependent factor
+    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+
+    # Collect output
+    PJ1 = np.squeeze(factAng[:, np.newaxis]*PJ1*wavenumber)
+    PJ0 = np.squeeze(PJ0 + factAng[:, np.newaxis]*PJ0b)
 
     # === 4.  FINISHED ============
-    printstartfinish(verb, t0)
+    printstartfinish(verb, t0, 1)
 
-    return PJ0, PJ1, PJ0b
+    return PJ0, PJ1
 
 
 # Shortcuts (legacy routines)
@@ -1017,10 +1124,12 @@ def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
     Only difference is that `frequency` here corresponds to `freqtime` in
     `dipole`.
 
+
     See Also
     --------
     dipole : EM field due to an EM source (dipole-dipole).
     bipole : EM field due to an EM source (bipole-bipole).
+
 
     Examples
     --------
@@ -1056,10 +1165,12 @@ def time(src, rec, depth, res, time, ab=11, signal=0, aniso=None, epermH=None,
     See `dipole` for info and a description of input and output parameters.
     Only difference is that `time` here corresponds to `freqtime` in `dipole`.
 
+
     See Also
     --------
     dipole : EM field due to an EM source (dipole-dipole).
     bipole : EM field due to an EM source (bipole-bipole).
+
 
     Examples
     --------
