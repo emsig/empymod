@@ -964,6 +964,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
         Source and receiver coordinates (m): [x, y, z].
         The x- and y-coordinates can be arrays, z is a single value.
         The x- and y-coordinates must have the same dimension.
+        The x- and y-coordinates only matter for the angle-dependent factor.
 
     depth : list
         Absolute layer interfaces z (m); #depth = #res - 1
@@ -1082,8 +1083,9 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     src, nsrc = check_dipole(src, 'src', verb)
     rec, nrec = check_dipole(rec, 'rec', verb)
 
-    # Get offsets and angles (off, angle)
-    off, angle = get_off_ang(src, rec, nsrc, nrec, verb)
+    # Get angle-dependent factor
+    _, angle = get_off_ang(src, rec, nsrc, nrec, verb)
+    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # Get layer number in which src and rec reside (lsrc/lrec)
     lsrc, zsrc = get_layer_nr(src, depth)
@@ -1096,9 +1098,6 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
                                        etaV, zetaH, zetaV,
                                        np.atleast_2d(wavenumber), ab_calc,
                                        xdirect, msrc, mrec, False)
-
-    # Get angle-dependent factor
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # Collect output
     PJ1 = np.squeeze(factAng[:, np.newaxis]*PJ1*wavenumber)
