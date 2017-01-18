@@ -4,8 +4,9 @@
 
 * [17/01/2017]
     - Cleaned-up wavenumber-domain routine.
-    - Initiated tests (Status 0/52).
+    - Initiated tests (Status 2/52), set-up Travis-CI
     - theta/phi -> azimuth/dip; easier to understand
+    - Bug fixes
 
 * [14/01/2017]
     - General modelling routine `bipole` (replaces `srcbipole`): Model the
@@ -15,6 +16,7 @@
       with regards to verbosity. Moved all warnings out from `transform` and
       `model` into `utils`.
     - Add kernel count (printed if verb > 0).
+    - Bug fixes
 
 ## v1.1.0 - *2016-12-22*
 
@@ -33,6 +35,8 @@
     * Replace `fftlog` with python version.
     * Additional sine-/cosine-filters: `key_81_CosSin_2009`,
       `key_241_CosSin_2009`, and `key_601_CosSin_2009`.
+
+* Bug fixes
 
 ## v1.0.0 - *2016-11-29*
 

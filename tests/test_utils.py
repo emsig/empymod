@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-
 import pytest
 import numpy as np
-from empymod.utils import *
+
+from empymod.utils import (check_ab, conv_warning)
 
 # utils. Status: 2/21
 #
@@ -37,20 +36,19 @@ def test_check_ab():
     oab = [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26,
            31, 32, 33, 34, 35, 36, 14, 24, 34, 11, 12, 13,
            15, 25, 35, 21, 22, 23, 16, 26, 36, 31, 32, 33]
-    omsrc = np.array([[False,]*3 + [True,]*3]*6).ravel()
-    omrec = [False,]*18 + [True,]*18
+    omsrc = np.array([[False, ]*3 + [True, ]*3]*6).ravel()
+    omrec = [False, ]*18 + [True, ]*18
     for i in range(len(iab)):
         ab, msrc, mrec = check_ab(iab[i], 0)
         assert ab == oab[i]
         assert msrc == omsrc[i]
         assert mrec == omrec[i]
 
-    # We just check one other thing here, that it fails if a list instead of
-    # one value is provided. Generally the try/except statement with int()
-    # should take proper care of all the checking right in check_ab.
-    with pytest.raises(TypeError) as exc_info:
-        ab, _, _ = check_ab([12,], 0)
-    assert exc_info.type == TypeError
+    # We just check one other thing here, that it fails with a TypeError if a
+    # list instead of one value is provided. Generally the try/except statement
+    # with int() should take proper care of all the checking right in check_ab.
+    with pytest.raises(TypeError):
+        check_ab([12, ], 0)
 
 
 # 10. get_abs
