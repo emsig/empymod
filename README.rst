@@ -1,7 +1,7 @@
 empymod
 =======
 
-|docs|
+|docs| |tests|
 
 **This is the master branch. Check out the**
 `latest release <https://github.com/prisae/empymod/releases/latest>`_
@@ -102,3 +102,8 @@ which `empymod` would not exist.
     :alt: Documentation Status
     :scale: 100%
     :target: https://empymod.readthedocs.io/en/latest/?badge=latest
+
+.. |tests| image:: https://travis-ci.org/prisae/empymod.png?branch=master
+    :alt: Test Status
+    :scale: 100%
+    :target: https://travis-ci.org/prisae/empymod/
