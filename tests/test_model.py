@@ -1,72 +1,44 @@
 import pytest
-import numpy as np
+# import numpy as np
 from numpy.testing import assert_allclose
 
-from empymod.model import dipole, frequency, time
+# Import main ones from empymod directly to check
+from empymod import bipole, dipole, frequency, time
+# Rest from model
+# from empymod.model import ...
 
-# model. Status: 0/13
+# model. Status: 3/13
 # These are kind of macro-tests, as they check the final results.
 
-# Set of models
-# Set of surveys
-# All ab's
-# Arbitrary angles
-# All transforms
-# All optimizations
-# Source/Receiver scaling
+# Different Sets of Sources
+dipSources = [
+        [0, 0, 400],
+        [100, -100, 400]
+        ]
 
-class SingleSurvEx:
-    def test_single(self):
-        src = [0, 0, 500]
-        rec = [5000, 1000, 600]
-        depth = 0
-        signal = 1
-        res = [1, 10]
-        freq = [0.01, 1, 100]
-        ab = 12
-        aniso = [1, 3]
-        epermH = [1, 80]
-        epermV = [1, 40]
-        mpermH = [1, 5]
-        mpermV = [1, 10]
-        xdirect = True
-        ht = 'fht'
-        htarg = ['key_401_2009', None]
-        ft = 'fftlog'
-        ftarg = [10, [-2, 1], -.5]
-        opt = 'spline'
-        loop = 'freq'
-        verb = 0
-        self.do(src, rec, depth, signal, res, freq, ab, aniso, epermH, epermV,
-                mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt, loop, verb)
+# Different Sets of Receivers
+dipReceivers = [
+        [1000, 0, 500],
+        [1000, 1000, 1000]
+        ]
 
-    def test_double(self):
-        src = [0, 0, 500]
-        rec = [np.arange(1,11)*500, np.ones(10)*1000, 600]
-        depth = 0
-        signal = 1
-        res = [1, 10]
-        freq = [0.01, 1, 100]
-        ab = 12
-        aniso = [1, 3]
-        epermH = [1, 80]
-        epermV = [1, 40]
-        mpermH = [1, 5]
-        mpermV = [1, 10]
-        xdirect = True
-        ht = 'fht'
-        htarg = ['key_401_2009', None]
-        ft = 'fftlog'
-        ftarg = [10, [-2, 1], -.5]
-        opt = 'spline'
-        loop = 'freq'
-        verb = 0
-        self.do(src, rec, depth, signal, res, freq, ab, aniso, epermH, epermV,
-                mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt, loop, verb)
+# Different Sets of Models
+simpleModels = [
+        {'depth': 0, 'res': [1e12, 10], 'aniso': [1, 1]},
+        {'depth': [0, 500], 'res': [1e12, 0.3, 10], 'aniso': [1, 1, 2]}
+        ]
 
-# 0. __init__ (Ensure main functions are importable from empymod)
 
-# 1. bipole
+# Create different types of surveys
+class SimpleDipoleSurvey:
+    @pytest.mark.parametrize("src", dipSources)
+    @pytest.mark.parametrize("rec", dipReceivers)
+    @pytest.mark.parametrize("model", simpleModels)
+    def test_single(self, src, rec, model):
+        self.do(src, rec, model)
+
+
+# 1. bipole  => Main and most important checks/comparisons
 
 # 1.1. Comparison to analytical fullspace solution
 
@@ -79,37 +51,47 @@ class SingleSurvEx:
 # 1.5. Comparison to Green3D
 
 # 2. dipole (Ensure it is equivalent to bipole)
+class TestDipole(SimpleDipoleSurvey):                               # 2. dipole
+    # As this is a shortcut, just run one test to ensure
+    # it is equivalent to bipole.
+    def do(self, src, rec, model):
+        f = 0.01
+        # v  dipole : ab = 26
+        # \> bipole : src-dip = 90, rec-azimuth=90, msrc=True
+        dip_res = dipole(src, rec, freqtime=f, ab=26, **model)
+        bip_res = bipole([src[0], src[1], src[2], 0, 90],
+                         [rec[0], rec[1], rec[2], 90, 0],
+                         msrc=True, freqtime=f, **model)
+        assert_allclose(dip_res, bip_res)
 
 # 3. gpr (Check it remains as in paper)
 
 # 4. wavenumber (Finish wavenumber properly; write checks)
 
-# 5. frequency: As this is a shortcut, just run one test to ensure it is
-#               equivalent to dipole with signal=None.
-class TestFrequency(SingleSurvEx):
-    def do(self, src, rec, depth, signal, res, freq, ab, aniso, epermH, epermV,
-           mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt, loop, verb):
-        f_res = frequency(src, rec, depth, res, freq, ab, aniso, epermH,
-                          epermV, mpermH, mpermV, xdirect, ht, htarg, opt,
-                          loop, verb)
-        d_res = dipole(src, rec, depth, res, freq, None, ab, aniso, epermH,
-                       epermV, mpermH, mpermV, xdirect, ht, htarg, opt, loop,
-                       verb)
-        assert_allclose(f_res, d_res, rtol=1e-7, atol=1e-14)
 
-# 6. time: As this is a shortcut, just run one test to ensure it is equivalent
-#          to dipole with signal!=None.
-class TestTime(SingleSurvEx):
-    def do(self, src, rec, depth, signal, res, freq, ab, aniso, epermH, epermV,
-           mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt, loop, verb):
+class TestFrequency(SimpleDipoleSurvey):                         # 5. frequency
+    # As this is a shortcut, just run one test to ensure
+    # it is equivalent to dipole with signal=None.
+    def do(self, src, rec, model):
+        f = 1
+        ab = 45
+        f_res = frequency(src, rec, freq=f, ab=ab, **model)
+        d_res = dipole(src, rec, freqtime=f, ab=ab, **model)
+        assert_allclose(f_res, d_res)
 
-        t_res = time(src, rec, depth, res, freq, ab, signal, aniso, epermH,
-                     epermV, mpermH, mpermV, xdirect, ht, htarg, ft, ftarg,
-                     opt, loop, verb)
-        d_res = dipole(src, rec, depth, res, freq, signal, ab, aniso, epermH,
-                       epermV, mpermH, mpermV, xdirect, ht, htarg, ft, ftarg,
-                       opt, loop, verb)
-        assert_allclose(t_res, d_res, rtol=1e-7, atol=1e-14)
+
+class TestTime(SimpleDipoleSurvey):                                   # 6. time
+    # As this is a shortcut, just run one test to ensure
+    # it is equivalent to dipole with signal!=None.
+    def do(self, src, rec, model):
+        t = 10
+        ab = 51
+        signal = -1
+        ft = 'fftlog'
+        t_res = time(src, rec, time=t, signal=signal, ab=ab, ft=ft, **model)
+        d_res = dipole(src, rec, freqtime=t, signal=signal, ab=ab, ft=ft,
+                       **model)
+        assert_allclose(t_res, d_res)
 
 
 # 7. fem
