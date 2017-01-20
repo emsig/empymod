@@ -1,3 +1,4 @@
+# model. Status: 7/13
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose
@@ -7,10 +8,9 @@ from scipy.constants import epsilon_0, mu_0
 #         are in the __init__.py-file.
 from empymod import bipole, dipole, frequency, time
 # Import rest from model
-# from empymod.model import gpr, wavenumber, tem, fem
+from empymod.model import wavenumber# , gpr, tem, fem
 from empymod.kernel import fullspace, halfspace
 
-# model. Status: 6/13
 # These are kind of macro-tests, as they check the final results.
 # I try to use different parameters for each test, to cover a wide range of
 # possibilities. It won't be possible to check all the possibilities though.
@@ -49,10 +49,17 @@ from empymod.kernel import fullspace, halfspace
 class TestBipole:                                                   # 1. bipole
     # => Main and most important checks/comparisons
 
-    # 1.1. Comparison to analytical fullspace solution          # 1.1 fullspace
-    #      More or less random values, to test a wide range of models.
-    #      src fixed at [0, 0, 0]; It will never be possible to test all
-    #      combinations...
+    # test freq, time (all signals)
+    # test loop-options
+    # test opt-options
+    # test integration points
+    # test source strength
+    # test ht args
+    # test ft args
+
+    # Comparison to analytical fullspace solution               # 1.1 fullspace
+    # More or less random values, to test a wide range of models.
+    # src fixed at [0, 0, 0]; Never possible to test all combinations...
     sp1 = ("ab", "rec", "freq", "res", "aniso", "epH", "epV", "mpH", "mpV")
     vp1 = [(11, [100000, 0, 500], 0.01, 10, 1, 1, 50, 67, 1),
            (12, [10000, 0, 400], 0.1, 3, 50, 1, 100, 68, 2),
@@ -133,12 +140,11 @@ class TestBipole:                                                   # 1. bipole
         # Check
         assert_allclose(fs_res, bip_res)
 
-    # 1.2. Comparison to analytical halfspace solution          # 1.2 halfspace
-    #      More or less random values, to test a wide range of models.
-    #      src fixed at [0, 0, 0]; It will never be possible to test all
-    #      combinations...
-    #      halfspace is only implemented for electric sources and receivers so
-    #      far, and for the diffusive approximation (low freq).
+    # Comparison to analytical halfspace solution               # 1.2 halfspace
+    # More or less random values, to test a wide range of models.
+    # src fixed at [0, 0, 0]; Never possible to test all combinations...
+    # halfspace is only implemented for electric sources and receivers so far,
+    # and for the diffusive approximation (low freq).
     sp2 = ("ab", "rec", "freq", "res", "aniso")
     vp2 = [(11, [10000, -300, 500], 0.01, 10, 1),
            (12, [5000, 200, 400], 0.1, 3, 5),
@@ -181,10 +187,13 @@ class TestBipole:                                                   # 1. bipole
         assert_allclose(hs_res, bip_res)
 
     # 1.3. Comparison to EMmod
+    # General tests, as in Comparing.ipynb
 
     # 1.4. Comparison to DIPOLE1D
+    # Test finite length bipoles, rotated
 
     # 1.5. Comparison to Green3D
+    # Test a few anisotropic cases
 
 
 def test_dipole():                                                 # 2. dipole
@@ -204,7 +213,54 @@ def test_dipole():                                                 # 2. dipole
 
 # 3. gpr (Check it remains as in paper)
 
-# 4. wavenumber (Finish wavenumber properly; write checks)
+
+def test_wavenumber():                                           # 4. wavenumber
+    # This is like `frequency`, without the Hankel transform. We just run a
+    # test here, to check that it remains the status quo.
+    model = {'src': [330, -200, 500],
+             'rec': [3000, 1000, 600],
+             'depth': [0, 550],
+             'res': [1e12, 5.55, 11],
+             'freq': 3.33,
+             'wavenumber': np.logspace(-3.6, -3.4, 10),
+             'ab': 52,
+             'aniso': [1, 2, 1.5],
+             'epermH': [1, 50, 10],
+             'epermV': [80, 20, 1],
+             'mpermH': [1, 20, 50],
+             'mpermV': [1, 30, 4],
+             'xdirect': True,
+             'verb': 0}
+
+    # PJ0 Result
+    PJ0 = np.array([9.87407175e-10 -6.34617396e-10j,
+                    1.19134463e-09 -6.68558766e-10j,
+                    1.43235285e-09 -7.00465477e-10j,
+                    1.71674062e-09 -7.29194616e-10j,
+                    2.05184912e-09 -7.53331115e-10j,
+                    2.44621653e-09 -7.71133632e-10j,
+                    2.90976830e-09 -7.80470046e-10j,
+                    3.45403688e-09 -7.78740522e-10j,
+                    4.09241513e-09 -7.62785619e-10j,
+                    4.84044858e-09 -7.28776375e-10j])
+
+    # PJ1 Result
+    PJ1 = np.array([-1.97481435e-09 +1.26923479e-09j,
+                    -2.38268927e-09 +1.33711753e-09j,
+                    -2.86470571e-09 +1.40093095e-09j,
+                    -3.43348125e-09 +1.45838923e-09j,
+                    -4.10369824e-09 +1.50666223e-09j,
+                    -4.89243305e-09 +1.54226726e-09j,
+                    -5.81953661e-09 +1.56094009e-09j,
+                    -6.90807375e-09 +1.55748104e-09j,
+                    -8.18483027e-09 +1.52557124e-09j,
+                    -9.68089716e-09 +1.45755275e-09j])
+
+    w_res0, w_res1 = wavenumber(**model)
+
+    assert_allclose(w_res0, PJ0)
+    assert_allclose(w_res1, PJ1)
+
 
 
 def test_frequency():                                           # 5. frequency
