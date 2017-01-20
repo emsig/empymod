@@ -34,7 +34,6 @@ root directory for more information regarding the involved licenses.
 
 
 import numpy as np
-from numexpr import evaluate as ne_eval
 
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']
@@ -414,8 +413,8 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         if use_ne_eval:
             ez_ratio = (e_zH/e_zV)[:, None, :, None]  # NOQA
             ez_prod = (z_eH*e_zH)[:, None, :, None]  # NOQA
-            lambd2 = ne_eval("lambd*lambd")[None, :, None, :]  # NOQA
-            Gam = ne_eval("sqrt(ez_ratio*lambd2 + ez_prod)")
+            lambd2 = use_ne_eval("lambd*lambd")[None, :, None, :]  # NOQA
+            Gam = use_ne_eval("sqrt(ez_ratio*lambd2 + ez_prod)")
         else:
             Gam = np.sqrt((e_zH/e_zV)[:, None, :, None] *
                           (lambd*lambd)[None, :, None, :] +
@@ -429,7 +428,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         if lrec != depth.size-1:  # No upgoing field prop. if rec in last layer
             ddepth = depth[lrec + 1] - zrec
             if use_ne_eval:
-                Wu = ne_eval("exp(-lrecGam*ddepth)")
+                Wu = use_ne_eval("exp(-lrecGam*ddepth)")
             else:
                 Wu = np.exp(-lrecGam*ddepth)
         else:
@@ -437,7 +436,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         if lrec != 0:     # No downgoing field propagator if rec in first layer
             ddepth = zrec - depth[lrec]
             if use_ne_eval:
-                Wd = ne_eval("exp(-lrecGam*ddepth)")
+                Wd = use_ne_eval("exp(-lrecGam*ddepth)")
             else:
                 Wd = np.exp(-lrecGam*ddepth)
         else:
@@ -480,7 +479,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
             else:
                 ddepth = depth[lrec+1] - depth[lrec]
             if use_ne_eval:
-                fexp = ne_eval("exp(-lrecGam*ddepth)")
+                fexp = use_ne_eval("exp(-lrecGam*ddepth)")
             else:
                 fexp = np.exp(-lrecGam*ddepth)
 
@@ -587,7 +586,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
             Gamb = Gam[:, :, iz+pm, :]
             if use_ne_eval:
                 rlocstr = "(e_zHa*Gama - e_zHb*Gamb)/(e_zHa*Gama + e_zHb*Gamb)"
-                rloc = ne_eval(rlocstr)
+                rloc = use_ne_eval(rlocstr)
             else:
                 rloca = e_zHa*Gama
                 rlocb = e_zHb*Gamb
@@ -600,13 +599,13 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
                 ddepth = depth[iz+1+pm]-depth[iz+pm]
                 iGam = Gam[:, :, iz+pm, :]
                 if use_ne_eval:
-                    term = ne_eval("tRef*exp(-2*iGam*ddepth)")
+                    term = use_ne_eval("tRef*exp(-2*iGam*ddepth)")
                 else:
                     term = tRef*np.exp(-2*iGam*ddepth)  # NOQA
 
             # Eqs 64, A-11
             if use_ne_eval:
-                tRef = ne_eval("(rloc + term)/(1 + rloc*term)")
+                tRef = use_ne_eval("(rloc + term)/(1 + rloc*term)")
             else:
                 tRef = (rloc + term)/(1 + rloc*term)
 
@@ -717,14 +716,14 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
             iGam = Gam[:, :, lsrc, :]
             if last_layer:  # If src/rec are in top (up) or bottom (down) layer
                 if use_ne_eval:
-                    P = ne_eval("Rmp*exp(-iGam*dm)")
+                    P = use_ne_eval("Rmp*exp(-iGam*dm)")
                 else:
                     P = Rmp*np.exp(-iGam*dm)
             else:           # If src and rec are in any layer in between
                 if use_ne_eval:
-                    Ms = ne_eval("1-Rmp*Rpm*exp(-2*iGam*ds)")
-                    P = ne_eval("Rmp/Ms*(exp(-iGam*dm) + " +
-                                "pm*Rpm*exp(-iGam*(ds+dp)))")
+                    Ms = use_ne_eval("1-Rmp*Rpm*exp(-2*iGam*ds)")
+                    P = use_ne_eval("Rmp/Ms*(exp(-iGam*dm) + " +
+                                    "pm*Rpm*exp(-iGam*(ds+dp)))")
                 else:
                     Ms = 1 - Rmp*Rpm*np.exp(-2*iGam*ds)
                     P = Rmp/Ms*(np.exp(-iGam*dm) +
@@ -739,15 +738,15 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
             iGam = Gam[:, :, lsrc, :]
             if first_layer:  # If src is in bottom (up) / top (down) layer
                 if use_ne_eval:
-                    P = ne_eval("(1 + iRpm)*mupm*exp(-iGam*dp)")
+                    P = use_ne_eval("(1 + iRpm)*mupm*exp(-iGam*dp)")
                 else:
                     P = (1 + iRpm)*mupm*np.exp(-iGam*dp)
             else:
                 iRmp = Rmp[:, :, rsrcl, :]
                 if use_ne_eval:
-                    Ms = ne_eval("(1 - iRmp*iRpm * exp(-2*iGam*ds))")
-                    P = ne_eval("((1 + iRpm)*(mupm*exp(-iGam*dp) + " +
-                                "pm*mupm*iRmp*exp(-iGam * (ds+dm))))/Ms")
+                    Ms = use_ne_eval("(1 - iRmp*iRpm * exp(-2*iGam*ds))")
+                    P = use_ne_eval("((1 + iRpm)*(mupm*exp(-iGam*dp) + " +
+                                    "pm*mupm*iRmp*exp(-iGam * (ds+dm))))/Ms")
                 else:
                     Ms = 1 - iRmp*iRpm * np.exp(-2*iGam*ds)
                     P = ((1 + iRpm)*(mupm*np.exp(-iGam*dp) +
@@ -759,7 +758,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
                 iRpm = Rpm[:, :, rsrcl-1*pup, :]
                 iGam = Gam[:, :, lsrc-1*pup, :]
                 if use_ne_eval:
-                    P = ne_eval("P/(1 + iRpm*exp(-2*iGam * ddepth))")
+                    P = use_ne_eval("P/(1 + iRpm*exp(-2*iGam * ddepth))")
                 else:
                     P /= (1 + iRpm*np.exp(-2*iGam * ddepth))
 
@@ -770,7 +769,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
                     iRpm = Rpm[:, :, iz+pup, :]
                     iGam = Gam[:, :, isr+iz+pup, :]
                     if use_ne_eval:
-                        P = ne_eval("P*(1 + iRpm)*exp(-iGam * ddepth)")
+                        P = use_ne_eval("P*(1 + iRpm)*exp(-iGam * ddepth)")
                     else:
                         P *= (1 + iRpm)*np.exp(-iGam * ddepth)
 
@@ -780,7 +779,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
                         iRpm = Rpm[:, :, iz, :]
                         iGam = Gam[:, :, isr+iz, :]
                         if use_ne_eval:
-                            P = ne_eval("P/(1 + iRpm*exp(-2*iGam * ddepth))")
+                            P = use_ne_eval("P/(1 + " +
+                                            "iRpm*exp(-2*iGam * ddepth))")
                         else:
                             P /= 1 + iRpm*np.exp(-2*iGam * ddepth)
 

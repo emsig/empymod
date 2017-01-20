@@ -2,6 +2,10 @@
 
 ## latest
 
+* [20/01/2017]
+    - `numexpr` is now only required if `opt=='parallel'`. If `numexpr` is not
+      found, `opt` is reset to `None` and a warning is printed.
+
 * [17/01/2017]
     - Cleaned-up wavenumber-domain routine.
     - Initiated tests (Status 2/52), set-up Travis-CI

@@ -14,8 +14,9 @@ Alternatively, to install it in your python distribution (linux), run:
 
    > python setup.py install
 
-Required are python version 3 or higher and the modules `NumPy`, `SciPy`, and
-`numexpr`.
+Required are python version 3.4 or higher and the modules `NumPy` and `SciPy`.
+If you want to run parts of the kernel in parallel, the module `numexpr` is
+required additionally.
 
 
 Usage

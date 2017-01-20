@@ -688,6 +688,16 @@ def check_opt(opt, loop, ht, htarg, verb):
     else:
         use_spline, use_ne_eval = False, False
 
+    # Try to import numexpr
+    if use_ne_eval:
+        try:
+            from numexpr import evaluate as use_ne_eval
+        except:
+            use_ne_eval = False
+            if verb > 0:
+                print("* WARNING :: `numexpr` is not installed, ",
+                      "`opt=='parallel'` has no effect.")
+
     # Define if to loop over frequencies or over offsets
     if ht == 'hqwe' or use_spline:
         loop_freq = True
