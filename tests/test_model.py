@@ -196,10 +196,10 @@ def test_dipole():                                                 # 2. dipole
     f = 0.01
     # v  dipole : ab = 26
     # \> bipole : src-dip = 90, rec-azimuth=90, msrc=True
-    dip_res = dipole(src, rec, freqtime=f, ab=26, **model, verb=0)
+    dip_res = dipole(src, rec, freqtime=f, ab=26, verb=0, **model)
     bip_res = bipole([src[0], src[1], src[2], 0, 90],
                      [rec[0], rec[1], rec[2], 90, 0], msrc=True, freqtime=f,
-                     **model, verb=0)
+                     verb=0, **model)
     assert_allclose(dip_res, bip_res)
 
 # 3. gpr (Check it remains as in paper)
@@ -215,8 +215,8 @@ def test_frequency():                                           # 5. frequency
     model = {'depth': [0, 500], 'res': [1e12, 0.3, 10], 'aniso': [1, 1, 2]}
     f = 1
     ab = 45
-    f_res = frequency(src, rec, freq=f, ab=ab, **model, verb=0)
-    d_res = dipole(src, rec, freqtime=f, ab=ab, **model, verb=0)
+    f_res = frequency(src, rec, freq=f, ab=ab, verb=0, **model)
+    d_res = dipole(src, rec, freqtime=f, ab=ab, verb=0, **model)
     assert_allclose(f_res, d_res)
 
 
@@ -230,10 +230,10 @@ def test_time():                                                      # 6. time
     ab = 51
     signal = -1
     ft = 'fftlog'
-    t_res = time(src, rec, time=t, signal=signal, ab=ab, ft=ft, **model,
-                 verb=0)
+    t_res = time(src, rec, time=t, signal=signal, ab=ab, ft=ft, verb=0,
+                 **model)
     d_res = dipole(src, rec, freqtime=t, signal=signal, ab=ab, ft=ft,
-                   **model, verb=0)
+                   verb=0, **model)
     assert_allclose(t_res, d_res)
 
 
