@@ -1,6 +1,8 @@
-# model. Status: 7/13
+# model. Status: 8/14
 import pytest
+import pickle
 import numpy as np
+from os.path import join, dirname
 from numpy.testing import assert_allclose
 from scipy.constants import epsilon_0, mu_0
 
@@ -8,7 +10,7 @@ from scipy.constants import epsilon_0, mu_0
 #         are in the __init__.py-file.
 from empymod import bipole, dipole, frequency, time
 # Import rest from model
-from empymod.model import wavenumber# , gpr, tem, fem
+from empymod.model import wavenumber, fem  # gpr, tem
 from empymod.kernel import fullspace, halfspace
 
 # These are kind of macro-tests, as they check the final results.
@@ -195,8 +197,11 @@ class TestBipole:                                                   # 1. bipole
     # 1.5. Comparison to Green3D
     # Test a few anisotropic cases
 
+    # 1.6 Comparison to self
+    # Test 4 bipole cases (EE, ME, EM, MM)
 
-def test_dipole():                                                 # 2. dipole
+
+def test_dipole():                                                  # 2. dipole
     # As this is a shortcut, just run one test to ensure
     # it is equivalent to bipole.
     src = [5000, 1000, -200]
@@ -214,7 +219,7 @@ def test_dipole():                                                 # 2. dipole
 # 3. gpr (Check it remains as in paper)
 
 
-def test_wavenumber():                                           # 4. wavenumber
+def test_wavenumber():                                          # 4. wavenumber
     # This is like `frequency`, without the Hankel transform. We just run a
     # test here, to check that it remains the status quo.
     model = {'src': [330, -200, 500],
@@ -233,28 +238,28 @@ def test_wavenumber():                                           # 4. wavenumber
              'verb': 0}
 
     # PJ0 Result
-    PJ0 = np.array([9.87407175e-10 -6.34617396e-10j,
-                    1.19134463e-09 -6.68558766e-10j,
-                    1.43235285e-09 -7.00465477e-10j,
-                    1.71674062e-09 -7.29194616e-10j,
-                    2.05184912e-09 -7.53331115e-10j,
-                    2.44621653e-09 -7.71133632e-10j,
-                    2.90976830e-09 -7.80470046e-10j,
-                    3.45403688e-09 -7.78740522e-10j,
-                    4.09241513e-09 -7.62785619e-10j,
-                    4.84044858e-09 -7.28776375e-10j])
+    PJ0 = np.array([9.87407175e-10 - 6.34617396e-10j,
+                    1.19134463e-09 - 6.68558766e-10j,
+                    1.43235285e-09 - 7.00465477e-10j,
+                    1.71674062e-09 - 7.29194616e-10j,
+                    2.05184912e-09 - 7.53331115e-10j,
+                    2.44621653e-09 - 7.71133632e-10j,
+                    2.90976830e-09 - 7.80470046e-10j,
+                    3.45403688e-09 - 7.78740522e-10j,
+                    4.09241513e-09 - 7.62785619e-10j,
+                    4.84044858e-09 - 7.28776375e-10j])
 
     # PJ1 Result
-    PJ1 = np.array([-1.97481435e-09 +1.26923479e-09j,
-                    -2.38268927e-09 +1.33711753e-09j,
-                    -2.86470571e-09 +1.40093095e-09j,
-                    -3.43348125e-09 +1.45838923e-09j,
-                    -4.10369824e-09 +1.50666223e-09j,
-                    -4.89243305e-09 +1.54226726e-09j,
-                    -5.81953661e-09 +1.56094009e-09j,
-                    -6.90807375e-09 +1.55748104e-09j,
-                    -8.18483027e-09 +1.52557124e-09j,
-                    -9.68089716e-09 +1.45755275e-09j])
+    PJ1 = np.array([-1.97481435e-09 + 1.26923479e-09j,
+                    -2.38268927e-09 + 1.33711753e-09j,
+                    -2.86470571e-09 + 1.40093095e-09j,
+                    -3.43348125e-09 + 1.45838923e-09j,
+                    -4.10369824e-09 + 1.50666223e-09j,
+                    -4.89243305e-09 + 1.54226726e-09j,
+                    -5.81953661e-09 + 1.56094009e-09j,
+                    -6.90807375e-09 + 1.55748104e-09j,
+                    -8.18483027e-09 + 1.52557124e-09j,
+                    -9.68089716e-09 + 1.45755275e-09j])
 
     w_res0, w_res1 = wavenumber(**model)
 
@@ -262,8 +267,7 @@ def test_wavenumber():                                           # 4. wavenumber
     assert_allclose(w_res1, PJ1)
 
 
-
-def test_frequency():                                           # 5. frequency
+def test_frequency():                                            # 5. frequency
     # As this is a shortcut, just run one test to ensure
     # it is equivalent to dipole with signal=None.
     src = [100, -100, 400]
@@ -293,6 +297,39 @@ def test_time():                                                      # 6. time
     assert_allclose(t_res, d_res)
 
 
-# 7. fem
+def test_fem():                                                        # 7. fem
+    # Just ensure functionality stays the same, with one example.
+    # Data generated with create_data/create_fem_data.py [23/01/2017]
+
+    # Load data
+    data = pickle.load(open(join(dirname(__file__), 'fem_data.pck'), 'rb'))
+
+    # Normal case: no looping
+    fEM, kcount, _ = fem(**data['inp2'])
+    assert_allclose(fEM, data['EM2'])
+    assert kcount == data['kcount2']
+
+    # Normal case: loop over frequencies
+    data['inp2']['loop_freq'] = True
+    fEM, kcount, _ = fem(**data['inp2'])
+    assert_allclose(fEM, data['EM2'])
+    assert kcount == data['inp2']['freq'].size
+
+    # Normal case: loop over offsets
+    data['inp2']['loop_off'] = True
+    data['inp2']['loop_freq'] = False
+    fEM, kcount, _ = fem(**data['inp2'])
+    assert_allclose(fEM, data['EM2'])
+    assert kcount == data['inp2']['off'].size
+
+    # Fullspace
+    fEM, kcount, _ = fem(**data['inp1'])
+    assert_allclose(fEM, data['EM1'])
+    assert kcount == data['kcount1']
+
+    # 36 (=> zeros)
+    fEM, kcount, _ = fem(**data['inp3'])
+    assert_allclose(fEM, data['EM3'])
+    assert kcount == data['kcount3']
 
 # 8. tem
