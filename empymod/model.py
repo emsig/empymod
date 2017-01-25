@@ -466,18 +466,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             # Get required scaling from src-strength and src/rec-length
             src_rec_w = 1
             if strength > 0:
-
-                # Source scaling
-                if nsrc == nsrcz:
-                    src_rec_w *= np.repeat(src_w[isz], irec)
-                else:
-                    src_rec_w *= np.repeat(src_w, irec)
-
-                # Receiver scaling
-                if nrec == nrecz:
-                    src_rec_w *= np.tile(rec_w[irz], isrc)
-                else:
-                    src_rec_w *= np.tile(rec_w, isrc)
+                src_rec_w *= np.repeat(src_w, irec)
+                src_rec_w *= np.tile(rec_w, isrc)
 
             # Add this src-rec signal
             EM[:, si:ei:st] = sEM*src_rec_w
