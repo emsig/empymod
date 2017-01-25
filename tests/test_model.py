@@ -1,6 +1,5 @@
-# model. Status: 8/14
+# model. Status: 9/14
 import pytest
-import pickle
 import numpy as np
 from os.path import join, dirname
 from numpy.testing import assert_allclose
@@ -10,7 +9,7 @@ from scipy.constants import epsilon_0, mu_0
 #         are in the __init__.py-file.
 from empymod import bipole, dipole, frequency, time
 # Import rest from model
-from empymod.model import wavenumber, fem  # gpr, tem
+from empymod.model import wavenumber, fem, tem  # gpr
 from empymod.kernel import fullspace, halfspace
 
 # These are kind of macro-tests, as they check the final results.
@@ -299,37 +298,61 @@ def test_time():                                                      # 6. time
 
 def test_fem():                                                        # 7. fem
     # Just ensure functionality stays the same, with one example.
-    # Data generated with create_data/create_fem_data.py [23/01/2017]
+    # Data generated with create_data/create_fem_tem.py [24/01/2017]
 
     # Load data
-    data = pickle.load(open(join(dirname(__file__), 'fem_data.pck'), 'rb'))
+    data = np.load(join(dirname(__file__), 'data_fem_tem.npz'))
+    data1 = data['out1'][()]
+    data2 = data['out2'][()]
+    data3 = data['out3'][()]
 
     # Normal case: no looping
-    fEM, kcount, _ = fem(**data['inp2'])
-    assert_allclose(fEM, data['EM2'])
-    assert kcount == data['kcount2']
+    fEM, kcount, _ = fem(**data2['inp'])
+    assert_allclose(fEM, data2['EM'])
+    assert kcount == data2['kcount']
 
     # Normal case: loop over frequencies
-    data['inp2']['loop_freq'] = True
-    fEM, kcount, _ = fem(**data['inp2'])
-    assert_allclose(fEM, data['EM2'])
-    assert kcount == data['inp2']['freq'].size
+    data2['inp']['loop_freq'] = True
+    fEM, kcount, _ = fem(**data2['inp'])
+    assert_allclose(fEM, data2['EM'])
+    assert kcount == data2['inp']['freq'].size
 
     # Normal case: loop over offsets
-    data['inp2']['loop_off'] = True
-    data['inp2']['loop_freq'] = False
-    fEM, kcount, _ = fem(**data['inp2'])
-    assert_allclose(fEM, data['EM2'])
-    assert kcount == data['inp2']['off'].size
+    data2['inp']['loop_off'] = True
+    data2['inp']['loop_freq'] = False
+    fEM, kcount, _ = fem(**data2['inp'])
+    assert_allclose(fEM, data2['EM'])
+    assert kcount == data2['inp']['off'].size
 
     # Fullspace
-    fEM, kcount, _ = fem(**data['inp1'])
-    assert_allclose(fEM, data['EM1'])
-    assert kcount == data['kcount1']
+    fEM, kcount, _ = fem(**data1['inp'])
+    assert_allclose(fEM, data1['EM'])
+    assert kcount == data1['kcount']
 
     # 36 (=> zeros)
-    fEM, kcount, _ = fem(**data['inp3'])
-    assert_allclose(fEM, data['EM3'])
-    assert kcount == data['kcount3']
+    fEM, kcount, _ = fem(**data3['inp'])
+    assert_allclose(fEM, data3['EM'])
+    assert kcount == data3['kcount']
 
-# 8. tem
+
+def test_tem():                                                        # 8. tem
+    # Just ensure functionality stays the same, with one example.
+    # Data generated with create_data/create_fem_tem.py [24/01/2017]
+
+    # Load data
+    data = np.load(join(dirname(__file__), 'data_fem_tem.npz'))
+    data4 = data['out4'][()]
+    data5 = data['out5'][()]
+    data6 = data['out6'][()]
+
+    # # Signal = 0
+    tEM, _ = tem(**data4['inp'])
+    assert_allclose(tEM, data4['EM'])
+
+    # Signal = 1
+    tEM, _ = tem(**data5['inp'])
+    assert_allclose(tEM, data5['EM'])
+
+    # Signal = -1
+    tEM, _ = tem(**data6['inp'])
+    assert_allclose(tEM, data6['EM'])
