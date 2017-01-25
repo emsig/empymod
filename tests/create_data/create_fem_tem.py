@@ -1,10 +1,10 @@
-"""Create data for test_model::test_fem and test_model::test_tem."""
+"""Create data for test_fem and test_tem."""
 import numpy as np
 from copy import deepcopy
 from empymod import filters
 from empymod.model import fem, tem
 
-# 1. FEM #
+# # A -- FEM # #
 
 # Model
 # res = [3, 10, 3]
@@ -86,7 +86,7 @@ inp1 = {'ab': 12,
 
 EM1, kcount1, _ = fem(**inp1)
 
-# 3. NORMAL CASE
+# 2. NORMAL CASE
 inp2 = deepcopy(inp1)
 inp2['etaH'] = etaH
 inp2['etaV'] = etaV
@@ -98,13 +98,23 @@ inp2['mrec'] = False
 
 EM2, kcount2, _ = fem(**inp2)
 
-# 3. 36/63
+# 3. NORMAL CASE; loop_freq
 inp3 = deepcopy(inp2)
-inp3['ab'] = 36
-inp3['msrc'] = True
+inp3['loop_freq'] = True
 EM3, kcount3, _ = fem(**inp3)
 
-# 2. TEM #
+# 4. NORMAL CASE; loop_off
+inp4 = deepcopy(inp2)
+inp4['loop_off'] = True
+EM4, kcount4, _ = fem(**inp4)
+
+# 5. 36/63
+inp5 = deepcopy(inp2)
+inp5['ab'] = 36
+inp5['msrc'] = True
+EM5, kcount5, _ = fem(**inp5)
+
+# # B -- TEM # #
 # Same parameters as for fem, except frequency, time, ab; plus signal
 
 # ab = 22
@@ -735,26 +745,28 @@ fEM = np.array([[-7.58011581e-09 - 6.33717380e-13j,
                  +3.72947422e-15 + 8.74021793e-15j,
                  +8.22362755e-15 - 1.86306161e-15j]])
 
-# 4. TIME; SIGNAL = 0
-inp4 = {'fEM': fEM, 'off': off, 'freq': freq, 'time': np.array([1., 2., 3.]),
+# 6. TIME; SIGNAL = 0
+inp6 = {'fEM': fEM, 'off': off, 'freq': freq, 'time': np.array([1., 2., 3.]),
         'signal': 0, 'ft': 'fftlog', 'ftarg': ftarg}
-EM4, _ = tem(**inp4)
-
-# 5. TIME; SIGNAL = 1
-inp5 = deepcopy(inp4)
-inp5['signal'] = 1
-EM5, _ = tem(**inp5)
-
-# 6. TIME; SIGNAL = -1
-inp6 = deepcopy(inp4)
-inp6['signal'] = -1
 EM6, _ = tem(**inp6)
+
+# 7. TIME; SIGNAL = 1
+inp7 = deepcopy(inp6)
+inp7['signal'] = 1
+EM7, _ = tem(**inp7)
+
+# 8. TIME; SIGNAL = -1
+inp8 = deepcopy(inp6)
+inp8['signal'] = -1
+EM8, _ = tem(**inp8)
 
 # Store data
 np.savez_compressed('../data_fem_tem.npz',
                     out1={'inp': inp1, 'EM': EM1, 'kcount': kcount1},
                     out2={'inp': inp2, 'EM': EM2, 'kcount': kcount2},
                     out3={'inp': inp3, 'EM': EM3, 'kcount': kcount3},
-                    out4={'inp': inp4, 'EM': EM4},
-                    out5={'inp': inp5, 'EM': EM5},
-                    out6={'inp': inp6, 'EM': EM6})
+                    out4={'inp': inp4, 'EM': EM4, 'kcount': kcount4},
+                    out5={'inp': inp5, 'EM': EM5, 'kcount': kcount5},
+                    out6={'inp': inp6, 'EM': EM6},
+                    out7={'inp': inp7, 'EM': EM7},
+                    out8={'inp': inp8, 'EM': EM8})
