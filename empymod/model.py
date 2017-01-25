@@ -1275,12 +1275,14 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
     # Step function for causal times is like a unit fct, therefore an impulse
     # in frequency domain
     if signal in [-1, 1]:
-        fEM *= signal/(2j*np.pi*freq[:, None])
+        fact = signal/(2j*np.pi*freq)
+    else:
+        fact = 1
 
     # 2. f->t transform
     tEM = np.zeros((time.size, off.size))
     for i in range(off.size):
-        out = getattr(transform, ft)(fEM[:, i], time, freq, ftarg)
+        out = getattr(transform, ft)(fEM[:, i]*fact, time, freq, ftarg)
         tEM[:, i] += out[0]
         conv *= out[1]
 
