@@ -44,6 +44,10 @@ def test_check_ab():
         assert msrc == omsrc[i]
         assert mrec == omrec[i]
 
+    # Check it raises a ValueError if a non-existing ab is provided.
+    with pytest.raises(ValueError):
+        check_ab(77, 0)
+
     # We just check one other thing here, that it fails with a TypeError if a
     # list instead of one value is provided. Generally the try/except statement
     # with int() should take proper care of all the checking right in check_ab.
@@ -79,6 +83,11 @@ def test_conv_warning(capsys):
     conv_warning(False, ['', '', '', 51, ''], 'Hankel', 1)
     out, _ = capsys.readouterr()
     assert out[:35] == "* WARNING :: Hankel-QWE used all 51"
+
+    # If converged, and verb>1, no output
+    conv_warning(True, ['', '', '', 51, ''], 'Hankel', 1)
+    out, _ = capsys.readouterr()
+    assert out == ""
 
 # 17. _check_shape
 
