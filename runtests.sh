@@ -8,7 +8,7 @@ for ((i = 4; i<7; i++)); do
 
   # Print info
   echo " "
-  echo "                    ************** PYTHON 3."${i}" **************"
+  echo "                   **************  PYTHON 3."${i}"  **************"
   echo " "
 
   # Create venv
