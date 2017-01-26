@@ -1,7 +1,10 @@
-"""Create data for test_self and test_wavenumber."""
+"""Create data for
+   - test_model:: test_self, test_gpr, and test_wavenumber
+   - test_kernel:: test_fullspace and test_halfspace."""
 import numpy as np
 from scipy.constants import epsilon_0, mu_0
-from empymod.model import bipole, wavenumber
+from empymod.model import bipole, wavenumber, gpr
+from empymod.kernel import halfspace, fullspace
 
 
 # # A -- BIPOLE # #
@@ -164,6 +167,7 @@ pmpV = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
         21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]
 fs = dict()
 fsbp = dict()
+fs_res = dict()
 for i in range(34):
     ab = pab[i]
     rec = prec[i]
@@ -239,6 +243,9 @@ for i in range(34):
                          'loop': None,
                          'verb': 0}
 
+    # Get result for halfspace
+    fs_res[str(pab[i])] = fullspace(**fs[str(pab[i])])
+
 # # D -- HALFSPACE # #
 # More or less random values, to test a wide range of models.
 # src fixed at [0, 0, 0]; Never possible to test all combinations...
@@ -253,6 +260,7 @@ pres = [10, 3, 3, 3, 4, .004, 300, 20, 1]
 paniso = [1, 5, 1, 5, 2, 3, 1, 1, 1]
 hs = dict()
 hsbp = dict()
+hs_res = dict()
 for i in range(9):
     ab = pab[i]
     srcazm = 0
@@ -279,6 +287,7 @@ for i in range(9):
                        'aniso': aniso,
                        'ab': ab}
 
+    # Collect dict for bipole
     hsbp[str(pab[i])] = {'src': [0, 0, 100, srcazm, srcdip],
                          'rec': [rec[0], rec[1], rec[2], recazm, recdip],
                          'depth': 0,
@@ -304,12 +313,37 @@ for i in range(9):
                          'loop': None,
                          'verb': 0}
 
-# # E -- Store data # #
-np.savez_compressed('../data_empymod.npz',
+    # Get result for halfspace
+    hs_res[str(pab[i])] = halfspace(**hs[str(pab[i])])
+
+# # E -- GPR # #
+igpr = {'src': [0, 0, 0.0000001],
+        'rec': [3, 0, 0.5],
+        'depth': [0, 1],
+        'res': [1e23, 200, 20],
+        'fc': 250,
+        'ab': 11,
+        'gain': 3,
+        'aniso': None,
+        'epermH': [1, 9, 15],
+        'epermV': [1, 9, 15],
+        'mpermH': None,
+        'mpermV': None,
+        'xdirect': True,
+        'ht': 'fht',
+        'htarg': ['key_401_2009', ''],
+        'opt': None,
+        'loop': None,
+        'verb': 0}
+_, ogpr = gpr(**igpr)
+
+# # F -- Store data # #
+np.savez_compressed('data_empymod.npz',
                     out1={'inp': inp1, 'EM': EM1},
                     out2={'inp': inp2, 'EM': EM2},
                     out3={'inp': inp3, 'EM': EM3},
                     out4={'inp': inp4, 'EM': EM4},
                     wout={'inp': winp, 'PJ0': PJ0, 'PJ1': PJ1},
-                    fs=fs, fsbp=fsbp,
-                    hs=hs, hsbp=hsbp)
+                    fs=fs, fsbp=fsbp, fsres=fs_res,
+                    hs=hs, hsbp=hsbp, hsres=hs_res,
+                    gprout={'inp': igpr, 'GPR': ogpr})

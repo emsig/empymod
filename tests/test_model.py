@@ -1,4 +1,4 @@
-# model. Status: 9/13
+# model. Status: 10/13
 import numpy as np
 from os.path import join, dirname
 from numpy.testing import assert_allclose
@@ -7,7 +7,7 @@ from numpy.testing import assert_allclose
 # the __init__.py-file.
 from empymod import bipole, dipole, frequency, time
 # Import rest from model
-from empymod.model import wavenumber, fem, tem  # gpr
+from empymod.model import gpr, wavenumber, fem, tem
 from empymod.kernel import fullspace, halfspace
 
 # These are kind of macro-tests, as they check the final results.
@@ -16,9 +16,9 @@ from empymod.kernel import fullspace, halfspace
 # Add tests when issues arise!
 
 # Load required data
-# Data generated with create_data/create_empymod.py [25/01/2017]
+# Data generated with create_empymod.py [25/01/2017]
 DATAEMPYMOD = np.load(join(dirname(__file__), 'data_empymod.npz'))
-# Data generated with create_data/create_fem_tem.py [25/01/2017]
+# Data generated with create_fem_tem.py [25/01/2017]
 DATAFEMTEM = np.load(join(dirname(__file__), 'data_fem_tem.npz'))
 
 
@@ -90,7 +90,15 @@ def test_dipole():                                                  # 2. dipole
                      verb=0, **model)
     assert_allclose(dip_res, bip_res)
 
-# 3. gpr (Check it remains as in paper)
+
+def test_gpr():                                                        # 3. gpr
+    # empymod is not really designed for GPR, more work on the Hankel and
+    # Fourier transform would be required for that; furthermore, you would
+    # rather do that straight in the time domain. However, it works. We just
+    # run a test here, to check that it remains the status quo.
+    res = DATAEMPYMOD['gprout'][()]
+    _, gprout = gpr(**res['inp'])
+    assert_allclose(gprout, res['GPR'])
 
 
 def test_wavenumber():                                          # 4. wavenumber

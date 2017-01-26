@@ -761,7 +761,7 @@ inp8['signal'] = -1
 EM8, _ = tem(**inp8)
 
 # Store data
-np.savez_compressed('../data_fem_tem.npz',
+np.savez_compressed('data_fem_tem.npz',
                     out1={'inp': inp1, 'EM': EM1, 'kcount': kcount1},
                     out2={'inp': inp2, 'EM': EM2, 'kcount': kcount2},
                     out3={'inp': inp3, 'EM': EM3, 'kcount': kcount3},
