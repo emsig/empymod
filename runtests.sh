@@ -17,7 +17,7 @@ for ((i = 4; i<7; i++)); do
   # Activate venv
   source activate test_3${i}
   # Run tests
-  pytest --cov=empymod
+  pytest tests/ --cov=empymod
   # De-activate venv
   source deactivate test_3${i}
   # Remove venv

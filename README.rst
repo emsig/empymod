@@ -100,16 +100,13 @@ which `empymod` would not exist.
 
 
 .. |docs| image:: https://readthedocs.org/projects/empymod/badge/?version=latest
-    :alt: Documentation Status
-    :scale: 100%
-    :target: https://empymod.readthedocs.io/en/latest/?badge=latest
+    :alt: Docs Status
+    :target: http://empymod.readthedocs.io/en/latest/?badge=latest
 
 .. |tests| image:: https://travis-ci.org/prisae/empymod.png?branch=master
     :alt: Test Status
-    :scale: 100%
     :target: https://travis-ci.org/prisae/empymod/
 
 .. |coverage| image:: https://coveralls.io/repos/github/prisae/empymod/badge.svg?branch=master
     :alt: Coverage
-    :scale: 100%
     :target: https://coveralls.io/github/prisae/empymod?branch=master
