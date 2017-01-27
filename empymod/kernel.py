@@ -39,6 +39,8 @@ __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']
 
 
+# Wavenumber-domain kernel
+
 def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                ab, xdirect, msrc, mrec, use_ne_eval):
     """Calculate wavenumber domain solution.
@@ -136,229 +138,6 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
     # Return PJ0, PJ1, PJ0b
     return PJ0, PJ1, PJ0b
-
-
-def angle_factor(angle, ab, msrc, mrec):
-    """Return the angle-dependent factor.
-
-    The whole calculation in the wavenumber domain is only a function of the
-    distance between the source and the receiver, it is independent of the
-    angel. The angle-dependency is this factor, which can be applied to the
-    corresponding parts in the wavenumber or in the frequency domain.
-
-    The `angle_factor` corresponds to the sine and cosine-functions in Eqs
-    105-107, 111-116, 119-121, 123-128.
-
-    This function is called from one of the Hankel functions in
-    :mod:`transform`.  Consult the modelling routines in :mod:`model` for a
-    description of the input and output parameters.
-
-    """
-
-    # 33/66 are completely symmetric and hence independent of angle
-    if ab in [33, ]:
-        return np.ones(angle.size)
-
-    # Reciprocity switch for magnetic receivers
-    if mrec and not msrc:  # If src is electric, swap src and rec (ME => EM).
-            # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
-            angle += np.pi
-
-    if ab in [11, 22, 15, 24, 13, 31, 26, 35]:
-        fct = np.cos
-        test_ang_1 = np.pi/2
-        test_ang_2 = 3*np.pi/2
-    else:
-        fct = np.sin
-        test_ang_1 = np.pi
-        test_ang_2 = 2*np.pi
-
-    if ab in [11, 22, 15, 24, 12, 21, 14, 25]:
-        eangle = 2*angle
-    else:
-        eangle = angle
-
-    # Get factor
-    factAng = fct(eangle)
-
-    # Ensure cos([pi/2, 3pi/2]) and sin([pi, 2pi]) are zero (floating point
-    # issue)
-    factAng[np.isclose(np.abs(eangle), test_ang_1, 1e-10, 1e-14)] = 0
-    factAng[np.isclose(np.abs(eangle), test_ang_2, 1e-10, 1e-14)] = 0
-
-    return factAng
-
-
-def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
-              mrec):
-    """Analytical full-space solutions in the frequency domain.
-
-    .. math:: \\hat{G}^{ee}_{\\alpha\\beta}, \\hat{G}^{ee}_{3\\alpha},
-              \\hat{G}^{ee}_{33}, \\hat{G}^{em}_{\\alpha\\beta},
-              \\hat{G}^{em}_{\\alpha 3}
-
-    This function corresponds to equations 45--50 in [Hunziker_et_al_2015]_,
-    and loosely to the corresponding files `Gin11.F90`, `Gin12.F90`,
-    `Gin13.F90`, `Gin22.F90`, `Gin23.F90`, `Gin31.F90`, `Gin32.F90`,
-    `Gin33.F90`, `Gin41.F90`, `Gin42.F90`, `Gin43.F90`, `Gin51.F90`,
-    `Gin52.F90`, `Gin53.F90`, `Gin61.F90`, and `Gin62.F90`.
-
-    This function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
-
-    """
-    xco = np.cos(angle)*off
-    yco = np.sin(angle)*off
-
-    # Reciprocity switches for magnetic receivers
-    if mrec:
-        if msrc:  # If src is also magnetic, switch eta and zeta (MM => EE).
-            # G^mm_ab(s, r, e, z) = -G^ee_ab(s, r, -z, -e)
-            etaH, zetaH = -zetaH, -etaH
-            etaV, zetaV = -zetaV, -etaV
-        else:  # If src is electric, swap src and rec (ME => EM).
-            # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
-            xco *= -1
-            yco *= -1
-            zsrc, zrec = zrec, zsrc
-
-    # Calculate TE/TM-variables
-    if ab not in [16, 26]:                      # Calc TM
-        lGamTM = np.sqrt(zetaH*etaV)
-        RTM = np.sqrt(off*off + ((zsrc-zrec)*(zsrc-zrec)*etaH/etaV)[:, None])
-        uGamTM = np.exp(-lGamTM[:, None]*RTM)/(4*np.pi*RTM *
-                                               np.sqrt(etaH/etaV)[:, None])
-
-    if ab not in [13, 23, 31, 32, 33, 34, 35]:  # Calc TE
-        lGamTE = np.sqrt(zetaV*etaH)
-        RTE = np.sqrt(off*off+(zsrc-zrec)*(zsrc-zrec)*(zetaH/zetaV)[:, None])
-        uGamTE = np.exp(-lGamTE[:, None]*RTE)/(4*np.pi*RTE *
-                                               np.sqrt(zetaH/zetaV)[:, None])
-
-    # Calculate responses
-    if ab in [11, 12, 21, 22]:  # Eqs 45, 46
-
-        # Define coo1, coo2, and delta
-        if ab in [11, 22]:
-            if ab in [11, ]:
-                coo1 = xco
-                coo2 = xco
-            else:
-                coo1 = yco
-                coo2 = yco
-            delta = 1
-        else:
-            coo1 = xco
-            coo2 = yco
-            delta = 0
-
-        # Calculate response
-        term1 = uGamTM*(3*coo1*coo2/(RTM*RTM) - delta)
-        term1 *= 1/(etaV[:, None]*RTM*RTM) + (lGamTM/etaV)[:, None]/RTM
-        term1 += uGamTM*zetaH[:, None]*coo1*coo2/(RTM*RTM)
-
-        term2 = -delta*zetaH[:, None]*uGamTE
-
-        term3 = -zetaH[:, None]*coo1*coo2/(off*off)*(uGamTM - uGamTE)
-
-        term4 = -np.sqrt(zetaH)[:, None]*(2*coo1*coo2/(off*off) - delta)
-        if np.any(zetaH.imag < 0):  # We need the sqrt where Im > 0.
-            term4 *= -1     # This if-statement corrects for it.
-        term4 *= np.exp(-lGamTM[:, None]*RTM) - np.exp(-lGamTE[:, None]*RTE)
-        term4 /= 4*np.pi*np.sqrt(etaH)[:, None]*off*off
-
-        gin = term1 + term2 + term3 + term4
-
-    elif ab in [13, 23, 31, 32]:  # Eq 47
-
-        # Define coo
-        if ab in [13, 31]:
-            coo = xco
-        elif ab in [23, 32]:
-            coo = yco
-
-        # Calculate response
-        term1 = (etaH/etaV)[:, None]*(zrec - zsrc)*coo/(RTM*RTM)
-        term2 = 3/(RTM*RTM) + 3*lGamTM[:, None]/RTM + (lGamTM*lGamTM)[:, None]
-        gin = term1*term2*uGamTM/etaV[:, None]
-
-    elif ab in [33, ]:  # Eq 48
-
-        # Calculate response
-        term1 = (((etaH/etaV)[:, None]*(zsrc - zrec)/RTM) *
-                 ((etaH/etaV)[:, None]*(zsrc - zrec)/RTM) *
-                 (3/(RTM*RTM) + 3*lGamTM[:, None]/RTM +
-                     (lGamTM*lGamTM)[:, None]))
-        term2 = (-(etaH/etaV)[:, None]/RTM*(1/RTM + lGamTM[:, None]) -
-                 (etaH*zetaH)[:, None])
-        gin = (term1 + term2)*uGamTM/etaV[:, None]
-
-    elif ab in [14, 24, 15, 25]:  # Eq 49
-
-        # Define coo1, coo2, coo3, coo4, delta, and pm
-        if ab in [14, 25]:
-            coo1, coo2 = xco, yco
-            coo3, coo4 = xco, yco
-            delta = 0
-            pm = -1
-        elif ab in [24, 15]:
-            coo1, coo2 = yco, yco
-            coo3, coo4 = xco, xco
-            delta = 1
-            pm = 1
-
-        # 15/25: Swap x/y
-        if ab in[15, 25]:
-            coo1, coo3 = coo3, coo1
-            coo2, coo4 = coo4, coo2
-
-        # 24/25: Swap src/rec
-        if ab in[24, 25]:
-            zrec, zsrc = zsrc, zrec
-
-        # Calculate response
-        def term(lGam, z_eH, z_eV, R, off, co1, co2):
-            fac = (lGam*z_eH/z_eV)[:, None]/R*np.exp(-lGam[:, None]*R)
-            term = 2/(off*off) + lGam[:, None]/R + 1/(R*R)
-            return fac*(co1*co2*term - delta)
-        termTM = term(lGamTM, etaH, etaV, RTM, off, coo1, coo2)
-        termTE = term(lGamTE, zetaH, zetaV, RTE, off, coo3, coo4)
-        mult = (zrec - zsrc)/(4*np.pi*np.sqrt(etaH*zetaH)[:, None]*off*off)
-        gin = -mult*(pm*termTM + termTE)
-
-    elif ab in [34, 35, 16, 26]:  # Eqs 50, 51
-
-        # Define coo
-        if ab in [34, 16]:
-            coo = yco
-        else:
-            coo = -xco
-
-        # Define R, lGam, uGam, e_zH, and e_zV
-        if ab in [34, 35]:
-            coo *= -1
-            R = RTM
-            lGam = lGamTM
-            uGam = uGamTM
-            e_zH = etaH
-            e_zV = etaV
-        else:
-            zrec, zsrc = zsrc, zrec
-            R = RTE
-            lGam = lGamTE
-            uGam = uGamTE
-            e_zH = zetaH
-            e_zV = zetaV
-
-        # Calculate response
-        gin = coo*(e_zH/e_zV)[:, None]/R*(lGam[:, None] + 1/R)*uGam
-
-    # If rec is magnetic switch sign (reciprocity MM/ME => EE/EM).
-    if mrec:
-        gin *= -1
-
-    return gin
 
 
 def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
@@ -792,6 +571,231 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
 
     # Return fields (up- and downgoing)
     return Pu, Pd
+
+
+# Frequency-domain functions
+
+def angle_factor(angle, ab, msrc, mrec):
+    """Return the angle-dependent factor.
+
+    The whole calculation in the wavenumber domain is only a function of the
+    distance between the source and the receiver, it is independent of the
+    angel. The angle-dependency is this factor, which can be applied to the
+    corresponding parts in the wavenumber or in the frequency domain.
+
+    The `angle_factor` corresponds to the sine and cosine-functions in Eqs
+    105-107, 111-116, 119-121, 123-128.
+
+    This function is called from one of the Hankel functions in
+    :mod:`transform`.  Consult the modelling routines in :mod:`model` for a
+    description of the input and output parameters.
+
+    """
+
+    # 33/66 are completely symmetric and hence independent of angle
+    if ab in [33, ]:
+        return np.ones(angle.size)
+
+    # Reciprocity switch for magnetic receivers
+    if mrec and not msrc:  # If src is electric, swap src and rec (ME => EM).
+        # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
+        angle += np.pi
+
+    if ab in [11, 22, 15, 24, 13, 31, 26, 35]:
+        fct = np.cos
+        test_ang_1 = np.pi/2
+        test_ang_2 = 3*np.pi/2
+    else:
+        fct = np.sin
+        test_ang_1 = np.pi
+        test_ang_2 = 2*np.pi
+
+    if ab in [11, 22, 15, 24, 12, 21, 14, 25]:
+        eangle = 2*angle
+    else:
+        eangle = angle
+
+    # Get factor
+    factAng = fct(eangle)
+
+    # Ensure cos([pi/2, 3pi/2]) and sin([pi, 2pi]) are zero (floating point
+    # issue)
+    factAng[np.isclose(np.abs(eangle), test_ang_1, 1e-10, 1e-14)] = 0
+    factAng[np.isclose(np.abs(eangle), test_ang_2, 1e-10, 1e-14)] = 0
+
+    return factAng
+
+
+def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
+              mrec):
+    """Analytical full-space solutions in the frequency domain.
+
+    .. math:: \\hat{G}^{ee}_{\\alpha\\beta}, \\hat{G}^{ee}_{3\\alpha},
+              \\hat{G}^{ee}_{33}, \\hat{G}^{em}_{\\alpha\\beta},
+              \\hat{G}^{em}_{\\alpha 3}
+
+    This function corresponds to equations 45--50 in [Hunziker_et_al_2015]_,
+    and loosely to the corresponding files `Gin11.F90`, `Gin12.F90`,
+    `Gin13.F90`, `Gin22.F90`, `Gin23.F90`, `Gin31.F90`, `Gin32.F90`,
+    `Gin33.F90`, `Gin41.F90`, `Gin42.F90`, `Gin43.F90`, `Gin51.F90`,
+    `Gin52.F90`, `Gin53.F90`, `Gin61.F90`, and `Gin62.F90`.
+
+    This function is called from one of the modelling routines in :mod:`model`.
+    Consult these modelling routines for a description of the input and output
+    parameters.
+
+    """
+    xco = np.cos(angle)*off
+    yco = np.sin(angle)*off
+
+    # Reciprocity switches for magnetic receivers
+    if mrec:
+        if msrc:  # If src is also magnetic, switch eta and zeta (MM => EE).
+            # G^mm_ab(s, r, e, z) = -G^ee_ab(s, r, -z, -e)
+            etaH, zetaH = -zetaH, -etaH
+            etaV, zetaV = -zetaV, -etaV
+        else:  # If src is electric, swap src and rec (ME => EM).
+            # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
+            xco *= -1
+            yco *= -1
+            zsrc, zrec = zrec, zsrc
+
+    # Calculate TE/TM-variables
+    if ab not in [16, 26]:                      # Calc TM
+        lGamTM = np.sqrt(zetaH*etaV)
+        RTM = np.sqrt(off*off + ((zsrc-zrec)*(zsrc-zrec)*etaH/etaV)[:, None])
+        uGamTM = np.exp(-lGamTM[:, None]*RTM)/(4*np.pi*RTM *
+                                               np.sqrt(etaH/etaV)[:, None])
+
+    if ab not in [13, 23, 31, 32, 33, 34, 35]:  # Calc TE
+        lGamTE = np.sqrt(zetaV*etaH)
+        RTE = np.sqrt(off*off+(zsrc-zrec)*(zsrc-zrec)*(zetaH/zetaV)[:, None])
+        uGamTE = np.exp(-lGamTE[:, None]*RTE)/(4*np.pi*RTE *
+                                               np.sqrt(zetaH/zetaV)[:, None])
+
+    # Calculate responses
+    if ab in [11, 12, 21, 22]:  # Eqs 45, 46
+
+        # Define coo1, coo2, and delta
+        if ab in [11, 22]:
+            if ab in [11, ]:
+                coo1 = xco
+                coo2 = xco
+            else:
+                coo1 = yco
+                coo2 = yco
+            delta = 1
+        else:
+            coo1 = xco
+            coo2 = yco
+            delta = 0
+
+        # Calculate response
+        term1 = uGamTM*(3*coo1*coo2/(RTM*RTM) - delta)
+        term1 *= 1/(etaV[:, None]*RTM*RTM) + (lGamTM/etaV)[:, None]/RTM
+        term1 += uGamTM*zetaH[:, None]*coo1*coo2/(RTM*RTM)
+
+        term2 = -delta*zetaH[:, None]*uGamTE
+
+        term3 = -zetaH[:, None]*coo1*coo2/(off*off)*(uGamTM - uGamTE)
+
+        term4 = -np.sqrt(zetaH)[:, None]*(2*coo1*coo2/(off*off) - delta)
+        if np.any(zetaH.imag < 0):  # We need the sqrt where Im > 0.
+            term4 *= -1     # This if-statement corrects for it.
+        term4 *= np.exp(-lGamTM[:, None]*RTM) - np.exp(-lGamTE[:, None]*RTE)
+        term4 /= 4*np.pi*np.sqrt(etaH)[:, None]*off*off
+
+        gin = term1 + term2 + term3 + term4
+
+    elif ab in [13, 23, 31, 32]:  # Eq 47
+
+        # Define coo
+        if ab in [13, 31]:
+            coo = xco
+        elif ab in [23, 32]:
+            coo = yco
+
+        # Calculate response
+        term1 = (etaH/etaV)[:, None]*(zrec - zsrc)*coo/(RTM*RTM)
+        term2 = 3/(RTM*RTM) + 3*lGamTM[:, None]/RTM + (lGamTM*lGamTM)[:, None]
+        gin = term1*term2*uGamTM/etaV[:, None]
+
+    elif ab in [33, ]:  # Eq 48
+
+        # Calculate response
+        term1 = (((etaH/etaV)[:, None]*(zsrc - zrec)/RTM) *
+                 ((etaH/etaV)[:, None]*(zsrc - zrec)/RTM) *
+                 (3/(RTM*RTM) + 3*lGamTM[:, None]/RTM +
+                     (lGamTM*lGamTM)[:, None]))
+        term2 = (-(etaH/etaV)[:, None]/RTM*(1/RTM + lGamTM[:, None]) -
+                 (etaH*zetaH)[:, None])
+        gin = (term1 + term2)*uGamTM/etaV[:, None]
+
+    elif ab in [14, 24, 15, 25]:  # Eq 49
+
+        # Define coo1, coo2, coo3, coo4, delta, and pm
+        if ab in [14, 25]:
+            coo1, coo2 = xco, yco
+            coo3, coo4 = xco, yco
+            delta = 0
+            pm = -1
+        elif ab in [24, 15]:
+            coo1, coo2 = yco, yco
+            coo3, coo4 = xco, xco
+            delta = 1
+            pm = 1
+
+        # 15/25: Swap x/y
+        if ab in[15, 25]:
+            coo1, coo3 = coo3, coo1
+            coo2, coo4 = coo4, coo2
+
+        # 24/25: Swap src/rec
+        if ab in[24, 25]:
+            zrec, zsrc = zsrc, zrec
+
+        # Calculate response
+        def term(lGam, z_eH, z_eV, R, off, co1, co2):
+            fac = (lGam*z_eH/z_eV)[:, None]/R*np.exp(-lGam[:, None]*R)
+            term = 2/(off*off) + lGam[:, None]/R + 1/(R*R)
+            return fac*(co1*co2*term - delta)
+        termTM = term(lGamTM, etaH, etaV, RTM, off, coo1, coo2)
+        termTE = term(lGamTE, zetaH, zetaV, RTE, off, coo3, coo4)
+        mult = (zrec - zsrc)/(4*np.pi*np.sqrt(etaH*zetaH)[:, None]*off*off)
+        gin = -mult*(pm*termTM + termTE)
+
+    elif ab in [34, 35, 16, 26]:  # Eqs 50, 51
+
+        # Define coo
+        if ab in [34, 16]:
+            coo = yco
+        else:
+            coo = -xco
+
+        # Define R, lGam, uGam, e_zH, and e_zV
+        if ab in [34, 35]:
+            coo *= -1
+            R = RTM
+            lGam = lGamTM
+            uGam = uGamTM
+            e_zH = etaH
+            e_zV = etaV
+        else:
+            zrec, zsrc = zsrc, zrec
+            R = RTE
+            lGam = lGamTE
+            uGam = uGamTE
+            e_zH = zetaH
+            e_zV = zetaV
+
+        # Calculate response
+        gin = coo*(e_zH/e_zV)[:, None]/R*(lGam[:, None] + 1/R)*uGam
+
+    # If rec is magnetic switch sign (reciprocity MM/ME => EE/EM).
+    if mrec:
+        gin *= -1
+
+    return gin
 
 
 def halfspace(xco, yco, zsrc, zrec, res, freq, aniso=1, ab=11):
