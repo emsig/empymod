@@ -1,4 +1,3 @@
-# transform. Status 6/8
 import pytest
 import numpy as np
 from os.path import join, dirname
@@ -12,7 +11,7 @@ from empymod import transform, filters, kernel, utils
 # inputs.
 
 # Load required data
-# Data generated with create_transform.py [27/01/2017]
+# Data generated with create_transform.py [28/01/2017]
 DATA = np.load(join(dirname(__file__), 'data_transform.npz'))
 
 
@@ -44,14 +43,12 @@ def test_fht(htype):                                         # 1. fht / 2. hqwe
     wvnr0, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                          etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
                          msrc, mrec)
-    wvnr0 = np.squeeze(wvnr0)
     # Analytical frequency-domain solution
     freq0 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
-    freq0 = np.squeeze(freq0)
     # Compare
     assert_allclose(cov, True)
-    assert_allclose(wvnr0, freq0)
+    assert_allclose(np.squeeze(wvnr0), np.squeeze(freq0))
 
     # # # 1. Spline; One angle # # #
     options = utils.check_opt('spline', None, htype, None, 0)
@@ -61,14 +58,12 @@ def test_fht(htype):                                         # 1. fht / 2. hqwe
     wvnr1, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                          etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
                          msrc, mrec)
-    wvnr1 = np.squeeze(wvnr1)
     # Analytical frequency-domain solution
     freq1 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
-    freq1 = np.squeeze(freq1)
     # Compare
     assert_allclose(cov, True)
-    assert_allclose(wvnr1, freq1, rtol=1e-4)
+    assert_allclose(np.squeeze(wvnr1), np.squeeze(freq1), rtol=1e-4)
 
     # # # 2. Spline; Multi angle # # #
     rec = [np.arange(1, 11)*500, np.arange(-5, 5)*200, 300]
@@ -78,14 +73,12 @@ def test_fht(htype):                                         # 1. fht / 2. hqwe
     wvnr2, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                          etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
                          msrc, mrec)
-    wvnr2 = np.squeeze(wvnr2)
     # Analytical frequency-domain solution
     freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
-    freq2 = np.squeeze(freq2)
     # Compare
     assert_allclose(cov, True)
-    assert_allclose(wvnr2, freq2, rtol=1e-4)
+    assert_allclose(np.squeeze(wvnr2), np.squeeze(freq2), rtol=1e-4)
 
     # # # 3. Spline; pts_per_dec # # #
     if htype == 'fht':
@@ -96,14 +89,12 @@ def test_fht(htype):                                         # 1. fht / 2. hqwe
     wvnr3, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                          etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
                          msrc, mrec)
-    wvnr3 = np.squeeze(wvnr3)
     # Analytical frequency-domain solution
     freq3 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
-    freq3 = np.squeeze(freq3)
     # Compare
     assert_allclose(cov, True)
-    assert_allclose(wvnr3, freq3, rtol=1e-4)
+    assert_allclose(np.squeeze(wvnr3), np.squeeze(freq3), rtol=1e-4)
 
     # # # 4. Spline; Only one offset # # #
     rec = [5000, 0, 300]
@@ -115,14 +106,12 @@ def test_fht(htype):                                         # 1. fht / 2. hqwe
     wvnr4, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                          etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
                          msrc, mrec)
-    wvnr4 = np.squeeze(wvnr4)
     # Analytical frequency-domain solution
     freq4 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
-    freq4 = np.squeeze(freq4)
     # Compare
     assert_allclose(cov, True)
-    assert_allclose(wvnr4, freq4, rtol=1e-4)
+    assert_allclose(np.squeeze(wvnr4), np.squeeze(freq4), rtol=1e-4)
 
 
 @pytest.mark.parametrize("ftype", ['fft', 'fqwe', 'fftlog'])
@@ -139,11 +128,45 @@ def test_fft(ftype):                             # 3. fft / 4. fqwe / 5. fftlog
         assert_allclose(tEM*2/np.pi, res, rtol=1e-3)
 
 
-# 6. qwe
+def test_qwe():                                                        # 6. qwe
+    # QWE is integral of hqwe and fqwe, and therefore tested a lot through
+    # those. Here we just ensure status quo. And if a problem arises in hqwe or
+    # fqwe, it would make it obvious if the problem arises from qwe or not.
 
-# Hankel and not spline
-# Fourier
-# Hankel with spline
+    # Fourier
+    dat = DATA['fqwe0'][()]
+    tres = DATA['tEM0'][()]
+    ftarg = dat['ftarg']
+    tEM, _, _ = transform.qwe(ftarg[0], ftarg[1], ftarg[3], dat['sEM'],
+                              dat['intervals'])
+    assert_allclose(np.squeeze(-tEM*2/np.pi), tres, rtol=1e-3)
+
+    # Hankel
+    dat = DATA['hqwe'][()]
+
+    # With spline
+    fEM, _, _ = transform.qwe(dat['rtol'], dat['atol'], dat['maxint'],
+                              dat['getkernel'], dat['intervals'], None, None,
+                              None)
+    assert_allclose(np.squeeze(fEM), dat['freqres'], rtol=1e-5)
+
+    # Without spline
+    # Define getkernel here, no straightforward way to pickle it...
+    def getkernel(i, inplambd, inpoff, inpfang):
+        iB = i*dat['nquad'] + np.arange(dat['nquad'])
+        PJ = kernel.wavenumber(lambd=np.atleast_2d(inplambd)[:, iB],
+                               **dat['nsinp'])
+        fEM = inpfang*np.dot(PJ[1][0, :], dat['BJ1'][iB])
+        if dat['ab'] in [11, 12, 21, 22, 14, 24, 15, 25]:
+            fEM /= np.atleast_1d(inpoff)
+        fEM += inpfang*np.dot(PJ[2][0, :], dat['BJ0'][iB])
+        fEM += np.dot(PJ[0][0, :], dat['BJ0'][iB])
+        return fEM
+    fEM, _, _ = transform.qwe(dat['rtol'], dat['atol'], dat['maxint'],
+                              getkernel, dat['intervals'],
+                              dat['lambd'], dat['off'], dat['factAng'])
+    assert_allclose(np.squeeze(fEM), dat['freqres'], rtol=1e-5)
+
 
 def test_get_spline_values():                            # 7. get_spline_values
     # Check one example
