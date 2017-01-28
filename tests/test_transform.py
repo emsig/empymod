@@ -1,6 +1,7 @@
-# transform. Status 2/8
+# transform. Status 5/8
+import pytest
 import numpy as np
-# from os.path import join, dirname
+from os.path import join, dirname
 from numpy.testing import assert_allclose
 
 from empymod import transform, filters
@@ -11,63 +12,29 @@ from empymod import transform, filters
 # inputs.
 
 # Load required data
-# Data generated with create_transform.py [26/01/2017]
-# DATA = np.load(join(dirname(__file__), 'data_transform.npz'))
+# Data generated with create_transform.py [27/01/2017]
+DATA = np.load(join(dirname(__file__), 'data_transform.npz'))
 
 # 1. fht
 
 # 2. hqwe
 
 
-# def test_fft():                                                      # 3. fft
-#     # Check FFT with the analytical functions for a halfspace.
-#     for i in [0, 1]:
-#         fl = DATA['fft'+str(i)][()]
-#         if i == 1:
-#             finp = fl['fEM']/(2j*np.pi*fl['f'])
-#         else:
-#             finp = fl['fEM']
-#         tEM, _ = transform.fft(finp, fl['t'], fl['f'], fl['ftarg'])
-#         from matplotlib import pyplot as plt
-#         plt.figure()
-#         plt.semilogx(fl['t'], fl['tEM'], '-.')
-#         plt.plot(fl['t'], tEM*2/np.pi, 'o')
-#         plt.show()
-#         assert_allclose(tEM*2/np.pi, fl['tEM'], rtol=1e-4)
+class TestFFT:                                   # 3. fft / 4. fqwe / 5. fftlog
+    # Check FFT-method with the analytical functions for a halfspace.
+    @pytest.mark.parametrize("ftype", ['fft', 'fqwe', 'fftlog'])
+    def test_fft(self, ftype):
+        t = DATA['t'][()]
+        for i in [0, 1]:
+            fl = DATA[ftype+str(i)][()]
+            res = DATA['tEM'+str(i)][()]
+            if i == 1:
+                finp = fl['fEM']/(2j*np.pi*fl['f'])
+            else:
+                finp = fl['fEM']
+            tEM, _ = getattr(transform, ftype)(finp, t, fl['f'], fl['ftarg'])
+            assert_allclose(tEM*2/np.pi, res, rtol=1e-3)
 
-
-# def test_fqwe():                                                    # 4. fqwe
-#     # Check FFT with the analytical functions for a halfspace.
-#     for i in [0, 1]:
-#         fl = DATA['fqwe'+str(i)][()]
-#         if i == 1:
-#             finp = fl['fEM']/(2j*np.pi*fl['f'])
-#         else:
-#             finp = fl['fEM']
-#         tEM, _ = transform.fqwe(finp, fl['t'], fl['f'], fl['ftarg'])
-#         from matplotlib import pyplot as plt
-#         plt.figure()
-#         plt.semilogx(fl['t'], fl['tEM'], '-.')
-#         plt.plot(fl['t'], tEM*2/np.pi, 'o')
-#         plt.show()
-#         # assert_allclose(tEM*2/np.pi, fl['tEM'], rtol=1e-3)
-
-
-# def test_fftlog():                                                # 5. fftlog
-#     # Check FFT with the analytical functions for a halfspace.
-#     for i in [0, 1]:
-#         fl = DATA['fftlog'+str(i)][()]
-#         if i == 1:
-#             finp = fl['fEM']/(2j*np.pi*fl['f'])
-#         else:
-#             finp = fl['fEM']
-#         tEM, _ = transform.fftlog(finp, fl['t'], fl['f'], fl['ftarg'])
-#         from matplotlib import pyplot as plt
-#         plt.figure()
-#         plt.semilogx(fl['t'], fl['tEM'], '-.')
-#         plt.plot(fl['t'], tEM*2/np.pi, 'o')
-#         plt.show()
-#         # assert_allclose(tEM*2/np.pi, fl['tEM'], rtol=1e-3)
 
 # 6. qwe
 

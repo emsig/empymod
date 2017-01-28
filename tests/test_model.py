@@ -16,9 +16,9 @@ from empymod.kernel import fullspace, halfspace
 # Add tests when issues arise!
 
 # Load required data
-# Data generated with create_empymod.py [25/01/2017]
+# Data generated with create_empymod.py [27/01/2017]
 DATAEMPYMOD = np.load(join(dirname(__file__), 'data_empymod.npz'))
-# Data generated with create_fem_tem.py [25/01/2017]
+# Data generated with create_fem_tem.py [27/01/2017]
 DATAFEMTEM = np.load(join(dirname(__file__), 'data_fem_tem.npz'))
 
 
