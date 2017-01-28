@@ -16,9 +16,11 @@ from empymod import transform, filters, kernel, utils
 DATA = np.load(join(dirname(__file__), 'data_transform.npz'))
 
 
-def test_fht():                                                        # 1. fht
+@pytest.mark.parametrize("htype", ['fht', 'hqwe'])
+def test_fht(htype):                                         # 1. fht / 2. hqwe
     # Compare wavenumber-domain calculation / FHT with analytical
     # frequency-domain fullspace solution
+    calc = getattr(transform, htype)
     model = utils.check_model([], 10, 2, 2, 5, 1, 10, 0)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
     frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
@@ -26,9 +28,9 @@ def test_fht():                                                        # 1. fht
     freq, etaH, etaV, zetaH, zetaV = frequency
     src = [0, 0, 0]
     src, nsrc = utils.check_dipole(src, 'src', 0)
-    ht, htarg = utils.check_hankel('fht', None, 0)
     ab, msrc, mrec = utils.check_ab(11, 0)
-    options = utils.check_opt(None, None, 'fht', None, 0)
+    ht, htarg = utils.check_hankel(htype, None, 0)
+    options = utils.check_opt(None, None, htype, None, 0)
     use_spline, use_ne_eval, loop_freq, loop_off = options
     xdirect = False  # Important, as we want to compare wavenumber-frequency!
     rec = [np.arange(1, 11)*500, np.zeros(10), 300]
@@ -39,30 +41,33 @@ def test_fht():                                                        # 1. fht
 
     # # # 0. No Spline # # #
     # Wavenumber solution plus transform
-    wvnr0, _, _ = transform.fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
-                                etaH, etaV, zetaH, zetaV, xdirect, htarg,
-                                use_spline, False, msrc, mrec)
+    wvnr0, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
+                         etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
+                         msrc, mrec)
     wvnr0 = np.squeeze(wvnr0)
     # Analytical frequency-domain solution
     freq0 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
     freq0 = np.squeeze(freq0)
     # Compare
+    assert_allclose(cov, True)
     assert_allclose(wvnr0, freq0)
 
     # # # 1. Spline; One angle # # #
-    options = utils.check_opt('spline', None, 'fht', None, 0)
+    options = utils.check_opt('spline', None, htype, None, 0)
+    use_spline, use_ne_eval, loop_freq, loop_off = options
     use_spline, use_ne_eval, loop_freq, loop_off = options
     # Wavenumber solution plus transform
-    wvnr1, _, _ = transform.fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
-                                etaH, etaV, zetaH, zetaV, xdirect, htarg,
-                                use_spline, False, msrc, mrec)
+    wvnr1, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
+                         etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
+                         msrc, mrec)
     wvnr1 = np.squeeze(wvnr1)
     # Analytical frequency-domain solution
     freq1 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
     freq1 = np.squeeze(freq1)
     # Compare
+    assert_allclose(cov, True)
     assert_allclose(wvnr1, freq1, rtol=1e-4)
 
     # # # 2. Spline; Multi angle # # #
@@ -70,69 +75,75 @@ def test_fht():                                                        # 1. fht
     rec, nrec = utils.check_dipole(rec, 'rec', 0)
     off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
     # Analytical frequency-domain solution
-    wvnr2, _, _ = transform.fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
-                                etaH, etaV, zetaH, zetaV, xdirect, htarg,
-                                use_spline, False, msrc, mrec)
+    wvnr2, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
+                         etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
+                         msrc, mrec)
     wvnr2 = np.squeeze(wvnr2)
     # Analytical frequency-domain solution
     freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
     freq2 = np.squeeze(freq2)
     # Compare
+    assert_allclose(cov, True)
     assert_allclose(wvnr2, freq2, rtol=1e-4)
 
-    # # # 3. Spline; ndec # # #
-    ht, htarg = utils.check_hankel('fht', ['key_201_2012', 20], 0)
+    # # # 3. Spline; pts_per_dec # # #
+    if htype == 'fht':
+        ht, htarg = utils.check_hankel('fht', ['key_201_2012', 20], 0)
+    else:
+        ht, htarg = utils.check_hankel('qwe', ['', '', '', '', 100], 0)
     # Analytical frequency-domain solution
-    wvnr3, _, _ = transform.fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
-                                etaH, etaV, zetaH, zetaV, xdirect, htarg,
-                                use_spline, False, msrc, mrec)
+    wvnr3, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
+                         etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
+                         msrc, mrec)
     wvnr3 = np.squeeze(wvnr3)
     # Analytical frequency-domain solution
     freq3 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
     freq3 = np.squeeze(freq3)
     # Compare
+    assert_allclose(cov, True)
     assert_allclose(wvnr3, freq3, rtol=1e-4)
 
     # # # 4. Spline; Only one offset # # #
     rec = [5000, 0, 300]
     rec, nrec = utils.check_dipole(rec, 'rec', 0)
     off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
+    if htype == 'hqwe':
+        ht, htarg = utils.check_hankel('qwe', ['', '', '', 200, ''], 0)
     # Analytical frequency-domain solution
-    wvnr4, _, _ = transform.fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
-                                etaH, etaV, zetaH, zetaV, xdirect, htarg,
-                                use_spline, False, msrc, mrec)
+    wvnr4, _, cov = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
+                         etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
+                         msrc, mrec)
     wvnr4 = np.squeeze(wvnr4)
     # Analytical frequency-domain solution
     freq4 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
     freq4 = np.squeeze(freq4)
     # Compare
+    assert_allclose(cov, True)
     assert_allclose(wvnr4, freq4, rtol=1e-4)
 
 
-# 2. hqwe
-
-
-class TestFFT:                                   # 3. fft / 4. fqwe / 5. fftlog
+@pytest.mark.parametrize("ftype", ['fft', 'fqwe', 'fftlog'])
+def test_fft(ftype):                             # 3. fft / 4. fqwe / 5. fftlog
     # Check FFT-method with the analytical functions for a halfspace.
-    @pytest.mark.parametrize("ftype", ['fft', 'fqwe', 'fftlog'])
-    def test_fft(self, ftype):
-        t = DATA['t'][()]
-        for i in [0, 1]:
-            fl = DATA[ftype+str(i)][()]
-            res = DATA['tEM'+str(i)][()]
-            if i == 1:
-                finp = fl['fEM']/(2j*np.pi*fl['f'])
-            else:
-                finp = fl['fEM']
-            tEM, _ = getattr(transform, ftype)(finp, t, fl['f'], fl['ftarg'])
-            assert_allclose(tEM*2/np.pi, res, rtol=1e-3)
+    t = DATA['t'][()]
+    for i in [0, 1]:
+        fl = DATA[ftype+str(i)][()]
+        res = DATA['tEM'+str(i)][()]
+        finp = fl['fEM']
+        if i == 1:
+            finp /= 2j*np.pi*fl['f']
+        tEM, _ = getattr(transform, ftype)(finp, t, fl['f'], fl['ftarg'])
+        assert_allclose(tEM*2/np.pi, res, rtol=1e-3)
 
 
 # 6. qwe
 
+# Hankel and not spline
+# Fourier
+# Hankel with spline
 
 def test_get_spline_values():                            # 7. get_spline_values
     # Check one example

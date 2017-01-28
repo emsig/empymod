@@ -221,7 +221,7 @@ def check_bipole(inp, name):
 
     """
 
-    def check_dipole(inp, name):
+    def chck_dipole(inp, name):
         """Check inp for shape and type."""
         # Check x
         inp[0] = _check_var(inp[0], float, 1, name+'-x')
@@ -250,7 +250,7 @@ def check_bipole(inp, name):
 
     if isdipole:  # dipole checks
         # Check x, y, and z
-        inp = check_dipole(inp, name)
+        inp = chck_dipole(inp, name)
 
         # Check azimuth and dip (must be floats, otherwise use `bipole`)
         inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,))
@@ -261,8 +261,8 @@ def check_bipole(inp, name):
 
     else:         # bipole checks
         # Check each pole for x, y, and z
-        inp0 = check_dipole(inp[::2], name+'-1')   # [x0, y0, z0]
-        inp1 = check_dipole(inp[1::2], name+'-2')  # [x1, y1, z1]
+        inp0 = chck_dipole(inp[::2], name+'-1')   # [x0, y0, z0]
+        inp1 = chck_dipole(inp[1::2], name+'-2')  # [x1, y1, z1]
 
         # If one pole has a single depth, but the other has various
         # depths, we have to repeat the single depth, as we will have
@@ -1419,12 +1419,13 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
 def printstartfinish(verb, inp=None, kcount=None):
     """Print start and finish with time measure and kernel count."""
-    if inp and verb > 1:
-        ttxt = str(timedelta(seconds=default_timer() - inp))
-        ktxt = ' '
-        if kcount:
-            ktxt += str(kcount) + ' kernel call(s)'
-        print('\n:: empymod END; runtime = ' + ttxt + ' ::' + ktxt + '\n')
+    if inp:
+        if verb > 1:
+            ttxt = str(timedelta(seconds=default_timer() - inp))
+            ktxt = ' '
+            if kcount:
+                ktxt += str(kcount) + ' kernel call(s)'
+            print('\n:: empymod END; runtime = ' + ttxt + ' ::' + ktxt + '\n')
     else:
         t0 = default_timer()
         if verb > 2:
@@ -1474,7 +1475,7 @@ def _prnt_min_max_val(var, text, verb):
     """Print variable; if more than one, just min and max, unless verb > 3."""
     if var.size > 1:
         print(text, str(var.min()), "-", str(var.max()),
-              ";", str(var.size), " [min-max; #]")
+              ":", str(var.size), " [min-max; #]")
         if verb > 3:
             print("                   : ", _strvar(var))
     else:
