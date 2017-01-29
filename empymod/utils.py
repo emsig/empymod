@@ -254,7 +254,7 @@ def check_bipole(inp, name):
 
         # Check azimuth and dip (must be floats, otherwise use `bipole`)
         inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,))
-        inp[4] = _check_var(inp[4], float, 1, 'dip', inp[3].shape)
+        inp[4] = _check_var(inp[4], float, 1, 'dip', (1,))
 
         # How many different depths
         inpz = inp[2].size
@@ -272,6 +272,15 @@ def check_bipole(inp, name):
                 inp0[2] = np.repeat(inp0[2], inp1[2].size)
             else:
                 inp1[2] = np.repeat(inp1[2], inp0[2].size)
+
+        # Check if inp is a dipole instead of a bipole
+        # (This is a problem, as we would could not define the angles then.)
+        if not np.any([np.all(inp0[0] != inp1[0]), np.all(inp0[1] != inp1[1]),
+                      np.all(inp0[2] != inp1[2])]):
+            print("* ERROR   :: At least one of <" + name + "> is a point " +
+                  "dipole, use the format [x, y, z, azimuth, dip] instead " +
+                  "of [x0, x1, y0, y1, z0, z1].")
+            raise ValueError('Bipole: bipole-' + name)
 
         # Collect elements
         inp = [inp0[0], inp1[0], inp0[1], inp1[1], inp0[2], inp1[2]]
@@ -432,12 +441,10 @@ def check_hankel(ht, htarg, verb):
         # Check filter; defaults to key_401_2009
         try:
             fhtfilt = htarg[0]
-        except:
-            fhtfilt = filters.key_401_2009()
-        else:
-            # If not already filter-instance, get it from string
             if not hasattr(fhtfilt, 'base'):
                 fhtfilt = getattr(filters, fhtfilt)()
+        except:
+            fhtfilt = filters.key_401_2009()
 
         # Check pts_per_dec; defaults to None
         try:
@@ -507,6 +514,7 @@ def check_hankel(ht, htarg, verb):
             print("     > atol        :  " + str(htarg[1]))
             print("     > nquad       :  " + str(htarg[2]))
             print("     > maxint      :  " + str(htarg[3]))
+            print("     > pts_per_dec :  " + str(htarg[4]))
 
     else:
         print("* ERROR   :: <ht> must be one of: ['fht', 'qwe'];" +
@@ -622,15 +630,10 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     # EM-field is computed analytically directly in the frequency-domain.
     # Note: Also a stack of layers with the same material parameters is treated
     #       as a homogeneous full-space.
-    if res.shape == ():
-        isfullspace = True
-    else:
-        isores = (res - res[0] == 0).all()*(aniso - aniso[0] == 0).all()
-        isoeph = (epermH - epermH[0] == 0).all()
-        isoepv = (epermV - epermV[0] == 0).all()
-        isomph = (mpermH - mpermH[0] == 0).all()
-        isompv = (mpermV - mpermV[0] == 0).all()
-        isfullspace = isores*isoeph*isoepv*isomph*isompv
+    isores = (res - res[0] == 0).all()*(aniso - aniso[0] == 0).all()
+    isoep = (epermH - epermH[0] == 0).all()*(epermV - epermV[0] == 0).all()
+    isomp = (mpermH - mpermH[0] == 0).all()*(mpermV - mpermV[0] == 0).all()
+    isfullspace = isores*isoep*isomp
 
     # Print fullspace info
     if verb > 2 and isfullspace:
@@ -1316,6 +1319,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
         # Check if tinp is a dipole instead of a bipole
         # (This is a problem, as we would could not define the angles then.)
+        # Is also checked in check_bipole, but just to be sure.
         if np.any((dx == 0)*(dy == 0)*(dz == 0)):
             print("* ERROR   :: At least one of <" + name + "> is a point " +
                   "dipole, use the format [x, y, z, azimuth, dip] instead " +
@@ -1472,14 +1476,14 @@ def _strvar(a, prec='{:G}'):
 
 
 def _prnt_min_max_val(var, text, verb):
-    """Print variable; if more than one, just min and max, unless verb > 3."""
-    if var.size > 1:
-        print(text, str(var.min()), "-", str(var.max()),
-              ":", str(var.size), " [min-max; #]")
+    """Print variable; if more than three, just min/max, unless verb > 3."""
+    if var.size > 3:
+        print(text, _strvar(var.min()), "-", _strvar(var.max()),
+              ":", _strvar(var.size), " [min-max; #]")
         if verb > 3:
             print("                   : ", _strvar(var))
     else:
-        print(text, str(np.atleast_1d(var)[0]))
+        print(text, _strvar(np.atleast_1d(var)))
 
 
 def _check_min(par, minval, name, unit, verb):

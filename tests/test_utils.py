@@ -1,9 +1,9 @@
-# utils. Status: 14/21
+# utils. Status: 17/21
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose
 
-from empymod import utils
+from empymod import utils, filters
 
 
 def test_emarray():                                                # 1. EMArray
@@ -64,7 +64,71 @@ def test_check_ab(capsys):                                        # 2. check_ab
         utils.check_ab([12, ], 0)
 
 
-# 3. check_bipole
+def test_check_bipole():                                      # 3. check_bipole
+    # Wrong size
+    with pytest.raises(ValueError):
+        utils.check_bipole([0, 0, 0], 'tvar')
+
+    # # Dipole stuff
+
+    # Normal case
+    pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 0, 32]
+    pole, nout, outz, isdipole = utils.check_bipole(pole, 'tvar')
+    assert_allclose(pole[0], np.array([0, 0, 0]))
+    assert_allclose(pole[1], np.array([10, 20, 30]))
+    assert_allclose(pole[2], np.array([100, 0, 100]))
+    assert nout == 3
+    assert outz == 3
+    assert_allclose(isdipole, True)
+
+    # Wrong azimuth
+    pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], [0, 1, 2], 1]
+    with pytest.raises(ValueError):
+        utils.check_bipole(pole, 'tvar')
+    # Wrong dip
+    pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 1, [0, 1, 2]]
+    with pytest.raises(ValueError):
+        utils.check_bipole(pole, 'tvar')
+    # x.size != y.size
+    pole = [[0, 0], [10, 20, 30], [100, 0, 100], 0, 0]
+    with pytest.raises(ValueError):
+        utils.check_bipole(pole, 'tvar')
+
+    # # Bipole stuff
+
+    # Dipole instead bipole
+    pole = [0, 0, 1000, 1000, 10, 10]
+    with pytest.raises(ValueError):
+        utils.check_bipole(pole, 'tvar')
+
+    # Normal case
+    pole = [0, 0, 1000, 1000, 10, 20]
+    pole, nout, outz, isdipole = utils.check_bipole(pole, 'tvar')
+    assert_allclose(pole[0], 0)
+    assert_allclose(pole[1], 0)
+    assert_allclose(pole[2], 1000)
+    assert_allclose(pole[3], 1000)
+    assert_allclose(pole[4], 10)
+    assert_allclose(pole[5], 20)
+    assert nout == 1
+    assert outz == 1
+    assert_allclose(isdipole, False)
+
+    # Pole one has variable depths
+    pole = [[0, 0], [10, 10], [0, 0], [20, 30], [10, 20], 0]
+    pole, nout, outz, _ = utils.check_bipole(pole, 'tvar')
+    assert_allclose(pole[4], [10, 20])
+    assert_allclose(pole[5], [0, 0])
+    assert nout == 2
+    assert outz == 2
+
+    # Pole one has variable depths
+    pole = [[0, 0], [10, 10], [0, 0], [20, 30], 10, [20, 0]]
+    pole, nout, outz, _ = utils.check_bipole(pole, 'tvar')
+    assert_allclose(pole[4], [10, 10])
+    assert_allclose(pole[5], [20, 0])
+    assert nout == 2
+    assert outz == 2
 
 
 def test_check_dipole(capsys):                                # 4. check_dipole
@@ -77,9 +141,20 @@ def test_check_dipole(capsys):                                # 4. check_dipole
     assert_allclose(src[2], 0)
 
     outstr = "   Source(s)       :  2 dipole(s)\n"
-    outstr += "     > x       [m] :  1000.0 - 2000.0 : 2  [min-max; #]\n"
-    outstr += "     > y       [m] :  0.0 - 0.0 : 2  [min-max; #]\n"
-    outstr += "     > z       [m] :  0.0\n"
+    outstr += "     > x       [m] :  1000 2000\n"
+    outstr += "     > y       [m] :  0 0\n"
+    outstr += "     > z       [m] :  0\n"
+    assert out == outstr
+
+    # Check print if more than 3 dipoles
+    utils.check_dipole([[1, 2, 3, 4], [0, 0, 0, 0], 0], 'src', 4)
+    out, _ = capsys.readouterr()
+    outstr = "   Source(s)       :  4 dipole(s)\n"
+    outstr += "     > x       [m] :  1 - 4 : 4  [min-max; #]\n"
+    outstr += "                   :  1 2 3 4\n"
+    outstr += "     > y       [m] :  0 - 0 : 4  [min-max; #]\n"
+    outstr += "                   :  0 0 0 0\n"
+    outstr += "     > z       [m] :  0\n"
     assert out == outstr
 
     # correct input, verb > 2, rec
@@ -91,9 +166,9 @@ def test_check_dipole(capsys):                                # 4. check_dipole
     assert_allclose(rec[2], 0)
 
     outstr = "   Receiver(s)     :  1 dipole(s)\n"
-    outstr += "     > x       [m] :  0.0\n"
-    outstr += "     > y       [m] :  0.0\n"
-    outstr += "     > z       [m] :  0.0\n"
+    outstr += "     > x       [m] :  0\n"
+    outstr += "     > y       [m] :  0\n"
+    outstr += "     > z       [m] :  0\n"
     assert out == outstr
 
     # Check Errors: more than one z
@@ -133,9 +208,103 @@ def test_check_frequency(capsys):                          # 5. check_frequency
     assert_allclose(zetaV, rzetaV)
 
 
-# 6. check_hankel
+def test_check_hankel(capsys):                                # 6. check_hankel
+    # # FHT # #
+    # verbose
+    ht, htarg = utils.check_hankel('fht', None, 4)
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel          :  Fast Hankel Transform\n     > Filter"
+    assert out[:57] == outstr
+    assert ht == 'fht'
+    assert htarg[0].name == filters.key_401_2009().name
+    assert htarg[1] is None
 
-# 7. check_model
+    # [filter str]
+    _, htarg = utils.check_hankel('fht', 'key_201_2009', 0)
+    assert htarg[0].name == filters.key_201_2009().name
+    assert htarg[1] is None
+    # [filter inst]
+    _, htarg = utils.check_hankel('fht', filters.kong_61_2007(), 0)
+    assert htarg[0].name == filters.kong_61_2007().name
+    assert htarg[1] is None
+    # ['', pts_per_dec]
+    _, htarg = utils.check_hankel('fht', ['', 20], 0)
+    assert htarg[0].name == filters.key_401_2009().name
+    assert htarg[1] == 20
+    # [filter str, pts_per_dec]
+    _, htarg = utils.check_hankel('fht', ['key_201_2009', 20], 0)
+    assert htarg[0].name == filters.key_201_2009().name
+    assert htarg[1] == 20
+
+    # # QWE # #
+    # verbose
+    ht, htarg = utils.check_hankel('qwe', None, 4)
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel          :  Quadrature-with-Extrapolation\n     > rtol"
+    assert out[:63] == outstr
+    assert ht == 'hqwe'
+    assert_allclose(htarg, [1e-12, 1e-30, 51, 100, 80])
+
+    # only last argument
+    _, htarg = utils.check_hankel('qwe', ['', '', '', '', 30], 0)
+    assert_allclose(htarg, [1e-12, 1e-30, 51, 100, 30])
+    # all arguments
+    _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30], 0)
+    assert_allclose(htarg, [1e-3, 1e-4, 31, 20, 30])
+
+    # wrong ht
+    with pytest.raises(ValueError):
+        utils.check_hankel('doesnotexist', None, 1)
+
+
+def test_check_model(capsys):                                  # 7. check_model
+    # Normal case
+    res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
+                            [1, 1], 1)
+    depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = res
+    out, _ = capsys.readouterr()
+    assert out[:32] == "* WARNING :: Parameter epermH < "
+    assert_allclose(depth, [-np.infty, 0])
+    assert_allclose(res, [1e20, 20])
+    assert_allclose(aniso, [1, 2])
+    assert_allclose(epermH, [1e-20, 1])
+    assert_allclose(epermV, [50, 80])
+    assert_allclose(mpermH, [10, 1])
+    assert_allclose(mpermV, [1, 1])
+    assert_allclose(isfullspace, False)
+
+    # Check -np.infty is added to depth
+    out = utils.check_model([], 2, 1, 1, 1, 1, 1, 1)
+    assert_allclose(out[0], -np.infty)
+
+    # Check -np.infty is not added if it is already in depth
+    out = utils.check_model(-np.infty, 2, 1, 1, 1, 1, 1, 1)
+    assert_allclose(out[0], -np.infty)
+
+    # Check verbosity and fullspace
+    utils.check_model(0, [1, 1], [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], 4)
+    out, _ = capsys.readouterr()
+    outstr1 = "   depth       [m] :  0\n   res     [Ohm.m] :  1 1\n   aniso"
+    outstr2 = "S A FULLSPACE; returning analytical frequency-domain solution\n"
+    assert out[:58] == outstr1
+    assert out[-62:] == outstr2
+
+    # Check fullspace if only one value
+    utils.check_model([], 1, 2, 10, 1, 2, 3, 4)
+    out, _ = capsys.readouterr()
+    assert out[-62:] == outstr2
+
+    # Increasing depth
+    with pytest.raises(ValueError):
+        var = [1, 1, 1, 1]
+        utils.check_model([0, 100, 90], var, var, var, var, var, var, 1)
+        out, _ = capsys.readouterr()
+        assert out[:25] == "* ERROR   :: <depth> must"
+
+    # A ValueError check
+    with pytest.raises(ValueError):
+        utils.check_model(0, 1, [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], 1)
+
 
 # 8. check_opt
 
@@ -260,7 +429,7 @@ def test_conv_warning(capsys):                               # 16. conv_warning
     assert out == ""
 
 
-def test_check_shape(capsys):                                # 17. _check_shape
+def test_check_shape():                                      # 17. _check_shape
     # Ensure no Error is raised
     utils._check_shape(np.zeros((3, 4)), 'tvar', (3, 4))
     utils._check_shape(np.zeros((3, 4)), 'tvar', (3, 4), (2, ))
