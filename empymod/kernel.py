@@ -623,6 +623,10 @@ def angle_factor(angle, ab, msrc, mrec):
     factAng[np.isclose(np.abs(eangle), test_ang_1, 1e-10, 1e-14)] = 0
     factAng[np.isclose(np.abs(eangle), test_ang_2, 1e-10, 1e-14)] = 0
 
+    # Reset
+    if mrec and not msrc:
+        angle -= np.pi
+
     return factAng
 
 
