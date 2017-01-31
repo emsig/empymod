@@ -3,7 +3,7 @@ import numpy as np
 from os.path import join, dirname
 from numpy.testing import assert_allclose
 
-from empymod.kernel import fullspace, halfspace
+from empymod import kernel
 
 # No input checks are carried out in kernel, by design. Input checks are
 # carried out in model/utils, not in the core functions kernel/transform.
@@ -11,30 +11,36 @@ from empymod.kernel import fullspace, halfspace
 # inputs.
 
 # Load required data
-# Data generated with create_empymod.py [25/01/2017]
+# Data generated with create_empymod.py
 DATAEMPYMOD = np.load(join(dirname(__file__), 'data_empymod.npz'))
+# Data generated with create_kernel.py
+DATAKERNEL = np.load(join(dirname(__file__), 'data_kernel.npz'))
 
 # 1. wavenumber
 
-# 2. angle_factor
+# 2. greenfct
+
+# 3. reflections
+
+# 4. fields
 
 
-def test_fullspace():                                            # 3. fullspace
+def test_angle_factor():                                      # 5. angle_factor
+    dat = DATAKERNEL['angres'][()]
+    for ddat in dat:
+        res = kernel.angle_factor(**ddat['inp'])
+        assert_allclose(res, ddat['res'])
+
+
+def test_fullspace():                                            # 6. fullspace
     # Compare all to maintain status quo.
     fs = DATAEMPYMOD['fs'][()]
     fsres = DATAEMPYMOD['fsres'][()]
     for key in fs:
         # Get fullspace
-        fs_res = fullspace(**fs[key])
+        fs_res = kernel.fullspace(**fs[key])
         # Check
         assert_allclose(fs_res, fsres[key])
-
-
-# 4. greenfct
-
-# 5. reflections
-
-# 6. fields
 
 
 def test_halfspace():                                            # 7. halfspace
@@ -43,6 +49,6 @@ def test_halfspace():                                            # 7. halfspace
     hsres = DATAEMPYMOD['hsres'][()]
     for key in hs:
         # Get halfspace
-        hs_res = halfspace(**hs[key])
+        hs_res = kernel.halfspace(**hs[key])
         # Check
         assert_allclose(hs_res, hsres[key])

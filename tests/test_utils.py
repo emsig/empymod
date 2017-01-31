@@ -572,10 +572,25 @@ def test_get_geo_fact():                                     # 11. get_geo_fact
     res = np.array([0.017051023225738, 0.020779123804907, -0.11077204227395,
                     -0.081155809427821, -0.098900024313067, 0.527229048585517,
                     -0.124497144079623, -0.151717673241039, 0.808796206796408])
+    res2 = np.rot90(np.fliplr(res.reshape(3, -1))).ravel()
+
+    # EE, MM
     ab = [11, 12, 13, 21, 22, 23, 31, 32, 33]
     i = 0
     for i in range(9):
+        out = utils.get_geo_fact(ab[i], 13.45, 23.8, 124.3, 5.3, False, False)
+        assert_allclose(out[0], res[i])
         out = utils.get_geo_fact(ab[i], 13.45, 23.8, 124.3, 5.3, True, True)
+        assert_allclose(out[0], res[i])
+        i += 1
+
+    # ME, EM
+    ab = [14, 15, 16, 24, 25, 26, 34, 35, 36]
+    i = 0
+    for i in range(9):
+        out = utils.get_geo_fact(ab[i], 13.45, 23.8, 124.3, 5.3, False, True)
+        assert_allclose(out[0], res2[i])
+        out = utils.get_geo_fact(ab[i], 13.45, 23.8, 124.3, 5.3, True, False)
         assert_allclose(out[0], res[i])
         i += 1
 
