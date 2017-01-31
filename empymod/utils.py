@@ -448,13 +448,9 @@ def check_hankel(ht, htarg, verb):
 
         # Check pts_per_dec; defaults to None
         try:
-            pts_per_dec = htarg[1]
+            pts_per_dec = _check_var(htarg[1], int, 0, 'fht: pts_per_dec', ())
         except:
             pts_per_dec = None
-        else:
-            if pts_per_dec:  # Check pts_per_dec
-                pts_per_dec = _check_var(pts_per_dec, int, 0,
-                                         'fht: pts_per_dec', ())
 
         # Assemble htarg
         htarg = (fhtfilt, pts_per_dec)
@@ -822,22 +818,16 @@ def check_time(time, signal, ft, ftarg, verb):
         # Check filter; defaults to key_201_CosSin_2012
         try:
             fftfilt = ftarg[0]
-        except:
-            fftfilt = filters.key_201_CosSin_2012()
-        else:
-            # If not already filters-instance, get it from string
             if not hasattr(fftfilt, 'base'):
                 fftfilt = getattr(filters, fftfilt)()
+        except:
+            fftfilt = filters.key_201_CosSin_2012()
 
         # Check pts_per_dec; defaults to None
         try:
-            pts_per_dec = ftarg[1]
+            pts_per_dec = _check_var(ftarg[1], int, 0, ft + 'pts_per_dec', ())
         except:
             pts_per_dec = None
-        else:
-            if pts_per_dec:  # Check pts_per_dec
-                pts_per_dec = _check_var(pts_per_dec, int, 0,
-                                         ft + ' pts_per_dec', ())
 
         # Assemble ftarg
         ftarg = (fftfilt, pts_per_dec, ft)
@@ -901,7 +891,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # If verbose, print Fourier transform information
         if verb > 2:
-            print("   Fourier          :  Quadrature-with-Extrapolation")
+            print("   Fourier         :  Quadrature-with-Extrapolation")
             print("     > rtol        :  " + str(ftarg[0]))
             print("     > atol        :  " + str(ftarg[1]))
             print("     > nquad       :  " + str(ftarg[2]))
@@ -941,10 +931,10 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # If verbose, print Fourier transform information
         if verb > 2:
-            print("   Fourier          :  FFTLog ")
-            print("     > pts/dec      :  " + str(pts_per_dec))
-            print("     > add_dec      :  " + str(add_dec))
-            print("     > q            :  " + str(q))
+            print("   Fourier         :  FFTLog")
+            print("     > pts/dec     :  " + str(pts_per_dec))
+            print("     > add_dec     :  " + str(add_dec))
+            print("     > q           :  " + str(q))
 
         # Calculate minimum and maximum required frequency
         minf = np.log10(1/time.max()) + add_dec[0]
@@ -956,7 +946,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # Assemble ftarg
         # Keep first 3 entries, so re-running this check is stable
-        ftarg = (pts_per_dec, add_dec, q, tcalc, dlnr, kr, rk, q)
+        ftarg = (pts_per_dec, add_dec, q, tcalc, dlnr, kr, rk)
 
     else:
         print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +

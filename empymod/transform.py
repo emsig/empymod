@@ -564,7 +564,7 @@ def fftlog(fEM, time, freq, ftarg):
 
     """
     # Get tcalc, dlnr, kr, rk, q; a and n
-    _, _, _, tcalc, dlnr, kr, rk, q = ftarg
+    _, _, q, tcalc, dlnr, kr, rk = ftarg
     a = -fEM.imag
     n = a.size
 

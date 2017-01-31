@@ -306,9 +306,208 @@ def test_check_model(capsys):                                  # 7. check_model
         utils.check_model(0, 1, [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], 1)
 
 
-# 8. check_opt
+def test_check_opt(capsys):                                      # 8. check_opt
+    fhtarg = [filters.kong_61_2007(), 43]
+    qwehtarg = [np.array(1e-12), np.array(1e-30), np.array(51), np.array(100),
+                np.array(33)]
 
-# 9. check_time
+    res = utils.check_opt(None, None, 'fht', fhtarg, 4)
+    assert_allclose(res, (False, False, False, False))
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel Opt.     :  None\n   Loop over       :  None"
+    assert out[:53] == outstr
+
+    res = utils.check_opt(None, 'off', 'hqwe', qwehtarg, 4)
+    assert_allclose(res, (False, False, True, False))
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel Opt.     :  None\n   Loop over       :  Freq"
+    assert out[:53] == outstr
+
+    res = utils.check_opt('parallel', 'off', 'fht', fhtarg, 4)
+    assert_allclose(res[0], False)
+    assert_allclose(callable(res[1]), True)
+    assert_allclose(res[2:], (False, True))
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel Opt.     :  Use parallel\n   Loop over       :  Offs"
+    assert out[:61] == outstr
+
+    res = utils.check_opt('parallel', 'freq', 'hqwe', qwehtarg, 4)
+    assert_allclose(res[0], False)
+    assert_allclose(callable(res[1]), True)
+    assert_allclose(res[2:], (True, False))
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel Opt.     :  Use parallel\n   Loop over       :  Freq"
+    assert out[:61] == outstr
+
+    res = utils.check_opt('spline', None, 'fht', fhtarg, 4)
+    assert_allclose(res, (True, False, True, False))
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel Opt.     :  Use spline\n     > pts/dec     :  43\n"
+    outstr += "   Loop over       :  Frequencies\n"
+    assert out == outstr
+
+    res = utils.check_opt('spline', None, 'fht', [fhtarg[0], None], 4)
+    assert_allclose(res, (True, False, True, False))
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel Opt.     :  Use spline\n     > pts/dec     :  "
+    outstr += "Defined by filter (lagged)\n   Loop over       :  Frequencies\n"
+    assert out == outstr
+
+    res = utils.check_opt('spline', None, 'hqwe', qwehtarg, 4)
+    assert_allclose(res, (True, False, True, False))
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel Opt.     :  Use spline\n     > pts/dec     :  33\n"
+    outstr += "   Loop over       :  Frequencies\n"
+    assert out == outstr
+
+
+def test_check_time(capsys):                                    # 9. check_time
+    time = np.array([3])
+
+    # # FFT # #
+    # verbose
+    _, f, ft, ftarg = utils.check_time(time, 0, 'fft', None, 4)
+    out, _ = capsys.readouterr()
+    outstr = "   time        [s] :  3\n"
+    outstr += "   Fourier         :  Sine-Filter\n     > Filter"
+    assert out[:71] == outstr
+    assert ft == 'fft'
+    assert ftarg[0].name == filters.key_201_CosSin_2012().name
+    assert ftarg[1] is None
+    f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
+                   7.39786458e-08, 8.50106448e-08, 9.76877807e-08,
+                   1.12255383e-07, 1.28995366e-07, 1.48231684e-07])
+    f2 = np.array([2.88109455e+04, 3.31073518e+04, 3.80444558e+04,
+                   4.37178011e+04, 5.02371788e+04, 5.77287529e+04,
+                   6.63375012e+04, 7.62300213e+04, 8.75977547e+04])
+    assert_allclose(f[:9], f1)
+    assert_allclose(f[-9:], f2)
+    assert_allclose(f.size, 201+3)
+    assert ftarg[2] == 'sin'
+
+    # [filter str]
+    _, f, _, ftarg = utils.check_time(time, 0, 'cos', 'key_201_CosSin_2012', 4)
+    out, _ = capsys.readouterr()
+    outstr = "   time        [s] :  3\n"
+    outstr += "   Fourier         :  Cosine-Filter\n     > Filter"
+    assert out[:73] == outstr
+    assert ft == 'fft'
+    assert ftarg[0].name == filters.key_201_CosSin_2012().name
+    assert ftarg[1] is None
+    f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
+                   7.39786458e-08, 8.50106448e-08, 9.76877807e-08,
+                   1.12255383e-07, 1.28995366e-07, 1.48231684e-07])
+    f2 = np.array([2.88109455e+04, 3.31073518e+04, 3.80444558e+04,
+                   4.37178011e+04, 5.02371788e+04, 5.77287529e+04,
+                   6.63375012e+04, 7.62300213e+04, 8.75977547e+04])
+    assert_allclose(f[:9], f1)
+    assert_allclose(f[-9:], f2)
+    assert_allclose(f.size, 201+3)
+    assert ftarg[2] == 'cos'
+
+    # [filter inst]
+    _, _, _, ftarg = utils.check_time(time, 1, 'sin',
+                                      filters.key_201_CosSin_2012(), 0)
+    assert ftarg[0].name == filters.key_201_CosSin_2012().name
+    assert ftarg[1] is None
+    assert ftarg[2] == 'sin'
+
+    # ['', pts_per_dec]
+    out, _ = capsys.readouterr()  # clear buffer
+    _, _, _, ftarg = utils.check_time(time, 0, 'fft', ['', 30], 4)
+    assert ftarg[0].name == filters.key_201_CosSin_2012().name
+    assert ftarg[1] == 30
+    assert ftarg[2] == 'sin'
+    out, _ = capsys.readouterr()
+    outstr = "     > pts/dec     :  30"
+    assert out[-25:-1] == outstr
+
+    # [filter str, pts_per_dec]
+    _, _, _, ftarg = utils.check_time(time, 0, 'cos',
+                                      ['key_81_CosSin_2009', 50], 0)
+    assert ftarg[0].name == filters.key_81_CosSin_2009().name
+    assert ftarg[1] == 50
+    assert ftarg[2] == 'cos'
+
+    # # QWE # #
+    # verbose
+    _, f, ft, htarg = utils.check_time(time, 0, 'qwe', None, 4)
+    out, _ = capsys.readouterr()
+    outstr = "   Fourier         :  Quadrature-with-Extrapolation\n     > rtol"
+    assert out[24:87] == outstr
+    assert ft == 'fqwe'
+    assert_allclose(htarg, [1e-8, 1e-20, 21, 200, 20])
+    f1 = np.array([3.16227766e-03, 3.54813389e-03, 3.98107171e-03,
+                   4.46683592e-03, 5.01187234e-03, 5.62341325e-03,
+                   6.30957344e-03, 7.07945784e-03, 7.94328235e-03])
+    f2 = np.array([1.00000000e+02, 1.12201845e+02, 1.25892541e+02,
+                   1.41253754e+02, 1.58489319e+02, 1.77827941e+02,
+                   1.99526231e+02, 2.23872114e+02, 2.51188643e+02])
+    assert_allclose(f[:9], f1)
+    assert_allclose(f[-9:], f2)
+    assert_allclose(f.size, 99)
+
+    # only last argument
+    _, _, _, ftarg = utils.check_time(time, 1, 'fqwe', ['', '', '', '', 30], 0)
+    assert_allclose(ftarg, [1e-8, 1e-20, 21, 200, 30])
+
+    # all arguments
+    _, _, _, ftarg = utils.check_time(time, -1, 'qwe',
+                                      [1e-3, 1e-4, 31, 20, 30], 0)
+    assert_allclose(ftarg, [1e-3, 1e-4, 31, 20, 30])
+
+    # # FFTLog # #
+    # verbose
+    _, f, ft, ftarg = utils.check_time(time, 0, 'fftlog', None, 4)
+    out, _ = capsys.readouterr()
+    outstr = "   Fourier         :  FFTLog\n     > pts/dec"
+    assert out[24:67] == outstr
+    assert ft == 'fftlog'
+    assert ftarg[0] == 10
+    assert_allclose(ftarg[1], np.array([-2.,  1.]))
+    assert ftarg[2] == 0
+    tres = np.array([0.3571562, 0.44963302, 0.56605443, 0.71262031, 0.89713582,
+                     1.12942708, 1.42186445, 1.79002129, 2.25350329,
+                     2.83699255, 3.57156202, 4.49633019, 5.66054433,
+                     7.1262031, 8.97135818, 11.29427079, 14.2186445,
+                     17.90021288, 22.53503287, 28.36992554, 35.71562019,
+                     44.96330186, 56.60544331, 71.26203102, 89.71358175,
+                     112.94270785, 142.18644499, 179.00212881, 225.35032873,
+                     283.69925539])
+    assert_allclose(ftarg[3], tres)
+    assert_allclose(ftarg[4:], [0.23025850929940461, 1.0610526667295022,
+                    0.016449035064149849])
+
+    fres = np.array([0.00059525, 0.00074937, 0.00094341, 0.00118768, 0.0014952,
+                     0.00188234, 0.00236973, 0.00298331, 0.00375577,
+                     0.00472823, 0.00595249, 0.00749374, 0.00943407,
+                     0.01187678, 0.01495199, 0.01882343, 0.0236973,
+                     0.02983313, 0.03755769, 0.04728233, 0.05952493,
+                     0.07493744, 0.09434065, 0.11876785, 0.14951986,
+                     0.18823435, 0.23697301, 0.29833134, 0.3755769,
+                     0.47282331])
+    assert_allclose(f, fres, rtol=1e-5)
+
+    # Several parameters
+    _, _, _, ftarg = utils.check_time(time, 0, 'fftlog', ['', [-3, 4], 2], 0)
+    assert ftarg[0] == 10
+    assert_allclose(ftarg[1], np.array([-3.,  4.]))
+    assert ftarg[2] == 1  # q > 1 reset to 1...
+    assert_allclose(ftarg[4:], [0.23025850929940461, 1.0582078033615059,
+                    1.6493256300417651])
+
+    # minimum time
+    _ = utils.check_time(0, 0, 'cos', 'key_201_CosSin_2012', 1)
+    out, _ = capsys.readouterr()
+    assert out[:21] == "* WARNING :: Times < "
+
+    # Signal != -1, 0, 1
+    with pytest.raises(ValueError):
+        utils.check_time(time, -2, 'fft', None, 0)
+
+    # ft != cos, sin, fft, qwe, hqwe, fftlog,
+    with pytest.raises(ValueError):
+        utils.check_time(time, 0, 'fht', None, 0)
 
 
 def test_get_abs(capsys):                                         # 10. get_abs
