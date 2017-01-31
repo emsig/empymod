@@ -1,4 +1,3 @@
-# utils. Status: 17/21
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose
@@ -282,7 +281,7 @@ def test_check_model(capsys):                                  # 7. check_model
     assert_allclose(out[0], -np.infty)
 
     # Check verbosity and fullspace
-    utils.check_model(0, [1, 1], [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], 4)
+    utils.check_model(0, [1, 1], [2, 2], [10, 10], [1, 1], None, [3, 3], 4)
     out, _ = capsys.readouterr()
     outstr1 = "   depth       [m] :  0\n   res     [Ohm.m] :  1 1\n   aniso"
     outstr2 = "S A FULLSPACE; returning analytical frequency-domain solution\n"
@@ -513,7 +512,7 @@ def test_check_time(capsys):                                    # 9. check_time
 def test_get_abs(capsys):                                         # 10. get_abs
     # Check some cases
     #       general,  x/y-pl,  x/z-pl    x
-    ang = [[45, 45], [30, 0], [0, 60], [0, 0]]
+    ang = [[np.pi/4, np.pi/4], [np.pi/6, 0], [0, np.pi/3], [0, 0]]
     # Results for EE, ME, EM, MM
     res = [[11, 12, 13, 21, 22, 23, 31, 32, 33], [11, 12, 13, 21, 22, 23],
            [11, 12, 13, 31, 32, 33], [11, 12, 13], [11, 12, 21, 22, 31, 32],
@@ -535,6 +534,24 @@ def test_get_abs(capsys):                                         # 10. get_abs
            [11, 12, 21, 22], [11, 12, 31, 32], [11, 12],
            [11, 13, 21, 23, 31, 33], [11, 13, 21, 23], [11, 13, 31, 33],
            [11, 13], [11, 21, 31], [11, 21], [11, 31], [11]]
+
+    i = 0
+    for msrc in [False, True]:
+        for mrec in [False, True]:
+            for src in ang:
+                for rec in ang:
+                    out = utils.get_abs(msrc, mrec, src[0], src[1], rec[0],
+                                        rec[1], 0)
+                    assert_allclose(out, res[i])
+                    i += 1
+
+    # Check some more
+    #       y/z-plane,  z-dir
+    ang = [[np.pi/2, 0], [0, np.pi/2]]
+    # Results for EE, ME, EM, MM
+    res = [[22], [32], [23], [33], [25], [26], [35], [36], [25], [35], [26],
+           [36], [22], [32], [23], [33]]
+
     i = 0
     for msrc in [False, True]:
         for mrec in [False, True]:
@@ -550,7 +567,17 @@ def test_get_abs(capsys):                                         # 10. get_abs
     out, _ = capsys.readouterr()
     assert out == "   Required ab's   :  11 12 31 32\n"
 
-# 11. get_geo_fact
+
+def test_get_geo_fact():                                     # 11. get_geo_fact
+    res = np.array([0.017051023225738, 0.020779123804907, -0.11077204227395,
+                    -0.081155809427821, -0.098900024313067, 0.527229048585517,
+                    -0.124497144079623, -0.151717673241039, 0.808796206796408])
+    ab = [11, 12, 13, 21, 22, 23, 31, 32, 33]
+    i = 0
+    for i in range(9):
+        out = utils.get_geo_fact(ab[i], 13.45, 23.8, 124.3, 5.3, True, True)
+        assert_allclose(out[0], res[i])
+        i += 1
 
 
 def test_get_layer_nr():                                     # 12. get_layer_nr
@@ -579,7 +606,70 @@ def test_get_off_ang(capsys):                                 # 13. get_off_ang
     assert_allclose(ang, resang, equal_nan=True)
 
 
-# 14. get_azm_dip
+def test_get_azm_dip(capsys):                                 # 14. get_azm_dip
+    # Dipole, src, ninpz = 1
+    inp = [np.array([0]), np.array([0]), np.array([0]), np.array([0]),
+           np.array([np.pi/4])]
+    out = utils.get_azm_dip(inp, 0, 1, 1, True, 300, 'src', 0)
+    assert out[0][0] == inp[0]
+    assert out[0][1] == inp[1]
+    assert out[0][2] == inp[2]
+    assert out[0][3] == inp[3]
+    assert out[0][4] == inp[4]
+    assert out[1] == 0
+    assert_allclose(out[2], 0.013707783890402)
+    assert out[3] == 1
+    assert out[4] == 1
+    assert out[5] == 300
+
+    # Dipole, rec, ninpz = 2, verbose
+    inp = [np.array([0, 0]), np.array([0, 0]), np.array([0, 100]),
+           np.array([np.pi/2]), np.array([np.pi/3])]
+    out = utils.get_azm_dip(inp, 0, 2, 52, True, 300, 'rec', 4)
+    outstr, _ = capsys.readouterr()
+    assert out[0][0] == inp[0][0]
+    assert out[0][1] == inp[1][0]
+    assert out[0][2] == inp[2][0]
+    assert out[0][3] == inp[3]
+    assert out[0][4] == inp[4]
+    assert_allclose(out[1], 0.027415567780804)
+    assert_allclose(out[2], 0.018277045187203)
+    assert out[3] == 1
+    assert out[4] == 1
+    assert out[5] == 1
+    assert outstr[:42] == "   Receiver(s)     :  1 dipole(s)\n     > x"
+
+    # Bipole, src, ninpz = 1, intpts = 5, verbose
+    inp = [np.array([-50]), np.array([50]), np.array([50]), np.array([100]),
+           np.array([0]), np.array([0])]
+    out = utils.get_azm_dip(inp, 0, 1, 5, False, 300, 'src', 4)
+    outstr, _ = capsys.readouterr()
+    assert_allclose(out[0][0],
+                    np.array([-45.309, -26.923, 0., 26.923, 45.309]))
+    assert_allclose(out[0][1], np.array([52.346, 61.538, 75., 88.462, 97.654]))
+    assert_allclose(out[0][2], np.array([0.,  0.,  0.,  0.,  0.]))
+    assert_allclose(out[1], 0.463647609000806)
+    assert out[2] == 0
+    assert_allclose(out[3], np.array([0.118463442528094, 0.239314335249683,
+                    0.284444444444445, 0.239314335249683, 0.118463442528094]))
+    assert out[4] == 5
+    assert_allclose(out[5], 33541.01966249684483)
+    assert outstr[:47] == "   Source(s)       :  1 bipole(s)\n     > intpts"
+
+    # Bipole, rec, ninpz = 2, intpts = 1, verbose
+    inp = [np.array([-50, 0]), np.array([50, 0]), np.array([0, -50]),
+           np.array([0, 50]), np.array([0, 100]), np.array([0, 100])]
+    out = utils.get_azm_dip(inp, 0, 2, 1, False, 300, 'rec', 4)
+    outstr, _ = capsys.readouterr()
+    assert out[0][0] == 0
+    assert out[0][1] == 0
+    assert out[0][2] == 0
+    assert out[1] == 0
+    assert out[2] == 0
+    assert out[3] == 1
+    assert out[4] == 1
+    assert out[5] == 100
+    assert outstr[:47] == "   Receiver(s)     :  1 bipole(s)\n     > intpts"
 
 
 def test_printstartfinish(capsys):                       # 15. printstartfinish

@@ -1,6 +1,4 @@
-"""Create data for
-   - test_model:: test_self, test_gpr, and test_wavenumber
-   - test_kernel:: test_fullspace and test_halfspace."""
+"""Create data for test_model::test_green3d."""
 import numpy as np
 from create_external import green3d
 

@@ -51,6 +51,7 @@ min_time = 1e-20   # Minimum time       [s]
 min_off = 1e-3     # Minimum offset     [m]
 #                  # > Also used to round src- & rec-coordinates (1e-3 => mm)
 min_param = 1e-20  # Minimum model parameter (aniso, [m/e]perm[H/V]) to avoid 0
+min_angle = 1e-10  # Angle factors smaller than that are set to 0
 
 
 # 1. Class EMArray
@@ -1082,23 +1083,24 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
     if mrec and not msrc:
         fis, fir = fir, fis
 
-    # Geometrical factor from source
-    if fis in [1, 4]:    # x-directed
-        fsrc = np.cos(srcazm)*np.cos(srcdip)
-    elif fis in [2, 5]:  # y-directed
-        fsrc = np.sin(srcazm)*np.cos(srcdip)
-    else:                # z-directed
-        fsrc = np.sin(srcdip)
+    def gfact(bp, azm, dip):
+        """Geometrical factor of source or receiver."""
+        if bp in [1, 4]:    # x-directed
+            return np.cos(azm)*np.cos(dip)
+        elif bp in [2, 5]:  # y-directed
+            return np.sin(azm)*np.cos(dip)
+        else:               # z-directed
+            return np.sin(dip)
 
-    # Geometrical factor from receiver
-    if fir in [1, 4]:    # x-directed
-        frec = np.cos(recazm)*np.cos(recdip)
-    elif fir in [2, 5]:  # y-directed
-        frec = np.sin(recazm)*np.cos(recdip)
-    else:           # z-directed
-        frec = np.sin(recdip)
+    # Calculate src-rec-factor
+    fsrc = gfact(fis, srcazm, srcdip)
+    frec = gfact(fir, recazm, recdip)
+    fact = np.outer(fsrc, frec).ravel()
 
-    return np.outer(fsrc, frec).ravel()
+    # Set very small angles to proper zero (because e.g. sin(pi/2) != exact 0)
+    fact[np.abs(fact) < min_angle] = 0
+
+    return fact
 
 
 def get_layer_nr(inp, depth):
@@ -1266,7 +1268,8 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     else:  # If there are several depths, we take the current one
         if isdipole:
             tinp = [np.atleast_1d(inp[0][iz]), np.atleast_1d(inp[1][iz]),
-                    np.atleast_1d(inp[2][iz])]
+                    np.atleast_1d(inp[2][iz]), np.atleast_1d(inp[3]),
+                    np.atleast_1d(inp[4])]
         else:
             tinp = [inp[0][iz], inp[1][iz], inp[2][iz],
                     inp[3][iz], inp[4][iz], inp[5][iz]]
@@ -1281,20 +1284,16 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         intpts = 1
 
         # Check azm
-        azm = _check_var(np.deg2rad(inp[3]), float, 1, 'azimuth')
-        if ninpz == 1 and azm.size == 1:
-            azm = np.ones(tinp[0].shape)*azm
+        azm = _check_var(np.deg2rad(tinp[3]), float, 1, 'azimuth')
 
         # Check dip
-        dip = _check_var(np.deg2rad(inp[4]), float, 1, 'dip')
-        if ninpz == 1 and dip.size == 1:
-            dip = np.ones(tinp[0].shape)*dip
+        dip = _check_var(np.deg2rad(tinp[4]), float, 1, 'dip')
 
         # If dipole, g_w are ones
-        g_w = np.ones(inp[0].size)
+        g_w = np.ones(tinp[0].size)
 
         # If dipole, inp_w are once, unless strength > 0
-        inp_w = np.ones(inp[0].size)
+        inp_w = np.ones(tinp[0].size)
         if name == 'src' and strength > 0:
             inp_w *= strength
 
@@ -1306,15 +1305,6 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         dx = np.squeeze(tinp[1] - tinp[0])
         dy = np.squeeze(tinp[3] - tinp[2])
         dz = np.squeeze(tinp[5] - tinp[4])
-
-        # Check if tinp is a dipole instead of a bipole
-        # (This is a problem, as we would could not define the angles then.)
-        # Is also checked in check_bipole, but just to be sure.
-        if np.any((dx == 0)*(dy == 0)*(dz == 0)):
-            print("* ERROR   :: At least one of <" + name + "> is a point " +
-                  "dipole, use the format [x, y, z, azimuth, dip] instead " +
-                  "of [x0, x1, y0, y1, z0, z1].")
-            raise ValueError('Bipole: bipole-' + name)
 
         # Length of bipole
         dl = np.atleast_1d(np.linalg.norm([dx, dy, dz], axis=0))
