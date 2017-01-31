@@ -104,6 +104,14 @@ def green3d(src, rec, depth, res, freq, aniso, par, strength=0):
         Hy = temp[:, 8] + 1j*temp[:, 9]
         Hz = temp[:, 10] + 1j*temp[:, 11]
 
+        if par in [6, 7, 8, 10]:
+            Ex /= 2j*freq*np.pi*mu_0
+            Ey /= 2j*freq*np.pi*mu_0
+            Ez /= 2j*freq*np.pi*mu_0
+            Hx /= 2j*freq*np.pi*mu_0
+            Hy /= 2j*freq*np.pi*mu_0
+            Hz /= 2j*freq*np.pi*mu_0
+
         return Ex, Ey, Ez, Hx, Hy, Hz
 
 
