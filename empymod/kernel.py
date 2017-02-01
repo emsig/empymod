@@ -34,6 +34,7 @@ root directory for more information regarding the involved licenses.
 
 
 import numpy as np
+np.seterr(all='ignore')
 
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']

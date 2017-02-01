@@ -1,4 +1,3 @@
-# model. Status: 10/13
 import numpy as np
 from os.path import join, dirname
 from numpy.testing import assert_allclose
@@ -22,12 +21,16 @@ DATAEMPYMOD = np.load(join(dirname(__file__), 'data_empymod.npz'))
 DATAFEMTEM = np.load(join(dirname(__file__), 'data_fem_tem.npz'))
 # Data generated with create_green3d.py [30/01/2017]
 GREEN3D = np.load(join(dirname(__file__), 'data_green3d.npz'))
-# Data generated with create_dipole1d.py [30/01/2017]
+# Data generated with create_dipole1d.py [01/02/2017]
 DIPOLE1D = np.load(join(dirname(__file__), 'data_dipole1d.npz'))
 
 
 class TestBipole:                                                   # 1. bipole
     # => Main and most important checks/comparisons
+
+    # WRONG INPUT
+
+    # Dipole-Bipole checks
 
     # test freq, time (all signals)
     # test loop-options
@@ -86,98 +89,19 @@ class TestBipole:                                                   # 1. bipole
         def crec(rec, azm, dip):
             return [rec[0], rec[1], rec[2], azm, dip]
 
-        def get_xyz(src, rec, depth, res, freq, srcpts, verb, mrec=False):
-            x = bipole(src=src, rec=crec(rec, 0, 0), depth=depth, res=res,
-                       freqtime=freq, signal=None, srcpts=srcpts, mrec=mrec,
-                       verb=verb)
-            y = bipole(src=src, rec=crec(rec, 90, 0), depth=depth, res=res,
-                       freqtime=freq, signal=None, srcpts=srcpts, mrec=mrec,
-                       verb=verb)
-            z = bipole(src=src, rec=crec(rec, 0, 90), depth=depth, res=res,
-                       freqtime=freq, signal=None, srcpts=srcpts, mrec=mrec,
-                       verb=verb)
-            return x, y, z
-
-        # 1. x-directed dipole
-        inp, res = DIPOLE1D['xdirdip'][()]
-        Ex, Ey, Ez = get_xyz(**inp)
-        par = {'rtol': 5e-3, 'atol': 1e-24, 'equal_nan': True}
-        assert_allclose(Ex, res[0], **par)
-        assert_allclose(Ey, res[1], **par)
-        assert_allclose(Ez, res[2], **par)
-
-        # 2. y-directed dipole
-        inp, res = DIPOLE1D['ydirdip'][()]
-        Ex, Ey, Ez = get_xyz(**inp)
-        par = {'rtol': 1e-3, 'atol': 1e-24, 'equal_nan': True}
-        assert_allclose(Ex, res[0], **par)
-        assert_allclose(Ey, res[1], **par)
-        assert_allclose(Ez, res[2], **par)
-
-        # 3. z-directed dipole
-        inp, res = DIPOLE1D['zdirdip'][()]
-        Ex, Ey, Ez = get_xyz(**inp)
-        par = {'rtol': 5e-3, 'atol': 1e-24, 'equal_nan': True}
-        assert_allclose(Ex, res[0], **par)
-        assert_allclose(Ey, res[1], **par)
-        assert_allclose(Ez, res[2], **par)
-
-        # 4. xy-directed dipole
-        inp, res = DIPOLE1D['xydirdip'][()]
-        Ex, Ey, Ez = get_xyz(**inp)
-        par = {'rtol': 1e-3, 'atol': 1e-24, 'equal_nan': True}
-        assert_allclose(Ex, res[0], **par)
-        assert_allclose(Ey, res[1], **par)
-        assert_allclose(Ez, res[2], **par)
-
-        # 5. xz-directed dipole
-        inp, res = DIPOLE1D['xzdirdip'][()]
-        Ex, Ey, Ez = get_xyz(**inp)
-        par = {'rtol': 5e-3, 'atol': 1e-24, 'equal_nan': True}
-        assert_allclose(Ex, res[0], **par)
-        assert_allclose(Ey, res[1], **par)
-        assert_allclose(Ez, res[2], **par)
-
-        # 6. yz-directed dipole
-        inp, res = DIPOLE1D['yzdirdip'][()]
-        Ex, Ey, Ez = get_xyz(**inp)
-        par = {'rtol': 5e-3, 'atol': 1e-24, 'equal_nan': True}
-        assert_allclose(Ex, res[0], **par)
-        assert_allclose(Ey, res[1], **par)
-        assert_allclose(Ez, res[2], **par)
-
-        # 7. xyz-directed dipole
-        inp, res = DIPOLE1D['xyzdirdip'][()]
-        Ex, Ey, Ez = get_xyz(**inp)
-        par = {'rtol': 2e-2, 'atol': 1e-24, 'equal_nan': True}
-        assert_allclose(Ex, res[0], **par)
-        assert_allclose(Ey, res[1], **par)
-        assert_allclose(Ez, res[2], **par)
-
-    def test_green3d(self):                        # 1.5. Comparison to Green3D
-        # Test a few anisotropic cases
-        def crec(rec, azm, dip):
-            return [rec[0], rec[1], rec[2], azm, dip]
-
-        def get_xyz(src, rec, depth, res, freq, aniso, strength, srcpts, msrc):
-            ex = bipole(src=src, rec=crec(rec, 0, 0), depth=depth, res=res,
-                        freqtime=freq, signal=None, aniso=aniso, msrc=msrc,
-                        mrec=False, strength=strength, srcpts=srcpts, verb=0)
-            ey = bipole(src=src, rec=crec(rec, 90, 0), depth=depth, res=res,
-                        freqtime=freq, signal=None, aniso=aniso, msrc=msrc,
-                        mrec=False, strength=strength, srcpts=srcpts, verb=0)
-            ez = bipole(src=src, rec=crec(rec, 0, 90), depth=depth, res=res,
-                        freqtime=freq, signal=None, aniso=aniso, msrc=msrc,
-                        mrec=False, strength=strength, srcpts=srcpts, verb=0)
-            mx = bipole(src=src, rec=crec(rec, 0, 0), depth=depth, res=res,
-                        freqtime=freq, signal=None, aniso=aniso, msrc=msrc,
-                        mrec=True, strength=strength, srcpts=srcpts, verb=0)
-            my = bipole(src=src, rec=crec(rec, 90, 0), depth=depth, res=res,
-                        freqtime=freq, signal=None, aniso=aniso, msrc=msrc,
-                        mrec=True, strength=strength, srcpts=srcpts, verb=0)
-            mz = bipole(src=src, rec=crec(rec, 0, 90), depth=depth, res=res,
-                        freqtime=freq, signal=None, aniso=aniso, msrc=msrc,
-                        mrec=True, strength=strength, srcpts=srcpts, verb=0)
+        def get_xyz(src, rec, depth, res, freq, srcpts):
+            ex = bipole(src, crec(rec, 0, 0), depth, res, freq, srcpts=srcpts,
+                        mrec=False, verb=0)
+            ey = bipole(src, crec(rec, 90, 0), depth, res, freq, srcpts=srcpts,
+                        mrec=False, verb=0)
+            ez = bipole(src, crec(rec, 0, 90), depth, res, freq, srcpts=srcpts,
+                        mrec=False, verb=0)
+            mx = bipole(src, crec(rec, 0, 0), depth, res, freq, srcpts=srcpts,
+                        mrec=True, verb=0)
+            my = bipole(src, crec(rec, 90, 0), depth, res, freq, srcpts=srcpts,
+                        mrec=True, verb=0)
+            mz = bipole(src, crec(rec, 0, 90), depth, res, freq, srcpts=srcpts,
+                        mrec=True, verb=0)
             return ex, ey, ez, mx, my, mz
 
         def comp_all(data, rtol=1e-3, atol=1e-24):
@@ -190,30 +114,101 @@ class TestBipole:                                                   # 1. bipole
             assert_allclose(Hy, res[4], rtol, atol, True)
             assert_allclose(Hz, res[5], rtol, atol, True)
 
+        # DIPOLES
+        # 1. x-directed dipole
+        comp_all(DIPOLE1D['xdirdip'][()])
+        # 2. y-directed dipole
+        comp_all(DIPOLE1D['ydirdip'][()])
+        # 3. z-directed dipole
+        comp_all(DIPOLE1D['zdirdip'][()])
+        # 4. dipole in xy-plane
+        comp_all(DIPOLE1D['xydirdip'][()])
+        # 5. dipole in xz-plane
+        comp_all(DIPOLE1D['xzdirdip'][()])
+        # 6. dipole in yz-plane
+        comp_all(DIPOLE1D['yzdirdip'][()])
+        # 7. arbitrary xyz-dipole
+        comp_all(DIPOLE1D['xyzdirdip'][()])
+
+        # Bipoles
+        # 8. x-directed bipole
+        comp_all(DIPOLE1D['xdirbip'][()])
+        # 9. y-directed bipole
+        comp_all(DIPOLE1D['ydirbip'][()])
+        # 10. z-directed bipole
+        comp_all(DIPOLE1D['zdirbip'][()])
+        # 11. bipole in xy-plane
+        comp_all(DIPOLE1D['xydirbip'][()])
+        # 12. bipole in xz-plane
+        comp_all(DIPOLE1D['xzdirbip'][()])
+        # 13. bipole in yz-plane
+        comp_all(DIPOLE1D['yzdirbip'][()])
+        # 14. arbitrary xyz-bipole
+        comp_all(DIPOLE1D['xyzdirbip'][()])
+        # 14.b Check bipole reciprocity
+        inp, res = DIPOLE1D['xyzdirbip'][()]
+        ex = bipole(crec(inp['rec'], 0, 0), inp['src'], inp['depth'],
+                    inp['res'], inp['freq'], recpts=inp['srcpts'], verb=0)
+        assert_allclose(ex, res[0], 2e-2, 1e-24, True)
+        mx = bipole(crec(inp['rec'], 0, 0), inp['src'], inp['depth'],
+                    inp['res'], inp['freq'], msrc=True, recpts=inp['srcpts'],
+                    verb=0)
+        assert_allclose(-mx, res[3], 2e-2, 1e-24, True)
+
+    def test_green3d(self):                        # 1.5. Comparison to Green3D
+        def crec(rec, azm, dip):
+            return [rec[0], rec[1], rec[2], azm, dip]
+
+        def get_xyz(src, rec, depth, res, freq, aniso, strength, srcpts, msrc):
+            ex = bipole(src, crec(rec, 0, 0), depth, res, freq, aniso=aniso,
+                        msrc=msrc, mrec=False, strength=strength,
+                        srcpts=srcpts, verb=0)
+            ey = bipole(src, crec(rec, 90, 0), depth, res, freq, aniso=aniso,
+                        msrc=msrc, mrec=False, strength=strength,
+                        srcpts=srcpts, verb=0)
+            ez = bipole(src, crec(rec, 0, 90), depth, res, freq, aniso=aniso,
+                        msrc=msrc, mrec=False, strength=strength,
+                        srcpts=srcpts, verb=0)
+            mx = bipole(src, crec(rec, 0, 0), depth, res, freq, aniso=aniso,
+                        msrc=msrc, mrec=True, strength=strength, srcpts=srcpts,
+                        verb=0)
+            my = bipole(src, crec(rec, 90, 0), depth, res, freq, aniso=aniso,
+                        msrc=msrc, mrec=True, strength=strength, srcpts=srcpts,
+                        verb=0)
+            mz = bipole(src, crec(rec, 0, 90), depth, res, freq, aniso=aniso,
+                        msrc=msrc, mrec=True, strength=strength, srcpts=srcpts,
+                        verb=0)
+            return ex, ey, ez, mx, my, mz
+
+        def comp_all(data, rtol=1e-3, atol=1e-24):
+            inp, res = data
+            Ex, Ey, Ez, Hx, Hy, Hz = get_xyz(**inp)
+            assert_allclose(Ex, res[0], rtol, atol, True)
+            assert_allclose(Ey, res[1], rtol, atol, True)
+            assert_allclose(Ez, res[2], rtol, atol, True)
+            assert_allclose(Hx, res[3], rtol, atol, True)
+            assert_allclose(Hy, res[4], rtol, atol, True)
+            assert_allclose(Hz, res[5], rtol, atol, True)
+
+        # ELECTRIC AND MAGNETIC DIPOLES
         # 1. x-directed electric and magnetic dipole
         comp_all(GREEN3D['xdirdip'][()])
         comp_all(GREEN3D['xdirdipm'][()])
-
         # 2. y-directed electric and magnetic dipole
         comp_all(GREEN3D['ydirdip'][()])
         comp_all(GREEN3D['ydirdipm'][()])
-
         # 3. z-directed electric and magnetic dipole
         comp_all(GREEN3D['zdirdip'][()], 5e-3)
         comp_all(GREEN3D['zdirdipm'][()], 5e-3)
-
         # 4. xy-directed electric and magnetic dipole
         comp_all(GREEN3D['xydirdip'][()])
         comp_all(GREEN3D['xydirdipm'][()])
-
         # 5. xz-directed electric and magnetic dipole
         comp_all(GREEN3D['xzdirdip'][()], 5e-3)
         comp_all(GREEN3D['xzdirdipm'][()], 5e-3)
-
         # 6. yz-directed electric and magnetic dipole
         comp_all(GREEN3D['yzdirdip'][()], 5e-3)
         comp_all(GREEN3D['yzdirdipm'][()], 5e-3)
-
         # 7. xyz-directed electric and magnetic dipole
         comp_all(GREEN3D['xyzdirdip'][()], 2e-2)
         comp_all(GREEN3D['xyzdirdipm'][()], 2e-2)
@@ -225,6 +220,7 @@ class TestBipole:                                                   # 1. bipole
                     srcpts=1, recpts=inp['srcpts'], verb=0)
         assert_allclose(-ey, res[1], 2e-2, 1e-24, True)
 
+        # ELECTRIC AND MAGNETIC BIPOLES
         # 8. x-directed electric and magnetic bipole
         comp_all(GREEN3D['xdirbip'][()], 5e-3)
         comp_all(GREEN3D['xdirbipm'][()], 5e-3)
@@ -235,11 +231,9 @@ class TestBipole:                                                   # 1. bipole
                     mrec=inp['msrc'], msrc=False, strength=inp['strength'],
                     srcpts=1, recpts=inp['srcpts'], verb=0)
         assert_allclose(ex, res[0], 5e-3, 1e-24, True)
-
         # 9. y-directed electric and magnetic bipole
         comp_all(GREEN3D['ydirbip'][()], 5e-3)
         comp_all(GREEN3D['ydirbipm'][()], 5e-3)
-
         # 10. z-directed electric and magnetic bipole
         comp_all(GREEN3D['zdirbip'][()], 5e-3)
         comp_all(GREEN3D['zdirbipm'][()], 5e-3)

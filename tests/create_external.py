@@ -115,7 +115,7 @@ def green3d(src, rec, depth, res, freq, aniso, par, strength=0):
         return Ex, Ey, Ez, Hx, Hy, Hz
 
 
-def dipole1d(src, rec, depth, res, freq, strength=0):
+def dipole1d(src, rec, depth, res, freq, srcpts=5):
     """Run model with dipole1d (Scripps).
 
     You must have Dipole1D installed and it must be in your system path.
@@ -137,6 +137,7 @@ def dipole1d(src, rec, depth, res, freq, strength=0):
         theta = np.rad2deg(np.arctan2(dy, dx))
         phi = np.rad2deg(np.pi/2-np.arccos(dz/r))
         src = [src[0]+dx/2, src[2]+dy/2, src[4]+dz/2, theta, phi]
+
     else:
         r = 0  # 0 = dipole
 
@@ -144,6 +145,12 @@ def dipole1d(src, rec, depth, res, freq, strength=0):
     #        anticlockwise.  In Dipole1D, x is Northing, and the angle is the
     #        deviation from x clockwise. Convert angle to within 0<=ang<360:
     ang = (-src[3] % - 360 + 90) % 360
+
+    # Counts
+    nsrc = np.size(src[2])
+    nrec = np.size(rec[0])
+    nfreq = np.size(freq)
+    nlay = np.size(res)
 
     # Write input file
     with open(rundir + 'RUNFILE', 'wb') as runfile:
@@ -154,19 +161,20 @@ def dipole1d(src, rec, depth, res, freq, strength=0):
             'HT Filters:       kk_ht_401\n'
             'UseSpline1D:      no\n'
             'Dipole Length:    '+str(r)+'\n'
-            '# TRANSMITTERS:   '+str(np.size(src[2]))+'\n'
+            '# integ pts:      '+str(srcpts)+'\n'
+            '# TRANSMITTERS:   '+str(nsrc)+'\n'
             '          X           Y           Z    ROTATION         DIP\n',
             'UTF-8'))
         np.savetxt(runfile, np.atleast_2d(np.r_[src[1], src[0], src[2], ang,
                    src[4]]), fmt='%12.4f')
-        runfile.write(bytes('# FREQUENCIES:    '+str(np.size(freq))+'\n',
+        runfile.write(bytes('# FREQUENCIES:    '+str(nfreq)+'\n',
                       'UTF-8'))
         np.savetxt(runfile, freq, fmt='%10.3f')
-        runfile.write(bytes('# LAYERS:         '+str(np.size(res))+'\n',
+        runfile.write(bytes('# LAYERS:         '+str(nlay)+'\n',
                       'UTF-8'))
         np.savetxt(runfile, np.r_[[np.r_[-1000000, depth]], [res]].transpose(),
                    fmt='%12.5g')
-        runfile.write(bytes('# RECEIVERS:      '+str(np.size(rec[0]))+'\n',
+        runfile.write(bytes('# RECEIVERS:      '+str(nrec)+'\n',
                       'UTF-8'))
         rec = np.r_[[rec[1].ravel()], [rec[0].ravel()],
                     [np.ones(np.size(rec[0]))*rec[2]]]
@@ -178,16 +186,14 @@ def dipole1d(src, rec, depth, res, freq, strength=0):
                        stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 
     # Read output-file
-    with open(rundir + 'RUNFILE', 'rb') as infile:
-        nlines = np.int(sum(1 for line in infile))
-
+    skiprows = nlay + nsrc + nfreq + nrec + 6
     with open(rundir + 'dipole1d.csem', 'rb') as outfile:
-        temp = np.loadtxt(outfile, skiprows=nlines-5, unpack=True)
+        temp = np.loadtxt(outfile, skiprows=skiprows, unpack=True)
         Ex = temp[0] - 1j*temp[1]
         Ey = temp[2] - 1j*temp[3]
         Ez = temp[4] - 1j*temp[5]
-        Hx = temp[6]/mu_0 - 1j*temp[7]/mu_0
-        Hy = temp[8]/mu_0 - 1j*temp[9]/mu_0
-        Hz = temp[10]/mu_0 - 1j*temp[11]/mu_0
+        Hx = -temp[6]/mu_0 + 1j*temp[7]/mu_0
+        Hy = -temp[8]/mu_0 + 1j*temp[9]/mu_0
+        Hz = -temp[10]/mu_0 + 1j*temp[11]/mu_0
 
     return Ey, Ex, Ez, Hy, Hx, Hz
