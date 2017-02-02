@@ -7,7 +7,7 @@ from empymod.model import bipole, wavenumber, gpr
 from empymod.kernel import halfspace, fullspace
 
 
-# # A -- BIPOLE # #
+# # A -- BIPOLE (SELF) # #
 
 # Test 1: EE; multiple src & rec
 inp1 = {'src': [[-200, 200], [300, -300], [-100, -200], [-200, -100],

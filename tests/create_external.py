@@ -14,6 +14,10 @@
 
 Tested only on Linux (Ubuntu 16.04 LTS, x86_64).
 
+Warning: These functions are to generate test-data with the provided scripts.
+         They do not check the input, and are therefore very fragile if you do
+         not provide the input as expected.
+
 """
 import os
 import subprocess
@@ -197,3 +201,84 @@ def dipole1d(src, rec, depth, res, freq, srcpts=5):
         Hz = -temp[10]/mu_0 + 1j*temp[11]/mu_0
 
     return Ey, Ex, Ez, Hy, Hx, Hz
+
+
+def emmod(dx, nx, dy, ny, src, rec, depth, res, freq, aniso, epermV, epermH,
+          mpermV, mpermH, ab, nd=1000, startlogx=-6, deltalogx=0.5, nlogx=24,
+          kmax=10, c1=0, c2=0.001, maxpt=1000, dopchip=0, xdirect=0):
+    """Run model with emmod (Hunziker et al, 2015).
+
+    You must have EMmod installed and it must be in your system path.
+
+    http://software.seg.org/2015/0001
+
+    nd        : number of integration domains
+    startlogx : first integration point in space
+    deltalogx : log sampling rate of integr. pts in space at first iteration
+    nlogx     : amount of integration points in space at first iteration
+    kmax      : largest wavenumber to be integrated
+    c1        : first precision parameter
+    c2        : second precision parameter
+    maxpt     : maximum amount of integration points in space
+    dopchip   : pchip interpolation (1) or linear interpolation (0)
+    xdirect   : direct field in space domain (1) or in wavenumber domain (0)
+
+    """
+
+    # Create directory, overwrite existing
+    rundir = join(dirname(__file__), 'emmod/')
+    os.makedirs(rundir, exist_ok=True)
+
+    # Write input-file
+    with open(rundir + 'emmod.scr', 'wb') as runfile:
+        runfile.write(bytes(
+            '#!/bin/bash\n\nemmod \\\n'
+            '  freq='+str(freq)+' \\\n'
+            '  file_out=emmod.out \\\n'
+            '  writebin=0 \\\n'
+            '  nx='+str(nx)+' \\\n'
+            '  ny='+str(ny)+' \\\n'
+            '  zsrc='+str(src[2])+' \\\n'
+            '  zrcv='+str(rec[2])+' \\\n'
+            '  dx='+str(dx)+' \\\n'
+            '  dy='+str(dy)+' \\\n'
+            '  z='+','.join(map(str, np.r_[-1, depth]))+' \\\n'
+            '  econdV='+','.join(map(str, 1/(res*aniso**2)))+' \\\n'
+            '  econdH='+','.join(map(str, 1/res))+' \\\n'
+            '  epermV='+','.join(map(str, epermV))+' \\\n'
+            '  epermH='+','.join(map(str, epermH))+' \\\n'
+            '  mpermV='+','.join(map(str, mpermV))+' \\\n'
+            '  mpermH='+','.join(map(str, mpermH))+' \\\n'
+            '  verbose=0 \\\n'
+            '  component='+str(ab)+' \\\n'
+            '  nd='+str(nd)+' \\\n'
+            '  startlogx='+str(startlogx)+' \\\n'
+            '  deltalogx='+str(deltalogx)+' \\\n'
+            '  nlogx='+str(nlogx)+' \\\n'
+            '  kmax='+str(kmax)+' \\\n'
+            '  c1='+str(c1)+' \\\n'
+            '  c2='+str(c2)+' \\\n'
+            '  maxpt='+str(maxpt)+' \\\n'
+            '  dopchip='+str(dopchip)+' \\\n'
+            '  xdirect='+str(xdirect)+' \n',
+            'UTF-8'))
+
+    # Run EMmod
+    with ChDir(rundir):
+        subprocess.run('bash emmod.scr', shell=True,
+                       stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+
+    # Read output-file
+    with open(rundir + 'emmod.out', 'rb') as outfile:
+        temp = np.loadtxt(outfile, skiprows=1, unpack=True)
+
+        # Get same x/y as requested (round to mm)
+        tct = np.round(temp[0], 4) + 1j*np.round(temp[1], 4)
+        tcr = np.round(rec[0], 4) + 1j*np.round(rec[1], 4)
+
+        result = np.zeros(rec[0].shape, dtype=complex)
+        for i in range(rec[0].size):
+            itr = np.where(tct == tcr[i])[0]
+            result[i] = (temp[3][itr] + 1j*temp[4][itr])[0]
+
+    return result
