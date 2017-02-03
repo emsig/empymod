@@ -50,7 +50,42 @@ default value:
     >>> # Calculate electric field due to an electric source at 1 Hz.
     >>> # [msrc = mrec = True (default)]
     >>> EMfield = bipole(src, rec, depth, res, freq)
-    :: empymod END; runtime = 0:00:00.008278 :: 1 kernel call(s)
+    >>> EMfield = bipole(src, rec, depth, res, freq, verb=4)
+    :: empymod START  ::
+    ~
+       depth       [m] :  0 300 1000 1050
+       res     [Ohm.m] :  1E+20 0.3 1 50 1
+       aniso       [-] :  1 1 1 1 1
+       epermH      [-] :  1 1 1 1 1
+       epermV      [-] :  1 1 1 1 1
+       mpermH      [-] :  1 1 1 1 1
+       mpermV      [-] :  1 1 1 1 1
+       Hankel          :  Fast Hankel Transform
+         > Filter      :  Key 401 (2009)
+       Hankel Opt.     :  None
+       Loop over       :  None (all vectorized)
+       Source(s)       :  1 bipole(s)
+         > intpts      :  1 (as dipole)
+         > length  [m] :  100
+         > x_c     [m] :  0
+         > y_c     [m] :  0
+         > z_c     [m] :  100
+         > azimuth [°] :  0
+         > dip     [°] :  0
+       Receiver(s)     :  10 dipole(s)
+         > x       [m] :  500 - 5000 : 10  [min-max; #]
+                       :  500 1000 1500 2000 2500 3000 3500 4000 4500 5000
+         > y       [m] :  0 - 0 : 10  [min-max; #]
+                       :  0 0 0 0 0 0 0 0 0 0
+         > z       [m] :  200
+         > azimuth [°] :  0 - 0 : 10  [min-max; #]
+                       :  0 0 0 0 0 0 0 0 0 0
+         > dip     [°] :  0 - 0 : 10  [min-max; #]
+                       :  0 0 0 0 0 0 0 0 0 0
+       Required ab's   :  11
+    ~
+    :: empymod END; runtime = 0:00:00.022349 :: 1 kernel call(s)
+    ~
     >>> print(EMfield)
     [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
       -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
@@ -108,6 +143,8 @@ A list of things that should or could be added and improved:
 
     - GUI.
 
+    - Add a benchmark suite, e.g. http://asv.readthedocs.io, in addition to the
+      testing suite.
 
 Testing
 -------

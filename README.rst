@@ -3,10 +3,6 @@ empymod
 
 |docs| |tests| |coverage|
 
-**This is the master branch. Check out the**
-`latest release <https://github.com/prisae/empymod/releases/latest>`_
-**if you are looking for a stable version.**
-
 Electromagnetic modeller in Python
 ----------------------------------
 

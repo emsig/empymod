@@ -300,18 +300,19 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     --------
     >>> import numpy as np
     >>> from empymod import bipole
-    >>> # x-directed bipole source
+    >>> # x-directed bipole source: x0, x1, y0, y1, z0, z1
     >>> src = [-50, 50, 0, 0, 100, 100]
-    >>> # x-directed dipole source-array
+    >>> # x-directed dipole source-array: x, y, z, azimuth, dip
     >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 0]
     >>> # layer boundaries
     >>> depth = [0, 300, 1000, 1050]
     >>> # layer resistivities
     >>> res = [1e20, .3, 1, 50, 1]
+    >>> # Frequency
+    >>> freq = 1
     >>> # Calculate electric field due to an electric source at 1 Hz.
     >>> # [msrc = mrec = True (default)]
-    >>> EMfield = bipole(src, rec, depth, res, freqtime=1, verb=4)
-    >>> print(EMfield)
+    >>> EMfield = bipole(src, rec, depth, res, freq, verb=4)
     :: empymod START  ::
     ~
        depth       [m] :  0 300 1000 1050
@@ -347,6 +348,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     ~
     :: empymod END; runtime = 0:00:00.022349 :: 1 kernel call(s)
     ~
+    >>> print(EMfield)
     [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
       -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
        1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j

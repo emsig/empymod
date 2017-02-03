@@ -24,7 +24,7 @@ DATAFEMTEM = np.load(join(dirname(__file__), 'data_fem_tem.npz'))
 GREEN3D = np.load(join(dirname(__file__), 'data_green3d.npz'))
 # Data generated with create_dipole1d.py [01/02/2017]
 DIPOLE1D = np.load(join(dirname(__file__), 'data_dipole1d.npz'))
-# Data generated with create_emmod.py [01/02/2017]
+# Data generated with create_emmod.py [02/02/2017]
 EMMOD = np.load(join(dirname(__file__), 'data_emmod.npz'))
 
 
@@ -55,13 +55,11 @@ class TestBipole:                                                   # 1. bipole
 
     def test_emmod(self):                            # 1.3. Comparison to EMmod
         # Comparsion to EMmod (Hunziker et al., 2015)
-        # NOTE: The comparison to EMmod is with f=1.25Hz. It would be good to
-        #       include further tests with much lower/higher frequencies!
+        # Comparison f = [0.013, 1.25, 130] Hz.; 11 models, 34 ab's, f altern.
         dat = EMMOD['res'][()]
         for key, val in dat.items():
             res = bipole(**val[0])
-            assert_allclose(np.abs(res), np.abs(val[1]), 2e-2, 1e-20, True)
-            assert_allclose(res, val[1], 3e-2, 1e-20, True)
+            assert_allclose(res, val[1], 3e-2, 1e-17, True)
 
     def test_dipole1d(self):                      # 1.4. Comparison to DIPOLE1D
         # Comparison to DIPOLE1D (Key, Scripps)
