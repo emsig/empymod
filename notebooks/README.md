@@ -1,6 +1,9 @@
 # Examples, tests, benchmarks and profiling of `empymod`.
 
-More examples can be found in [../paper/notebooks](../paper/notebooks).
+More examples can be found in
+[../publications/Geophysics2017/notebooks](../publications/Geophysics2017/notebooks)
+and in
+[../publications/TheLeadingEdge2017](../publications/TheLeadingEdge2017).
 
 ## Examples
 
