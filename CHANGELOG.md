@@ -2,7 +2,7 @@
 
 ## latest
 
-* [06/02/2017] Now installable via pip
+* [06/02/2017] Now installable via pip/conda
 
 ## v1.2.0 - *2017-02-02*
 

@@ -6,7 +6,14 @@ https://empymod.readthedocs.io.
 Installation & requirements
 ---------------------------
 
-The easiest way to install the latest stable version of `empymod` is via pip:
+The easiest way to install the latest stable version of `empymod` is via
+`conda`:
+
+.. code-block:: console
+
+   > conda install -c prisae empymod
+
+or via `pip`:
 
 .. code-block:: console
 
@@ -505,3 +512,4 @@ References |_|
 # Import main modelling routines to make them available as primary functions
 from .model import bipole, dipole, frequency, time
 __all__ = ['bipole', 'dipole', 'frequency', 'time']
+__version__ = 'v1.2.dev'

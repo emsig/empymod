@@ -1,7 +1,7 @@
 empymod
 =======
 
-|docs| |tests| |coverage| |pypi|
+|docs| |tests| |coverage| |pypi| |anaconda|
 
 Electromagnetic modeller in Python
 ----------------------------------
@@ -14,7 +14,14 @@ permeability, from very low frequencies to very high frequencies.
 Installation & requirements
 ---------------------------
 
-The easiest way to install the latest stable version of `empymod` is via pip:
+The easiest way to install the latest stable version of `empymod` is via
+`conda`:
+
+.. code:: bash
+
+    conda install -c prisae empymod
+
+or via `pip`:
 
 .. code:: bash
 
@@ -117,3 +124,7 @@ which `empymod` would not exist.
 .. |pypi| image:: https://img.shields.io/pypi/v/empymod.svg
     :alt: PyPi Version
     :target: https://pypi.python.org/pypi/empymod
+
+.. |anaconda| image:: https://anaconda.org/prisae/empymod/badges/version.svg
+    :alt: Anaconda Version
+    :target: https://anaconda.org/prisae/empymod
