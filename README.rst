@@ -110,21 +110,16 @@ which `empymod` would not exist.
 
 
 .. |docs| image:: https://readthedocs.org/projects/empymod/badge/?version=latest
-    :alt: Docs Status
     :target: http://empymod.readthedocs.io/en/latest/?badge=latest
 
 .. |tests| image:: https://travis-ci.org/prisae/empymod.png?branch=master
-    :alt: Test Status
     :target: https://travis-ci.org/prisae/empymod/
 
 .. |coverage| image:: https://coveralls.io/repos/github/prisae/empymod/badge.svg?branch=master
-    :alt: Coverage
     :target: https://coveralls.io/github/prisae/empymod?branch=master
 
 .. |pypi| image:: https://img.shields.io/pypi/v/empymod.svg
-    :alt: PyPi Version
     :target: https://pypi.python.org/pypi/empymod
 
 .. |anaconda| image:: https://anaconda.org/prisae/empymod/badges/version.svg
-    :alt: Anaconda Version
     :target: https://anaconda.org/prisae/empymod
