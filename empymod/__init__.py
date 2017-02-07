@@ -6,9 +6,15 @@ https://empymod.readthedocs.io.
 Installation & requirements
 ---------------------------
 
-Just add the path to `empymod` to your python-path variable.
+The easiest way to install the latest stable version of `empymod` is via pip:
 
-Alternatively, to install it in your python distribution (linux), run:
+.. code-block:: console
+
+   > pip install empymod
+
+Alternatively, you can download the latest version from GitHub and either add
+the path to `empymod` to your python-path variable, or install it in your
+python distribution via:
 
 .. code-block:: console
 
@@ -118,8 +124,6 @@ Missing features
 
 A list of things that should or could be added and improved:
 
-    - Make it easier installable (PyPI, Anaconda, ...).
-
     - Kernel
         - Include `scipy.integrate.quad` as an additional Hankel transform.
           There are cases when both `QWE` and `FHT` struggle, e.g. at very
@@ -167,6 +171,9 @@ the tests, just install `pytest` and run it within the `empymod`-top-directory.
     > pytest
 
 It should run all tests successfully. Please let me know if not!
+
+Note that the version on PyPi (pip) does not have the test-suite included.
+To run the test-suite you must download `empymod` from GitHub.
 
 
 Citation

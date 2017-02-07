@@ -1,7 +1,7 @@
 empymod
 =======
 
-|docs| |tests| |coverage|
+|docs| |tests| |coverage| |pypi|
 
 Electromagnetic modeller in Python
 ----------------------------------
@@ -14,9 +14,15 @@ permeability, from very low frequencies to very high frequencies.
 Installation & requirements
 ---------------------------
 
-Just add the path to `empymod` to your python-path variable.
+The easiest way to install the latest stable version of `empymod` is via pip:
 
-Alternatively, to install it in your python distribution (linux), run:
+.. code:: bash
+
+   pip install empymod
+
+Alternatively, you can download the latest version from GitHub and either add
+the path to `empymod` to your python-path variable, or install it in your
+python distribution via:
 
 .. code:: bash
 
@@ -25,6 +31,7 @@ Alternatively, to install it in your python distribution (linux), run:
 Required are python version 3.4 or higher and the modules `NumPy` and `SciPy`.
 If you want to run parts of the kernel in parallel, the module `numexpr` is
 required additionally.
+
 
 
 Documentation
@@ -106,3 +113,7 @@ which `empymod` would not exist.
 .. |coverage| image:: https://coveralls.io/repos/github/prisae/empymod/badge.svg?branch=master
     :alt: Coverage
     :target: https://coveralls.io/github/prisae/empymod?branch=master
+
+.. |pypi| image:: https://img.shields.io/pypi/v/empymod.svg
+    :alt: PyPi Version
+    :target: https://pypi.python.org/pypi/empymod
