@@ -179,7 +179,7 @@ the tests, just install `pytest` and run it within the `empymod`-top-directory.
 
 It should run all tests successfully. Please let me know if not!
 
-Note that the version on PyPi (pip) does not have the test-suite included.
+Note that the installations via conda/pip do not have the test-suite included.
 To run the test-suite you must download `empymod` from GitHub.
 
 

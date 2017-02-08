@@ -4,19 +4,29 @@ from copy import deepcopy
 from scipy.constants import mu_0, epsilon_0
 from empymod import kernel, filters
 
-# All possible ab's for mrec=False
+# All possible (ab, msrc, mrec) combinations
 pab = (np.arange(1, 7)[None, :] + np.array([10, 20, 30])[:, None]).ravel()
+iab = {}
+for mrec in [False, True]:
+    for ab in pab:
+        if ab == 36:
+            continue
+        if ab % 10 > 3:
+            msrc = True
+        else:
+            msrc = False
+        if mrec:
+            msrc = not msrc
+        iab[ab] = (msrc, mrec)
 
 # # A -- ANGLE # #
 
 angres = []
 angle = np.array([1., 2., 4., 5.])
-for msrc in [True, False]:
-    for mrec in [True, False]:
-        for ab in pab:
-            inp = {'angle': angle, 'ab': ab, 'msrc': msrc, 'mrec': mrec}
-            res = kernel.angle_factor(angle, ab, msrc, mrec)
-            angres.append({'inp': inp, 'res': res})
+for key, val in iab.items():
+    inp = {'angle': angle, 'ab': key, 'msrc': val[0], 'mrec': val[1]}
+    res = kernel.angle_factor(angle, key, val[0], val[1])
+    angres.append({'inp': inp, 'res': res})
 
 # # B -- WAVENUMBER # #
 
@@ -47,17 +57,9 @@ inp1 = {'zsrc': np.array([100]),
         'xdirect': False,
         'use_ne_eval': False}
 wave = {}
-for mrec in [False, True]:
-    for ab in pab:
-        if ab == 36:
-            continue
-        if ab % 10 > 3:
-            msrc = True
-        else:
-            msrc = False
-
-        res = kernel.wavenumber(ab=ab, msrc=msrc, mrec=mrec, **inp1)
-        wave[ab] = (ab, msrc, mrec, inp1, res)
+for key, val in iab.items():
+    res = kernel.wavenumber(ab=key, msrc=val[0], mrec=val[1], **inp1)
+    wave[key] = (key, val[0], val[1], inp1, res)
 
 # # C -- GREENFCT # #
 
@@ -72,20 +74,12 @@ inp4 = deepcopy(inp1)
 inp4['zrec'] = np.array([-30])
 inp4['lrec'] = np.array(0)
 green = {}
-for mrec in [False, True]:
-    for ab in pab:
-        if ab == 36:
-            continue
-        if ab % 10 > 3:
-            msrc = True
-        else:
-            msrc = False
+for key, val in iab.items():
+    res1 = kernel.greenfct(ab=key, msrc=val[0], mrec=val[1], **inp2)
+    res2 = kernel.greenfct(ab=key, msrc=val[0], mrec=val[1], **inp3)
+    res3 = kernel.greenfct(ab=key, msrc=val[0], mrec=val[1], **inp4)
 
-        res1 = kernel.greenfct(ab=ab, msrc=msrc, mrec=mrec, **inp2)
-        res2 = kernel.greenfct(ab=ab, msrc=msrc, mrec=mrec, **inp3)
-        res3 = kernel.greenfct(ab=ab, msrc=msrc, mrec=mrec, **inp4)
-
-        green[ab] = (ab, msrc, mrec, inp2, res1, inp3, res2, inp4, res3)
+    green[key] = (key, val[0], val[1], inp2, res1, inp3, res2, inp4, res3)
 
 
 # # D -- REFLECTIONS # #

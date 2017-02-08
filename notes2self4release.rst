@@ -33,14 +33,17 @@ Steps to carry out for a new release
 
    Has to be done outside of ~/, because conda skeleton cannot handle, at the
    moment, the encrypted home.
+   https://conda.io/docs/build_tutorials/pkgs.html
 
 
         # Install miniconda in /opt
         wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
         bash miniconda.sh -b -p /opt/miniconda/miniconda
         export PATH="/opt/miniconda/miniconda/bin:$PATH"
-        conda install conda-build
         conda update conda
+        conda install conda-build anaconda-client
+        conda config --set anaconda_upload yes
+        anaconda login
 
         # Now to the conda-build part
         conda skeleton pypi empymod
@@ -48,14 +51,11 @@ Steps to carry out for a new release
         conda build --python 3.5 empymod
         conda build --python 3.6 empymod
 
-        # Install and login to anaconda
-        conda install anaconda-client
-        anaconda login
+        # Convert for all platforms
 
-        # Upload
-        anaconda upload /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.0-py34_0.tar.bz2
-        anaconda upload /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.0-py35_0.tar.bz2
-        anaconda upload /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.0-py36_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.0-py34_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.0-py35_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.0-py36_0.tar.bz2
 
         # Logout
         anaconda logout

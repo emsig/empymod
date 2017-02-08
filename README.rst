@@ -110,7 +110,7 @@ which `empymod` would not exist.
 
 
 .. |docs| image:: https://readthedocs.org/projects/empymod/badge/?version=latest
-    :target: http://empymod.readthedocs.io/en/latest/?badge=latest
+    :target: https://empymod.readthedocs.io/en/latest/?badge=latest
 
 .. |tests| image:: https://travis-ci.org/prisae/empymod.png?branch=master
     :target: https://travis-ci.org/prisae/empymod/
