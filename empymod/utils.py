@@ -362,11 +362,12 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
 
     epermH, epermV : array_like
-        Horizontal/vertical electric permittivities epsilon_h/epsilon_v (-);
+        Relative horizontal/vertical electric permittivities
+        epsilon_h/epsilon_v (-);
         #epermH = #epermV = #res.
 
     mpermH, mpermV : array_like
-        Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
+        Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res.
 
     verb : {0, 1, 2, 3, 4}
@@ -541,11 +542,12 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
 
     epermH, epermV : array_like
-        Horizontal/vertical electric permittivities epsilon_h/epsilon_v (-);
+        Relative horizontal/vertical electric permittivities
+        epsilon_h/epsilon_v (-);
         #epermH = #epermV = #res.
 
     mpermH, mpermV : array_like
-        Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
+        Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res.
 
     verb : {0, 1, 2, 3, 4}

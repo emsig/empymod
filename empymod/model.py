@@ -130,11 +130,12 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         Defaults to ones.
 
     epermH, epermV : array_like, optional
-        Horizontal/vertical electric permittivities epsilon_h/epsilon_v (-);
+        Relative horizontal/vertical electric permittivities
+        epsilon_h/epsilon_v (-);
         #epermH = #epermV = #res. Default is ones.
 
     mpermH, mpermV : array_like, optional
-        Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
+        Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res. Default is ones.
 
     msrc, mrec : boolean, optional
@@ -607,11 +608,12 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         Defaults to ones.
 
     epermH, epermV : array_like, optional
-        Horizontal/vertical electric permittivities epsilon_h/epsilon_v (-);
+        Relative horizontal/vertical electric permittivities
+        epsilon_h/epsilon_v (-);
         #epermH = #epermV = #res. Default is ones.
 
     mpermH, mpermV : array_like, optional
-        Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
+        Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res. Default is ones.
 
     xdirect : bool, optional
@@ -1032,11 +1034,12 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
         Defaults to ones.
 
     epermH, epermV : array_like, optional
-        Horizontal/vertical electric permittivities epsilon_h/epsilon_v (-);
+        Relative horizontal/vertical electric permittivities
+        epsilon_h/epsilon_v (-);
         #epermH = #epermV = #res. Default is ones.
 
     mpermH, mpermV : array_like, optional
-        Horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
+        Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res. Default is ones.
 
     xdirect : bool, optional
