@@ -11,25 +11,25 @@ due to a three-dimensional electric or magnetic source in a layered-earth model
 with vertical transverse isotropy, electric permittivity, and magnetic
 permeability, from very low frequencies to very high frequencies.
 
-Installation & requirements
----------------------------
+Installation & requirements |anaconda| |pypi| |github|
+------------------------------------------------------
 
-|anaconda| The easiest way to install the latest stable version of `empymod` is
-via `conda`:
+The easiest way to install the latest stable version of `empymod` is via
+`conda`:
 
 .. code:: bash
 
     conda install -c prisae empymod
 
-|pypi| or via `pip`:
+or via `pip`:
 
 .. code:: bash
 
    pip install empymod
 
-|github| Alternatively, you can download the latest version from GitHub and
-either add the path to `empymod` to your python-path variable, or install it in
-your python distribution via:
+Alternatively, you can download the latest version from GitHub and either add
+the path to `empymod` to your python-path variable, or install it in your
+python distribution via:
 
 .. code:: bash
 
@@ -41,11 +41,11 @@ required additionally.
 
 
 
-Documentation
--------------
+Documentation |manual|
+----------------------
 
-|manual| The manual for `empymod` can be found at
-http://empymod.readthedocs.io.
+The manual of `empymod` can be found at `empymod.readthedocs.io
+<http://empymod.readthedocs.io/en/stable>`_.
 
 
 License
@@ -74,9 +74,9 @@ Notice
 
 This product includes software that was initially (till 01/2017) developed at
 *The Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
-http://www.imp.mx). The project was funded through *The Mexican National
-Council of Science and Technology* (*Consejo Nacional de Ciencia y Tecnología*,
-http://www.conacyt.mx).
+`gob.mx/imp <http://www.gob.mx/imp>`_). The project was funded through *The
+Mexican National Council of Science and Technology* (*Consejo Nacional de
+Ciencia y Tecnología*, `conacyt.mx <http://www.conacyt.mx>`_).
 
 
 This product is a derivative work of the following two publications and their
