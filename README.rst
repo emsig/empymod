@@ -1,7 +1,10 @@
 empymod
 =======
 
-|docs| |tests| |coverage| |pypi| |anaconda|
+|docs| |tests| |coverage|
+
+`Latest stable release <https://github.com/prisae/empymod/releases/latest>`_:
+|pypi| |anaconda| |zenodo| |manual|
 
 Electromagnetic modeller in Python
 ----------------------------------
@@ -106,7 +109,7 @@ I am in the process of publishing an article regarding `empymod`, and I will
 put the info here once it is a reality. If you publish results for which you
 used `empymod`, please consider citing this article. Also consider citing the
 two articles given above, *Hunziker et al, 2015*, and *Key, 2012*, without
-which `empymod` would not exist.
+which `empymod` would not exist. (All releases have a Zenodo-DOI.)
 
 
 .. |docs| image:: https://readthedocs.org/projects/empymod/badge/?version=latest
@@ -123,3 +126,9 @@ which `empymod` would not exist.
 
 .. |anaconda| image:: https://anaconda.org/prisae/empymod/badges/version.svg
     :target: https://anaconda.org/prisae/empymod
+
+.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.293081.svg
+   :target: https://doi.org/10.5281/zenodo.293081
+
+.. |manual| image:: https://readthedocs.org/projects/empymod/badge/?version=v1.2.0
+    :target: https://empymod.readthedocs.io/en/v1.2.0/?badge=v1.2.0

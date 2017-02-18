@@ -14,22 +14,29 @@ Steps to carry out for a new release
 
         rm -rf build/ dist/ empymod.egg-info/
 
-   5. Push it to GitHub, create a release tagging it
+   5. Create a Zenodo-DOI, add it to release notes
 
-   6. Create tar and wheel
+   6. Update batches in README
+      - Remove the current batches (readthedocs, travis-ci, coveralls)
+      - Update batches for latest stable release (pypi, anaconda, zenodo,
+        readthedocs)
+
+   7. Push it to GitHub, create a release tagging it
+
+   8. Create tar and wheel
 
         python setup.py sdist
         python setup.py bdist_wheel
 
-   7. Test it on testpypi (requires ~/.pypirc)
+   9. Test it on testpypi (requires ~/.pypirc)
 
         twine upload dist/* -r testpypi
 
-   8. Push it to PyPi (requires ~/.pypirc)
+   10. Push it to PyPi (requires ~/.pypirc)
 
         twine upload dist/*
 
-   9. conda build
+   11. conda build
 
    Has to be done outside of ~/, because conda skeleton cannot handle, at the
    moment, the encrypted home.
@@ -60,7 +67,10 @@ Steps to carry out for a new release
         # Logout
         anaconda logout
 
-   10. Update version number with a dev for future
+   12. Update version number with a dev for future
       - `setup.py`
       - `docs/conf.py`
       - `empymod/__init__.py`
+
+   13. Add batches to README
+      - Add the current batches (readthedocs, travis-ci, coveralls)
