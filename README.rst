@@ -1,10 +1,9 @@
 empymod
 =======
 
-|docs| |tests| |coverage|
+Master branch: |docs| |tests| |coverage|
 
-`Latest stable release <https://github.com/prisae/empymod/releases/latest>`_:
-|pypi| |anaconda| |zenodo| |manual|
+Latest release: |github| |pypi| |anaconda| |zenodo| |manual|
 
 Electromagnetic modeller in Python
 ----------------------------------
@@ -120,6 +119,9 @@ which `empymod` would not exist. (All releases have a Zenodo-DOI.)
 
 .. |coverage| image:: https://coveralls.io/repos/github/prisae/empymod/badge.svg?branch=master
     :target: https://coveralls.io/github/prisae/empymod?branch=master
+
+.. |github| image:: https://img.shields.io/github/release/prisae/empymod.svg
+    :target: https://github.com/prisae/empymod/releases/latest
 
 .. |pypi| image:: https://img.shields.io/pypi/v/empymod.svg
     :target: https://pypi.python.org/pypi/empymod

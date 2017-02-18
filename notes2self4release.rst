@@ -18,8 +18,8 @@ Steps to carry out for a new release
 
    6. Update batches in README
       - Remove the current batches (readthedocs, travis-ci, coveralls)
-      - Update batches for latest stable release (pypi, anaconda, zenodo,
-        readthedocs)
+      - Update batches for latest stable release (github, pypi, anaconda,
+        zenodo, readthedocs)
 
    7. Push it to GitHub, create a release tagging it
 
