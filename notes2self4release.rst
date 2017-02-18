@@ -1,42 +1,35 @@
 Steps to carry out for a new release
 ====================================
 
-   1. Update CHANGELOG
+   1. Update:
+      - `CHANGELOG`
+      - `setup.py`: Version number; check and update everything
+      - `docs/conf.py`: Version number
+      - `empymod/__init__.py`: Version number
+      - `README.rst`: remove the current batches (|docs| |tests| |coverage|)
 
-   2. Update the version number in
-      - `setup.py`
-      - `docs/conf.py`
-      - `empymod/__init__.py`
-
-   3. Check and update everything in setup.py
-
-   4. Remove any old stuff (just in case)
+   2. Remove any old stuff (just in case)
 
         rm -rf build/ dist/ empymod.egg-info/
 
-   5. Create a Zenodo-DOI, add it to release notes
+   3. Create a Zenodo-DOI, add it to release notes
 
-   6. Update batches in README
-      - Remove the current batches (readthedocs, travis-ci, coveralls)
-      - Update batches for latest stable release (github, pypi, anaconda,
-        zenodo, readthedocs)
+   4. Push it to GitHub, create a release tagging it
 
-   7. Push it to GitHub, create a release tagging it
-
-   8. Create tar and wheel
+   5. Create tar and wheel
 
         python setup.py sdist
         python setup.py bdist_wheel
 
-   9. Test it on testpypi (requires ~/.pypirc)
+   6. Test it on testpypi (requires ~/.pypirc)
 
         twine upload dist/* -r testpypi
 
-   10. Push it to PyPi (requires ~/.pypirc)
+   7. Push it to PyPi (requires ~/.pypirc)
 
         twine upload dist/*
 
-   11. conda build
+   8. conda build
 
    Has to be done outside of ~/, because conda skeleton cannot handle, at the
    moment, the encrypted home.
@@ -67,10 +60,8 @@ Steps to carry out for a new release
         # Logout
         anaconda logout
 
-   12. Update version number with a dev for future
+   9. Update version number with a dev for future
       - `setup.py`
       - `docs/conf.py`
       - `empymod/__init__.py`
-
-   13. Add batches to README
-      - Add the current batches (readthedocs, travis-ci, coveralls)
+      - `README.rst`: add the current batches (|docs| |tests| |coverage|)

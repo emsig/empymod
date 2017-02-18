@@ -1,9 +1,7 @@
 empymod
 =======
 
-Master branch: |docs| |tests| |coverage|
-
-Latest release: |github| |pypi| |anaconda| |zenodo| |manual|
+|docs| |tests| |coverage|
 
 Electromagnetic modeller in Python
 ----------------------------------
@@ -16,22 +14,22 @@ permeability, from very low frequencies to very high frequencies.
 Installation & requirements
 ---------------------------
 
-The easiest way to install the latest stable version of `empymod` is via
-`conda`:
+|anaconda| The easiest way to install the latest stable version of `empymod` is
+via `conda`:
 
 .. code:: bash
 
     conda install -c prisae empymod
 
-or via `pip`:
+|pypi| or via `pip`:
 
 .. code:: bash
 
    pip install empymod
 
-Alternatively, you can download the latest version from GitHub and either add
-the path to `empymod` to your python-path variable, or install it in your
-python distribution via:
+|github| Alternatively, you can download the latest version from GitHub and
+either add the path to `empymod` to your python-path variable, or install it in
+your python distribution via:
 
 .. code:: bash
 
@@ -46,8 +44,8 @@ required additionally.
 Documentation
 -------------
 
-The manual for `empymod` can be found at http://empymod.readthedocs.io. Consult
-the manual for further information and a list of TODOs.
+|manual| The manual for `empymod` can be found at
+http://empymod.readthedocs.io.
 
 
 License
@@ -108,8 +106,8 @@ I am in the process of publishing an article regarding `empymod`, and I will
 put the info here once it is a reality. If you publish results for which you
 used `empymod`, please consider citing this article. Also consider citing the
 two articles given above, *Hunziker et al, 2015*, and *Key, 2012*, without
-which `empymod` would not exist. (All releases have a Zenodo-DOI.)
-
+which `empymod` would not exist. (All releases have additionally a Zenodo-DOI,
+provided on the `release-page <https://github.com/prisae/empymod/releases>`_.)
 
 .. |docs| image:: https://readthedocs.org/projects/empymod/badge/?version=latest
     :target: https://empymod.readthedocs.io/en/latest/?badge=latest
@@ -129,8 +127,5 @@ which `empymod` would not exist. (All releases have a Zenodo-DOI.)
 .. |anaconda| image:: https://anaconda.org/prisae/empymod/badges/version.svg
     :target: https://anaconda.org/prisae/empymod
 
-.. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.293081.svg
-   :target: https://doi.org/10.5281/zenodo.293081
-
-.. |manual| image:: https://readthedocs.org/projects/empymod/badge/?version=v1.2.0
-    :target: https://empymod.readthedocs.io/en/v1.2.0/?badge=v1.2.0
+.. |manual| image:: https://readthedocs.org/projects/empymod/badge/?version=stable
+    :target: https://empymod.readthedocs.io/en/stable/?badge=stable
