@@ -321,7 +321,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         # New lambda, from min to max required lambda with pts_per_dec
         start = np.log(lambd.min())
         stop = np.log(lambd.max())
-        ilambd = np.logspace(start, stop, (stop-start)*pts_per_dec + 1, 10)
+        ilambd = np.logspace(start, stop, (stop-start)*pts_per_dec + 1)
 
         # Call the kernel
         PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
