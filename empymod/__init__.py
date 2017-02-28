@@ -335,6 +335,15 @@ all involve :math:`\Gamma` in one way or another, often calculating square
 roots or exponentials. As :math:`\Gamma` has dimensions (#frequencies,
 #offsets, #layers, #lambdas), it can become fairly big.
 
+The module `numexpr` uses by default all available cores up to a maximum of 8.
+You can change this behaviour to a lower or a higher value with the following
+command (in the example it is changed to 4):
+
+.. code-block:: python
+
+    >>> import numexpr
+    >>> numexpr.set_num_threads(4)
+
 This parallelisation will make `empymod` faster if you calculate a lot of
 offsets/frequencies at once, but slower for few offsets/frequencies. Best
 practice is to check first which one is faster. (You can use the included

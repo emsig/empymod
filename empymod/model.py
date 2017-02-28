@@ -246,6 +246,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
               statements, which all contain `Gamma` in one way or another,
               which has dimensions (#frequencies, #offsets, #layers, #lambdas),
               therefore can grow pretty big.
+              The module `numexpr` uses by default all available cores up to a
+              maximum of 8. You can change this behaviour to your desired
+              number of threads `nthreads` with
+              `numexpr.set_num_threads(nthreads)`.
             - If 'spline', the *lagged convolution* or *splined* variant of the
               FHT or the *splined* version of the QWE are used. Use with
               caution and check with the non-spline version for a specific
@@ -706,6 +710,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
               statements, which all contain `Gamma` in one way or another,
               which has dimensions (#frequencies, #offsets, #layers, #lambdas),
               therefore can grow pretty big.
+              The module `numexpr` uses by default all available cores up to a
+              maximum of 8. You can change this behaviour to your desired
+              number of threads `nthreads` with
+              `numexpr.set_num_threads(nthreads)`.
             - If 'spline', the *lagged convolution* or *splined* variant of the
               FHT or the *splined* version of the QWE are used. Use with
               caution and check with the non-spline version for a specific
