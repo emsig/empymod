@@ -174,7 +174,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
                 - filter: string of filter name in `empymod.filters` or
                           the filter method itself.
-                          (default: `empymod.filters.key_401_2009()`)
+                          (default: `empymod.filters.key_201_2009()`)
                 - pts_per_dec: points per decade (only relevant if spline=True)
                                If none, standard lagged convolution is used.
                                 (default: None)
@@ -328,7 +328,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        mpermH      [-] :  1 1 1 1 1
        mpermV      [-] :  1 1 1 1 1
        Hankel          :  Fast Hankel Transform
-         > Filter      :  Key 401 (2009)
+         > Filter      :  Key 201 (2009)
        Hankel Opt.     :  None
        Loop over       :  None (all vectorized)
        Source(s)       :  1 bipole(s)

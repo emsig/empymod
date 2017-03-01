@@ -215,7 +215,7 @@ def test_check_hankel(capsys):                                # 6. check_hankel
     outstr = "   Hankel          :  Fast Hankel Transform\n     > Filter"
     assert out[:57] == outstr
     assert ht == 'fht'
-    assert htarg[0].name == filters.key_401_2009().name
+    assert htarg[0].name == filters.key_201_2009().name
     assert htarg[1] is None
 
     # [filter str]
@@ -228,7 +228,7 @@ def test_check_hankel(capsys):                                # 6. check_hankel
     assert htarg[1] is None
     # ['', pts_per_dec]
     _, htarg = utils.check_hankel('fht', ['', 20], 0)
-    assert htarg[0].name == filters.key_401_2009().name
+    assert htarg[0].name == filters.key_201_2009().name
     assert htarg[1] == 20
     # [filter str, pts_per_dec]
     _, htarg = utils.check_hankel('fht', ['key_201_2009', 20], 0)

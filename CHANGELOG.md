@@ -2,6 +2,10 @@
 
 ## latest
 
+* [01/03/2017] Change default filter from `key_401_2009` to `key_201_2009`
+               (because of warning regarding 401 pt filter in source code of
+               `DIPOLE1D`.)
+
 * [06/02/2017] Now installable via pip/conda
 
 ## v1.2.0 - *2017-02-02*

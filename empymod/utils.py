@@ -440,13 +440,13 @@ def check_hankel(ht, htarg, verb):
         elif not isinstance(htarg, (list, tuple)):  # If only filter
             htarg = [htarg, ]
 
-        # Check filter; defaults to key_401_2009
+        # Check filter; defaults to key_201_2009
         try:
             fhtfilt = htarg[0]
             if not hasattr(fhtfilt, 'base'):
                 fhtfilt = getattr(filters, fhtfilt)()
         except:
-            fhtfilt = filters.key_401_2009()
+            fhtfilt = filters.key_201_2009()
 
         # Check pts_per_dec; defaults to None
         try:
