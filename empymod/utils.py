@@ -414,7 +414,7 @@ def check_hankel(ht, htarg, verb):
 
     Parameters
     ----------
-    ht : {'fht', 'qwe'}
+    ht : {'fht', 'qwe', 'quad'}
         Flag to choose the Hankel transform.
 
     htarg : str or filter from empymod.filters or array_like,
@@ -516,8 +516,65 @@ def check_hankel(ht, htarg, verb):
             print("     > maxint      :  " + str(htarg[3]))
             print("     > pts_per_dec :  " + str(htarg[4]))
 
+    elif ht in ['quad', 'hquad']:
+        # Rename ht
+        ht = 'hquad'
+
+        # Get and check input or set defaults
+        if not htarg:
+            htarg = []
+
+        # rtol : 1e-12
+        try:
+            rtol = _check_var(htarg[0], float, 0, 'quad: rtol', ())
+        except:
+            rtol = np.array(1e-12, dtype=float)
+
+        # atol : 1e-20
+        try:
+            atol = _check_var(htarg[1], float, 0, 'quad: atol', ())
+        except:
+            atol = np.array(1e-20, dtype=float)
+
+        # limit : 500
+        try:
+            limit = _check_var(htarg[2], int, 0, 'quad: limit', ())
+        except:
+            limit = np.array(500, dtype=int)
+
+        # lmin : 1e-6
+        try:
+            lmin = _check_var(htarg[3], float, 0, 'quad: lmin', ())
+        except:
+            lmin = np.array(1e-6, dtype=float)
+
+        # lmax : 100
+        try:
+            lmax = _check_var(htarg[4], float, 0, 'quad: lmax', ())
+        except:
+            lmax = np.array(100, dtype=float)
+
+        # pts_per_dec : 40
+        try:
+            pts_per_dec = _check_var(htarg[5], int, 0, 'quad: pts_per_dec', ())
+        except:
+            pts_per_dec = np.array(40, dtype=int)
+
+        # Assemble htarg
+        htarg = (atol, rtol, limit, lmin, lmax, pts_per_dec)
+
+        # If verbose, print Hankel transform information
+        if verb > 2:
+            print("   Hankel          :  Quadrature")
+            print("     > rtol        :  " + str(htarg[0]))
+            print("     > atol        :  " + str(htarg[1]))
+            print("     > limit       :  " + str(htarg[2]))
+            print("     > lmin        :  " + str(htarg[3]))
+            print("     > lmax        :  " + str(htarg[4]))
+            print("     > pts_per_dec :  " + str(htarg[5]))
+
     else:
-        print("* ERROR   :: <ht> must be one of: ['fht', 'qwe'];" +
+        print("* ERROR   :: <ht> must be one of: ['fht', 'qwe', 'quad'];" +
               " <ht> provided: " + str(ht))
         raise ValueError('ht')
 
@@ -703,7 +760,7 @@ def check_opt(opt, loop, ht, htarg, verb):
                       "`opt=='parallel'` has no effect.")
 
     # Define if to loop over frequencies or over offsets
-    if ht == 'hqwe' or use_spline:
+    if ht in ['hqwe', 'hquad'] or use_spline:
         loop_freq = True
         loop_off = False
     else:

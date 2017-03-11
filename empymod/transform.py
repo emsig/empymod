@@ -38,8 +38,8 @@ from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
 from . import kernel
 
-__all__ = ['fht', 'hqwe', 'fft', 'fqwe', 'fftlog', 'qwe', 'get_spline_values',
-           'fhti']
+__all__ = ['fht', 'hqwe', 'hquad', 'fft', 'fqwe', 'fftlog', 'qwe',
+           'get_spline_values', 'fhti']
 
 
 # 1. Hankel transforms (wavenumber -> frequency)
@@ -391,6 +391,107 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
                             off, factAng)
 
     return fEM, kcount, conv
+
+
+def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
+          zetaV, xdirect, quadargs, use_spline, use_ne_eval, msrc, mrec):
+    """Hankel Transform using the QUADPACK library.
+
+    This routine uses the `scipy.integrate.quad` module, which in turn makes
+    use of the Fortran library `QUADPACK` (`qagse`).
+
+    It is massively (orders of magnitudes) slower than either `fht` or `hqwe`,
+    and is mainly here for completeness and comparison purposes. It always uses
+    interpolation in the wavenumber domain, hence it generally will not be as
+    precise as the other methods. However, it might work in some areas where
+    the others fail.
+
+    The function is called from one of the modelling routines in :mod:`model`.
+    Consult these modelling routines for a description of the input and output
+    parameters.
+
+    Returns
+    -------
+    fEM : array
+        Returns frequency-domain EM response.
+
+    kcount : int
+        Kernel count. For HQUAD, this is 1.
+
+    conv : bool
+        Only relevant for QWE, not for FHT.
+
+    """
+
+    # Get quadargs
+    atol, rtol, limit, lmin, lmax, pts_per_dec = quadargs
+
+    # Get required lambdas
+    llmin = np.log10(lmin)
+    llmax = np.log10(lmax)
+    ilambd = np.logspace(llmin, llmax, (llmax-llmin)*pts_per_dec + 1)
+
+    # Call the kernel
+    PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
+                                       etaV, zetaH, zetaV,
+                                       np.atleast_2d(ilambd), ab, xdirect,
+                                       msrc, mrec, use_ne_eval)
+
+    # Interpolation in wavenumber domain: Has to be done separately on each PJ,
+    # in order to work with multiple offsets which have different angles.
+    sPJ0r = iuSpline(np.log(ilambd), PJ0.real)
+    sPJ0i = iuSpline(np.log(ilambd), PJ0.imag)
+
+    sPJ1r = iuSpline(np.log(ilambd), PJ1.real)
+    sPJ1i = iuSpline(np.log(ilambd), PJ1.imag)
+
+    sPJ0br = iuSpline(np.log(ilambd), PJ0b.real)
+    sPJ0bi = iuSpline(np.log(ilambd), PJ0b.imag)
+
+    # Define the quadrature kernels
+    def quad0(klambd, sPJ, sPJb, koff, kang):
+        """Quadrature for J0."""
+        tP0 = sPJ(np.log(klambd)) + kang*sPJb(np.log(klambd))
+        return tP0*special.j0(koff*klambd)
+
+    def quad1(klambd, sPJ, ab, koff, kang):
+        """Quadrature for J1."""
+        tP1 = kang*sPJ(np.log(klambd))
+        if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+            # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+            tP1 /= koff
+        return tP1*special.j1(koff*klambd)
+
+    # Get the angle factor
+    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+
+    # Pre-allocate output array
+    fEM = np.zeros(off.size, dtype=complex)
+
+    # Input-dictionary for quad
+    iinp = {'a': lmin, 'b': lmax, 'epsabs': atol, 'epsrel': rtol,
+            'limit': limit}
+    # Loop over offsets
+    for i in range(off.size):
+
+        # Carry out quadrature of J0
+        iargs = (sPJ0r, sPJ0br, off[i], factAng[i])
+        fr0 = integrate.quad(quad0, args=iargs, **iinp)
+        iargs = (sPJ0i, sPJ0bi, off[i], factAng[i])
+        fi0 = integrate.quad(quad0, args=iargs, **iinp)
+
+        # Carry out quadrature of J1
+        iargs = (sPJ1r, ab, off[i], factAng[i])
+        fr1 = integrate.quad(quad1, args=iargs, **iinp)
+        iargs = (sPJ1i, ab, off[i], factAng[i])
+        fi1 = integrate.quad(quad1, args=iargs, **iinp)
+
+        # Collect the results
+        fEM[i] = fr0[0] + fr1[0] + 1j*(fi0[0] + fi1[0])
+
+    # Return the electromagnetic field
+    # Second argument (1) is the kernel count, last argument is only for QWE.
+    return fEM, 1, True
 
 
 # 2. Fourier transforms (frequency -> time)

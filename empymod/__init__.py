@@ -139,26 +139,24 @@ Missing features
 
 A list of things that should or could be added and improved:
 
-    - Kernel
-        - Include `scipy.integrate.quad` as an additional Hankel transform.
-          There are cases when both `QWE` and `FHT` struggle, e.g. at very
-          short offsets with very high frequencies (GPR).
-        - A `cython` or `numba` (pure C?) implementation of the `kernel` and
-          the `transform` modules. Maybe not worth it, as it may improve speed,
-          but decrease accessibility. Both at the same time would be nice. A
-          fast C-version for calculations (inversions), and a Python-version to
-          tinker with for interested folks. (Probably combined with default
-          parallelisation, removing the `numexpr` variant.)
+    - A `cython`, `numba`, or pure C/C++ implementation of the `kernel` and the
+      `transform` modules. Maybe not worth it, as it may improve speed, but
+      decrease accessibility. Both at the same time would be nice. A fast
+      C/C++-version for calculations (inversions), and a Python-version to
+      tinker with for interested folks. (Probably combined with default
+      parallelisation, removing the `numexpr` variant.)
 
     - More modelling routines:
-        - Convolution with a wavelet for GPR (proper version of `model.gpr`,
-          needs another HT/FT).
-        - Various source-receiver arrangements (loops etc).
-        - Load and save functions to store and load model, together with all
-          information.
+        - Convolution with a wavelet for GPR (proper version of `model.gpr`).
+        - Additional source-receiver arrangements (e.g. loops).
+        - Load and save functions to store and load model information
+          (resistivity model, acquisition parameters, and modelling parameters)
+          together with the modelling data.
 
     - Module to create Hankel filters (nice to have addition, mainly for
       educational purposes).
+
+    - Abstraction of the code.
 
     - GUI.
 
@@ -259,13 +257,17 @@ There is the usual trade-off between speed, memory, and accuracy. Very
 generally speaking we can say that the *FHT* is faster than *QWE*, but *QWE* is
 much easier on memory usage. I doubt you will ever run into memory issues with
 *QWE*, whereas for *FHT* you might for ten thousands of offsets or hundreds of
-layers. Furthermore, *QWE* allows you to control the accuracy.
+layers. Furthermore, *QWE* allows you to control the accuracy. A standard
+quadrature in the form of *QUAD* is also provided. *QUAD* is orders of
+magnitudes slower, and more fragile depending on the input arguments. However,
+it can provide accurate results where *FHT* and *QWE* fail.
 
 There are two optimisation possibilities included via the ``opt``-flag:
 parallelisation (``opt='parallel'``) and spline interpolation
 (``opt='spline'``).  They are switched off by default. The optimization
 ``opt='parallel'`` only affects speed and memory usage, whereas
-``opt='spline'`` also affects precision!
+``opt='spline'`` also affects precision! (*QUAD* is always using `spline`, and
+is therefore usually slower and less precise than *FHT* and *QWE*.)
 
 I am sure `empymod` could be made much faster with cleverer coding style or
 with the likes of `cython` or `numba`. Suggestions and contributions are

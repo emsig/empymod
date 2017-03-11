@@ -162,10 +162,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         calculated in the wavenumber domain.
         Defaults to True.
 
-    ht : {'fht', 'qwe'}, optional
-        Flag to choose either the *Fast Hankel Transform* (FHT) or the
-        *Quadrature-With-Extrapolation* (QWE) for the Hankel transform.
-        Defaults to 'fht'.
+    ht : {'fht', 'qwe', 'quad'}, optional
+        Flag to choose either the *Fast Hankel Transform* (FHT), the
+        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
+        for the Hankel transform.  Defaults to 'fht'.
 
     htarg : str or filter from empymod.filters or array_like, optional
         Depends on the value for `ht`:
@@ -193,6 +193,21 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
               All are optional, you only have to maintain the order. To only
               change `nquad` to 11 and use the defaults otherwise, you can
               provide htarg=['', '', 11].
+
+            - If `ht` = 'quad': array containing:
+              [atol, rtol, limit, lmin, lmax, pts_per_dec]:
+
+                - rtol: relative tolerance (default: 1e-12)
+                - atol: absolute tolerance (default: 1e-20)
+                - limit: An upper bound on the number of subintervals used in
+                  the adaptive algorithm (default: 500)
+                - lmin: Minimum wavenumber (default 1e-6)
+                - lmax: Maximum wavenumber (default 100)
+                - pts_per_dec: points per decade (default: 40)
+
+              All are optional, you only have to maintain the order. To only
+              change `limit` to 1000 and use the defaults otherwise, you can
+              provide htarg=['', '', 1000].
 
     ft : {'sin', 'cos', 'qwe', 'fftlog'}, optional
         Only used if `signal` != None. Flag to choose either the Sine- or
@@ -479,7 +494,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                                              recdip, msrc, mrec)
 
                         # Add field to EM with geometrical factor
-                        abEM += out[0]*tfact
+                        abEM += out[0]*np.squeeze(tfact)
 
                         # Update kernel count
                         kcount += out[1]
@@ -626,10 +641,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         calculated in the wavenumber domain.
         Defaults to True.
 
-    ht : {'fht', 'qwe'}, optional
-        Flag to choose either the *Fast Hankel Transform* (FHT) or the
-        *Quadrature-With-Extrapolation* (QWE) for the Hankel transform.
-        Defaults to 'fht'.
+    ht : {'fht', 'qwe', 'quad'}, optional
+        Flag to choose either the *Fast Hankel Transform* (FHT), the
+        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
+        for the Hankel transform.  Defaults to 'fht'.
 
     htarg : str or filter from empymod.filters or array_like, optional
         Depends on the value for `ht`:
@@ -657,6 +672,21 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
               All are optional, you only have to maintain the order. To only
               change `nquad` to 11 and use the defaults otherwise, you can
               provide htarg=['', '', 11].
+
+            - If `ht` = 'quad': array containing:
+              [atol, rtol, limit, lmin, lmax, pts_per_dec]:
+
+                - rtol: relative tolerance (default: 1e-12)
+                - atol: absolute tolerance (default: 1e-20)
+                - limit: An upper bound on the number of subintervals used in
+                  the adaptive algorithm (default: 500)
+                - lmin: Minimum wavenumber (default 1e-6)
+                - lmax: Maximum wavenumber (default 100)
+                - pts_per_dec: points per decade (default: 40)
+
+              All are optional, you only have to maintain the order. To only
+              change `limit` to 1000 and use the defaults otherwise, you can
+              provide htarg=['', '', 1000].
 
     ft : {'sin', 'cos', 'qwe', 'fftlog'}, optional
         Only used if `signal` != None. Flag to choose either the Sine- or

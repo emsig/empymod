@@ -1,5 +1,10 @@
 # Changelog
 
+## latest
+
+* Add conventional quadrature-routine for the Hankel transform.
+
+
 ## v1.2.1 - *2017-03-11*
 
 * Change default filter from `key_401_2009` to `key_201_2009` (because of
