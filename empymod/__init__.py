@@ -529,4 +529,4 @@ References |_|
 # Import main modelling routines to make them available as primary functions
 from .model import bipole, dipole, frequency, time
 __all__ = ['bipole', 'dipole', 'frequency', 'time']
-__version__ = 'v1.2.1'
+__version__ = 'v1.2.dev'

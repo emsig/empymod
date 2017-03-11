@@ -53,9 +53,14 @@ Steps to carry out for a new release
 
         # Convert for all platforms
 
-        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.0-py34_0.tar.bz2
-        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.0-py35_0.tar.bz2
-        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.0-py36_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.1-py34_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.1-py35_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.1-py36_0.tar.bz2
+
+        # Upload them
+        anaconda upload osx-64/*
+        anaconda upload win-*/*
+        anaconda upload linux-32/*
 
         # Logout
         anaconda logout
