@@ -92,7 +92,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     """
     # Get fhtargs
     fhtfilt = fhtarg[0]
-    ndec = fhtarg[1]
+    pts_per_dec = fhtarg[1]
 
     # For FHT, spline for one offset is equals no spline
     if use_spline and off.size == 1:
@@ -101,7 +101,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # 1. COMPUTE REQUIRED LAMBDAS for given hankel-filter-base
     if use_spline:           # Use interpolation
         # Get lambda from offset and filter
-        lambd, ioff = get_spline_values(fhtfilt, off, ndec)
+        lambd, ioff = get_spline_values(fhtfilt, off, pts_per_dec)
 
     else:  # df.base/off
         lambd = fhtfilt.base/off[:, None]
@@ -111,7 +111,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
                                        etaV, zetaH, zetaV, lambd, ab, xdirect,
                                        msrc, mrec, use_ne_eval)
 
-    if use_spline and ndec:  # If spline in wavenumber domain, interpolate PJ's
+    if use_spline and pts_per_dec:  # If spline in wnr-domain, interpolate PJ's
         # Interpolate in wavenumber domain
         PJ0real = iuSpline(np.log(lambd), PJ0.real)
         PJ0imag = iuSpline(np.log(lambd), PJ0.imag)
@@ -319,8 +319,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # Call and return QWE, depending if spline or not
     if use_spline:  # If spline, we calculate all kernels here
         # New lambda, from min to max required lambda with pts_per_dec
-        start = np.log(lambd.min())
-        stop = np.log(lambd.max())
+        start = np.log10(lambd.min())
+        stop = np.log10(lambd.max())
         ilambd = np.logspace(start, stop, (stop-start)*pts_per_dec + 1)
 
         # Call the kernel
