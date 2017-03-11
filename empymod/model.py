@@ -638,7 +638,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
                 - filter: string of filter name in `empymod.filters` or
                           the filter method itself.
-                          (default: `empymod.filters.key_401_2009()`)
+                          (default: `empymod.filters.key_201_2009()`)
                 - pts_per_dec: points per decade (only relevant if spline=True)
                                If none, standard lagged convolution is used.
                                 (default: None)

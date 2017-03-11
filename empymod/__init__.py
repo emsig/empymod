@@ -82,7 +82,7 @@ default value:
        mpermH      [-] :  1 1 1 1 1
        mpermV      [-] :  1 1 1 1 1
        Hankel          :  Fast Hankel Transform
-         > Filter      :  Key 401 (2009)
+         > Filter      :  Key 201 (2009)
        Hankel Opt.     :  None
        Loop over       :  None (all vectorized)
        Source(s)       :  1 bipole(s)
