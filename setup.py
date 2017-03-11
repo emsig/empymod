@@ -6,13 +6,13 @@ with open('README.rst') as f:
 
 setup(
     name='empymod',
-    version='1.2.dev',
+    version='1.2.1',
     description='ElectroMagnetic Python forward MODeller (1D)',
     long_description=readme,
     author='Dieter Werthmüller',
     author_email='dieter@werthmuller.org',
     url='https://github.com/prisae/empymod',
-    download_url='https://github.com/prisae/empymod/tarball/v1.2.0',
+    download_url='https://github.com/prisae/empymod/tarball/v1.2.1',
     license='Apache License V2.0',
     packages=['empymod'],
     classifiers=[
