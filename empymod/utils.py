@@ -389,6 +389,8 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
     # Check frequency
     freq = _check_var(freq, float, 1, 'freq')
+    if verb > 2:
+        _prnt_min_max_val(freq, "   frequency  [Hz] : ", verb)
 
     # Minimum frequency to avoid division by zero at freq = 0 Hz.
     # => min_freq is defined at the start of this file

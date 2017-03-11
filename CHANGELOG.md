@@ -8,6 +8,8 @@
 
 * [06/02/2017] Now installable via pip/conda
 
+* Bug fixes
+
 ## v1.2.0 - *2017-02-02*
 
 * New routine:

@@ -196,7 +196,7 @@ def test_check_frequency(capsys):                          # 5. check_frequency
     output = utils.check_frequency(np.array([0, 1, 1e6]), np.array([20, .02]),
                                    np.array([1, 3]), np.array([10, 5]),
                                    np.array([20, 50]), np.array([1, 1]),
-                                   np.array([10, 5]), 3)
+                                   np.array([10, 5]), 2)
     out, _ = capsys.readouterr()
     assert out[:27] == "* WARNING :: Frequencies < "
     freq, etaH, etaV, zetaH, zetaV = output
