@@ -1,8 +1,6 @@
 empymod
 =======
 
-|docs| |tests| |coverage|
-
 Electromagnetic modeller in Python
 ----------------------------------
 
@@ -54,25 +52,15 @@ The manual of `empymod` can be found at `empymod.readthedocs.io
 <http://empymod.readthedocs.io/en/stable>`_.
 
 
-License
--------
+Citation
+--------
 
-Copyright 2016-2017 Dieter Werthmüller
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-See the *LICENSE*-file in the root directory for a full reprint of the Apache
-License.
+I am in the process of publishing an article regarding `empymod`, and I will
+put the info here once it is a reality. If you publish results for which you
+used `empymod`, please consider citing this article. Also consider citing the
+two articles given below, *Hunziker et al, 2015*, and *Key, 2012*, without
+which `empymod` would not exist. (All releases have additionally a Zenodo-DOI,
+provided on the `release-page <https://github.com/prisae/empymod/releases>`_.)
 
 
 Notice
@@ -105,24 +93,25 @@ modeller `emmod` from Hunziker et al, 2015, is furthermore released under the
 directory for more information and a reprint of the SEG disclaimer and the CPL.
 
 
-Citation
---------
+License
+-------
 
-I am in the process of publishing an article regarding `empymod`, and I will
-put the info here once it is a reality. If you publish results for which you
-used `empymod`, please consider citing this article. Also consider citing the
-two articles given above, *Hunziker et al, 2015*, and *Key, 2012*, without
-which `empymod` would not exist. (All releases have additionally a Zenodo-DOI,
-provided on the `release-page <https://github.com/prisae/empymod/releases>`_.)
+Copyright 2016-2017 Dieter Werthmüller
 
-.. |docs| image:: https://readthedocs.org/projects/empymod/badge/?version=latest
-    :target: https://empymod.readthedocs.io/en/latest/?badge=latest
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-.. |tests| image:: https://travis-ci.org/prisae/empymod.png?branch=master
-    :target: https://travis-ci.org/prisae/empymod/
+    http://www.apache.org/licenses/LICENSE-2.0
 
-.. |coverage| image:: https://coveralls.io/repos/github/prisae/empymod/badge.svg?branch=master
-    :target: https://coveralls.io/github/prisae/empymod?branch=master
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+See the *LICENSE*-file in the root directory for a full reprint of the Apache
+License.
 
 .. |github| image:: https://img.shields.io/github/release/prisae/empymod.svg
     :target: https://github.com/prisae/empymod/releases/latest

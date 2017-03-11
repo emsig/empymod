@@ -3,7 +3,7 @@ Steps to carry out for a new release
 
    1. Update:
       - `CHANGELOG`
-      - `setup.py`: Version number; check and update everything
+      - `setup.py`: Version number, download url; check and update everything
       - `docs/conf.py`: Version number
       - `empymod/__init__.py`: Version number
       - `README.rst`: remove the current batches (|docs| |tests| |coverage|)
@@ -12,9 +12,9 @@ Steps to carry out for a new release
 
         rm -rf build/ dist/ empymod.egg-info/
 
-   3. Create a Zenodo-DOI, add it to release notes
+   3. Push it to GitHub, create a release tagging it
 
-   4. Push it to GitHub, create a release tagging it
+   4. Create a Zenodo-DOI, add it to release notes
 
    5. Create tar and wheel
 
