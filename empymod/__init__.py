@@ -163,6 +163,12 @@ A list of things that should or could be added and improved:
     - Add a benchmark suite, e.g. http://asv.readthedocs.io, in addition to the
       testing suite.
 
+    - More transforms, for instance the regular FFT or QUAD for
+      frequency-to-time transformation.
+
+    - Add some clever checks, e.g. as in [Key_2012]_: abort loops if the field
+      is strongly attenuated.
+
 Testing
 -------
 

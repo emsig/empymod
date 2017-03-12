@@ -278,7 +278,7 @@ class TestBipole:                                                   # 1. bipole
         assert "Loop over       :  Frequencies" in out
         assert_allclose(non, lfr, equal_nan=True)
 
-    def test_empymod_fht_qwe(self, capsys):
+    def test_empymod_fht_qwe_quad(self, capsys):
         # Compare Hankel transforms
         inp = {'depth': [-20, 100], 'res': [1e20, 5, 100],
                'freqtime': [1.34, 23, 31], 'src': [0, 0, 0, 0, 90],
@@ -293,6 +293,12 @@ class TestBipole:                                                   # 1. bipole
         assert "Hankel          :  Quadrature-with-Extrapolation" in out
         assert_allclose(fht, qwe, equal_nan=True)
 
+        quad = bipole(ht='quad', htarg=['', '', '', '', 1, 1000], verb=3,
+                      **inp)
+        out, _ = capsys.readouterr()
+        assert "Hankel          :  Quadrature" in out
+        assert_allclose(fht, quad, equal_nan=True)
+
     def test_empymod_fft_qwe_fftlog(self, capsys):
         # Compare Fourier transforms
         inp = {'depth': [0, 300], 'res': [1e12, 1/3, 5],
@@ -303,7 +309,7 @@ class TestBipole:                                                   # 1. bipole
         out, _ = capsys.readouterr()
         assert "Fourier         :  FFTLog" in out
 
-        qwe = bipole(ft='qwe', verb=3, **inp)
+        qwe = bipole(ft='qwe', ftarg=['', '', '', '', 30], verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Fourier         :  Quadrature-with-Extrapolation" in out
         assert_allclose(qwe, ftl, 1e-2, equal_nan=True)

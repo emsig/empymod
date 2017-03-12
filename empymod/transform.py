@@ -593,12 +593,14 @@ def fqwe(fEM, time, freq, qweargs):
     SS = np.sin(Bx)*np.tile(g_w, maxint)
 
     # Interpolate in frequency domain
-    tEM_rint = iuSpline(np.log(2*np.pi*freq), fEM.real)
-    tEM_iint = iuSpline(np.log(2*np.pi*freq), fEM.imag)
+    tEM_rint = iuSpline(np.log10(2*np.pi*freq), fEM.real)
+    tEM_iint = iuSpline(np.log10(2*np.pi*freq), fEM.imag)
 
     # Check if we use QWE or SciPy's Quad
-    check = np.log(intervals[:, 1])
-    doqwe = np.abs(fEM[0])/np.abs(tEM_rint(check) + 1j*tEM_iint(check)) < 100
+    check0 = np.log10(intervals[:, 0])
+    check1 = np.log10(intervals[:, 1])
+    doqwe = (np.abs(tEM_rint(check0) + 1j*tEM_iint(check0))/
+             np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < 100)
 
     # Pre-allocate output array
     tEM = np.zeros(time.size)
@@ -607,7 +609,7 @@ def fqwe(fEM, time, freq, qweargs):
     if np.any(~doqwe):
         def sEMquad(w, t):
             """Return scaled, interpolated value of tEM_iint for `w`."""
-            return tEM_iint(np.log(w))*np.sin(w*t)
+            return tEM_iint(np.log10(w))*np.sin(w*t)
 
         # Loop over times that require Quad
         for i in np.where(~doqwe)[0]:
@@ -620,7 +622,7 @@ def fqwe(fEM, time, freq, qweargs):
 
     # Carry out QWE if required
     if np.any(doqwe):
-        sEM = tEM_iint(np.log(Bx/time[doqwe, None]))*SS
+        sEM = tEM_iint(np.log10(Bx/time[doqwe, None]))*SS
         tEM[doqwe], _, conv = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :])
 
     return -tEM, conv
