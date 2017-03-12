@@ -424,7 +424,7 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     """
 
     # Get quadargs
-    atol, rtol, limit, lmin, lmax, pts_per_dec = quadargs
+    rtol, atol, limit, lmin, lmax, pts_per_dec = quadargs
 
     # Get required lambdas
     llmin = np.log10(lmin)

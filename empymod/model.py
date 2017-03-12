@@ -202,7 +202,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - limit: An upper bound on the number of subintervals used in
                   the adaptive algorithm (default: 500)
                 - lmin: Minimum wavenumber (default 1e-6)
-                - lmax: Maximum wavenumber (default 100)
+                - lmax: Maximum wavenumber (default 0.1)
                 - pts_per_dec: points per decade (default: 40)
 
               All are optional, you only have to maintain the order. To only
@@ -681,7 +681,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - limit: An upper bound on the number of subintervals used in
                   the adaptive algorithm (default: 500)
                 - lmin: Minimum wavenumber (default 1e-6)
-                - lmax: Maximum wavenumber (default 100)
+                - lmax: Maximum wavenumber (default 0.1)
                 - pts_per_dec: points per decade (default: 40)
 
               All are optional, you only have to maintain the order. To only

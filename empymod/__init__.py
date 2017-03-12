@@ -266,8 +266,7 @@ There are two optimisation possibilities included via the ``opt``-flag:
 parallelisation (``opt='parallel'``) and spline interpolation
 (``opt='spline'``).  They are switched off by default. The optimization
 ``opt='parallel'`` only affects speed and memory usage, whereas
-``opt='spline'`` also affects precision! (*QUAD* is always using `spline`, and
-is therefore usually slower and less precise than *FHT* and *QWE*.)
+``opt='spline'`` also affects precision!
 
 I am sure `empymod` could be made much faster with cleverer coding style or
 with the likes of `cython` or `numba`. Suggestions and contributions are
@@ -387,9 +386,10 @@ can achieve higher precision, normally at the cost of speed.
     with the non-spline version if you can apply the spline-version to your
     problem at hand!
 
-Be aware that the `QWE`- and the `FHT`-Versions for the frequency-to-time
-transformation *always* use the splined version and *always* loop over
-offsets.
+Be aware that `QUAD` (Hankel transform) and the `QWE`- and the `FHT`-Versions
+for the frequency-to-time transformation as well as `FFTLog` *always* use the
+splined version and *always* loop over offsets.
+
 
 Looping
 '''''''

@@ -548,11 +548,11 @@ def check_hankel(ht, htarg, verb):
         except:
             lmin = np.array(1e-6, dtype=float)
 
-        # lmax : 100
+        # lmax : 0.1
         try:
             lmax = _check_var(htarg[4], float, 0, 'quad: lmax', ())
         except:
-            lmax = np.array(100, dtype=float)
+            lmax = np.array(0.1, dtype=float)
 
         # pts_per_dec : 40
         try:
@@ -561,7 +561,7 @@ def check_hankel(ht, htarg, verb):
             pts_per_dec = np.array(40, dtype=int)
 
         # Assemble htarg
-        htarg = (atol, rtol, limit, lmin, lmax, pts_per_dec)
+        htarg = (rtol, atol, limit, lmin, lmax, pts_per_dec)
 
         # If verbose, print Hankel transform information
         if verb > 2:

@@ -196,9 +196,10 @@ def test_check_frequency(capsys):                          # 5. check_frequency
     output = utils.check_frequency(np.array([0, 1, 1e6]), np.array([20, .02]),
                                    np.array([1, 3]), np.array([10, 5]),
                                    np.array([20, 50]), np.array([1, 1]),
-                                   np.array([10, 5]), 2)
+                                   np.array([10, 5]), 3)
     out, _ = capsys.readouterr()
-    assert out[:27] == "* WARNING :: Frequencies < "
+    assert "   frequency  [Hz] :  " in out
+    assert "* WARNING :: Frequencies < " in out
     freq, etaH, etaV, zetaH, zetaV = output
     assert_allclose(freq, rfreq)
     assert_allclose(etaH, retaH)
@@ -250,6 +251,22 @@ def test_check_hankel(capsys):                                # 6. check_hankel
     # all arguments
     _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30], 0)
     assert_allclose(htarg, [1e-3, 1e-4, 31, 20, 30])
+
+    # # QUAD # #
+    # verbose
+    ht, htarg = utils.check_hankel('quad', None, 4)
+    out, _ = capsys.readouterr()
+    outstr = "   Hankel          :  Quadrature\n     > rtol"
+    assert out[:44] == outstr
+    assert ht == 'hquad'
+    assert_allclose(htarg, [1e-12, 1e-20, 500, 1e-6, 0.1, 40])
+
+    # only last argument
+    _, htarg = utils.check_hankel('quad', ['', '', '', '', '', 100], 0)
+    assert_allclose(htarg, [1e-12, 1e-20, 500, 1e-6, 0.1, 100])
+    # all arguments
+    _, htarg = utils.check_hankel('quad', [1e-3, 1e-4, 100, 1e-10, 200, 50], 0)
+    assert_allclose(htarg, [1e-3, 1e-4, 100, 1e-10, 200, 50])
 
     # wrong ht
     with pytest.raises(ValueError):
