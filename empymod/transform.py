@@ -332,17 +332,52 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
         # Interpolation : Has to be done separately on each PJ,
         # in order to work with multiple offsets which have different angles.
-        si_PJ0r = iuSpline(np.log(ilambd), PJ0.real)
-        si_PJ0i = iuSpline(np.log(ilambd), PJ0.imag)
-        si_PJ1r = iuSpline(np.log(ilambd), PJ1.real)
-        si_PJ1i = iuSpline(np.log(ilambd), PJ1.imag)
-        si_PJ0br = iuSpline(np.log(ilambd), PJ0b.real)
-        si_PJ0bi = iuSpline(np.log(ilambd), PJ0b.imag)
+        si_PJ0r = iuSpline(np.log10(ilambd), PJ0.real)
+        si_PJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
+        si_PJ1r = iuSpline(np.log10(ilambd), PJ1.real)
+        si_PJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
+        si_PJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
+        si_PJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
+
+# vvvvvvvv Work in progress; include QUAD into QWE vvvvvvvv
+
+        # Check if we use QWE or SciPy's Quad
+#         check0 = np.log10(intervals[:, 0])
+#         check1 = np.log10(intervals[:, 1])
+#         doqwe = (np.abs(tEM_rint(check0) + 1j*tEM_iint(check0))/
+#                 np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < 100)
+#
+#         # Pre-allocate output array
+#         tEM = np.zeros(time.size)
+#
+#         # Carry out SciPy's Quad if required
+#         if np.any(~doqwe):
+#             def sEMquad(w, t):
+#                 """Return scaled, interpolated value of tEM_iint for `w`."""
+#                 return tEM_iint(np.log10(w))*np.sin(w*t)
+#
+#             # Loop over times that require Quad
+#             for i in np.where(~doqwe)[0]:
+#                 tEM[i], _ = integrate.quad(sEMquad, intervals[i, 0],
+#                                         intervals[i, -1], (time[i],),
+#                                         0, atol, rtol, limit=500)
+#
+#             # Required because of QWE
+#             conv = True
+#
+#         # Carry out QWE if required
+#         if np.any(doqwe):
+#             sEM = tEM_iint(np.log10(Bx/time[doqwe, None]))*SS
+#             tEM[doqwe], _, conv = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :])
+#
+#         return -tEM, conv
+
+# ^^^^^^^^ Work in progress; include QUAD into QWE ^^^^^^^^
 
         # Get EM-field at required offsets
-        sPJ0 = si_PJ0r(np.log(lambd))+1j*si_PJ0i(np.log(lambd))
-        sPJ1 = si_PJ1r(np.log(lambd))+1j*si_PJ1i(np.log(lambd))
-        sPJ0b = si_PJ0br(np.log(lambd))+1j*si_PJ0bi(np.log(lambd))
+        sPJ0 = si_PJ0r(np.log10(lambd)) + 1j*si_PJ0i(np.log10(lambd))
+        sPJ1 = si_PJ1r(np.log10(lambd)) + 1j*si_PJ1i(np.log10(lambd))
+        sPJ0b = si_PJ0br(np.log10(lambd)) + 1j*si_PJ0bi(np.log10(lambd))
 
         # Carry out and return the Hankel transform for this interval
         sEM = np.sum(np.reshape(sPJ1*BJ1, (off.size, nquad, -1), order='F'), 1)
@@ -356,10 +391,10 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
                                  order='F'), 1)
 
         getkernel = sEM
-        # Parameters not used if spline
-        lambd = None
-        off = None
-        factAng = None
+
+        # Get QWE
+        fEM, kcount, conv = qwe(rtol, atol, maxint, getkernel, intervals,
+                                None, None, None)
 
     else:  # If not spline, we define the wavenumber-kernel here
         def getkernel(i, inplambd, inpoff, inpfang):
@@ -377,18 +412,18 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
                                                use_ne_eval)
 
             # Carry out and return the Hankel transform for this interval
-            fEM = inpfang*np.dot(PJ1[0, :], BJ1[iB])
+            gEM = inpfang*np.dot(PJ1[0, :], BJ1[iB])
             if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
                 # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-                fEM /= np.atleast_1d(inpoff)
-            fEM += inpfang*np.dot(PJ0b[0, :], BJ0[iB])
-            fEM += np.dot(PJ0[0, :], BJ0[iB])
+                gEM /= np.atleast_1d(inpoff)
+            gEM += inpfang*np.dot(PJ0b[0, :], BJ0[iB])
+            gEM += np.dot(PJ0[0, :], BJ0[iB])
 
-            return fEM
+            return gEM
 
-    # Get QWE
-    fEM, kcount, conv = qwe(rtol, atol, maxint, getkernel, intervals, lambd,
-                            off, factAng)
+        # Get QWE
+        fEM, kcount, conv = qwe(rtol, atol, maxint, getkernel, intervals,
+                                lambd, off, factAng)
 
     return fEM, kcount, conv
 
