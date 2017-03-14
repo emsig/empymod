@@ -508,17 +508,25 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 # Add this source element, with weight from integration
                 sEM += rEM*srcg_w[isg]
 
-            # Get required indices
+            # Get required [s]tart- and [e]nd-[i]ndices, and [st]ep
             if nrec == nrecz:
                 if nsrc == nsrcz:  # Case 1: Looped over each src and each rec
-                    si, ei, st = isz*irec + irz, isz*irec + irz + 1, 1
+                    si = isz*nrec + irz
+                    ei = si + 1
+                    st = 1
                 else:              # Case 2: Looped over each rec
-                    si, ei, st = irz, nsrc*nrec, nrec
+                    si = irz
+                    ei = nsrc*nrec
+                    st = nrec
             else:
                 if nsrc == nsrcz:  # Case 3: Looped over each src
-                    si, ei, st = isz*irec, (isz+1)*irec, 1
+                    si = isz*nrec
+                    ei = si + nrec
+                    st = 1
                 else:              # Case 4: All in one go
-                    si, ei, st = 0, nsrc*nrec, 1
+                    si = 0
+                    ei = nsrc*nrec
+                    st = 1
 
             # Get required scaling from src-strength and src/rec-length
             src_rec_w = 1

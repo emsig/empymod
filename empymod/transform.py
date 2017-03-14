@@ -368,7 +368,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 #         # Carry out QWE if required
 #         if np.any(doqwe):
 #             sEM = tEM_iint(np.log10(Bx/time[doqwe, None]))*SS
-#             tEM[doqwe], _, conv = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :])
+#             tEM[doqwe], _, conv = qwe(rtol, atol, maxint, sEM,
+#                                       intervals[doqwe, :])
 #
 #         return -tEM, conv
 
@@ -634,7 +635,7 @@ def fqwe(fEM, time, freq, qweargs):
     # Check if we use QWE or SciPy's Quad
     check0 = np.log10(intervals[:, 0])
     check1 = np.log10(intervals[:, 1])
-    doqwe = (np.abs(tEM_rint(check0) + 1j*tEM_iint(check0))/
+    doqwe = (np.abs(tEM_rint(check0) + 1j*tEM_iint(check0)) /
              np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < 100)
 
     # Pre-allocate output array

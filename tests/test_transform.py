@@ -42,8 +42,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
     if htype != 'hquad':  # hquad is always using spline
         # Wavenumber solution plus transform
         wvnr0, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
-                             etaH, etaV, zetaH, zetaV, xdirect, htarg,
-                             use_spline, False, msrc, mrec)
+                              etaH, etaV, zetaH, zetaV, xdirect, htarg,
+                              use_spline, False, msrc, mrec)
         # Analytical frequency-domain solution
         freq0 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
                                  zetaV, ab, msrc, mrec)
@@ -57,8 +57,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
     use_spline, use_ne_eval, loop_freq, loop_off = options
     # Wavenumber solution plus transform
     wvnr1, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
-                         etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
-                         msrc, mrec)
+                          etaV, zetaH, zetaV, xdirect, htarg, use_spline,
+                          False, msrc, mrec)
     # Analytical frequency-domain solution
     freq1 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
@@ -74,8 +74,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
         ht, htarg = utils.check_hankel('qwe', ['', '', '', 200], 0)
     # Analytical frequency-domain solution
     wvnr2, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
-                         etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
-                         msrc, mrec)
+                          etaV, zetaH, zetaV, xdirect, htarg, use_spline,
+                          False, msrc, mrec)
     # Analytical frequency-domain solution
     freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)
@@ -91,8 +91,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
     if htype != 'hquad':  # hquad is always pts_per_dec
         # Analytical frequency-domain solution
         wvnr3, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
-                             etaH, etaV, zetaH, zetaV, xdirect, htarg,
-                             use_spline, False, msrc, mrec)
+                              etaH, etaV, zetaH, zetaV, xdirect, htarg,
+                              use_spline, False, msrc, mrec)
         # Analytical frequency-domain solution
         freq3 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
                                  zetaV, ab, msrc, mrec)
@@ -110,8 +110,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
         ht, htarg = utils.check_hankel('quad', None, 0)
     # Analytical frequency-domain solution
     wvnr4, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
-                         etaV, zetaH, zetaV, xdirect, htarg, use_spline, False,
-                         msrc, mrec)
+                          etaV, zetaH, zetaV, xdirect, htarg, use_spline,
+                          False, msrc, mrec)
     # Analytical frequency-domain solution
     freq4 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                              ab, msrc, mrec)

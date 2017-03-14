@@ -366,14 +366,20 @@ class TestBipole:                                                   # 1. bipole
         # 1.2 three dipoles at same depth at once => comp to 1.1
         dd = bipole(rec=[[7000, 8000, 9000], [500, 500, 500], 100, 0, 0],
                     **inp)
+        de = bipole(rec=[[7000, 8000, 9000], [500, 500, 500], 200, 0, 0],
+                    **inp)
+        df = bipole(rec=[[7000, 8000, 9000], [500, 500, 500], 300, 0, 0],
+                    **inp)
         assert_allclose(dd[:, 0], da)
+        assert_allclose(de[:, 1], db)
+        assert_allclose(df[:, 2], dc)
 
         # 1.3 three dipoles at different depths at once => comp to 1.1
-        de = bipole(rec=[[7000, 8000, 9000], [500, 500, 500], [100, 200, 300],
+        dg = bipole(rec=[[7000, 8000, 9000], [500, 500, 500], [100, 200, 300],
                     0, 0], **inp)
-        assert_allclose(de[:, 0], da)
-        assert_allclose(de[:, 1], db)
-        assert_allclose(de[:, 2], dc)
+        assert_allclose(dg[:, 0], da)
+        assert_allclose(dg[:, 1], db)
+        assert_allclose(dg[:, 2], dc)
 
         # 2.1 three different bipoles
         # => asdipole/!asdipole/one_bpdepth/!one_bpdepth
@@ -404,6 +410,39 @@ class TestBipole:                                                   # 1. bipole
         assert_allclose(be, bf, 1e-3)
         assert_allclose(bg, bh, 1e-3)
         assert_allclose(be, bg, 1e-2)  # As the dip is very small
+
+    def test_empymod_combinations2(self):
+        # Additional to test_empymod_combinations: different src- and rec-
+        # bipoles at the same time
+
+        inp = {'depth': [0.75, 500], 'res': [20, 5, 11],
+               'freqtime': [1.05, 3.76], 'verb': 0}
+
+        # Source bipoles and equivalent dipoles
+        srcbip = [[-1, -1], [1, 1], [0, -1], [0, 1], [100, 200], [100, 200]]
+        srcdip1 = [0, 0, 100, 0, 0]
+        srcdip2 = [0, 0, 200, 45, 0]
+
+        # Receiver bipoles and equivalent dipoles
+        recbip = [[7999, 7999], [8001, 8001], [0, 0], [0, 0],
+                  [200, 300], [200, 300]]
+        recdip1 = [8000, 0, 200, 0, 0]
+        recdip2 = [8000, 0, 300, 0, 0]
+
+        # 1. calculate all bipoles at once
+        bip = bipole(srcbip, recbip, **inp)
+
+        # 2. calculate each dipole separate
+        dip1 = bipole(srcdip1, recdip1, **inp)
+        dip2 = bipole(srcdip1, recdip2, **inp)
+        dip3 = bipole(srcdip2, recdip1, **inp)
+        dip4 = bipole(srcdip2, recdip2, **inp)
+
+        # 3. compare
+        assert_allclose(bip[:, 0, 0], dip1)
+        assert_allclose(bip[:, 1, 0], dip2)
+        assert_allclose(bip[:, 0, 1], dip3)
+        assert_allclose(bip[:, 1, 1], dip4)
 
 
 def test_dipole():                                                  # 2. dipole

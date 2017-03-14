@@ -276,8 +276,8 @@ def check_bipole(inp, name):
 
         # Check if inp is a dipole instead of a bipole
         # (This is a problem, as we would could not define the angles then.)
-        if not np.any([np.all(inp0[0] != inp1[0]), np.all(inp0[1] != inp1[1]),
-                      np.all(inp0[2] != inp1[2])]):
+        if not np.all((inp0[0] != inp1[0]) + (inp0[1] != inp1[1]) +
+                      (inp0[2] != inp1[2])):
             print("* ERROR   :: At least one of <" + name + "> is a point " +
                   "dipole, use the format [x, y, z, azimuth, dip] instead " +
                   "of [x0, x1, y0, y1, z0, z1].")
