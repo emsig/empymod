@@ -113,20 +113,20 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
     if use_spline and pts_per_dec:  # If spline in wnr-domain, interpolate PJ's
         # Interpolate in wavenumber domain
-        PJ0real = iuSpline(np.log(lambd), PJ0.real)
-        PJ0imag = iuSpline(np.log(lambd), PJ0.imag)
-        PJ1real = iuSpline(np.log(lambd), PJ1.real)
-        PJ1imag = iuSpline(np.log(lambd), PJ1.imag)
-        PJ0breal = iuSpline(np.log(lambd), PJ0b.real)
-        PJ0bimag = iuSpline(np.log(lambd), PJ0b.imag)
+        PJ0real = iuSpline(np.log10(lambd), PJ0.real)
+        PJ0imag = iuSpline(np.log10(lambd), PJ0.imag)
+        PJ1real = iuSpline(np.log10(lambd), PJ1.real)
+        PJ1imag = iuSpline(np.log10(lambd), PJ1.imag)
+        PJ0breal = iuSpline(np.log10(lambd), PJ0b.real)
+        PJ0bimag = iuSpline(np.log10(lambd), PJ0b.imag)
 
         # Overwrite lambd with non-spline lambd
         lambd = fhtfilt.base/off[:, None]
 
         # Get fEM-field at required non-spline lambdas
-        PJ0 = PJ0real(np.log(lambd)) + 1j*PJ0imag(np.log(lambd))
-        PJ1 = PJ1real(np.log(lambd)) + 1j*PJ1imag(np.log(lambd))
-        PJ0b = PJ0breal(np.log(lambd)) + 1j*PJ0bimag(np.log(lambd))
+        PJ0 = PJ0real(np.log10(lambd)) + 1j*PJ0imag(np.log10(lambd))
+        PJ1 = PJ1real(np.log10(lambd)) + 1j*PJ1imag(np.log10(lambd))
+        PJ0b = PJ0breal(np.log10(lambd)) + 1j*PJ0bimag(np.log10(lambd))
 
         # Set spline to false
         use_spline = False
@@ -161,9 +161,9 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         EM_int += np.dot(PJ0 + factAng[0]*PJ0b, fhtfilt.j0)
 
         # 2. Interpolation
-        real_EM = iuSpline(np.log(ioff[::-1]), EM_int.real[::-1])
-        imag_EM = iuSpline(np.log(ioff[::-1]), EM_int.imag[::-1])
-        fEM = real_EM(np.log(off)) + 1j*imag_EM(np.log(off))
+        real_EM = iuSpline(np.log10(ioff[::-1]), EM_int.real[::-1])
+        imag_EM = iuSpline(np.log10(ioff[::-1]), EM_int.imag[::-1])
+        fEM = real_EM(np.log10(off)) + 1j*imag_EM(np.log10(off))
 
     elif use_spline:  # SPLINE, VARYING ANGLES
         # If not all offsets are in one line from the source, hence do not have
@@ -182,14 +182,14 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
         # 2. Interpolation
         # Separately on EM_noang and EM_angle
-        real_noang = iuSpline(np.log(ioff[::-1]), EM_noang.real[::-1])
-        imag_noang = iuSpline(np.log(ioff[::-1]), EM_noang.imag[::-1])
-        real_angle = iuSpline(np.log(ioff[::-1]), EM_angle.real[::-1])
-        imag_angle = iuSpline(np.log(ioff[::-1]), EM_angle.imag[::-1])
+        real_noang = iuSpline(np.log10(ioff[::-1]), EM_noang.real[::-1])
+        imag_noang = iuSpline(np.log10(ioff[::-1]), EM_noang.imag[::-1])
+        real_angle = iuSpline(np.log10(ioff[::-1]), EM_angle.real[::-1])
+        imag_angle = iuSpline(np.log10(ioff[::-1]), EM_angle.imag[::-1])
 
         # Get fEM-field at required offsets
-        EM_noang = real_noang(np.log(off)) + 1j*imag_noang(np.log(off))
-        EM_angle = real_angle(np.log(off)) + 1j*imag_angle(np.log(off))
+        EM_noang = real_noang(np.log10(off)) + 1j*imag_noang(np.log10(off))
+        EM_angle = real_angle(np.log10(off)) + 1j*imag_angle(np.log10(off))
 
         # Angle dependency
         fEM = (factAng*EM_angle + EM_noang)
@@ -262,19 +262,17 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # Get rtol, atol, nquad, maxint, and pts_per_dec
     rtol, atol, nquad, maxint, pts_per_dec = qweargs
 
-    # ** 1. PRE-COMPUTE THE BESSEL FUNCTIONS
-    #    at fixed quadrature points for each interval and multiply by the
-    #    corresponding Gauss quadrature weights
+    # 1. PRE-COMPUTE THE BESSEL FUNCTIONS
+    # at fixed quadrature points for each interval and multiply by the
+    # corresponding Gauss quadrature weights
 
-    # ** 1.a COMPUTE GAUSS QUADRATURE WEIGHTS
+    # Get Gauss quadrature weights
     g_x, g_w = special.p_roots(nquad)
 
-    # ** 1.b COMPUTES N ZEROS OF THE BESSEL FUNCTION OF THE FIRST KIND
-    #    of order 1 using the Newton-Raphson method, which is fast enough for
-    #    our purposes.
-    #    Could be done with a loop for:
-    #        b_zero[i] = optimize.newton(special.j1, b_zero[i])
-    #    but it is slower.
+    # Compute n zeros of the Bessel function of the first kind of order 1 using
+    # the Newton-Raphson method, which is fast enough for our purposes.  Could
+    # be done with a loop for (but it is slower):
+    # b_zero[i] = optimize.newton(special.j1, b_zero[i])
 
     # Initial guess using asymptotic zeros
     b_zero = np.pi*np.arange(1.25, maxint+1)
@@ -296,7 +294,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         if all(np.abs(b_h) < 8*np.finfo(float).eps*b_zero):
             break
 
-    # ** 1.c COMPUTES THE QUADRATURE INTERVALS AND BESSEL FUNCTION WEIGHTS
+    # 2. COMPUTE THE QUADRATURE INTERVALS AND BESSEL FUNCTION WEIGHTS
 
     # Lower limit of integrand, a small but non-zero value
     xint = np.concatenate((np.array([1e-20]), b_zero))
@@ -307,7 +305,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     BJ0 = special.j0(Bx)*np.tile(g_w, maxint)
     BJ1 = special.j1(Bx)*np.tile(g_w, maxint)
 
-    # ** 2. START QWE
+    # 3. START QWE
 
     # Intervals and lambdas for all offset
     intervals = xint/off[:, None]
@@ -332,70 +330,67 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
         # Interpolation : Has to be done separately on each PJ,
         # in order to work with multiple offsets which have different angles.
-        si_PJ0r = iuSpline(np.log10(ilambd), PJ0.real)
-        si_PJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
-        si_PJ1r = iuSpline(np.log10(ilambd), PJ1.real)
-        si_PJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
-        si_PJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
-        si_PJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
-
-# vvvvvvvv Work in progress; include QUAD into QWE vvvvvvvv
+        sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
+        sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
+        sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
+        sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
+        sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
+        sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
 
         # Check if we use QWE or SciPy's Quad
-#         check0 = np.log10(intervals[:, 0])
-#         check1 = np.log10(intervals[:, 1])
-#         doqwe = (np.abs(tEM_rint(check0) + 1j*tEM_iint(check0))/
-#                 np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < 100)
-#
-#         # Pre-allocate output array
-#         tEM = np.zeros(time.size)
-#
-#         # Carry out SciPy's Quad if required
-#         if np.any(~doqwe):
-#             def sEMquad(w, t):
-#                 """Return scaled, interpolated value of tEM_iint for `w`."""
-#                 return tEM_iint(np.log10(w))*np.sin(w*t)
-#
-#             # Loop over times that require Quad
-#             for i in np.where(~doqwe)[0]:
-#                 tEM[i], _ = integrate.quad(sEMquad, intervals[i, 0],
-#                                         intervals[i, -1], (time[i],),
-#                                         0, atol, rtol, limit=500)
-#
-#             # Required because of QWE
-#             conv = True
-#
-#         # Carry out QWE if required
-#         if np.any(doqwe):
-#             sEM = tEM_iint(np.log10(Bx/time[doqwe, None]))*SS
-#             tEM[doqwe], _, conv = qwe(rtol, atol, maxint, sEM,
-#                                       intervals[doqwe, :])
-#
-#         return -tEM, conv
+        check0 = np.log10(intervals[:, 0])
+        check1 = np.log10(intervals[:, 1])
+        doqwe = (np.abs(sPJ0r(check0) + 1j*sPJ0i(check0) +
+                        sPJ1r(check0) + 1j*sPJ1i(check0) +
+                        sPJ0br(check0) + 1j*sPJ0bi(check0)) /
+                 np.abs(sPJ0r(check1) + 1j*sPJ0i(check1) +
+                        sPJ1r(check1) + 1j*sPJ1i(check1) +
+                        sPJ0br(check1) + 1j*sPJ0bi(check1)) < 100)
 
-# ^^^^^^^^ Work in progress; include QUAD into QWE ^^^^^^^^
+        # Pre-allocate output array
+        fEM = np.zeros(off.size, dtype=complex)
 
-        # Get EM-field at required offsets
-        sPJ0 = si_PJ0r(np.log10(lambd)) + 1j*si_PJ0i(np.log10(lambd))
-        sPJ1 = si_PJ1r(np.log10(lambd)) + 1j*si_PJ1i(np.log10(lambd))
-        sPJ0b = si_PJ0br(np.log10(lambd)) + 1j*si_PJ0bi(np.log10(lambd))
+        # Carry out SciPy's Quad if required
+        if np.any(~doqwe):
 
-        # Carry out and return the Hankel transform for this interval
-        sEM = np.sum(np.reshape(sPJ1*BJ1, (off.size, nquad, -1), order='F'), 1)
-        if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-            # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-            sEM /= np.atleast_1d(off[:, np.newaxis])
-        sEM += np.sum(np.reshape(sPJ0b*BJ0, (off.size, nquad, -1),
-                                 order='F'), 1)
-        sEM *= factAng[:, np.newaxis]
-        sEM += np.sum(np.reshape(sPJ0*BJ0, (off.size, nquad, -1),
-                                 order='F'), 1)
+            # Loop over offsets that require Quad
+            for i in np.where(~doqwe)[0]:
 
-        getkernel = sEM
+                # Input-dictionary for quad
+                iinp = {'a': intervals[i, 0], 'b': intervals[i, -1],
+                        'epsabs': atol, 'epsrel': rtol, 'limit': 500}
 
-        # Get QWE
-        fEM, kcount, conv = qwe(rtol, atol, maxint, getkernel, intervals,
-                                None, None, None)
+                fEM[i] = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab,
+                              off[i], factAng[i], iinp)
+
+            # Return conv=True, kcount=1 in case no QWE is calculated
+            conv = True
+            kcount = 1
+
+        if np.any(doqwe):
+            # Get EM-field at required offsets
+            sPJ0 = sPJ0r(np.log10(lambd)) + 1j*sPJ0i(np.log10(lambd))
+            sPJ1 = sPJ1r(np.log10(lambd)) + 1j*sPJ1i(np.log10(lambd))
+            sPJ0b = sPJ0br(np.log10(lambd)) + 1j*sPJ0bi(np.log10(lambd))
+
+            # Carry out and return the Hankel transform for this interval
+            sEM = np.sum(np.reshape(sPJ1*BJ1, (off.size, nquad, -1),
+                         order='F'), 1)
+            if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+                # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+                sEM /= np.atleast_1d(off[:, np.newaxis])
+            sEM += np.sum(np.reshape(sPJ0b*BJ0, (off.size, nquad, -1),
+                                     order='F'), 1)
+            sEM *= factAng[:, np.newaxis]
+            sEM += np.sum(np.reshape(sPJ0*BJ0, (off.size, nquad, -1),
+                                     order='F'), 1)
+
+            getkernel = sEM[doqwe, :]
+
+            # Get QWE
+            fEM[doqwe], kcount, conv = qwe(rtol, atol, maxint, getkernel,
+                                           intervals[doqwe, :], None, None,
+                                           None)
 
     else:  # If not spline, we define the wavenumber-kernel here
         def getkernel(i, inplambd, inpoff, inpfang):
@@ -475,28 +470,14 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
     # Interpolation in wavenumber domain: Has to be done separately on each PJ,
     # in order to work with multiple offsets which have different angles.
-    sPJ0r = iuSpline(np.log(ilambd), PJ0.real)
-    sPJ0i = iuSpline(np.log(ilambd), PJ0.imag)
+    sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
+    sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
 
-    sPJ1r = iuSpline(np.log(ilambd), PJ1.real)
-    sPJ1i = iuSpline(np.log(ilambd), PJ1.imag)
+    sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
+    sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
 
-    sPJ0br = iuSpline(np.log(ilambd), PJ0b.real)
-    sPJ0bi = iuSpline(np.log(ilambd), PJ0b.imag)
-
-    # Define the quadrature kernels
-    def quad0(klambd, sPJ, sPJb, koff, kang):
-        """Quadrature for J0."""
-        tP0 = sPJ(np.log(klambd)) + kang*sPJb(np.log(klambd))
-        return tP0*special.j0(koff*klambd)
-
-    def quad1(klambd, sPJ, ab, koff, kang):
-        """Quadrature for J1."""
-        tP1 = kang*sPJ(np.log(klambd))
-        if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-            # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-            tP1 /= koff
-        return tP1*special.j1(koff*klambd)
+    sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
+    sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
 
     # Get the angle factor
     factAng = kernel.angle_factor(angle, ab, msrc, mrec)
@@ -507,23 +488,11 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # Input-dictionary for quad
     iinp = {'a': lmin, 'b': lmax, 'epsabs': atol, 'epsrel': rtol,
             'limit': limit}
+
     # Loop over offsets
     for i in range(off.size):
-
-        # Carry out quadrature of J0
-        iargs = (sPJ0r, sPJ0br, off[i], factAng[i])
-        fr0 = integrate.quad(quad0, args=iargs, **iinp)
-        iargs = (sPJ0i, sPJ0bi, off[i], factAng[i])
-        fi0 = integrate.quad(quad0, args=iargs, **iinp)
-
-        # Carry out quadrature of J1
-        iargs = (sPJ1r, ab, off[i], factAng[i])
-        fr1 = integrate.quad(quad1, args=iargs, **iinp)
-        iargs = (sPJ1i, ab, off[i], factAng[i])
-        fi1 = integrate.quad(quad1, args=iargs, **iinp)
-
-        # Collect the results
-        fEM[i] = fr0[0] + fr1[0] + 1j*(fi0[0] + fi1[0])
+        fEM[i] = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off[i],
+                      factAng[i], iinp)
 
     # Return the electromagnetic field
     # Second argument (1) is the kernel count, last argument is only for QWE.
@@ -565,8 +534,8 @@ def fft(fEM, time, freq, ftarg):
 
     if pts_per_dec:  # Use pts_per_dec frequencies per decade
         # 1. Interpolate in frequency domain
-        sfEM = iuSpline(np.log(2*np.pi*freq), fEM)
-        ifEM = sfEM(np.log(fftfilt.base/time[:, None]))
+        sfEM = iuSpline(np.log10(2*np.pi*freq), fEM)
+        ifEM = sfEM(np.log10(fftfilt.base/time[:, None]))
 
         # 2. Filter
         tEM = np.dot(ifEM, getattr(fftfilt, ftkind))
@@ -585,8 +554,8 @@ def fft(fEM, time, freq, ftarg):
         stEM = np.dot(fEM, getattr(fftfilt, ftkind))
 
         # 2. Interpolate in time domain
-        itEM = iuSpline(np.log((itime)[::-1]), stEM[::-1])
-        tEM = itEM(np.log(time))
+        itEM = iuSpline(np.log10((itime)[::-1]), stEM[::-1])
+        tEM = itEM(np.log10(time))
 
     # Return the electromagnetic time domain field
     # (Second argument is only for QWE)
@@ -624,6 +593,9 @@ def fqwe(fEM, time, freq, qweargs):
 
     # Get Gauss Quadrature Weights
     g_x, g_w = special.p_roots(nquad)
+
+    # Pre-compute the Bessel functions at fixed quadrature points, multiplied
+    # by the corresponding Gauss quadrature weight.
     dx = np.repeat(np.diff(xint)/2, nquad)
     Bx = dx*(np.tile(g_x, maxint) + 1) + np.repeat(xint[:-1], nquad)
     SS = np.sin(Bx)*np.tile(g_w, maxint)
@@ -633,6 +605,8 @@ def fqwe(fEM, time, freq, qweargs):
     tEM_iint = iuSpline(np.log10(2*np.pi*freq), fEM.imag)
 
     # Check if we use QWE or SciPy's Quad
+    # If we are starting at the steep decay of high frequencies we have to use
+    # QUAD, as QWE is not designed for steep intervals.
     check0 = np.log10(intervals[:, 0])
     check1 = np.log10(intervals[:, 1])
     doqwe = (np.abs(tEM_rint(check0) + 1j*tEM_iint(check0)) /
@@ -647,16 +621,17 @@ def fqwe(fEM, time, freq, qweargs):
             """Return scaled, interpolated value of tEM_iint for `w`."""
             return tEM_iint(np.log10(w))*np.sin(w*t)
 
-        # Loop over times that require Quad
+        # Loop over times that require QUAD
         for i in np.where(~doqwe)[0]:
-            tEM[i], _ = integrate.quad(sEMquad, intervals[i, 0],
-                                       intervals[i, -1], (time[i],),
-                                       0, atol, rtol, limit=500)
+            # We ignore here any feedback from QUAD. This could be improved.
+            out = integrate.quad(sEMquad, intervals[i, 0], intervals[i, -1],
+                                 (time[i],), 0, atol, rtol, limit=500)
+            tEM[i] = out[0]
 
-        # Required because of QWE
+        # Return conv=True in case no QWE is calculated
         conv = True
 
-    # Carry out QWE if required
+    # Carry out QWE for 'well-behaved' intervals
     if np.any(doqwe):
         sEM = tEM_iint(np.log10(Bx/time[doqwe, None]))*SS
         tEM[doqwe], _, conv = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :])
@@ -818,29 +793,25 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         """Return weights for this interval."""
         return (np.atleast_2d(inpint)[:,  i+1] - np.atleast_2d(inpint)[:, i])/2
 
-    # 2.a Calculate the first interval for all offsets
+    # 1. Calculate the first interval for all offsets
     if hasattr(inp, '__call__'):  # Hankel and not spline
         EM0 = inp(0, lambd, off, factAng)
     else:                         # Fourier or Hankel with spline
         EM0 = inp[:, 0]
     EM0 *= getweights(0, intervals)
 
-    # Initialize kernel count (only important for Hankel)
-    kcount = 1
+    # 2. Pre-allocate arrays and initialize
+    EM = np.zeros(EM0.size, dtype=EM0.dtype)                # EM array
+    om = np.ones(EM0.size, dtype=bool)                      # Convergence array
+    S = np.zeros((EM0.size, maxint), dtype=EM0.dtype)  # Working arr. 4 recurs.
+    relErr = np.zeros((EM0.size, maxint))                   # Relative error
+    extrap = np.zeros((EM0.size, maxint), dtype=EM0.dtype)  # extrap. result
+    kcount = 1  # Initialize kernel count (only important for Hankel)
 
-    # 2.b pre-allocate arrays
-    EM = np.zeros(EM0.size, dtype=EM0.dtype)
-    om = np.ones(EM0.size, dtype=bool)
-    S = np.zeros((EM0.size, maxint), dtype=EM0.dtype)
-    relErr = np.zeros((EM0.size, maxint))
-    extrap = np.zeros((EM0.size, maxint), dtype=EM0.dtype)
-
-    # 2.c the extrapolation transformation loop
-    old_settings = np.seterr(all='ignore')
-    for i in range(1, maxint):
-        im = np.mod(i, 2)
-
-        # 2.c.1. calculate the field for this interval
+    # 3. The extrapolation transformation loop
+    old_settings = np.seterr(all='ignore')  # QWE throws a lot of errors; we
+    for i in range(1, maxint):              # ignore them, could be improved.
+        # 3.a Calculate the field for this interval
         if hasattr(inp, '__call__'):  # Hankel and not spline
             EMi = inp(i, lambd[om, :], off[om], factAng[om])
             kcount += 1  # Update count
@@ -848,11 +819,11 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
             EMi = inp[om, i]
         EMi *= getweights(i, intervals[om, :])
 
-        # 2.c.2. compute shanks transformation
-        # using the epsilon algorithm; structured after [weniger_1989]_, p26.
+        # 3.b Compute Shanks transformation
+        # Using the epsilon algorithm: structured after [Weniger_1989]_, p26.
         S[:, i][om] = S[:, i-1][om] + EMi  # working array for transformation
 
-        # recursive loop
+        # Recursive loop
         aux2 = np.zeros(om.sum(), dtype=EM0.dtype)
         for k in range(i, 0, -1):
             aux1, aux2 = aux2, S[om, k-1]
@@ -860,10 +831,10 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
             S[om, k-1] = np.where(np.abs(ddff) < np.finfo(np.double).tiny,
                                   np.finfo(np.double).max, aux1 + 1/ddff)
 
-        # the extrapolated result plus the first interval term
-        extrap[om, i-1] = S[om, im] + EM0[om]
+        # The extrapolated result plus the first interval term
+        extrap[om, i-1] = S[om, np.mod(i, 2)] + EM0[om]
 
-        # 2.c.3. analyze for convergence
+        # 3.c Analyze for convergence
         if i > 1:
             # Calculate relative and absolute error
             rErr = (extrap[om, i-1] - extrap[om, i-2])/extrap[om, i-1]
@@ -879,17 +850,65 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         if (~om).all():
             break
 
+    # 4. Cleaning up
+
     # Warning if maxint is potentially too small
     conv = i+1 != maxint
 
     # Catch the ones that did not converge
     EM[om] = extrap[om, i-1]
+
+    # Reset error-settings
     np.seterr(**old_settings)
 
     # Set np.finfo(np.double).max to 0
     EM.real[EM.real == np.finfo(np.double).max] = 0
 
     return EM, kcount, conv
+
+
+def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
+    """Quadrature for Hankel transform.
+
+    This is the kernel of the QUAD method, used for the Hankel transforms
+    `hquad` and `hqwe` (where the integral is not suited for QWE).
+
+    """
+
+    # QUAD throws a lot of errors; we ignore them, could be improved.
+    old_settings = np.seterr(all='ignore')
+
+    # Define the quadrature kernels
+    def quad0(klambd, sPJ, sPJb, koff, kang):
+        """Quadrature for J0."""
+        tP0 = sPJ(np.log10(klambd)) + kang*sPJb(np.log10(klambd))
+        return tP0*special.j0(koff*klambd)
+
+    def quad1(klambd, sPJ, ab, koff, kang):
+        """Quadrature for J1."""
+        tP1 = kang*sPJ(np.log10(klambd))
+        if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+            # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+            tP1 /= koff
+        return tP1*special.j1(koff*klambd)
+
+    # Carry out quadrature of J0
+    iargs = (sPJ0r, sPJ0br, off, factAng)
+    fr0 = integrate.quad(quad0, args=iargs, **iinp)
+    iargs = (sPJ0i, sPJ0bi, off, factAng)
+    fi0 = integrate.quad(quad0, args=iargs, **iinp)
+
+    # Carry out quadrature of J1
+    iargs = (sPJ1r, ab, off, factAng)
+    fr1 = integrate.quad(quad1, args=iargs, **iinp)
+    iargs = (sPJ1i, ab, off, factAng)
+    fi1 = integrate.quad(quad1, args=iargs, **iinp)
+
+    # Reset error-settings
+    np.seterr(**old_settings)
+
+    # Collect the results
+    return fr0[0] + fr1[0] + 1j*(fi0[0] + fi1[0])
 
 
 def get_spline_values(filt, inp, nr_per_dec=None):

@@ -894,6 +894,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
         epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=True,
         ht='fht', htarg=None, opt=None, loop='off', verb=2):
+        # freqtime, ft, ftarg
     """Return the Ground-Penetrating Radar signal.
 
     THIS FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION.
@@ -942,6 +943,8 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
     # Frequency range from centre frequency
     fc *= 10**6
     freq = np.linspace(1, 2048, 2048)*10**6
+    # signal = 0
+    # time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
@@ -1002,15 +1005,24 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
     gprEM = nfreq*np.fft.fftshift(ifftEM*dfreq, 0)
     dt = 1/(nfreq*dfreq)
 
+    # # Do f->t transform if required
+    # if signal is not None:
+    #     gprEM, conv = tem(fEM, off, freq, time, signal, ft, ftarg)
+    #
+    #     # In case of QWE, print Warning if not converged
+    #     conv_warning(conv, ftarg, 'Fourier', verb)
+
     # 4. Apply gain
-    t = np.linspace(-nfreq/2, nfreq/2-1, nfreq)*dt
+    t = np.linspace(-nfreq/2, nfreq/2-1, nfreq)*dt  # remove!
     if gain:
         gprEM *= (1 + np.abs((t*10**9)**gain))[:, None]
+    #     gprEM *= (1 + np.abs((time*10**9)**gain))[:, None]
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
 
     return t[2048:], gprEM[2048:, :].real
+    # return gprEM.real
 
 
 def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
