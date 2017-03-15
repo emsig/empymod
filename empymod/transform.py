@@ -237,6 +237,10 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     This function is based on `get_CSEM1D_FD_QWE.m`, `qwe.m`, and
     `getBesselWeights.m` from the source code distributed with [Key_2012]_.
 
+    In the spline-version, `hqwe` checks how steep the decay of the
+    wavenumber-domain result is, and calls QUAD for the very steep interval,
+    for which QWE is not suited.
+
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
     parameters.
@@ -259,8 +263,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     zetaH = zetaH[0, :]
     zetaV = zetaV[0, :]
 
-    # Get rtol, atol, nquad, maxint, and pts_per_dec
-    rtol, atol, nquad, maxint, pts_per_dec = qweargs
+    # Get rtol, atol, nquad, maxint, pts_per_dec, and diff_quad
+    rtol, atol, nquad, maxint, pts_per_dec, diff_quad = qweargs
 
     # 1. PRE-COMPUTE THE BESSEL FUNCTIONS
     # at fixed quadrature points for each interval and multiply by the
@@ -345,7 +349,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
                         sPJ0br(check0) + 1j*sPJ0bi(check0)) /
                  np.abs(sPJ0r(check1) + 1j*sPJ0i(check1) +
                         sPJ1r(check1) + 1j*sPJ1i(check1) +
-                        sPJ0br(check1) + 1j*sPJ0bi(check1)) < 100)
+                        sPJ0br(check1) + 1j*sPJ0bi(check1)) < diff_quad)
 
         # Pre-allocate output array
         fEM = np.zeros(off.size, dtype=complex)
@@ -358,7 +362,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
                 # Input-dictionary for quad
                 iinp = {'a': intervals[i, 0], 'b': intervals[i, -1],
-                        'epsabs': atol, 'epsrel': rtol, 'limit': 500}
+                        'epsabs': atol, 'epsrel': rtol, 'limit': maxint}
 
                 fEM[i] = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab,
                               off[i], factAng[i], iinp)
@@ -575,6 +579,9 @@ def fqwe(fEM, time, freq, qweargs):
     This function is based on `get_CSEM1D_TD_QWE.m` from the source code
     distributed with [Key_2012]_.
 
+    `fqwe` checks how steep the decay of the frequency-domain result is, and
+    calls QUAD for the very steep interval, for which QWE is not suited.
+
     Returns
     -------
     tEM : array
@@ -584,8 +591,8 @@ def fqwe(fEM, time, freq, qweargs):
         If true, QWE converged. If not, maxint might have to be set higher.
 
     """
-    # Get rtol, atol, nquad, and maxint
-    rtol, atol, nquad, maxint, _ = qweargs
+    # Get rtol, atol, nquad, maxint, and diff_quad
+    rtol, atol, nquad, maxint, _, diff_quad = qweargs
 
     # Calculate quadrature intervals for all offset
     xint = np.concatenate((np.array([1e-20]), np.arange(1, maxint+1)*np.pi))
@@ -610,7 +617,7 @@ def fqwe(fEM, time, freq, qweargs):
     check0 = np.log10(intervals[:, 0])
     check1 = np.log10(intervals[:, 1])
     doqwe = (np.abs(tEM_rint(check0) + 1j*tEM_iint(check0)) /
-             np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < 100)
+             np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < diff_quad)
 
     # Pre-allocate output array
     tEM = np.zeros(time.size)
@@ -625,7 +632,7 @@ def fqwe(fEM, time, freq, qweargs):
         for i in np.where(~doqwe)[0]:
             # We ignore here any feedback from QUAD. This could be improved.
             out = integrate.quad(sEMquad, intervals[i, 0], intervals[i, -1],
-                                 (time[i],), 0, atol, rtol, limit=500)
+                                 (time[i],), 1, atol, rtol, limit=maxint)
             tEM[i] = out[0]
 
         # Return conv=True in case no QWE is calculated
@@ -873,10 +880,9 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
     This is the kernel of the QUAD method, used for the Hankel transforms
     `hquad` and `hqwe` (where the integral is not suited for QWE).
 
-    """
+    At the moment we ignore any feedback from QUAD. This could be improved.
 
-    # QUAD throws a lot of errors; we ignore them, could be improved.
-    old_settings = np.seterr(all='ignore')
+    """
 
     # Define the quadrature kernels
     def quad0(klambd, sPJ, sPJb, koff, kang):
@@ -894,18 +900,15 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
 
     # Carry out quadrature of J0
     iargs = (sPJ0r, sPJ0br, off, factAng)
-    fr0 = integrate.quad(quad0, args=iargs, **iinp)
+    fr0 = integrate.quad(quad0, args=iargs, full_output=1, **iinp)
     iargs = (sPJ0i, sPJ0bi, off, factAng)
-    fi0 = integrate.quad(quad0, args=iargs, **iinp)
+    fi0 = integrate.quad(quad0, args=iargs, full_output=1, **iinp)
 
     # Carry out quadrature of J1
     iargs = (sPJ1r, ab, off, factAng)
-    fr1 = integrate.quad(quad1, args=iargs, **iinp)
+    fr1 = integrate.quad(quad1, args=iargs, full_output=1, **iinp)
     iargs = (sPJ1i, ab, off, factAng)
-    fi1 = integrate.quad(quad1, args=iargs, **iinp)
-
-    # Reset error-settings
-    np.seterr(**old_settings)
+    fi1 = integrate.quad(quad1, args=iargs, full_output=1, **iinp)
 
     # Collect the results
     return fr0[0] + fr1[0] + 1j*(fi0[0] + fi1[0])

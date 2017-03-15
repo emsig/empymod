@@ -243,14 +243,14 @@ def test_check_hankel(capsys):                                # 6. check_hankel
     outstr = "   Hankel          :  Quadrature-with-Extrapolation\n     > rtol"
     assert out[:63] == outstr
     assert ht == 'hqwe'
-    assert_allclose(htarg, [1e-12, 1e-30, 51, 100, 80])
+    assert_allclose(htarg, [1e-12, 1e-30, 51, 100, 80, 100])
 
     # only last argument
-    _, htarg = utils.check_hankel('qwe', ['', '', '', '', 30], 0)
-    assert_allclose(htarg, [1e-12, 1e-30, 51, 100, 30])
+    _, htarg = utils.check_hankel('qwe', ['', '', '', '', '', 30], 0)
+    assert_allclose(htarg, [1e-12, 1e-30, 51, 100, 80, 30])
     # all arguments
-    _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30], 0)
-    assert_allclose(htarg, [1e-3, 1e-4, 31, 20, 30])
+    _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30, 200], 0)
+    assert_allclose(htarg, [1e-3, 1e-4, 31, 20, 30, 200])
 
     # # QUAD # #
     # verbose
@@ -452,7 +452,7 @@ def test_check_time(capsys):                                    # 9. check_time
     outstr = "   Fourier         :  Quadrature-with-Extrapolation\n     > rtol"
     assert out[24:87] == outstr
     assert ft == 'fqwe'
-    assert_allclose(htarg, [1e-8, 1e-20, 21, 200, 20])
+    assert_allclose(htarg, [1e-8, 1e-20, 21, 200, 20, 100])
     f1 = np.array([3.16227766e-03, 3.54813389e-03, 3.98107171e-03,
                    4.46683592e-03, 5.01187234e-03, 5.62341325e-03,
                    6.30957344e-03, 7.07945784e-03, 7.94328235e-03])
@@ -464,13 +464,14 @@ def test_check_time(capsys):                                    # 9. check_time
     assert_allclose(f.size, 99)
 
     # only last argument
-    _, _, _, ftarg = utils.check_time(time, 1, 'fqwe', ['', '', '', '', 30], 0)
-    assert_allclose(ftarg, [1e-8, 1e-20, 21, 200, 30])
+    _, _, _, ftarg = utils.check_time(time, 1, 'fqwe',
+                                      ['', '', '', '', '', 30], 0)
+    assert_allclose(ftarg, [1e-8, 1e-20, 21, 200, 20, 30])
 
     # all arguments
     _, _, _, ftarg = utils.check_time(time, -1, 'qwe',
-                                      [1e-3, 1e-4, 31, 20, 30], 0)
-    assert_allclose(ftarg, [1e-3, 1e-4, 31, 20, 30])
+                                      [1e-3, 1e-4, 31, 20, 30, 200], 0)
+    assert_allclose(ftarg, [1e-3, 1e-4, 31, 20, 30, 200])
 
     # # FFTLog # #
     # verbose

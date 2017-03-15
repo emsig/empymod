@@ -189,6 +189,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                   (default: 40)
                 - pts_per_dec: points per decade (only relevant if
                   opt='spline') (default: 80)
+                - diff_quad: criteria when to swap to QUAD (only relevant if
+                  opt='spline') (default: 100)
 
               All are optional, you only have to maintain the order. To only
               change `nquad` to 11 and use the defaults otherwise, you can
@@ -235,6 +237,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                   (default: 200)
                 - pts_per_dec: points per decade (only relevant if spline=True)
                   (default: 20)
+                - diff_quad: criteria when to swap to QUAD (default: 100)
 
               All are optional, you only have to maintain the order. To only
               change `nquad` to 11 and use the defaults otherwise, you can
@@ -676,6 +679,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                   (default: 40)
                 - pts_per_dec: points per decade (only relevant if
                   opt='spline') (default: 80)
+                - diff_quad: criteria when to swap to QUAD (only relevant if
+                  opt='spline') (default: 100)
 
               All are optional, you only have to maintain the order. To only
               change `nquad` to 11 and use the defaults otherwise, you can
@@ -722,6 +727,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                   (default: 200)
                 - pts_per_dec: points per decade (only relevant if spline=True)
                   (default: 20)
+                - diff_quad: criteria when to swap to QUAD (default: 100)
 
               All are optional, you only have to maintain the order. To only
               change `nquad` to 11 and use the defaults otherwise, you can
@@ -894,10 +900,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
         epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=True,
         ht='fht', htarg=None, opt=None, loop='off', verb=2):
-        # freqtime, ft, ftarg
     """Return the Ground-Penetrating Radar signal.
 
-    THIS FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION.
+    THIS FUNCTION IS EXPERIMENTAL, USE WITH CAUTION.
 
     Or in other words it is merely an example how one could calculate the
     GPR-response.  However, the currently included *FHT* and *QWE* struggle for
@@ -933,7 +938,8 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
         GPR response
 
     """
-    print('* WARNING :: GPR FUNCTION IS IN DEVELOPMENT, USE WITH CAUTION')
+    if verb > 0:
+        print('* WARNING :: GPR FUNCTION IS EXPERIMENTAL, USE WITH CAUTION.')
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -943,8 +949,6 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
     # Frequency range from centre frequency
     fc *= 10**6
     freq = np.linspace(1, 2048, 2048)*10**6
-    # signal = 0
-    # time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
@@ -1005,24 +1009,15 @@ def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
     gprEM = nfreq*np.fft.fftshift(ifftEM*dfreq, 0)
     dt = 1/(nfreq*dfreq)
 
-    # # Do f->t transform if required
-    # if signal is not None:
-    #     gprEM, conv = tem(fEM, off, freq, time, signal, ft, ftarg)
-    #
-    #     # In case of QWE, print Warning if not converged
-    #     conv_warning(conv, ftarg, 'Fourier', verb)
-
     # 4. Apply gain
-    t = np.linspace(-nfreq/2, nfreq/2-1, nfreq)*dt  # remove!
+    t = np.linspace(-nfreq/2, nfreq/2-1, nfreq)*dt
     if gain:
         gprEM *= (1 + np.abs((t*10**9)**gain))[:, None]
-    #     gprEM *= (1 + np.abs((time*10**9)**gain))[:, None]
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
 
     return t[2048:], gprEM[2048:, :].real
-    # return gprEM.real
 
 
 def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,

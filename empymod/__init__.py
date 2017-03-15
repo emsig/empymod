@@ -376,7 +376,7 @@ for many offsets/frequencies (thousands).  Additionally, spline minimizes
 memory requirements a lot.  Speed-up is greater if all source-receiver angles
 are identical.
 
-`FHT`: Default for ``pts_per_dec = None``, which is the original *lagged
+*FHT*: Default for ``pts_per_dec = None``, which is the original *lagged
 convolution*, where the spacing is defined by the filter-base, the transform is
 carried out first followed by spline-interpolation. You can set this parameter
 to an integer, which defines the number of points to evaluate per decade. In
@@ -392,9 +392,15 @@ can achieve higher precision, normally at the cost of speed.
     with the non-spline version if you can apply the spline-version to your
     problem at hand!
 
-Be aware that `QUAD` (Hankel transform) and the `QWE`- and the `FHT`-Versions
-for the frequency-to-time transformation as well as `FFTLog` *always* use the
+Be aware that *QUAD* (Hankel transform) and the *QWE*- and the *FHT*-Versions
+for the frequency-to-time transformation as well as *FFTLog* *always* use the
 splined version and *always* loop over offsets.
+
+The splined versions of *QWE* check whether the ratio first interval /
+second interval is above a certain threshold (steep end of the wavenumber or
+frequency spectrum). If it is, it carries out *QUAD* for this interval instead
+of *QWE*. The threshold is stored in `diff_quad`, which is the last input
+parameter in `htarg` and `ftarg`.
 
 
 Looping

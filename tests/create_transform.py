@@ -119,7 +119,7 @@ etaH = etaH[0, :]
 etaV = etaV[0, :]
 zetaH = zetaH[0, :]
 zetaV = zetaV[0, :]
-rtol, atol, nquad, maxint, pts_per_dec = htarg
+rtol, atol, nquad, maxint, pts_per_dec, diff_quad = htarg
 g_x, g_w = special.p_roots(nquad)
 b_zero = np.pi*np.arange(1.25, maxint+1)
 for i in range(10):
@@ -172,7 +172,7 @@ nsinp = {'zsrc': zsrc, 'zrec': zrec, 'lsrc': lsrc, 'lrec': lrec, 'depth':
 hqwe = {'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
         'intervals': intervals, 'lambd': lambd, 'off': off, 'factAng': factAng,
         'nsinp': nsinp, 'nquad': nquad, 'BJ0': BJ0, 'BJ1': BJ1, 'ab': ab,
-        'freqres': np.squeeze(freqres)}
+        'freqres': np.squeeze(freqres), 'diff_quad': diff_quad}
 
 # # G -- Store data # #
 np.savez_compressed('data_transform.npz',

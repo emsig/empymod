@@ -70,8 +70,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
     rec = [np.arange(1, 11)*500, np.arange(-5, 5)*200, 300]
     rec, nrec = utils.check_dipole(rec, 'rec', 0)
     off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
-    if htype == 'hqwe':
-        ht, htarg = utils.check_hankel('qwe', ['', '', '', 200], 0)
+    if htype == 'hqwe':  # Put a very low diff_quad, to test it.
+        ht, htarg = utils.check_hankel('qwe', ['', '', '', 200, '', .1], 0)
     # Analytical frequency-domain solution
     wvnr2, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                           etaV, zetaH, zetaV, xdirect, htarg, use_spline,

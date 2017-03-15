@@ -504,8 +504,14 @@ def check_hankel(ht, htarg, verb):
         except:
             pts_per_dec = np.array(80, dtype=int)
 
+        # diff_quad : 100
+        try:
+            diff_quad = _check_var(htarg[5], int, 0, 'qwe: diff_quad', ())
+        except:
+            diff_quad = np.array(100, dtype=int)
+
         # Assemble htarg
-        htarg = (rtol, atol, nquad, maxint, pts_per_dec)
+        htarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad)
 
         # If verbose, print Hankel transform information
         if verb > 2:
@@ -515,6 +521,7 @@ def check_hankel(ht, htarg, verb):
             print("     > nquad       :  " + str(htarg[2]))
             print("     > maxint      :  " + str(htarg[3]))
             print("     > pts_per_dec :  " + str(htarg[4]))
+            print("     > diff_quad   :  " + str(htarg[5]))
 
     elif ht in ['quad', 'hquad']:
         # Rename ht
@@ -948,8 +955,15 @@ def check_time(time, signal, ft, ftarg, verb):
         except:
             pts_per_dec = np.array(20, dtype=int)
 
+        # diff_quad : 100
+        try:
+            diff_quad = _check_var(ftarg[5], int, 0, 'qwe: diff_quad', ())
+        except:
+            diff_quad = np.array(100, dtype=int)
+
+
         # Assemble ftarg
-        ftarg = (rtol, atol, nquad, maxint, pts_per_dec)
+        ftarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad)
 
         # If verbose, print Fourier transform information
         if verb > 2:
@@ -959,6 +973,7 @@ def check_time(time, signal, ft, ftarg, verb):
             print("     > nquad       :  " + str(ftarg[2]))
             print("     > maxint      :  " + str(ftarg[3]))
             print("     > pts/dec     :  " + str(ftarg[4]))
+            print("     > diff_quad   :  " + str(ftarg[5]))
 
         # Get required frequencies
         g_x, _ = special.p_roots(ftarg[2])
