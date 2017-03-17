@@ -63,11 +63,11 @@ fftlog1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 0
 _, f, _, ftarg = utils.check_time(t, 0, 'cos', None, 0)
 fEM = test_freq(res, off, f)
-fft0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+ffht0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1
 _, f, _, ftarg = utils.check_time(t, 1, 'sin', ['key_201_CosSin_2012', 20], 0)
 fEM = test_freq(res, off, f)
-fft1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+ffht1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
 # # D -- FQWE # #
 # Signal = 0
@@ -178,6 +178,6 @@ hqwe = {'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
 np.savez_compressed('data_transform.npz',
                     t=t, tEM0=tEM0, tEM1=tEM1,
                     fftlog0=fftlog0, fftlog1=fftlog1,
-                    fft0=fft0, fft1=fft1,
+                    ffht0=ffht0, ffht1=ffht1,
                     fqwe0=fqwe0, fqwe1=fqwe1,
                     hqwe=hqwe)

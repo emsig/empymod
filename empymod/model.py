@@ -186,15 +186,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - atol: absolute tolerance (default: 1e-30)
                 - nquad: order of Gaussian quadrature (default: 51)
                 - maxint: maximum number of partial integral intervals
-                  (default: 40)
-                - pts_per_dec: points per decade (only relevant if
-                  opt='spline') (default: 80)
+                          (default: 40)
+                - pts_per_dec: points per decade; only relevant if opt='spline'
+                               (default: 80)
                 - diff_quad: criteria when to swap to QUAD (only relevant if
                   opt='spline') (default: 100)
-
-              All are optional, you only have to maintain the order. To only
-              change `nquad` to 11 and use the defaults otherwise, you can
-              provide htarg=['', '', 11].
 
             - If `ht` = 'quad': array containing:
               [atol, rtol, limit, lmin, lmax, pts_per_dec]:
@@ -207,14 +203,14 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - lmax: Maximum wavenumber (default 0.1)
                 - pts_per_dec: points per decade (default: 40)
 
-              All are optional, you only have to maintain the order. To only
-              change `limit` to 1000 and use the defaults otherwise, you can
-              provide htarg=['', '', 1000].
+        All `htarg`-parameters are optional, you only have to maintain the
+        order. For example, to only change `nquad` in `qwe` to 11 and use the
+        defaults otherwise, you can provide ftarg=['', '', 11].
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog'}, optional
+    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if `signal` != None. Flag to choose either the Sine- or
-        Cosine-Filter, the Quadrature-With-Extrapolation (QWE), or FFTLog for
-        the Fourier transform.  Defaults to 'sin'.
+        Cosine-Filter, the Quadrature-With-Extrapolation (QWE), the FFTLog, or
+        the FFT for the Fourier transform.  Defaults to 'sin'.
 
     ftarg : str or filter from empymod.filters or array_like, optional
         Only used if `signal` !=None. Depends on the value for `ft`:
@@ -234,14 +230,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - atol: absolute tolerance (default: 1e-20)
                 - nquad: order of Gaussian quadrature (default: 21)
                 - maxint: maximum number of partial integral intervals
-                  (default: 200)
-                - pts_per_dec: points per decade (only relevant if spline=True)
-                  (default: 20)
+                          (default: 200)
+                - pts_per_dec: points per decade (default: 20)
                 - diff_quad: criteria when to swap to QUAD (default: 100)
-
-              All are optional, you only have to maintain the order. To only
-              change `nquad` to 11 and use the defaults otherwise, you can
-              provide ftarg=['', '', 11].
 
             - If `ft` = 'fftlog': array containing: [pts_per_dec, add_dec, q]:
 
@@ -249,9 +240,20 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - add_dec: additional decades [left, right] (default: [-2, 1])
                 - q: exponent of power law bias (default: 0); -1 <= q <= 1
 
-              All are optional, you only have to maintain the order. To only
-              change `add_dec` to [-1, 1] and use the defaults otherwise, you
-              can provide ftarg=['', [-1, 1]].
+            - If `ft` = 'fft': array containing: [dfreq, nfreq, ntot]:
+
+                - dfreq: Linear step-size of frequencies (default: 0.002)
+                - nfreq: Number of frequencies (default: 2048)
+                - ntot:  Total number for FFT; difference between nfreq and
+                         ntot is padded with zeroes. This number is ideally a
+                         power of 2, e.g. 2048 or 4096 (default: nfreq).
+
+                Padding can sometimes improve the result, not always. The
+                default samples from 0.002 Hz - 4.096 Hz.
+
+        All `ftarg`-parameters are optional, you only have to maintain the
+        order. For example, to only change `nquad` in `qwe` to 11 and use the
+        defaults otherwise, you can provide ftarg=['', '', 11].
 
     opt : {None, 'parallel', 'spline'}, optional
         Optimization flag. Defaults to None:
@@ -540,14 +542,14 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             # Add this src-rec signal
             EM[:, si:ei:st] = sEM*src_rec_w
 
-    # In case of QWE, print Warning if not converged
+    # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
 
     # Do f->t transform if required
     if signal is not None:
         EM, conv = tem(EM, off, freq, time, signal, ft, ftarg)
 
-        # In case of QWE, print Warning if not converged
+        # In case of QWE/QUAD, print Warning if not converged
         conv_warning(conv, ftarg, 'Fourier', verb)
 
     # Reshape for number of sources
@@ -676,15 +678,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - atol: absolute tolerance (default: 1e-30)
                 - nquad: order of Gaussian quadrature (default: 51)
                 - maxint: maximum number of partial integral intervals
-                  (default: 40)
-                - pts_per_dec: points per decade (only relevant if
-                  opt='spline') (default: 80)
+                          (default: 40)
+                - pts_per_dec: points per decade; only relevant if opt='spline'
+                               (default: 80)
                 - diff_quad: criteria when to swap to QUAD (only relevant if
                   opt='spline') (default: 100)
-
-              All are optional, you only have to maintain the order. To only
-              change `nquad` to 11 and use the defaults otherwise, you can
-              provide htarg=['', '', 11].
 
             - If `ht` = 'quad': array containing:
               [atol, rtol, limit, lmin, lmax, pts_per_dec]:
@@ -697,14 +695,14 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - lmax: Maximum wavenumber (default 0.1)
                 - pts_per_dec: points per decade (default: 40)
 
-              All are optional, you only have to maintain the order. To only
-              change `limit` to 1000 and use the defaults otherwise, you can
-              provide htarg=['', '', 1000].
+        All `htarg`-parameters are optional, you only have to maintain the
+        order. For example, to only change `nquad` in `qwe` to 11 and use the
+        defaults otherwise, you can provide ftarg=['', '', 11].
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog'}, optional
+    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if `signal` != None. Flag to choose either the Sine- or
-        Cosine-Filter, the Quadrature-With-Extrapolation (QWE), or FFTLog for
-        the Fourier transform.  Defaults to 'sin'.
+        Cosine-Filter, the Quadrature-With-Extrapolation (QWE), the FFTLog, or
+        the FFT for the Fourier transform.  Defaults to 'sin'.
 
     ftarg : str or filter from empymod.filters or array_like, optional
         Only used if `signal` !=None. Depends on the value for `ft`:
@@ -724,14 +722,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - atol: absolute tolerance (default: 1e-20)
                 - nquad: order of Gaussian quadrature (default: 21)
                 - maxint: maximum number of partial integral intervals
-                  (default: 200)
-                - pts_per_dec: points per decade (only relevant if spline=True)
-                  (default: 20)
+                          (default: 200)
+                - pts_per_dec: points per decade (default: 20)
                 - diff_quad: criteria when to swap to QUAD (default: 100)
-
-              All are optional, you only have to maintain the order. To only
-              change `nquad` to 11 and use the defaults otherwise, you can
-              provide ftarg=['', '', 11].
 
             - If `ft` = 'fftlog': array containing: [pts_per_dec, add_dec, q]:
 
@@ -739,9 +732,20 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - add_dec: additional decades [left, right] (default: [-2, 1])
                 - q: exponent of power law bias (default: 0); -1 <= q <= 1
 
-              All are optional, you only have to maintain the order. To only
-              change `add_dec` to [-1, 1] and use the defaults otherwise, you
-              can provide ftarg=['', [-1, 1]].
+            - If `ft` = 'fft': array containing: [dfreq, nfreq, ntot]:
+
+                - dfreq: Linear step-size of frequencies (default: 0.002)
+                - nfreq: Number of frequencies (default: 2048)
+                - ntot:  Total number for FFT; difference between nfreq and
+                         ntot is padded with zeroes. This number is ideally a
+                         power of 2, e.g. 2048 or 4096 (default: nfreq).
+
+                Padding can sometimes improve the result, not always. The
+                default samples from 0.002 Hz - 4.096 Hz.
+
+        All `ftarg`-parameters are optional, you only have to maintain the
+        order. For example, to only change `nquad` in `qwe` to 11 and use the
+        defaults otherwise, you can provide ftarg=['', '', 11].
 
     opt : {None, 'parallel', 'spline'}, optional
         Optimization flag. Defaults to None:
@@ -878,14 +882,14 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
            use_ne_eval, msrc, mrec, loop_freq, loop_off)
     EM, kcount, conv = fem(*inp)
 
-    # In case of QWE, print Warning if not converged
+    # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
 
     # Do f->t transform if required
     if signal is not None:
         EM, conv = tem(EM, off, freq, time, signal, ft, ftarg)
 
-        # In case of QWE, print Warning if not converged
+        # In case of QWE/QUAD, print Warning if not converged
         conv_warning(conv, ftarg, 'Fourier', verb)
 
     # Reshape for number of sources

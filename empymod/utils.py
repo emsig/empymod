@@ -820,8 +820,8 @@ def check_time(time, signal, ft, ftarg, verb):
             - 0 : Impulse time-domain response
             - +1 : Switch-on time-domain response
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog'}
-        Flag for Fourier transform, only used if `signal` != None.
+    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}
+        Flag for Fourier transform.
 
     ftarg : str or filter from empymod.filters or array_like,
         Only used if `signal` !=None. Depends on the value for `ft`:
@@ -862,12 +862,12 @@ def check_time(time, signal, ft, ftarg, verb):
     # Ensure ft is all lowercase
     ft = ft.lower()
 
-    if ft in ['cos', 'sin', 'fft']:  # If Cosine/Sine, check filter setting
+    if ft in ['cos', 'sin', 'ffht']:  # Fourier-FHT (Sine/Cosine-filters)
 
-        # If `ft='fft'`, we assume that it run the check before, and get
+        # If `ft='ffht'`, we assume that it run the check before, and get
         # sin/cos from ftarg. If not, defaults to 'sin'. To ensure that this
         # check can be re-run without failing.
-        if ft == 'fft':
+        if ft == 'ffht':
             try:
                 ft = ftarg[2]
             except:
@@ -920,9 +920,9 @@ def check_time(time, signal, ft, ftarg, verb):
         freq = np.squeeze(freq)
 
         # Rename ft
-        ft = 'fft'
+        ft = 'ffht'
 
-    elif ft in ['qwe', 'fqwe']:    # QWE
+    elif ft in ['qwe', 'fqwe']:       # QWE (using sine and imag-part)
         # Rename ft
         ft = 'fqwe'
 
@@ -981,7 +981,7 @@ def check_time(time, signal, ft, ftarg, verb):
         maxf = np.ceil(10*np.log10(ftarg[3]*np.pi/time.min()))/10
         freq = np.logspace(minf, maxf, (maxf-minf)*ftarg[4] + 1)
 
-    elif ft == 'fftlog':    # FFTLog
+    elif ft == 'fftlog':              # FFTLog (using sine and imag-part)
 
         # Get and check input or set defaults
         if not ftarg:  # Default values
@@ -1025,9 +1025,47 @@ def check_time(time, signal, ft, ftarg, verb):
         # Keep first 3 entries, so re-running this check is stable
         ftarg = (pts_per_dec, add_dec, q, tcalc, dlnr, kr, rk)
 
+    elif ft == 'fft':                 # FFT
+
+        # Get and check input or set defaults
+        if not ftarg:  # Default values
+            ftarg = []
+
+        try:  # dfreq
+            dfreq = _check_var(ftarg[0], float, 0, 'fft: dfreq', ())
+        except:
+            dfreq = np.array(0.002, dtype=float)
+
+        try:  # nfreq
+            nfreq = _check_var(ftarg[1], int, 0, 'fft: nfreq', ())
+        except:
+            nfreq = np.array(2048, dtype=int)
+
+        nall = 2**np.arange(20)
+        try:  # ntot
+            ntot = _check_var(ftarg[2], int, 0, 'fft: ntot', ())
+        except:
+            ntot = nall[np.argmax(nall >= nfreq)]
+        else:  # Assure that input ntot is not bigger than nfreq
+            if nfreq > ntot:
+                ntot = nall[np.argmax(nall >= nfreq)]
+
+        # Assemble ftarg
+        ftarg = (dfreq, nfreq, ntot)
+
+        # If verbose, print Fourier transform information
+        if verb > 2:
+            print("   Fourier         :  Fast Fourier Transform FFT")
+            print("     > dfreq       :  " + str(ftarg[0]))
+            print("     > nfreq       :  " + str(ftarg[1]))
+            print("     > ntot        :  " + str(ftarg[2]))
+
+        # Get required frequencies
+        freq = np.arange(1, nfreq+1)*dfreq
+
     else:
         print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +
-              "'fftlog']; <ft> provided: "+str(ft))
+              "'fftlog', 'fft']; <ft> provided: "+str(ft))
         raise ValueError('ft')
 
     return time, freq, ft, ftarg
@@ -1494,10 +1532,11 @@ def printstartfinish(verb, inp=None, kcount=None):
 
 
 def conv_warning(conv, targ, name, verb):
-    """Print error if QWE did not converge at least once."""
+    """Print error if QWE/QUAD did not converge at least once."""
     if verb > 0 and not conv:
-        print('* WARNING :: ' + name + '-QWE used all ' + str(targ[3]) +
-              ' intervals; set `maxint` higher.')
+        print('* WARNING :: ' + name +
+              '-quadrature did not converge at least once;\n             ' +
+              '=> desired `atol` and `rtol` might not be achieved.')
 
 
 # 3. Internal utilities

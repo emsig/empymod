@@ -38,7 +38,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
 from . import kernel
 
-__all__ = ['fht', 'hqwe', 'hquad', 'fft', 'fqwe', 'fftlog', 'qwe',
+__all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'qwe',
            'get_spline_values', 'fhti']
 
 
@@ -87,7 +87,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         Kernel count. For FHT, this is 1.
 
     conv : bool
-        Only relevant for QWE, not for FHT.
+        Only relevant for QWE/QUAD.
 
     """
     # Get fhtargs
@@ -254,7 +254,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         Kernel count.
 
     conv : bool
-        If true, QWE converged. If not, maxint might have to be set higher.
+        If true, QWE/QUAD converged. If not, <htarg> might have to be adjusted.
 
     """
     # Input params have an additional dimension for frequency, reduce here
@@ -353,6 +353,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
         # Pre-allocate output array
         fEM = np.zeros(off.size, dtype=complex)
+        conv = True
 
         # Carry out SciPy's Quad if required
         if np.any(~doqwe):
@@ -364,11 +365,13 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
                 iinp = {'a': intervals[i, 0], 'b': intervals[i, -1],
                         'epsabs': atol, 'epsrel': rtol, 'limit': maxint}
 
-                fEM[i] = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab,
-                              off[i], factAng[i], iinp)
+                fEM[i], tc = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi,
+                                  ab, off[i], factAng[i], iinp)
 
-            # Return conv=True, kcount=1 in case no QWE is calculated
-            conv = True
+                # Update conv
+                conv *= tc
+
+            # Return kcount=1 in case no QWE is calculated
             kcount = 1
 
         if np.any(doqwe):
@@ -392,9 +395,9 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
             getkernel = sEM[doqwe, :]
 
             # Get QWE
-            fEM[doqwe], kcount, conv = qwe(rtol, atol, maxint, getkernel,
-                                           intervals[doqwe, :], None, None,
-                                           None)
+            fEM[doqwe], kcount, tc = qwe(rtol, atol, maxint, getkernel,
+                                         intervals[doqwe, :], None, None, None)
+            conv *= tc
 
     else:  # If not spline, we define the wavenumber-kernel here
         def getkernel(i, inplambd, inpoff, inpfang):
@@ -454,7 +457,7 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         Kernel count. For HQUAD, this is 1.
 
     conv : bool
-        Only relevant for QWE, not for FHT.
+        If true, QUAD converged. If not, <htarg> might have to be adjusted.
 
     """
 
@@ -488,6 +491,7 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
     # Pre-allocate output array
     fEM = np.zeros(off.size, dtype=complex)
+    conv = True
 
     # Input-dictionary for quad
     iinp = {'a': lmin, 'b': lmax, 'epsabs': atol, 'epsrel': rtol,
@@ -495,17 +499,18 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
     # Loop over offsets
     for i in range(off.size):
-        fEM[i] = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off[i],
-                      factAng[i], iinp)
+        fEM[i], tc = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab,
+                          off[i], factAng[i], iinp)
+        conv *= tc
 
     # Return the electromagnetic field
     # Second argument (1) is the kernel count, last argument is only for QWE.
-    return fEM, 1, True
+    return fEM, 1, conv
 
 
 # 2. Fourier transforms (frequency -> time)
 
-def fft(fEM, time, freq, ftarg):
+def ffht(fEM, time, freq, ftarg):
     """Fourier Transform using a Cosine- or a Sine-filter.
 
     It follows the Filter methodology [Anderson_1975]_, see `fht` for more
@@ -524,7 +529,7 @@ def fft(fEM, time, freq, ftarg):
         Returns time-domain EM response of `fEM` for given `time`.
 
     conv : bool
-        Only relevant for QWE, not for FFT.
+        Only relevant for QWE/QUAD.
 
     """
     # Get ftarg values
@@ -588,7 +593,7 @@ def fqwe(fEM, time, freq, qweargs):
         Returns time-domain EM response of `fEM` for given `time`.
 
     conv : bool
-        If true, QWE converged. If not, maxint might have to be set higher.
+        If true, QWE/QUAD converged. If not, <ftarg> might have to be adjusted.
 
     """
     # Get rtol, atol, nquad, maxint, and diff_quad
@@ -621,6 +626,7 @@ def fqwe(fEM, time, freq, qweargs):
 
     # Pre-allocate output array
     tEM = np.zeros(time.size)
+    conv = True
 
     # Carry out SciPy's Quad if required
     if np.any(~doqwe):
@@ -630,18 +636,19 @@ def fqwe(fEM, time, freq, qweargs):
 
         # Loop over times that require QUAD
         for i in np.where(~doqwe)[0]:
-            # We ignore here any feedback from QUAD. This could be improved.
             out = integrate.quad(sEMquad, intervals[i, 0], intervals[i, -1],
                                  (time[i],), 1, atol, rtol, limit=maxint)
             tEM[i] = out[0]
 
-        # Return conv=True in case no QWE is calculated
-        conv = True
+            # If there is a fourth output from QUAD, it means it did not conv.
+            if len(out) > 3:
+                conv *= False
 
     # Carry out QWE for 'well-behaved' intervals
     if np.any(doqwe):
         sEM = tEM_iint(np.log10(Bx/time[doqwe, None]))*SS
-        tEM[doqwe], _, conv = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :])
+        tEM[doqwe], _, tc = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :])
+        conv *= tc
 
     return -tEM, conv
 
@@ -668,9 +675,6 @@ def fftlog(fEM, time, freq, ftarg):
 
     Furthermore, `q` is restricted to -1 <= q <= 1.
 
-    I am trying to get `FFTLog` into `scipy`. If this happens the current
-    implementation will be replaced by the `scipy.fftpack.fftlog`-version.
-
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
     parameters.
@@ -681,7 +685,7 @@ def fftlog(fEM, time, freq, ftarg):
         Returns time-domain EM response of `fEM` for given `time`.
 
     conv : bool
-        Only relevant for QWE, not for FFTLog.
+        Only relevant for QWE/QUAD.
 
     """
     # Get tcalc, dlnr, kr, rk, q; a and n
@@ -744,7 +748,7 @@ def fftlog(fEM, time, freq, ftarg):
         ai = a[2*m]
         a[2*m-1] = ar*argcos[:-1] - ai*argsin[:-1]
         a[2*m] = ar*argsin[:-1] + ai*argcos[:-1]
-        # problem(2*m)atical last element, for even n
+        # problematical last element, for even n
         if np.mod(n, 2) == 0:
             ar = argcos[-1]
             a[-1] *= ar
@@ -783,6 +787,42 @@ def fftlog(fEM, time, freq, ftarg):
     return tEM, True
 
 
+def fft(fEM, time, freq, ftarg):
+    """Fourier Transform using the Fast Fourier Transform.
+
+    The function is called from one of the modelling routines in :mod:`model`.
+    Consult these modelling routines for a description of the input and output
+    parameters.
+
+    Returns
+    -------
+    tEM : array
+        Returns time-domain EM response of `fEM` for given `time`.
+
+    conv : bool
+        Only relevant for QWE/QUAD.
+
+    """
+    # Get ftarg values
+    dfreq, nfreq, ntot = ftarg
+
+    # Pad the frequency result
+    fEM = np.pad(fEM, (0, ntot-nfreq), 'linear_ramp')
+
+    # Carry out FFT
+    ifftEM = fftpack.ifft(np.r_[fEM[1:], 0, fEM[::-1].conj()]).real
+    stEM = 2*ntot*fftpack.fftshift(ifftEM*dfreq, 0)
+
+    # Interpolate in time domain
+    dt = 1/(2*ntot*dfreq)
+    ifEM = iuSpline(np.linspace(-ntot, ntot-1, 2*ntot)*dt, stEM)
+    tEM = ifEM(time)/2*np.pi  # (Multiplication of 2/pi in model.tem)
+
+    # Return the electromagnetic time domain field
+    # (Second argument is only for QWE)
+    return tEM, True
+
+
 # 3. Utilities
 
 def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
@@ -816,8 +856,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
     kcount = 1  # Initialize kernel count (only important for Hankel)
 
     # 3. The extrapolation transformation loop
-    old_settings = np.seterr(all='ignore')  # QWE throws a lot of errors; we
-    for i in range(1, maxint):              # ignore them, could be improved.
+    for i in range(1, maxint):
         # 3.a Calculate the field for this interval
         if hasattr(inp, '__call__'):  # Hankel and not spline
             EMi = inp(i, lambd[om, :], off[om], factAng[om])
@@ -865,9 +904,6 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
     # Catch the ones that did not converge
     EM[om] = extrap[om, i-1]
 
-    # Reset error-settings
-    np.seterr(**old_settings)
-
     # Set np.finfo(np.double).max to 0
     EM.real[EM.real == np.finfo(np.double).max] = 0
 
@@ -879,8 +915,6 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
 
     This is the kernel of the QUAD method, used for the Hankel transforms
     `hquad` and `hqwe` (where the integral is not suited for QWE).
-
-    At the moment we ignore any feedback from QUAD. This could be improved.
 
     """
 
@@ -910,8 +944,14 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
     iargs = (sPJ1i, ab, off, factAng)
     fi1 = integrate.quad(quad1, args=iargs, full_output=1, **iinp)
 
+    # If there is a fourth output from QUAD, it means it did not converge
+    if np.any(np.array([len(fr0), len(fi0), len(fr1), len(fi1)]) > 3):
+        conv = False
+    else:
+        conv = True
+
     # Collect the results
-    return fr0[0] + fr1[0] + 1j*(fi0[0] + fi1[0])
+    return fr0[0] + fr1[0] + 1j*(fi0[0] + fi1[0]), conv
 
 
 def get_spline_values(filt, inp, nr_per_dec=None):

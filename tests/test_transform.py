@@ -55,6 +55,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
     options = utils.check_opt('spline', None, htype, None, 0)
     use_spline, use_ne_eval, loop_freq, loop_off = options
     use_spline, use_ne_eval, loop_freq, loop_off = options
+    if htype == 'hquad':  # Lower atol to ensure convergence
+        ht, htarg = utils.check_hankel('quad', [1e-8], 0)
     # Wavenumber solution plus transform
     wvnr1, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                           etaV, zetaH, zetaV, xdirect, htarg, use_spline,
@@ -70,8 +72,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
     rec = [np.arange(1, 11)*500, np.arange(-5, 5)*200, 300]
     rec, nrec = utils.check_dipole(rec, 'rec', 0)
     off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
-    if htype == 'hqwe':  # Put a very low diff_quad, to test it.
-        ht, htarg = utils.check_hankel('qwe', ['', '', '', 200, '', .1], 0)
+    if htype == 'hqwe':  # Put a very low diff_quad, to test it.; lower err
+        ht, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, '', .1], 0)
     # Analytical frequency-domain solution
     wvnr2, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                           etaV, zetaH, zetaV, xdirect, htarg, use_spline,
@@ -120,8 +122,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
     assert_allclose(np.squeeze(wvnr4), np.squeeze(freq4), rtol=1e-4)
 
 
-@pytest.mark.parametrize("ftype", ['fft', 'fqwe', 'fftlog'])
-def test_fft(ftype):                             # 3. fft / 4. fqwe / 5. fftlog
+@pytest.mark.parametrize("ftype", ['ffht', 'fqwe', 'fftlog'])
+def test_fft(ftype):                            # 3. ffht / 4. fqwe / 5. fftlog
     # Check FFT-method with the analytical functions for a halfspace.
     t = DATA['t'][()]
     for i in [0, 1]:

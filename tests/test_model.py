@@ -314,10 +314,10 @@ class TestBipole:                                                   # 1. bipole
         assert "Fourier         :  Quadrature-with-Extrapolation" in out
         assert_allclose(qwe, ftl, 1e-2, equal_nan=True)
 
-        fft = bipole(ft='fft', verb=3, **inp)
+        ffht = bipole(ft='ffht', verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Fourier         :  Sine-Filter" in out
-        assert_allclose(fft, ftl, 1e-2, equal_nan=True)
+        assert_allclose(ffht, ftl, 1e-2, equal_nan=True)
 
     def test_empymod_example_wrong(self):
         # One example of wrong input. But inputs are checked in test_utils.py.

@@ -380,14 +380,14 @@ def test_check_opt(capsys):                                      # 8. check_opt
 def test_check_time(capsys):                                    # 9. check_time
     time = np.array([3])
 
-    # # FFT # #
+    # # FFHT # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'fft', None, 4)
+    _, f, ft, ftarg = utils.check_time(time, 0, 'ffht', None, 4)
     out, _ = capsys.readouterr()
     outstr = "   time        [s] :  3\n"
     outstr += "   Fourier         :  Sine-Filter\n     > Filter"
     assert out[:71] == outstr
-    assert ft == 'fft'
+    assert ft == 'ffht'
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
     assert ftarg[1] is None
     f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
@@ -407,7 +407,7 @@ def test_check_time(capsys):                                    # 9. check_time
     outstr = "   time        [s] :  3\n"
     outstr += "   Fourier         :  Cosine-Filter\n     > Filter"
     assert out[:73] == outstr
-    assert ft == 'fft'
+    assert ft == 'ffht'
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
     assert ftarg[1] is None
     f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
@@ -430,7 +430,7 @@ def test_check_time(capsys):                                    # 9. check_time
 
     # ['', pts_per_dec]
     out, _ = capsys.readouterr()  # clear buffer
-    _, _, _, ftarg = utils.check_time(time, 0, 'fft', ['', 30], 4)
+    _, _, _, ftarg = utils.check_time(time, 0, 'ffht', ['', 30], 4)
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
     assert ftarg[1] == 30
     assert ftarg[2] == 'sin'
@@ -520,9 +520,9 @@ def test_check_time(capsys):                                    # 9. check_time
 
     # Signal != -1, 0, 1
     with pytest.raises(ValueError):
-        utils.check_time(time, -2, 'fft', None, 0)
+        utils.check_time(time, -2, 'ffht', None, 0)
 
-    # ft != cos, sin, fft, qwe, hqwe, fftlog,
+    # ft != cos, sin, ffht, qwe, hqwe, fftlog,
     with pytest.raises(ValueError):
         utils.check_time(time, 0, 'fht', None, 0)
 
@@ -743,7 +743,7 @@ def test_conv_warning(capsys):                               # 16. conv_warning
     # If not converged, and verb>0, print
     utils.conv_warning(False, ['', '', '', 51, ''], 'Hankel', 1)
     out, _ = capsys.readouterr()
-    assert out[:35] == "* WARNING :: Hankel-QWE used all 51"
+    assert '* WARNING :: Hankel-quadrature did not converge' in out
 
     # If converged, and verb>1, no output
     utils.conv_warning(True, ['', '', '', 51, ''], 'Hankel', 1)
