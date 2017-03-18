@@ -513,6 +513,29 @@ def test_check_time(capsys):                                    # 9. check_time
     assert_allclose(ftarg[4:], [0.23025850929940461, 1.0582078033615059,
                     1.6493256300417651])
 
+    # # FFT # #
+    # verbose
+    _, f, ft, ftarg = utils.check_time(time, 0, 'fft', None, 4)
+    out, _ = capsys.readouterr()
+    outstr = "   Fourier         :  Fast Fourier Transform FFT\n     > dfreq"
+    assert outstr in out
+    assert ft == 'fft'
+    assert ftarg[0] == 0.002
+    assert ftarg[1] == 2048
+    assert ftarg[2] == 2048
+    fres = np.array([0.002, 0.004, 0.006, 0.008, 0.01, 4.088, 4.09, 4.092,
+                     4.094, 4.096])
+    assert_allclose(f[:5], fres[:5])
+    assert_allclose(f[-5:], fres[-5:])
+
+    # Several parameters
+    _, _, _, ftarg = utils.check_time(time, 0, 'fft', [1e-3, 2**15+1, 3], 0)
+    assert ftarg[0] == 0.001
+    assert ftarg[1] == 2**15+1
+    assert ftarg[2] == 2**16
+
+    # # Various # #
+
     # minimum time
     _ = utils.check_time(0, 0, 'cos', 'key_201_CosSin_2012', 1)
     out, _ = capsys.readouterr()

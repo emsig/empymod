@@ -16,15 +16,15 @@ from empymod.kernel import fullspace, halfspace
 # Add tests when issues arise!
 
 # Load required data
-# Data generated with create_empymod.py [27/01/2017]
+# Data generated with create_empymod.py
 DATAEMPYMOD = np.load(join(dirname(__file__), 'data_empymod.npz'))
-# Data generated with create_fem_tem.py [27/01/2017]
+# Data generated with create_fem_tem.py
 DATAFEMTEM = np.load(join(dirname(__file__), 'data_fem_tem.npz'))
-# Data generated with create_green3d.py [30/01/2017]
+# Data generated with create_green3d.py
 GREEN3D = np.load(join(dirname(__file__), 'data_green3d.npz'))
-# Data generated with create_dipole1d.py [01/02/2017]
+# Data generated with create_dipole1d.py
 DIPOLE1D = np.load(join(dirname(__file__), 'data_dipole1d.npz'))
-# Data generated with create_emmod.py [02/02/2017]
+# Data generated with create_emmod.py
 EMMOD = np.load(join(dirname(__file__), 'data_emmod.npz'))
 
 
@@ -216,7 +216,7 @@ class TestBipole:                                                   # 1. bipole
         comp_all(GREEN3D['zdirbip'][()], 5e-3)
         comp_all(GREEN3D['zdirbipm'][()], 5e-3)
 
-    def test_empymod_status_quo(self):                            # 1.6 empymod
+    def test_status_quo(self):                                    # 1.6 empymod
         # Comparison to self, to ensure nothing changed.
         # 4 bipole-bipole cases in EE, ME, EM, MM, all different values
         for i in ['1', '2', '3', '4']:
@@ -224,7 +224,7 @@ class TestBipole:                                                   # 1. bipole
             tEM = bipole(**res['inp'])
             assert_allclose(tEM, res['EM'])
 
-    def test_empymod_dipole_bipole(self):
+    def test_dipole_bipole(self):                        # 1.7 dipole vs bipole
         # Compare a dipole to a bipole
         # Checking intpts, strength, reciprocity
         inp = {'depth': [0, 250], 'res': [1e20, 0.3, 5], 'freqtime': 1}
@@ -238,7 +238,7 @@ class TestBipole:                                                   # 1. bipole
         assert_allclose(bip1, dip*3300, 1e-5)  # bipole as dipole
         assert_allclose(bip2, dip*3300, 1e-2)  # bipole, src/rec switched.
 
-    def test_empymod_optimizaton(self, capsys):
+    def test_optimizaton(self, capsys):                     # 1.8 optimizations
         # Compare optimization options: None, parallel, spline
         inp = {'depth': [0, 500], 'res': [10, 3, 50], 'freqtime': [1, 2, 3],
                'rec': [[6000, 7000, 8000], [200, 200, 200], 300, 0, 0],
@@ -258,7 +258,7 @@ class TestBipole:                                                   # 1. bipole
         assert "Hankel Opt.     :  Use spline" in out
         assert_allclose(non, spl, 1e-3, 1e-22, True)
 
-    def test_empymod_loop(self, capsys):
+    def test_loop(self, capsys):                                     # 1.9 loop
         # Compare loop options: None, 'off', 'freq'
         inp = {'depth': [0, 500], 'res': [10, 3, 50], 'freqtime': [1, 2, 3],
                'rec': [[6000, 7000, 8000], [200, 200, 200], 300, 0, 0],
@@ -278,7 +278,7 @@ class TestBipole:                                                   # 1. bipole
         assert "Loop over       :  Frequencies" in out
         assert_allclose(non, lfr, equal_nan=True)
 
-    def test_empymod_fht_qwe_quad(self, capsys):
+    def test_hankel(self, capsys):                                # 1.10 Hankel
         # Compare Hankel transforms
         inp = {'depth': [-20, 100], 'res': [1e20, 5, 100],
                'freqtime': [1.34, 23, 31], 'src': [0, 0, 0, 0, 90],
@@ -299,7 +299,7 @@ class TestBipole:                                                   # 1. bipole
         assert "Hankel          :  Quadrature" in out
         assert_allclose(fht, quad, equal_nan=True)
 
-    def test_empymod_fft_qwe_fftlog(self, capsys):
+    def test_fourier(self, capsys):                              # 1.11 Fourier
         # Compare Fourier transforms
         inp = {'depth': [0, 300], 'res': [1e12, 1/3, 5],
                'freqtime': np.logspace(-1.5, 1, 20), 'signal': 0,
@@ -319,17 +319,26 @@ class TestBipole:                                                   # 1. bipole
         assert "Fourier         :  Sine-Filter" in out
         assert_allclose(ffht, ftl, 1e-2, equal_nan=True)
 
-    def test_empymod_example_wrong(self):
+        # FFT: We keep the error-check very low, otherwise we would have to
+        #      calculate too many frequencies.
+        fft = bipole(ft='fft', ftarg=[0.002, 2**13, 2**16], verb=3, **inp)
+        out, _ = capsys.readouterr()
+        assert "Fourier         :  Fast Fourier Transform FFT" in out
+        assert_allclose(fft, ftl, 1e-1, 1e-13, equal_nan=True)
+
+    def test_example_wrong(self):                                  # 1.12 Error
         # One example of wrong input. But inputs are checked in test_utils.py.
         with pytest.raises(ValueError):
             bipole([0, 0, 0], [0, 0, 0, 0, 0], [], 1, 1, verb=0)
 
-    def test_empymod_combinations(self):
+    def test_combinations(self):                   # 1.13 Bipole-combinations 1
         # These are the 15 options that each bipole (src or rec) can take.
         # There are therefore 15x15 possibilities for src-rec combination
         # within bipole!
         # Here we are just checking a few possibilities... But these should
         # cover the principle and therefore hold for all cases.
+        inp = {'depth': [-100, 300], 'res': [1e20, 1, 10],
+               'freqtime': [0.5, 0.9], 'src': [0, 0, 0, 0, 0]}
 
         #                one_depth  dipole  asdipole one_bpdepth
         #   =====================================================
@@ -354,9 +363,6 @@ class TestBipole:                                                   # 1. bipole
         #                   false    false     TRUE    false
         #                   false    false    false    false
         #   -----------------------------------------------------
-
-        inp = {'depth': [-100, 300], 'res': [1e20, 1, 10],
-               'freqtime': [0.5, 0.9], 'src': [0, 0, 0, 0, 0]}
 
         # 1.1 three different dipoles
         da = bipole(rec=[7000, 500, 100, 0, 0], **inp)
@@ -411,10 +417,9 @@ class TestBipole:                                                   # 1. bipole
         assert_allclose(bg, bh, 1e-3)
         assert_allclose(be, bg, 1e-2)  # As the dip is very small
 
-    def test_empymod_combinations2(self):
-        # Additional to test_empymod_combinations: different src- and rec-
+    def test_combinations2(self):                  # 1.14 Bipole-combinations 2
+        # Additional to test_combinations: different src- and rec-
         # bipoles at the same time
-
         inp = {'depth': [0.75, 500], 'res': [20, 5, 11],
                'freqtime': [1.05, 3.76], 'verb': 0}
 

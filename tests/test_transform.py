@@ -11,7 +11,7 @@ from empymod import transform, filters, kernel, utils
 # inputs.
 
 # Load required data
-# Data generated with create_transform.py [28/01/2017]
+# Data generated with create_transform.py
 DATA = np.load(join(dirname(__file__), 'data_transform.npz'))
 
 
@@ -122,8 +122,8 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
     assert_allclose(np.squeeze(wvnr4), np.squeeze(freq4), rtol=1e-4)
 
 
-@pytest.mark.parametrize("ftype", ['ffht', 'fqwe', 'fftlog'])
-def test_fft(ftype):                            # 3. ffht / 4. fqwe / 5. fftlog
+@pytest.mark.parametrize("ftype", ['ffht', 'fqwe', 'fftlog'])  # , 'fft'])
+def test_fft(ftype):                   # 4. ffht / 5. fqwe / 6. fftlog / 7. fft
     # Check FFT-method with the analytical functions for a halfspace.
     t = DATA['t'][()]
     for i in [0, 1]:
@@ -136,7 +136,7 @@ def test_fft(ftype):                            # 3. ffht / 4. fqwe / 5. fftlog
         assert_allclose(tEM*2/np.pi, res, rtol=1e-3)
 
 
-def test_qwe():                                                        # 6. qwe
+def test_qwe():                                                        # 8. qwe
     # QWE is integral of hqwe and fqwe, and therefore tested a lot through
     # those. Here we just ensure status quo. And if a problem arises in hqwe or
     # fqwe, it would make it obvious if the problem arises from qwe or not.
@@ -176,7 +176,7 @@ def test_qwe():                                                        # 6. qwe
     assert_allclose(np.squeeze(fEM), dat['freqres'], rtol=1e-5)
 
 
-def test_get_spline_values():                            # 7. get_spline_values
+def test_get_spline_values():                            # 9. get_spline_values
     # Check one example
     filt = filters.key_81_CosSin_2009()
     out, new_inp = transform.get_spline_values(filt, np.arange(1, 6), None)
@@ -224,7 +224,7 @@ def test_get_spline_values():                            # 7. get_spline_values
     assert_allclose(out.size, 804)
 
 
-def test_fhti():                                                      # 8. fhti
+def test_fhti():                                                     # 10. fhti
     # Check one example
     freq, tcalc, dlnr, kr, rk = transform.fhti(-1, 2, 60, 0)
     # Expected values

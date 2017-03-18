@@ -961,7 +961,6 @@ def check_time(time, signal, ft, ftarg, verb):
         except:
             diff_quad = np.array(100, dtype=int)
 
-
         # Assemble ftarg
         ftarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad)
 
@@ -1045,6 +1044,8 @@ def check_time(time, signal, ft, ftarg, verb):
         try:  # ntot
             ntot = _check_var(ftarg[2], int, 0, 'fft: ntot', ())
         except:
+            # We could use here fftpack.next_fast_len, but tests have shown
+            # that powers of two yield better results in this case.
             ntot = nall[np.argmax(nall >= nfreq)]
         else:  # Assure that input ntot is not bigger than nfreq
             if nfreq > ntot:

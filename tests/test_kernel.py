@@ -12,9 +12,9 @@ from empymod import kernel
 # possibility of that given function.
 
 # Load required data
-# Data generated with create_empymod.py [01/02/2017]
+# Data generated with create_empymod.py
 DATAEMPYMOD = np.load(join(dirname(__file__), 'data_empymod.npz'))
-# Data generated with create_kernel.py [01/02/2017]
+# Data generated with create_kernel.py
 DATAKERNEL = np.load(join(dirname(__file__), 'data_kernel.npz'))
 
 
