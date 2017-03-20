@@ -321,7 +321,8 @@ igpr = {'src': [0, 0, 0.0000001],
         'rec': [3, 0, 0.5],
         'depth': [0, 1],
         'res': [1e23, 200, 20],
-        'fc': 250,
+        'freqtime': np.arange(1, 81)*1e-9,
+        'cf': 250e6,
         'ab': 11,
         'gain': 3,
         'aniso': None,
@@ -331,11 +332,11 @@ igpr = {'src': [0, 0, 0.0000001],
         'mpermV': None,
         'xdirect': True,
         'ht': 'fht',
-        'htarg': ['key_401_2009', ''],
+        'htarg': ['key_201_2009', ''],
         'opt': None,
         'loop': None,
-        'verb': 0}
-_, ogpr = gpr(**igpr)
+        'verb': 3}
+ogpr = gpr(**igpr)
 
 # # F -- Store data # #
 np.savez_compressed('data_empymod.npz',

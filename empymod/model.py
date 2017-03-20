@@ -205,7 +205,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         All `htarg`-parameters are optional, you only have to maintain the
         order. For example, to only change `nquad` in `qwe` to 11 and use the
-        defaults otherwise, you can provide ftarg=['', '', 11].
+        defaults otherwise, you can provide htarg=['', '', 11].
 
     ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if `signal` != None. Flag to choose either the Sine- or
@@ -247,9 +247,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - ntot:  Total number for FFT; difference between nfreq and
                          ntot is padded with zeroes. This number is ideally a
                          power of 2, e.g. 2048 or 4096 (default: nfreq).
+                - pts_per_dec : points per decade (default: None)
 
                 Padding can sometimes improve the result, not always. The
-                default samples from 0.002 Hz - 4.096 Hz.
+                default samples from 0.002 Hz - 4.096 Hz. If pts_per_dec is set
+                to an integer, calculated frequencies are logarithmically
+                spaced with the given number per decade, and then interpolated
+                to yield the required frequencies for the FFT.
 
         All `ftarg`-parameters are optional, you only have to maintain the
         order. For example, to only change `nquad` in `qwe` to 11 and use the
@@ -697,7 +701,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
         All `htarg`-parameters are optional, you only have to maintain the
         order. For example, to only change `nquad` in `qwe` to 11 and use the
-        defaults otherwise, you can provide ftarg=['', '', 11].
+        defaults otherwise, you can provide htarg=['', '', 11].
 
     ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if `signal` != None. Flag to choose either the Sine- or
@@ -739,9 +743,13 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - ntot:  Total number for FFT; difference between nfreq and
                          ntot is padded with zeroes. This number is ideally a
                          power of 2, e.g. 2048 or 4096 (default: nfreq).
+                - pts_per_dec : points per decade (default: None)
 
                 Padding can sometimes improve the result, not always. The
-                default samples from 0.002 Hz - 4.096 Hz.
+                default samples from 0.002 Hz - 4.096 Hz. If pts_per_dec is set
+                to an integer, calculated frequencies are logarithmically
+                spaced with the given number per decade, and then interpolated
+                to yield the required frequencies for the FFT.
 
         All `ftarg`-parameters are optional, you only have to maintain the
         order. For example, to only change `nquad` in `qwe` to 11 and use the
@@ -901,127 +909,86 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     return EM
 
 
-def gpr(src, rec, depth, res, fc=250, ab=11, gain=None, aniso=None,
+def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
         epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=True,
-        ht='fht', htarg=None, opt=None, loop='off', verb=2):
+        ht='quad', htarg=None, ft='fft', ftarg=None, opt=None, loop=None,
+        verb=2):
     """Return the Ground-Penetrating Radar signal.
 
     THIS FUNCTION IS EXPERIMENTAL, USE WITH CAUTION.
 
-    Or in other words it is merely an example how one could calculate the
-    GPR-response.  However, the currently included *FHT* and *QWE* struggle for
-    these high frequencies, and another Hankel transform has to be included to
-    make GPR work properly (e.g. `scipy.integrate.quad`).
+    It is rather an example how you can calculate GPR responses; however, DO
+    NOT RELY ON IT! It works only well with QUAD or QWE (`quad`, `qwe`) for the
+    Hankel transform, and with FFT (`fft`) for the Fourier transform.
 
-    - `QWE` is slow, but does a pretty good job except for very short offsets:
-      only direct wave for offset < 0.1 m, triangle-like noise at later times.
-    - `FHT` is fast. Airwave, direct wave and first reflection are well
-      visible, but afterwards it is very noisy.
+    It calls internally `dipole` for the frequency-domain calculation. It
+    subsequently convolves the response with a Ricker wavelet with central
+    frequency `cf`. If signal!=None, it carries out the Fourier transform and
+    applies a gain to the response.
 
-    A lot is still hard-coded in this routine, for instance the frequency-range
-    used to calculate the response.
-
-    For input parameters see `frequency`, except for:
-
+    For input parameters see the function `dipole`, except for:
 
     Parameters
     ----------
-    fc : float
-        Centre frequency of GPR-signal (MHz). Sensible values are between
+    cf : float
+        Centre frequency of GPR-signal, in Hz. Sensible values are between
         10 MHz and 3000 MHz.
 
     gain : float
-        Power of gain function. If None, no gain is applied.
+        Power of gain function. If None, no gain is applied. Only used if
+        signal!=None.
 
 
     Returns
     -------
-    t : array
-        Times (s)
-    gprEM : ndarray
+    EM : ndarray
         GPR response
 
     """
-    if verb > 0:
-        print('* WARNING :: GPR FUNCTION IS EXPERIMENTAL, USE WITH CAUTION.')
+    if verb > 2:
+        print("   GPR             :  EXPERIMENTAL, USE WITH CAUTION")
+        print("     > centre freq :  " + str(cf))
+        print("     > gain        :  " + str(gain))
 
-    # === 1.  LET'S START ============
-    t0 = printstartfinish(verb)
+    # === 1.  CHECK TIME ============
 
-    # === 2.  CHECK INPUT ============
+    # Check times and Fourier Transform arguments, get required frequencies
+    time, freq, ft, ftarg = check_time(freqtime, 0, ft, ftarg, verb)
 
-    # Frequency range from centre frequency
-    fc *= 10**6
-    freq = np.linspace(1, 2048, 2048)*10**6
+    # === 2. CALL DIPOLE ============
 
-    # Check layer parameters
-    model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
-                        verb)
-    depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
+    EM = dipole(src, rec, depth, res, freq, None, ab, aniso, epermH, epermV,
+                mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt, loop, verb)
 
-    # Check frequency => get etaH, etaV, zetaH, and zetaV
-    frequency = check_frequency(freq, res, aniso, epermH, epermV, mpermH,
-                                mpermV, verb)
-    freq, etaH, etaV, zetaH, zetaV = frequency
+    # === 3. GPR STUFF
 
-    # Check Hankel transform parameters
-    ht, htarg = check_hankel(ht, htarg, verb)
+    # Get required parameters
+    src, nsrc = check_dipole(src, 'src', 0)
+    rec, nrec = check_dipole(rec, 'rec', 0)
+    off, _ = get_off_ang(src, rec, nsrc, nrec, 0)
 
-    # Check optimization
-    optimization = check_opt(opt, loop, ht, htarg, verb)
-    use_spline, use_ne_eval, loop_freq, loop_off = optimization
+    # Reshape output from dipole
+    EM = EM.reshape((-1, nrec*nsrc), order='F')
 
-    # Check src-rec configuration
-    # => Get flags if src or rec or both are magnetic (msrc, mrec)
-    ab_calc, msrc, mrec = check_ab(ab, verb)
-
-    # Check src and rec
-    src, nsrc = check_dipole(src, 'src', verb)
-    rec, nrec = check_dipole(rec, 'rec', verb)
-
-    # Get offsets and angles (off, angle)
-    off, angle = get_off_ang(src, rec, nsrc, nrec, verb)
-
-    # Get layer number in which src and rec reside (lsrc/lrec)
-    lsrc, zsrc = get_layer_nr(src, depth)
-    lrec, zrec = get_layer_nr(rec, depth)
-
-    # Collect variables for fem
-    fdata = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
-             etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
-             use_ne_eval, msrc, mrec, loop_freq, loop_off)
-
-    # === 3. GPR CALCULATION ============
-
-    # 1. Get fem responses
-    fEM, kcount, conv = fem(*fdata)
-    conv_warning(conv, htarg, 'Hankel', verb)
-
-    # 2. Multiply with ricker wavelet
-    cfc = -(np.r_[0, freq[:-1]]/fc)**2
+    # Multiply with ricker wavelet
+    cfc = -(np.r_[0, freq[:-1]]/cf)**2
     fwave = cfc*np.exp(cfc)
-    fEM *= fwave[:, None]
+    EM *= fwave[:, None]
 
-    # 3. Carry out FFT
-    tempEM = fEM[::-1, :].conj()
-    tempEM = np.r_[np.zeros((1, tempEM.shape[1])), tempEM]
-    dtmpEM = np.r_[tempEM, fEM[1:, :]]
-    shftEM = np.fft.fftshift(dtmpEM, 0)
-    ifftEM = np.fft.ifft(shftEM, axis=0).real
-    nfreq = 2*freq.size
-    dfreq = freq[1]-freq[0]
-    gprEM = nfreq*np.fft.fftshift(ifftEM*dfreq, 0)
-    dt = 1/(nfreq*dfreq)
+    # Do f->t transform
+    EM, conv = tem(EM, off, freq, time, 0, ft, ftarg)
 
-    # 4. Apply gain
-    t = np.linspace(-nfreq/2, nfreq/2-1, nfreq)*dt
-    if gain:
-        gprEM *= (1 + np.abs((t*10**9)**gain))[:, None]
+    # In case of QWE/QUAD, print Warning if not converged
+    conv_warning(conv, ftarg, 'Fourier', verb)
 
-    # === 4.  FINISHED ============
-    printstartfinish(verb, t0, kcount)
+    # Apply gain; make pure real
+    EM *= (1 + np.abs((time*10**9)**gain))[:, None]
+    EM = EM.real
 
-    return t[2048:], gprEM[2048:, :].real
+    # Reshape for number of sources
+    EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
+
+    return EM
 
 
 def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,

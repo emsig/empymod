@@ -358,21 +358,21 @@ def test_check_opt(capsys):                                      # 8. check_opt
     res = utils.check_opt('spline', None, 'fht', fhtarg, 4)
     assert_allclose(res, (True, False, True, False))
     out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  Use spline\n     > pts/dec     :  43\n"
+    outstr = "   Hankel Opt.     :  Use spline\n     > pts_per_dec :  43\n"
     outstr += "   Loop over       :  Frequencies\n"
     assert out == outstr
 
     res = utils.check_opt('spline', None, 'fht', [fhtarg[0], None], 4)
     assert_allclose(res, (True, False, True, False))
     out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  Use spline\n     > pts/dec     :  "
+    outstr = "   Hankel Opt.     :  Use spline\n     > pts_per_dec :  "
     outstr += "Defined by filter (lagged)\n   Loop over       :  Frequencies\n"
     assert out == outstr
 
     res = utils.check_opt('spline', None, 'hqwe', qwehtarg, 4)
     assert_allclose(res, (True, False, True, False))
     out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  Use spline\n     > pts/dec     :  33\n"
+    outstr = "   Hankel Opt.     :  Use spline\n     > pts_per_dec :  33\n"
     outstr += "   Loop over       :  Frequencies\n"
     assert out == outstr
 
@@ -435,7 +435,7 @@ def test_check_time(capsys):                                    # 9. check_time
     assert ftarg[1] == 30
     assert ftarg[2] == 'sin'
     out, _ = capsys.readouterr()
-    outstr = "     > pts/dec     :  30"
+    outstr = "     > pts_per_dec :  30"
     assert out[-25:-1] == outstr
 
     # [filter str, pts_per_dec]
@@ -477,8 +477,8 @@ def test_check_time(capsys):                                    # 9. check_time
     # verbose
     _, f, ft, ftarg = utils.check_time(time, 0, 'fftlog', None, 4)
     out, _ = capsys.readouterr()
-    outstr = "   Fourier         :  FFTLog\n     > pts/dec"
-    assert out[24:67] == outstr
+    outstr = "   Fourier         :  FFTLog\n     > pts_per_dec"
+    assert outstr in out
     assert ft == 'fftlog'
     assert ftarg[0] == 10
     assert_allclose(ftarg[1], np.array([-2.,  1.]))
@@ -523,6 +523,8 @@ def test_check_time(capsys):                                    # 9. check_time
     assert ftarg[0] == 0.002
     assert ftarg[1] == 2048
     assert ftarg[2] == 2048
+    assert ftarg[3] == None
+    assert_allclose(f, ftarg[4])
     fres = np.array([0.002, 0.004, 0.006, 0.008, 0.01, 4.088, 4.09, 4.092,
                      4.094, 4.096])
     assert_allclose(f[:5], fres[:5])
@@ -533,6 +535,23 @@ def test_check_time(capsys):                                    # 9. check_time
     assert ftarg[0] == 0.001
     assert ftarg[1] == 2**15+1
     assert ftarg[2] == 2**16
+
+    # Several parameters; pts_per_dec
+    _, f, _, ftarg = utils.check_time(time, 0, 'fft', ['', '', '', 5], 0)
+    assert ftarg[0] == 0.002
+    assert ftarg[1] == 2048
+    assert ftarg[2] == 2048
+    assert ftarg[3] == 5
+    assert_allclose(ftarg[4][:5], fres[:5])
+    assert_allclose(ftarg[4][-5:], fres[-5:])
+    outf = np.array([2.00000000e-03, 3.22098066e-03, 5.18735822e-03,
+                     8.35419026e-03, 1.34543426e-02, 2.16680888e-02,
+                     3.48962474e-02, 5.62000691e-02, 9.05096680e-02,
+                     1.45764945e-01, 2.34753035e-01, 3.78067493e-01,
+                     6.08874043e-01, 9.80585759e-01, 1.57922389e+00,
+                     2.54332480e+00, 4.09600000e+00])
+
+    assert_allclose(f, outf)
 
     # # Various # #
 

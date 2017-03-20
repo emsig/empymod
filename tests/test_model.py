@@ -466,13 +466,15 @@ def test_dipole():                                                  # 2. dipole
     assert_allclose(dip_res, bip_res)
 
 
-def test_gpr():                                                        # 3. gpr
-    # empymod is not really designed for GPR, more work on the Hankel and
-    # Fourier transform would be required for that; furthermore, you would
-    # rather do that straight in the time domain. However, it works. We just
-    # run a test here, to check that it remains the status quo.
+def test_gpr(capsys):                                                  # 3. gpr
+    # empymod is not really designed for GPR, you would rather do that straight
+    # in the time domain. However, it works. We just run a test here, to check
+    # that it remains the status quo.
     res = DATAEMPYMOD['gprout'][()]
-    _, gprout = gpr(**res['inp'])
+    gprout = gpr(**res['inp'])
+    out, _ = capsys.readouterr()
+    assert 'GPR' in out
+    assert '> centre freq :  250000000' in out
     assert_allclose(gprout, res['GPR'])
 
 

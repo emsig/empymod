@@ -778,7 +778,7 @@ def check_opt(opt, loop, ht, htarg, verb):
     if verb > 2:
         if use_spline:
             print("   Hankel Opt.     :  Use spline")
-            pstr = "     > pts/dec     :  "
+            pstr = "     > pts_per_dec :  "
             if ht == 'hqwe':
                 print(pstr + str(htarg[4]))
             else:
@@ -908,7 +908,7 @@ def check_time(time, signal, ft, ftarg, verb):
             else:
                 print("   Fourier         :  Cosine-Filter")
             print("     > Filter      :  " + ftarg[0].name)
-            pstr = "     > pts/dec     :  "
+            pstr = "     > pts_per_dec :  "
             if ftarg[1]:
                 print(pstr + str(ftarg[1]))
             else:
@@ -971,14 +971,14 @@ def check_time(time, signal, ft, ftarg, verb):
             print("     > atol        :  " + str(ftarg[1]))
             print("     > nquad       :  " + str(ftarg[2]))
             print("     > maxint      :  " + str(ftarg[3]))
-            print("     > pts/dec     :  " + str(ftarg[4]))
+            print("     > pts_per_dec :  " + str(ftarg[4]))
             print("     > diff_quad   :  " + str(ftarg[5]))
 
         # Get required frequencies
-        g_x, _ = special.p_roots(ftarg[2])
+        g_x, _ = special.p_roots(nquad)
         minf = np.floor(10*np.log10((g_x.min() + 1)*np.pi/2/time.max()))/10
-        maxf = np.ceil(10*np.log10(ftarg[3]*np.pi/time.min()))/10
-        freq = np.logspace(minf, maxf, (maxf-minf)*ftarg[4] + 1)
+        maxf = np.ceil(10*np.log10(maxint*np.pi/time.min()))/10
+        freq = np.logspace(minf, maxf, (maxf-minf)*pts_per_dec + 1)
 
     elif ft == 'fftlog':              # FFTLog (using sine and imag-part)
 
@@ -1008,7 +1008,7 @@ def check_time(time, signal, ft, ftarg, verb):
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  FFTLog")
-            print("     > pts/dec     :  " + str(pts_per_dec))
+            print("     > pts_per_dec :  " + str(pts_per_dec))
             print("     > add_dec     :  " + str(add_dec))
             print("     > q           :  " + str(q))
 
@@ -1040,7 +1040,7 @@ def check_time(time, signal, ft, ftarg, verb):
         except:
             nfreq = np.array(2048, dtype=int)
 
-        nall = 2**np.arange(20)
+        nall = 2**np.arange(30)
         try:  # ntot
             ntot = _check_var(ftarg[2], int, 0, 'fft: ntot', ())
         except:
@@ -1051,8 +1051,25 @@ def check_time(time, signal, ft, ftarg, verb):
             if nfreq > ntot:
                 ntot = nall[np.argmax(nall >= nfreq)]
 
+        # Check pts_per_dec; defaults to None
+        try:
+            pts_per_dec = _check_var(ftarg[3], int, 0, 'fft: pts_per_dec', ())
+        except:
+            pts_per_dec = None
+
+        # Get required frequencies
+        freq = np.arange(1, nfreq+1)*dfreq
+        fftfreq = freq
+
+        # If pts_per_dec, we space actually calculated freqs logarithmically.
+        if pts_per_dec:
+            start = np.log10(fftfreq.min())
+            stop = np.log10(fftfreq.max())
+            # Overwrite freq
+            freq = np.logspace(start, stop, (stop-start)*pts_per_dec + 1)
+
         # Assemble ftarg
-        ftarg = (dfreq, nfreq, ntot)
+        ftarg = (dfreq, nfreq, ntot, pts_per_dec, fftfreq)
 
         # If verbose, print Fourier transform information
         if verb > 2:
@@ -1060,9 +1077,7 @@ def check_time(time, signal, ft, ftarg, verb):
             print("     > dfreq       :  " + str(ftarg[0]))
             print("     > nfreq       :  " + str(ftarg[1]))
             print("     > ntot        :  " + str(ftarg[2]))
-
-        # Get required frequencies
-        freq = np.arange(1, nfreq+1)*dfreq
+            print("     > pts_per_dec :  " + str(ftarg[3]))
 
     else:
         print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +

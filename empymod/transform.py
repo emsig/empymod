@@ -804,7 +804,14 @@ def fft(fEM, time, freq, ftarg):
 
     """
     # Get ftarg values
-    dfreq, nfreq, ntot = ftarg
+    dfreq, nfreq, ntot, pts_per_dec, fftfreq = ftarg
+
+    # If pts_per_dec, we have first to interpolate fEM to fftfreq
+    if pts_per_dec:
+        sfEMr = iuSpline(np.log10(freq), fEM.real)
+        sfEMi = iuSpline(np.log10(freq), fEM.imag)
+        freq = fftfreq  # Rename freq to freq for FFT
+        fEM = sfEMr(np.log10(freq)) + 1j*sfEMi(np.log10(freq))
 
     # Pad the frequency result
     fEM = np.pad(fEM, (0, ntot-nfreq), 'linear_ramp')
