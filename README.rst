@@ -61,8 +61,8 @@ I am in the process of publishing an article regarding `empymod`, and I will
 put the info here once it is a reality. If you publish results for which you
 used `empymod`, please consider citing this article. Also consider citing the
 two articles given below, *Hunziker et al, 2015*, and *Key, 2012*, without
-which `empymod` would not exist. (All releases have additionally a Zenodo-DOI,
-provided on the `release-page <https://github.com/prisae/empymod/releases>`_.)
+which `empymod` would not exist. All releases have additionally a Zenodo-DOI,
+provided on the `release-page <https://github.com/prisae/empymod/releases>`_.
 
 
 Notice

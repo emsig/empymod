@@ -49,7 +49,7 @@ electric or magnetic bipole sources, measured by arbitrary finite electric or
 magnetic bipole receivers. The model is defined by horizontal resistivity and
 anisotropy, horizontal and vertical electric permittivities and horizontal and
 vertical magnetic permeabilities. By default, the electromagnetic response is
-normalized to to source and receiver of 1 m length, and source strength of 1 A.
+normalized to source and receiver of 1 m length, and source strength of 1 A.
 
 A simple frequency-domain example, with most of the parameters left at the
 default value:
@@ -126,11 +126,10 @@ Structure
       electromagnetic response. Plus analytical, frequency-domain full- and
       half-space solutions.
     - **transform.py**: Methods to carry out the required Hankel transform from
-      wavenumber to frequency domain and Fourier transform from frequency to
-      time
+      wavenumber to space domain and Fourier transform from frequency to time
       domain.
-    - **filters.py**: Filters for the *Fast Hankel Transform* (FHT,
-      [Anderson_1982]_) and the *Fourier Sine and Cosine Transforms*
+    - **filters.py**: Filters for the *Fast Hankel Transform* FHT
+      [Anderson_1982]_, and the *Fourier Sine and Cosine Transforms*
       [Anderson_1975]_.
 
 
@@ -147,14 +146,11 @@ A list of things that should or could be added and improved:
       parallelisation, removing the `numexpr` variant.)
 
     - More modelling routines:
-        - Convolution with a wavelet for GPR (proper version of `model.gpr`).
         - Additional source-receiver arrangements (e.g. loops).
+        - Improve `model.gpr`.
         - Load and save functions to store and load model information
           (resistivity model, acquisition parameters, and modelling parameters)
           together with the modelling data.
-
-    - Module to create Hankel filters (nice to have addition, mainly for
-      educational purposes).
 
     - Abstraction of the code.
 
@@ -163,11 +159,11 @@ A list of things that should or could be added and improved:
     - Add a benchmark suite, e.g. http://asv.readthedocs.io, in addition to the
       testing suite.
 
-    - More transforms, for instance the regular FFT or QUAD for
-      frequency-to-time transformation.
-
     - Add some clever checks, e.g. as in [Key_2012]_: abort loops if the field
       is strongly attenuated.
+
+    - Module to create Hankel filters (nice to have addition, mainly for
+      educational purposes).
 
 Testing
 -------
@@ -202,8 +198,8 @@ I am in the process of publishing an article regarding `empymod`, and I will
 put the info here once it is reality. If you publish results for which you used
 `empymod`, please consider citing this article. Also consider citing
 [Hunziker_et_al_2015]_ and [Key_2012]_, without which `empymod` would not
-exist.
-
+exist. All releases have a Zenodo-DOI, provided on the `GitHub release-page
+<https://github.com/prisae/empymod/releases>`_.
 
 License
 -------
@@ -231,7 +227,7 @@ Notice
 
 This product includes software that was initially (till 01/2017) developed at
 *The Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
-http://www.imp.mx). The project was funded through *The Mexican National
+http://www.gob.mx/imp). The project was funded through *The Mexican National
 Council of Science and Technology* (*Consejo Nacional de Ciencia y Tecnología*,
 http://www.conacyt.mx).
 
@@ -261,12 +257,10 @@ Note on speed, memory, and accuracy
 -----------------------------------
 There is the usual trade-off between speed, memory, and accuracy. Very
 generally speaking we can say that the *FHT* is faster than *QWE*, but *QWE* is
-much easier on memory usage. I doubt you will ever run into memory issues with
-*QWE*, whereas for *FHT* you might for ten thousands of offsets or hundreds of
-layers. Furthermore, *QWE* allows you to control the accuracy. A standard
-quadrature in the form of *QUAD* is also provided. *QUAD* is orders of
-magnitudes slower, and more fragile depending on the input arguments. However,
-it can provide accurate results where *FHT* and *QWE* fail.
+much easier on memory usage. *QWE* allows you to control the accuracy. A
+standard quadrature in the form of *QUAD* is also provided. *QUAD* is generally
+orders of magnitudes slower, and more fragile depending on the input arguments.
+However, it can provide accurate results where *FHT* and *QWE* fail.
 
 There are two optimisation possibilities included via the ``opt``-flag:
 parallelisation (``opt='parallel'``) and spline interpolation
@@ -277,6 +271,23 @@ parallelisation (``opt='parallel'``) and spline interpolation
 I am sure `empymod` could be made much faster with cleverer coding style or
 with the likes of `cython` or `numba`. Suggestions and contributions are
 welcomed!
+
+
+Included transforms
+'''''''''''''''''''
+
+**Hankel transform**:
+
+    - Fast Hankel Transform *FHT* ([Gosh_1971]_)
+    - Quadrature with Extrapolation *QWE* ([Key_2012]_)
+    - Adaptive quadrature from `QUADPACK`
+
+**Fourier transform**:
+
+    - Sine- and Cosine filters ([Anderson_1975]_)
+    - Quadrature with Extrapolation *QWE* ([Key_2012]_)
+    - Fast Fourier Transform *FFT*
+    - Logarithmic Fast Fourier Transform *FFTLog* ([Hamilton_2000]_)
 
 
 Depths, Rotation, and Bipole
@@ -290,7 +301,7 @@ z can be calculated in one kernel call. For arbitrary aligned di- or bipoles,
 3 kernel calls are required. If source and receiver are arbitrary aligned,
 3x3 hence 9 kernel calls are required.
 
-**Bipole**: Bipole increase the calculation time by the amount of integration
+**Bipole**: Bipoles increase the calculation time by the amount of integration
 points used. For a source and a receiver bipole with each 5 integration points
 you need 5x5 hence 25 kernel calls. You can calculate it in 1 kernel call if
 you set both integration points to 1, and hence calculate the bipole as if they
@@ -392,9 +403,9 @@ can achieve higher precision, normally at the cost of speed.
     with the non-spline version if you can apply the spline-version to your
     problem at hand!
 
-Be aware that *QUAD* (Hankel transform) and the *QWE*- and the *FHT*-Versions
-for the frequency-to-time transformation as well as *FFTLog* *always* use the
-splined version and *always* loop over offsets.
+Be aware that *QUAD* (Hankel transform) *always* use the splined version and
+*always* loop over offsets. The same applies for all frequency-to-time
+transformations.
 
 The splined versions of *QWE* check whether the ratio first interval /
 second interval is above a certain threshold (steep end of the wavenumber or
@@ -410,11 +421,11 @@ vectorized (for the *FHT*), which is the default. The ``loop`` parameter gives
 you the possibility to force looping over frequencies or offsets. This
 parameter can have severe effects on both runtime and memory usage. Play around
 with this factor to find the fastest version for your problem at hand. It
-ALWAYS loops over frequencies if ``ht = 'QWE'`` or if ``opt = 'spline'``.  All
-vectorized is very fast if there are few offsets or few frequencies. If there
-are many offsets and many frequencies, looping over the smaller of the two will
-be faster. Choosing the right looping together with ``opt = 'parallel'`` can
-have a huge influence.
+ALWAYS loops over frequencies if ``ht = 'QWE'/'QUAD'`` or if ``opt =
+'spline'``.  All vectorized is very fast if there are few offsets or few
+frequencies. If there are many offsets and many frequencies, looping over the
+smaller of the two will be faster. Choosing the right looping together with
+``opt = 'parallel'`` can have a huge influence.
 
 Vertical components
 '''''''''''''''''''
