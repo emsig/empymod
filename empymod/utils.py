@@ -436,15 +436,12 @@ def check_hankel(ht, htarg, verb):
 
     if ht == 'fht':    # If FHT, check filter settings
 
-        # Check Input
-        if not htarg:  # If None, create empty list
-            htarg = []
-        elif not isinstance(htarg, (list, tuple)):  # If only filter
-            htarg = [htarg, ]
+        # Get and check input or set defaults
+        htarg = _check_targ(htarg, ['fhtfilt', 'pts_per_dec'])
 
         # Check filter; defaults to key_201_2009
         try:
-            fhtfilt = htarg[0]
+            fhtfilt = htarg['fhtfilt']
             if not hasattr(fhtfilt, 'base'):
                 fhtfilt = getattr(filters, fhtfilt)()
         except:
@@ -452,7 +449,8 @@ def check_hankel(ht, htarg, verb):
 
         # Check pts_per_dec; defaults to None
         try:
-            pts_per_dec = _check_var(htarg[1], int, 0, 'fht: pts_per_dec', ())
+            pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
+                                     'fht: pts_per_dec', ())
         except:
             pts_per_dec = None
 
@@ -463,8 +461,8 @@ def check_hankel(ht, htarg, verb):
         if verb > 2:
             print("   Hankel          :  Fast Hankel Transform")
             print("     > Filter      :  " + fhtfilt.name)
-            if htarg[1]:
-                print("     > pts_per_dec :  " + str(htarg[1]))
+            if pts_per_dec:
+                print("     > pts_per_dec :  " + str(pts_per_dec))
             else:
                 print("     > pts_per_dec :  Defined by filter (lagged)")
 
@@ -473,60 +471,63 @@ def check_hankel(ht, htarg, verb):
         ht = 'hqwe'
 
         # Get and check input or set defaults
-        if not htarg:
-            htarg = []
+        htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
+                            'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
 
         # rtol : 1e-12
         try:
-            rtol = _check_var(htarg[0], float, 0, 'qwe: rtol', ())
+            rtol = _check_var(htarg['rtol'], float, 0, 'qwe: rtol', ())
         except:
             rtol = np.array(1e-12, dtype=float)
 
         # atol : 1e-30
         try:
-            atol = _check_var(htarg[1], float, 0, 'qwe: atol', ())
+            atol = _check_var(htarg['atol'], float, 0, 'qwe: atol', ())
         except:
             atol = np.array(1e-30, dtype=float)
 
         # nquad : 51
         try:
-            nquad = _check_var(htarg[2], int, 0, 'qwe: nquad', ())
+            nquad = _check_var(htarg['nquad'], int, 0, 'qwe: nquad', ())
         except:
             nquad = np.array(51, dtype=int)
 
         # maxint : 100
         try:
-            maxint = _check_var(htarg[3], int, 0, 'qwe: maxint', ())
+            maxint = _check_var(htarg['maxint'], int, 0, 'qwe: maxint', ())
         except:
             maxint = np.array(100, dtype=int)
 
         # pts_per_dec : 80
         try:
-            pts_per_dec = _check_var(htarg[4], int, 0, 'qwe: pts_per_dec', ())
+            pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
+                                     'qwe: pts_per_dec', ())
         except:
             pts_per_dec = np.array(80, dtype=int)
 
         # diff_quad : 100
         try:
-            diff_quad = _check_var(htarg[5], float, 0, 'qwe: diff_quad', ())
+            diff_quad = _check_var(htarg['diff_quad'], float, 0,
+                                   'qwe: diff_quad', ())
         except:
             diff_quad = np.array(100, dtype=float)
 
         # a : None
         try:
-            a = _check_var(htarg[6], float, 0, 'qwe: a (quad)', ())
+            a = _check_var(htarg['a'], float, 0, 'qwe: a (quad)', ())
         except:
             a = None
 
         # b : None
         try:
-            b = _check_var(htarg[7], float, 0, 'qwe: b (quad)', ())
+            b = _check_var(htarg['b'], float, 0, 'qwe: b (quad)', ())
         except:
             b = None
 
         # limit : None
         try:
-            limit = _check_var(htarg[8], float, 0, 'qwe: limit (quad)', ())
+            limit = _check_var(htarg['limit'], float, 0, 'qwe: limit (quad)',
+                               ())
         except:
             limit = None
 
@@ -537,60 +538,61 @@ def check_hankel(ht, htarg, verb):
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  Quadrature-with-Extrapolation")
-            print("     > rtol        :  " + str(htarg[0]))
-            print("     > atol        :  " + str(htarg[1]))
-            print("     > nquad       :  " + str(htarg[2]))
-            print("     > maxint      :  " + str(htarg[3]))
-            print("     > pts_per_dec :  " + str(htarg[4]))
-            print("     > diff_quad   :  " + str(htarg[5]))
+            print("     > rtol        :  " + str(rtol))
+            print("     > atol        :  " + str(atol))
+            print("     > nquad       :  " + str(nquad))
+            print("     > maxint      :  " + str(maxint))
+            print("     > pts_per_dec :  " + str(pts_per_dec))
+            print("     > diff_quad   :  " + str(diff_quad))
             if a:
-                print("     > a     (quad):  " + str(htarg[6]))
+                print("     > a     (quad):  " + str(a))
             if b:
-                print("     > b     (quad):  " + str(htarg[7]))
+                print("     > b     (quad):  " + str(b))
             if limit:
-                print("     > limit (quad):  " + str(htarg[8]))
+                print("     > limit (quad):  " + str(limit))
 
     elif ht in ['quad', 'hquad']:
         # Rename ht
         ht = 'hquad'
 
         # Get and check input or set defaults
-        if not htarg:
-            htarg = []
+        htarg = _check_targ(htarg, ['rtol', 'atol', 'limit', 'a', 'b',
+                                    'pts_per_dec'])
 
         # rtol : 1e-12
         try:
-            rtol = _check_var(htarg[0], float, 0, 'quad: rtol', ())
+            rtol = _check_var(htarg['rtol'], float, 0, 'quad: rtol', ())
         except:
             rtol = np.array(1e-12, dtype=float)
 
         # atol : 1e-20
         try:
-            atol = _check_var(htarg[1], float, 0, 'quad: atol', ())
+            atol = _check_var(htarg['atol'], float, 0, 'quad: atol', ())
         except:
             atol = np.array(1e-20, dtype=float)
 
         # limit : 500
         try:
-            limit = _check_var(htarg[2], int, 0, 'quad: limit', ())
+            limit = _check_var(htarg['limit'], int, 0, 'quad: limit', ())
         except:
             limit = np.array(500, dtype=int)
 
         # a : 1e-6
         try:
-            a = _check_var(htarg[3], float, 0, 'quad: a', ())
+            a = _check_var(htarg['a'], float, 0, 'quad: a', ())
         except:
             a = np.array(1e-6, dtype=float)
 
         # b : 0.1
         try:
-            b = _check_var(htarg[4], float, 0, 'quad: b', ())
+            b = _check_var(htarg['b'], float, 0, 'quad: b', ())
         except:
             b = np.array(0.1, dtype=float)
 
         # pts_per_dec : 40
         try:
-            pts_per_dec = _check_var(htarg[5], int, 0, 'quad: pts_per_dec', ())
+            pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
+                                     'quad: pts_per_dec', ())
         except:
             pts_per_dec = np.array(40, dtype=int)
 
@@ -600,12 +602,12 @@ def check_hankel(ht, htarg, verb):
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  Quadrature")
-            print("     > rtol        :  " + str(htarg[0]))
-            print("     > atol        :  " + str(htarg[1]))
-            print("     > limit       :  " + str(htarg[2]))
-            print("     > a           :  " + str(htarg[3]))
-            print("     > b           :  " + str(htarg[4]))
-            print("     > pts_per_dec :  " + str(htarg[5]))
+            print("     > rtol        :  " + str(rtol))
+            print("     > atol        :  " + str(atol))
+            print("     > limit       :  " + str(limit))
+            print("     > a           :  " + str(a))
+            print("     > b           :  " + str(b))
+            print("     > pts_per_dec :  " + str(pts_per_dec))
 
     else:
         print("* ERROR   :: <ht> must be one of: ['fht', 'qwe', 'quad'];" +
@@ -898,14 +900,11 @@ def check_time(time, signal, ft, ftarg, verb):
             ft = 'sin'
 
         # Check Input
-        if not ftarg:  # If None, create empty list
-            ftarg = []
-        elif not isinstance(ftarg, (list, tuple)):  # If only filter
-            ftarg = [ftarg, ]
+        ftarg = _check_targ(ftarg, ['fftfilt', 'pts_per_dec', 'ft'])
 
         # Check filter; defaults to key_201_CosSin_2012
         try:
-            fftfilt = ftarg[0]
+            fftfilt = ftarg['fftfilt']
             if not hasattr(fftfilt, 'base'):
                 fftfilt = getattr(filters, fftfilt)()
         except:
@@ -913,7 +912,8 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # Check pts_per_dec; defaults to None
         try:
-            pts_per_dec = _check_var(ftarg[1], int, 0, ft + 'pts_per_dec', ())
+            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
+                                     ft + 'pts_per_dec', ())
         except:
             pts_per_dec = None
 
@@ -926,10 +926,10 @@ def check_time(time, signal, ft, ftarg, verb):
                 print("   Fourier         :  Sine-Filter")
             else:
                 print("   Fourier         :  Cosine-Filter")
-            print("     > Filter      :  " + ftarg[0].name)
+            print("     > Filter      :  " + fftfilt.name)
             pstr = "     > pts_per_dec :  "
-            if ftarg[1]:
-                print(pstr + str(ftarg[1]))
+            if pts_per_dec:
+                print(pstr + str(pts_per_dec))
             else:
                 print(pstr + 'Defined by filter (lagged)')
 
@@ -946,55 +946,58 @@ def check_time(time, signal, ft, ftarg, verb):
         ft = 'fqwe'
 
         # Get and check input or set defaults
-        if not ftarg:  # Default values
-            ftarg = []
+        ftarg = _check_targ(ftarg, ['rtol', 'atol', 'nquad', 'maxint',
+                            'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
 
         try:  # rtol
-            rtol = _check_var(ftarg[0], float, 0, 'qwe: rtol', ())
+            rtol = _check_var(ftarg['rtol'], float, 0, 'qwe: rtol', ())
         except:
             rtol = np.array(1e-8, dtype=float)
 
         try:  # atol
-            atol = _check_var(ftarg[1], float, 0, 'qwe: atol', ())
+            atol = _check_var(ftarg['atol'], float, 0, 'qwe: atol', ())
         except:
             atol = np.array(1e-20, dtype=float)
 
         try:  # nquad
-            nquad = _check_var(ftarg[2], int, 0, 'qwe: nquad', ())
+            nquad = _check_var(ftarg['nquad'], int, 0, 'qwe: nquad', ())
         except:
             nquad = np.array(21, dtype=int)
 
         try:  # maxint
-            maxint = _check_var(ftarg[3], int, 0, 'qwe: maxint', ())
+            maxint = _check_var(ftarg['maxint'], int, 0, 'qwe: maxint', ())
         except:
             maxint = np.array(200, dtype=int)
 
         try:  # pts_per_dec
-            pts_per_dec = _check_var(ftarg[4], int, 0, 'qwe: pts_per_dec', ())
+            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
+                                     'qwe: pts_per_dec', ())
         except:
             pts_per_dec = np.array(20, dtype=int)
 
         # diff_quad : 100
         try:
-            diff_quad = _check_var(ftarg[5], int, 0, 'qwe: diff_quad', ())
+            diff_quad = _check_var(ftarg['diff_quad'], int, 0,
+                                   'qwe: diff_quad', ())
         except:
             diff_quad = np.array(100, dtype=int)
 
         # a : None
         try:
-            a = _check_var(ftarg[6], float, 0, 'qwe: a (quad)', ())
+            a = _check_var(ftarg['a'], float, 0, 'qwe: a (quad)', ())
         except:
             a = None
 
         # b : None
         try:
-            b = _check_var(ftarg[7], float, 0, 'qwe: b (quad)', ())
+            b = _check_var(ftarg['b'], float, 0, 'qwe: b (quad)', ())
         except:
             b = None
 
         # limit : None
         try:
-            limit = _check_var(ftarg[8], float, 0, 'qwe: limit (quad)', ())
+            limit = _check_var(ftarg['limit'], float, 0, 'qwe: limit (quad)',
+                               ())
         except:
             limit = None
 
@@ -1005,18 +1008,18 @@ def check_time(time, signal, ft, ftarg, verb):
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  Quadrature-with-Extrapolation")
-            print("     > rtol        :  " + str(ftarg[0]))
-            print("     > atol        :  " + str(ftarg[1]))
-            print("     > nquad       :  " + str(ftarg[2]))
-            print("     > maxint      :  " + str(ftarg[3]))
-            print("     > pts_per_dec :  " + str(ftarg[4]))
-            print("     > diff_quad   :  " + str(ftarg[5]))
+            print("     > rtol        :  " + str(rtol))
+            print("     > atol        :  " + str(atol))
+            print("     > nquad       :  " + str(nquad))
+            print("     > maxint      :  " + str(maxint))
+            print("     > pts_per_dec :  " + str(pts_per_dec))
+            print("     > diff_quad   :  " + str(diff_quad))
             if a:
-                print("     > a     (quad):  " + str(ftarg[6]))
+                print("     > a     (quad):  " + str(a))
             if b:
-                print("     > b     (quad):  " + str(ftarg[7]))
+                print("     > b     (quad):  " + str(b))
             if limit:
-                print("     > limit (quad):  " + str(ftarg[8]))
+                print("     > limit (quad):  " + str(limit))
 
         # Get required frequencies
         g_x, _ = special.p_roots(nquad)
@@ -1027,22 +1030,23 @@ def check_time(time, signal, ft, ftarg, verb):
     elif ft == 'fftlog':              # FFTLog (using sine and imag-part)
 
         # Get and check input or set defaults
-        if not ftarg:  # Default values
-            ftarg = []
+        ftarg = _check_targ(ftarg, ['pts_per_dec', 'add_dec', 'q', 'tcalc',
+                                    'dlnr', 'kr', 'rk'])
 
         try:  # pts_per_dec
-            pts_per_dec = _check_var(ftarg[0], int, 0,
+            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'fftlog: pts_per_dec', ())
         except:
             pts_per_dec = np.array(10, dtype=int)
 
         try:  # add_dec
-            add_dec = _check_var(ftarg[1], float, 1, 'fftlog: add_dec', (2,))
+            add_dec = _check_var(ftarg['add_dec'], float, 1, 'fftlog: add_dec',
+                                 (2,))
         except:
             add_dec = np.array([-2, 1], dtype=float)
 
         try:  # q
-            q = _check_var(ftarg[2], float, 0, 'fftlog: q', ())
+            q = _check_var(ftarg['q'], float, 0, 'fftlog: q', ())
             # Restrict q to +/- 1
             if np.abs(q) > 1:
                 q = np.sign(q)
@@ -1071,22 +1075,22 @@ def check_time(time, signal, ft, ftarg, verb):
     elif ft == 'fft':                 # FFT
 
         # Get and check input or set defaults
-        if not ftarg:  # Default values
-            ftarg = []
+        ftarg = _check_targ(ftarg, ['dfreq', 'nfreq', 'ntot', 'pts_per_dec',
+                                    'fftfreq'])
 
         try:  # dfreq
-            dfreq = _check_var(ftarg[0], float, 0, 'fft: dfreq', ())
+            dfreq = _check_var(ftarg['dfreq'], float, 0, 'fft: dfreq', ())
         except:
             dfreq = np.array(0.002, dtype=float)
 
         try:  # nfreq
-            nfreq = _check_var(ftarg[1], int, 0, 'fft: nfreq', ())
+            nfreq = _check_var(ftarg['nfreq'], int, 0, 'fft: nfreq', ())
         except:
             nfreq = np.array(2048, dtype=int)
 
         nall = 2**np.arange(30)
         try:  # ntot
-            ntot = _check_var(ftarg[2], int, 0, 'fft: ntot', ())
+            ntot = _check_var(ftarg['ntot'], int, 0, 'fft: ntot', ())
         except:
             # We could use here fftpack.next_fast_len, but tests have shown
             # that powers of two yield better results in this case.
@@ -1097,7 +1101,8 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # Check pts_per_dec; defaults to None
         try:
-            pts_per_dec = _check_var(ftarg[3], int, 0, 'fft: pts_per_dec', ())
+            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
+                                     'fft: pts_per_dec', ())
         except:
             pts_per_dec = None
 
@@ -1652,3 +1657,14 @@ def _check_min(par, minval, name, unit, verb):
         print('* WARNING :: ' + name + ' < ' + str(minval) + ' ' + unit +
               ' are set to ' + str(minval) + ' ' + unit + '!')
     return par
+
+
+def _check_targ(targ, keys):
+    """Check format of htarg/ftarg and return dict."""
+    if not targ:                               # If None
+        targ = {}
+    elif not isinstance(targ, (list, tuple)):  # If only one value
+        targ = [targ, ]
+    if isinstance(targ, list):                 # Put list into dict
+        targ = {keys[i]: targ[i] for i in range(len(targ))}
+    return targ

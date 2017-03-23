@@ -341,7 +341,6 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
         sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
 
-
         # Get quadargs: diff_quad, a, b, limit
         diff_quad, a, b, limit = qweargs[5:]
 
@@ -351,11 +350,11 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         if not a:
             a = intervals[:, 0]
         else:
-            a *= np.ones(off.shape)
+            a = a*np.ones(off.shape)
         if not b:
             b = intervals[:, -1]
         else:
-            b *= np.ones(off.shape)
+            b = b*np.ones(off.shape)
 
         # Check if we use QWE or SciPy's QUAD
         # If there are any steep decays within an interval we have to use QUAD,
@@ -365,7 +364,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         doqwe = np.all((np.abs(sPJ0r(check0) + 1j*sPJ0i(check0) +
                         sPJ1r(check0) + 1j*sPJ1i(check0) +
                         sPJ0br(check0) + 1j*sPJ0bi(check0)) /
-                 np.abs(sPJ0r(check1) + 1j*sPJ0i(check1) +
+                        np.abs(sPJ0r(check1) + 1j*sPJ0i(check1) +
                         sPJ1r(check1) + 1j*sPJ1i(check1) +
                         sPJ0br(check1) + 1j*sPJ0bi(check1)) < diff_quad), 1)
 
@@ -639,7 +638,8 @@ def fqwe(fEM, time, freq, qweargs):
     check0 = np.log10(intervals[:, :-1])
     check1 = np.log10(intervals[:, 1:])
     doqwe = np.all((np.abs(tEM_rint(check0) + 1j*tEM_iint(check0)) /
-             np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < diff_quad), 1)
+                   np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < diff_quad),
+                   1)
 
     # Set quadargs if not given:
     if not limit:
@@ -647,11 +647,11 @@ def fqwe(fEM, time, freq, qweargs):
     if not a:
         a = intervals[:, 0]
     else:
-        a *= np.ones(off.shape)
+        a = a*np.ones(time.shape)
     if not b:
         b = intervals[:, -1]
     else:
-        b *= np.ones(off.shape)
+        b = b*np.ones(time.shape)
 
     # Pre-allocate output array
     tEM = np.zeros(time.size)

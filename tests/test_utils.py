@@ -244,16 +244,16 @@ def test_check_hankel(capsys):                                # 6. check_hankel
     assert out[:63] == outstr
     assert ht == 'hqwe'
     assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 80, 100])
-    assert htarg[-3] == None
-    assert htarg[-2] == None
-    assert htarg[-1] == None
+    assert htarg[-3] is None
+    assert htarg[-2] is None
+    assert htarg[-1] is None
 
     # only last argument
     _, htarg = utils.check_hankel('qwe', ['', '', '', '', '', '', '', '', 30],
                                   0)
     assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 80, 100])
-    assert htarg[-3] == None
-    assert htarg[-2] == None
+    assert htarg[-3] is None
+    assert htarg[-2] is None
     assert htarg[-1] == 30
     # all arguments
     _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30, 200, 1e-6,
@@ -470,16 +470,16 @@ def test_check_time(capsys):                                    # 9. check_time
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 99)
-    assert ftarg[-3] == None
-    assert ftarg[-2] == None
-    assert ftarg[-1] == None
+    assert ftarg[-3] is None
+    assert ftarg[-2] is None
+    assert ftarg[-1] is None
 
     # only last argument
     _, _, _, ftarg = utils.check_time(time, 1, 'fqwe',
                                       ['', '', '', '', '', '', '', '', 30], 0)
     assert_allclose(ftarg[:-3], [1e-8, 1e-20, 21, 200, 20, 100])
-    assert ftarg[-3] == None
-    assert ftarg[-2] == None
+    assert ftarg[-3] is None
+    assert ftarg[-2] is None
     assert ftarg[-1] == 30
 
     # all arguments
@@ -537,7 +537,7 @@ def test_check_time(capsys):                                    # 9. check_time
     assert ftarg[0] == 0.002
     assert ftarg[1] == 2048
     assert ftarg[2] == 2048
-    assert ftarg[3] == None
+    assert ftarg[3] is None
     assert_allclose(f, ftarg[4])
     fres = np.array([0.002, 0.004, 0.006, 0.008, 0.01, 4.088, 4.09, 4.092,
                      4.094, 4.096])

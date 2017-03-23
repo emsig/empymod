@@ -2,19 +2,22 @@
 
 ## latest
 
-* Add additional transforms:
+* Add additional transforms and improve QWE:
     - Conventional adaptive quadrature (QUADPACK) for the Hankel transform;
     - Conventional FFT for the Fourier transform.
+    - Add `diff_quad` to `htarg`/`ftarg` of QWE, a switch parameter for
+      QWE/QUAD.
+    - Change QWE/QUAD switch from comparing first interval to comparing all
+      intervals.
+    - Add parameters for QUAD (a, b, limit) into `htarg`/`ftarg` for QWE.
 
-* Improve `model.gpr`; still experimental.
+* Allow `htarg`/`ftarg` as dict additionally to list/tuple.
+
+* Improve `model.gpr`.
 
 * Internal changes:
     - Rename internally the sine/cosine filter from `fft` to `ffht`, because of
       the addition of the Fast Fourier Transform `fft`.
-    - Add `diff_quad` to `htarg` of QWE, a switch parameter for QWE/QUAD.
-    - Add parameters for QUAD into `htarg` for QWE.
-    - Change QWE/QUAD switch from comparing first interval to comparing all
-      intervalls.
 
 * Bug fixes and documentation improvements
 

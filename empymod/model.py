@@ -167,10 +167,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
         for the Hankel transform.  Defaults to 'fht'.
 
-    htarg : str or filter from empymod.filters or array_like, optional
+    htarg : dict or list, optional
         Depends on the value for `ht`:
-            - If `ht` = 'fht': array containing:
-              [filter, pts_per_dec]:
+            - If `ht` = 'fht': [filter, pts_per_dec]:
 
                 - filter: string of filter name in `empymod.filters` or
                           the filter method itself.
@@ -179,8 +178,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                                If none, standard lagged convolution is used.
                                 (default: None)
 
-            - If `ht` = 'qwe': array containing:
-              [rtol, atol, nquad, maxint, pts_per_dec]:
+            - If `ht` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
+                                diff_quad, a, b, limit]:
 
                 - rtol: relative tolerance (default: 1e-12)
                 - atol: absolute tolerance (default: 1e-30)
@@ -191,9 +190,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                                (default: 80)
                 - diff_quad: criteria when to swap to QUAD (only relevant if
                   opt='spline') (default: 100)
+                - a: lower limit for QUAD (default: first interval from QWE)
+                - b: upper limit for QUAD (default: last interval from QWE)
+                - limit: limit for quad (default: maxint)
 
-            - If `ht` = 'quad': array containing:
-              [atol, rtol, limit, lmin, lmax, pts_per_dec]:
+            - If `ht` = 'quad': [atol, rtol, limit, lmin, lmax, pts_per_dec]:
 
                 - rtol: relative tolerance (default: 1e-12)
                 - atol: absolute tolerance (default: 1e-20)
@@ -203,19 +204,25 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - lmax: Maximum wavenumber (default 0.1)
                 - pts_per_dec: points per decade (default: 40)
 
-        All `htarg`-parameters are optional, you only have to maintain the
-        order. For example, to only change `nquad` in `qwe` to 11 and use the
-        defaults otherwise, you can provide htarg=['', '', 11].
+        The values can be provided as dict with the keywords, or as list.
+        However, if provided as list, you have to follow the order given above.
+        A few examples, assuming `ht` = `qwe`:
+
+            - Only changing rtol:
+                {'rtol': 1e-4} or [1e-4] or 1e-4
+            - Changing rtol and nquad:
+                {'rtol': 1e-4, 'nquad': 101} or [1e-4, '', 101]
+            - Only changing diff_quad:
+                {'diffquad': 10} or ['', '', '', '', '', 10]
 
     ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if `signal` != None. Flag to choose either the Sine- or
         Cosine-Filter, the Quadrature-With-Extrapolation (QWE), the FFTLog, or
         the FFT for the Fourier transform.  Defaults to 'sin'.
 
-    ftarg : str or filter from empymod.filters or array_like, optional
+    ftarg : dict or list, optional
         Only used if `signal` !=None. Depends on the value for `ft`:
-            - If `ft` = 'sin' or 'cos': array containing:
-              [filter, pts_per_dec]:
+            - If `ft` = 'sin' or 'cos': [filter, pts_per_dec]:
 
                 - filter: string of filter name in `empymod.filters` or
                           the filter method itself.
@@ -223,8 +230,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - pts_per_dec: points per decade.  If none, standard lagged
                                convolution is used. (Default: None)
 
-            - If `ft` = 'qwe': array containing:
-              [rtol, atol, nquad, maxint, pts_per_dec]:
+            - If `ft` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
 
                 - rtol: relative tolerance (default: 1e-8)
                 - atol: absolute tolerance (default: 1e-20)
@@ -233,14 +239,17 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                           (default: 200)
                 - pts_per_dec: points per decade (default: 20)
                 - diff_quad: criteria when to swap to QUAD (default: 100)
+                - a: lower limit for QUAD (default: first interval from QWE)
+                - b: upper limit for QUAD (default: last interval from QWE)
+                - limit: limit for quad (default: maxint)
 
-            - If `ft` = 'fftlog': array containing: [pts_per_dec, add_dec, q]:
+            - If `ft` = 'fftlog': [pts_per_dec, add_dec, q]:
 
                 - pts_per_dec: sampels per decade (default: 10)
                 - add_dec: additional decades [left, right] (default: [-2, 1])
                 - q: exponent of power law bias (default: 0); -1 <= q <= 1
 
-            - If `ft` = 'fft': array containing: [dfreq, nfreq, ntot]:
+            - If `ft` = 'fft': [dfreq, nfreq, ntot]:
 
                 - dfreq: Linear step-size of frequencies (default: 0.002)
                 - nfreq: Number of frequencies (default: 2048)
@@ -255,9 +264,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 spaced with the given number per decade, and then interpolated
                 to yield the required frequencies for the FFT.
 
-        All `ftarg`-parameters are optional, you only have to maintain the
-        order. For example, to only change `nquad` in `qwe` to 11 and use the
-        defaults otherwise, you can provide ftarg=['', '', 11].
+        The values can be provided as dict with the keywords, or as list.
+        However, if provided as list, you have to follow the order given above.
+        See `htarg` for a few examples.
 
     opt : {None, 'parallel', 'spline'}, optional
         Optimization flag. Defaults to None:
@@ -281,7 +290,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
               interpolation.) If spline is set it will make use of the
               parameter pts_per_dec that can be defined in htarg. If
               pts_per_dec is not set for FHT, then the *lagged* version is
-              used, else the *splined*.
+              used, else the *splined*. This option has no effect on QUAD.
 
         The option 'parallel' only affects speed and memory usage, whereas
         'spline' also affects precision!  Please read the note in the *README*
@@ -663,10 +672,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
         for the Hankel transform.  Defaults to 'fht'.
 
-    htarg : str or filter from empymod.filters or array_like, optional
+    htarg : dict or list, optional
         Depends on the value for `ht`:
-            - If `ht` = 'fht': array containing:
-              [filter, pts_per_dec]:
+            - If `ht` = 'fht': [filter, pts_per_dec]:
 
                 - filter: string of filter name in `empymod.filters` or
                           the filter method itself.
@@ -675,8 +683,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                                If none, standard lagged convolution is used.
                                 (default: None)
 
-            - If `ht` = 'qwe': array containing:
-              [rtol, atol, nquad, maxint, pts_per_dec]:
+            - If `ht` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
+                                diff_quad, a, b, limit]:
 
                 - rtol: relative tolerance (default: 1e-12)
                 - atol: absolute tolerance (default: 1e-30)
@@ -687,9 +695,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                                (default: 80)
                 - diff_quad: criteria when to swap to QUAD (only relevant if
                   opt='spline') (default: 100)
+                - a: lower limit for QUAD (default: first interval from QWE)
+                - b: upper limit for QUAD (default: last interval from QWE)
+                - limit: limit for quad (default: maxint)
 
-            - If `ht` = 'quad': array containing:
-              [atol, rtol, limit, lmin, lmax, pts_per_dec]:
+            - If `ht` = 'quad': [atol, rtol, limit, lmin, lmax, pts_per_dec]:
 
                 - rtol: relative tolerance (default: 1e-12)
                 - atol: absolute tolerance (default: 1e-20)
@@ -699,19 +709,25 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - lmax: Maximum wavenumber (default 0.1)
                 - pts_per_dec: points per decade (default: 40)
 
-        All `htarg`-parameters are optional, you only have to maintain the
-        order. For example, to only change `nquad` in `qwe` to 11 and use the
-        defaults otherwise, you can provide htarg=['', '', 11].
+        The values can be provided as dict with the keywords, or as list.
+        However, if provided as list, you have to follow the order given above.
+        A few examples, assuming `ht` = `qwe`:
+
+            - Only changing rtol:
+                {'rtol': 1e-4} or [1e-4] or 1e-4
+            - Changing rtol and nquad:
+                {'rtol': 1e-4, 'nquad': 101} or [1e-4, '', 101]
+            - Only changing diff_quad:
+                {'diffquad': 10} or ['', '', '', '', '', 10]
 
     ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if `signal` != None. Flag to choose either the Sine- or
         Cosine-Filter, the Quadrature-With-Extrapolation (QWE), the FFTLog, or
         the FFT for the Fourier transform.  Defaults to 'sin'.
 
-    ftarg : str or filter from empymod.filters or array_like, optional
+    ftarg : dict or list, optional
         Only used if `signal` !=None. Depends on the value for `ft`:
-            - If `ft` = 'sin' or 'cos': array containing:
-              [filter, pts_per_dec]:
+            - If `ft` = 'sin' or 'cos': [filter, pts_per_dec]:
 
                 - filter: string of filter name in `empymod.filters` or
                           the filter method itself.
@@ -719,8 +735,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - pts_per_dec: points per decade.  If none, standard lagged
                                convolution is used. (Default: None)
 
-            - If `ft` = 'qwe': array containing:
-              [rtol, atol, nquad, maxint, pts_per_dec]:
+            - If `ft` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
 
                 - rtol: relative tolerance (default: 1e-8)
                 - atol: absolute tolerance (default: 1e-20)
@@ -729,14 +744,17 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                           (default: 200)
                 - pts_per_dec: points per decade (default: 20)
                 - diff_quad: criteria when to swap to QUAD (default: 100)
+                - a: lower limit for QUAD (default: first interval from QWE)
+                - b: upper limit for QUAD (default: last interval from QWE)
+                - limit: limit for quad (default: maxint)
 
-            - If `ft` = 'fftlog': array containing: [pts_per_dec, add_dec, q]:
+            - If `ft` = 'fftlog': [pts_per_dec, add_dec, q]:
 
                 - pts_per_dec: sampels per decade (default: 10)
                 - add_dec: additional decades [left, right] (default: [-2, 1])
                 - q: exponent of power law bias (default: 0); -1 <= q <= 1
 
-            - If `ft` = 'fft': array containing: [dfreq, nfreq, ntot]:
+            - If `ft` = 'fft': [dfreq, nfreq, ntot]:
 
                 - dfreq: Linear step-size of frequencies (default: 0.002)
                 - nfreq: Number of frequencies (default: 2048)
@@ -751,9 +769,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 spaced with the given number per decade, and then interpolated
                 to yield the required frequencies for the FFT.
 
-        All `ftarg`-parameters are optional, you only have to maintain the
-        order. For example, to only change `nquad` in `qwe` to 11 and use the
-        defaults otherwise, you can provide ftarg=['', '', 11].
+        The values can be provided as dict with the keywords, or as list.
+        However, if provided as list, you have to follow the order given above.
+        See `htarg` for a few examples.
 
     opt : {None, 'parallel', 'spline'}, optional
         Optimization flag. Defaults to None:
@@ -777,7 +795,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
               interpolation.) If spline is set it will make use of the
               parameter pts_per_dec that can be defined in htarg. If
               pts_per_dec is not set for FHT, then the *lagged* version is
-              used, else the *splined*.
+              used, else the *splined*. This option has no effect on QUAD.
 
         The option 'parallel' only affects speed and memory usage, whereas
         'spline' also affects precision!  Please read the note in the *README*
