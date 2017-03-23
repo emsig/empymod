@@ -358,21 +358,21 @@ def test_check_opt(capsys):                                      # 8. check_opt
     res = utils.check_opt('spline', None, 'fht', fhtarg, 4)
     assert_allclose(res, (True, False, True, False))
     out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  Use spline\n     > pts_per_dec :  43\n"
+    outstr = "   Hankel Opt.     :  Use spline\n"
     outstr += "   Loop over       :  Frequencies\n"
     assert out == outstr
 
     res = utils.check_opt('spline', None, 'fht', [fhtarg[0], None], 4)
     assert_allclose(res, (True, False, True, False))
     out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  Use spline\n     > pts_per_dec :  "
-    outstr += "Defined by filter (lagged)\n   Loop over       :  Frequencies\n"
+    outstr = "   Hankel Opt.     :  Use spline\n"
+    outstr += "   Loop over       :  Frequencies\n"
     assert out == outstr
 
     res = utils.check_opt('spline', None, 'hqwe', qwehtarg, 4)
     assert_allclose(res, (True, False, True, False))
     out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  Use spline\n     > pts_per_dec :  33\n"
+    outstr = "   Hankel Opt.     :  Use spline\n"
     outstr += "   Loop over       :  Frequencies\n"
     assert out == outstr
 

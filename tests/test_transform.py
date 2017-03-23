@@ -16,7 +16,7 @@ DATA = np.load(join(dirname(__file__), 'data_transform.npz'))
 
 
 @pytest.mark.parametrize("htype", ['fht', 'hqwe', 'hquad'])
-def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
+def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
     # Compare wavenumber-domain calculation / FHT with analytical
     # frequency-domain fullspace solution
     calc = getattr(transform, htype)
@@ -123,7 +123,7 @@ def test_fht(htype):                              # 1. fht / 2. hqwe / 3. hquad
 
 
 @pytest.mark.parametrize("ftype", ['ffht', 'fqwe', 'fftlog'])  # , 'fft'])
-def test_fft(ftype):                   # 4. ffht / 5. fqwe / 6. fftlog / 7. fft
+def test_fourier(ftype):               # 4. ffht / 5. fqwe / 6. fftlog / 7. fft
     # Check FFT-method with the analytical functions for a halfspace.
     t = DATA['t'][()]
     for i in [0, 1]:
