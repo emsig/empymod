@@ -263,8 +263,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     zetaH = zetaH[0, :]
     zetaV = zetaV[0, :]
 
-    # Get rtol, atol, nquad, maxint, pts_per_dec, and diff_quad
-    rtol, atol, nquad, maxint, pts_per_dec, diff_quad = qweargs
+    # Get rtol, atol, nquad, maxint, and pts_per_dec
+    rtol, atol, nquad, maxint, pts_per_dec = qweargs[:5]
 
     # 1. PRE-COMPUTE THE BESSEL FUNCTIONS
     # at fixed quadrature points for each interval and multiply by the
@@ -341,15 +341,33 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
         sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
 
-        # Check if we use QWE or SciPy's Quad
-        check0 = np.log10(intervals[:, 0])
-        check1 = np.log10(intervals[:, 1])
-        doqwe = (np.abs(sPJ0r(check0) + 1j*sPJ0i(check0) +
+
+        # Get quadargs: diff_quad, a, b, limit
+        diff_quad, a, b, limit = qweargs[5:]
+
+        # Set quadargs if not given:
+        if not limit:
+            limit = maxint
+        if not a:
+            a = intervals[:, 0]
+        else:
+            a *= np.ones(off.shape)
+        if not b:
+            b = intervals[:, -1]
+        else:
+            b *= np.ones(off.shape)
+
+        # Check if we use QWE or SciPy's QUAD
+        # If there are any steep decays within an interval we have to use QUAD,
+        # as QWE is not designed for these intervals.
+        check0 = np.log10(intervals[:, :-1])
+        check1 = np.log10(intervals[:, 1:])
+        doqwe = np.all((np.abs(sPJ0r(check0) + 1j*sPJ0i(check0) +
                         sPJ1r(check0) + 1j*sPJ1i(check0) +
                         sPJ0br(check0) + 1j*sPJ0bi(check0)) /
                  np.abs(sPJ0r(check1) + 1j*sPJ0i(check1) +
                         sPJ1r(check1) + 1j*sPJ1i(check1) +
-                        sPJ0br(check1) + 1j*sPJ0bi(check1)) < diff_quad)
+                        sPJ0br(check1) + 1j*sPJ0bi(check1)) < diff_quad), 1)
 
         # Pre-allocate output array
         fEM = np.zeros(off.size, dtype=complex)
@@ -362,8 +380,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
             for i in np.where(~doqwe)[0]:
 
                 # Input-dictionary for quad
-                iinp = {'a': intervals[i, 0], 'b': intervals[i, -1],
-                        'epsabs': atol, 'epsrel': rtol, 'limit': maxint}
+                iinp = {'a': a[i], 'b': b[i], 'epsabs': atol, 'epsrel': rtol,
+                        'limit': limit}
 
                 fEM[i], tc = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi,
                                   ab, off[i], factAng[i], iinp)
@@ -462,12 +480,12 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     """
 
     # Get quadargs
-    rtol, atol, limit, lmin, lmax, pts_per_dec = quadargs
+    rtol, atol, limit, a, b, pts_per_dec = quadargs
 
     # Get required lambdas
-    llmin = np.log10(lmin)
-    llmax = np.log10(lmax)
-    ilambd = np.logspace(llmin, llmax, (llmax-llmin)*pts_per_dec + 1)
+    la = np.log10(a)
+    lb = np.log10(b)
+    ilambd = np.logspace(la, lb, (lb-la)*pts_per_dec + 1)
 
     # Call the kernel
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
@@ -494,8 +512,7 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     conv = True
 
     # Input-dictionary for quad
-    iinp = {'a': lmin, 'b': lmax, 'epsabs': atol, 'epsrel': rtol,
-            'limit': limit}
+    iinp = {'a': a, 'b': b, 'epsabs': atol, 'epsrel': rtol, 'limit': limit}
 
     # Loop over offsets
     for i in range(off.size):
@@ -596,8 +613,8 @@ def fqwe(fEM, time, freq, qweargs):
         If true, QWE/QUAD converged. If not, <ftarg> might have to be adjusted.
 
     """
-    # Get rtol, atol, nquad, maxint, and diff_quad
-    rtol, atol, nquad, maxint, _, diff_quad = qweargs
+    # Get rtol, atol, nquad, maxint, diff_quad, a, b, and limit
+    rtol, atol, nquad, maxint, _, diff_quad, a, b, limit = qweargs
 
     # Calculate quadrature intervals for all offset
     xint = np.concatenate((np.array([1e-20]), np.arange(1, maxint+1)*np.pi))
@@ -616,13 +633,25 @@ def fqwe(fEM, time, freq, qweargs):
     tEM_rint = iuSpline(np.log10(2*np.pi*freq), fEM.real)
     tEM_iint = iuSpline(np.log10(2*np.pi*freq), fEM.imag)
 
-    # Check if we use QWE or SciPy's Quad
-    # If we are starting at the steep decay of high frequencies we have to use
-    # QUAD, as QWE is not designed for steep intervals.
-    check0 = np.log10(intervals[:, 0])
-    check1 = np.log10(intervals[:, 1])
-    doqwe = (np.abs(tEM_rint(check0) + 1j*tEM_iint(check0)) /
-             np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < diff_quad)
+    # Check if we use QWE or SciPy's QUAD
+    # If there are any steep decays within an interval we have to use QUAD, as
+    # QWE is not designed for these intervals.
+    check0 = np.log10(intervals[:, :-1])
+    check1 = np.log10(intervals[:, 1:])
+    doqwe = np.all((np.abs(tEM_rint(check0) + 1j*tEM_iint(check0)) /
+             np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < diff_quad), 1)
+
+    # Set quadargs if not given:
+    if not limit:
+        limit = maxint
+    if not a:
+        a = intervals[:, 0]
+    else:
+        a *= np.ones(off.shape)
+    if not b:
+        b = intervals[:, -1]
+    else:
+        b *= np.ones(off.shape)
 
     # Pre-allocate output array
     tEM = np.zeros(time.size)
@@ -636,8 +665,8 @@ def fqwe(fEM, time, freq, qweargs):
 
         # Loop over times that require QUAD
         for i in np.where(~doqwe)[0]:
-            out = integrate.quad(sEMquad, intervals[i, 0], intervals[i, -1],
-                                 (time[i],), 1, atol, rtol, limit=maxint)
+            out = integrate.quad(sEMquad, a[i], b[i], (time[i],), 1, atol,
+                                 rtol, limit)
             tEM[i] = out[0]
 
             # If there is a fourth output from QUAD, it means it did not conv.

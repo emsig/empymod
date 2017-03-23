@@ -243,14 +243,22 @@ def test_check_hankel(capsys):                                # 6. check_hankel
     outstr = "   Hankel          :  Quadrature-with-Extrapolation\n     > rtol"
     assert out[:63] == outstr
     assert ht == 'hqwe'
-    assert_allclose(htarg, [1e-12, 1e-30, 51, 100, 80, 100])
+    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 80, 100])
+    assert htarg[-3] == None
+    assert htarg[-2] == None
+    assert htarg[-1] == None
 
     # only last argument
-    _, htarg = utils.check_hankel('qwe', ['', '', '', '', '', 30], 0)
-    assert_allclose(htarg, [1e-12, 1e-30, 51, 100, 80, 30])
+    _, htarg = utils.check_hankel('qwe', ['', '', '', '', '', '', '', '', 30],
+                                  0)
+    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 80, 100])
+    assert htarg[-3] == None
+    assert htarg[-2] == None
+    assert htarg[-1] == 30
     # all arguments
-    _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30, 200], 0)
-    assert_allclose(htarg, [1e-3, 1e-4, 31, 20, 30, 200])
+    _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30, 200, 1e-6,
+                                          160, 30], 0)
+    assert_allclose(htarg, [1e-3, 1e-4, 31, 20, 30, 200, 1e-6, 160, 30])
 
     # # QUAD # #
     # verbose
@@ -447,12 +455,12 @@ def test_check_time(capsys):                                    # 9. check_time
 
     # # QWE # #
     # verbose
-    _, f, ft, htarg = utils.check_time(time, 0, 'qwe', None, 4)
+    _, f, ft, ftarg = utils.check_time(time, 0, 'qwe', None, 4)
     out, _ = capsys.readouterr()
     outstr = "   Fourier         :  Quadrature-with-Extrapolation\n     > rtol"
     assert out[24:87] == outstr
     assert ft == 'fqwe'
-    assert_allclose(htarg, [1e-8, 1e-20, 21, 200, 20, 100])
+    assert_allclose(ftarg[:-3], [1e-8, 1e-20, 21, 200, 20, 100])
     f1 = np.array([3.16227766e-03, 3.54813389e-03, 3.98107171e-03,
                    4.46683592e-03, 5.01187234e-03, 5.62341325e-03,
                    6.30957344e-03, 7.07945784e-03, 7.94328235e-03])
@@ -462,16 +470,22 @@ def test_check_time(capsys):                                    # 9. check_time
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 99)
+    assert ftarg[-3] == None
+    assert ftarg[-2] == None
+    assert ftarg[-1] == None
 
     # only last argument
     _, _, _, ftarg = utils.check_time(time, 1, 'fqwe',
-                                      ['', '', '', '', '', 30], 0)
-    assert_allclose(ftarg, [1e-8, 1e-20, 21, 200, 20, 30])
+                                      ['', '', '', '', '', '', '', '', 30], 0)
+    assert_allclose(ftarg[:-3], [1e-8, 1e-20, 21, 200, 20, 100])
+    assert ftarg[-3] == None
+    assert ftarg[-2] == None
+    assert ftarg[-1] == 30
 
     # all arguments
-    _, _, _, ftarg = utils.check_time(time, -1, 'qwe',
-                                      [1e-3, 1e-4, 31, 20, 30, 200], 0)
-    assert_allclose(ftarg, [1e-3, 1e-4, 31, 20, 30, 200])
+    _, _, _, ftarg = utils.check_time(time, -1, 'qwe', [1e-3, 1e-4, 31, 20, 30,
+                                                        200, 0.01, .2, 100], 0)
+    assert_allclose(ftarg, [1e-3, 1e-4, 31, 20, 30, 200, 0.01, .2, 100])
 
     # # FFTLog # #
     # verbose

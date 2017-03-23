@@ -119,7 +119,7 @@ etaH = etaH[0, :]
 etaV = etaV[0, :]
 zetaH = zetaH[0, :]
 zetaV = zetaV[0, :]
-rtol, atol, nquad, maxint, pts_per_dec, diff_quad = htarg
+rtol, atol, nquad, maxint, pts_per_dec, diff_quad, a, b, limit = htarg
 g_x, g_w = special.p_roots(nquad)
 b_zero = np.pi*np.arange(1.25, maxint+1)
 for i in range(10):

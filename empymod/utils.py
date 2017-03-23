@@ -476,33 +476,31 @@ def check_hankel(ht, htarg, verb):
         if not htarg:
             htarg = []
 
-        # rtol : 1e-12 is low for accurate results
+        # rtol : 1e-12
         try:
             rtol = _check_var(htarg[0], float, 0, 'qwe: rtol', ())
         except:
             rtol = np.array(1e-12, dtype=float)
 
-        # atol : 1e-30 is low for accurate results
+        # atol : 1e-30
         try:
             atol = _check_var(htarg[1], float, 0, 'qwe: atol', ())
         except:
             atol = np.array(1e-30, dtype=float)
 
-        # nquad : 51 is relatively high
+        # nquad : 51
         try:
             nquad = _check_var(htarg[2], int, 0, 'qwe: nquad', ())
         except:
             nquad = np.array(51, dtype=int)
 
-        # maxint :  40/100 is relatively high
-        #             40 : 11-15, 21-25, 33-35, 41-45, 51-55
-        #            100 : 16/26, 31/32, 46/56, 61-66
+        # maxint : 100
         try:
             maxint = _check_var(htarg[3], int, 0, 'qwe: maxint', ())
         except:
             maxint = np.array(100, dtype=int)
 
-        # pts_per_dec : 80 is relatively high
+        # pts_per_dec : 80
         try:
             pts_per_dec = _check_var(htarg[4], int, 0, 'qwe: pts_per_dec', ())
         except:
@@ -510,12 +508,31 @@ def check_hankel(ht, htarg, verb):
 
         # diff_quad : 100
         try:
-            diff_quad = _check_var(htarg[5], int, 0, 'qwe: diff_quad', ())
+            diff_quad = _check_var(htarg[5], float, 0, 'qwe: diff_quad', ())
         except:
-            diff_quad = np.array(100, dtype=int)
+            diff_quad = np.array(100, dtype=float)
+
+        # a : None
+        try:
+            a = _check_var(htarg[6], float, 0, 'qwe: a (quad)', ())
+        except:
+            a = None
+
+        # b : None
+        try:
+            b = _check_var(htarg[7], float, 0, 'qwe: b (quad)', ())
+        except:
+            b = None
+
+        # limit : None
+        try:
+            limit = _check_var(htarg[8], float, 0, 'qwe: limit (quad)', ())
+        except:
+            limit = None
 
         # Assemble htarg
-        htarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad)
+        htarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad, a, b,
+                 limit)
 
         # If verbose, print Hankel transform information
         if verb > 2:
@@ -526,6 +543,12 @@ def check_hankel(ht, htarg, verb):
             print("     > maxint      :  " + str(htarg[3]))
             print("     > pts_per_dec :  " + str(htarg[4]))
             print("     > diff_quad   :  " + str(htarg[5]))
+            if a:
+                print("     > a     (quad):  " + str(htarg[6]))
+            if b:
+                print("     > b     (quad):  " + str(htarg[7]))
+            if limit:
+                print("     > limit (quad):  " + str(htarg[8]))
 
     elif ht in ['quad', 'hquad']:
         # Rename ht
@@ -553,17 +576,17 @@ def check_hankel(ht, htarg, verb):
         except:
             limit = np.array(500, dtype=int)
 
-        # lmin : 1e-6
+        # a : 1e-6
         try:
-            lmin = _check_var(htarg[3], float, 0, 'quad: lmin', ())
+            a = _check_var(htarg[3], float, 0, 'quad: a', ())
         except:
-            lmin = np.array(1e-6, dtype=float)
+            a = np.array(1e-6, dtype=float)
 
-        # lmax : 0.1
+        # b : 0.1
         try:
-            lmax = _check_var(htarg[4], float, 0, 'quad: lmax', ())
+            b = _check_var(htarg[4], float, 0, 'quad: b', ())
         except:
-            lmax = np.array(0.1, dtype=float)
+            b = np.array(0.1, dtype=float)
 
         # pts_per_dec : 40
         try:
@@ -572,7 +595,7 @@ def check_hankel(ht, htarg, verb):
             pts_per_dec = np.array(40, dtype=int)
 
         # Assemble htarg
-        htarg = (rtol, atol, limit, lmin, lmax, pts_per_dec)
+        htarg = (rtol, atol, limit, a, b, pts_per_dec)
 
         # If verbose, print Hankel transform information
         if verb > 2:
@@ -580,8 +603,8 @@ def check_hankel(ht, htarg, verb):
             print("     > rtol        :  " + str(htarg[0]))
             print("     > atol        :  " + str(htarg[1]))
             print("     > limit       :  " + str(htarg[2]))
-            print("     > lmin        :  " + str(htarg[3]))
-            print("     > lmax        :  " + str(htarg[4]))
+            print("     > a           :  " + str(htarg[3]))
+            print("     > b           :  " + str(htarg[4]))
             print("     > pts_per_dec :  " + str(htarg[5]))
 
     else:
@@ -957,8 +980,27 @@ def check_time(time, signal, ft, ftarg, verb):
         except:
             diff_quad = np.array(100, dtype=int)
 
+        # a : None
+        try:
+            a = _check_var(ftarg[6], float, 0, 'qwe: a (quad)', ())
+        except:
+            a = None
+
+        # b : None
+        try:
+            b = _check_var(ftarg[7], float, 0, 'qwe: b (quad)', ())
+        except:
+            b = None
+
+        # limit : None
+        try:
+            limit = _check_var(ftarg[8], float, 0, 'qwe: limit (quad)', ())
+        except:
+            limit = None
+
         # Assemble ftarg
-        ftarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad)
+        ftarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad, a, b,
+                 limit)
 
         # If verbose, print Fourier transform information
         if verb > 2:
@@ -969,6 +1011,12 @@ def check_time(time, signal, ft, ftarg, verb):
             print("     > maxint      :  " + str(ftarg[3]))
             print("     > pts_per_dec :  " + str(ftarg[4]))
             print("     > diff_quad   :  " + str(ftarg[5]))
+            if a:
+                print("     > a     (quad):  " + str(ftarg[6]))
+            if b:
+                print("     > b     (quad):  " + str(ftarg[7]))
+            if limit:
+                print("     > limit (quad):  " + str(ftarg[8]))
 
         # Get required frequencies
         g_x, _ = special.p_roots(nquad)
