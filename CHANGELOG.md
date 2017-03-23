@@ -2,8 +2,21 @@
 
 ## latest
 
-* Add conventional quadrature-routine for the Hankel transform.
+* Add additional transforms:
+    - Conventional adaptive quadrature (QUADPACK) for the Hankel transform;
+    - Conventional FFT for the Fourier transform.
 
+* Improve `model.gpr`; still experimental.
+
+* Internal changes:
+    - Rename internally the sine/cosine filter from `fft` to `ffht`, because of
+      the addition of the Fast Fourier Transform `fft`.
+    - Add `diff_quad` to `htarg` of QWE, a switch parameter for QWE/QUAD.
+    - Add parameters for QUAD into `htarg` for QWE.
+    - Change QWE/QUAD switch from comparing first interval to comparing all
+      intervalls.
+
+* Bug fixes and documentation improvements
 
 ## v1.2.1 - *2017-03-11*
 

@@ -463,6 +463,10 @@ def check_hankel(ht, htarg, verb):
         if verb > 2:
             print("   Hankel          :  Fast Hankel Transform")
             print("     > Filter      :  " + fhtfilt.name)
+            if htarg[1]:
+                print("     > pts_per_dec :  " + str(htarg[1]))
+            else:
+                print("     > pts_per_dec :  Defined by filter (lagged)")
 
     elif ht in ['qwe', 'hqwe']:
         # Rename ht
@@ -778,14 +782,6 @@ def check_opt(opt, loop, ht, htarg, verb):
     if verb > 2:
         if use_spline:
             print("   Hankel Opt.     :  Use spline")
-            pstr = "     > pts_per_dec :  "
-            if ht == 'hqwe':
-                print(pstr + str(htarg[4]))
-            else:
-                if htarg[1]:
-                    print(pstr + str(htarg[1]))
-                else:
-                    print(pstr + 'Defined by filter (lagged)')
         elif use_ne_eval:
             print("   Hankel Opt.     :  Use parallel")
         else:
@@ -1077,7 +1073,10 @@ def check_time(time, signal, ft, ftarg, verb):
             print("     > dfreq       :  " + str(ftarg[0]))
             print("     > nfreq       :  " + str(ftarg[1]))
             print("     > ntot        :  " + str(ftarg[2]))
-            print("     > pts_per_dec :  " + str(ftarg[3]))
+            if pts_per_dec:
+                print("     > pts_per_dec :  " + str(ftarg[3]))
+            else:
+                print("     > pts_per_dec :  linear")
 
     else:
         print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +
