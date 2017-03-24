@@ -2,6 +2,7 @@
    - test_model:: test_self, test_gpr, and test_wavenumber
    - test_kernel:: test_fullspace and test_halfspace."""
 import numpy as np
+from copy import deepcopy as dc
 from scipy.constants import epsilon_0, mu_0
 from empymod.model import bipole, wavenumber, gpr
 from empymod.kernel import halfspace, fullspace
@@ -317,8 +318,8 @@ for i in range(9):
     hs_res[str(pab[i])] = halfspace(**hs[str(pab[i])])
 
 # # E -- GPR # #
-igpr = {'src': [0, 0, 0.0000001],
-        'rec': [3, 0, 0.5],
+igpr = {'src': [[0, 0], [0, 1], 0.0000001],
+        'rec': [[2, 3], [0, 0], 0.5],
         'depth': [0, 1],
         'res': [1e23, 200, 20],
         'freqtime': np.arange(1, 81)*1e-9,
@@ -336,6 +337,10 @@ igpr = {'src': [0, 0, 0.0000001],
         'opt': None,
         'loop': None,
         'verb': 3}
+igpr2a = dc(igpr)
+igpr2a['src'] = [0, 1, 0.0000001]
+igpr2b = dc(igpr)
+igpr2b['rec'] = [2, 0, 0.5]
 ogpr = gpr(**igpr)
 
 # # F -- Store data # #
@@ -347,4 +352,5 @@ np.savez_compressed('data_empymod.npz',
                     wout={'inp': winp, 'PJ0': PJ0, 'PJ1': PJ1},
                     fs=fs, fsbp=fsbp, fsres=fs_res,
                     hs=hs, hsbp=hsbp, hsres=hs_res,
-                    gprout={'inp': igpr, 'GPR': ogpr})
+                    gprout={'inp': igpr, 'GPR': ogpr,
+                            'inp2a': igpr2a, 'inp2b': igpr2b})

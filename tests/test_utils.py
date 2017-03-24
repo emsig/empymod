@@ -213,8 +213,8 @@ def test_check_hankel(capsys):                                # 6. check_hankel
     # verbose
     ht, htarg = utils.check_hankel('fht', None, 4)
     out, _ = capsys.readouterr()
-    outstr = "   Hankel          :  Fast Hankel Transform\n     > Filter"
-    assert out[:57] == outstr
+    assert "   Hankel          :  Fast Hankel Transform\n     > Filter" in out
+    assert "     > pts_per_dec :  Defined by filter (lagged)" in out
     assert ht == 'fht'
     assert htarg[0].name == filters.key_201_2009().name
     assert htarg[1] is None
@@ -232,7 +232,9 @@ def test_check_hankel(capsys):                                # 6. check_hankel
     assert htarg[0].name == filters.key_201_2009().name
     assert htarg[1] == 20
     # [filter str, pts_per_dec]
-    _, htarg = utils.check_hankel('fht', ['key_201_2009', 20], 0)
+    _, htarg = utils.check_hankel('fht', ['key_201_2009', 20], 4)
+    out, _ = capsys.readouterr()
+    assert "     > pts_per_dec :  20" in out
     assert htarg[0].name == filters.key_201_2009().name
     assert htarg[1] == 20
 
@@ -255,9 +257,14 @@ def test_check_hankel(capsys):                                # 6. check_hankel
     assert htarg[-3] is None
     assert htarg[-2] is None
     assert htarg[-1] == 30
+
     # all arguments
     _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30, 200, 1e-6,
-                                          160, 30], 0)
+                                          160, 30], 3)
+    out, _ = capsys.readouterr()
+    assert "     > a     (quad):  1e-06" in out
+    assert "     > b     (quad):  160" in out
+    assert "     > limit (quad):  30" in out
     assert_allclose(htarg, [1e-3, 1e-4, 31, 20, 30, 200, 1e-6, 160, 30])
 
     # # QUAD # #
@@ -484,7 +491,11 @@ def test_check_time(capsys):                                    # 9. check_time
 
     # all arguments
     _, _, _, ftarg = utils.check_time(time, -1, 'qwe', [1e-3, 1e-4, 31, 20, 30,
-                                                        200, 0.01, .2, 100], 0)
+                                                        200, 0.01, .2, 100], 3)
+    out, _ = capsys.readouterr()
+    assert "     > a     (quad):  0.01" in out
+    assert "     > b     (quad):  0.2" in out
+    assert "     > limit (quad):  100" in out
     assert_allclose(ftarg, [1e-3, 1e-4, 31, 20, 30, 200, 0.01, .2, 100])
 
     # # FFTLog # #
@@ -531,14 +542,13 @@ def test_check_time(capsys):                                    # 9. check_time
     # verbose
     _, f, ft, ftarg = utils.check_time(time, 0, 'fft', None, 4)
     out, _ = capsys.readouterr()
-    outstr = "   Fourier         :  Fast Fourier Transform FFT\n     > dfreq"
-    assert outstr in out
+    assert "Fourier         :  Fast Fourier Transform FFT\n     > dfreq" in out
+    assert "     > pts_per_dec :  (linear)" in out
     assert ft == 'fft'
     assert ftarg[0] == 0.002
     assert ftarg[1] == 2048
     assert ftarg[2] == 2048
     assert ftarg[3] is None
-    assert_allclose(f, ftarg[4])
     fres = np.array([0.002, 0.004, 0.006, 0.008, 0.01, 4.088, 4.09, 4.092,
                      4.094, 4.096])
     assert_allclose(f[:5], fres[:5])
@@ -551,13 +561,13 @@ def test_check_time(capsys):                                    # 9. check_time
     assert ftarg[2] == 2**16
 
     # Several parameters; pts_per_dec
-    _, f, _, ftarg = utils.check_time(time, 0, 'fft', ['', '', '', 5], 0)
+    _, f, _, ftarg = utils.check_time(time, 0, 'fft', ['', '', '', 5], 3)
+    out, _ = capsys.readouterr()
+    assert "     > pts_per_dec :  5" in out
     assert ftarg[0] == 0.002
     assert ftarg[1] == 2048
     assert ftarg[2] == 2048
     assert ftarg[3] == 5
-    assert_allclose(ftarg[4][:5], fres[:5])
-    assert_allclose(ftarg[4][-5:], fres[-5:])
     outf = np.array([2.00000000e-03, 3.22098066e-03, 5.18735822e-03,
                      8.35419026e-03, 1.34543426e-02, 2.16680888e-02,
                      3.48962474e-02, 5.62000691e-02, 9.05096680e-02,
@@ -889,3 +899,31 @@ def test_check_min(capsys):                                    # 21. _check_min
     out, _ = capsys.readouterr()
     assert out[:35] == "* WARNING :: name < 1e-15 unit are "
     assert_allclose(np.array([1e-15, 1e-3]), out4)
+
+
+def test_check_targ():
+    # No input
+    assert utils._check_targ(None, ['test']) == {}
+    assert utils._check_targ([], ['test']) == {}
+    assert utils._check_targ((), ['test']) == {}
+    assert utils._check_targ({}, ['test']) == {}
+    assert utils._check_targ('', ['test']) == {}
+    assert utils._check_targ(np.array([]), ['test']) == {}
+
+    # One input
+    assert utils._check_targ(2.3, ['test']) == {'test': 2.3}
+    assert utils._check_targ([2.3], ['test']) == {'test': 2.3}
+    assert utils._check_targ((2.3), ['test']) == {'test': 2.3}
+    assert utils._check_targ({'test': 2.3}, ['test']) == {'test': 2.3}
+    assert utils._check_targ(np.array([2.3]), ['test']) == {'test': 2.3}
+
+    # Several inputs
+    # a: less than keys
+    assert utils._check_targ([2], ['a', 'b']) == {'a': 2}
+    assert utils._check_targ((2), ['a', 'b']) == {'a': 2}
+    # b: equal keys
+    assert utils._check_targ([2, 4], ['a', 'b']) == {'a': 2, 'b': 4}
+    assert utils._check_targ((2, 4), ['a', 'b']) == {'a': 2, 'b': 4}
+    # c: more than keys
+    assert utils._check_targ([2, 4, 5], ['a', 'b']) == {'a': 2, 'b': 4}
+    assert utils._check_targ((2, 4, 5), ['a', 'b']) == {'a': 2, 'b': 4}

@@ -59,7 +59,7 @@ _, f, _, ftarg = utils.check_time(t, 1, 'fftlog', [30, [-3, 2], -.5], 0)
 fEM = test_freq(res, off, f)
 fftlog1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
-# # C -- FFT # #
+# # C -- FFHT # #
 # Signal = 0
 _, f, _, ftarg = utils.check_time(t, 0, 'cos', None, 0)
 fEM = test_freq(res, off, f)
@@ -75,11 +75,18 @@ _, f, _, ftarg = utils.check_time(t, 0, 'qwe', None, 0)
 fEM = test_freq(res, off, f)
 fqwe0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1
-_, f, _, ftarg = utils.check_time(t, 1, 'qwe', [1e-6, '', 41, 300], 0)
+_, f, _, ftarg = utils.check_time(t, 1, 'qwe', [1e-6, '', 41, 300, '', '',
+                                                1e-4, 1e4, 1000], 0)
 fEM = test_freq(res, off, f)
 fqwe1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
-# # E -- QWE - FQWE # #
+# # E -- FFT # #
+# Signal = 0
+_, f, _, ftarg = utils.check_time(t, 0, 'fft', [0.0005, 2**20, '', 10], 0)
+fEM = test_freq(res, off, f)
+fft0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+
+# # F -- QWE - FQWE # #
 nquad = fqwe0['ftarg'][2]
 maxint = fqwe0['ftarg'][3]
 fEM = fqwe0['fEM']
@@ -96,7 +103,7 @@ sEM = tEM_iint(np.log(Bx/t[:, None]))*SS
 fqwe0['sEM'] = sEM
 fqwe0['intervals'] = intervals
 
-# # E -- QWE - HQWE # #
+# # G -- QWE - HQWE # #
 # Model
 model = utils.check_model([], 10, 2, 2, 5, 1, 10, 0)
 depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
@@ -174,10 +181,51 @@ hqwe = {'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
         'nsinp': nsinp, 'nquad': nquad, 'BJ0': BJ0, 'BJ1': BJ1, 'ab': ab,
         'freqres': np.squeeze(freqres), 'diff_quad': diff_quad}
 
-# # G -- Store data # #
+# # H -- QUAD # #
+# Model
+model = utils.check_model([], 10, 2, 2, 5, 1, 10, 0)
+depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
+frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
+                                  mpermV, 0)
+freq, etaH, etaV, zetaH, zetaV = frequency
+src, nsrc = utils.check_dipole([0, 0, 0], 'src', 0)
+ab, msrc, mrec = utils.check_ab(11, 0)
+ht, htarg = utils.check_hankel('quad', None, 0)
+rec = [5000, 0, 300]
+rec, nrec = utils.check_dipole(rec, 'rec', 0)
+off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
+lsrc, zsrc = utils.get_layer_nr(src, depth)
+lrec, zrec = utils.get_layer_nr(rec, depth)
+# Frequency-domain result
+freqres = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
+                           ab, msrc, mrec)
+# The following is a condensed version of transform.hquad
+rtol, atol, limit, a, b, pts_per_dec = htarg
+la = np.log10(a)
+lb = np.log10(b)
+ilambd = np.logspace(la, lb, (lb-la)*pts_per_dec + 1)
+PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
+                                   etaH[None, :], etaV[None, :],
+                                   zetaH[None, :], zetaV[None, :],
+                                   np.atleast_2d(ilambd), ab, False, msrc,
+                                   mrec, False)
+sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
+sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
+sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
+sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
+sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
+sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
+factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+iinp = {'a': a, 'b': b, 'epsabs': atol, 'epsrel': rtol, 'limit': limit}
+quad = {'inp': {'sPJ0r': sPJ0r, 'sPJ0i': sPJ0i, 'sPJ1r': sPJ1r, 'sPJ1i': sPJ1i,
+                'sPJ0br': sPJ0br, 'sPJ0bi': sPJ0bi, 'ab': ab, 'off': off,
+                'factAng': factAng, 'iinp': iinp}, 'res': np.squeeze(freqres)}
+
+# # I -- Store data # #
 np.savez_compressed('data_transform.npz',
                     t=t, tEM0=tEM0, tEM1=tEM1,
                     fftlog0=fftlog0, fftlog1=fftlog1,
                     ffht0=ffht0, ffht1=ffht1,
                     fqwe0=fqwe0, fqwe1=fqwe1,
-                    hqwe=hqwe)
+                    fft0=fft0, fft1=fft0,  # fft1 is a dummy
+                    hqwe=hqwe, quad=quad)

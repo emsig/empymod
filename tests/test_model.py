@@ -451,8 +451,10 @@ class TestBipole:                                                   # 1. bipole
 
 
 def test_dipole():                                                  # 2. dipole
-    # As this is a shortcut, just run one test to ensure
+    # As this is a shortcut, just run two tests to ensure
     # it is equivalent to bipole.
+
+    # 1. Frequency
     src = [5000, 1000, -200]
     rec = [0, 0, 1200]
     model = {'depth': [100, 1000], 'res': [2, 0.3, 100], 'aniso': [2, .5, 2]}
@@ -463,6 +465,14 @@ def test_dipole():                                                  # 2. dipole
     bip_res = bipole([src[0], src[1], src[2], 0, 90],
                      [rec[0], rec[1], rec[2], 90, 0], msrc=True, freqtime=f,
                      verb=0, **model)
+    assert_allclose(dip_res, bip_res)
+
+    # 2. Time
+    t = 1
+    dip_res = dipole(src, rec, freqtime=t, signal=1, ab=62, verb=0, **model)
+    bip_res = bipole([src[0], src[1], src[2], 0, 90],
+                     [rec[0], rec[1], rec[2], 90, 0], msrc=True, freqtime=t,
+                     signal=1, verb=0, **model)
     assert_allclose(dip_res, bip_res)
 
 
@@ -476,6 +486,11 @@ def test_gpr(capsys):                                                  # 3. gpr
     assert 'GPR' in out
     assert '> centre freq :  250000000' in out
     assert_allclose(gprout, res['GPR'])
+    # Ensure multi-source/receiver is correct (reshaping after dipole-call)
+    gprout2a = gpr(**res['inp2a'])
+    gprout2b = gpr(**res['inp2b'])
+    assert_allclose(gprout[:, :, 1], gprout2a)
+    assert_allclose(gprout[:, 0, :], gprout2b)
 
 
 def test_wavenumber():                                          # 4. wavenumber

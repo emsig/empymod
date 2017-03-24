@@ -73,7 +73,9 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
     rec, nrec = utils.check_dipole(rec, 'rec', 0)
     off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
     if htype == 'hqwe':  # Put a very low diff_quad, to test it.; lower err
-        ht, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, '', .1], 0)
+        ht, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, '', .1,
+                                               1e-6, .1, 1000], 0)
+
     # Analytical frequency-domain solution
     wvnr2, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
                           etaV, zetaH, zetaV, xdirect, htarg, use_spline,
@@ -122,7 +124,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
     assert_allclose(np.squeeze(wvnr4), np.squeeze(freq4), rtol=1e-4)
 
 
-@pytest.mark.parametrize("ftype", ['ffht', 'fqwe', 'fftlog'])  # , 'fft'])
+@pytest.mark.parametrize("ftype", ['ffht', 'fqwe', 'fftlog', 'fft'])
 def test_fourier(ftype):               # 4. ffht / 5. fqwe / 6. fftlog / 7. fft
     # Check FFT-method with the analytical functions for a halfspace.
     t = DATA['t'][()]
@@ -132,8 +134,12 @@ def test_fourier(ftype):               # 4. ffht / 5. fqwe / 6. fftlog / 7. fft
         finp = fl['fEM']
         if i == 1:
             finp /= 2j*np.pi*fl['f']
-        tEM, _ = getattr(transform, ftype)(finp, t, fl['f'], fl['ftarg'])
-        assert_allclose(tEM*2/np.pi, res, rtol=1e-3)
+        if ftype != 'fft':
+            tEM, _ = getattr(transform, ftype)(finp, t, fl['f'], fl['ftarg'])
+            assert_allclose(tEM*2/np.pi, res, rtol=1e-3)
+        elif i == 0:  # FFT is difficult, specifically for step responses
+            tEM, _ = getattr(transform, ftype)(finp, t, fl['f'], fl['ftarg'])
+            assert_allclose(tEM[:-7]*2/np.pi, res[:-7], rtol=1e-2)
 
 
 def test_qwe():                                                        # 8. qwe
@@ -267,3 +273,22 @@ def test_fhti():                                                     # 10. fhti
     assert_allclose(dlnr, odlnr, atol=1e-7)
     assert_allclose(kr, okr, atol=1e-7)
     assert_allclose(rk, ork, atol=1e-7)
+
+
+def test_quad():                                                      # 9. quad
+    # QUAD is used from hquad and hqwe, and therefore tested a lot through
+    # those. Here we just ensure status quo. And if a problem arises in hquad
+    # or hqwe, it would make it obvious if the problem arises from quad or not.
+
+    # Hankel
+    dat = DATA['quad'][()]
+
+    fEM, conv = transform.quad(**dat['inp'])
+    assert_allclose(conv, True)
+    assert_allclose(np.squeeze(fEM), dat['res'], rtol=1e-4)
+
+    # Same, but lower limit for conv=False
+    dat['inp']['iinp']['limit'] = 40
+    fEM, conv = transform.quad(**dat['inp'])
+    assert_allclose(conv, False)
+    assert_allclose(np.squeeze(fEM), dat['res'], rtol=1e-4)

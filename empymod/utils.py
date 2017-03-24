@@ -1107,18 +1107,15 @@ def check_time(time, signal, ft, ftarg, verb):
             pts_per_dec = None
 
         # Get required frequencies
-        freq = np.arange(1, nfreq+1)*dfreq
-        fftfreq = freq
-
-        # If pts_per_dec, we space actually calculated freqs logarithmically.
-        if pts_per_dec:
-            start = np.log10(fftfreq.min())
-            stop = np.log10(fftfreq.max())
-            # Overwrite freq
+        if pts_per_dec:  # Space actually calculated freqs logarithmically.
+            start = np.log10(dfreq)
+            stop = np.log10(nfreq*dfreq)
             freq = np.logspace(start, stop, (stop-start)*pts_per_dec + 1)
+        else:
+            freq = np.arange(1, nfreq+1)*dfreq
 
         # Assemble ftarg
-        ftarg = (dfreq, nfreq, ntot, pts_per_dec, fftfreq)
+        ftarg = (dfreq, nfreq, ntot, pts_per_dec)
 
         # If verbose, print Fourier transform information
         if verb > 2:
@@ -1129,7 +1126,7 @@ def check_time(time, signal, ft, ftarg, verb):
             if pts_per_dec:
                 print("     > pts_per_dec :  " + str(ftarg[3]))
             else:
-                print("     > pts_per_dec :  linear")
+                print("     > pts_per_dec :  (linear)")
 
     else:
         print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +
@@ -1661,10 +1658,10 @@ def _check_min(par, minval, name, unit, verb):
 
 def _check_targ(targ, keys):
     """Check format of htarg/ftarg and return dict."""
-    if not targ:                               # If None
+    if not targ:  # If None
         targ = {}
-    elif not isinstance(targ, (list, tuple)):  # If only one value
+    elif not isinstance(targ, (list, tuple, dict)):  # If only one value
         targ = [targ, ]
-    if isinstance(targ, list):                 # Put list into dict
-        targ = {keys[i]: targ[i] for i in range(len(targ))}
+    if isinstance(targ, (list, tuple)):  # Put list into dict
+        targ = {keys[i]: targ[i] for i in range(min(len(targ), len(keys)))}
     return targ
