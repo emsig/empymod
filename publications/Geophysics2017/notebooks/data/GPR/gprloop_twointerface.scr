@@ -2,13 +2,13 @@
 
 f=0
 df=1000000
-for ((x=1; x<2049; x++))
+for ((x=1; x<851; x++))
 do
   f=$(echo "$f+$df" | bc)
 
 emmod \
 	freq=$f \
-	file_out=gprloop_twointmod_freq${f}_11.bin \
+	file_out=gprloop_twointmod_freq${x}_11.bin \
 	writebin=1 \
 	nx=401 \
 	ny=2 \
