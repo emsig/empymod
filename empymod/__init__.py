@@ -248,7 +248,7 @@ and their publicly available software:
    `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
 
 Both pieces of software are published under the *SEG disclaimer*. Parts of the
-modeller `emmod` from Hunziker et al, 2015, is furthermore released under the
+modeller `EMmod` from [Hunziker_et_al_2015]_, is furthermore released under the
 *Common Public License Version 1.0 (CPL)*. See the *NOTICE*-file in the root
 directory for more information and a reprint of the SEG disclaimer and the CPL.
 

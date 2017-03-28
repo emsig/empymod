@@ -60,8 +60,8 @@ Citation
 I am in the process of publishing an article regarding `empymod`, and I will
 put the info here once it is a reality. If you publish results for which you
 used `empymod`, please consider citing this article. Also consider citing the
-two articles given below, *Hunziker et al, 2015*, and *Key, 2012*, without
-which `empymod` would not exist. All releases have additionally a Zenodo-DOI,
+two articles given below, Hunziker et al. (2015), and Key (2012), without which
+`empymod` would not exist. All releases have additionally a Zenodo-DOI,
 provided on the `release-page <https://github.com/prisae/empymod/releases>`_.
 
 
@@ -90,7 +90,7 @@ publicly available software:
    `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
 
 Both pieces of software are published under the *SEG disclaimer*. Parts of the
-modeller `emmod` from Hunziker et al, 2015, is furthermore released under the
+modeller `EMmod` from Hunziker et al. (2015), is furthermore released under the
 *Common Public License Version 1.0 (CPL)*. See the *NOTICE*-file in the root
 directory for more information and a reprint of the SEG disclaimer and the CPL.
 
