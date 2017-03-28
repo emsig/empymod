@@ -118,8 +118,10 @@ default value:
 Examples can be found in the `prisae/empymod-notebooks
 <https://github.com/prisae/empymod-notebooks>`_-repository.
 
-Published articles can be found in the `prisae/empymod-articles
-<https://github.com/prisae/empymod-articles>`_-repository.
+Articles (published or in preparation):
+
+    - `prisae/empymod-geo2017 <https://github.com/prisae/empymod-geo2017>`_
+    - `prisae/empymod-tle2017 <https://github.com/prisae/empymod-tle2017>`_
 
 Structure
 ---------
