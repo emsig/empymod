@@ -53,6 +53,12 @@ Documentation |manual|
 The manual of `empymod` can be found at `empymod.readthedocs.io
 <http://empymod.readthedocs.io/en/stable>`_.
 
+Examples can be found in the `prisae/empymod-notebooks
+<https://github.com/prisae/empymod-notebooks>`_-repository.
+
+Published articles can be found in the `prisae/empymod-articles
+<https://github.com/prisae/empymod-articles>`_-repository.
+
 
 Citation
 --------

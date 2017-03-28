@@ -114,8 +114,12 @@ default value:
        1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
-Have a look at the notebooks for more extensive examples including figures.
 
+Examples can be found in the `prisae/empymod-notebooks
+<https://github.com/prisae/empymod-notebooks>`_-repository.
+
+Published articles can be found in the `prisae/empymod-articles
+<https://github.com/prisae/empymod-articles>`_-repository.
 
 Structure
 ---------

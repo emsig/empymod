@@ -19,6 +19,10 @@
     - Rename internally the sine/cosine filter from `fft` to `ffht`, because of
       the addition of the Fast Fourier Transform `fft`.
 
+* Clean-up repository
+    - Move /prisae/empymod/notebooks to /prisae/empymod-notebooks
+    - Move /prisae/empymod/publications to /prisae/empymod-articles
+
 * Bug fixes and documentation improvements
 
 ## v1.2.1 - *2017-03-11*
