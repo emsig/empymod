@@ -20,8 +20,9 @@
       the addition of the Fast Fourier Transform `fft`.
 
 * Clean-up repository
-    - Move /prisae/empymod/notebooks to /prisae/empymod-notebooks
-    - Move /prisae/empymod/publications to /prisae/empymod-articles
+    - Move `notebooks` to /prisae/empymod-notebooks
+    - Move `publications/Geophysics2017` to /prisae/empymod-geo2017
+    - Move `publications/TheLeadingEdge2017` to /prisae/empymod-tle2017
 
 * Bug fixes and documentation improvements
 
