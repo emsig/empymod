@@ -1,6 +1,6 @@
-numexpr==2.6.1
-numpy==1.11.1
-numpydoc==0.6.0
-python-dateutil==2.5.3
-scipy==0.18.1
-sphinxcontrib-napoleon==0.6.0
+numexpr>=2.6.1
+numpy>=1.11.1
+numpydoc>=0.6.0
+python-dateutil>=2.5.3
+scipy>=0.18.1
+sphinxcontrib-napoleon>=0.6.0
