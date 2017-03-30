@@ -1,6 +1,8 @@
 empymod
 =======
 
+|docs| |tests| |coverage|
+
 Electromagnetic modeller in Python
 ----------------------------------
 
@@ -9,8 +11,8 @@ due to a three-dimensional electric or magnetic source in a layered-earth model
 with vertical transverse isotropy, electric permittivity, and magnetic
 permeability, from very low frequencies to very high frequencies.
 
-Installation & requirements
----------------------------
+Installation & requirements |anaconda| |pypi| |github|
+------------------------------------------------------
 
 The easiest way to install the latest stable version of `empymod` is via
 `conda`:
@@ -45,8 +47,8 @@ install Anaconda you can simply start the *Anaconda Navigator*, add the channel
 `prisae` and `empymod` will appear in the package list and can be installed
 with a click.
 
-Documentation
--------------
+Documentation |manual|
+----------------------
 
 The manual of `empymod` can be found at `empymod.readthedocs.io
 <http://empymod.readthedocs.io/en/stable>`_.
@@ -128,3 +130,23 @@ limitations under the License.
 See the *LICENSE*-file in the root directory for a full reprint of the Apache
 License.
 
+.. |docs| image:: https://readthedocs.org/projects/empymod/badge/?version=latest
+    :target: https://empymod.readthedocs.io/en/latest/?badge=latest
+
+.. |tests| image:: https://travis-ci.org/prisae/empymod.png?branch=master
+    :target: https://travis-ci.org/prisae/empymod/
+
+.. |coverage| image:: https://coveralls.io/repos/github/prisae/empymod/badge.svg?branch=master
+    :target: https://coveralls.io/github/prisae/empymod?branch=master
+
+.. |github| image:: https://img.shields.io/github/release/prisae/empymod.svg
+    :target: https://github.com/prisae/empymod/releases/latest
+
+.. |pypi| image:: https://img.shields.io/pypi/v/empymod.svg
+    :target: https://pypi.python.org/pypi/empymod
+
+.. |anaconda| image:: https://anaconda.org/prisae/empymod/badges/version.svg
+    :target: https://anaconda.org/prisae/empymod
+
+.. |manual| image:: https://readthedocs.org/projects/empymod/badge/?version=stable
+    :target: https://empymod.readthedocs.io/en/stable/?badge=stable

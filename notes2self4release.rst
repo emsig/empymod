@@ -21,11 +21,11 @@ Steps to carry out for a new release
         python setup.py sdist
         python setup.py bdist_wheel
 
-   6. Test it on testpypi (requires ~/.pypirc)
+   6. Test it on testpypi (requires ~/.pypirc and python3-setuptools)
 
         twine upload dist/* -r testpypi
 
-   7. Push it to PyPi (requires ~/.pypirc)
+   7. Push it to PyPi (requires ~/.pypirc and python3-setuptools)
 
         twine upload dist/*
 

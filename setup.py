@@ -6,7 +6,7 @@ with open('README.rst') as f:
 
 setup(
     name='empymod',
-    version='1.3.0',
+    version='1.3.dev',
     description='ElectroMagnetic Python forward MODeller (1D)',
     long_description=readme,
     author='Dieter Werthmüller',
