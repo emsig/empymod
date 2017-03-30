@@ -1,6 +1,6 @@
 # Changelog
 
-## latest
+## v1.3.0 - *2017-03-30*
 
 * Add additional transforms and improve QWE:
     - Conventional adaptive quadrature (QUADPACK) for the Hankel transform;
