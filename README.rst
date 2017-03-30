@@ -65,12 +65,19 @@ Articles (published or in preparation):
 Citation
 --------
 
-I am in the process of publishing an article regarding `empymod`, and I will
-put the info here once it is a reality. If you publish results for which you
-used `empymod`, please consider citing this article. Also consider citing the
-two articles given below, Hunziker et al. (2015), and Key (2012), without which
-`empymod` would not exist. All releases have additionally a Zenodo-DOI,
-provided on the `release-page <https://github.com/prisae/empymod/releases>`_.
+I am in the process of publishing an article in *Geophysics* regarding
+`empymod`, and I will put the info here once it is a reality. If you publish
+results for which you used `empymod`, please consider citing this article.
+Meanwhile, you could cite the Geophysical Tutorial:
+
+Werthmüller, D., 2017, Getting started with controlled-source electromagnetic
+1D modeling: The Leading Edge, 36, 352-355; doi: `10.1190/tle36040352.1
+<http://dx.doi.org/10.1190/tle36040352.1>`_.
+
+Also consider citing the two articles given below, Hunziker et al. (2015), and
+Key (2012), without which `empymod` would not exist. All releases have
+additionally a Zenodo-DOI, provided on the `release-page
+<https://github.com/prisae/empymod/releases>`_.
 
 
 Notice

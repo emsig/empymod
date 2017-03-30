@@ -200,12 +200,19 @@ To run the test-suite you must download `empymod` from GitHub.
 Citation
 --------
 
-I am in the process of publishing an article regarding `empymod`, and I will
-put the info here once it is reality. If you publish results for which you used
-`empymod`, please consider citing this article. Also consider citing
-[Hunziker_et_al_2015]_ and [Key_2012]_, without which `empymod` would not
-exist. All releases have a Zenodo-DOI, provided on the `GitHub release-page
-<https://github.com/prisae/empymod/releases>`_.
+I am in the process of publishing an article in *Geophysics* regarding
+`empymod`, and I will put the info here once it is a reality. If you publish
+results for which you used `empymod`, please consider citing this article.
+Meanwhile, you could cite the Geophysical Tutorial:
+
+Werthmüller, D., 2017, Getting started with controlled-source electromagnetic
+1D modeling: The Leading Edge, 36, 352-355; doi: `10.1190/tle36040352.1
+<http://dx.doi.org/10.1190/tle36040352.1>`_.
+
+Also consider citing [Hunziker_et_al_2015]_ and [Key_2012]_, without which
+`empymod` would not exist. All releases have a Zenodo-DOI, provided on the
+`GitHub release-page <https://github.com/prisae/empymod/releases>`_.
+
 
 License
 -------
