@@ -1,6 +1,3 @@
-Info
-====
-
 .. automodule:: empymod
 
 Code

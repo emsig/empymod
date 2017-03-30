@@ -22,16 +22,21 @@ These principal routines make use of the following two core routines:
     - `tem`: Carry out the Fourier transform to time domain after `fem`.
 
 Two further routines are shortcuts for frequency- and time-domain dipoles,
-respectively, and mainly in for legacy reasons:
+respectively, and mainly here for legacy reasons:
 
     - `frequency`: Shortcut of `dipole` for frequency-domain calculation.
     - `time`: Shortcut of `dipole` for time-domain calculation.
 
-Two more routines are more kind of examples and cannot be regarded stable;
-they can serve as template to create your own routines:
+The last two routines are:
 
-    - `gpr`:        Calculate the Ground-Penetrating Radar (GPR) response.
     - `wavenumber`: Calculate the electromagnetic wavenumber-domain solution.
+    - `gpr`:        Calculate the Ground-Penetrating Radar (GPR) response.
+
+The `wavenumber` routine can be used if you are interested in the
+wavenumber-domain result, without Hankel nor Fourier transform. It calls
+straight the `kernel`. The `gpr`-routine convolves the frequency-domain result
+with a wavelet, and applies a gain to the time-domain result. This function is
+still experimental.
 
 """
 # Copyright 2016-2017 Dieter Werthmüller
@@ -360,8 +365,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        epermV      [-] :  1 1 1 1 1
        mpermH      [-] :  1 1 1 1 1
        mpermV      [-] :  1 1 1 1 1
+       frequency  [Hz] :  1
        Hankel          :  Fast Hankel Transform
          > Filter      :  Key 201 (2009)
+         > pts_per_dec :  Defined by filter (lagged)
        Hankel Opt.     :  None
        Loop over       :  None (all vectorized)
        Source(s)       :  1 bipole(s)
@@ -378,13 +385,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
          > y       [m] :  0 - 0 : 10  [min-max; #]
                        :  0 0 0 0 0 0 0 0 0 0
          > z       [m] :  200
-         > azimuth [°] :  0 - 0 : 10  [min-max; #]
-                       :  0 0 0 0 0 0 0 0 0 0
-         > dip     [°] :  0 - 0 : 10  [min-max; #]
-                       :  0 0 0 0 0 0 0 0 0 0
+         > azimuth [°] :  0
+         > dip     [°] :  0
        Required ab's   :  11
     ~
-    :: empymod END; runtime = 0:00:00.022349 :: 1 kernel call(s)
+    :: empymod END; runtime = 0:00:00.005536 :: 1 kernel call(s)
     ~
     >>> print(EMfield)
     [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j

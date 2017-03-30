@@ -41,7 +41,7 @@ with a click.
 
 
 Usage
------
+'''''
 
 The main modelling routines is `bipole`, which can calculate the
 electromagnetic frequency- or time-domain field due to arbitrary finite
@@ -70,7 +70,6 @@ default value:
     >>> freq = 1
     >>> # Calculate electric field due to an electric source at 1 Hz.
     >>> # [msrc = mrec = True (default)]
-    >>> EMfield = bipole(src, rec, depth, res, freq)
     >>> EMfield = bipole(src, rec, depth, res, freq, verb=4)
     :: empymod START  ::
     ~
@@ -81,8 +80,10 @@ default value:
        epermV      [-] :  1 1 1 1 1
        mpermH      [-] :  1 1 1 1 1
        mpermV      [-] :  1 1 1 1 1
+       frequency  [Hz] :  1
        Hankel          :  Fast Hankel Transform
          > Filter      :  Key 201 (2009)
+         > pts_per_dec :  Defined by filter (lagged)
        Hankel Opt.     :  None
        Loop over       :  None (all vectorized)
        Source(s)       :  1 bipole(s)
@@ -99,13 +100,11 @@ default value:
          > y       [m] :  0 - 0 : 10  [min-max; #]
                        :  0 0 0 0 0 0 0 0 0 0
          > z       [m] :  200
-         > azimuth [°] :  0 - 0 : 10  [min-max; #]
-                       :  0 0 0 0 0 0 0 0 0 0
-         > dip     [°] :  0 - 0 : 10  [min-max; #]
-                       :  0 0 0 0 0 0 0 0 0 0
+         > azimuth [°] :  0
+         > dip     [°] :  0
        Required ab's   :  11
     ~
-    :: empymod END; runtime = 0:00:00.022349 :: 1 kernel call(s)
+    :: empymod END; runtime = 0:00:00.005536 :: 1 kernel call(s)
     ~
     >>> print(EMfield)
     [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
@@ -115,16 +114,19 @@ default value:
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
 
-Examples can be found in the `prisae/empymod-notebooks
+Frequency- and time-domain examples can be found in the
+`prisae/empymod-notebooks
 <https://github.com/prisae/empymod-notebooks>`_-repository.
 
-Articles (published or in preparation):
+More information and more examples can be found in the following articles
+(published or in preparation):
 
     - `prisae/empymod-geo2017 <https://github.com/prisae/empymod-geo2017>`_
     - `prisae/empymod-tle2017 <https://github.com/prisae/empymod-tle2017>`_
+      (doi: `10.1190/tle36040352.1 <http://dx.doi.org/10.1190/tle36040352.1>`_)
 
 Structure
----------
+'''''''''
 
     - **model.py**: EM modelling routines.
     - **utils.py**: Utilities for `model` such as checking input parameters.
@@ -140,7 +142,7 @@ Structure
 
 
 Missing features
-----------------
+''''''''''''''''
 
 A list of things that should or could be added and improved:
 
@@ -172,7 +174,7 @@ A list of things that should or could be added and improved:
       educational purposes).
 
 Testing
--------
+'''''''
 
 The modeller comes with a test suite using `pytest`. If you want to run
 the tests, just install `pytest` and run it within the `empymod`-top-directory.
@@ -183,22 +185,25 @@ the tests, just install `pytest` and run it within the `empymod`-top-directory.
     > # or
     > pip install pytest
     > # and then
-    > cd to/the/empymod/folder
-    > ls
-    CHANGELOG.md  empymod  notebooks  paper       requirements.txt  tests
-    docs          LICENSE  NOTICE     README.rst  setup.py          THANKS.md
+    > cd to/the/empymod/folder  # Ensure you are in the right directory,
+    > ls -d */                  # your output should look the same.
+    docs/  empymod/  tests/
     > # pytest will find the tests, which are located in the tests-folder.
     > # simply run
     > pytest
 
 It should run all tests successfully. Please let me know if not!
 
-Note that the installations via conda/pip do not have the test-suite included.
-To run the test-suite you must download `empymod` from GitHub.
+Note that installations of `empymod` via conda or pip do not have the
+test-suite included. To run the test-suite you must download `empymod` from
+GitHub.
 
+
+Info
+----
 
 Citation
---------
+''''''''
 
 I am in the process of publishing an article in *Geophysics* regarding
 `empymod`, and I will put the info here once it is a reality. If you publish
@@ -215,7 +220,7 @@ Also consider citing [Hunziker_et_al_2015]_ and [Key_2012]_, without which
 
 
 License
--------
+'''''''
 
 Copyright 2016-2017 Dieter Werthmüller
 
@@ -236,7 +241,7 @@ License.
 
 
 Notice
-------
+''''''
 
 This product includes software that was initially (till 01/2017) developed at
 *The Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
@@ -293,7 +298,7 @@ Included transforms
 
     - Fast Hankel Transform *FHT* ([Gosh_1971]_)
     - Quadrature with Extrapolation *QWE* ([Key_2012]_)
-    - Adaptive quadrature from `QUADPACK`
+    - Adaptive quadrature *QUAD* (from `QUADPACK`)
 
 **Fourier transform**:
 
@@ -303,6 +308,26 @@ Included transforms
     - Logarithmic Fast Fourier Transform *FFTLog* ([Hamilton_2000]_)
 
 
+FFTLog
+......
+
+FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT originally
+proposed by [Talman_1978]_. The code used by `empymod` was published in
+Appendix B of [Hamilton_2000]_ and is publicly available at
+`casa.colorado.edu/~ajsh/FFTLog <http://casa.colorado.edu/~ajsh/FFTLog>`_.
+From the `FFTLog`-website:
+
+*FFTLog is a set of fortran subroutines that compute the fast Fourier or Hankel
+(= Fourier-Bessel) transform of a periodic sequence of logarithmically spaced
+points.*
+
+FFTlog can be used for the Hankel as well as for the Fourier Transform, but
+currently `empymod` uses it only for the Fourier transform. It uses a
+simplified version of the python implementation of FFTLog, `pyfftlog`
+(`github.com/prisae/pyfftlog <https://github.com/prisae/pyfftlog>`_).
+
+
+
 Depths, Rotation, and Bipole
 ''''''''''''''''''''''''''''
 **Depths**: Calculation of many source and receiver positions is fastest if
@@ -310,14 +335,14 @@ they remain at the same depth, as they can be calculated in one kernel-call. If
 depths do change, one has to loop over them.
 
 **Rotation**: Sources and receivers aligned along the principal axes x, y, and
-z can be calculated in one kernel call. For arbitrary aligned di- or bipoles,
-3 kernel calls are required. If source and receiver are arbitrary aligned,
-3x3 hence 9 kernel calls are required.
+z can be calculated in one kernel call. For arbitrary oriented di- or bipoles,
+3 kernel calls are required. If source and receiver are arbitrary oriented,
+9 (3x3) kernel calls are required.
 
 **Bipole**: Bipoles increase the calculation time by the amount of integration
 points used. For a source and a receiver bipole with each 5 integration points
-you need 5x5 hence 25 kernel calls. You can calculate it in 1 kernel call if
-you set both integration points to 1, and hence calculate the bipole as if they
+you need 25 (5x5) kernel calls. You can calculate it in 1 kernel call if you
+set both integration points to 1, and therefore calculate the bipole as if they
 were dipoles at their centre.
 
 **Example**: For 1 source and 10 receivers, all at the same depth, 1 kernel
@@ -377,9 +402,9 @@ command (in the example it is changed to 4):
 
 This parallelisation will make `empymod` faster if you calculate a lot of
 offsets/frequencies at once, but slower for few offsets/frequencies. Best
-practice is to check first which one is faster. (You can use the included
-`jupyter notebook`-benchmark.)
-
+practice is to check first which one is faster. (You can use the
+benchmark-notebook in the `prisae/empymod-notebooks
+<https://github.com/prisae/empymod-notebooks>`_-repository.)
 
 Spline interpolation
 ''''''''''''''''''''
@@ -420,11 +445,11 @@ Be aware that *QUAD* (Hankel transform) *always* use the splined version and
 *always* loop over offsets. The same applies for all frequency-to-time
 transformations.
 
-The splined versions of *QWE* check whether the ratio first interval /
-second interval is above a certain threshold (steep end of the wavenumber or
+The splined versions of *QWE* check whether the ratio of any two adjacent
+intervals is above a certain threshold (steep end of the wavenumber or
 frequency spectrum). If it is, it carries out *QUAD* for this interval instead
-of *QWE*. The threshold is stored in `diff_quad`, which is the last input
-parameter in `htarg` and `ftarg`.
+of *QWE*. The threshold is stored in `diff_quad`, which can be changed within
+the parameter `htarg` and `ftarg`.
 
 
 Looping
@@ -452,25 +477,6 @@ are in the same layer to calculate
 
 The Hankel transforms methods are having sometimes difficulties transforming
 these functions.
-
-FFTLog
-------
-
-FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT originally
-proposed by [Talman_1978]_. The code used by `empymod` was published in
-Appendix B of [Hamilton_2000]_ and is publicly available at
-`casa.colorado.edu/~ajsh/FFTLog <http://casa.colorado.edu/~ajsh/FFTLog>`_.
-From the `FFTLog`-website:
-
-*FFTLog is a set of fortran subroutines that compute the fast Fourier or Hankel
-(= Fourier-Bessel) transform of a periodic sequence of logarithmically spaced
-points.*
-
-FFTlog can be used for the Hankel as well as for the Fourier Transform, but
-currently `empymod` uses it only for the Fourier transform. It uses a
-simplified version of the python implementation of FFTLog, `pyfftlog`
-(`github.com/prisae/pyfftlog <https://github.com/prisae/pyfftlog>`_).
-
 
 
 .. |_| unicode:: 0xA0
