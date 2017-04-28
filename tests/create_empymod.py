@@ -134,7 +134,6 @@ winp = {'src': [330, -200, 500],
         'epermV': [80, 20, 1],
         'mpermH': [1, 20, 50],
         'mpermV': [1, 30, 4],
-        'xdirect': True,
         'verb': 0}
 PJ0, PJ1 = wavenumber(**winp)
 

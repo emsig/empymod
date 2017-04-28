@@ -20,7 +20,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
     # Compare wavenumber-domain calculation / FHT with analytical
     # frequency-domain fullspace solution
     calc = getattr(transform, htype)
-    model = utils.check_model([], 10, 2, 2, 5, 1, 10, 0)
+    model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
     frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
                                       mpermV, 0)

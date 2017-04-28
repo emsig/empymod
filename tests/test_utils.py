@@ -291,7 +291,7 @@ def test_check_hankel(capsys):                                # 6. check_hankel
 def test_check_model(capsys):                                  # 7. check_model
     # Normal case
     res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
-                            [1, 1], 1)
+                            [1, 1], True, 1)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = res
     out, _ = capsys.readouterr()
     assert out[:32] == "* WARNING :: Parameter epermH < "
@@ -305,36 +305,41 @@ def test_check_model(capsys):                                  # 7. check_model
     assert_allclose(isfullspace, False)
 
     # Check -np.infty is added to depth
-    out = utils.check_model([], 2, 1, 1, 1, 1, 1, 1)
+    out = utils.check_model([], 2, 1, 1, 1, 1, 1, True, 1)
     assert_allclose(out[0], -np.infty)
 
     # Check -np.infty is not added if it is already in depth
-    out = utils.check_model(-np.infty, 2, 1, 1, 1, 1, 1, 1)
+    out = utils.check_model(-np.infty, 2, 1, 1, 1, 1, 1, True, 1)
     assert_allclose(out[0], -np.infty)
 
     # Check verbosity and fullspace
-    utils.check_model(0, [1, 1], [2, 2], [10, 10], [1, 1], None, [3, 3], 4)
+    utils.check_model(0, [1, 1], [2, 2], [10, 10], [1, 1], None, [3, 3], True,
+                      4)
     out, _ = capsys.readouterr()
     outstr1 = "   depth       [m] :  0\n   res     [Ohm.m] :  1 1\n   aniso"
     outstr2 = "S A FULLSPACE; returning analytical frequency-domain solution\n"
     assert out[:58] == outstr1
     assert out[-62:] == outstr2
 
-    # Check fullspace if only one value
-    utils.check_model([], 1, 2, 10, 1, 2, 3, 4)
+    # Check fullspace if only one value, w\o xdirect
+    utils.check_model([], 1, 2, 10, 1, 2, 3, True, 4)
     out, _ = capsys.readouterr()
     assert out[-62:] == outstr2
+    utils.check_model([], 1, 2, 10, 1, 2, 3, False, 4)
+    out, _ = capsys.readouterr()
+    assert out[-21:] == "MODEL IS A FULLSPACE\n"
 
     # Increasing depth
     with pytest.raises(ValueError):
         var = [1, 1, 1, 1]
-        utils.check_model([0, 100, 90], var, var, var, var, var, var, 1)
+        utils.check_model([0, 100, 90], var, var, var, var, var, var, True, 1)
         out, _ = capsys.readouterr()
         assert out[:25] == "* ERROR   :: <depth> must"
 
     # A ValueError check
     with pytest.raises(ValueError):
-        utils.check_model(0, 1, [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], 1)
+        utils.check_model(0, 1, [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], True,
+                          1)
 
 
 def test_check_opt(capsys):                                      # 8. check_opt

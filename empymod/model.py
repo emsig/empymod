@@ -413,7 +413,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
-                        verb)
+                        xdirect, verb)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
 
     # Check frequency => get etaH, etaV, zetaH, and zetaV
@@ -875,7 +875,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
-                        verb)
+                        xdirect, verb)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
 
     # Check frequency => get etaH, etaV, zetaH, and zetaV
@@ -1015,8 +1015,7 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
 
 
 def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
-               epermH=None, epermV=None, mpermH=None, mpermV=None,
-               xdirect=True, verb=2):
+               epermH=None, epermV=None, mpermH=None, mpermV=None, verb=2):
     """Return the electromagnetic wavenumber-domain field.
 
     Calculate the electromagnetic wavenumber-domain field due to infinitesimal
@@ -1089,12 +1088,6 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res. Default is ones.
 
-    xdirect : bool, optional
-        If True and source and receiver are in the same layer, the direct field
-        is calculated analytically in the frequency domain, if False it is
-        calculated in the wavenumber domain.
-        Defaults to True.
-
     verb : {0, 1, 2, 3, 4}, optional
         Level of verbosity, default is 2:
             - 0: Print nothing.
@@ -1145,7 +1138,8 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     # === 2.  CHECK INPUT ============
 
     # Check layer parameters (isfullspace not required)
-    modl = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb)
+    modl = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
+                       False, verb)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = modl
 
     # Check frequency => get etaH, etaV, zetaH, and zetaV
@@ -1174,7 +1168,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
                                        etaV, zetaH, zetaV,
                                        np.atleast_2d(wavenumber), ab_calc,
-                                       xdirect, msrc, mrec, False)
+                                       False, msrc, mrec, False)
 
     # Collect output
     PJ1 = np.squeeze(factAng[:, np.newaxis]*PJ1*wavenumber)
@@ -1296,15 +1290,15 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
     if ab in [36, ]:
         return fEM, kcount, conv
 
-    # Get full-space-solution if model is a full-space or
-    # if src and rec are in the same layer and xdirect=True.
-    if isfullspace or (lsrc == lrec and xdirect):
+    # Get full-space-solution if xdirect=True and model is a full-space or
+    # if src and rec are in the same layer.
+    if xdirect and (isfullspace or lsrc == lrec):
         fEM += kernel.fullspace(off, angle, zsrc, zrec, etaH[:, lrec],
                                 etaV[:, lrec], zetaH[:, lrec], zetaV[:, lrec],
                                 ab, msrc, mrec)
 
-    # If not full-space calculate fEM-field
-    if not isfullspace:
+    # If not full-space with xdirect calculate fEM-field
+    if not isfullspace*xdirect:
         calc = getattr(transform, ht)
         if loop_freq:
 

@@ -617,7 +617,8 @@ def check_hankel(ht, htarg, verb):
     return ht, htarg
 
 
-def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
+def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
+                verb):
     """Check the model: depth and corresponding layer parameters.
 
     This check-function is called from one of the modelling routines in
@@ -644,6 +645,11 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     mpermH, mpermV : array_like
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res.
+
+    xdirect : bool, optional
+        If True and source and receiver are in the same layer, the direct field
+        is calculated analytically in the frequency domain, if False it is
+        calculated in the wavenumber domain.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -731,8 +737,11 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
     # Print fullspace info
     if verb > 2 and isfullspace:
-        print("\n>  MODEL IS A FULLSPACE; returning analytical " +
-              "frequency-domain solution")
+        if xdirect:
+            print("\n>  MODEL IS A FULLSPACE; returning analytical " +
+                "frequency-domain solution")
+        else:
+            print("\n>  MODEL IS A FULLSPACE")
 
     return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
 
