@@ -17,7 +17,8 @@ mpermH = [1, 5, 10]
 mpermV = [2, 5, 5]
 epermH = [1, 80, 50]
 epermV = [1, 80, 80]
-model = utils.check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, 0)
+model = utils.check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
+                          True, 0)
 depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
 frequency = utils.check_frequency(freq, res, aniso, epermH, epermV, mpermH,
                                   mpermV, 0)
@@ -118,8 +119,21 @@ inp7['signal'] = 1
 EM7, _ = tem(**inp7)
 
 # 8. TIME; SIGNAL = -1
-inp8 = deepcopy(inp6)
-inp8['signal'] = -1
+_, freq1, _, _ = utils.check_time(time, 1, 'fftlog', None, 0)
+_, freq2, _, _ = utils.check_time(time, -1, 'fftlog', None, 0)
+frequency2 = utils.check_frequency(freq2, res, aniso, epermH, epermV, mpermH,
+                                   mpermV, 0)
+freq2, etaH2, etaV2, zetaH2, zetaV2 = frequency2
+
+tinp2 = deepcopy(inp2)
+tinp2['freq'] = freq2
+tinp2['etaH'] = etaH2
+tinp2['etaV'] = etaV2
+tinp2['zetaH'] = zetaH2
+tinp2['zetaV'] = zetaV2
+fEM2, _, _ = fem(**tinp2)
+inp8 = {'fEM': fEM2, 'off': off, 'freq': freq2, 'time': time, 'signal': -1,
+        'ft': ft, 'ftarg': ftarg}
 EM8, _ = tem(**inp8)
 
 # Store data

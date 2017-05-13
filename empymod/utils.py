@@ -739,7 +739,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     if verb > 2 and isfullspace:
         if xdirect:
             print("\n>  MODEL IS A FULLSPACE; returning analytical " +
-                "frequency-domain solution")
+                  "frequency-domain solution")
         else:
             print("\n>  MODEL IS A FULLSPACE")
 
@@ -1141,6 +1141,11 @@ def check_time(time, signal, ft, ftarg, verb):
         print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +
               "'fftlog', 'fft']; <ft> provided: "+str(ft))
         raise ValueError('ft')
+
+    # If switch-off, we add min_freq to calculate the DC-value, from which
+    # the response will be subtracted.
+    if signal == -1:
+        freq = np.r_[min_freq, freq]
 
     return time, freq, ft, ftarg
 

@@ -105,7 +105,7 @@ fqwe0['intervals'] = intervals
 
 # # G -- QWE - HQWE # #
 # Model
-model = utils.check_model([], 10, 2, 2, 5, 1, 10, 0)
+model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
 depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
 frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
                                   mpermV, 0)
@@ -183,7 +183,7 @@ hqwe = {'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
 
 # # H -- QUAD # #
 # Model
-model = utils.check_model([], 10, 2, 2, 5, 1, 10, 0)
+model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
 depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
 frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
                                   mpermV, 0)

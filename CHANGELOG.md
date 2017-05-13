@@ -1,5 +1,13 @@
 # Changelog
 
+
+## latest
+
+* [2017-05-13] Improved switch-off response (calculate and subtract from DC).
+* [2017-04-28] `xdirect` adjustments:
+    - `isfullspace` now respects `xdirect`.
+    - Removed `xdirect` from `model.wavenumber` (set to `False`).
+
 ## v1.3.0 - *2017-03-30*
 
 * Add additional transforms and improve QWE:
