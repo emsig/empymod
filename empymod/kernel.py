@@ -866,7 +866,6 @@ def halfspace(xco, yco, zsrc, zrec, res, freqtime, aniso=1, ab=11,
 
     Examples
     --------
-    Comparing the result from `dipole` and `halfspace`:
     >>> from empymod import dipole
     >>> from empymod.kernel import halfspace
     >>> src = [0, 0, 10]
