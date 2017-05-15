@@ -20,6 +20,7 @@ def collect_model(src, rec, freq, depth, res, srcpts=1):
              'srcpts': srcpts}
     return model
 
+
 # 1. x-directed dipole
 src1 = [0, 0, 150, 0, 0]
 out1 = dipole1d(src1, rec, depth, res, freq)

@@ -4,6 +4,7 @@ from numpy.testing import assert_allclose
 from numexpr import evaluate as use_ne_eval
 
 from empymod import kernel
+from empymod import bipole
 
 # No input checks are carried out in kernel, by design. Input checks are
 # carried out in model/utils, not in the core functions kernel/transform.
@@ -92,8 +93,43 @@ def test_halfspace():                                            # 7. halfspace
     # Compare all to maintain status quo.
     hs = DATAEMPYMOD['hs'][()]
     hsres = DATAEMPYMOD['hsres'][()]
+    hsbp = DATAEMPYMOD['hsbp'][()]
     for key in hs:
         # Get halfspace
         hs_res = kernel.halfspace(**hs[key])
         # Check
         assert_allclose(hs_res, hsres[key])
+
+    # Additional checks - Time
+    full = kernel.halfspace(**hs['21'])
+
+    # Check halfspace = sum of split
+    hs['21']['output'] = 'split'
+    direct, reflect, air = kernel.halfspace(**hs['21'])
+    assert_allclose(full, direct+reflect+air)
+
+    # Check fullspace = bipole-solution
+    hsbp['21']['xdirect'] = True
+    hsbp['21']['depth'] = []
+    hsbp['21']['res'] = hsbp['21']['res'][1]
+    hsbp['21']['aniso'] = hsbp['21']['aniso'][1]
+    hsbp['21']['ft'] = 'sin'
+    hs_res = bipole(**hsbp['21'])
+    assert_allclose(direct, hs_res)
+
+    # Additional checks - Frequency
+    hs['11']['output'] = 'fs'
+    full = kernel.halfspace(**hs['11'])
+
+    # Check halfspace = sum of split
+    hs['11']['output'] = 'fs'
+    direct = kernel.halfspace(**hs['11'])
+    assert_allclose(full, direct)
+
+    # Check fullspace = bipole-solution
+    hsbp['11']['xdirect'] = True
+    hsbp['11']['depth'] = []
+    hsbp['11']['res'] = hsbp['11']['res'][1]
+    hsbp['11']['aniso'] = hsbp['11']['aniso'][1]
+    hs_res = bipole(**hsbp['11'])
+    assert_allclose(direct, hs_res)

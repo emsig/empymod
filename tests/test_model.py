@@ -42,7 +42,7 @@ class TestBipole:                                                   # 1. bipole
             assert_allclose(fs_res, bip_res)
 
     def test_halfspace(self):                                   # 1.2 halfspace
-        # Comparison to analytical fullspace solution
+        # Comparison to analytical halfspace solution
         hs = DATAEMPYMOD['hs'][()]
         hsbp = DATAEMPYMOD['hsbp'][()]
         for key in hs:
@@ -51,7 +51,11 @@ class TestBipole:                                                   # 1. bipole
             # Get bipole
             bip_res = bipole(**hsbp[key])
             # Check
-            assert_allclose(hs_res, bip_res)
+            if key in ['12', '13', '21', '22', '23']:  # t-domain examples
+                rtol = 1e-2
+            else:
+                rtol = 1e-7
+            assert_allclose(hs_res, bip_res, rtol=rtol)
 
     def test_emmod(self):                            # 1.3. Comparison to EMmod
         # Comparsion to EMmod (Hunziker et al., 2015)

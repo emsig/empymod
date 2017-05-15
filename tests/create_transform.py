@@ -41,6 +41,7 @@ def test_time(res, off, t, signal):
     elif signal == 0:
         return fact1*tau**3/(4*t*np.sqrt(np.pi))*np.exp(-tau**2/4)
 
+
 # Time-domain solution
 res = 20  # Ohm.m
 off = 4000  # m

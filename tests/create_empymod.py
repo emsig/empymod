@@ -255,9 +255,10 @@ pab = [11, 12, 13, 21, 22, 23, 31, 32, 33]
 prec = [[10000, -300, 500], [5000, 200, 400], [1000, 0, 300], [100, 500, 500],
         [1000, 200, 300], [0, 2000, 200], [3000, 0, 300], [10, 1000, 10],
         [100, 6000, 200]]
-pfreq = [0.01, 0.1, 1, 1, 1, 0.01, 0.1, 1, 0.1]
 pres = [10, 3, 3, 3, 4, .004, 300, 20, 1]
-paniso = [1, 5, 1, 5, 2, 3, 1, 1, 1]
+paniso = [1, 5, 1, 3, 2, 3, 1, 1, 1]
+pfreq = [0.01, 1, 2, 0.1, 2, 1, 0.1, 1, 0.1]
+signal = [None, 1, 1, 0, -1, 1, 0, None, None]
 hs = dict()
 hsbp = dict()
 hs_res = dict()
@@ -283,7 +284,8 @@ for i in range(9):
                        'zsrc': 100,
                        'zrec': rec[2],
                        'res': res,
-                       'freq': freq,
+                       'freqtime': freq,
+                       'signal': signal[i],
                        'aniso': aniso,
                        'ab': ab}
 
@@ -293,7 +295,7 @@ for i in range(9):
                          'depth': 0,
                          'res': [1e20, res],
                          'freqtime': freq,
-                         'signal': None,
+                         'signal': signal[i],
                          'aniso': [1, aniso],
                          'epermH': None,
                          'epermV': None,
@@ -307,7 +309,7 @@ for i in range(9):
                          'xdirect': False,
                          'ht': 'fht',
                          'htarg': None,
-                         'ft': None,
+                         'ft': 'sin',
                          'ftarg': None,
                          'opt': None,
                          'loop': None,

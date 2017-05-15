@@ -3,6 +3,9 @@
 
 ## latest
 
+* [2017-05-15] Include t-domain ee halfspace solution into `kernel.halfspace`;
+  possible to obtain direct, reflected, and airwave separately, as well as only
+  fullspace solution (all for the diffusive approximation).
 * [2017-05-13] Improved switch-off response (calculate and subtract from DC).
 * [2017-04-28] `xdirect` adjustments:
     - `isfullspace` now respects `xdirect`.

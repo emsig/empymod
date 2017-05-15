@@ -34,6 +34,12 @@ root directory for more information regarding the involved licenses.
 
 
 import numpy as np
+
+# Imports for halfspace solution
+from scipy.special import ive, kve  # Modified Bessel functions
+from scipy.special import erfc      # Complementary error function
+from scipy.constants import mu_0    # Magn. perm.y of free space  [H/m]
+
 np.seterr(all='ignore')
 
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
@@ -803,74 +809,101 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
     return gin
 
 
-def halfspace(xco, yco, zsrc, zrec, res, freq, aniso=1, ab=11):
-    """Return frequency-space domain VTI half-space solution.
+def halfspace(xco, yco, zsrc, zrec, res, freqtime, aniso=1, ab=11,
+              signal=None, output='hs'):
+    """Return frequency- or time-space domain VTI half-space solution.
 
-    Calculates the frequency-space domain electromagnetic response for a
-    half-space below air using the diffusive approximation, as given in
-    [Slob_et_al_2010]_.
+    Calculates the frequency- or time-space domain electromagnetic response for
+    a half-space below air using the diffusive approximation, as given in
+    [Slob_et_al_2010]_, where the electric source is located at [0, 0, zsrc],
+    and the electric receiver at [xco, yco, zrec].
+
+    It can also be used to calculate the fullspace solution or the separate
+    fields: direct field, reflected field, and airwave; always using the
+    diffusive approximation. See `output`-parameter.
 
     This routine is not strictly part of `empymod` and not used by it.
-    However, it can be useful to compare the code to the analytical solution.
-
-    There are a few known typos in the equations of [Slob_et_al_2010]_. Write
-    the authors to receive an updated version!
-
-    This could be integrated into `empymod` by checking if the top-layer is a
-    very resistive layer, hence air, and the rest is a half-space, and then
-    calling this function instead of `wavenumber`. (Similar to the way
-    `fullspace` is incorporated if all layer parameters are identical.) The
-    time-space domain solution could be implemented as well.
+    However, it can be useful to compare the code to this analytical solution.
 
     Parameters
     ----------
     xco, yco : array
         Inline and crossline coordinates (m)
     zsrc, zrec : float
-        Source and receiver depth (m)
+        Source and receiver depths (m)
     res : float or array
         Half-space resistivity (Ohm.m)
-    freq : float
-        Frequency (Hz)
+    freqtime : float
+        Frequency (Hz) or time (s), depending on signal.
     aniso : float, optional
        Anisotropy (-), default = 1
     ab : int, optional
        Src-Rec config, default = 11; {11, 12, 13, 21, 22, 23, 31, 32, 33}
+    signal : {None, 0, 1, -1}, optional
+        Source signal, default is None:
+            - None: Frequency-domain response
+            - -1 : Switch-off time-domain response
+            - 0 : Impulse time-domain response
+            - +1 : Switch-on time-domain response
+    output : str, optional
+        Defines what is returned:
+            - 'hs' : Half-space solution (default)
+            - 'fs' : Full-space solution
+            - 'split' : Direct field, reflected field, airwave
 
     Returns
     -------
-    EM half-space solution
+    EM : array
+        Frequency- or time-domain EM field (depending on `signal`):
+            - Frequency-domain or impulse response: returns E [V/m].
+            - Step response: returns E [V/(m.s)].
+
+        However, source and receiver are normalised. So for instance in the
+        electric case the source strength is 1 A and its length is 1 m. So the
+        electric field could also be written as [V/(A.m2)].
+
+        Three arrays are returned if `output='split'`.
 
     Examples
     --------
+    Comparing the result from `dipole` and `halfspace`:
+    >>> from empymod import dipole
     >>> from empymod.kernel import halfspace
-    >>> EM = halfspace(1000, 0, 10, 1, 10, 1)
-    >>> print('HS response : ', EM)
-    HS response :  (3.02186073352e-09-3.87322421836e-10j)
-
+    >>> src = [0, 0, 10]
+    >>> rec = [1000, 0, 1]
+    >>> time = 1
+    >>> res = [2e14, 10]
+    >>> depth = 0
+    >>> EMdi = dipole(src, rec, depth, res, time, verb=0)
+    >>> EMhs = halfspace(rec[0], rec[1], src[2], rec[2], res[1], time)
+    >>> print('Half-space response : %1.6e + %1.6ej' % (EMhs.real, EMhs.imag))
+    >>> print('Dipole response     : %1.6e + %1.6ej' % (EMdi.real, EMdi.imag))
+    Half-space response : 3.021861e-09 + -3.873224e-10j
+    Dipole response     : 3.021861e-09 + -3.873224e-10j
     """
 
-    # As `halfspace` is not strictly part of `empymod`, module imports are
-    # here, so they are only imported if needed
-    from scipy.special import ive, kve  # Modified Bessel functions
-    from scipy.constants import mu_0    # Magn. perm.y of free space  [H/m]
-
-    # Cast input
+    # No input checks are carried out, but we cast the variables.
     xco = np.array(xco, dtype=float)
     yco = np.array(yco, dtype=float)
-    zsrc = np.array(zsrc, dtype=float)
-    zrec = np.array(zrec, dtype=float)
-    res = np.array(res, dtype=float)
-    freq = np.array(freq, dtype=float)
-    aniso = np.array(aniso, dtype=float)
+    zsrc = float(zsrc)
+    zrec = float(zrec)
+    res = float(res)
+    aniso = float(aniso)
+    freqtime = np.array(freqtime, dtype=float, ndmin=1)
     ab = int(ab)
 
-    # Defined parameters
-    s = 2j*np.pi*freq  # Laplace parameter
-    #
-    zeta = s*mu_0
-    gamH = np.sqrt(zeta/res)
-    #
+    # Define freq/time and dtype depending on signal.
+    if signal is None:
+        freq = freqtime
+        dtype = complex
+    else:
+        time = freqtime
+        if signal == -1:  # Calculate DC
+            time = np.r_[time, 1e4]
+            freqtime = time
+        dtype = float
+
+    # Other defined parameters
     rh = np.sqrt(xco**2 + yco**2)  # Horizontal distance in space
     hp = np.abs(zrec + zsrc)       # Physical vertical distance
     hm = np.abs(zrec - zsrc)
@@ -886,8 +919,8 @@ def halfspace(xco, yco, zsrc, zrec, res, freq, aniso=1, ab=11):
     tsp = mu_0*rsp**2/(res*aniso**2*4)  # Scaled diffusion time
     tsm = mu_0*rsm**2/(res*aniso**2*4)
     #
-    xip = gamH*(rp + hp)/2
-    xim = gamH*(rp - hp)/2
+    if signal is None:
+        s = 2j*np.pi*freq  # Laplace parameter
 
     # delta-fct delta_\alpha\beta
     if ab in [11, 22, 33]:
@@ -920,39 +953,69 @@ def halfspace(xco, yco, zsrc, zrec, res, freq, aniso=1, ab=11):
         rev = 1
 
     # Exponential diffusion functions for m=0,1,2
-    f0p = np.exp(-2*np.sqrt(s*tp))
-    f0m = np.exp(-2*np.sqrt(s*tm))
-    fs0p = np.exp(-2*np.sqrt(s*tsp))
-    fs0m = np.exp(-2*np.sqrt(s*tsm))
-    f1p = np.sqrt(s)*f0p
-    f1m = np.sqrt(s)*f0m
-    fs1p = np.sqrt(s)*fs0p
-    fs1m = np.sqrt(s)*fs0m
-    f2p = s*f0p
-    f2m = s*f0m
-    fs2p = s*fs0p
-    fs2m = s*fs0m
 
-    # Bessel functions
-    BI0 = np.exp(-np.real(gamH)*hp)*ive(0, xim)
-    BI1 = np.exp(-np.real(gamH)*hp)*ive(1, xim)
-    BI2 = np.exp(-np.real(gamH)*hp)*ive(2, xim)
-    BK0 = np.exp(-1j*np.imag(xip))*kve(0, xip)
-    BK1 = np.exp(-1j*np.imag(xip))*kve(1, xip)
+    if signal is None:  # Frequency-domain
+        f0p = np.exp(-2*np.sqrt(s*tp))
+        f0m = np.exp(-2*np.sqrt(s*tm))
+        fs0p = np.exp(-2*np.sqrt(s*tsp))
+        fs0m = np.exp(-2*np.sqrt(s*tsm))
+
+        f1p = np.sqrt(s)*f0p
+        f1m = np.sqrt(s)*f0m
+        fs1p = np.sqrt(s)*fs0p
+        fs1m = np.sqrt(s)*fs0m
+
+        f2p = s*f0p
+        f2m = s*f0m
+        fs2p = s*fs0p
+        fs2m = s*fs0m
+
+    elif np.abs(signal) == 1:  # Time-domain step response
+        # Replace F(m) with F(m-2)
+        f0p = erfc(np.sqrt(tp/time))
+        f0m = erfc(np.sqrt(tm/time))
+        fs0p = erfc(np.sqrt(tsp/time))
+        fs0m = erfc(np.sqrt(tsm/time))
+
+        f1p = np.exp(-tp/time)/np.sqrt(np.pi*time)
+        f1m = np.exp(-tm/time)/np.sqrt(np.pi*time)
+        fs1p = np.exp(-tsp/time)/np.sqrt(np.pi*time)
+        fs1m = np.exp(-tsm/time)/np.sqrt(np.pi*time)
+
+        f2p = f1p*np.sqrt(tp)/time
+        f2m = f1m*np.sqrt(tm)/time
+        fs2p = fs1p*np.sqrt(tsp)/time
+        fs2m = fs1m*np.sqrt(tsm)/time
+
+    else:  # Time-domain impulse response
+        f0p = np.sqrt(tp/(np.pi*time**3))*np.exp(-tp/time)
+        f0m = np.sqrt(tm/(np.pi*time**3))*np.exp(-tm/time)
+        fs0p = np.sqrt(tsp/(np.pi*time**3))*np.exp(-tsp/time)
+        fs0m = np.sqrt(tsm/(np.pi*time**3))*np.exp(-tsm/time)
+
+        f1p = (tp/time - 0.5)/np.sqrt(tp)*f0p
+        f1m = (tm/time - 0.5)/np.sqrt(tm)*f0m
+        fs1p = (tsp/time - 0.5)/np.sqrt(tsp)*fs0p
+        fs1m = (tsm/time - 0.5)/np.sqrt(tsm)*fs0m
+
+        f2p = (tp/time - 1.5)/time*f0p
+        f2m = (tm/time - 1.5)/time*f0m
+        fs2p = (tsp/time - 1.5)/time*fs0p
+        fs2m = (tsm/time - 1.5)/time*fs0m
 
     # Pre-allocate arrays
-    gs0m = np.zeros(np.shape(x), dtype=complex)
-    gs0p = np.zeros(np.shape(x), dtype=complex)
-    gs1m = np.zeros(np.shape(x), dtype=complex)
-    gs1p = np.zeros(np.shape(x), dtype=complex)
-    gs2m = np.zeros(np.shape(x), dtype=complex)
-    gs2p = np.zeros(np.shape(x), dtype=complex)
-    g0p = np.zeros(np.shape(x), dtype=complex)
-    g1m = np.zeros(np.shape(x), dtype=complex)
-    g1p = np.zeros(np.shape(x), dtype=complex)
-    g2m = np.zeros(np.shape(x), dtype=complex)
-    g2p = np.zeros(np.shape(x), dtype=complex)
-    outP = np.zeros(1, dtype=complex)
+    gs0m = np.zeros(np.shape(x), dtype=dtype)
+    gs0p = np.zeros(np.shape(x), dtype=dtype)
+    gs1m = np.zeros(np.shape(x), dtype=dtype)
+    gs1p = np.zeros(np.shape(x), dtype=dtype)
+    gs2m = np.zeros(np.shape(x), dtype=dtype)
+    gs2p = np.zeros(np.shape(x), dtype=dtype)
+    g0p = np.zeros(np.shape(x), dtype=dtype)
+    g1m = np.zeros(np.shape(x), dtype=dtype)
+    g1p = np.zeros(np.shape(x), dtype=dtype)
+    g2m = np.zeros(np.shape(x), dtype=dtype)
+    g2p = np.zeros(np.shape(x), dtype=dtype)
+    air = np.zeros(np.shape(freqtime), dtype=dtype)
 
     if srcrec == 1:  # 1. {alpha, beta}
         # Get indices for singularities
@@ -995,20 +1058,80 @@ def halfspace(xco, yco, zsrc, zrec, res, freq, aniso=1, ab=11):
         g2m[iir] = -mu_0*fab[iir]/(4*np.pi*rh[iir]**2*rm[iir])
 
         # TE-mode for numerical singularities rh=0 (hm!=0)
-        g1m[izr*iih] = np.zeros(np.shape(g1m[izr*iih]), dtype=complex)
+        g1m[izr*iih] = np.zeros(np.shape(g1m[izr*iih]), dtype=dtype)
         g1p[izr*iih] = -np.sqrt(mu_0*res)*delta/(2*np.pi*hp**2)
         g2m[izr*iih] = mu_0*delta/(8*np.pi*hm)
         g2p[izr*iih] = mu_0*delta/(8*np.pi*hp)
 
-        # Airwave (eq. 35)
-        P1 = (s*mu_0)**(3/2)*fab*hp/(4*np.sqrt(res))
-        P2 = 4*BI1*BK0 - (3*BI0 - 4*np.sqrt(res)*BI1/(np.sqrt(s*mu_0) *
-                          (rp + hp)) + BI2)*BK1
-        P3 = 3*fab/rp**2 - delta
-        P4 = (s*mu_0*hp*rp*(BI0*BK0 - BI1*BK1) + np.sqrt(res*s*mu_0)*BI0*BK1 *
-              (rp + hp) + np.sqrt(res*s*mu_0)*BI1*BK0*(rp - hp))
+        # Bessel functions for airwave
+        def BI(gamH, hp, nr, xim):
+            """Return BI_nr."""
+            return np.exp(-np.real(gamH)*hp)*ive(nr, xim)
 
-        outP = (P1*P2 - P3*P4)/(4*np.pi*rp**3)
+        def BK(xip, nr):
+            """Return BK_nr."""
+            return np.exp(-1j*np.imag(xip))*kve(nr, xip)
+
+        # Airwave calculation
+        def airwave(s, hp, rp, res, fab, delta):
+            """Return airwave."""
+            # Parameters
+            zeta = s*mu_0
+            gamH = np.sqrt(zeta/res)
+            xip = gamH*(rp + hp)/2
+            xim = gamH*(rp - hp)/2
+
+            # Bessel functions
+            BI0 = BI(gamH, hp, 0, xim)
+            BI1 = BI(gamH, hp, 1, xim)
+            BI2 = BI(gamH, hp, 2, xim)
+            BK0 = BK(xip, 0)
+            BK1 = BK(xip, 1)
+
+            # Calculation
+            P1 = (s*mu_0)**(3/2)*fab*hp/(4*np.sqrt(res))
+            P2 = 4*BI1*BK0 - (3*BI0 - 4*np.sqrt(res)*BI1/(np.sqrt(s*mu_0) *
+                              (rp + hp)) + BI2)*BK1
+            P3 = 3*fab/rp**2 - delta
+            P4 = (s*mu_0*hp*rp*(BI0*BK0 - BI1*BK1) +
+                  np.sqrt(res*s*mu_0)*BI0*BK1 *
+                  (rp + hp) + np.sqrt(res*s*mu_0)*BI1*BK0*(rp - hp))
+
+            return (P1*P2 - P3*P4)/(4*np.pi*rp**3)
+
+        # Airwave depending on signal
+        if signal is None:  # Frequency-domain
+            air = airwave(s, hp, rp, res, fab, delta)
+
+        elif np.abs(signal) == 1:  # Time-domain step response
+            # Solution for step-response air-wave is not analytical, but uses
+            # the Gaver-Stehfest method.
+            K = 16
+
+            # Coefficients Dk
+            fn = np.vectorize(np.math.factorial)
+
+            def coeff_dk(k, K):
+                """Return coefficients Dk for k, K."""
+                n = np.arange(int((k+1)/2), np.min([k, K/2])+.5, 1, dtype=int)
+                Dk = n**(K/2)*fn(2*n)
+                Dk /= fn(n)*fn(n-1)*fn(k-n)*fn(2*n-k)*fn(K/2-n)
+                return Dk.sum()*(-1)**(k+K/2)
+
+            for k in range(1, K+1):
+                s = k*np.log(2)/time
+                cair = airwave(s, hp, rp, res, fab, delta)
+                air += coeff_dk(k, K)*cair.real/k
+
+        else:  # Time-domain impulse response
+            thp = mu_0*hp**2/(4*res)
+            trh = mu_0*rh**2/(8*res)
+            P1 = (mu_0**2*hp*np.exp(-thp/time))/(res*32*np.pi*time**3)
+            P2 = 2*(delta - (x*y)/rh**2)*ive(1, trh/time)
+            P3 = mu_0/(2*res*time)*(rh**2*delta - x*y)-delta
+            P4 = ive(0, trh/time) - ive(1, trh/time)
+
+            air = P1*(P2 - P3*P4)
 
     elif srcrec == 2:  # 2. {3, alpha}, {alpha, 3}
         # TM-mode
@@ -1029,8 +1152,26 @@ def halfspace(xco, yco, zsrc, zrec, res, freq, aniso=1, ab=11):
         gs2m = mu_0*aniso*(hsm**2 - rsm**2)/(4*np.pi*rsm**3)
         gs2p = -mu_0*aniso*(hsp**2 - rsp**2)/(4*np.pi*rsp**3)
 
-    outTM = (gs0m*fs0m + gs0p*fs0p + gs1m*fs1m +
-             gs1p*fs1p + gs2m*fs2m + gs2p*fs2p)
-    outTE = g0p*f0p + g1m*f1m + g1p*f1p + g2m*f2m + g2p*f2p
+    # Direct field
+    direct_TM = gs0m*fs0m + gs1m*fs1m + gs2m*fs2m
+    direct_TE = g1m*f1m + g2m*f2m
+    direct = direct_TM + direct_TE
 
-    return outTE + outTM + outP
+    # Reflection
+    reflect_TM = gs0p*fs0p + gs1p*fs1p + gs2p*fs2p
+    reflect_TE = g0p*f0p + g1p*f1p + g2p*f2p
+    reflect = reflect_TM + reflect_TE
+
+    # If switch-on, subtract switch-on from DC value
+    if signal == -1:
+        direct = direct[-1]-direct[:-1]
+        reflect = reflect[-1]-reflect[:-1]
+        air = air[-1]-air[:-1]
+
+    # Return, depending on 'output'
+    if output == 'fs':
+        return direct
+    elif output == 'split':
+        return direct, reflect, air
+    else:
+        return direct + reflect + air

@@ -26,6 +26,7 @@ def collect_model(src, rec, freq, depth, res, aniso, strength=0, srcpts=1,
              'msrc': msrc}
     return model
 
+
 # 1. x-directed electric dipole
 src1 = [0, 0, 150, 0, 0]
 out1 = green3d(src1, rec, depth, res, freq, aniso, 9)
