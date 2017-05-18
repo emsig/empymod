@@ -121,7 +121,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
     freqtime : array_like
-        Frequencies f (Hz) if `signal` == None, else times t (s).
+        Frequencies f (Hz) if `signal` == None, else times t (s); (f, t > 0).
 
     signal : {None, 0, 1, -1}, optional
         Source signal, default is None:
@@ -623,7 +623,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
     freqtime : array_like
-        Frequencies f (Hz) if `signal` == None, else times t (s).
+        Frequencies f (Hz) if `signal` == None, else times t (s); (f, t > 0).
 
     signal : {None, 0, 1, -1}, optional
         Source signal, default is None:
