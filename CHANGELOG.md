@@ -3,6 +3,9 @@
 
 ## latest
 
+* [2017-05-19] Remove legacy routines `model.time` and `model.frequency`.
+  They are covered perfectly by `model.dipole`.
+
 * [2017-05-19] Move all empymod-repos to new home on
   [empymod.github.io](https://empymod.github.io).
     - /prisae/empymod -> /empymod/empymod

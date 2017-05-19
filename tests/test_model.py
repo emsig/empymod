@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose
 
 # Import main modelling routines from empymod directly to ensure they are in
 # the __init__.py-file.
-from empymod import bipole, dipole, frequency, time
+from empymod import bipole, dipole
 # Import rest from model
 from empymod.model import gpr, wavenumber, fem, tem
 from empymod.kernel import fullspace, halfspace
@@ -506,37 +506,7 @@ def test_wavenumber():                                          # 4. wavenumber
     assert_allclose(w_res1, res['PJ1'])
 
 
-def test_frequency():                                            # 5. frequency
-    # As this is a shortcut, just run one test to ensure
-    # it is equivalent to dipole with signal=None.
-    src = [100, -100, 400]
-    rec = [1000, 1000, 1000]
-    model = {'depth': [0, 500], 'res': [1e12, 0.3, 10], 'aniso': [1, 1, 2]}
-    f = 1
-    ab = 45
-    f_res = frequency(src, rec, freq=f, ab=ab, verb=0, **model)
-    d_res = dipole(src, rec, freqtime=f, ab=ab, verb=0, **model)
-    assert_allclose(f_res, d_res)
-
-
-def test_time():                                                      # 6. time
-    # As this is a shortcut, just run one test to ensure
-    # it is equivalent to dipole with signal!=None.
-    src = [-100, 300, 600]
-    rec = [1000, -500, 400]
-    model = {'depth': [-100, 600], 'res': [1e12, 3, 1], 'aniso': [1, 2, 3]}
-    t = 10
-    ab = 51
-    signal = -1
-    ft = 'fftlog'
-    t_res = time(src, rec, time=t, signal=signal, ab=ab, ft=ft, verb=0,
-                 **model)
-    d_res = dipole(src, rec, freqtime=t, signal=signal, ab=ab, ft=ft,
-                   verb=0, **model)
-    assert_allclose(t_res, d_res)
-
-
-def test_fem():                                                        # 7. fem
+def test_fem():                                                        # 5. fem
     # Just ensure functionality stays the same, with one example.
     for i in ['1', '2', '3', '4', '5']:
         res = DATAFEMTEM['out'+i][()]
@@ -545,7 +515,7 @@ def test_fem():                                                        # 7. fem
         assert kcount == res['kcount']
 
 
-def test_tem():                                                        # 8. tem
+def test_tem():                                                        # 6. tem
     # Just ensure functionality stays the same, with one example.
     for i in ['6', '7', '8']:  # Signal = 0, 1, -1
         res = DATAFEMTEM['out'+i][()]

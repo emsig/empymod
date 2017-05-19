@@ -16,18 +16,7 @@ receiver(s) of arbitrary direction, for electric or magnetic sources and
 receivers, both in frequency and in time. A subset of `bipole` is `dipole`,
 which models infinitesimal small dipoles along the principal axes x, y, and z.
 
-These principal routines make use of the following two core routines:
-    - `fem`: Calculate wavenumber-domain electromagnetic field and carry out
-             the Hankel transform to the frequency domain.
-    - `tem`: Carry out the Fourier transform to time domain after `fem`.
-
-Two further routines are shortcuts for frequency- and time-domain dipoles,
-respectively, and mainly here for legacy reasons:
-
-    - `frequency`: Shortcut of `dipole` for frequency-domain calculation.
-    - `time`: Shortcut of `dipole` for time-domain calculation.
-
-The last two routines are:
+Further routines are:
 
     - `wavenumber`: Calculate the electromagnetic wavenumber-domain solution.
     - `gpr`:        Calculate the Ground-Penetrating Radar (GPR) response.
@@ -37,6 +26,11 @@ wavenumber-domain result, without Hankel nor Fourier transform. It calls
 straight the `kernel`. The `gpr`-routine convolves the frequency-domain result
 with a wavelet, and applies a gain to the time-domain result. This function is
 still experimental.
+
+The modelling routines make use of the following two core routines:
+    - `fem`: Calculate wavenumber-domain electromagnetic field and carry out
+             the Hankel transform to the frequency domain.
+    - `tem`: Carry out the Fourier transform to time domain after `fem`.
 
 """
 # Copyright 2016-2017 Dieter Werthmüller
@@ -64,8 +58,7 @@ from .utils import (check_time, check_model, check_frequency, check_hankel,
                     get_geo_fact, get_azm_dip, get_off_ang, get_layer_nr,
                     printstartfinish, conv_warning)
 
-__all__ = ['bipole', 'dipole', 'frequency', 'time', 'gpr', 'wavenumber', 'fem',
-           'tem']
+__all__ = ['bipole', 'dipole', 'gpr', 'wavenumber', 'fem', 'tem']
 
 
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
@@ -1178,89 +1171,6 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     printstartfinish(verb, t0, 1)
 
     return PJ0, PJ1
-
-
-# Shortcuts (legacy routines)
-
-def frequency(src, rec, depth, res, freq, ab=11, aniso=None, epermH=None,
-              epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
-              htarg=None, opt=None, loop=None, verb=2):
-    """Return the frequency-domain EM field due to a dipole source.
-
-    This is a shortcut for frequency-domain modelling using `dipole` (mainly
-    for legacy reasons).
-
-    See `dipole` for info and a description of input and output parameters.
-    Only difference is that `frequency` here corresponds to `freqtime` in
-    `dipole`.
-
-
-    See Also
-    --------
-    dipole : EM field due to an EM source (dipole-dipole).
-    bipole : EM field due to an EM source (bipole-bipole).
-
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from empymod import frequency
-    >>> src = [0, 0, 100]
-    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200]
-    >>> depth = [0, 300, 1000, 1050]
-    >>> res = [1e20, .3, 1, 50, 1]
-    >>> EMfield = frequency(src, rec, depth, res, freq=1, verb=0)
-    >>> print(EMfield)
-    [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
-      -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
-       1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j
-       1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j
-       6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
-
-    """
-
-    return dipole(src, rec, depth, res, freq, None, ab, aniso, epermH, epermV,
-                  mpermH, mpermV, xdirect, ht, htarg, opt=opt, loop=loop,
-                  verb=verb)
-
-
-def time(src, rec, depth, res, time, ab=11, signal=0, aniso=None, epermH=None,
-         epermV=None, mpermH=None, mpermV=None, xdirect=True, ht='fht',
-         htarg=None, ft='sin', ftarg=None, opt=None, loop='off', verb=2):
-    """Return the time-domain EM field due to a dipole source.
-
-    This is a shortcut for time-domain modelling using `dipole` (mainly for
-    legacy reasons).
-
-    See `dipole` for info and a description of input and output parameters.
-    Only difference is that `time` here corresponds to `freqtime` in `dipole`.
-
-
-    See Also
-    --------
-    dipole : EM field due to an EM source (dipole-dipole).
-    bipole : EM field due to an EM source (bipole-bipole).
-
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from empymod import time
-    >>> src = [0, 0, 100]
-    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200]
-    >>> depth = [0, 300, 1000, 1050]
-    >>> res = [1e20, .3, 1, 50, 1]
-    >>> EMfield = time(src, rec, depth, res, time=1, verb=0)
-    >>> print(EMfield)
-    [  4.23754930e-11   3.13805193e-11   1.98884433e-11   1.14387827e-11
-       6.34605628e-12   3.54905259e-12   2.03906739e-12   1.20569287e-12
-       7.31746271e-13   4.55825907e-13]
-
-    """
-
-    return dipole(src, rec, depth, res, time, signal, ab, aniso, epermH,
-                  epermV, mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt,
-                  loop, verb)
 
 
 # Core modelling routines
