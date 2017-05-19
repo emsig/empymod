@@ -58,13 +58,13 @@ Documentation |manual|
 The manual of `empymod` can be found at `empymod.readthedocs.io
 <http://empymod.readthedocs.io/en/stable>`_.
 
-Examples can be found in the `prisae/empymod-notebooks
-<https://github.com/prisae/empymod-notebooks>`_-repository.
+Examples can be found in the `empymod/example-notebooks
+<https://github.com/empymod/example-notebooks>`_-repository.
 
 Articles (published or in preparation):
 
-    - `prisae/empymod-geo2017 <https://github.com/prisae/empymod-geo2017>`_
-    - `prisae/empymod-tle2017 <https://github.com/prisae/empymod-tle2017>`_
+    - `empymod/article-geo2017 <https://github.com/empymod/article-geo2017>`_
+    - `empymod/article-tle2017 <https://github.com/empymod/article-tle2017>`_
 
 
 Citation
@@ -82,7 +82,7 @@ Werthmüller, D., 2017, Getting started with controlled-source electromagnetic
 Also consider citing the two articles given below, Hunziker et al. (2015), and
 Key (2012), without which `empymod` would not exist. All releases have
 additionally a Zenodo-DOI, provided on the `release-page
-<https://github.com/prisae/empymod/releases>`_.
+<https://github.com/empymod/empymod/releases>`_.
 
 
 Notice
@@ -138,20 +138,20 @@ License.
 .. |docs| image:: https://readthedocs.org/projects/empymod/badge/?version=latest
     :target: https://empymod.readthedocs.io/en/latest/?badge=latest
 
-.. |tests| image:: https://travis-ci.org/prisae/empymod.png?branch=master
-    :target: https://travis-ci.org/prisae/empymod/
+.. |tests| image:: https://travis-ci.org/empymod/empymod.png?branch=master
+    :target: https://travis-ci.org/empymod/empymod/
 
-.. |coverage| image:: https://coveralls.io/repos/github/prisae/empymod/badge.svg?branch=master
-    :target: https://coveralls.io/github/prisae/empymod?branch=master
+.. |coverage| image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
+    :target: https://coveralls.io/github/empymod/empymod?branch=master
 
-.. |github| image:: https://img.shields.io/github/release/prisae/empymod.svg
-    :target: https://github.com/prisae/empymod/releases/latest
+.. |github| image:: https://img.shields.io/github/release/empymod/empymod.svg
+    :target: https://github.com/empymod/empymod/releases/latest
 
 .. |pypi| image:: https://img.shields.io/pypi/v/empymod.svg
     :target: https://pypi.python.org/pypi/empymod
 
-.. |anaconda| image:: https://anaconda.org/prisae/empymod/badges/version.svg
-    :target: https://anaconda.org/prisae/empymod
+.. |anaconda| image:: https://anaconda.org/empymod/empymod/badges/version.svg
+    :target: https://anaconda.org/empymod/empymod
 
 .. |manual| image:: https://readthedocs.org/projects/empymod/badge/?version=stable
     :target: https://empymod.readthedocs.io/en/stable/?badge=stable

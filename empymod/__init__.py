@@ -121,14 +121,14 @@ default value:
 
 
 Frequency- and time-domain examples can be found in the
-`prisae/empymod-notebooks
-<https://github.com/prisae/empymod-notebooks>`_-repository.
+`empymod/example-notebooks
+<https://github.com/empymod/example-notebooks>`_-repository.
 
 More information and more examples can be found in the following articles
 (published or in preparation):
 
-    - `prisae/empymod-geo2017 <https://github.com/prisae/empymod-geo2017>`_
-    - `prisae/empymod-tle2017 <https://github.com/prisae/empymod-tle2017>`_
+    - `empymod/article-geo2017 <https://github.com/empymod/article-geo2017>`_
+    - `empymod/article-tle2017 <https://github.com/empymod/article-tle2017>`_
       (doi: `10.1190/tle36040352.1 <http://dx.doi.org/10.1190/tle36040352.1>`_)
 
 Structure
@@ -222,7 +222,7 @@ Werthmüller, D., 2017, Getting started with controlled-source electromagnetic
 
 Also consider citing [Hunziker_et_al_2015]_ and [Key_2012]_, without which
 `empymod` would not exist. All releases have a Zenodo-DOI, provided on the
-`GitHub release-page <https://github.com/prisae/empymod/releases>`_.
+`GitHub release-page <https://github.com/empymod/empymod/releases>`_.
 
 
 License
@@ -409,8 +409,8 @@ command (in the example it is changed to 4):
 This parallelisation will make `empymod` faster if you calculate a lot of
 offsets/frequencies at once, but slower for few offsets/frequencies. Best
 practice is to check first which one is faster. (You can use the
-benchmark-notebook in the `prisae/empymod-notebooks
-<https://github.com/prisae/empymod-notebooks>`_-repository.)
+benchmark-notebook in the `empymod/example-notebooks
+<https://github.com/empymod/example-notebooks>`_-repository.)
 
 Spline interpolation
 ''''''''''''''''''''

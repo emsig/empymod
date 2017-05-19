@@ -11,8 +11,8 @@ setup(
     long_description=readme,
     author='Dieter Werthmüller',
     author_email='dieter@werthmuller.org',
-    url='https://github.com/prisae/empymod',
-    download_url='https://github.com/prisae/empymod/tarball/v1.3.0',
+    url='https://github.com/empymod/empymod',
+    download_url='https://github.com/empymod/empymod/tarball/v1.3.0',
     license='Apache License V2.0',
     packages=['empymod'],
     classifiers=[

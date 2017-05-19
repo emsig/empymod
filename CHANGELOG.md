@@ -3,10 +3,19 @@
 
 ## latest
 
+* [2017-05-19] Move all empymod-repos to new home on
+  [empymod.github.io](https://empymod.github.io).
+    - /prisae/empymod -> /empymod/empymod
+    - /prisae/empymod-notebooks -> /empymod/example-notebooks
+    - /prisae/empymod-geo2017 -> /empymod/article-geo2017
+    - /prisae/empymod-tle2017 -> /empymod/article-tle2017
+
 * [2017-05-15] Include t-domain ee halfspace solution into `kernel.halfspace`;
   possible to obtain direct, reflected, and airwave separately, as well as only
   fullspace solution (all for the diffusive approximation).
+
 * [2017-05-13] Improved switch-off response (calculate and subtract from DC).
+
 * [2017-04-28] `xdirect` adjustments:
     - `isfullspace` now respects `xdirect`.
     - Removed `xdirect` from `model.wavenumber` (set to `False`).
