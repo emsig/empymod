@@ -150,8 +150,8 @@ License.
 .. |pypi| image:: https://img.shields.io/pypi/v/empymod.svg
     :target: https://pypi.python.org/pypi/empymod
 
-.. |anaconda| image:: https://anaconda.org/empymod/empymod/badges/version.svg
-    :target: https://anaconda.org/empymod/empymod
+.. |anaconda| image:: https://anaconda.org/prisae/empymod/badges/version.svg
+    :target: https://anaconda.org/prisae/empymod
 
 .. |manual| image:: https://readthedocs.org/projects/empymod/badge/?version=stable
     :target: https://empymod.readthedocs.io/en/stable/?badge=stable
