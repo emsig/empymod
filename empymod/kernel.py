@@ -832,8 +832,8 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     """
     xco = np.cos(angle)*off
     yco = np.sin(angle)*off
-    res = np.squeeze(np.real(1/etaH))
-    aniso = np.squeeze(np.sqrt(np.real(1/etaV)/res))
+    res = np.real(1/etaH[0, 0])
+    aniso = 1/np.sqrt(np.real(etaV[0, 0])*res)
 
     # Define freq/time and dtype depending on signal.
     if signal is None:
