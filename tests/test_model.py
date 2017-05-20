@@ -489,7 +489,7 @@ def test_analytical():
              'freqtime': 40,
              'ab': 42,
              'verb': 0}
-    dip_res = dipole(**model, depth=[])
+    dip_res = dipole(depth=[], **model)
     ana_res = analytical(**model)
     assert_allclose(dip_res, ana_res)
 
@@ -502,10 +502,10 @@ def test_analytical():
              'signal': 1,
              'ab': 12,
              'verb': 0}
-    ana_res = analytical(**model, solution='dhs')
+    ana_res = analytical(solution='dhs', **model)
     model['res'] = [2e14, model['res']]
     model['aniso'] = [1, model['aniso']]
-    dip_res = dipole(**model, depth=0)
+    dip_res = dipole(depth=0, **model)
     assert_allclose(dip_res, ana_res, rtol=1e-4)
 
 
