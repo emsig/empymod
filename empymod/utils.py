@@ -39,10 +39,11 @@ from scipy.constants import epsilon_0  # Elec. permittivity of free space [F/m]
 from . import filters, transform
 
 
-__all__ = ['EMArray', 'check_time', 'check_model', 'check_frequency',
-           'check_hankel', 'check_opt', 'check_dipole', 'check_bipole',
-           'check_ab', 'get_abs', 'get_geo_fact', 'get_azm_dip', 'get_off_ang',
-           'get_layer_nr', 'printstartfinish', 'conv_warning']
+__all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
+           'check_frequency', 'check_hankel', 'check_opt', 'check_dipole',
+           'check_bipole', 'check_ab', 'check_solution', 'get_abs',
+           'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
+           'printstartfinish', 'conv_warning']
 
 # 0. General settings
 
@@ -132,6 +133,7 @@ def check_ab(ab, verb):
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
+
 
     Returns
     -------
@@ -874,20 +876,8 @@ def check_time(time, signal, ft, ftarg, verb):
 
     """
 
-    # Check input signal
-    if int(signal) not in [-1, 0, 1]:
-        print("* ERROR   :: <signal> must be one of: [None, -1, 0, 1]; " +
-              "<signal> provided: "+str(signal))
-        raise ValueError('signal')
-
-    # Check time
-    time = _check_var(time, float, 1, 'time')
-
-    # Minimum time to avoid division by zero  at time = 0 s.
-    # => min_time is defined at the start of this file
-    time = _check_min(time, min_time, 'Times', 's', verb)
-    if verb > 2:
-        _prnt_min_max_val(time, "   time        [s] : ", verb)
+    # Check time and input signal
+    time = check_time_only(time, signal, verb)
 
     # Ensure ft is all lowercase
     ft = ft.lower()
@@ -1148,6 +1138,98 @@ def check_time(time, signal, ft, ftarg, verb):
         freq = np.r_[min_freq, freq]
 
     return time, freq, ft, ftarg
+
+
+def check_time_only(time, signal, verb):
+    """Check time and signal parameters.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`.  Consult these modelling routines for a detailed description
+    of the input parameters.
+
+    Parameters
+    ----------
+    time : array_like
+        Times t (s).
+
+    signal : {None, 0, 1, -1}
+        Source signal:
+            - None: Frequency-domain response
+            - -1 : Switch-off time-domain response
+            - 0 : Impulse time-domain response
+            - +1 : Switch-on time-domain response
+
+    verb : {0, 1, 2, 3, 4}
+        Level of verbosity.
+
+
+    Returns
+    -------
+    time : float
+        Time, checked for size and assured min_time.
+
+    """
+
+    # Check input signal
+    if int(signal) not in [-1, 0, 1]:
+        print("* ERROR   :: <signal> must be one of: [None, -1, 0, 1]; " +
+              "<signal> provided: "+str(signal))
+        raise ValueError('signal')
+
+    # Check time
+    time = _check_var(time, float, 1, 'time')
+
+    # Minimum time to avoid division by zero  at time = 0 s.
+    # => min_time is defined at the start of this file
+    time = _check_min(time, min_time, 'Times', 's', verb)
+    if verb > 2:
+        _prnt_min_max_val(time, "   time        [s] : ", verb)
+
+    return time
+
+
+def check_solution(solution, signal, ab, msrc, mrec):
+    """Check required solution with parameters.
+
+    This check-function is called from one of the modelling routines in
+    :mod:`model`. Consult these modelling routines for a detailed description
+    of the input parameters.
+
+    Parameters
+    ----------
+    solution : str
+        String to define analytical solution.
+
+    signal : {None, 0, 1, -1}
+        Source signal:
+            - None: Frequency-domain response
+            - -1 : Switch-off time-domain response
+            - 0 : Impulse time-domain response
+            - +1 : Switch-on time-domain response
+
+    msrc, mrec : bool
+        True if src/rec is magnetic, else False.
+
+    """
+
+    # Ensure valid solution.
+    if solution not in ['fs', 'dfs', 'dhs', 'dsplit']:
+        print("* ERROR   :: Solution must be one of ['fs', 'dfs', 'dhs', " +
+              "'dsplit']; <solution> provided: " + solution)
+        raise ValueError('solution')
+
+    # If diffusive solution is required, ensure EE-field.
+    if solution[0] == 'd' and (msrc or mrec):
+        print('* ERROR   :: Diffusive solution is only implemented for ' +
+              'electric sources and electric receivers, <ab> provided: ' +
+              str(ab))
+        raise ValueError('ab')
+
+    # If full solution is required, ensure frequency-domain.
+    if solution == 'fs' and signal is not None:
+        print('* ERROR   :: Full fullspace solution is only implemented for ' +
+              'the frequency domain, <signal> provided: ' + str(signal))
+        raise ValueError('signal')
 
 
 # 2.b <Get>s (alphabetically)

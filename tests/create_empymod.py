@@ -16,7 +16,7 @@ inp1 = {'src': [[-200, 200], [300, -300], [-100, -200], [-200, -100],
         'rec': [[5000, 5200], [5100, 5350], [1000, 2000], [1010, 2020],
                 [200, 500], [220, 520]],
         'depth': [0, 300, 500],
-        'res': [1e20, 0.3, 2, 5],
+        'res': [2e14, 0.3, 2, 5],
         'freqtime': 1,
         'signal': None,
         'aniso': [1, 1, 2, 4],
@@ -44,7 +44,7 @@ inp2 = {'src': [[-30, 10], [40, -20], [-15, -10], [-30, -20], [3, 5], [3, 5]],
         'rec': [[400, 420], [410, 400], [50, 20], [60, 20], [30, 40],
                 [22, 52]],
         'depth': [0, 25, 40],
-        'res': [1e20, 10, 20, 5],
+        'res': [2e14, 10, 20, 5],
         'freqtime': 1000,
         'signal': None,
         'aniso': [2, 2, 1, 3],
@@ -71,7 +71,7 @@ EM2 = bipole(**inp2)
 inp3 = {'src': [[0, 1000], [100, 1200], [0, 0], [0, 100], 10, 10],
         'rec': [[50000, 60000], [51000, 61000], [0, 100], [0, 200], 20, 20],
         'depth': [0, 3000, 5000],
-        'res': [1e20, .5, 30, 50],
+        'res': [2e14, .5, 30, 50],
         'freqtime': .01,
         'signal': None,
         'aniso': [3, 1, 1, 5],
@@ -98,7 +98,7 @@ EM3 = bipole(**inp3)
 inp4 = {'src': [0, 100, 0, 0, 10, 10],
         'rec': [5000, 5100, 100, 200, 20, 20],
         'depth': [0, 300, 500],
-        'res': [1e20, .5, 30, 50],
+        'res': [2e14, .5, 30, 50],
         'freqtime': 1,
         'signal': 0,
         'aniso': [3, 1, 1, 5],
@@ -220,7 +220,7 @@ for i in range(34):
     # Collect dict for bipole
     fsbp[str(pab[i])] = {'src': [0, 0, 0, srcazm, srcdip],
                          'rec': [rec[0], rec[1], rec[2], recazm, recdip],
-                         'depth': 1e20,
+                         'depth': 2e14,
                          'res': [res, res+1e-10],
                          'freqtime': freq,
                          'signal': None,
@@ -243,12 +243,12 @@ for i in range(34):
                          'loop': None,
                          'verb': 0}
 
-    # Get result for halfspace
+    # Get result for fullspace
     fs_res[str(pab[i])] = fullspace(**fs[str(pab[i])])
 
 # # D -- HALFSPACE # #
 # More or less random values, to test a wide range of models.
-# src fixed at [0, 0, 0]; Never possible to test all combinations...
+# src fixed at [0, 0, 100]; Never possible to test all combinations...
 # halfspace is only implemented for electric sources and receivers so far,
 # and for the diffusive approximation (low freq).
 pab = [11, 12, 13, 21, 22, 23, 31, 32, 33]
@@ -257,13 +257,21 @@ prec = [[10000, -300, 500], [5000, 200, 400], [1000, 0, 300], [100, 500, 500],
         [100, 6000, 200]]
 pres = [10, 3, 3, 3, 4, .004, 300, 20, 1]
 paniso = [1, 5, 1, 3, 2, 3, 1, 1, 1]
-pfreq = [0.01, 1, 2, 0.1, 2, 1, 0.1, 1, 0.1]
+# this is freq or time; for diffusive approximation, we must use low freqs
+# or late time, according to signal
+pfreq = [0.1, 5, 6, 7, 8, 9, 10, 1, 0.1]
 signal = [None, 1, 1, 0, -1, 1, 0, None, None]
 hs = dict()
 hsbp = dict()
 hs_res = dict()
 for i in range(9):
     ab = pab[i]
+    rec = prec[i]
+    freq = pfreq[i]
+    res = pres[i]
+    aniso = paniso[i]
+    off = np.sqrt(rec[0]**2 + rec[1]**2)
+    angle = np.arctan2(rec[1], rec[0])
     srcazm = 0
     srcdip = 0
     if ab % 10 in [3, 6]:
@@ -276,24 +284,24 @@ for i in range(9):
         recdip = 90
     elif ab // 10 in [2, ]:
         recazm = 90
-    msrc = ab % 10 > 3
 
     # Collect dict for halfspace
-    hs[str(pab[i])] = {'xco': rec[0],
-                       'yco': rec[1],
+    hs[str(pab[i])] = {'off': off,
+                       'angle': angle,
                        'zsrc': 100,
                        'zrec': rec[2],
-                       'res': res,
+                       'etaH': 1/res,
+                       'etaV': 1/(res*aniso*aniso),
                        'freqtime': freq,
                        'signal': signal[i],
-                       'aniso': aniso,
-                       'ab': ab}
+                       'ab': ab,
+                       'solution': 'dhs'}
 
     # Collect dict for bipole
     hsbp[str(pab[i])] = {'src': [0, 0, 100, srcazm, srcdip],
                          'rec': [rec[0], rec[1], rec[2], recazm, recdip],
                          'depth': 0,
-                         'res': [1e20, res],
+                         'res': [2e14, res],
                          'freqtime': freq,
                          'signal': signal[i],
                          'aniso': [1, aniso],
@@ -301,7 +309,7 @@ for i in range(9):
                          'epermV': None,
                          'mpermH': None,
                          'mpermV': None,
-                         'msrc': msrc,
+                         'msrc': False,
                          'srcpts': 1,
                          'mrec': False,
                          'recpts': 1,

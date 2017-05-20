@@ -3,6 +3,10 @@
 
 ## latest
 
+* [2017-05-20] Modify `kernel.halfspace` to use same input as other kernel
+  functions. New modelling routine `model.analytical`, which serves as a
+  front-end to `kernel.fullspace` or `kernel.halfspace`.
+
 * [2017-05-19] Remove legacy routines `model.time` and `model.frequency`.
   They are covered perfectly by `model.dipole`.
 

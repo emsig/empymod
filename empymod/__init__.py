@@ -577,6 +577,6 @@ References |_|
 # the License.
 
 # Import main modelling routines to make them available as primary functions
-from .model import bipole, dipole
-__all__ = ['bipole', 'dipole']
+from .model import bipole, dipole, analytical
+__all__ = ['bipole', 'dipole', 'analytical']
 __version__ = 'v1.3.1.dev'

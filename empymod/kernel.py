@@ -809,8 +809,8 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
     return gin
 
 
-def halfspace(xco, yco, zsrc, zrec, res, freqtime, aniso=1, ab=11,
-              signal=None, output='hs'):
+def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
+              solution='dhs'):
     """Return frequency- or time-space domain VTI half-space solution.
 
     Calculates the frequency- or time-space domain electromagnetic response for
@@ -820,76 +820,20 @@ def halfspace(xco, yco, zsrc, zrec, res, freqtime, aniso=1, ab=11,
 
     It can also be used to calculate the fullspace solution or the separate
     fields: direct field, reflected field, and airwave; always using the
-    diffusive approximation. See `output`-parameter.
+    diffusive approximation. See `solution`-parameter.
 
     This routine is not strictly part of `empymod` and not used by it.
     However, it can be useful to compare the code to this analytical solution.
 
-    Parameters
-    ----------
-    xco, yco : array
-        Inline and crossline coordinates (m)
-    zsrc, zrec : float
-        Source and receiver depths (m)
-    res : float or array
-        Half-space resistivity (Ohm.m)
-    freqtime : float
-        Frequency (Hz) or time (s), depending on signal.
-    aniso : float, optional
-       Anisotropy (-), default = 1
-    ab : int, optional
-       Src-Rec config, default = 11; {11, 12, 13, 21, 22, 23, 31, 32, 33}
-    signal : {None, 0, 1, -1}, optional
-        Source signal, default is None:
-            - None: Frequency-domain response
-            - -1 : Switch-off time-domain response
-            - 0 : Impulse time-domain response
-            - +1 : Switch-on time-domain response
-    output : str, optional
-        Defines what is returned:
-            - 'hs' : Half-space solution (default)
-            - 'fs' : Full-space solution
-            - 'split' : Direct field, reflected field, airwave
+    This function is called from one of the modelling routines in :mod:`model`.
+    Consult these modelling routines for a description of the input and
+    solution parameters.
 
-    Returns
-    -------
-    EM : array
-        Frequency- or time-domain EM field (depending on `signal`):
-            - Frequency-domain or impulse response: returns E [V/m].
-            - Step response: returns E [V/(m.s)].
-
-        However, source and receiver are normalised. So for instance in the
-        electric case the source strength is 1 A and its length is 1 m. So the
-        electric field could also be written as [V/(A.m2)].
-
-        Three arrays are returned if `output='split'`.
-
-    Examples
-    --------
-    >>> from empymod import dipole
-    >>> from empymod.kernel import halfspace
-    >>> src = [0, 0, 10]
-    >>> rec = [1000, 0, 1]
-    >>> time = 1
-    >>> res = [2e14, 10]
-    >>> depth = 0
-    >>> EMdi = dipole(src, rec, depth, res, time, verb=0)
-    >>> EMhs = halfspace(rec[0], rec[1], src[2], rec[2], res[1], time)
-    >>> print('Half-space response : %1.6e + %1.6ej' % (EMhs.real, EMhs.imag))
-    >>> print('Dipole response     : %1.6e + %1.6ej' % (EMdi.real, EMdi.imag))
-    Half-space response : 3.021861e-09 + -3.873224e-10j
-    Dipole response     : 3.021861e-09 + -3.873224e-10j
     """
-
-    # No input checks are carried out, but we cast the variables.
-    xco = np.array(xco, dtype=float)
-    yco = np.array(yco, dtype=float)
-    zsrc = float(zsrc)
-    zrec = float(zrec)
-    res = float(res)
-    aniso = float(aniso)
-    freqtime = np.array(freqtime, dtype=float, ndmin=1)
-    ab = int(ab)
+    xco = np.cos(angle)*off
+    yco = np.sin(angle)*off
+    res = np.squeeze(np.real(1/etaH))
+    aniso = np.squeeze(np.sqrt(np.real(1/etaV)/res))
 
     # Define freq/time and dtype depending on signal.
     if signal is None:
@@ -1167,10 +1111,10 @@ def halfspace(xco, yco, zsrc, zrec, res, freqtime, aniso=1, ab=11,
         reflect = reflect[-1]-reflect[:-1]
         air = air[-1]-air[:-1]
 
-    # Return, depending on 'output'
-    if output == 'fs':
+    # Return, depending on 'solution'
+    if solution == 'dfs':
         return direct
-    elif output == 'split':
+    elif solution == 'dsplit':
         return direct, reflect, air
     else:
         return direct + reflect + air

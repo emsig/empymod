@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose
 
 # Import main modelling routines from empymod directly to ensure they are in
 # the __init__.py-file.
-from empymod import bipole, dipole
+from empymod import bipole, dipole, analytical
 # Import rest from model
 from empymod.model import gpr, wavenumber, fem, tem
 from empymod.kernel import fullspace, halfspace
@@ -28,8 +28,8 @@ DIPOLE1D = np.load(join(dirname(__file__), 'data_dipole1d.npz'))
 EMMOD = np.load(join(dirname(__file__), 'data_emmod.npz'))
 
 
-class TestBipole:                                                   # 1. bipole
-    def test_fullspace(self):                                   # 1.1 fullspace
+class TestBipole:
+    def test_fullspace(self):
         # Comparison to analytical fullspace solution
         fs = DATAEMPYMOD['fs'][()]
         fsbp = DATAEMPYMOD['fsbp'][()]
@@ -41,7 +41,7 @@ class TestBipole:                                                   # 1. bipole
             # Check
             assert_allclose(fs_res, bip_res)
 
-    def test_halfspace(self):                                   # 1.2 halfspace
+    def test_halfspace(self):
         # Comparison to analytical halfspace solution
         hs = DATAEMPYMOD['hs'][()]
         hsbp = DATAEMPYMOD['hsbp'][()]
@@ -51,13 +51,13 @@ class TestBipole:                                                   # 1. bipole
             # Get bipole
             bip_res = bipole(**hsbp[key])
             # Check
-            if key in ['12', '13', '21', '22', '23']:  # t-domain examples
+            if key in ['12', '13', '21', '22', '23', '31']:  # t-domain ex.
                 rtol = 1e-2
             else:
                 rtol = 1e-7
             assert_allclose(hs_res, bip_res, rtol=rtol)
 
-    def test_emmod(self):                            # 1.3. Comparison to EMmod
+    def test_emmod(self):
         # Comparsion to EMmod (Hunziker et al., 2015)
         # Comparison f = [0.013, 1.25, 130] Hz.; 11 models, 34 ab's, f altern.
         dat = EMMOD['res'][()]
@@ -65,7 +65,7 @@ class TestBipole:                                                   # 1. bipole
             res = bipole(**val[0])
             assert_allclose(res, val[1], 3e-2, 1e-17, True)
 
-    def test_dipole1d(self):                      # 1.4. Comparison to DIPOLE1D
+    def test_dipole1d(self):
         # Comparison to DIPOLE1D (Key, Scripps)
         def crec(rec, azm, dip):
             return [rec[0], rec[1], rec[2], azm, dip]
@@ -136,7 +136,7 @@ class TestBipole:                                                   # 1. bipole
                     verb=0)
         assert_allclose(-mx, res[3], 2e-2, 1e-24, True)
 
-    def test_green3d(self):                        # 1.5. Comparison to Green3D
+    def test_green3d(self):
         # Comparison to green3d (CEMI Consortium)
         def crec(rec, azm, dip):
             return [rec[0], rec[1], rec[2], azm, dip]
@@ -220,7 +220,7 @@ class TestBipole:                                                   # 1. bipole
         comp_all(GREEN3D['zdirbip'][()], 5e-3)
         comp_all(GREEN3D['zdirbipm'][()], 5e-3)
 
-    def test_status_quo(self):                                    # 1.6 empymod
+    def test_status_quo(self):
         # Comparison to self, to ensure nothing changed.
         # 4 bipole-bipole cases in EE, ME, EM, MM, all different values
         for i in ['1', '2', '3', '4']:
@@ -228,7 +228,7 @@ class TestBipole:                                                   # 1. bipole
             tEM = bipole(**res['inp'])
             assert_allclose(tEM, res['EM'])
 
-    def test_dipole_bipole(self):                        # 1.7 dipole vs bipole
+    def test_dipole_bipole(self):
         # Compare a dipole to a bipole
         # Checking intpts, strength, reciprocity
         inp = {'depth': [0, 250], 'res': [1e20, 0.3, 5], 'freqtime': 1}
@@ -242,7 +242,7 @@ class TestBipole:                                                   # 1. bipole
         assert_allclose(bip1, dip*3300, 1e-5)  # bipole as dipole
         assert_allclose(bip2, dip*3300, 1e-2)  # bipole, src/rec switched.
 
-    def test_optimizaton(self, capsys):                     # 1.8 optimizations
+    def test_optimizaton(self, capsys):
         # Compare optimization options: None, parallel, spline
         inp = {'depth': [0, 500], 'res': [10, 3, 50], 'freqtime': [1, 2, 3],
                'rec': [[6000, 7000, 8000], [200, 200, 200], 300, 0, 0],
@@ -262,7 +262,7 @@ class TestBipole:                                                   # 1. bipole
         assert "Hankel Opt.     :  Use spline" in out
         assert_allclose(non, spl, 1e-3, 1e-22, True)
 
-    def test_loop(self, capsys):                                     # 1.9 loop
+    def test_loop(self, capsys):
         # Compare loop options: None, 'off', 'freq'
         inp = {'depth': [0, 500], 'res': [10, 3, 50], 'freqtime': [1, 2, 3],
                'rec': [[6000, 7000, 8000], [200, 200, 200], 300, 0, 0],
@@ -282,7 +282,7 @@ class TestBipole:                                                   # 1. bipole
         assert "Loop over       :  Frequencies" in out
         assert_allclose(non, lfr, equal_nan=True)
 
-    def test_hankel(self, capsys):                                # 1.10 Hankel
+    def test_hankel(self, capsys):
         # Compare Hankel transforms
         inp = {'depth': [-20, 100], 'res': [1e20, 5, 100],
                'freqtime': [1.34, 23, 31], 'src': [0, 0, 0, 0, 90],
@@ -303,7 +303,7 @@ class TestBipole:                                                   # 1. bipole
         assert "Hankel          :  Quadrature" in out
         assert_allclose(fht, quad, equal_nan=True)
 
-    def test_fourier(self, capsys):                              # 1.11 Fourier
+    def test_fourier(self, capsys):
         # Compare Fourier transforms
         inp = {'depth': [0, 300], 'res': [1e12, 1/3, 5],
                'freqtime': np.logspace(-1.5, 1, 20), 'signal': 0,
@@ -330,12 +330,12 @@ class TestBipole:                                                   # 1. bipole
         assert "Fourier         :  Fast Fourier Transform FFT" in out
         assert_allclose(fft, ftl, 1e-1, 1e-13, equal_nan=True)
 
-    def test_example_wrong(self):                                  # 1.12 Error
+    def test_example_wrong(self):
         # One example of wrong input. But inputs are checked in test_utils.py.
         with pytest.raises(ValueError):
             bipole([0, 0, 0], [0, 0, 0, 0, 0], [], 1, 1, verb=0)
 
-    def test_combinations(self):                   # 1.13 Bipole-combinations 1
+    def test_combinations(self):
         # These are the 15 options that each bipole (src or rec) can take.
         # There are therefore 15x15 possibilities for src-rec combination
         # within bipole!
@@ -421,7 +421,7 @@ class TestBipole:                                                   # 1. bipole
         assert_allclose(bg, bh, 1e-3)
         assert_allclose(be, bg, 1e-2)  # As the dip is very small
 
-    def test_combinations2(self):                  # 1.14 Bipole-combinations 2
+    def test_combinations2(self):
         # Additional to test_combinations: different src- and rec-
         # bipoles at the same time
         inp = {'depth': [0.75, 500], 'res': [20, 5, 11],
@@ -454,8 +454,8 @@ class TestBipole:                                                   # 1. bipole
         assert_allclose(bip[:, 1, 1], dip4)
 
 
-def test_dipole():                                                  # 2. dipole
-    # As this is a shortcut, just run two tests to ensure
+def test_dipole():
+    # As this is a subset of bipole, just run two tests to ensure
     # it is equivalent to bipole.
 
     # 1. Frequency
@@ -480,7 +480,36 @@ def test_dipole():                                                  # 2. dipole
     assert_allclose(dip_res, bip_res)
 
 
-def test_gpr(capsys):                                                  # 3. gpr
+def test_analytical():
+    # 1. fullspace
+    model = {'src': [500, -100, -200],
+             'rec': [0, 1000, 200],
+             'res': 6.71,
+             'aniso': 1.2,
+             'freqtime': 40,
+             'ab': 42,
+             'verb': 0}
+    dip_res = dipole(**model, depth=[])
+    ana_res = analytical(**model)
+    assert_allclose(dip_res, ana_res)
+
+    # 2. halfspace
+    model = {'src': [500, -100, 5],
+             'rec': [0, 1000, 20],
+             'res': 6.71,
+             'aniso': 1.2,
+             'freqtime': 10,
+             'signal': 1,
+             'ab': 12,
+             'verb': 0}
+    ana_res = analytical(**model, solution='dhs')
+    model['res'] = [2e14, model['res']]
+    model['aniso'] = [1, model['aniso']]
+    dip_res = dipole(**model, depth=0)
+    assert_allclose(dip_res, ana_res, rtol=1e-4)
+
+
+def test_gpr(capsys):
     # empymod is not really designed for GPR, you would rather do that straight
     # in the time domain. However, it works. We just run a test here, to check
     # that it remains the status quo.
@@ -497,7 +526,7 @@ def test_gpr(capsys):                                                  # 3. gpr
     assert_allclose(gprout[:, 0, :], gprout2b)
 
 
-def test_wavenumber():                                          # 4. wavenumber
+def test_wavenumber():
     # This is like `frequency`, without the Hankel transform. We just run a
     # test here, to check that it remains the status quo.
     res = DATAEMPYMOD['wout'][()]
@@ -506,7 +535,7 @@ def test_wavenumber():                                          # 4. wavenumber
     assert_allclose(w_res1, res['PJ1'])
 
 
-def test_fem():                                                        # 5. fem
+def test_fem():
     # Just ensure functionality stays the same, with one example.
     for i in ['1', '2', '3', '4', '5']:
         res = DATAFEMTEM['out'+i][()]
@@ -515,7 +544,7 @@ def test_fem():                                                        # 5. fem
         assert kcount == res['kcount']
 
 
-def test_tem():                                                        # 6. tem
+def test_tem():
     # Just ensure functionality stays the same, with one example.
     for i in ['6', '7', '8']:  # Signal = 0, 1, -1
         res = DATAFEMTEM['out'+i][()]

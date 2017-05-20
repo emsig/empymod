@@ -18,6 +18,7 @@ which models infinitesimal small dipoles along the principal axes x, y, and z.
 
 Further routines are:
 
+    - `analytical`: Calculate analytical fullspace and halfspace solutions.
     - `wavenumber`: Calculate the electromagnetic wavenumber-domain solution.
     - `gpr`:        Calculate the Ground-Penetrating Radar (GPR) response.
 
@@ -53,12 +54,13 @@ The modelling routines make use of the following two core routines:
 import numpy as np
 
 from . import kernel, transform
-from .utils import (check_time, check_model, check_frequency, check_hankel,
-                    check_opt, check_dipole, check_bipole, check_ab, get_abs,
-                    get_geo_fact, get_azm_dip, get_off_ang, get_layer_nr,
-                    printstartfinish, conv_warning)
+from .utils import (check_time, check_time_only, check_model, check_frequency,
+                    check_hankel, check_opt, check_dipole, check_bipole,
+                    check_ab, check_solution, get_abs, get_geo_fact,
+                    get_azm_dip, get_off_ang, get_layer_nr, printstartfinish,
+                    conv_warning)
 
-__all__ = ['bipole', 'dipole', 'gpr', 'wavenumber', 'fem', 'tem']
+__all__ = ['bipole', 'dipole', 'analytical', 'gpr', 'wavenumber', 'fem', 'tem']
 
 
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
@@ -921,6 +923,199 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
+
+    return EM
+
+
+def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
+               aniso=None, epermH=None, epermV=None, mpermH=None, mpermV=None,
+               verb=2):
+    """Return the analytical full- or half-space solution.
+
+    Calculate the electromagnetic frequency- or time-domain field due to
+    infinitesimal small electric or magnetic dipole source(s), measured by
+    infinitesimal small electric or magnetic dipole receiver(s); sources and
+    receivers are directed along the principal directions x, y, or z, and all
+    sources are at the same depth, as well as all receivers are at the same
+    depth.
+
+    In the case of a halfspace the air-interface is located at z = 0 m.
+
+    You can call the functions `fullspace` and `halfspace` in `analytical.py`
+    directly. This interface is just to provide a consistent interface with the
+    same input parameters as for instance for `dipole`.
+
+    This function yields the same result if `solution='fs'` as `dipole`, if the
+    model is a fullspace.
+
+    Included are:
+      - Full fullspace solution (`solution='fs'`) for ee-, me-, em-, mm-fields,
+        [Hunziker_et_al_2015]_.
+      - Diffusive fullspace solution (`solution='dfs'`) for ee-fields,
+        [Slob_et_al_2010]_.
+      - Diffusive halfspace solution (`solution='dhs'`) for ee-fields,
+        [Slob_et_al_2010]_.
+      - Diffusive direct- and reflected field and airwave (`solution='dsplit'`)
+        for ee-fields, [Slob_et_al_2010]_.
+
+    Parameters
+    ----------
+    src, rec : list of floats or arrays
+        Source and receiver coordinates (m): [x, y, z].
+        The x- and y-coordinates can be arrays, z is a single value.
+        The x- and y-coordinates must have the same dimension.
+
+    res : float
+        Horizontal resistivity rho_h (Ohm.m).
+
+    freqtime : array_like
+        Frequencies f (Hz) if `signal` == None, else times t (s); (f, t > 0).
+
+    solution : str, optional
+      Defines which solution is returned:
+        - 'fs' : Full fullspace solution (ee-, me-, em-, mm-fields).
+        - 'dfs' : Diffusive fullspace solution (ee-fields only).
+        - 'dhs' : Diffusive halfspace solution (ee-fields only).
+        - 'dsplit' : Diffusive direct- and reflected field and airwave
+                     (ee-fields only).
+
+    signal : {None, 0, 1, -1}, optional
+        Source signal, default is None:
+            - None: Frequency-domain response
+            - -1 : Switch-off time-domain response
+            - 0 : Impulse time-domain response
+            - +1 : Switch-on time-domain response
+
+    ab : int, optional
+        Source-receiver configuration, defaults to 11.
+
+        +---------------+-------+------+------+------+------+------+------+
+        |                       | electric  source   | magnetic source    |
+        +===============+=======+======+======+======+======+======+======+
+        |                       | **x**| **y**| **z**| **x**| **y**| **z**|
+        +---------------+-------+------+------+------+------+------+------+
+        |               | **x** |  11  |  12  |  13  |  14  |  15  |  16  |
+        + **electric**  +-------+------+------+------+------+------+------+
+        |               | **y** |  21  |  22  |  23  |  24  |  25  |  26  |
+        + **receiver**  +-------+------+------+------+------+------+------+
+        |               | **z** |  31  |  32  |  33  |  34  |  35  |  36  |
+        +---------------+-------+------+------+------+------+------+------+
+        |               | **x** |  41  |  42  |  43  |  44  |  45  |  46  |
+        + **magnetic**  +-------+------+------+------+------+------+------+
+        |               | **y** |  51  |  52  |  53  |  54  |  55  |  56  |
+        + **receiver**  +-------+------+------+------+------+------+------+
+        |               | **z** |  61  |  62  |  63  |  64  |  65  |  66  |
+        +---------------+-------+------+------+------+------+------+------+
+
+    aniso : float, optional
+        Anisotropy lambda = sqrt(rho_v/rho_h) (-); defaults to one.
+
+    epermH, epermV : float, optional
+        Relative horizontal/vertical electric permittivity
+        epsilon_h/epsilon_v (-);
+        Default is one; ignored for the diffusive solutions.
+
+    mpermH, mpermV : float, optional
+        Relative horizontal/vertical magnetic permeability mu_h/mu_v (-);
+        Default is one; ignored for the diffusive solutions.
+
+    verb : {0, 1, 2, 3, 4}, optional
+        Level of verbosity, default is 2:
+            - 0: Print nothing.
+            - 1: Print warnings.
+            - 2: Print additional runtime and kernel calls
+            - 3: Print additional start/stop, condensed parameter information.
+            - 4: Print additional full parameter information
+
+    Returns
+    -------
+    EM : ndarray, (nfreq, nrec, nsrc)
+        Frequency- or time-domain EM field (depending on `signal`):
+            - If rec is electric, returns E [V/m].
+            - If rec is magnetic, returns B [T] (not H [A/m]!).
+
+        In the case of the impulse time-domain response, the unit is further
+        divided by seconds [1/s].
+
+        However, source and receiver are normalised. So for instance in the
+        electric case the source strength is 1 A and its length is 1 m. So the
+        electric field could also be written as [V/(A.m2)].
+
+        The shape of EM is (nfreq, nrec, nsrc). However, single dimensions
+        are removed.
+
+        If `solution='dsplit'`, three ndarrays are returned: direct, reflect,
+        air.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from empymod import dipole
+    >>> src = [0, 0, 100]
+    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200]
+    >>> depth = [0, 300, 1000, 1050]
+    >>> res = [1e20, .3, 1, 50, 1]
+    >>> EMfield = dipole(src, rec, depth, res, freqtime=1, verb=0)
+    >>> print(EMfield)
+    [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
+      -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
+       1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j
+       1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j
+       6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
+
+    """
+
+    # === 1.  LET'S START ============
+    t0 = printstartfinish(verb)
+
+    # === 2.  CHECK INPUT ============
+
+    # Check times or frequencies
+    if signal is not None:
+        freqtime = check_time_only(freqtime, signal, verb)
+
+    # Check layer parameters
+    model = check_model([], res, aniso, epermH, epermV, mpermH, mpermV, True,
+                        verb)
+    depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = model
+
+    # Check frequency => get etaH, etaV, zetaH, and zetaV
+    frequency = check_frequency(freqtime, res, aniso, epermH, epermV, mpermH,
+                                mpermV, verb)
+    freqtime, etaH, etaV, zetaH, zetaV = frequency
+
+    # Check src-rec configuration
+    # => Get flags if src or rec or both are magnetic (msrc, mrec)
+    ab_calc, msrc, mrec = check_ab(ab, verb)
+
+    # Check src and rec
+    src, nsrc = check_dipole(src, 'src', verb)
+    rec, nrec = check_dipole(rec, 'rec', verb)
+
+    # Get offsets and angles (off, angle)
+    off, angle = get_off_ang(src, rec, nsrc, nrec, verb)
+
+    # Get layer number in which src and rec reside (lsrc/lrec)
+    _, zsrc = get_layer_nr(src, depth)
+    _, zrec = get_layer_nr(rec, depth)
+
+    # Check possibilities
+    check_solution(solution, signal, ab, msrc, mrec)
+
+    # === 3. EM-FIELD CALCULATION ============
+
+    if solution[0] == 'd':
+        EM = kernel.halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime,
+                              ab_calc, signal, solution)
+    else:
+        EM = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
+                              ab_calc, msrc, mrec)
+
+    # Squeeze
+    EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
+
+    # === 4.  FINISHED ============
+    printstartfinish(verb, t0)
 
     return EM
 

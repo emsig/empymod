@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose
 from empymod import utils, filters
 
 
-def test_emarray():                                                # 1. EMArray
+def test_emarray():
     out = utils.EMArray(3)
     assert out.amp == 3
     assert out.pha == 0
@@ -25,7 +25,7 @@ def test_emarray():                                                # 1. EMArray
     assert_allclose(out.imag, [1, 1])
 
 
-def test_check_ab(capsys):                                        # 2. check_ab
+def test_check_ab(capsys):
     # This is another way how check_ab could have been done: hard-coded.
     # We use it here to check the output of check_ab.
     iab = [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26,
@@ -63,7 +63,7 @@ def test_check_ab(capsys):                                        # 2. check_ab
         utils.check_ab([12, ], 0)
 
 
-def test_check_bipole():                                      # 3. check_bipole
+def test_check_bipole():
     # Wrong size
     with pytest.raises(ValueError):
         utils.check_bipole([0, 0, 0], 'tvar')
@@ -130,7 +130,7 @@ def test_check_bipole():                                      # 3. check_bipole
     assert outz == 2
 
 
-def test_check_dipole(capsys):                                # 4. check_dipole
+def test_check_dipole(capsys):
     # correct input, verb > 2, src
     src, nsrc = utils.check_dipole([[1000, 2000], [0, 0], 0], 'src', 3)
     out, _ = capsys.readouterr()
@@ -178,7 +178,7 @@ def test_check_dipole(capsys):                                # 4. check_dipole
         utils.check_dipole([0, 0, 0, 0], 'rec', 3)
 
 
-def test_check_frequency(capsys):                          # 5. check_frequency
+def test_check_frequency(capsys):
     rfreq = np.array([1e-20, 1, 1e06])
     retaH = np.array([[0.05 + 5.56325028e-30j, 50 + 2.78162514e-30j],
                       [0.05 + 5.56325028e-10j, 50 + 2.78162514e-10j],
@@ -208,7 +208,7 @@ def test_check_frequency(capsys):                          # 5. check_frequency
     assert_allclose(zetaV, rzetaV)
 
 
-def test_check_hankel(capsys):                                # 6. check_hankel
+def test_check_hankel(capsys):
     # # FHT # #
     # verbose
     ht, htarg = utils.check_hankel('fht', None, 4)
@@ -288,7 +288,7 @@ def test_check_hankel(capsys):                                # 6. check_hankel
         utils.check_hankel('doesnotexist', None, 1)
 
 
-def test_check_model(capsys):                                  # 7. check_model
+def test_check_model(capsys):
     # Normal case
     res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
                             [1, 1], True, 1)
@@ -342,7 +342,7 @@ def test_check_model(capsys):                                  # 7. check_model
                           1)
 
 
-def test_check_opt(capsys):                                      # 8. check_opt
+def test_check_opt(capsys):
     fhtarg = [filters.kong_61_2007(), 43]
     qwehtarg = [np.array(1e-12), np.array(1e-30), np.array(51), np.array(100),
                 np.array(33)]
@@ -397,7 +397,7 @@ def test_check_opt(capsys):                                      # 8. check_opt
     assert out == outstr
 
 
-def test_check_time(capsys):                                    # 9. check_time
+def test_check_time(capsys):
     time = np.array([3])
 
     # # FFHT # #
@@ -598,7 +598,21 @@ def test_check_time(capsys):                                    # 9. check_time
         utils.check_time(time, 0, 'fht', None, 0)
 
 
-def test_get_abs(capsys):                                         # 10. get_abs
+def test_check_solution(capsys):
+    # wrong solution
+    with pytest.raises(ValueError):
+        utils.check_solution('hs', 1, 13, False, False)
+
+    # wrong ab/msrc/mrec
+    with pytest.raises(ValueError):
+        utils.check_solution('dhs', None, 11, True, False)
+
+    # wrong domain
+    with pytest.raises(ValueError):
+        utils.check_solution('fs', 1, 21, True, True)
+
+
+def test_get_abs(capsys):
     # Check some cases
     #       general,  x/y-pl,  x/z-pl    x
     ang = [[np.pi/4, np.pi/4], [np.pi/6, 0], [0, np.pi/3], [0, 0]]
@@ -657,7 +671,7 @@ def test_get_abs(capsys):                                         # 10. get_abs
     assert out == "   Required ab's   :  11 12 31 32\n"
 
 
-def test_get_geo_fact():                                     # 11. get_geo_fact
+def test_get_geo_fact():
     res = np.array([0.017051023225738, 0.020779123804907, -0.11077204227395,
                     -0.081155809427821, -0.098900024313067, 0.527229048585517,
                     -0.124497144079623, -0.151717673241039, 0.808796206796408])
@@ -684,7 +698,7 @@ def test_get_geo_fact():                                     # 11. get_geo_fact
         i += 1
 
 
-def test_get_layer_nr():                                     # 12. get_layer_nr
+def test_get_layer_nr():
     bip = np.array([0, 0, 300])
     lbip, zbip = utils.get_layer_nr(bip, np.array([-np.infty, 500]))
     assert lbip == 0
@@ -698,7 +712,7 @@ def test_get_layer_nr():                                     # 12. get_layer_nr
     assert_allclose(lbip, [0, 1, 1, 2])
 
 
-def test_get_off_ang(capsys):                                 # 13. get_off_ang
+def test_get_off_ang(capsys):
     src = [np.array([0, 100]), np.array([0, 100]), np.array([0, 100])]
     rec = [np.array([0, 5000]), np.array([0, 100]), np.array([0, 200])]
     resoff = np.array([0.001, 5001, 141.42135623730951, 4900])
@@ -710,7 +724,7 @@ def test_get_off_ang(capsys):                                 # 13. get_off_ang
     assert_allclose(ang, resang, equal_nan=True)
 
 
-def test_get_azm_dip(capsys):                                 # 14. get_azm_dip
+def test_get_azm_dip(capsys):
     # Dipole, src, ninpz = 1
     inp = [np.array([0]), np.array([0]), np.array([0]), np.array([0]),
            np.array([np.pi/4])]
@@ -776,7 +790,7 @@ def test_get_azm_dip(capsys):                                 # 14. get_azm_dip
     assert outstr[:47] == "   Receiver(s)     :  1 bipole(s)\n     > intpts"
 
 
-def test_printstartfinish(capsys):                       # 15. printstartfinish
+def test_printstartfinish(capsys):
     t0 = utils.printstartfinish(0)
     assert type(t0) == float
     out, _ = capsys.readouterr()
@@ -800,7 +814,7 @@ def test_printstartfinish(capsys):                       # 15. printstartfinish
     assert out[-19:] == "13 kernel call(s)\n\n"
 
 
-def test_conv_warning(capsys):                               # 16. conv_warning
+def test_conv_warning(capsys):
     # If converged, no output
     utils.conv_warning(True, ['', '', '', 51, ''], 'Hankel', 0)
     out, _ = capsys.readouterr()
@@ -822,7 +836,7 @@ def test_conv_warning(capsys):                               # 16. conv_warning
     assert out == ""
 
 
-def test_check_shape():                                      # 17. _check_shape
+def test_check_shape():
     # Ensure no Error is raised
     utils._check_shape(np.zeros((3, 4)), 'tvar', (3, 4))
     utils._check_shape(np.zeros((3, 4)), 'tvar', (3, 4), (2, ))
@@ -834,7 +848,7 @@ def test_check_shape():                                      # 17. _check_shape
         utils._check_shape(np.zeros((3, 4)), 'tvar', (2,), (1, 4))
 
 
-def test_check_var():                                          # 18. _check_var
+def test_check_var():
     # This is basically np.array(), with an optional call to _check_shape
     # above. Just three simple checks therefore; one without call, one with one
     # shape, and one with two shapes
@@ -851,7 +865,7 @@ def test_check_var():                                          # 18. _check_var
     out = utils._check_var(np.arange(3)*.5, float, 1, 'tvar', (1, 3), (3, ))
 
 
-def test_strvar():                                                # 19. _strvar
+def test_strvar():
     out = utils._strvar(np.arange(3)*np.pi)
     assert out == "0 3.14159 6.28319"
 
@@ -859,7 +873,7 @@ def test_strvar():                                                # 19. _strvar
     assert out == "    3.1415926536e+00"
 
 
-def test_prnt_min_max_val(capsys):                      # 20. _prnt_min_max_val
+def test_prnt_min_max_val(capsys):
     utils._prnt_min_max_val(np.arange(1, 5)*2, 'tvar', 0)
     out, _ = capsys.readouterr()
     assert out == "tvar 2 - 8 : 4  [min-max; #]\n"
@@ -878,7 +892,7 @@ def test_prnt_min_max_val(capsys):                      # 20. _prnt_min_max_val
     assert out == "tvar 1\n"
 
 
-def test_check_min(capsys):                                    # 21. _check_min
+def test_check_min(capsys):
     # Have to provide copies, as they are changed in place...good/bad?
     # inp > minval verb = 0
     inp1 = np.array([1e-3])
