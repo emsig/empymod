@@ -3,85 +3,97 @@ empymod
 
 |docs| |tests| |coverage|
 
-Electromagnetic modeller in Python
-----------------------------------
+The electromagnetic modeller **empymod** can model electric or magnetic
+responses due to a three-dimensional electric or magnetic source in a
+layered-earth model with vertical transverse isotropic (VTI) resistivity, VTI
+electric permittivity, and VTI magnetic permeability, from very low frequencies
+(DC) to very high frequencies (GPR). The calculation is carried out in the
+wavenumber-frequency domain, and various Hankel- and Fourier-transform methods
+are included to transform the responses into the space-frequency and space-time
+domains.
 
-The electromagnetic modeller `empymod` can model electric or magnetic responses
-due to a three-dimensional electric or magnetic source in a layered-earth model
-with vertical transverse isotropy, electric permittivity, and magnetic
-permeability, from very low frequencies to very high frequencies.
 
-Installation & requirements |anaconda| |pypi| |github|
-------------------------------------------------------
+More information
+----------------
 
-The easiest way to install the latest stable version of `empymod` is via
-`conda`:
+For more information on installation, requirements, documentation, examples,
+contributing and so on, please have a look at the website for more information:
+`empymod.github.io <https://empymod.github.io>`_.
 
-.. code:: bash
 
-    conda install -c prisae empymod
+Installation from source
+------------------------
 
-or via `pip`:
-
-.. code:: bash
-
-   pip install empymod
-
-Alternatively, you can download the latest version from GitHub and either add
-the path to `empymod` to your python-path variable, or install it in your
-python distribution via:
+You can clone or download the latest version from GitHub and either add the
+path to `empymod` to your python-path variable, or install it in your python
+distribution via:
 
 .. code:: bash
 
    python setup.py install
 
-Required are python version 3.4 or higher and the modules `NumPy` and `SciPy`.
-If you want to run parts of the kernel in parallel, the module `numexpr` is
-required additionally.
 
-**Note**: Do not use `scipy == 0.19.0`. It has a memory leak in `quad`, see
-`github.com/scipy/scipy/pull/7216 <https://github.com/scipy/scipy/pull/7216>`_.
-So if you use QUAD (or potentially QWE) in any of your transforms you might see
-your memory usage going through the roof.
+Roadmap
+-------
 
-If you are new to Python I recommend using a Python distribution, which will
-ensure that all dependencies are met, specifically properly compiled versions
-of `NumPy` and `SciPy`; I recommend using Anaconda (version 3.x;
-`continuum.io/downloads <https://www.continuum.io/downloads>`_).  If you
-install Anaconda you can simply start the *Anaconda Navigator*, add the channel
-`prisae` and `empymod` will appear in the package list and can be installed
-with a click.
-
-Documentation |manual|
-----------------------
-
-The manual of `empymod` can be found at `empymod.readthedocs.io
-<http://empymod.readthedocs.io/en/stable>`_.
-
-Examples can be found in the `empymod/example-notebooks
-<https://github.com/empymod/example-notebooks>`_-repository.
-
-Articles (published or in preparation):
-
-    - `empymod/article-geo2017 <https://github.com/empymod/article-geo2017>`_
-    - `empymod/article-tle2017 <https://github.com/empymod/article-tle2017>`_
+- Additional modelling routines:
+  - Ramp waveform
+  - Arbitrary waveform
+  - TEM (in-loop, coincident loop, ...) The problems to tackle are
+    mainly zero-offset, loop integration, and windowing.
+  - Improve the GPR-routine
+- Additional analytical functions (semi-analytical); if possible
+  - Complete fullspace (el./mag. src/rec); space-time domain
+  - Extend diffusive halfspace solution to magnetic sources and receivers;
+    space-frequency and space-time domains
+  - Complete halfspace
+- Extend `fQWE` and `fftlog` to use cosine: At the moment, `fqwe` and `fftlog`
+  are implemented with the sine-transform. It would not be too much work to
+  make them flexible to handle sine- and cosine-transforms. Having this
+  flexibility we could calculate the step-off response with the cosine versions
+  of `fftlog`, `fqwe`, and `ffht` instead of subtracting the step-on from the
+  DC value. (Check how it works with `fft`!)
+- Module to design digital filters
+  - Hankel transform (almost ready)(
+  - Extend to Fourier transform
+- Inversion: Inversion routines, preferably a selection of different ones.
+- Extend examples (example-notebooks); reproduce published results
+  - Clean-up!
+  - Schlumberger, Wenner
+  - CSEM
+  - MTEM
+  - DC
+  - TEM
+  - GPR
+  - EM31
+  - ...
 
 
 Citation
 --------
 
-I am in the process of publishing an article in *Geophysics* regarding
-`empymod`, and I will put the info here once it is a reality. If you publish
-results for which you used `empymod`, please consider citing this article.
-Meanwhile, you could cite the Geophysical Tutorial:
+I am in the process of publishing an article in Geophysics regarding empymod,
+and I will put the info here once it is a reality. If you publish results for
+which you used empymod, please consider citing this article. Meanwhile, you
+could cite the Geophysical Tutorial:
 
-Werthmüller, D., 2017, Getting started with controlled-source electromagnetic
-1D modeling: The Leading Edge, 36, 352-355; doi: `10.1190/tle36040352.1
-<http://dx.doi.org/10.1190/tle36040352.1>`_.
+> Werthmüller, D., 2017, Getting started with controlled-source electromagnetic
+> 1D modeling: The Leading Edge, 36, 352-355;
+> DOI: `10.1190/tle36040352.1 <http://dx.doi.org/10.1190/tle36040352.1>`_.
 
-Also consider citing the two articles given below, Hunziker et al. (2015), and
-Key (2012), without which `empymod` would not exist. All releases have
-additionally a Zenodo-DOI, provided on the `release-page
+Also consider citing the two articles given below, Hunziker et al. (2015)
+and Key (2012), without which empymod would not exist:
+
+> Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response
+> in a layered vertical transverse isotropic medium: A new look at an old
+> problem: Geophysics, 80, F1-F18; DOI: 10.1190/geo2013-0411.1. DOI:
+> `10.1190/10.1190/geo2013-0411.1 <http://dx.doi.org/10.1190/geo2013-0411.1>`_.
+
+> Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
+> Geophysics, 77, F21-F30; DOI: 10.1190/GEO2011-0237.1. DOI:
+> `10.1190/10.1190/GEO2011-0237.1 <http://dx.doi.org/10.1190/GEO2011-0237.1>`_.
+
+All releases have additionally a Zenodo-DOI, provided on the `release-page
 <https://github.com/empymod/empymod/releases>`_.
 
 
@@ -89,30 +101,10 @@ Notice
 ------
 
 This product includes software that was initially (till 01/2017) developed at
-*The Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
-`gob.mx/imp <http://www.gob.mx/imp>`_). The project was funded through *The
-Mexican National Council of Science and Technology* (*Consejo Nacional de
-Ciencia y Tecnología*, `conacyt.mx <http://www.conacyt.mx>`_).
-
-
-This product is a derivative work of the following two publications and their
-publicly available software:
-
-1. Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response
-   in a layered vertical transverse isotropic medium: A new look at an old
-   problem: Geophysics, 80, F1-F18; DOI: `10.1190/geo2013-0411.1
-   <http://dx.doi.org/10.1190/geo2013-0411.1>`_; Software:
-   `software.seg.org/2015/0001 <http://software.seg.org/2015/0001>`_.
-
-2. Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
-   Geophysics, 77, F21-F30; DOI: `10.1190/GEO2011-0237.1
-   <http://dx.doi.org/10.1190/GEO2011-0237.1>`_; Software:
-   `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
-
-Both pieces of software are published under the *SEG disclaimer*. Parts of the
-modeller `EMmod` from Hunziker et al. (2015), is furthermore released under the
-*Common Public License Version 1.0 (CPL)*. See the *NOTICE*-file in the root
-directory for more information and a reprint of the SEG disclaimer and the CPL.
+*The Mexican Institute of Petroleum IMP*
+(`Instituto Mexicano del Petróleo <http://www.gob.mx/imp>`_). The project was
+funded through *The Mexican National Council of Science and Technology*
+(`Consejo Nacional de Ciencia y Tecnología <http://www.conacyt.mx>`_).
 
 
 License
@@ -143,15 +135,3 @@ License.
 
 .. |coverage| image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
     :target: https://coveralls.io/github/empymod/empymod?branch=master
-
-.. |github| image:: https://img.shields.io/github/release/empymod/empymod.svg
-    :target: https://github.com/empymod/empymod/releases/latest
-
-.. |pypi| image:: https://img.shields.io/pypi/v/empymod.svg
-    :target: https://pypi.python.org/pypi/empymod
-
-.. |anaconda| image:: https://anaconda.org/prisae/empymod/badges/version.svg
-    :target: https://anaconda.org/prisae/empymod
-
-.. |manual| image:: https://readthedocs.org/projects/empymod/badge/?version=stable
-    :target: https://empymod.readthedocs.io/en/stable/?badge=stable
