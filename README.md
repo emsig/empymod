@@ -30,6 +30,23 @@ distribution via:
 python setup.py install
 ```
 
+## Testing
+
+The modeller comes with a test suite using `pytest`. If you want to run the
+tests, just install `pytest` and run it within the `empymod`-top-directory.
+
+```bash
+pytest
+```
+
+Pytest will find the tests, which are located in the tests-folder. It should
+run all tests successfully. Please let me know if not!
+
+Note that installations of `empymod` via conda or pip do not have the
+test-suite included. To run the test-suite you must download `empymod` from
+GitHub.
+
+
 ## Roadmap
 
 A collection of ideas of what could be added or improved in empymod. Please
@@ -108,12 +125,12 @@ and Key (2012), without which empymod would not exist:
 
 > Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response in
 > a layered vertical transverse isotropic medium: A new look at an old problem:
-> Geophysics, 80, F1-F18; DOI: 10.1190/geo2013-0411.1. DOI:
-> [10.1190/10.1190/geo2013-0411.1](http://dx.doi.org/10.1190/geo2013-0411.1).
+> Geophysics, 80, F1-F18; DOI:
+> [10.1190/geo2013-0411.1](http://dx.doi.org/10.1190/geo2013-0411.1).
 
 > Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
-> Geophysics, 77, F21-F30; DOI: 10.1190/GEO2011-0237.1. DOI:
-> [10.1190/10.1190/GEO2011-0237.1](http://dx.doi.org/10.1190/GEO2011-0237.1).
+> Geophysics, 77, F21-F30; DOI:
+> [10.1190/GEO2011-0237.1](http://dx.doi.org/10.1190/GEO2011-0237.1).
 
 All releases have additionally a Zenodo-DOI, provided on the 
 [release-page](https://github.com/empymod/empymod/releases).

@@ -150,34 +150,9 @@ Structure
 Missing features
 ''''''''''''''''
 
-A list of things that should or could be added and improved:
+A list of things that should or could be added and improved can be found
+in the `Roadmap <https://github.com/empymod/empymod#roadmap>`_.
 
-    - A `cython`, `numba`, or pure C/C++ implementation of the `kernel` and the
-      `transform` modules. Maybe not worth it, as it may improve speed, but
-      decrease accessibility. Both at the same time would be nice. A fast
-      C/C++-version for calculations (inversions), and a Python-version to
-      tinker with for interested folks. (Probably combined with default
-      parallelisation, removing the `numexpr` variant.)
-
-    - More modelling routines:
-        - Additional source-receiver arrangements (e.g. loops).
-        - Improve `model.gpr`.
-        - Load and save functions to store and load model information
-          (resistivity model, acquisition parameters, and modelling parameters)
-          together with the modelling data.
-
-    - Abstraction of the code.
-
-    - GUI.
-
-    - Add a benchmark suite, e.g. http://asv.readthedocs.io, in addition to the
-      testing suite.
-
-    - Add some clever checks, e.g. as in [Key_2012]_: abort loops if the field
-      is strongly attenuated.
-
-    - Module to create Hankel filters (nice to have addition, mainly for
-      educational purposes).
 
 Testing
 '''''''
