@@ -53,9 +53,9 @@ A collection of ideas of what could be added or improved in empymod. Please
 get in touch if you would like to tackle one of these problems!
 
 - Additional modelling routines:
-  - Ramp waveform
-  - Arbitrary waveform
-  - TEM (in-loop, coincident loop, ...) The problems to tackle are
+  - **Ramp waveform**
+  - **Arbitrary waveform**
+  - **TEM (in-loop, coincident loop, ...):** the problems to tackle are
     mainly zero-offset, loop integration, and windowing.
   - Improve the GPR-routine
   - Load and save functions to store and load model information
@@ -68,21 +68,22 @@ get in touch if you would like to tackle one of these problems!
     space-frequency and space-time domains
   - Complete halfspace
 
-- Extend `fQWE` and `fftlog` to use cosine: At the moment, `fqwe` and `fftlog`
-  are implemented with the sine-transform. It would not be too much work to
-  make them flexible to handle sine- and cosine-transforms. Having this
+- **Extend `fQWE` and `fftlog` to use cosine:** At the moment, `fqwe` and
+  `fftlog` are implemented with the sine-transform. It would not be too much
+  work to make them flexible to handle sine- and cosine-transforms. Having this
   flexibility we could calculate the step-off response with the cosine versions
   of `fftlog`, `fqwe`, and `ffht` instead of subtracting the step-on from the
   DC value. (Check how it works with `fft`!)
 
 - Module to design digital filters
-  - Hankel transform (almost ready)(
+  - **Hankel transform (almost ready)**
   - Extend to Fourier transform
 
 - Inversion: Inversion routines, preferably a selection of different ones.
 
 - Extend examples (example-notebooks); reproduce published results
-  - Clean-up!
+  - **Clean-up!**
+  - **Move comparing.ipynb to tests-functions**
   - Schlumberger, Wenner
   - CSEM
   - MTEM
