@@ -81,6 +81,9 @@ get in touch if you would like to tackle one of these problems!
 
 - Inversion: Inversion routines, preferably a selection of different ones.
 
+- Improve documentation
+  - Add actual equations, instead of only references to them.
+
 - Extend examples (example-notebooks); reproduce published results
   - **Clean-up!**
   - **Move comparing.ipynb to tests-functions**
