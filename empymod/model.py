@@ -108,6 +108,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             - azimuth (°): horizontal deviation from x-axis, anti-clockwise.
             - dip (°): vertical deviation from xy-plane downwards.
 
+        Sources or receivers placed on a layer interface are considered in the
+        upper layer.
+
     depth : list
         Absolute layer interfaces z (m); #depth = #res - 1
         (excluding +/- infinity).
@@ -609,6 +612,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         Source and receiver coordinates (m): [x, y, z].
         The x- and y-coordinates can be arrays, z is a single value.
         The x- and y-coordinates must have the same dimension.
+
+        Sources or receivers placed on a layer interface are considered in the
+        upper layer.
 
     depth : list
         Absolute layer interfaces z (m); #depth = #res - 1
@@ -1226,6 +1232,9 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
         The x- and y-coordinates can be arrays, z is a single value.
         The x- and y-coordinates must have the same dimension.
         The x- and y-coordinates only matter for the angle-dependent factor.
+
+        Sources or receivers placed on a layer interface are considered in the
+        upper layer.
 
     depth : list
         Absolute layer interfaces z (m); #depth = #res - 1

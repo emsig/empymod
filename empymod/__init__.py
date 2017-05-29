@@ -313,7 +313,8 @@ Depths, Rotation, and Bipole
 ''''''''''''''''''''''''''''
 **Depths**: Calculation of many source and receiver positions is fastest if
 they remain at the same depth, as they can be calculated in one kernel-call. If
-depths do change, one has to loop over them.
+depths do change, one has to loop over them. Note: Sources or receivers placed
+on a layer interface are considered in the upper layer.
 
 **Rotation**: Sources and receivers aligned along the principal axes x, y, and
 z can be calculated in one kernel call. For arbitrary oriented di- or bipoles,
