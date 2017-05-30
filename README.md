@@ -1,9 +1,5 @@
 # empymod
 
-[![readthedocs](https://readthedocs.org/projects/empymod/badge/?version=latest)](https://empymod.readthedocs.io/en/latest/?badge=latest)
-[![travis-ci](https://travis-ci.org/empymod/empymod.png?branch=master)](https://travis-ci.org/empymod/empymod/)
-[![coveralls](https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master)](https://coveralls.io/github/empymod/empymod?branch=master)
-
 The electromagnetic modeller **empymod** can model electric or magnetic
 responses due to a three-dimensional electric or magnetic source in a
 layered-earth model with vertical transverse isotropic (VTI) resistivity, VTI

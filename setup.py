@@ -6,13 +6,13 @@ with open('README.md') as f:
 
 setup(
     name='empymod',
-    version='1.3.1.dev',
-    description='ElectroMagnetic Python forward MODeller (1D)',
+    version='1.4.0',
+    description='Open-source full 3D electromagnetic modeller for 1D VTI media',
     long_description=readme,
     author='Dieter Werthmüller',
     author_email='dieter@werthmuller.org',
-    url='https://github.com/empymod/empymod',
-    download_url='https://github.com/empymod/empymod/tarball/v1.3.0',
+    url='https://empymod.github.io',
+    download_url='https://github.com/empymod/empymod/tarball/v1.4.0',
     license='Apache License V2.0',
     packages=['empymod'],
     classifiers=[

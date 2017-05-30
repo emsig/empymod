@@ -4,7 +4,7 @@
 ===================================
 
 Kernel of `empymod`, calculates the wavenumber-domain electromagnetic response.
-Plus analytical, frequency-domain full- and half-space solutions.
+Plus analytical full- and half-space solutions.
 
 The functions 'wavenumber', 'angle_factor', 'fullspace', 'greenfct',
 'reflections', and 'fields' are based on source files (specified in each
@@ -46,7 +46,7 @@ __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']
 
 
-# Wavenumber-domain kernel
+# Wavenumber-frequency domain kernel
 
 def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                ab, xdirect, msrc, mrec, use_ne_eval):
@@ -580,7 +580,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
     return Pu, Pd
 
 
-# Frequency-domain functions
+# Angle Factor
 
 def angle_factor(angle, ab, msrc, mrec):
     """Return the angle-dependent factor.
@@ -636,6 +636,8 @@ def angle_factor(angle, ab, msrc, mrec):
 
     return factAng
 
+
+# Analytical solutions
 
 def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
               mrec):

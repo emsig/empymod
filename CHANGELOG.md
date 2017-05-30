@@ -1,55 +1,55 @@
 # Changelog
 
 
-## latest
+## v1.4.0 - *2017-05-30*
 
-* [2017-05-20] Modify `kernel.halfspace` to use same input as other kernel
-  functions. New modelling routine `model.analytical`, which serves as a
-  front-end to `kernel.fullspace` or `kernel.halfspace`.
+* New home: [empymod.github.io](https://empymod.github.io) as entry point,
+  and the project page on [github.com/empymod](https://github.com/empymod).
+  All empymod-repos moved to the new home:
+    * /prisae/empymod -> /empymod/empymod
+    * /prisae/empymod-notebooks -> /empymod/example-notebooks
+    * /prisae/empymod-geo2017 -> /empymod/article-geo2017
+    * /prisae/empymod-tle2017 -> /empymod/article-tle2017
 
-* [2017-05-19] Remove legacy routines `model.time` and `model.frequency`.
-  They are covered perfectly by `model.dipole`.
+* Modelling routines:
+    * New modelling routine `model.analytical`, which serves as a front-end to
+      `kernel.fullspace` or `kernel.halfspace`.
+    * Remove legacy routines `model.time` and `model.frequency`.  They are
+      covered perfectly by `model.dipole`.
+    * Improved switch-off response (calculate and subtract from DC).
+    * `xdirect` adjustments:
+        * `isfullspace` now respects `xdirect`.
+        * Removed `xdirect` from `model.wavenumber` (set to `False`).
 
-* [2017-05-19] Move all empymod-repos to new home on
-  [empymod.github.io](https://empymod.github.io).
-    - /prisae/empymod -> /empymod/empymod
-    - /prisae/empymod-notebooks -> /empymod/example-notebooks
-    - /prisae/empymod-geo2017 -> /empymod/article-geo2017
-    - /prisae/empymod-tle2017 -> /empymod/article-tle2017
-
-* [2017-05-15] Include t-domain ee halfspace solution into `kernel.halfspace`;
-  possible to obtain direct, reflected, and airwave separately, as well as only
-  fullspace solution (all for the diffusive approximation).
-
-* [2017-05-13] Improved switch-off response (calculate and subtract from DC).
-
-* [2017-04-28] `xdirect` adjustments:
-    - `isfullspace` now respects `xdirect`.
-    - Removed `xdirect` from `model.wavenumber` (set to `False`).
+* Kernel:
+    * Modify `kernel.halfspace` to use same input as other kernel functions.
+    * Include time-domain ee halfspace solution into `kernel.halfspace`;
+      possible to obtain direct, reflected, and airwave separately, as well as
+      only fullspace solution (all for the diffusive approximation).
 
 ## v1.3.0 - *2017-03-30*
 
 * Add additional transforms and improve QWE:
-    - Conventional adaptive quadrature (QUADPACK) for the Hankel transform;
-    - Conventional FFT for the Fourier transform.
-    - Add `diff_quad` to `htarg`/`ftarg` of QWE, a switch parameter for
+    * Conventional adaptive quadrature (QUADPACK) for the Hankel transform;
+    * Conventional FFT for the Fourier transform.
+    * Add `diff_quad` to `htarg`/`ftarg` of QWE, a switch parameter for
       QWE/QUAD.
-    - Change QWE/QUAD switch from comparing first interval to comparing all
+    * Change QWE/QUAD switch from comparing first interval to comparing all
       intervals.
-    - Add parameters for QUAD (a, b, limit) into `htarg`/`ftarg` for QWE.
+    * Add parameters for QUAD (a, b, limit) into `htarg`/`ftarg` for QWE.
 
 * Allow `htarg`/`ftarg` as dict additionally to list/tuple.
 
 * Improve `model.gpr`.
 
 * Internal changes:
-    - Rename internally the sine/cosine filter from `fft` to `ffht`, because of
+    * Rename internally the sine/cosine filter from `fft` to `ffht`, because of
       the addition of the Fast Fourier Transform `fft`.
 
 * Clean-up repository
-    - Move `notebooks` to /prisae/empymod-notebooks
-    - Move `publications/Geophysics2017` to /prisae/empymod-geo2017
-    - Move `publications/TheLeadingEdge2017` to /prisae/empymod-tle2017
+    * Move `notebooks` to /prisae/empymod-notebooks
+    * Move `publications/Geophysics2017` to /prisae/empymod-geo2017
+    * Move `publications/TheLeadingEdge2017` to /prisae/empymod-tle2017
 
 * Bug fixes and documentation improvements
 
@@ -65,27 +65,27 @@
 ## v1.2.0 - *2017-02-02*
 
 * New routine:
-    - General modelling routine `bipole` (replaces `srcbipole`): Model the
+    * General modelling routine `bipole` (replaces `srcbipole`): Model the
       EM field for arbitrarily oriented, finite length bipole sources and
       receivers.
 
 * Added a test suite:
-    - Unit-tests of small functions.
-    - Framework-tests of the bigger functions:
-        - Comparing to status quo (regression tests),
-        - Comparing to known analytical solutions,
-        - Comparing different options to each other,
-        - Comparing to other 1D modellers (EMmod, DIPOLE1D, GREEN3D).
-    - Incorporated with Travis CI and Coveralls.
+    * Unit-tests of small functions.
+    * Framework-tests of the bigger functions:
+        * Comparing to status quo (regression tests),
+        * Comparing to known analytical solutions,
+        * Comparing different options to each other,
+        * Comparing to other 1D modellers (EMmod, DIPOLE1D, GREEN3D).
+    * Incorporated with Travis CI and Coveralls.
 
 * Internal changes:
-    - Add kernel count (printed if verb > 1).
-    - `numexpr` is now only required if `opt=='parallel'`. If `numexpr` is not
+    * Add kernel count (printed if verb > 1).
+    * `numexpr` is now only required if `opt=='parallel'`. If `numexpr` is not
       found, `opt` is reset to `None` and a warning is printed.
-    - Cleaned-up wavenumber-domain routine.
-    - theta/phi -> azimuth/dip; easier to understand.
-    - Refined verbosity levels.
-    - Lots of changes in `utils`, with regards to the new routine `bipole` and
+    * Cleaned-up wavenumber-domain routine.
+    * theta/phi -> azimuth/dip; easier to understand.
+    * Refined verbosity levels.
+    * Lots of changes in `utils`, with regards to the new routine `bipole` and
       with regards to verbosity. Moved all warnings out from `transform` and
       `model` into `utils`.
 
