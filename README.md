@@ -1,5 +1,10 @@
 # empymod
 
+[![readthedocs](https://readthedocs.org/projects/empymod/badge/?version=latest)](https://empymod.readthedocs.io/en/latest/?badge=latest)
+[![travis-ci](https://travis-ci.org/empymod/empymod.png?branch=master)](https://travis-ci.org/empymod/empymod/)
+[![coveralls](https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master)](https://coveralls.io/github/empymod/empymod?branch=master)
+
+
 The electromagnetic modeller **empymod** can model electric or magnetic
 responses due to a three-dimensional electric or magnetic source in a
 layered-earth model with vertical transverse isotropic (VTI) resistivity, VTI
@@ -49,20 +54,20 @@ A collection of ideas of what could be added or improved in empymod. Please
 get in touch if you would like to tackle one of these problems!
 
 - Additional modelling routines:
-  - **Ramp waveform**
-  - **Arbitrary waveform**
-  - **TEM (in-loop, coincident loop, ...):** the problems to tackle are
-    mainly zero-offset, loop integration, and windowing.
-  - Improve the GPR-routine
-  - Load and save functions to store and load model information
-    (resistivity model, acquisition parameters, and modelling parameters)
-    together with the modelling data.
+    - **Ramp waveform**
+    - **Arbitrary waveform**
+    - **TEM (in-loop, coincident loop, ...):** the problems to tackle are
+      mainly zero-offset, loop integration, and windowing.
+    - Improve the GPR-routine
+    - Load and save functions to store and load model information
+      (resistivity model, acquisition parameters, and modelling parameters)
+      together with the modelling data.
 
 - Additional analytical functions (semi-analytical); if possible
-  - Complete fullspace (el./mag. src/rec); space-time domain
-  - Extend diffusive halfspace solution to magnetic sources and receivers;
-    space-frequency and space-time domains
-  - Complete halfspace
+    - Complete fullspace (el./mag. src/rec); space-time domain
+    - Extend diffusive halfspace solution to magnetic sources and receivers;
+      space-frequency and space-time domains
+    - Complete halfspace
 
 - **Extend `fQWE` and `fftlog` to use cosine:** At the moment, `fqwe` and
   `fftlog` are implemented with the sine-transform. It would not be too much
@@ -72,25 +77,25 @@ get in touch if you would like to tackle one of these problems!
   DC value. (Check how it works with `fft`!)
 
 - Module to design digital filters
-  - **Hankel transform (almost ready)**
-  - Extend to Fourier transform
+    - **Hankel transform (almost ready)**
+    - Extend to Fourier transform
 
 - Inversion: Inversion routines, preferably a selection of different ones.
 
 - Improve documentation
-  - Add actual equations, instead of only references to them.
+    - Add actual equations, instead of only references to them.
 
 - Extend examples (example-notebooks); reproduce published results
-  - **Clean-up!**
-  - **Move comparing.ipynb to tests-functions**
-  - Schlumberger, Wenner
-  - CSEM
-  - MTEM
-  - DC
-  - TEM
-  - GPR
-  - EM31
-  - ...
+    - **Clean-up!**
+    - **Move comparing.ipynb to tests-functions**
+    - Schlumberger, Wenner
+    - CSEM
+    - MTEM
+    - DC
+    - TEM
+    - GPR
+    - EM31
+    - ...
 
 - A `cython`, `numba`, or pure C/C++ implementation of the `kernel` and the
   `transform` modules. Maybe not worth it, as it may improve speed, but

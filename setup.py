@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
-
-with open('README.md') as f:
-    readme = f.read()
+try:
+    import pypandoc
+    readme = pypandoc.convert('README.md', 'rst')
+except(IOError, ImportError):
+    readme = open('README.md').read()
 
 setup(
     name='empymod',
-    version='1.4.0',
+    version='1.4.1.dev',
     description='Open-source full 3D electromagnetic modeller for 1D VTI media',
     long_description=readme,
     author='Dieter Werthmüller',
