@@ -2,3 +2,4 @@ include CHANGELOG.md
 include LICENSE
 include NOTICE
 include THANKS.md
+include README.md

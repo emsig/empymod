@@ -1,5 +1,7 @@
 # Changelog
 
+## v1.4.1 - *2017-05-30*
+* Bug-fix unrelated to the code itself (setup/pypi/anaconda-issue).
 
 ## v1.4.0 - *2017-05-30*
 
