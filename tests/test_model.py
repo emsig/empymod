@@ -16,16 +16,18 @@ from empymod.kernel import fullspace, halfspace
 # Add tests when issues arise!
 
 # Load required data
-# Data generated with create_empymod.py
-DATAEMPYMOD = np.load(join(dirname(__file__), 'data_empymod.npz'))
-# Data generated with create_fem_tem.py
-DATAFEMTEM = np.load(join(dirname(__file__), 'data_fem_tem.npz'))
-# Data generated with create_green3d.py
-GREEN3D = np.load(join(dirname(__file__), 'data_green3d.npz'))
-# Data generated with create_dipole1d.py
-DIPOLE1D = np.load(join(dirname(__file__), 'data_dipole1d.npz'))
-# Data generated with create_emmod.py
-EMMOD = np.load(join(dirname(__file__), 'data_emmod.npz'))
+# Data generated with create_self.py
+DATAEMPYMOD = np.load(join(dirname(__file__), 'data/empymod.npz'))
+# Data generated with create_data/fem_tem.py
+DATAFEMTEM = np.load(join(dirname(__file__), 'data/fem_tem.npz'))
+# Data generated with create_data/green3d.py
+GREEN3D = np.load(join(dirname(__file__), 'data/green3d.npz'))
+# Data generated with create_data/dipole1d.py
+DIPOLE1D = np.load(join(dirname(__file__), 'data/dipole1d.npz'))
+# Data generated with create_data/emmod.py
+EMMOD = np.load(join(dirname(__file__), 'data/emmod.npz'))
+# Data generated with create_data/regression.py
+REGRES = np.load(join(dirname(__file__), 'data/regression.npz'))
 
 
 class TestBipole:
@@ -58,7 +60,7 @@ class TestBipole:
             assert_allclose(hs_res, bip_res, rtol=rtol)
 
     def test_emmod(self):
-        # Comparsion to EMmod (Hunziker et al., 2015)
+        # Comparison to EMmod (Hunziker et al., 2015)
         # Comparison f = [0.013, 1.25, 130] Hz.; 11 models, 34 ab's, f altern.
         dat = EMMOD['res'][()]
         for key, val in dat.items():
@@ -550,3 +552,12 @@ def test_tem():
         res = DATAFEMTEM['out'+i][()]
         tEM, _ = tem(**res['inp'])
         assert_allclose(tEM, res['EM'])
+
+
+def test_regres():
+    # Comparison to self (regression test)
+    # 1836 cases; f = [0.01, 1, 100] Hz.; 18 models, 34 ab's, f altern.
+    dat = REGRES['res'][()]
+    for key, val in dat.items():
+        res = dipole(**val[0])
+        assert_allclose(res, val[1], 3e-2, 1e-17, True)

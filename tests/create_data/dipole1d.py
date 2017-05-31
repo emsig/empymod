@@ -1,6 +1,6 @@
 """Create data for test_model::test_dipole1d."""
 import numpy as np
-from create_external import dipole1d
+from external import dipole1d
 
 # # Comparison to DIPOLE1D for EE/ME
 
@@ -92,7 +92,7 @@ out14 = dipole1d(src14, rec, depth, res, freq, 5)
 xyzdirbip = (collect_model(src14, rec, freq, depth, res, 5), out14)
 
 # # Store data # #
-np.savez_compressed('data_dipole1d.npz',
+np.savez_compressed('../data/dipole1d.npz',
                     xdirdip=xdirdip, ydirdip=ydirdip, zdirdip=zdirdip,
                     xydirdip=xydirdip, xzdirdip=xzdirdip, yzdirdip=yzdirdip,
                     xyzdirdip=xyzdirdip,

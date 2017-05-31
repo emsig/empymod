@@ -353,7 +353,7 @@ igpr2b['rec'] = [2, 0, 0.5]
 ogpr = gpr(**igpr)
 
 # # F -- Store data # #
-np.savez_compressed('data_empymod.npz',
+np.savez_compressed('../data/empymod.npz',
                     out1={'inp': inp1, 'EM': EM1},
                     out2={'inp': inp2, 'EM': EM2},
                     out3={'inp': inp3, 'EM': EM3},

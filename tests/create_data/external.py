@@ -65,7 +65,7 @@ def green3d(src, rec, depth, res, freq, aniso, par, strength=0):
 
     # Execution directory
     # (no need to create it, it HAS to exist with the necessary green3d-files).
-    rundir = join(dirname(__file__), 'green3d/')
+    rundir = join(dirname(__file__), 'tmp/green3d/')
 
     # Source-input depending on par
     if par in [9, 10]:
@@ -129,7 +129,7 @@ def dipole1d(src, rec, depth, res, freq, srcpts=5):
     """
 
     # Create directory, overwrite existing
-    rundir = join(dirname(__file__), 'dipole1d/')
+    rundir = join(dirname(__file__), 'tmp/dipole1d/')
     os.makedirs(rundir, exist_ok=True)
 
     # Source: A bipole in dipole1d is defined as: center point, angles, length
@@ -226,7 +226,7 @@ def emmod(dx, nx, dy, ny, src, rec, depth, res, freq, aniso, epermV, epermH,
     """
 
     # Create directory, overwrite existing
-    rundir = join(dirname(__file__), 'emmod/')
+    rundir = join(dirname(__file__), 'tmp/emmod/')
     os.makedirs(rundir, exist_ok=True)
 
     # Write input-file

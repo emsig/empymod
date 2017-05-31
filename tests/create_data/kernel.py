@@ -181,5 +181,5 @@ for TM in [False, True]:
                       inp11, out5)
 
 # # F -- Store data # #
-np.savez_compressed('data_kernel.npz', angres=angres, wave=wave, green=green,
-                    refl=refl, fields=fields)
+np.savez_compressed('../data/kernel.npz', angres=angres, wave=wave,
+                    green=green, refl=refl, fields=fields)

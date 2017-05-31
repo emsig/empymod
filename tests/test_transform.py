@@ -11,8 +11,8 @@ from empymod import transform, filters, kernel, utils
 # inputs.
 
 # Load required data
-# Data generated with create_transform.py
-DATA = np.load(join(dirname(__file__), 'data_transform.npz'))
+# Data generated with create_data/transform.py
+DATA = np.load(join(dirname(__file__), 'data/transform.npz'))
 
 
 @pytest.mark.parametrize("htype", ['fht', 'hqwe', 'hquad'])

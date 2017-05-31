@@ -20,7 +20,7 @@ Model parameters
 """
 import numpy as np
 
-from create_external import emmod
+from external import emmod
 
 # 1. Define coordinates for empymod:
 
@@ -145,4 +145,4 @@ for i in np.arange(np.size(srcn)):
             ifr = 0
 
 # # Store data # #
-np.savez_compressed('data_emmod.npz', res=outdict)
+np.savez_compressed('../data/emmod.npz', res=outdict)

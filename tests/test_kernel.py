@@ -13,10 +13,10 @@ from empymod import bipole
 # possibility of that given function.
 
 # Load required data
-# Data generated with create_empymod.py
-DATAEMPYMOD = np.load(join(dirname(__file__), 'data_empymod.npz'))
-# Data generated with create_kernel.py
-DATAKERNEL = np.load(join(dirname(__file__), 'data_kernel.npz'))
+# Data generated with create_data/self.py
+DATAEMPYMOD = np.load(join(dirname(__file__), 'data/empymod.npz'))
+# Data generated with create_data/kernel.py
+DATAKERNEL = np.load(join(dirname(__file__), 'data/kernel.npz'))
 
 
 def test_wavenumber():                                          # 1. wavenumber

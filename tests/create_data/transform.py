@@ -223,7 +223,7 @@ quad = {'inp': {'sPJ0r': sPJ0r, 'sPJ0i': sPJ0i, 'sPJ1r': sPJ1r, 'sPJ1i': sPJ1i,
                 'factAng': factAng, 'iinp': iinp}, 'res': np.squeeze(freqres)}
 
 # # I -- Store data # #
-np.savez_compressed('data_transform.npz',
+np.savez_compressed('../data/transform.npz',
                     t=t, tEM0=tEM0, tEM1=tEM1,
                     fftlog0=fftlog0, fftlog1=fftlog1,
                     ffht0=ffht0, ffht1=ffht1,

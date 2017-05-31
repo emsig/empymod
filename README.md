@@ -87,7 +87,6 @@ get in touch if you would like to tackle one of these problems!
 
 - Extend examples (example-notebooks); reproduce published results
     - **Clean-up!**
-    - **Move comparing.ipynb to tests-functions**
     - Schlumberger, Wenner
     - CSEM
     - MTEM

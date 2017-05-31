@@ -1,6 +1,6 @@
 """Create data for test_model::test_green3d."""
 import numpy as np
-from create_external import green3d
+from external import green3d
 
 # # Comparison to Green3D for EE (electrical source, electrical receiver)
 
@@ -128,7 +128,7 @@ xyzdirdipm = (collect_model(src7, rec, freq, depth, res, aniso, 0, 1, True),
               out20)
 
 # # Store data # #
-np.savez_compressed('data_green3d.npz',
+np.savez_compressed('../data/green3d.npz',
                     xdirdip=xdirdip, ydirdip=ydirdip, zdirdip=zdirdip,
                     xydirdip=xydirdip, xzdirdip=xzdirdip, yzdirdip=yzdirdip,
                     xyzdirdip=xyzdirdip,
