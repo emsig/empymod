@@ -504,11 +504,14 @@ def test_analytical():
              'signal': 1,
              'ab': 12,
              'verb': 0}
+    # Check dhs and dsplit
     ana_res = analytical(solution='dhs', **model)
+    res1, res2, res3 = analytical(solution='dsplit', **model)
     model['res'] = [2e14, model['res']]
     model['aniso'] = [1, model['aniso']]
     dip_res = dipole(depth=0, **model)
     assert_allclose(dip_res, ana_res, rtol=1e-4)
+    assert_allclose(ana_res, res1+res2+res3)
 
 
 def test_gpr(capsys):

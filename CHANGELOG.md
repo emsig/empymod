@@ -1,5 +1,10 @@
 # Changelog
 
+## latest
+
+* [01/06/2017] Bugfix: Fixed squeeze in `model.analytical` with
+  `solution='dsplit'`.
+
 ## v1.4.1 - *2017-05-30*
 * Bug-fix unrelated to the code itself (setup/pypi/anaconda-issue).
 

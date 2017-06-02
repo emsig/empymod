@@ -1116,7 +1116,12 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
                               ab_calc, msrc, mrec)
 
     # Squeeze
-    EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
+    if solution[1:] == 'split':
+        EM = (np.squeeze(EM[0].reshape((-1, nrec, nsrc), order='F')),
+              np.squeeze(EM[1].reshape((-1, nrec, nsrc), order='F')),
+              np.squeeze(EM[2].reshape((-1, nrec, nsrc), order='F')))
+    else:
+        EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0)

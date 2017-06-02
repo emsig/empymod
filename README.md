@@ -85,16 +85,9 @@ get in touch if you would like to tackle one of these problems!
 - Improve documentation
     - Add actual equations, instead of only references to them.
 
-- Extend examples (example-notebooks); reproduce published results
-    - **Clean-up!**
-    - Schlumberger, Wenner
-    - CSEM
-    - MTEM
-    - DC
-    - TEM
-    - GPR
-    - EM31
-    - ...
+- Extend examples (example-notebooks):
+    - Add different methods (e.g. DC)
+    - Reproduce published results
 
 - A `cython`, `numba`, or pure C/C++ implementation of the `kernel` and the
   `transform` modules. Maybe not worth it, as it may improve speed, but
@@ -111,6 +104,8 @@ get in touch if you would like to tackle one of these problems!
 
 - Add some clever checks, e.g. as in Key (2012): abort loops if the field
   is strongly attenuated.
+
+- Move empymod from channel 'prisae' to 'conda-forge'.
 
 
 ## Citation
