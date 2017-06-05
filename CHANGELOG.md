@@ -1,12 +1,16 @@
 # Changelog
 
-## latest
 
-* [01/06/2017] Bugfix: Fixed squeeze in `model.analytical` with
-  `solution='dsplit'`.
+## v1.4.2 - *2017-04-06*
+
+* Bugfix: Fixed squeeze in `model.analytical` with `solution='dsplit'`.
+
+* Version of final submission of manuscript to Geophysics.
+
 
 ## v1.4.1 - *2017-05-30*
 * Bug-fix unrelated to the code itself (setup/pypi/anaconda-issue).
+
 
 ## v1.4.0 - *2017-05-30*
 
@@ -34,6 +38,7 @@
       possible to obtain direct, reflected, and airwave separately, as well as
       only fullspace solution (all for the diffusive approximation).
 
+
 ## v1.3.0 - *2017-03-30*
 
 * Add additional transforms and improve QWE:
@@ -60,6 +65,7 @@
 
 * Bug fixes and documentation improvements
 
+
 ## v1.2.1 - *2017-03-11*
 
 * Change default filter from `key_401_2009` to `key_201_2009` (because of
@@ -68,6 +74,7 @@
 * Since 06/02/2017 installable via pip/conda.
 
 * Bug fixes
+
 
 ## v1.2.0 - *2017-02-02*
 
@@ -98,6 +105,7 @@
 
 * Bug fixes
 
+
 ## v1.1.0 - *2016-12-22*
 
 * New routines:
@@ -117,6 +125,7 @@
       `key_241_CosSin_2009`, and `key_601_CosSin_2009`.
 
 * Bug fixes
+
 
 ## v1.0.0 - *2016-11-29*
 
