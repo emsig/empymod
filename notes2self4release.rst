@@ -6,7 +6,7 @@ Steps to carry out for a new release
       - `setup.py`: Version number, download url; check and update everything
       - `docs/conf.py`: Version number
       - `empymod/__init__.py`: Version number
-      - `README.rst`: Remove all batches
+      - `README.md`: Remove all batches
 
    2. Remove any old stuff (just in case)
 
@@ -69,4 +69,4 @@ Steps to carry out for a new release
       - `setup.py`
       - `docs/conf.py`
       - `empymod/__init__.py`
-      - `README.rst`: add the current batches (|docs| |tests| |coverage|)
+      - `README.md`: add the current batches (|docs| |tests| |coverage|)
