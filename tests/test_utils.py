@@ -422,7 +422,8 @@ def test_check_time(capsys):
     assert ftarg[2] == 'sin'
 
     # [filter str]
-    _, f, _, ftarg = utils.check_time(time, 0, 'cos', 'key_201_CosSin_2012', 4)
+    _, f, _, ftarg = utils.check_time(time, -1, 'cos', 'key_201_CosSin_2012',
+                                      4)
     out, _ = capsys.readouterr()
     outstr = "   time        [s] :  3\n"
     outstr += "   Fourier         :  Cosine-Filter\n     > Filter"
@@ -472,7 +473,7 @@ def test_check_time(capsys):
     outstr = "   Fourier         :  Quadrature-with-Extrapolation\n     > rtol"
     assert out[24:87] == outstr
     assert ft == 'fqwe'
-    assert_allclose(ftarg[:-3], [1e-8, 1e-20, 21, 200, 20, 100])
+    assert_allclose(ftarg[:-4], [1e-8, 1e-20, 21, 200, 20, 100])
     f1 = np.array([3.16227766e-03, 3.54813389e-03, 3.98107171e-03,
                    4.46683592e-03, 5.01187234e-03, 5.62341325e-03,
                    6.30957344e-03, 7.07945784e-03, 7.94328235e-03])
@@ -482,17 +483,19 @@ def test_check_time(capsys):
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 99)
+    assert ftarg[-4] is None
     assert ftarg[-3] is None
     assert ftarg[-2] is None
-    assert ftarg[-1] is None
+    assert ftarg[-1] is np.sin
 
     # only last argument
     _, _, _, ftarg = utils.check_time(time, 1, 'fqwe',
                                       ['', '', '', '', '', '', '', '', 30], 0)
-    assert_allclose(ftarg[:-3], [1e-8, 1e-20, 21, 200, 20, 100])
+    assert_allclose(ftarg[:-4], [1e-8, 1e-20, 21, 200, 20, 100])
+    assert ftarg[-4] is None
     assert ftarg[-3] is None
-    assert ftarg[-2] is None
-    assert ftarg[-1] == 30
+    assert ftarg[-2] == 30
+    assert ftarg[-1] is np.sin
 
     # all arguments
     _, _, _, ftarg = utils.check_time(time, -1, 'qwe', [1e-3, 1e-4, 31, 20, 30,
@@ -501,7 +504,8 @@ def test_check_time(capsys):
     assert "     > a     (quad):  0.01" in out
     assert "     > b     (quad):  0.2" in out
     assert "     > limit (quad):  100" in out
-    assert_allclose(ftarg, [1e-3, 1e-4, 31, 20, 30, 200, 0.01, .2, 100])
+    assert_allclose(ftarg[:-1], [1e-3, 1e-4, 31, 20, 30, 200, 0.01, .2, 100])
+    assert ftarg[-1] is np.cos
 
     # # FFTLog # #
     # verbose
@@ -521,8 +525,9 @@ def test_check_time(capsys):
                      44.96330186, 56.60544331, 71.26203102, 89.71358175,
                      112.94270785, 142.18644499, 179.00212881, 225.35032873,
                      283.69925539])
-    assert_allclose(ftarg[3], tres)
-    assert_allclose(ftarg[4:], [0.23025850929940461, 1.0610526667295022,
+    assert ftarg[3] == 0.5
+    assert_allclose(ftarg[4], tres)
+    assert_allclose(ftarg[5:], [0.23025850929940461, 1.0610526667295022,
                     0.016449035064149849])
 
     fres = np.array([0.00059525, 0.00074937, 0.00094341, 0.00118768, 0.0014952,
@@ -536,12 +541,13 @@ def test_check_time(capsys):
     assert_allclose(f, fres, rtol=1e-5)
 
     # Several parameters
-    _, _, _, ftarg = utils.check_time(time, 0, 'fftlog', ['', [-3, 4], 2], 0)
+    _, _, _, ftarg = utils.check_time(time, -1, 'fftlog', ['', [-3, 4], 2], 0)
     assert ftarg[0] == 10
     assert_allclose(ftarg[1], np.array([-3.,  4.]))
     assert ftarg[2] == 1  # q > 1 reset to 1...
-    assert_allclose(ftarg[4:], [0.23025850929940461, 1.0582078033615059,
-                    1.6493256300417651])
+    assert ftarg[3] == -0.5
+    assert_allclose(ftarg[5:], [0.23025850929940461, 0.94312869748639161,
+                                1.8505737940600746])
 
     # # FFT # #
     # verbose

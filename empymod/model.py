@@ -1463,13 +1463,8 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
     # Step function for causal times is like a unit fct, therefore an impulse
     # in frequency domain
     if signal in [-1, 1]:
-        # If -1, we subtract the response from the 'DC' value.
-        # DC was calculated with min_freq, which is stored as first entry.
-        if signal == -1:
-            fEM = fEM[1, :] - fEM[1:, :]
-            freq = freq[1:]
-        # Divide by 2j*pi*f to obtain step response
-        fact = 1/(2j*np.pi*freq)
+        # Divide by signal/(2j*pi*f) to obtain step response
+        fact = signal/(2j*np.pi*freq)
     else:
         fact = 1
 

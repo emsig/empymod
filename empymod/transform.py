@@ -613,10 +613,12 @@ def fqwe(fEM, time, freq, qweargs):
 
     """
     # Get rtol, atol, nquad, maxint, diff_quad, a, b, and limit
-    rtol, atol, nquad, maxint, _, diff_quad, a, b, limit = qweargs
+    rtol, atol, nquad, maxint, _, diff_quad, a, b, limit, sincos = qweargs
 
     # Calculate quadrature intervals for all offset
     xint = np.concatenate((np.array([1e-20]), np.arange(1, maxint+1)*np.pi))
+    if sincos == np.cos:  # Adjust zero-crossings if cosine-transform
+        xint[1:] -= np.pi/2
     intervals = xint/time[:, None]
 
     # Get Gauss Quadrature Weights
@@ -626,11 +628,11 @@ def fqwe(fEM, time, freq, qweargs):
     # by the corresponding Gauss quadrature weight.
     dx = np.repeat(np.diff(xint)/2, nquad)
     Bx = dx*(np.tile(g_x, maxint) + 1) + np.repeat(xint[:-1], nquad)
-    SS = np.sin(Bx)*np.tile(g_w, maxint)
+    SS = sincos(Bx)*np.tile(g_w, maxint)
 
     # Interpolate in frequency domain
     tEM_rint = iuSpline(np.log10(2*np.pi*freq), fEM.real)
-    tEM_iint = iuSpline(np.log10(2*np.pi*freq), fEM.imag)
+    tEM_iint = iuSpline(np.log10(2*np.pi*freq), -fEM.imag)
 
     # Check if we use QWE or SciPy's QUAD
     # If there are any steep decays within an interval we have to use QUAD, as
@@ -640,6 +642,12 @@ def fqwe(fEM, time, freq, qweargs):
     doqwe = np.all((np.abs(tEM_rint(check0) + 1j*tEM_iint(check0)) /
                    np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < diff_quad),
                    1)
+
+    # Choose imaginary part if sine-transform, else real part
+    if sincos == np.sin:
+        tEM_int = tEM_iint
+    else:
+        tEM_int = tEM_rint
 
     # Set quadargs if not given:
     if not limit:
@@ -660,8 +668,8 @@ def fqwe(fEM, time, freq, qweargs):
     # Carry out SciPy's Quad if required
     if np.any(~doqwe):
         def sEMquad(w, t):
-            """Return scaled, interpolated value of tEM_iint for `w`."""
-            return tEM_iint(np.log10(w))*np.sin(w*t)
+            """Return scaled, interpolated value of tEM_int for `w`."""
+            return tEM_int(np.log10(w))*sincos(w*t)
 
         # Loop over times that require QUAD
         for i in np.where(~doqwe)[0]:
@@ -675,11 +683,11 @@ def fqwe(fEM, time, freq, qweargs):
 
     # Carry out QWE for 'well-behaved' intervals
     if np.any(doqwe):
-        sEM = tEM_iint(np.log10(Bx/time[doqwe, None]))*SS
+        sEM = tEM_int(np.log10(Bx/time[doqwe, None]))*SS
         tEM[doqwe], _, tc = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :])
         conv *= tc
 
-    return -tEM, conv
+    return tEM, conv
 
 
 def fftlog(fEM, time, freq, ftarg):
@@ -697,7 +705,6 @@ def fftlog(fEM, time, freq, ftarg):
     logarithmic FFT (`fftl` in `FFTLog`), not the Hankel transform (`fht` in
     `FFTLog`). Furthermore, the following parameters are fixed:
 
-       - `mu` = 0.5 (sine-transform)
        - `kr` = 1 (initial value)
        - `kropt` = 1 (silently adjusts `kr`)
        - `dir` = 1 (forward)
@@ -718,8 +725,11 @@ def fftlog(fEM, time, freq, ftarg):
 
     """
     # Get tcalc, dlnr, kr, rk, q; a and n
-    _, _, q, tcalc, dlnr, kr, rk = ftarg
-    a = -fEM.imag
+    _, _, q, mu, tcalc, dlnr, kr, rk = ftarg
+    if mu > 0:  # Sine
+        a = -fEM.imag
+    else:       # Cosine
+        a = fEM.real
     n = a.size
 
     # 1. Amplitude and Argument of kr^(-2 i y) U_mu(q + 2 i y)
@@ -729,12 +739,12 @@ def fftlog(fEM, time, freq, ftarg):
     y = m*d  # y = m*pi/(n*dlnr)
 
     if q == 0:  # unbiased case (q = 0)
-        zp = special.loggamma(0.75 + 1j*y)
+        zp = special.loggamma((mu + 1)/2.0 + 1j*y)
         arg = 2.0*(ln2kr*y + zp.imag)
 
     else:       # biased case (q != 0)
-        xp = (1.5 + q)/2.0
-        xm = (1.5 - q)/2.0
+        xp = (mu + 1.0 + q)/2.0
+        xm = (mu + 1.0 - q)/2.0
 
         zp = special.loggamma(xp + 0j)
         zm = special.loggamma(xm + 0j)
@@ -1021,7 +1031,7 @@ def get_spline_values(filt, inp, nr_per_dec=None):
     return np.atleast_2d(out), new_inp
 
 
-def fhti(rmin, rmax, n, q):
+def fhti(rmin, rmax, n, q, mu):
     """Return parameters required for FFTLog."""
 
     # Central point log10(r_c) of periodic interval
@@ -1036,8 +1046,8 @@ def fhti(rmin, rmax, n, q):
 
     # Get low-ringing kr
     y = 1j*np.pi/(2.0*dlnr)
-    zp = special.loggamma((1.5 + q)/2.0 + y)
-    zm = special.loggamma((1.5 - q)/2.0 + y)
+    zp = special.loggamma((mu + 1.0 + q)/2.0 + y)
+    zm = special.loggamma((mu + 1.0 - q)/2.0 + y)
     arg = np.log(2.0)/dlnr + (zp.imag + zm.imag)/np.pi
     kr = np.exp((arg - np.round(arg))*dlnr)
 

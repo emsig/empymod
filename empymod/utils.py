@@ -893,10 +893,11 @@ def check_time(time, signal, ft, ftarg, verb):
             except:
                 ft = 'sin'
 
-        # If switch-off/on is required, ensure ft is sine
-        # Sine-transform uses imaginary part, which is 0 at DC (-> late time)
-        if signal != 0:
+        # If switch-off/on is required, ensure ft is cosine/sine
+        if signal > 0:
             ft = 'sin'
+        elif signal < 0:
+            ft = 'cos'
 
         # Check Input
         ftarg = _check_targ(ftarg, ['fftfilt', 'pts_per_dec', 'ft'])
@@ -946,7 +947,14 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # Get and check input or set defaults
         ftarg = _check_targ(ftarg, ['rtol', 'atol', 'nquad', 'maxint',
-                            'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
+                                    'pts_per_dec', 'diff_quad', 'a', 'b',
+                                    'limit', 'sincos'])
+
+        # If switch-off is required, use cosine, else sine
+        if signal >= 0:
+            sincos = np.sin
+        elif signal < 0:
+            sincos = np.cos
 
         try:  # rtol
             rtol = _check_var(ftarg['rtol'], float, 0, 'qwe: rtol', ())
@@ -1002,7 +1010,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # Assemble ftarg
         ftarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad, a, b,
-                 limit)
+                 limit, sincos)
 
         # If verbose, print Fourier transform information
         if verb > 2:
@@ -1029,8 +1037,8 @@ def check_time(time, signal, ft, ftarg, verb):
     elif ft == 'fftlog':              # FFTLog (using sine and imag-part)
 
         # Get and check input or set defaults
-        ftarg = _check_targ(ftarg, ['pts_per_dec', 'add_dec', 'q', 'tcalc',
-                                    'dlnr', 'kr', 'rk'])
+        ftarg = _check_targ(ftarg, ['pts_per_dec', 'add_dec', 'q', 'mu',
+                                    'tcalc', 'dlnr', 'kr', 'rk'])
 
         try:  # pts_per_dec
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
@@ -1052,6 +1060,12 @@ def check_time(time, signal, ft, ftarg, verb):
         except:
             q = np.array(0, dtype=float)
 
+        # If switch-off is required, use cosine, else sine
+        if signal >= 0:
+            mu = 0.5
+        elif signal < 0:
+            mu = -0.5
+
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  FFTLog")
@@ -1065,11 +1079,11 @@ def check_time(time, signal, ft, ftarg, verb):
         n = np.int(maxf - minf)*pts_per_dec
 
         # Initialize FFTLog, get required parameters
-        freq, tcalc, dlnr, kr, rk = transform.fhti(minf, maxf, n, q)
+        freq, tcalc, dlnr, kr, rk = transform.fhti(minf, maxf, n, q, mu)
 
         # Assemble ftarg
         # Keep first 3 entries, so re-running this check is stable
-        ftarg = (pts_per_dec, add_dec, q, tcalc, dlnr, kr, rk)
+        ftarg = (pts_per_dec, add_dec, q, mu, tcalc, dlnr, kr, rk)
 
     elif ft == 'fft':                 # FFT
 
@@ -1131,11 +1145,6 @@ def check_time(time, signal, ft, ftarg, verb):
         print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +
               "'fftlog', 'fft']; <ft> provided: "+str(ft))
         raise ValueError('ft')
-
-    # If switch-off, we add min_freq to calculate the DC-value, from which
-    # the response will be subtracted.
-    if signal == -1:
-        freq = np.r_[min_freq, freq]
 
     return time, freq, ft, ftarg
 

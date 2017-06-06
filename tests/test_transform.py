@@ -128,12 +128,14 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
 def test_fourier(ftype):               # 4. ffht / 5. fqwe / 6. fftlog / 7. fft
     # Check FFT-method with the analytical functions for a halfspace.
     t = DATA['t'][()]
-    for i in [0, 1]:
+    for i in [0, 1, 2]:
         fl = DATA[ftype+str(i)][()]
         res = DATA['tEM'+str(i)][()]
         finp = fl['fEM']
-        if i == 1:
+        if i > 0:
             finp /= 2j*np.pi*fl['f']
+        if i > 1:
+            finp *= -1
         if ftype != 'fft':
             tEM, _ = getattr(transform, ftype)(finp, t, fl['f'], fl['ftarg'])
             assert_allclose(tEM*2/np.pi, res, rtol=1e-3)
@@ -232,7 +234,7 @@ def test_get_spline_values():                            # 9. get_spline_values
 
 def test_fhti():                                                     # 10. fhti
     # Check one example
-    freq, tcalc, dlnr, kr, rk = transform.fhti(-1, 2, 60, 0)
+    freq, tcalc, dlnr, kr, rk = transform.fhti(-1, 2, 60, 0, 0.5)
     # Expected values
     ofreq = np.array([0.01685855, 0.0189156, 0.02122365, 0.02381333, 0.026719,
                       0.02997921, 0.03363722, 0.03774158, 0.04234675,

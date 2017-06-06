@@ -36,10 +36,14 @@ def test_time(res, off, t, signal):
     tau = np.sqrt(mu_0*off**2/(res*t))
     fact1 = res/(2*np.pi*off**3)
     fact2 = tau/np.sqrt(np.pi)
-    if signal == 1:
-        return fact1*(2 - special.erf(tau/2) + fact2*np.exp(-tau**2/4))
-    elif signal == 0:
+    if signal == 0:
         return fact1*tau**3/(4*t*np.sqrt(np.pi))*np.exp(-tau**2/4)
+    else:
+        resp = fact1*(2 - special.erf(tau/2) + fact2*np.exp(-tau**2/4))
+        if signal < 0:
+            DC = test_time(res, off, 1000000, 1)
+            resp = DC-resp
+        return resp
 
 
 # Time-domain solution
@@ -48,6 +52,7 @@ off = 4000  # m
 t = np.logspace(-1.5, 1, 20)  # s
 tEM0 = test_time(res, off, t, 0)
 tEM1 = test_time(res, off, t, 1)
+tEM2 = test_time(res, off, t, -1)
 
 
 # # B -- FFTLog # #
@@ -59,6 +64,10 @@ fftlog0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 _, f, _, ftarg = utils.check_time(t, 1, 'fftlog', [30, [-3, 2], -.5], 0)
 fEM = test_freq(res, off, f)
 fftlog1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+# Signal = -1
+_, f, _, ftarg = utils.check_time(t, -1, 'fftlog', [30, [-5, 2], .1], 0)
+fEM = test_freq(res, off, f)
+fftlog2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
 # # C -- FFHT # #
 # Signal = 0
@@ -69,6 +78,10 @@ ffht0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 _, f, _, ftarg = utils.check_time(t, 1, 'sin', ['key_201_CosSin_2012', 20], 0)
 fEM = test_freq(res, off, f)
 ffht1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+# Signal = -1
+_, f, _, ftarg = utils.check_time(t, -1, 'sin', ['key_201_CosSin_2012', 20], 0)
+fEM = test_freq(res, off, f)
+ffht2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
 # # D -- FQWE # #
 # Signal = 0
@@ -80,6 +93,11 @@ _, f, _, ftarg = utils.check_time(t, 1, 'qwe', [1e-6, '', 41, 300, '', '',
                                                 1e-4, 1e4, 1000], 0)
 fEM = test_freq(res, off, f)
 fqwe1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+# Signal = -1
+_, f, _, ftarg = utils.check_time(t, -1, 'qwe', [1e-6, '', 41, 300, '', '',
+                                                 1e-5, 1e5, 1000], 0)
+fEM = test_freq(res, off, f)
+fqwe2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
 # # E -- FFT # #
 # Signal = 0
@@ -224,9 +242,9 @@ quad = {'inp': {'sPJ0r': sPJ0r, 'sPJ0i': sPJ0i, 'sPJ1r': sPJ1r, 'sPJ1i': sPJ1i,
 
 # # I -- Store data # #
 np.savez_compressed('../data/transform.npz',
-                    t=t, tEM0=tEM0, tEM1=tEM1,
-                    fftlog0=fftlog0, fftlog1=fftlog1,
-                    ffht0=ffht0, ffht1=ffht1,
-                    fqwe0=fqwe0, fqwe1=fqwe1,
-                    fft0=fft0, fft1=fft0,  # fft1 is a dummy
+                    t=t, tEM0=tEM0, tEM1=tEM1, tEM2=tEM2,
+                    fftlog0=fftlog0, fftlog1=fftlog1, fftlog2=fftlog2,
+                    ffht0=ffht0, ffht1=ffht1, ffht2=ffht2,
+                    fqwe0=fqwe0, fqwe1=fqwe1, fqwe2=fqwe2,
+                    fft0=fft0, fft1=fft0, fft2=fft0,  # fft1/2 are dummies
                     hqwe=hqwe, quad=quad)

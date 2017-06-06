@@ -69,12 +69,7 @@ get in touch if you would like to tackle one of these problems!
       space-frequency and space-time domains
     - Complete halfspace
 
-- **Extend `fQWE` and `fftlog` to use cosine:** At the moment, `fqwe` and
-  `fftlog` are implemented with the sine-transform. It would not be too much
-  work to make them flexible to handle sine- and cosine-transforms. Having this
-  flexibility we could calculate the step-off response with the cosine versions
-  of `fftlog`, `fqwe`, and `ffht` instead of subtracting the step-on from the
-  DC value. (Check how it works with `fft`!)
+- **Check FFT:** Reduce to real/imaginary part depending on response.
 
 - Module to design digital filters
     - **Hankel transform (almost ready)**

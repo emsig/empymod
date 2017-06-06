@@ -1,5 +1,13 @@
 # Changelog
 
+## latest
+
+* [2017-06-06] Extended `fQWE` and `fftlog` to be able to use the
+  cosine-transform. Now the cosine-transform with the real-part frequency
+  response is used internally if a switch-off response (`signal=-1`) is
+  required, rather than calculating the switch-on response (with sine-transform
+  and imaginary-part frequency response) and subtracting it from the DC value.
+
 
 ## v1.4.2 - *2017-04-06*
 
