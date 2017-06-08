@@ -313,7 +313,7 @@ on [Talman_1978]_. I do not know if Hamilton was aware of the work by Haines
 and Jones. The two publications share as reference only the original paper by
 Talman, and both cite a publication of Anderson; Hamilton cites
 [Anderson_1982]_, and Haines and Jones cite [Anderson_1979]_. Hamilton probably
-never heard of Haines as Jones, as he works in astronomy, and Haines and Jones
+never heard of Haines and Jones, as he works in astronomy, and Haines and Jones
 was published in the *Geophysical Journal*.
 
 Logarithmic FFTs are not widely used in electromagnetics, as far as I know,

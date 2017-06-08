@@ -88,8 +88,8 @@ get in touch if you would like to tackle one of these problems!
 
 
 - Fourier transform
-    - Adjust `fft` to use sine/cosine transform with imaginary/real part, as all
-      other Fourier transforms
+    - Change `fft` to use discrete sine/cosine transforms instead, as all other
+      Fourier transforms
     - If previous step is successful, clean up the internal decisions
       (`utils.check_time`) when to use sine/cosine transform (not consistent at
       the moment, some choice only exists with `ffht` impulse responses, `fqwe`
