@@ -53,36 +53,63 @@ GitHub.
 A collection of ideas of what could be added or improved in empymod. Please
 get in touch if you would like to tackle one of these problems!
 
-- Additional modelling routines:
+- **Additional modelling routines**
+    - `tdem` (**TEM**)
+      Issues that have to be adressed: ramp waveform, windowing, loop
+      integration, zero-offset (coincident loop).
+        - in-loop
+        - coincident loop
+        - ...
     - **Ramp waveform**
     - **Arbitrary waveform**
-    - **TEM (in-loop, coincident loop, ...):** the problems to tackle are
-      mainly zero-offset, loop integration, and windowing.
     - Improve the GPR-routine
-    - Load and save functions to store and load model information
+    - Load and save functions to easily store and load model information
       (resistivity model, acquisition parameters, and modelling parameters)
-      together with the modelling data.
+      together with the modelling data (using `pickle` or `shelve`).
 
-- Additional analytical functions (semi-analytical); if possible
-    - Complete fullspace (el./mag. src/rec); space-time domain
-    - Extend diffusive halfspace solution to magnetic sources and receivers;
+
+- **Inversion**: Inversion routines, preferably a selection of different ones.
+
+
+- **Improve documentation**
+    - Move main part from `empymod/__init__.py` to `docs/*.rst`
+    - Add actual equations, instead of only references to them
+    - Add general EM introduction and derivation
+    - Add a few simple example of its usage including figures
+    - Add more explanations regarding the different transforms
+
+
+- Additional (semi-)analytical functions (where possible)
+    - Complete full-space (electric and magnetic source and receiver);
+      space-time domain
+    - Extend diffusive half-space solution to magnetic sources and receivers;
       space-frequency and space-time domains
-    - Complete halfspace
+    - Complete half-space
 
-- **Check FFT:** Reduce to real/imaginary part depending on response.
+
+- Fourier transform
+    - Adjust `fft` to use sine/cosine transform with imaginary/real part, as all
+      other Fourier transforms
+    - If previous step is successful, clean up the internal decisions
+      (`utils.check_time`) when to use sine/cosine transform (not consistent at
+      the moment, some choice only exists with `ffht` impulse responses, `fqwe`
+      and `fftlog` use sine for impulse, and all three use sine for step-on
+      responses and cosine for step-off responses)
+
+
+- Hankel transform
+    - Add the `fht`-module from FFTLog for the Hankel transform.
+
 
 - Module to design digital filters
-    - **Hankel transform (almost ready)**
+    - **Hankel transform** (almost ready)
     - Extend to Fourier transform
 
-- Inversion: Inversion routines, preferably a selection of different ones.
 
-- Improve documentation
-    - Add actual equations, instead of only references to them.
-
-- Extend examples (example-notebooks):
+- Extend examples (example-notebooks)
     - Add different methods (e.g. DC)
     - Reproduce published results
+
 
 - A `cython`, `numba`, or pure C/C++ implementation of the `kernel` and the
   `transform` modules. Maybe not worth it, as it may improve speed, but
@@ -90,6 +117,7 @@ get in touch if you would like to tackle one of these problems!
   C/C++-version for calculations (inversions), and a Python-version to
   tinker with for interested folks. (Probably combined with default
   parallelisation, removing the `numexpr` variant.)
+
 - Abstraction of the code.
 
 - GUI.
@@ -98,9 +126,9 @@ get in touch if you would like to tackle one of these problems!
   testing suite.
 
 - Add some clever checks, e.g. as in Key (2012): abort loops if the field
-  is strongly attenuated.
+  is strongly attenuated (more relevant if once an inversion is implemented).
 
-- Move empymod from channel 'prisae' to 'conda-forge'.
+- Move empymod from channel 'prisae' to 'conda-forge' (pros/cons?).
 
 
 ## Citation
@@ -114,47 +142,46 @@ could cite the Geophysical Tutorial:
 > 1D modeling: The Leading Edge, 36, 352-355; DOI:
 > [10.1190/tle36040352.1](http://dx.doi.org/10.1190/tle36040352.1).
 
-Also consider citing the two articles given below, Hunziker et al. (2015)
-and Key (2012), without which empymod would not exist:
+Also consider citing Hunziker et al. (2015) and Key (2012), without which
+empymod would not exist:
 
 > Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response in
 > a layered vertical transverse isotropic medium: A new look at an old problem:
 > Geophysics, 80, F1-F18; DOI:
-> [10.1190/geo2013-0411.1](http://dx.doi.org/10.1190/geo2013-0411.1).
-
+> [10.1190/geo2013-0411.1](http://dx.doi.org/10.1190/geo2013-0411.1).  
+>  
 > Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
 > Geophysics, 77, F21-F30; DOI:
 > [10.1190/GEO2011-0237.1](http://dx.doi.org/10.1190/GEO2011-0237.1).
 
-All releases have additionally a Zenodo-DOI, provided on the 
+All releases have a Zenodo-DOI, provided on the
 [release-page](https://github.com/empymod/empymod/releases).
 
 
-Notice
-------
+## Notice
 
 This product includes software that was initially (till 01/2017) developed at
 *The Mexican Institute of Petroleum IMP*
 ([Instituto Mexicano del Petróleo](http://www.gob.mx/imp)). The project was
 funded through *The Mexican National Council of Science and Technology*
-([Consejo Nacional de Ciencia y Tecnología](http://www.conacyt.mx)).
+([Consejo Nacional de Ciencia y Tecnología](http://www.conacyt.mx)). Since
+02/2017 it is a personal effort, and new contributors are welcome!
 
-License
--------
+
+## License
 
 Copyright 2016-2017 Dieter Werthmüller
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License.  You may obtain a copy of the
+License at
 
 [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations under the License.
 
 See the *LICENSE*-file in the root directory for a full reprint of the Apache
 License.
