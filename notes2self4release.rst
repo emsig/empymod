@@ -3,8 +3,7 @@ Steps to carry out for a new release
 
    1. Update:
       - `CHANGELOG`
-      - `setup.py`: Version number, download url; check and update everything
-      - `empymod/__init__.py`: Version number
+      - `empymod/__init__.py`: Check version number, remove '.dev?'.
       - `README.md`: Remove all batches
 
    2. Remove any old stuff (just in case)
@@ -13,7 +12,7 @@ Steps to carry out for a new release
 
    3. Push it to GitHub, create a release tagging it
 
-   4. Create a Zenodo-DOI, add it to release notes
+   4. Get the Zenodo-DOI and add it to release notes
 
    5. Create tar and wheel
 
@@ -52,9 +51,9 @@ Steps to carry out for a new release
 
         # Convert for all platforms
 
-        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.1-py34_0.tar.bz2
-        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.1-py35_0.tar.bz2
-        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-1.2.1-py36_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py34_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py35_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py36_0.tar.bz2
 
         # Upload them
         anaconda upload osx-64/*
@@ -64,7 +63,6 @@ Steps to carry out for a new release
         # Logout
         anaconda logout
 
-   9. Update version number with a dev for future
-      - `setup.py`
-      - `empymod/__init__.py`
-      - `README.md`: add the current batches (|docs| |tests| |coverage|)
+   9. Post-commit changes
+      - `empymod/__init__.py`: Bump number, add '.dev0' to version number
+      - `README.md`: Add the current batches (|docs| |tests| |coverage|)

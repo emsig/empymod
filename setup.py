@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
+from empymod import __version__
+
 try:
     import pypandoc
     readme = pypandoc.convert('README.md', 'rst')
@@ -8,13 +10,13 @@ except(IOError, ImportError):
 
 setup(
     name='empymod',
-    version='1.4.3.dev',
+    version=__version__,
     description='Open-source full 3D electromagnetic modeller for 1D VTI media',
     long_description=readme,
     author='Dieter Werthmüller',
     author_email='dieter@werthmuller.org',
     url='https://empymod.github.io',
-    download_url='https://github.com/empymod/empymod/tarball/v1.4.2',
+    download_url='https://github.com/empymod/empymod/tarball/v' + __version__,
     license='Apache License V2.0',
     packages=['empymod'],
     classifiers=[

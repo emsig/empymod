@@ -555,4 +555,6 @@ References |_|
 # Import main modelling routines to make them available as primary functions
 from .model import bipole, dipole, analytical
 __all__ = ['bipole', 'dipole', 'analytical']
-__version__ = '1.4.3.dev'
+
+# Version
+__version__ = '1.4.3.dev1'
