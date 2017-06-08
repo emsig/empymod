@@ -4,7 +4,6 @@ Steps to carry out for a new release
    1. Update:
       - `CHANGELOG`
       - `setup.py`: Version number, download url; check and update everything
-      - `docs/conf.py`: Version number
       - `empymod/__init__.py`: Version number
       - `README.md`: Remove all batches
 
@@ -67,6 +66,5 @@ Steps to carry out for a new release
 
    9. Update version number with a dev for future
       - `setup.py`
-      - `docs/conf.py`
       - `empymod/__init__.py`
       - `README.md`: add the current batches (|docs| |tests| |coverage|)
