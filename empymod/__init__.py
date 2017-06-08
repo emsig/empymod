@@ -307,7 +307,60 @@ currently `empymod` uses it only for the Fourier transform. It uses a
 simplified version of the python implementation of FFTLog, `pyfftlog`
 (`github.com/prisae/pyfftlog <https://github.com/prisae/pyfftlog>`_).
 
+[Haines_and_Jones_1988]_ proposed a logarithmic Fourier transformed
+(abbreviated by the authors as LFT) for electromagnetic geophysics, also based
+on [Talman_1978]_. I do not know if Hamilton was aware of the work by Haines
+and Jones. The two publications share as reference only the original paper by
+Talman, and both cite a publication of Anderson; Hamilton cites
+[Anderson_1982]_, and Haines and Jones cite [Anderson_1979]_. Hamilton probably
+never heard of Haines as Jones, as he works in astronomy, and Haines and Jones
+was published in the *Geophysical Journal*.
 
+Logarithmic FFTs are not widely used in electromagnetics, as far as I know,
+probably because of the ease, speed, and generally sufficient precision of the
+digital filter methods with sine and cosine transforms ([Anderson_1975]_).
+However, comparisons show that the FFTLog can be faster and more precise than
+digital filters, specifically for responses with source and receiver at the
+interface between air and subsurface. Credit to use the FFTLog in
+electromagnetics goes to David Taylor in the mid-2000s, who implemented FFTLog
+into the forward modellers of the company Multi-Transient ElectroMagnetic (MTEM
+Ltd, later Petroleum Geo-Services PGS). The implementation was driven by land
+responses, where FFTLog can be much more precise than the filter method for
+very early times.
+
+
+Notes on Fourier Transform
+..........................
+
+The Fourier transform to obtain the space-time domain impulse response from the
+complex-valued space-frequency response can be calculated by either a
+cosine transform with the real values, or a sine transform with the imaginary
+part,
+
+.. math::
+
+    E(r, t) &= \ \\frac{2}{\pi}\int^\infty_0 \Re[E(r, \omega)]\ 
+                        \cos(\omega t)\ \\rm{d}\omega \ , \\\\
+            &= -\\frac{2}{\pi}\int^\infty_0 \Im[E(r, \omega)]\ 
+                \sin(\omega t)\ \\rm{d}\omega \ ,
+
+see, e.g., [Anderson_1975] or [Key_2012]_. Quadrature-with-extrapolation,
+FFTLog, and obviously the sine/cosine-transform all make use of this split.
+
+To obtain the step-on response the frequency-domain result is first divided
+by :math:`i\omega`, in the case of the step-off response it is additionally
+multiplied by -1. The impulse-response is the time-derivative of the
+step-response. Using :math:`\\frac{\\rm{d}}{\\rm{d}t} f(t) \Leftrightarrow
+i\omega F(\omega)` and going the other way, from impulse to step, leads to the
+divison by :math:`i\omega`. This uses the causality principle that
+:math:`E(r, t \le 0) = 0`.
+
+Currently, Quadrature-with-extrapolation and FFTLog use the cosine transform
+for step-off responses, and the sine transform for impulse and step-on
+responses.  With the sine/cosine transform you can choose which one you want
+for the impulse responses. For the switch-on response, however, the
+sine-transform is enforced, and equally the cosine transform for the switch-off
+response. The FFT uses the full complex-valued response at the moment.
 
 Depths, Rotation, and Bipole
 ''''''''''''''''''''''''''''
@@ -484,6 +537,10 @@ References |_|
    measurements: Geophysical Prospecting, 19, 192--217;
    DOI: |_| `10.1111/j.1365-2478.1971.tb00593.x
    <http://dx.doi.org/10.1111/j.1365-2478.1971.tb00593.x>`_.
+.. [Haines_and_Jones_1988] Haines, G. V., and A. G. Jones, 1988, Logarithmic
+   Fourier transformation: Geophysical Journal, 92, 171--178;
+   DOI: |_| `10.1111/j.1365-246X.1988.tb01131.x
+   <http://dx.doi.org/10.1111/j.1365-246X.1988.tb01131.x>`_.
 .. [Hamilton_2000] Hamilton, A. J. S., 2000, Uncorrelated modes of the
    non-linear power spectrum: Monthly Notices of the Royal Astronomical
    Society, 312, pages 257-284; DOI: |_| `10.1046/j.1365-8711.2000.03071.x
