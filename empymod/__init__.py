@@ -339,10 +339,10 @@ part,
 
 .. math::
 
-    E(r, t) &= \ \\frac{2}{\pi}\int^\infty_0 \Re[E(r, \omega)]\ 
-                        \cos(\omega t)\ \\rm{d}\omega \ , \\\\
-            &= -\\frac{2}{\pi}\int^\infty_0 \Im[E(r, \omega)]\ 
-                \sin(\omega t)\ \\rm{d}\omega \ ,
+    E(r, t)^\\text{Impulse} &= \ \\frac{2}{\pi}\int^\infty_0 \Re[E(r, \omega)]\
+                        \cos(\omega t)\ \\text{d}\omega \ , \\\\
+            &= -\\frac{2}{\pi}\int^\infty_0 \Im[E(r, \omega)]\
+                \sin(\omega t)\ \\text{d}\omega \ ,
 
 see, e.g., [Anderson_1975] or [Key_2012]_. Quadrature-with-extrapolation,
 FFTLog, and obviously the sine/cosine-transform all make use of this split.
@@ -350,17 +350,44 @@ FFTLog, and obviously the sine/cosine-transform all make use of this split.
 To obtain the step-on response the frequency-domain result is first divided
 by :math:`i\omega`, in the case of the step-off response it is additionally
 multiplied by -1. The impulse-response is the time-derivative of the
-step-response. Using :math:`\\frac{\\rm{d}}{\\rm{d}t} f(t) \Leftrightarrow
-i\omega F(\omega)` and going the other way, from impulse to step, leads to the
-divison by :math:`i\omega`. This uses the causality principle that
-:math:`E(r, t \le 0) = 0`.
+step-response,
 
-Currently, Quadrature-with-extrapolation and FFTLog use the cosine transform
-for step-off responses, and the sine transform for impulse and step-on
-responses.  With the sine/cosine transform you can choose which one you want
-for the impulse responses. For the switch-on response, however, the
-sine-transform is enforced, and equally the cosine transform for the switch-off
-response. The FFT uses the full complex-valued response at the moment.
+.. math::
+
+    E(r, t)^\\text{Impulse} =
+                        \\frac{\partial\ E(r, t)^\\text{step}}{\partial t}\ .
+
+Using :math:`\\frac{\partial}{\partial t} \Leftrightarrow i\omega` and going
+the other way, from impulse to step, leads to the divison by :math:`i\omega`.
+(This only holds because we define in accordance with the causality principle
+that :math:`E(r, t \le 0) = 0`).
+
+With the sine/cosine transform (`ft='ffht'/'sin'/'cos'`) you can choose which
+one you want for the impulse responses. For the switch-on response, however,
+the sine-transform is enforced, and equally the cosine transform for the
+switch-off response. This is because these two do not need to now the field at
+time 0, :math:`E(r, t=0)`.
+
+The Quadrature-with-extrapolation and FFTLog are hard-coded to use the cosine
+transform for step-off responses, and the sine transform for impulse and
+step-on responses. The FFT uses the full complex-valued response at the moment.
+
+For completeness sake, the step-on response is given by
+
+.. math::
+
+    E(r, t)^\\text{Step-on} = - \\frac{2}{\pi}\int^\infty_0
+                            \Im\\left[\\frac{E(r,\omega)}{i \omega}\\right]\
+                            \sin(\omega t)\ \\text{d}\omega \ ,
+
+and the step-off by
+
+.. math::
+
+    E(r, t)^\\text{Step-off} = - \\frac{2}{\pi}\int^\infty_0
+                             \Re\\left[\\frac{E(r,\omega)}{i\omega}\\right]\
+                             \cos(\omega t)\ \\text{d}\omega \ .
+
 
 Depths, Rotation, and Bipole
 ''''''''''''''''''''''''''''
