@@ -133,14 +133,12 @@ get in touch if you would like to tackle one of these problems!
 
 ## Citation
 
-I am in the process of publishing an article in Geophysics regarding empymod,
-and I will put the info here once it is a reality. If you publish results for
-which you used empymod, please consider citing this article. Meanwhile, you
-could cite the Geophysical Tutorial:
+If you publish results for which you used empymod, please give credit by citing
+this article:
 
-> Werthmüller, D., 2017, Getting started with controlled-source electromagnetic
-> 1D modeling: The Leading Edge, 36, 352-355; DOI:
-> [10.1190/tle36040352.1](http://dx.doi.org/10.1190/tle36040352.1).
+> Werthmüller, D., 2017, An open-source full 3D electromagnetic modeler for 1D
+> VTI media in Python: empymod: Geophysics, 82; DOI:
+> [10.1190/geo2016-0626.1](http://doi.org/10.1190/geo2016-0626.1).
 
 Also consider citing Hunziker et al. (2015) and Key (2012), without which
 empymod would not exist:
@@ -148,11 +146,11 @@ empymod would not exist:
 > Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response in
 > a layered vertical transverse isotropic medium: A new look at an old problem:
 > Geophysics, 80, F1-F18; DOI:
-> [10.1190/geo2013-0411.1](http://dx.doi.org/10.1190/geo2013-0411.1).  
+> [10.1190/geo2013-0411.1](http://doi.org/10.1190/geo2013-0411.1).
 >  
 > Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
 > Geophysics, 77, F21-F30; DOI:
-> [10.1190/GEO2011-0237.1](http://dx.doi.org/10.1190/GEO2011-0237.1).
+> [10.1190/geo2011-0237.1](http://doi.org/10.1190/geo2011-0237.1).
 
 All releases have a Zenodo-DOI, provided on the
 [release-page](https://github.com/empymod/empymod/releases).

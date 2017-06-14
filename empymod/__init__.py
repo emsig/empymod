@@ -124,12 +124,12 @@ Frequency- and time-domain examples can be found in the
 `empymod/example-notebooks
 <https://github.com/empymod/example-notebooks>`_-repository.
 
-More information and more examples can be found in the following articles
-(published or in preparation):
+More information and more examples can be found in the following articles:
 
     - `empymod/article-geo2017 <https://github.com/empymod/article-geo2017>`_
+      (doi: `10.1190/geo2016-0626.1 <http://doi.org/10.1190/geo2016-0626.1>`_)
     - `empymod/article-tle2017 <https://github.com/empymod/article-tle2017>`_
-      (doi: `10.1190/tle36040352.1 <http://dx.doi.org/10.1190/tle36040352.1>`_)
+      (doi: `10.1190/tle36040352.1 <http://doi.org/10.1190/tle36040352.1>`_)
 
 Structure
 '''''''''
@@ -186,18 +186,29 @@ Info
 Citation
 ''''''''
 
-I am in the process of publishing an article in *Geophysics* regarding
-`empymod`, and I will put the info here once it is a reality. If you publish
-results for which you used `empymod`, please consider citing this article.
-Meanwhile, you could cite the Geophysical Tutorial:
+If you publish results for which you used empymod, please give credit by citing
+this article:
 
-Werthmüller, D., 2017, Getting started with controlled-source electromagnetic
-1D modeling: The Leading Edge, 36, 352-355; doi: `10.1190/tle36040352.1
-<http://dx.doi.org/10.1190/tle36040352.1>`_.
+    Werthmüller, D., 2017, An open-source full 3D electromagnetic modeler for
+    1D VTI media in Python: empymod: Geophysics, 82; DOI:
+    `10.1190/geo2016-0626.1 <http://doi.org/10.1190/geo2016-0626.1>`_.
 
 Also consider citing [Hunziker_et_al_2015]_ and [Key_2012]_, without which
-`empymod` would not exist. All releases have a Zenodo-DOI, provided on the
-`GitHub release-page <https://github.com/empymod/empymod/releases>`_.
+empymod would not existk
+
+All releases have a Zenodo-DOI, provided on the
+`release-page <https://github.com/empymod/empymod/releases>`_.
+
+
+Notice
+''''''
+
+This product includes software that was initially (till 01/2017) developed at
+*The Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
+http://www.gob.mx/imp). The project was funded through *The Mexican National
+Council of Science and Technology* (*Consejo Nacional de Ciencia y Tecnología*,
+http://www.conacyt.mx). Since 02/2017 it is a personal effort, and new
+contributors are welcome!
 
 
 License
@@ -219,37 +230,6 @@ limitations under the License.
 
 See the *LICENSE*-file in the root directory for a full reprint of the Apache
 License.
-
-
-Notice
-''''''
-
-This product includes software that was initially (till 01/2017) developed at
-*The Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
-http://www.gob.mx/imp). The project was funded through *The Mexican National
-Council of Science and Technology* (*Consejo Nacional de Ciencia y Tecnología*,
-http://www.conacyt.mx).
-
-
-This product is a derivative work of [Hunziker_et_al_2015]_ and [Key_2012]_,
-and their publicly available software:
-
-
-1. Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response
-   in a layered vertical transverse isotropic medium: A new look at an old
-   problem: Geophysics, 80, F1-F18; DOI: `10.1190/geo2013-0411.1
-   <http://dx.doi.org/10.1190/geo2013-0411.1>`_; Software:
-   `software.seg.org/2015/0001 <http://software.seg.org/2015/0001>`_.
-
-2. Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
-   Geophysics, 77, F21-F30; DOI: `10.1190/GEO2011-0237.1
-   <http://dx.doi.org/10.1190/GEO2011-0237.1>`_; Software:
-   `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
-
-Both pieces of software are published under the *SEG disclaimer*. Parts of the
-modeller `EMmod` from [Hunziker_et_al_2015]_, is furthermore released under the
-*Common Public License Version 1.0 (CPL)*. See the *NOTICE*-file in the root
-directory for more information and a reprint of the SEG disclaimer and the CPL.
 
 
 Note on speed, memory, and accuracy
@@ -554,70 +534,77 @@ References |_|
 .. [Anderson_1979] Anderson, W. L., 1979, Numerical integration of related
    Hankel transforms of orders 0 and 1 by adaptive digital filtering:
    Geophysics, 44, 1287--1305; DOI: |_| `10.1190/1.1441007
-   <http://dx.doi.org/10.1190/1.1441007>`_.
+   <http://doi.org/10.1190/1.1441007>`_.
 .. [Anderson_1982] Anderson, W. L., 1982, Fast Hankel transforms using
    related and lagged convolutions: ACM Trans. on Math. Softw. (TOMS), 8,
    344--368; DOI: |_| `10.1145/356012.356014
-   <http://dx.doi.org/10.1145/356012.356014>`_.
+   <http://doi.org/10.1145/356012.356014>`_.
 .. [Gosh_1971] Ghosh, D. P., 1971, The application of linear filter theory to
    the direct interpretation of geoelectrical resistivity sounding
    measurements: Geophysical Prospecting, 19, 192--217;
    DOI: |_| `10.1111/j.1365-2478.1971.tb00593.x
-   <http://dx.doi.org/10.1111/j.1365-2478.1971.tb00593.x>`_.
+   <http://doi.org/10.1111/j.1365-2478.1971.tb00593.x>`_.
 .. [Haines_and_Jones_1988] Haines, G. V., and A. G. Jones, 1988, Logarithmic
    Fourier transformation: Geophysical Journal, 92, 171--178;
    DOI: |_| `10.1111/j.1365-246X.1988.tb01131.x
-   <http://dx.doi.org/10.1111/j.1365-246X.1988.tb01131.x>`_.
+   <http://doi.org/10.1111/j.1365-246X.1988.tb01131.x>`_.
 .. [Hamilton_2000] Hamilton, A. J. S., 2000, Uncorrelated modes of the
    non-linear power spectrum: Monthly Notices of the Royal Astronomical
    Society, 312, pages 257-284; DOI: |_| `10.1046/j.1365-8711.2000.03071.x
-   <http://dx.doi.org/10.1046/j.1365-8711.2000.03071.x>`_; Website of FFTLog:
+   <http://doi.org/10.1046/j.1365-8711.2000.03071.x>`_; Website of FFTLog:
    `casa.colorado.edu/~ajsh/FFTLog <http://casa.colorado.edu/~ajsh/FFTLog>`_.
 .. [Hunziker_et_al_2015] Hunziker, J., J. Thorbecke, and E. Slob, 2015, The
    electromagnetic response in a layered vertical transverse isotropic medium:
    A new look at an old problem: Geophysics, 80, F1--F18;
    DOI: |_| `10.1190/geo2013-0411.1
-   <http://dx.doi.org/10.1190/geo2013-0411.1>`_;
+   <http://doi.org/10.1190/geo2013-0411.1>`_;
    Software: `software.seg.org/2015/0001 <http://software.seg.org/2015/0001>`_.
 .. [Key_2009] Key, K., 2009, 1D inversion of multicomponent, multifrequency
    marine CSEM data: Methodology and synthetic studies for resolving thin
    resistive layers: Geophysics, 74, F9--F20; DOI: |_| `10.1190/1.3058434
-   <http://dx.doi.org/10.1190/1.3058434>`_.
+   <http://doi.org/10.1190/1.3058434>`_.
    Software: `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
 .. [Key_2012] Key, K., 2012, Is the fast Hankel transform faster than
-   quadrature?: Geophysics, 77, F21--F30; DOI: |_| `10.1190/GEO2011-0237.1
-   <http://dx.doi.org/10.1190/GEO2011-0237.1>`_;
+   quadrature?: Geophysics, 77, F21--F30; DOI: |_| `10.1190/geo2011-0237.1
+   <http://doi.org/10.1190/geo2011-0237.1>`_;
    Software: `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
 .. [Kong_2007] Kong, F. N., 2007, Hankel transform filters for dipole antenna
    radiation in a conductive medium: Geophysical Prospecting, 55, 83--89;
    DOI: |_| `10.1111/j.1365-2478.2006.00585.x
-   <http://dx.doi.org/10.1111/j.1365-2478.2006.00585.x>`_.
+   <http://doi.org/10.1111/j.1365-2478.2006.00585.x>`_.
 .. [Shanks_1955] Shanks, D., 1955, Non-linear transformations of divergent and
    slowly convergent sequences: Journal of Mathematics and Physics, 34, 1--42;
    DOI: |_| `10.1002/sapm19553411
-   <http://dx.doi.org/10.1002/sapm19553411>`_.
+   <http://doi.org/10.1002/sapm19553411>`_.
 .. [Slob_et_al_2010] Slob, E., J. Hunziker, and W. A. Mulder, 2010, Green's
    tensors for the diffusive electric field in a VTI half-space: PIER, 107,
    1--20: DOI: |_| `10.2528/PIER10052807
-   <http://dx.doi.org/10.2528/PIER10052807>`_.
+   <http://doi.org/10.2528/PIER10052807>`_.
 .. [Talman_1978] Talman, J. D., 1978, Numerical Fourier and Bessel transforms
     in logarithmic variables: Journal of Computational Physics, 29, pages
     35-48; DOI: |_| `10.1016/0021-9991(78)90107-9
-    <http://dx.doi.org/10.1016/0021-9991(78)90107-9>`_.
+    <http://doi.org/10.1016/0021-9991(78)90107-9>`_.
 .. [Trefethen_2000] Trefethen, L. N., 2000, Spectral methods in MATLAB: Society
    for Industrial and Applied Mathematics (SIAM), volume 10 of Software,
    Environments, and Tools, chapter 12, page 129;
    DOI: |_| `10.1137/1.9780898719598.ch12
-   <http://dx.doi.org/10.1137/1.9780898719598.ch12>`_.
+   <http://doi.org/10.1137/1.9780898719598.ch12>`_.
 .. [Weniger_1989] Weniger, E. J., 1989, Nonlinear sequence transformations for
    the acceleration of convergence and the summation of divergent series:
    Computer Physics Reports, 10, 189--371;
    arXiv: |_| `abs/math/0306302 <https://arxiv.org/abs/math/0306302>`_.
+.. [Werthmuller_2017] Werthmüller, D., 2017, An open-source full 3D
+   electromagnetic modeler for 1D VTI media in Python: empymod: Geophysics, 82;
+   DOI: |_| `10.1190/geo2016-0626.1 <http://doi.org/10.1190/geo2016-0626.1>`_.
+.. [Werthmuller_2017b] Werthmüller, D., 2017, Getting started with
+   controlled-source electromagnetic 1D modeling: The Leading Edge, 36,
+   352-355;
+   DOI: |_| `10.1190/tle36040352.1 <http://doi.org/10.1190/tle36040352.1>`_.
 .. [Wynn_1956] Wynn, P., 1956, On a device for computing the
    :math:`e_m(S_n)` tranformation: Math. Comput., 10, 91--96;
    DOI: |_| `10.1090/S0025-5718-1956-0084056-6
-   <http://dx.doi.org/10.1090/S0025-5718-1956-0084056-6>`_.
+   <http://doi.org/10.1090/S0025-5718-1956-0084056-6>`_.
 
 """
 # Copyright 2016-2017 Dieter Werthmüller
