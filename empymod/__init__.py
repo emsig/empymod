@@ -319,14 +319,14 @@ was published in the *Geophysical Journal*.
 Logarithmic FFTs are not widely used in electromagnetics, as far as I know,
 probably because of the ease, speed, and generally sufficient precision of the
 digital filter methods with sine and cosine transforms ([Anderson_1975]_).
-However, comparisons show that the FFTLog can be faster and more precise than
+However, comparisons show that FFTLog can be faster and more precise than
 digital filters, specifically for responses with source and receiver at the
-interface between air and subsurface. Credit to use the FFTLog in
-electromagnetics goes to David Taylor in the mid-2000s, who implemented FFTLog
-into the forward modellers of the company Multi-Transient ElectroMagnetic (MTEM
-Ltd, later Petroleum Geo-Services PGS). The implementation was driven by land
-responses, where FFTLog can be much more precise than the filter method for
-very early times.
+interface between air and subsurface. Credit to use FFTLog in electromagnetics
+goes to David Taylor who, in the mid-2000s, implemented FFTLog into the forward
+modellers of the company Multi-Transient ElectroMagnetic (MTEM Ltd, later
+Petroleum Geo-Services PGS). The implementation was driven by land responses,
+where FFTLog can be much more precise than the filter method for very early
+times.
 
 
 Notes on Fourier Transform
@@ -344,7 +344,7 @@ part,
             &= -\\frac{2}{\pi}\int^\infty_0 \Im[E(r, \omega)]\
                 \sin(\omega t)\ \\text{d}\omega \ ,
 
-see, e.g., [Anderson_1975] or [Key_2012]_. Quadrature-with-extrapolation,
+see, e.g., [Anderson_1975]_ or [Key_2012]_. Quadrature-with-extrapolation,
 FFTLog, and obviously the sine/cosine-transform all make use of this split.
 
 To obtain the step-on response the frequency-domain result is first divided
