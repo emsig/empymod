@@ -2,6 +2,8 @@
 
 ## latest
 
+* [2017-06-20] Improve `kernel.wavenumber` for fullspaces.
+
 * [2017-06-06] Extended `fQWE` and `fftlog` to be able to use the
   cosine-transform. Now the cosine-transform with the real-part frequency
   response is used internally if a switch-off response (`signal=-1`) is

@@ -206,37 +206,43 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                           (lambd*lambd)[None, :, None, :] +
                           (z_eH*e_zH)[:, None, :, None])
 
-        # Reflection (coming from below (Rp) and above (Rm) rec)
-        Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval)
-
-        # Field propagators (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74
+        # Gamma in receiver layer
         lrecGam = Gam[:, :, lrec, :]
-        if lrec != depth.size-1:  # No upgoing field prop. if rec in last layer
-            ddepth = depth[lrec + 1] - zrec
-            if use_ne_eval:
-                Wu = use_ne_eval("exp(-lrecGam*ddepth)")
-            else:
-                Wu = np.exp(-lrecGam*ddepth)
-        else:
-            Wu = np.full_like(lrecGam, 0+0j)
-        if lrec != 0:     # No downgoing field propagator if rec in first layer
-            ddepth = zrec - depth[lrec]
-            if use_ne_eval:
-                Wd = use_ne_eval("exp(-lrecGam*ddepth)")
-            else:
-                Wd = np.exp(-lrecGam*ddepth)
-        else:
-            Wd = np.full_like(lrecGam, 0+0j)
 
-        # Field at receiver level (coming from below (Pu) and above (Pd) rec)
-        Pu, Pd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM,
-                        use_ne_eval)
+        # Reflection (coming from below (Rp) and above (Rm) rec)
+        if depth.size > 1:  # Only if more than 1 layer
+            Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval)
+
+            # Field propagators
+            # (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74
+            if lrec != depth.size-1:  # No upgoing field prop. if rec in last
+                ddepth = depth[lrec + 1] - zrec
+                if use_ne_eval:
+                    Wu = use_ne_eval("exp(-lrecGam*ddepth)")
+                else:
+                    Wu = np.exp(-lrecGam*ddepth)
+            else:
+                Wu = np.full_like(lrecGam, 0+0j)
+            if lrec != 0:     # No downgoing field propagator if rec in first
+                ddepth = zrec - depth[lrec]
+                if use_ne_eval:
+                    Wd = use_ne_eval("exp(-lrecGam*ddepth)")
+                else:
+                    Wd = np.exp(-lrecGam*ddepth)
+            else:
+                Wd = np.full_like(lrecGam, 0+0j)
+
+            # Field at rec level (coming from below (Pu) and above (Pd) rec)
+            Pu, Pd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM,
+                            use_ne_eval)
 
         # Green's functions
         if lsrc == lrec:  # Rec in src layer; Eqs 108, 109, 110, 117, 118, 122
 
             # Green's function depending on <ab>
-            if ab in [13, 23, 31, 32, 14, 24, 15, 25]:
+            if depth.size == 1:  # If only one layer, no reflections/fields
+                green = np.full_like(lrecGam, 0+0j)
+            elif ab in [13, 23, 31, 32, 14, 24, 15, 25]:
                 green = Pu*Wu - Pd*Wd
             else:
                 green = Pu*Wu + Pd*Wd
