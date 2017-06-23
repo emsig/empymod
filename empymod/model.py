@@ -1355,7 +1355,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     rec, nrec = check_dipole(rec, 'rec', verb)
 
     # Get angle-dependent factor
-    _, angle = get_off_ang(src, rec, nsrc, nrec, verb)
+    off, angle = get_off_ang(src, rec, nsrc, nrec, verb)
     factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # Get layer number in which src and rec reside (lsrc/lrec)
@@ -1371,13 +1371,16 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
                                        False, msrc, mrec, False)
 
     # Collect output
-    PJ1 = np.squeeze(factAng[:, np.newaxis]*PJ1*wavenumber)
-    PJ0 = np.squeeze(PJ0 + factAng[:, np.newaxis]*PJ0b)
+    PJ1 = factAng[:, np.newaxis]*PJ1
+    if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+        # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+        PJ1 /= off[:, None]
+    PJ0 = PJ0 + factAng[:, np.newaxis]*PJ0b
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, 1)
 
-    return PJ0, PJ1
+    return np.squeeze(PJ0), np.squeeze(PJ1)
 
 
 # Core modelling routines

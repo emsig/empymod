@@ -10,6 +10,8 @@
   required, rather than calculating the switch-on response (with sine-transform
   and imaginary-part frequency response) and subtracting it from the DC value.
 
+* [2017-06-22] Bug fixes
+
 
 ## v1.4.2 - *2017-04-06*
 
