@@ -13,7 +13,7 @@
 * [2017-06-22] Bug fixes
 
 
-## v1.4.2 - *2017-04-06*
+## v1.4.2 - *2017-06-04*
 
 * Bugfix: Fixed squeeze in `model.analytical` with `solution='dsplit'`.
 
