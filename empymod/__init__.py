@@ -287,7 +287,7 @@ currently `empymod` uses it only for the Fourier transform. It uses a
 simplified version of the python implementation of FFTLog, `pyfftlog`
 (`github.com/prisae/pyfftlog <https://github.com/prisae/pyfftlog>`_).
 
-[Haines_and_Jones_1988]_ proposed a logarithmic Fourier transformed
+[Haines_and_Jones_1988]_ proposed a logarithmic Fourier transform
 (abbreviated by the authors as LFT) for electromagnetic geophysics, also based
 on [Talman_1978]_. I do not know if Hamilton was aware of the work by Haines
 and Jones. The two publications share as reference only the original paper by

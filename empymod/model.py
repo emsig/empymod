@@ -1109,8 +1109,8 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     # === 3. EM-FIELD CALCULATION ============
 
     if solution[0] == 'd':
-        EM = kernel.halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime,
-                              ab_calc, signal, solution)
+        EM = kernel.halfspace(off, angle, zsrc, zrec, etaH, etaV,
+                              freqtime[:, None], ab_calc, signal, solution)
     else:
         EM = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                               ab_calc, msrc, mrec)
