@@ -126,6 +126,15 @@ def test_halfspace():                                            # 7. halfspace
     direct, _, _ = kernel.halfspace(**hs['11'])
     assert_allclose(full, direct)
 
+    # Check sums of dtetm = dsplit
+    hs['11']['solution'] = 'dsplit'
+    direct, reflect, air = kernel.halfspace(**hs['11'])
+    hs['11']['solution'] = 'dtetm'
+    dTE, dTM, rTE, rTM, air2 = kernel.halfspace(**hs['11'])
+    assert_allclose(direct, dTE+dTM)
+    assert_allclose(reflect, rTE+rTM)
+    assert_allclose(air, air2)
+
     # Check fullspace = bipole-solution
     hsbp['11']['xdirect'] = True
     hsbp['11']['depth'] = []

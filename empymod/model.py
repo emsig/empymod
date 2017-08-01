@@ -963,6 +963,8 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         [Slob_et_al_2010]_.
       - Diffusive direct- and reflected field and airwave (`solution='dsplit'`)
         for ee-fields, [Slob_et_al_2010]_.
+      - Diffusive direct- and reflected field and airwave (`solution='dtetm'`)
+        for ee-fields, split into TE and TM mode [Slob_et_al_2010]_.
 
     Parameters
     ----------
@@ -984,6 +986,8 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         - 'dhs' : Diffusive halfspace solution (ee-fields only).
         - 'dsplit' : Diffusive direct- and reflected field and airwave
                      (ee-fields only).
+        - 'dtetm' : as dsplit, but direct fielt TE, TM; reflected field TE, TM,
+                    and airwave (ee-fields only).
 
     signal : {None, 0, 1, -1}, optional
         Source signal, default is None:
@@ -1053,6 +1057,10 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         If `solution='dsplit'`, three ndarrays are returned: direct, reflect,
         air.
 
+        If `solution='dtetm'`, five ndarrays are returned: direct_TE,
+        direct_TM, reflect_TE, reflect_TM, air.
+
+
     Examples
     --------
     >>> import numpy as np
@@ -1120,6 +1128,12 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         EM = (np.squeeze(EM[0].reshape((-1, nrec, nsrc), order='F')),
               np.squeeze(EM[1].reshape((-1, nrec, nsrc), order='F')),
               np.squeeze(EM[2].reshape((-1, nrec, nsrc), order='F')))
+    elif solution[1:] == 'tetm':
+        EM = (np.squeeze(EM[0].reshape((-1, nrec, nsrc), order='F')),
+              np.squeeze(EM[1].reshape((-1, nrec, nsrc), order='F')),
+              np.squeeze(EM[2].reshape((-1, nrec, nsrc), order='F')),
+              np.squeeze(EM[3].reshape((-1, nrec, nsrc), order='F')),
+              np.squeeze(EM[4].reshape((-1, nrec, nsrc), order='F')))
     else:
         EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
 

@@ -966,7 +966,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     g1p = np.zeros(np.shape(x), dtype=dtype)
     g2m = np.zeros(np.shape(x), dtype=dtype)
     g2p = np.zeros(np.shape(x), dtype=dtype)
-    air = np.zeros(np.shape(freqtime), dtype=dtype)
+    air = np.zeros(np.shape(f0p), dtype=dtype)
 
     if srcrec == 1:  # 1. {alpha, beta}
         # Get indices for singularities
@@ -1115,8 +1115,14 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
     # If switch-on, subtract switch-on from DC value
     if signal == -1:
+        direct_TM = direct_TM[-1]-direct_TM[:-1]
+        direct_TE = direct_TE[-1]-direct_TE[:-1]
         direct = direct[-1]-direct[:-1]
+
+        reflect_TM = reflect_TM[-1]-reflect_TM[:-1]
+        reflect_TE = reflect_TE[-1]-reflect_TE[:-1]
         reflect = reflect[-1]-reflect[:-1]
+
         air = air[-1]-air[:-1]
 
     # Return, depending on 'solution'
@@ -1124,5 +1130,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         return direct
     elif solution == 'dsplit':
         return direct, reflect, air
+    elif solution == 'dtetm':
+        return direct_TE, direct_TM, reflect_TE, reflect_TM, air
     else:
         return direct + reflect + air

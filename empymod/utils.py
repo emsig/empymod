@@ -1222,9 +1222,9 @@ def check_solution(solution, signal, ab, msrc, mrec):
     """
 
     # Ensure valid solution.
-    if solution not in ['fs', 'dfs', 'dhs', 'dsplit']:
+    if solution not in ['fs', 'dfs', 'dhs', 'dsplit', 'dtetm']:
         print("* ERROR   :: Solution must be one of ['fs', 'dfs', 'dhs', " +
-              "'dsplit']; <solution> provided: " + solution)
+              "'dsplit', 'dtetm']; <solution> provided: " + solution)
         raise ValueError('solution')
 
     # If diffusive solution is required, ensure EE-field.

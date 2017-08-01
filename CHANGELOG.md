@@ -2,6 +2,8 @@
 
 ## latest
 
+* [2017-07-31] Add TE/TM split to diffusive ee-halfspace solution.
+
 * [2017-06-20] Improve `kernel.wavenumber` for fullspaces.
 
 * [2017-06-06] Extended `fQWE` and `fftlog` to be able to use the
