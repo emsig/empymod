@@ -292,7 +292,7 @@ for i in range(9):
                        'zrec': rec[2],
                        'etaH': np.atleast_2d(1/res),
                        'etaV': np.atleast_2d(1/(res*aniso*aniso)),
-                       'freqtime': freq,
+                       'freqtime': np.atleast_2d(freq),
                        'signal': signal[i],
                        'ab': ab,
                        'solution': 'dhs'}

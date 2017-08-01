@@ -850,7 +850,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     else:
         time = freqtime
         if signal == -1:  # Calculate DC
-            time = np.r_[time, 1e4]
+            time = np.r_[time[:, 0], 1e4][:, None]
             freqtime = time
         dtype = float
 

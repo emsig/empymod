@@ -333,6 +333,12 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         length is 1 m. So the electric field could also be written as
         [V/(A.m2)].
 
+        In the magnetic case the source strength is given by
+        :math:`i\omega\mu_0 A I^e`, where A is the loop area (m2), and
+        :math:`I^e` the electric source strength. For the normalized magnetic
+        source :math:`A=1m^2` and :math:`I^e=1 Ampere`. A magnetic source is
+        therefore frequency dependent.
+
         The shape of EM is (nfreq, nrec, nsrc). However, single dimensions
         are removed.
 
