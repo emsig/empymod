@@ -953,7 +953,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     In the case of a halfspace the air-interface is located at z = 0 m.
 
-    You can call the functions `fullspace` and `halfspace` in `analytical.py`
+    You can call the functions `fullspace` and `halfspace` in `kernel.py`
     directly. This interface is just to provide a consistent interface with the
     same input parameters as for instance for `dipole`.
 
@@ -1027,19 +1027,18 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         Anisotropy lambda = sqrt(rho_v/rho_h) (-); defaults to one.
 
     epermH, epermV : float, optional
-        Relative horizontal/vertical electric permittivity
-        epsilon_h/epsilon_v (-);
-        Default is one; ignored for the diffusive solutions.
+        Relative horizontal/vertical electric permittivity epsilon_h/epsilon_v
+        (-); default is one. Ignored for the diffusive solution.
 
     mpermH, mpermV : float, optional
         Relative horizontal/vertical magnetic permeability mu_h/mu_v (-);
-        Default is one; ignored for the diffusive solutions.
+        default is one. Ignored for the diffusive solution.
 
     verb : {0, 1, 2, 3, 4}, optional
         Level of verbosity, default is 2:
             - 0: Print nothing.
             - 1: Print warnings.
-            - 2: Print additional runtime and kernel calls
+            - 2: Print additional runtime
             - 3: Print additional start/stop, condensed parameter information.
             - 4: Print additional full parameter information
 
