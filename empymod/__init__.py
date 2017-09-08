@@ -190,7 +190,7 @@ If you publish results for which you used empymod, please give credit by citing
 this article:
 
     Werthmüller, D., 2017, An open-source full 3D electromagnetic modeler for
-    1D VTI media in Python: empymod: Geophysics, 82; DOI:
+    1D VTI media in Python: empymod: Geophysics, 82, WB9--WB19; DOI:
     `10.1190/geo2016-0626.1 <http://doi.org/10.1190/geo2016-0626.1>`_.
 
 Also consider citing [Hunziker_et_al_2015]_ and [Key_2012]_, without which
