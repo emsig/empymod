@@ -3,6 +3,7 @@ Steps to carry out for a new release
 
    1. Update:
       - `CHANGELOG`
+      - `setup.py`: Version number, download url; DO NOT CHANGE THAT
       - `empymod/__init__.py`: Check version number, remove '.dev?'.
       - `README.md`: Remove all batches
 
@@ -64,5 +65,6 @@ Steps to carry out for a new release
         anaconda logout
 
    9. Post-commit changes
+      - `setup.py`
       - `empymod/__init__.py`: Bump number, add '.dev0' to version number
       - `README.md`: Add the current batches (|docs| |tests| |coverage|)

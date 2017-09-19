@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.4 - *2017-09-18*
+* Bug-fix unrelated to the code itself (setup/pypi/anaconda-issue).
+  Don't do that anymore!
+
 ## v1.4.3 - *2017-09-18*
 
 * Add TE/TM split to diffusive ee-halfspace solution.
