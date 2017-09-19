@@ -628,4 +628,4 @@ from .model import bipole, dipole, analytical
 __all__ = ['bipole', 'dipole', 'analytical']
 
 # Version
-__version__ = '1.4.3.dev1'
+__version__ = '1.4.3'
