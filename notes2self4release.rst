@@ -65,6 +65,6 @@ Steps to carry out for a new release
         anaconda logout
 
    9. Post-commit changes
-      - `setup.py`
+      - `setup.py`: Bump number, add '.dev0' to version number
       - `empymod/__init__.py`: Bump number, add '.dev0' to version number
       - `README.md`: Add the current batches (|docs| |tests| |coverage|)

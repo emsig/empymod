@@ -1,10 +1,8 @@
 # Changelog
 
 ## v1.4.4 - *2017-09-18*
-* Bug-fix unrelated to the code itself (setup/pypi/anaconda-issue).
-  Don't do that anymore!
-
-## v1.4.3 - *2017-09-18*
+[This was meant to be 1.4.3, but due to a setup/pypi/anaconda-issue I had to
+push it to 1.4.4; so there isn't really a version 1.4.3.]
 
 * Add TE/TM split to diffusive ee-halfspace solution.
 
@@ -28,10 +26,8 @@
 
 
 ## v1.4.1 - *2017-05-30*
-* Bug-fix unrelated to the code itself (setup/pypi/anaconda-issue).
-
-
-## v1.4.0 - *2017-05-30*
+[This was meant to be 1.4.0, but due to a setup/pypi/anaconda-issue I had to
+push it to 1.4.1; so there isn't really a version 1.4.0.]
 
 * New home: [empymod.github.io](https://empymod.github.io) as entry point,
   and the project page on [github.com/empymod](https://github.com/empymod).
