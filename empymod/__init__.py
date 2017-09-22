@@ -180,6 +180,23 @@ test-suite included. To run the test-suite you must download `empymod` from
 GitHub.
 
 
+Add-ons
+'''''''
+
+The repository `empyscripts` contains add-ons for `empymod`. These are scripts
+that did not make it into `empymod`. Most likely because they require some sort
+of change to the `empymod` core features, but are only for a very specific use
+cases. Hence it was decided to not implement them in `empymod`.
+
+Please note that these add-ons are not as thoroughly tested as `empymod`, and
+potentially not as well documented either. There are, as of now, also no tests
+for it.
+
+To install them just follow the instructions for `empymod`, replacing `empymod`
+with `empyscripts` in the command.
+
+
+
 Info
 ----
 
