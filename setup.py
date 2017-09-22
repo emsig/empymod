@@ -9,7 +9,7 @@ except(IOError, ImportError):
 
 setup(
     name='empymod',
-    version='1.4.4dev0',
+    version='1.4.5dev0',
     description='Open-source full 3D electromagnetic modeller for 1D VTI media',
     long_description=readme,
     author='Dieter Werthmüller',
