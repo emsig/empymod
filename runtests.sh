@@ -12,7 +12,7 @@ for ((i = 4; i<7; i++)); do
   echo " "
 
   # Create venv
-  conda create -y -n test_3${i} python=3.${i} numpy scipy numexpr python-dateutil setuptools pytest pytest-cov &> /dev/null
+  conda create -y -n test_3${i} python=3.${i} numpy scipy numexpr python-dateutil setuptools pytest pytest-cov mkl=2017.0.4 &> /dev/null
 
   # Activate venv
   source activate test_3${i}
