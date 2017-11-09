@@ -148,9 +148,9 @@ def check_ab(ab, verb):
     # Try to cast ab into an integer
     try:
         ab = int(ab)
-    except(TypeError, ValueError):
+    except:
         print('* ERROR   :: <ab> must be an integer')
-        raise
+        raise TypeError('ab')
 
     # Check src and rec orientation (<ab> for alpha-beta)
     # pab: all possible values that <ab> can take
@@ -694,7 +694,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     if np.any(depth[1:] - depth[:-1] < 0):
         print('* ERROR   :: <depth> must be increasing;' +
               ' <depth> provided: ' + _strvar(depth))
-        raise ValueError('ab')
+        raise ValueError('depth')
 
     # Cast and check resistivity
     res = _check_var(res, float, 1, 'res', depth.shape)
@@ -1670,8 +1670,9 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
                            np.atleast_1d(tinp[2])[0] + dy/2,
                            np.atleast_1d(tinp[4])[0] + dz/2]
 
-            # Print bipole length
+            # Print bipole length and strength
             _prnt_min_max_val(dl, "     > length  [m] : ", verb)
+            print("     > strength[A] : ", _strvar(strength))
 
         # Print coordinates
         for i in range(3):

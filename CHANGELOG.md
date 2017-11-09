@@ -1,5 +1,9 @@
 # Changelog
 
+## latest
+
+* Bug fixes
+
 ## v1.4.4 - *2017-09-18*
 [This was meant to be 1.4.3, but due to a setup/pypi/anaconda-issue I had to
 push it to 1.4.4; so there isn't really a version 1.4.3.]
