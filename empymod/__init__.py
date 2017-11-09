@@ -29,7 +29,7 @@ python distribution via:
 
 Required are python version 3.4 or higher and the modules `NumPy` and `SciPy`.
 If you want to run parts of the kernel in parallel, the module `numexpr` is
-required additionally.
+required additionally (built with Intel's VML).
 
 **Note**: Do not use `scipy == 0.19.0`. It has a memory leak in `quad`, see
 `github.com/scipy/scipy/pull/7216 <https://github.com/scipy/scipy/pull/7216>`_.
@@ -449,6 +449,14 @@ are all in the `kernel`-functions `greenfct`, `reflections`, and `fields`, and
 all involve :math:`\Gamma` in one way or another, often calculating square
 roots or exponentials. As :math:`\Gamma` has dimensions (#frequencies,
 #offsets, #layers, #lambdas), it can become fairly big.
+
+The package `numexpr` has to be built with Intel's VML, otherwise it won't be
+used. You can check if it uses VML with
+
+.. code-block:: python
+
+    >>> import numexpr
+    >>> numexpr.use_vml
 
 The module `numexpr` uses by default all available cores up to a maximum of 8.
 You can change this behaviour to a lower or a higher value with the following

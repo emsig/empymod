@@ -799,7 +799,12 @@ def check_opt(opt, loop, ht, htarg, verb):
     # Try to import numexpr
     if use_ne_eval:
         try:
-            from numexpr import evaluate as use_ne_eval
+            from numexpr import use_vml, evaluate as use_ne_eval
+            if not use_vml:  # Ensure Intel's Vector Math Library
+                use_ne_eval = False
+                if verb > 0:
+                    print("* WARNING :: `numexpr` is not installed with VML, ",
+                          "`opt=='parallel'` has no effect.")
         except:
             use_ne_eval = False
             if verb > 0:

@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+from numexpr import use_vml
 from os.path import join, dirname
 from numpy.testing import assert_allclose
 
@@ -244,7 +245,7 @@ class TestBipole:
         assert_allclose(bip1, dip*3300, 1e-5)  # bipole as dipole
         assert_allclose(bip2, dip*3300, 1e-2)  # bipole, src/rec switched.
 
-    def test_optimizaton(self, capsys):
+    def test_optimization(self, capsys):
         # Compare optimization options: None, parallel, spline
         inp = {'depth': [0, 500], 'res': [10, 3, 50], 'freqtime': [1, 2, 3],
                'rec': [[6000, 7000, 8000], [200, 200, 200], 300, 0, 0],
@@ -256,7 +257,10 @@ class TestBipole:
 
         par = bipole(opt='parallel', verb=3, **inp)
         out, _ = capsys.readouterr()
-        assert "Hankel Opt.     :  Use parallel" in out
+        if use_vml:
+            assert "Hankel Opt.     :  Use parallel" in out
+        else:
+            assert "Hankel Opt.     :  None" in out
         assert_allclose(non, par, equal_nan=True)
 
         spl = bipole(opt='spline', verb=3, **inp)

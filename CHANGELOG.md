@@ -2,6 +2,10 @@
 
 ## latest
 
+* [2017-11-09] `opt=parallel` has no effect if `numexpr` is not built against
+  Intel's VML. (Use `import numexpr; numexpr.use_vml` to see if your `numexpr`
+  uses VML.)
+
 * Bug fixes
 
 ## v1.4.4 - *2017-09-18*
