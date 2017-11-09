@@ -360,23 +360,29 @@ def test_check_opt(capsys):
     outstr = "   Hankel Opt.     :  None\n   Loop over       :  Freq"
     assert out[:53] == outstr
 
+    res = utils.check_opt('parallel', 'off', 'fht', fhtarg, 4)
+    assert_allclose(res[0], False)
     if use_vml:
-        res = utils.check_opt('parallel', 'off', 'fht', fhtarg, 4)
-        assert_allclose(res[0], False)
         assert_allclose(callable(res[1]), True)
-        assert_allclose(res[2:], (False, True))
-        out, _ = capsys.readouterr()
         outstr = "   Hankel Opt.     :  Use parallel\n   Loop over       :  Of"
-        assert out[:59] == outstr
+    else:
+        assert_allclose(callable(res[1]), False)
+        outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"
+    assert_allclose(res[2:], (False, True))
+    out, _ = capsys.readouterr()
+    assert out[:59] == outstr
 
+    res = utils.check_opt('parallel', 'freq', 'hqwe', qwehtarg, 4)
+    assert_allclose(res[0], False)
     if use_vml:
-        res = utils.check_opt('parallel', 'freq', 'hqwe', qwehtarg, 4)
-        assert_allclose(res[0], False)
         assert_allclose(callable(res[1]), True)
-        assert_allclose(res[2:], (True, False))
-        out, _ = capsys.readouterr()
         outstr = "   Hankel Opt.     :  Use parallel\n   Loop over       :  Fr"
-        assert out[:59] == outstr
+    else:
+        assert_allclose(callable(res[1]), False)
+        outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"
+    assert_allclose(res[2:], (True, False))
+    out, _ = capsys.readouterr()
+    assert out[:59] == outstr
 
     res = utils.check_opt('spline', None, 'fht', fhtarg, 4)
     assert_allclose(res, (True, False, True, False))

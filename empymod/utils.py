@@ -803,12 +803,12 @@ def check_opt(opt, loop, ht, htarg, verb):
             if not use_vml:  # Ensure Intel's Vector Math Library
                 use_ne_eval = False
                 if verb > 0:
-                    print("* WARNING :: `numexpr` is not installed with VML, ",
-                          "`opt=='parallel'` has no effect.")
+                    print("* WARNING :: `numexpr` is not installed with VML," +
+                          " `opt=='parallel'` has no effect.")
         except:
             use_ne_eval = False
             if verb > 0:
-                print("* WARNING :: `numexpr` is not installed, ",
+                print("* WARNING :: `numexpr` is not installed, " +
                       "`opt=='parallel'` has no effect.")
 
     # Define if to loop over frequencies or over offsets
