@@ -22,6 +22,7 @@ CHANNEL=defaults
 PYTHON3VERSION="4 5 6"
 PRINT=0
 PACKAGES="numpy scipy numexpr python-dateutil setuptools pytest pytest-cov"
+STR2="**  WITH numexpr  "
 
 # Get Optional Input
 while getopts "hpnv:c:" opt; do
@@ -36,6 +37,7 @@ while getopts "hpnv:c:" opt; do
     p) PRINT=1
        ;;
     n) PACKAGES="numpy scipy python-dateutil setuptools pytest pytest-cov"
+       STR2="**  NO numexpr  "
        ;;
     :) printf "missing argument for -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
@@ -53,7 +55,7 @@ for i in ${PYTHON3VERSION[@]}; do
 
   # Print info
   echo " "
-  STR="  PYTHON 3."${i}"  **  Channel "$CHANNEL"  "
+  STR="  PYTHON 3."${i}"  **  Channel "$CHANNEL"  $STR2"
   LENGTH=$(( ($(tput cols) - ${#STR}) / 2 - 2 ))
   printf "  "
   printf '\e[1m\e[34m%*s' "${LENGTH}" '' | tr ' ' -
