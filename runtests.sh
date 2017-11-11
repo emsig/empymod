@@ -2,41 +2,41 @@
 
 # Help text
 usage="
-$(basename "$0") [-h] [-c -v]
+$(basename "$0") [-hcpn] [-v VERSION(S)]
 
 Run pytest for empymod locally in an isolated venv before submitting to
 GitHub/Travis-CI; by default for all supported python versions of empymod.
 
 where:
-    -h : show this help text
-    -v : Python 3.x version, e.g. '-v 5' for Python 3.5
-         Default: 4 5 6
-    -c : Anaconda channel, e.g. '-c conda-forge' to use conda-forge
-         Default: defaults
-    -p : If provided prints output of conda.
-    -n : If provided, run tests without numexpr.
+    -h : Show this help text.
+    -v : Python 3.x version, e.g. '-v 5' for Python 3.5. Default: '4 5 6'.
+    -c : Use channel 'conda-forge' instead of channel 'defaults'.
+    -p : Print output of conda.
+    -n : Run tests without numexpr.
+
 "
 
 # Set default values
-CHANNEL=defaults
+CHAN=defaults
 PYTHON3VERSION="4 5 6"
-PRINT=0
-PACKAGES="numpy scipy numexpr python-dateutil setuptools pytest pytest-cov"
+PRINT="/dev/null"
+PCKGS="numpy scipy python-dateutil setuptools pytest pytest-cov"
+NMXPR="numexpr"
 STR2="**  WITH numexpr  "
 
 # Get Optional Input
-while getopts "hpnv:c:" opt; do
+while getopts "hv:cpn" opt; do
   case $opt in
     h) echo "$usage"
        exit
        ;;
     v) PYTHON3VERSION=$OPTARG
        ;;
-    c) CHANNEL=$OPTARG
+    c) CHAN=conda-forge
        ;;
-    p) PRINT=1
+    p) PRINT="/dev/tty"
        ;;
-    n) PACKAGES="numpy scipy python-dateutil setuptools pytest pytest-cov"
+    n) NMXPR=""
        STR2="**  NO numexpr  "
        ;;
     :) printf "missing argument for -%s\n" "$OPTARG" >&2
@@ -54,10 +54,9 @@ done
 for i in ${PYTHON3VERSION[@]}; do
 
   # Print info
-  echo " "
-  STR="  PYTHON 3."${i}"  **  Channel "$CHANNEL"  $STR2"
+  STR="  PYTHON 3."${i}"  **  Channel "$CHAN"  $STR2"
   LENGTH=$(( ($(tput cols) - ${#STR}) / 2 - 2 ))
-  printf "  "
+  printf "\n  "
   printf '\e[1m\e[34m%*s' "${LENGTH}" '' | tr ' ' -
   if [ $((${#STR}%2)) -ne 0 ];
   then
@@ -67,22 +66,11 @@ for i in ${PYTHON3VERSION[@]}; do
   printf '%*s\n' "${LENGTH}" '' | tr ' ' -
   printf "\e[0m\n"
 
-  # Create venv
-  if [ "$PRINT" == "1" ]; then
-    conda create -y -n test_3${i} python=3.${i}
-  else
-    conda create -y -n test_3${i} python=3.${i} &> /dev/null
-  fi
+  # Create venv, with channel CHAN
+  conda create -y -n test_3${i} -c $CHAN python=3.${i} $PCKGS $NMXPR &> $PRINT
 
   # Activate venv
   source activate test_3${i}
-
-  # Install with CHANNEL
-  if [ "$PRINT" == "1" ]; then
-    conda install -y -c $CHANNEL $PACKAGES
-  else
-    conda install -y -c $CHANNEL $PACKAGES &> /dev/null
-  fi
 
   # Run tests
   pytest tests/ --cov=empymod
@@ -91,10 +79,6 @@ for i in ${PYTHON3VERSION[@]}; do
   source deactivate test_3${i}
 
   # Remove venv
-  if [ "$PRINT" == "1" ]; then
-    conda remove -y -n test_3${i} --all
-  else
-    conda remove -y -n test_3${i} --all &> /dev/null
-  fi
+  conda remove -y -n test_3${i} --all &> $PRINT
 
 done
