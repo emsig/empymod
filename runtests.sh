@@ -14,15 +14,17 @@ where:
     -c : Anaconda channel, e.g. '-c conda-forge' to use conda-forge
          Default: defaults
     -p : If provided prints output of conda.
+    -n : If provided, run tests without numexpr.
 "
 
 # Set default values
 CHANNEL=defaults
 PYTHON3VERSION="4 5 6"
 PRINT=0
+PACKAGES="numpy scipy numexpr python-dateutil setuptools pytest pytest-cov"
 
 # Get Optional Input
-while getopts "hpv:c:" opt; do
+while getopts "hpnv:c:" opt; do
   case $opt in
     h) echo "$usage"
        exit
@@ -32,6 +34,8 @@ while getopts "hpv:c:" opt; do
     c) CHANNEL=$OPTARG
        ;;
     p) PRINT=1
+       ;;
+    n) PACKAGES="numpy scipy python-dateutil setuptools pytest pytest-cov"
        ;;
     :) printf "missing argument for -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
@@ -73,11 +77,9 @@ for i in ${PYTHON3VERSION[@]}; do
 
   # Install with CHANNEL
   if [ "$PRINT" == "1" ]; then
-    conda install -y -c $CHANNEL numpy scipy numexpr python-dateutil \
-        setuptools pytest pytest-cov
+    conda install -y -c $CHANNEL $PACKAGES
   else
-    conda install -y -c $CHANNEL numpy scipy numexpr python-dateutil \
-        setuptools pytest pytest-cov &> /dev/null
+    conda install -y -c $CHANNEL $PACKAGES &> /dev/null
   fi
 
   # Run tests

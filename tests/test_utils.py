@@ -1,7 +1,13 @@
 import pytest
 import numpy as np
-from numexpr import use_vml
 from numpy.testing import assert_allclose
+
+# See if numexpr is installed, and if it is, if it uses VML
+try:
+    from numexpr import use_vml, evaluate as use_ne_eval
+except:
+    use_vml = False
+    use_ne_eval = False
 
 from empymod import utils, filters
 
@@ -365,6 +371,9 @@ def test_check_opt(capsys):
     if use_vml:
         assert_allclose(callable(res[1]), True)
         outstr = "   Hankel Opt.     :  Use parallel\n   Loop over       :  Of"
+    elif not use_ne_eval:
+        assert_allclose(callable(res[1]), False)
+        outstr = "* WARNING :: `numexpr` is not installed, `opt=='parallel'` "
     else:
         assert_allclose(callable(res[1]), False)
         outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"
@@ -377,6 +386,9 @@ def test_check_opt(capsys):
     if use_vml:
         assert_allclose(callable(res[1]), True)
         outstr = "   Hankel Opt.     :  Use parallel\n   Loop over       :  Fr"
+    elif not use_ne_eval:
+        assert_allclose(callable(res[1]), False)
+        outstr = "* WARNING :: `numexpr` is not installed, `opt=='parallel'` "
     else:
         assert_allclose(callable(res[1]), False)
         outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"

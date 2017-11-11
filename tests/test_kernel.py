@@ -1,7 +1,14 @@
 import numpy as np
 from os.path import join, dirname
 from numpy.testing import assert_allclose
-from numexpr import use_vml, evaluate as use_ne_eval
+
+# See if numexpr is installed, and if it is, if it uses VML
+try:
+    from numexpr import use_vml, evaluate as use_ne_eval
+except:
+    use_vml = False
+    use_ne_eval = False
+
 
 from empymod import kernel
 from empymod import bipole

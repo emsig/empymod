@@ -1,8 +1,14 @@
 import pytest
 import numpy as np
-from numexpr import use_vml
 from os.path import join, dirname
 from numpy.testing import assert_allclose
+
+# See if numexpr is installed, and if it is, if it uses VML
+try:
+    from numexpr import use_vml, evaluate as use_ne_eval
+except:
+    use_vml = False
+    use_ne_eval = False
 
 # Import main modelling routines from empymod directly to ensure they are in
 # the __init__.py-file.
@@ -257,7 +263,7 @@ class TestBipole:
 
         par = bipole(opt='parallel', verb=3, **inp)
         out, _ = capsys.readouterr()
-        if use_vml:
+        if use_ne_eval and use_vml:
             assert "Hankel Opt.     :  Use parallel" in out
         else:
             assert "Hankel Opt.     :  None" in out
