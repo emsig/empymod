@@ -18,7 +18,7 @@ def test_fhtfilters():                                         # 2. FHT filters
     #   (c) factor is correct.
     allfilt = ['kong_61_2007', 'kong_241_2007', 'key_101_2009', 'key_201_2009',
                'key_401_2009', 'anderson_801_1982', 'key_51_2012',
-               'key_101_2012', 'key_201_2012']
+               'key_101_2012', 'key_201_2012', 'wer_201_2018']
     for filt in allfilt:
         fhtfilt = getattr(filters, filt)()
         nr = int(filt.split('_')[1])

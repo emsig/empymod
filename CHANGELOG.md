@@ -2,6 +2,8 @@
 
 ## latest
 
+* [2017-11-28] New Hankel filter `wer_201_2018`
+
 * [2017-11-09] `opt=parallel` has no effect if `numexpr` is not built against
   Intel's VML. (Use `import numexpr; numexpr.use_vml` to see if your `numexpr`
   uses VML.)
