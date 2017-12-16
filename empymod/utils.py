@@ -47,12 +47,12 @@ __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
 
 # 0. General settings
 
-min_freq = 1e-20   # Minimum frequency  [Hz]
-min_time = 1e-20   # Minimum time       [s]
-min_off = 1e-3     # Minimum offset     [m]
-#                  # > Also used to round src- & rec-coordinates (1e-3 => mm)
-min_param = 1e-20  # Minimum model parameter (aniso, [m/e]perm[H/V]) to avoid 0
-min_angle = 1e-10  # Angle factors smaller than that are set to 0
+_min_freq = 1e-20   # Minimum frequency  [Hz]
+_min_time = 1e-20   # Minimum time       [s]
+_min_off = 1e-3     # Minimum offset     [m]
+#                   # > Also used to round src- & rec-coordinates (1e-3 => mm)
+_min_param = 1e-20  # Minimum model param (aniso, [m/e]perm[H/V]) to avoid 0
+_min_angle = 1e-10  # Angle factors smaller than that are set to 0
 
 
 # 1. Class EMArray
@@ -388,15 +388,16 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         Parameters zetaH/zetaV, same size as provided resistivity.
 
     """
+    global _min_freq
 
     # Check frequency
     freq = _check_var(freq, float, 1, 'freq')
-    if verb > 2:
-        _prnt_min_max_val(freq, "   frequency  [Hz] : ", verb)
 
     # Minimum frequency to avoid division by zero at freq = 0 Hz.
-    # => min_freq is defined at the start of this file
-    freq = _check_min(freq, min_freq, 'Frequencies', 'Hz', verb)
+    # => min_freq can be set with utils.set_min
+    freq = _check_min(freq, _min_freq, 'Frequencies', 'Hz', verb)
+    if verb > 2:
+        _prnt_min_max_val(freq, "   frequency  [Hz] : ", verb)
 
     # Calculate eta and zeta (horizontal and vertical)
     etaH = 1/res + np.outer(2j*np.pi*freq, epermH*epsilon_0)
@@ -679,6 +680,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
         and mpermV are in all layers the same).
 
     """
+    global _min_param
 
     # Check depth
     depth = _check_var(depth, float, 1, 'depth')
@@ -698,8 +700,8 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
     # Cast and check resistivity
     res = _check_var(res, float, 1, 'res', depth.shape)
-    # => min_param is defined at the start of this file
-    res = _check_min(res, min_param, 'Resistivities', 'Ohm.m', verb)
+    # => min_param can be set with utils.set_min
+    res = _check_min(res, _min_param, 'Resistivities', 'Ohm.m', verb)
 
     # Check anisotropy, electric permittivity, and magnetic permeability
     def check_inp(var, name):
@@ -708,8 +710,9 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
             return np.ones(depth.size)
         else:
             param = _check_var(var, float, 1, name, depth.shape)
-            # => min_param is defined at the start of this file
-            param = _check_min(param, min_param, 'Parameter ' + name, '', verb)
+            # => min_param can be set with utils.set_min
+            param = _check_min(param, _min_param, 'Parameter ' + name, '',
+                               verb)
             return param
 
     aniso = check_inp(aniso, 'aniso')
@@ -1183,6 +1186,7 @@ def check_time_only(time, signal, verb):
         Time, checked for size and assured min_time.
 
     """
+    global _min_time
 
     # Check input signal
     if int(signal) not in [-1, 0, 1]:
@@ -1194,8 +1198,8 @@ def check_time_only(time, signal, verb):
     time = _check_var(time, float, 1, 'time')
 
     # Minimum time to avoid division by zero  at time = 0 s.
-    # => min_time is defined at the start of this file
-    time = _check_min(time, min_time, 'Times', 's', verb)
+    # => min_time can be set with utils.set_min
+    time = _check_min(time, _min_time, 'Times', 's', verb)
     if verb > 2:
         _prnt_min_max_val(time, "   time        [s] : ", verb)
 
@@ -1362,6 +1366,7 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
         Geometrical scaling factor.
 
     """
+    global _min_angle
 
     # Get current direction for source and receiver
     fis = ab % 10
@@ -1387,7 +1392,8 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
     fact = np.outer(fsrc, frec).ravel()
 
     # Set very small angles to proper zero (because e.g. sin(pi/2) != exact 0)
-    fact[np.abs(fact) < min_angle] = 0
+    # => min_angle can be set with utils.set_min
+    fact[np.abs(fact) < _min_angle] = 0
 
     return fact
 
@@ -1464,6 +1470,7 @@ def get_off_ang(src, rec, nsrc, nrec, verb):
         Angles
 
     """
+    global _min_off
 
     # Pre-allocate off and angle
     off = np.empty((nrec*nsrc,))
@@ -1482,9 +1489,9 @@ def get_off_ang(src, rec, nsrc, nrec, verb):
     # for real data.
 
     # Minimum offset to avoid singularities at off = 0 m.
-    # => min_off is defined at the start of this file
-    angle[np.where(off < min_off)] = np.nan
-    off = _check_min(off, min_off, 'Offsets', 'm', verb)
+    # => min_off can be set with utils.set_min
+    angle[np.where(off < _min_off)] = np.nan
+    off = _check_min(off, _min_off, 'Offsets', 'm', verb)
 
     return off, angle
 
@@ -1550,6 +1557,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         Factors from source/receiver length and source strength.
 
     """
+    global _min_off
 
     # Get this di-/bipole
     if ninpz == 1:  # If there is only one distinct depth, all at once
@@ -1645,7 +1653,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
                 inp_w *= strength
 
         # Collect output list; rounding coord. to same precision as min_off
-        rndco = int(np.round(np.log10(1/min_off)))
+        rndco = int(np.round(np.log10(1/_min_off)))
         tout = [np.round(xinp, rndco).ravel('F'),
                 np.round(yinp, rndco).ravel('F'),
                 np.round(zinp, rndco).ravel('F')]
@@ -1715,7 +1723,82 @@ def conv_warning(conv, targ, name, verb):
               '=> desired `atol` and `rtol` might not be achieved.')
 
 
-# 3. Internal utilities
+# 3. Set/get min values
+
+def set_minimum(min_freq=None, min_time=None, min_off=None, min_param=None,
+                min_angle=None):
+    """
+    Set minimum values of parameters.
+
+    The given parameters are set to its minimum value if they are smaller.
+
+    Parameters
+    ----------
+    min_freq : float, optional
+        Minimum frequency [Hz] (default 1e-20 Hz).
+    min_time : float, optional
+        Minimum time [s] (default 1e-20 s).
+    min_off : float, optional
+        Minimum offset [m] (default 1e-3 m).
+        Also used to round src- & rec-coordinates.
+    min_param : float, optional
+        Minimum aniso, [m/e]perm[H/V] [-] (default 1e-20).
+    min_angle : float, optional
+        Minimum angle [-] (default 1e-10).
+
+    Note
+    ----
+    set_minvals and get_minvals are derived after set_printoptions and
+    get_printoptions from arrayprint.py in numpy.
+
+    """
+
+    global _min_freq, _min_time, _min_off, _min_param, _min_angle
+
+    if min_freq is not None:
+        _min_freq = min_freq
+    if min_time is not None:
+        _min_time = min_time
+    if min_off is not None:
+        _min_off = min_off
+    if min_param is not None:
+        _min_param = min_param
+    if min_angle is not None:
+        _min_angle = min_angle
+
+
+def get_minimum():
+    """
+    Return the current minimum values.
+
+    Returns
+    -------
+    min_vals : dict
+        Dictionary of current minimum values with keys
+
+          - min_freq : float
+          - min_time : float
+          - min_off : float
+          - min_param : float
+          - min_angle : float
+
+        For a full description of these options, see `set_minvals`.
+
+    Note
+    ----
+    set_minvals and get_minvals are derived after set_printoptions and
+    get_printoptions from arrayprint.py in numpy.
+
+    """
+    d = dict(min_freq=_min_freq,
+             min_time=_min_time,
+             min_off=_min_off,
+             min_param=_min_param,
+             min_angle=_min_angle)
+    return d
+
+
+# 4. Internal utilities
 
 def _check_shape(var, name, shape, shape2=None):
     """Check that <var> has shape <shape>; if false raise ValueError(name)"""

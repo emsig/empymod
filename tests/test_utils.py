@@ -973,3 +973,24 @@ def test_check_targ():
     # c: more than keys
     assert utils._check_targ([2, 4, 5], ['a', 'b']) == {'a': 2, 'b': 4}
     assert utils._check_targ((2, 4, 5), ['a', 'b']) == {'a': 2, 'b': 4}
+
+
+def test_minimum():
+    # Check default values
+    d = utils.get_minimum()
+    assert d['min_freq'] == 1e-20
+    assert d['min_time'] == 1e-20
+    assert d['min_off'] == 1e-3
+    assert d['min_param'] == 1e-20
+    assert d['min_angle'] == 1e-10
+
+    # Set all default values to new values
+    utils.set_minimum(1e-2, 1e-3, 1, 1e-4, 1e-5)
+
+    # Check new values
+    d = utils.get_minimum()
+    assert d['min_freq'] == 1e-2
+    assert d['min_time'] == 1e-3
+    assert d['min_off'] == 1
+    assert d['min_param'] == 1e-4
+    assert d['min_angle'] == 1e-5
