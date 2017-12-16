@@ -20,6 +20,9 @@ domains.
 For information regarding installation, requirements, documentation, examples,
 contributing and so on: [empymod.github.io](https://empymod.github.io).
 
+For the add-ons to empymod see
+[github.com/empymod/empyscripts](https://github.com/empymod/empyscripts).
+
 
 ## Installation from source
 
@@ -99,11 +102,6 @@ get in touch if you would like to tackle one of these problems!
 
 - Hankel transform
     - Add the `fht`-module from FFTLog for the Hankel transform.
-
-
-- Module to design digital filters
-    - **Hankel transform** (almost ready)
-    - Extend to Fourier transform
 
 
 - Extend examples (example-notebooks)
