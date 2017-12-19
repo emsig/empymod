@@ -541,12 +541,6 @@ are in the same layer to calculate
 The Hankel transforms methods are having sometimes difficulties transforming
 these functions.
 
-Add-ons
--------
-
-
-
-
 
 .. |_| unicode:: 0xA0
    :trim:
