@@ -72,8 +72,11 @@ for i in ${PYTHON3VERSION[@]}; do
   # Activate venv
   source activate test_3${i}
 
+  # Install flake8
+  pip install pytest-flake8 &> $PRINT
+
   # Run tests
-  pytest tests/ --cov=empymod
+  pytest tests/ --cov=empymod --flake8
 
   # De-activate venv
   source deactivate test_3${i}

@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose
 # See if numexpr is installed, and if it is, if it uses VML
 try:
     from numexpr import use_vml, evaluate as use_ne_eval
-except:
+except ImportError:
     use_vml = False
     use_ne_eval = False
 
