@@ -148,9 +148,9 @@ def check_ab(ab, verb):
     # Try to cast ab into an integer
     try:
         ab = int(ab)
-    except:
+    except TypeError('ab'):
         print('* ERROR   :: <ab> must be an integer')
-        raise TypeError('ab')
+        raise
 
     # Check src and rec orientation (<ab> for alpha-beta)
     # pab: all possible values that <ab> can take
@@ -447,14 +447,14 @@ def check_hankel(ht, htarg, verb):
             fhtfilt = htarg['fhtfilt']
             if not hasattr(fhtfilt, 'base'):
                 fhtfilt = getattr(filters, fhtfilt)()
-        except:
+        except Exception:
             fhtfilt = filters.key_201_2009()
 
         # Check pts_per_dec; defaults to None
         try:
             pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'fht: pts_per_dec', ())
-        except:
+        except Exception:
             pts_per_dec = None
 
         # Assemble htarg
@@ -480,58 +480,58 @@ def check_hankel(ht, htarg, verb):
         # rtol : 1e-12
         try:
             rtol = _check_var(htarg['rtol'], float, 0, 'qwe: rtol', ())
-        except:
+        except Exception:
             rtol = np.array(1e-12, dtype=float)
 
         # atol : 1e-30
         try:
             atol = _check_var(htarg['atol'], float, 0, 'qwe: atol', ())
-        except:
+        except Exception:
             atol = np.array(1e-30, dtype=float)
 
         # nquad : 51
         try:
             nquad = _check_var(htarg['nquad'], int, 0, 'qwe: nquad', ())
-        except:
+        except Exception:
             nquad = np.array(51, dtype=int)
 
         # maxint : 100
         try:
             maxint = _check_var(htarg['maxint'], int, 0, 'qwe: maxint', ())
-        except:
+        except Exception:
             maxint = np.array(100, dtype=int)
 
         # pts_per_dec : 80
         try:
             pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'qwe: pts_per_dec', ())
-        except:
+        except Exception:
             pts_per_dec = np.array(80, dtype=int)
 
         # diff_quad : 100
         try:
             diff_quad = _check_var(htarg['diff_quad'], float, 0,
                                    'qwe: diff_quad', ())
-        except:
+        except Exception:
             diff_quad = np.array(100, dtype=float)
 
         # a : None
         try:
             a = _check_var(htarg['a'], float, 0, 'qwe: a (quad)', ())
-        except:
+        except Exception:
             a = None
 
         # b : None
         try:
             b = _check_var(htarg['b'], float, 0, 'qwe: b (quad)', ())
-        except:
+        except Exception:
             b = None
 
         # limit : None
         try:
             limit = _check_var(htarg['limit'], float, 0, 'qwe: limit (quad)',
                                ())
-        except:
+        except Exception:
             limit = None
 
         # Assemble htarg
@@ -565,38 +565,38 @@ def check_hankel(ht, htarg, verb):
         # rtol : 1e-12
         try:
             rtol = _check_var(htarg['rtol'], float, 0, 'quad: rtol', ())
-        except:
+        except Exception:
             rtol = np.array(1e-12, dtype=float)
 
         # atol : 1e-20
         try:
             atol = _check_var(htarg['atol'], float, 0, 'quad: atol', ())
-        except:
+        except Exception:
             atol = np.array(1e-20, dtype=float)
 
         # limit : 500
         try:
             limit = _check_var(htarg['limit'], int, 0, 'quad: limit', ())
-        except:
+        except Exception:
             limit = np.array(500, dtype=int)
 
         # a : 1e-6
         try:
             a = _check_var(htarg['a'], float, 0, 'quad: a', ())
-        except:
+        except Exception:
             a = np.array(1e-6, dtype=float)
 
         # b : 0.1
         try:
             b = _check_var(htarg['b'], float, 0, 'quad: b', ())
-        except:
+        except Exception:
             b = np.array(0.1, dtype=float)
 
         # pts_per_dec : 40
         try:
             pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'quad: pts_per_dec', ())
-        except:
+        except Exception:
             pts_per_dec = np.array(40, dtype=int)
 
         # Assemble htarg
@@ -808,7 +808,7 @@ def check_opt(opt, loop, ht, htarg, verb):
                 if verb > 0:
                     print("* WARNING :: `numexpr` is not installed with VML," +
                           " `opt=='parallel'` has no effect.")
-        except:
+        except ImportError:
             use_ne_eval = False
             if verb > 0:
                 print("* WARNING :: `numexpr` is not installed, " +
@@ -898,7 +898,7 @@ def check_time(time, signal, ft, ftarg, verb):
         if ft == 'ffht':
             try:
                 ft = ftarg[2]
-            except:
+            except Exception:
                 ft = 'sin'
 
         # If switch-off/on is required, ensure ft is cosine/sine
@@ -915,14 +915,14 @@ def check_time(time, signal, ft, ftarg, verb):
             fftfilt = ftarg['fftfilt']
             if not hasattr(fftfilt, 'base'):
                 fftfilt = getattr(filters, fftfilt)()
-        except:
+        except Exception:
             fftfilt = filters.key_201_CosSin_2012()
 
         # Check pts_per_dec; defaults to None
         try:
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      ft + 'pts_per_dec', ())
-        except:
+        except Exception:
             pts_per_dec = None
 
         # Assemble ftarg
@@ -966,54 +966,54 @@ def check_time(time, signal, ft, ftarg, verb):
 
         try:  # rtol
             rtol = _check_var(ftarg['rtol'], float, 0, 'qwe: rtol', ())
-        except:
+        except Exception:
             rtol = np.array(1e-8, dtype=float)
 
         try:  # atol
             atol = _check_var(ftarg['atol'], float, 0, 'qwe: atol', ())
-        except:
+        except Exception:
             atol = np.array(1e-20, dtype=float)
 
         try:  # nquad
             nquad = _check_var(ftarg['nquad'], int, 0, 'qwe: nquad', ())
-        except:
+        except Exception:
             nquad = np.array(21, dtype=int)
 
         try:  # maxint
             maxint = _check_var(ftarg['maxint'], int, 0, 'qwe: maxint', ())
-        except:
+        except Exception:
             maxint = np.array(200, dtype=int)
 
         try:  # pts_per_dec
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'qwe: pts_per_dec', ())
-        except:
+        except Exception:
             pts_per_dec = np.array(20, dtype=int)
 
         # diff_quad : 100
         try:
             diff_quad = _check_var(ftarg['diff_quad'], int, 0,
                                    'qwe: diff_quad', ())
-        except:
+        except Exception:
             diff_quad = np.array(100, dtype=int)
 
         # a : None
         try:
             a = _check_var(ftarg['a'], float, 0, 'qwe: a (quad)', ())
-        except:
+        except Exception:
             a = None
 
         # b : None
         try:
             b = _check_var(ftarg['b'], float, 0, 'qwe: b (quad)', ())
-        except:
+        except Exception:
             b = None
 
         # limit : None
         try:
             limit = _check_var(ftarg['limit'], float, 0, 'qwe: limit (quad)',
                                ())
-        except:
+        except Exception:
             limit = None
 
         # Assemble ftarg
@@ -1051,13 +1051,13 @@ def check_time(time, signal, ft, ftarg, verb):
         try:  # pts_per_dec
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'fftlog: pts_per_dec', ())
-        except:
+        except Exception:
             pts_per_dec = np.array(10, dtype=int)
 
         try:  # add_dec
             add_dec = _check_var(ftarg['add_dec'], float, 1, 'fftlog: add_dec',
                                  (2,))
-        except:
+        except Exception:
             add_dec = np.array([-2, 1], dtype=float)
 
         try:  # q
@@ -1065,7 +1065,7 @@ def check_time(time, signal, ft, ftarg, verb):
             # Restrict q to +/- 1
             if np.abs(q) > 1:
                 q = np.sign(q)
-        except:
+        except Exception:
             q = np.array(0, dtype=float)
 
         # If switch-off is required, use cosine, else sine
@@ -1101,18 +1101,18 @@ def check_time(time, signal, ft, ftarg, verb):
 
         try:  # dfreq
             dfreq = _check_var(ftarg['dfreq'], float, 0, 'fft: dfreq', ())
-        except:
+        except Exception:
             dfreq = np.array(0.002, dtype=float)
 
         try:  # nfreq
             nfreq = _check_var(ftarg['nfreq'], int, 0, 'fft: nfreq', ())
-        except:
+        except Exception:
             nfreq = np.array(2048, dtype=int)
 
         nall = 2**np.arange(30)
         try:  # ntot
             ntot = _check_var(ftarg['ntot'], int, 0, 'fft: ntot', ())
-        except:
+        except Exception:
             # We could use here fftpack.next_fast_len, but tests have shown
             # that powers of two yield better results in this case.
             ntot = nall[np.argmax(nall >= nfreq)]
@@ -1124,7 +1124,7 @@ def check_time(time, signal, ft, ftarg, verb):
         try:
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'fft: pts_per_dec', ())
-        except:
+        except Exception:
             pts_per_dec = None
 
         # Get required frequencies
