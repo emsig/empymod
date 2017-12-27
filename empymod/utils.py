@@ -43,7 +43,7 @@ __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
            'check_frequency', 'check_hankel', 'check_opt', 'check_dipole',
            'check_bipole', 'check_ab', 'check_solution', 'get_abs',
            'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
-           'printstartfinish', 'conv_warning']
+           'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum']
 
 # 0. General settings
 
@@ -1748,7 +1748,7 @@ def set_minimum(min_freq=None, min_time=None, min_off=None, min_param=None,
 
     Note
     ----
-    set_minvals and get_minvals are derived after set_printoptions and
+    set_minimum and get_minimum are derived after set_printoptions and
     get_printoptions from arrayprint.py in numpy.
 
     """
@@ -1782,11 +1782,11 @@ def get_minimum():
           - min_param : float
           - min_angle : float
 
-        For a full description of these options, see `set_minvals`.
+        For a full description of these options, see `set_minimum`.
 
     Note
     ----
-    set_minvals and get_minvals are derived after set_printoptions and
+    set_minimum and get_minimum are derived after set_printoptions and
     get_printoptions from arrayprint.py in numpy.
 
     """
