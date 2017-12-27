@@ -148,7 +148,7 @@ def check_ab(ab, verb):
     # Try to cast ab into an integer
     try:
         ab = int(ab)
-    except TypeError('ab'):
+    except (ValueError, TypeError):
         print('* ERROR   :: <ab> must be an integer')
         raise
 
