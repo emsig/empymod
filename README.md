@@ -135,7 +135,7 @@ If you publish results for which you used empymod, please give credit by citing
 this article:
 
 > Werthmüller, D., 2017, An open-source full 3D electromagnetic modeler for 1D
-> VTI media in Python: empymod: Geophysics, 82, WB9-WB19; DOI:
+> VTI media in Python: empymod: Geophysics, 82(6), WB9-WB19; DOI:
 > [10.1190/geo2016-0626.1](http://doi.org/10.1190/geo2016-0626.1).
 
 Also consider citing Hunziker et al. (2015) and Key (2012), without which
@@ -143,11 +143,11 @@ empymod would not exist:
 
 > Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response in
 > a layered vertical transverse isotropic medium: A new look at an old problem:
-> Geophysics, 80, F1-F18; DOI:
+> Geophysics, 80(1), F1-F18; DOI:
 > [10.1190/geo2013-0411.1](http://doi.org/10.1190/geo2013-0411.1).
 >  
 > Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
-> Geophysics, 77, F21-F30; DOI:
+> Geophysics, 77(3), F21-F30; DOI:
 > [10.1190/geo2011-0237.1](http://doi.org/10.1190/geo2011-0237.1).
 
 All releases have a Zenodo-DOI, provided on the

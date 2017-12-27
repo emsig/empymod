@@ -203,7 +203,7 @@ If you publish results for which you used empymod, please give credit by citing
 this article:
 
     Werthmüller, D., 2017, An open-source full 3D electromagnetic modeler for
-    1D VTI media in Python: empymod: Geophysics, 82, WB9--WB19; DOI:
+    1D VTI media in Python: empymod: Geophysics, 82(6), WB9--WB19; DOI:
     `10.1190/geo2016-0626.1 <http://doi.org/10.1190/geo2016-0626.1>`_.
 
 Also consider citing [Hunziker_et_al_2015]_ and [Key_2012]_, without which
@@ -576,18 +576,18 @@ References |_|
    `casa.colorado.edu/~ajsh/FFTLog <http://casa.colorado.edu/~ajsh/FFTLog>`_.
 .. [Hunziker_et_al_2015] Hunziker, J., J. Thorbecke, and E. Slob, 2015, The
    electromagnetic response in a layered vertical transverse isotropic medium:
-   A new look at an old problem: Geophysics, 80, F1--F18;
+   A new look at an old problem: Geophysics, 80(1), F1--F18;
    DOI: |_| `10.1190/geo2013-0411.1
    <http://doi.org/10.1190/geo2013-0411.1>`_;
    Software: `software.seg.org/2015/0001 <http://software.seg.org/2015/0001>`_.
 .. [Key_2009] Key, K., 2009, 1D inversion of multicomponent, multifrequency
    marine CSEM data: Methodology and synthetic studies for resolving thin
-   resistive layers: Geophysics, 74, F9--F20; DOI: |_| `10.1190/1.3058434
+   resistive layers: Geophysics, 74(2), F9--F20; DOI: |_| `10.1190/1.3058434
    <http://doi.org/10.1190/1.3058434>`_.
    Software: `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
 .. [Key_2012] Key, K., 2012, Is the fast Hankel transform faster than
-   quadrature?: Geophysics, 77, F21--F30; DOI: |_| `10.1190/geo2011-0237.1
+   quadrature?: Geophysics, 77(3), F21--F30; DOI: |_| `10.1190/geo2011-0237.1
    <http://doi.org/10.1190/geo2011-0237.1>`_;
    Software: `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
 .. [Kong_2007] Kong, F. N., 2007, Hankel transform filters for dipole antenna
@@ -616,8 +616,9 @@ References |_|
    Computer Physics Reports, 10, 189--371;
    arXiv: |_| `abs/math/0306302 <https://arxiv.org/abs/math/0306302>`_.
 .. [Werthmuller_2017] Werthmüller, D., 2017, An open-source full 3D
-   electromagnetic modeler for 1D VTI media in Python: empymod: Geophysics, 82;
-   DOI: |_| `10.1190/geo2016-0626.1 <http://doi.org/10.1190/geo2016-0626.1>`_.
+   electromagnetic modeler for 1D VTI media in Python: empymod: Geophysics,
+   82(6), WB9-WB19; DOI: |_| `10.1190/geo2016-0626.1
+   <http://doi.org/10.1190/geo2016-0626.1>`_.
 .. [Werthmuller_2017b] Werthmüller, D., 2017, Getting started with
    controlled-source electromagnetic 1D modeling: The Leading Edge, 36,
    352-355;
