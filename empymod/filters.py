@@ -33,7 +33,7 @@ These filters are distributed under the SEG license.
 The filter `wer_201_2018` was designed with the add-on `fdesign`.
 
 """
-# Copyright 2016-2017 Dieter Werthmüller
+# Copyright 2016-2018 Dieter Werthmüller
 #
 # This file is part of `empymod`.
 #

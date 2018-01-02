@@ -226,7 +226,7 @@ carried out at *The Mexican Institute of Petroleum IMP*
 License
 '''''''
 
-Copyright 2016-2017 Dieter Werthmüller
+Copyright 2016-2018 Dieter Werthmüller
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -628,7 +628,7 @@ References |_|
    <http://doi.org/10.1090/S0025-5718-1956-0084056-6>`_.
 
 """
-# Copyright 2016-2017 Dieter Werthmüller
+# Copyright 2016-2018 Dieter Werthmüller
 #
 # This file is part of `empymod`.
 #

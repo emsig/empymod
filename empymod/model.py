@@ -34,7 +34,7 @@ The modelling routines make use of the following two core routines:
     - `tem`: Carry out the Fourier transform to time domain after `fem`.
 
 """
-# Copyright 2016-2017 Dieter Werthmüller
+# Copyright 2016-2018 Dieter Werthmüller
 #
 # This file is part of `empymod`.
 #
