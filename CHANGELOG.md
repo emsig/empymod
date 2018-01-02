@@ -1,15 +1,14 @@
 # Changelog
 
-## latest
+## v1.5.0 - *2018-01-02*
 
-* [2017-12-15] Minimum parameter values can now be set and verified with
-  `utils.set_minimum` and `utils.get_minimum`.
+* Minimum parameter values can now be set and verified with `utils.set_minimum`
+  and `utils.get_minimum`.
 
-* [2017-11-28] New Hankel filter `wer_201_2018`
+* New Hankel filter `wer_201_2018`.
 
-* [2017-11-09] `opt=parallel` has no effect if `numexpr` is not built against
-  Intel's VML. (Use `import numexpr; numexpr.use_vml` to see if your `numexpr`
-  uses VML.)
+* `opt=parallel` has no effect if `numexpr` is not built against Intel's VML.
+  (Use `import numexpr; numexpr.use_vml` to see if your `numexpr` uses VML.)
 
 * Bug fixes
 
