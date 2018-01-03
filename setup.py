@@ -7,10 +7,12 @@ try:
 except(IOError, ImportError):
     readme = open('README.md').read()
 
+description = 'Open-source full 3D electromagnetic modeller for 1D VTI media'
+
 setup(
     name='empymod',
     version='1.5.1dev0',
-    description='Open-source full 3D electromagnetic modeller for 1D VTI media',
+    description=description,
     long_description=readme,
     author='Dieter Werthmüller',
     author_email='dieter@werthmuller.org',

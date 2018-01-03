@@ -24,6 +24,6 @@ install:
   - pip install coveralls pytest-flake8
   - python setup.py install
 
-script: pytest tests/ --cov=empymod --flake8
+script: pytest --cov=empymod --flake8
 
 after_success: coveralls
