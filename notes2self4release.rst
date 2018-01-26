@@ -1,6 +1,8 @@
 Steps to carry out for a new release
 ====================================
 
+Note: I really should replace this with an automatic deploy-setup...
+
    1. Update:
       - `CHANGELOG`
       - `setup.py`: Version number, download url; DO NOT CHANGE THAT
@@ -15,20 +17,25 @@ Steps to carry out for a new release
 
    4. Get the Zenodo-DOI and add it to release notes
 
-   5. Create tar and wheel
+   5. Ensure `pypandoc` and `python3-setuptools` are installed:
+
+        conda install pypandoc
+        sudo apt install python3-setuptools
+
+   6. Create tar and wheel
 
         python setup.py sdist
         python setup.py bdist_wheel
 
-   6. Test it on testpypi (requires ~/.pypirc and python3-setuptools)
+   7. Test it on testpypi (requires ~/.pypirc)
 
         twine upload dist/* -r testpypi
 
-   7. Push it to PyPi (requires ~/.pypirc and python3-setuptools)
+   8. Push it to PyPi (requires ~/.pypircs)
 
         twine upload dist/*
 
-   8. conda build
+   9. conda build
 
    Has to be done outside of ~/, because conda skeleton cannot handle, at the
    moment, the encrypted home.
@@ -64,7 +71,7 @@ Steps to carry out for a new release
         # Logout
         anaconda logout
 
-   9. Post-commit changes
+   10. Post-commit changes
       - `setup.py`: Bump number, add '.dev0' to version number
       - `empymod/__init__.py`: Bump number, add '.dev0' to version number
       - `README.md`: Add the current batches (|docs| |tests| |coverage|)
