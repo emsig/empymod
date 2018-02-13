@@ -16,21 +16,22 @@ To calculate the `fhtfilter.factor` I used
 The filters `kong_61_2007` and `kong_241_2007` from [Kong_2007]_, and
 `key_101_2009`, `key_201_2009`, `key_401_2009`, `key_81_CosSin_2009`,
 `key_241_CosSin_2009`, and `key_601_CosSin_2009` from [Key_2009]_ are taken
-from *DIPOLE1D*, [Key_2009]_, which can be downloaded at
-`marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-<http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_. *DIPOLE1D* is
-distributed under the license GNU GPL version 3 or later. Kerry Key gave his
-written permission to re-distribute the filters under the Apache License,
-Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November 2016).
+from *DIPOLE1D*, [Key_2009]_, which can be downloaded at 1DCSEM_.
+*DIPOLE1D* is distributed under the license GNU GPL version 3 or later. Kerry
+Key gave his written permission to re-distribute the filters under the Apache
+License, Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November
+2016).
 
 The filters `anderson_801_1982` from [Anderson_1982]_ and
 `key_51_2012`, `key_101_2012`, `key_201_2012`, `key_101_CosSin_2012`, and
 `key_201_CosSin_2012`, all from [Key_2012]_, are taken from the software
-distributed with [Key_2012]_ and available at
-`software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
+distributed with [Key_2012]_ and available at SEG-2012-003_.
 These filters are distributed under the SEG license.
 
 The filter `wer_201_2018` was designed with the add-on `fdesign`.
+
+.. _1DCSEM: http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM
+.. _SEG-2012-003: http://software.seg.org/2012/0003
 
 """
 # Copyright 2016-2018 Dieter Werthmüller
@@ -65,14 +66,12 @@ class DigitalFilter:
 # 1. FHT
 
 def kong_61_2007():
-    """Kong 61: [Kong_2007]_.
+    """Kong 61 pt Hankel filter, as published in [Kong_2007]_.
 
-    Kong 61 pt filter, as published in [Kong_2007]_; taken from file
-    *FilterModules.f90* from [Key_2009]_, available on
-    `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
-    License: Apache License, Version 2.0,
-    http://www.apache.org/licenses/LICENSE-2.0.
+    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+
+    License: `Apache License, Version 2.0,
+    <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -183,14 +182,12 @@ def kong_61_2007():
 
 
 def kong_241_2007():
-    """Kong 241: [Kong_2007]_.
+    """Kong 241 pt Hankel filter, as published in [Kong_2007]_.
 
-    Kong 241 pt filter, as published in [Kong_2007]_; taken from file
-    *FilterModules.f90* from [Key_2009]_, available on
-    `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
-    License: Apache License, Version 2.0,
-    http://www.apache.org/licenses/LICENSE-2.0.
+    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+
+    License: `Apache License, Version 2.0,
+    <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -571,14 +568,12 @@ def kong_241_2007():
 
 
 def key_101_2009():
-    """Key 101 2009: [Key_2009]_.
+    """Key 101 pt Hankel filter, as published in [Key_2009]_.
 
-    Key 101 pt filter, as published in [Key_2009]_; taken from file
-    *FilterModules.f90* from [Key_2009]_, available on
-    `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
-    License: Apache License, Version 2.0,
-    http://www.apache.org/licenses/LICENSE-2.0.
+    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+
+    License: `Apache License, Version 2.0,
+    <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -698,14 +693,12 @@ def key_101_2009():
 
 
 def key_201_2009():
-    """Key 201 2009: [Key_2009]_.
+    """Key 201 pt Hankel filter, as published in [Key_2009]_.
 
-    Key 201 pt filter, as published in [Key_2009]_; taken from file
-    *FilterModules.f90* from [Key_2009]_, available on
-    `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
-    License: Apache License, Version 2.0,
-    http://www.apache.org/licenses/LICENSE-2.0.
+    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+
+    License: `Apache License, Version 2.0,
+    <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -924,14 +917,12 @@ def key_201_2009():
 
 
 def key_401_2009():
-    """Key 401 2009: [Key_2009]_.
+    """Key 401 pt Hankel filter, as published in [Key_2009]_.
 
-    Key 401 pt filter, as published in [Key_2009]_; taken from file
-    *FilterModules.f90* from [Key_2009]_, available on
-    `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
-    License: Apache License, Version 2.0,
-    http://www.apache.org/licenses/LICENSE-2.0.
+    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+
+    License: `Apache License, Version 2.0,
+    <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -1350,12 +1341,10 @@ def key_401_2009():
 
 
 def anderson_801_1982():
-    """Anderson 801: [Anderson_1982]_.
+    """Anderson 801 pt Hankel filter, as published in [Anderson_1982]_.
 
-    Anderson 801 pt filter, as published in [Anderson_1982]_; taken from
-    file *wa801Hankel.txt* from [Key_2012]_, published by the Society of
-    Exploration Geophysicists; `software.seg.org/2012/0003
-    <http://software.seg.org/2012/0003>`_.
+    Taken from file *wa801Hankel.txt* provided with SEG-2012-003_.
+
     License: http://software.seg.org/disclaimer.txt.
 
     """
@@ -2444,11 +2433,10 @@ def anderson_801_1982():
 
 
 def key_51_2012():
-    """Key 51 2012: [Key_2012]_.
+    """Key 51 pt Hankel filter, as published in [Key_2012]_.
 
-    Key 51 pt filter, taken from file *kk51Hankel.txt* from [Key_2012]_,
-    published by the Society of Exploration Geophysicists;
-    `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
+    Taken from file *kk51Hankel.txt* provided with SEG-2012-003_.
+
     License: http://software.seg.org/disclaimer.txt.
 
     """
@@ -2537,11 +2525,10 @@ def key_51_2012():
 
 
 def key_101_2012():
-    """Key 101 2012: [Key_2012]_.
+    """Key 101 pt Hankel filter, as published in [Key_2012]_.
 
-    Key 101 pt filter, taken from file *kk101Hankel.txt* from [Key_2012]_,
-    published by the Society of Exploration Geophysicists;
-    `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
+    Taken from file *kk101Hankel.txt* provided with SEG-2012-003_.
+
     License: http://software.seg.org/disclaimer.txt.
 
     """
@@ -2696,11 +2683,10 @@ def key_101_2012():
 
 
 def key_201_2012():
-    """Key 201 2012: [Key_2012]_.
+    """Key 201 pt Hankel filter, as published in [Key_2012]_.
 
-    Key 201 pt filter, taken from file *kk201Hankel.txt* from [Key_2012]_,
-    published by the Society of Exploration Geophysicists;
-    `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
+    Taken from file *kk201Hankel.txt* provided with SEG-2012-003_.
+
     License: http://software.seg.org/disclaimer.txt.
 
     """
@@ -2989,7 +2975,7 @@ def key_201_2012():
 
 
 def wer_201_2018():
-    """Werthmüller 201 2018."""
+    """Werthmüller 201 pt Hankel filter, 2018."""
 
     fhtfilter = DigitalFilter('Werthmüller 201')
 
@@ -3311,14 +3297,12 @@ def wer_201_2018():
 
 
 def key_81_CosSin_2009():
-    """Key 81 CosSin 2009: [Key_2009]_.
+    """Key 81 pt CosSin filter, as published in [Key_2009]_.
 
-    Key 81 pt filter, as published in [Key_2009]_; taken from file
-    *FilterModules.f90* from [Key_2009]_, available on
-    `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
-    License: Apache License, Version 2.0,
-    http://www.apache.org/licenses/LICENSE-2.0.
+    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+
+    License: `Apache License, Version 2.0,
+    <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -3419,14 +3403,12 @@ def key_81_CosSin_2009():
 
 
 def key_241_CosSin_2009():
-    """Key 241 CosSin 2009: [Key_2009]_.
+    """Key 241 pt CosSin filter, as published in [Key_2009]_.
 
-    Key 241 pt filter, as published in [Key_2009]_; taken from file
-    *FilterModules.f90* from [Key_2009]_, available on
-    `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
-    License: Apache License, Version 2.0,
-    http://www.apache.org/licenses/LICENSE-2.0.
+    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+
+    License: `Apache License, Version 2.0,
+    <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -3687,14 +3669,12 @@ def key_241_CosSin_2009():
 
 
 def key_601_CosSin_2009():
-    """Key 601 CosSin 2009: [Key_2009]_.
+    """Key 601 pt CosSin filter, as published in [Key_2009]_.
 
-    Key 601 pt filter, as published in [Key_2009]_; taken from file
-    *FilterModules.f90* from [Key_2009]_, available on
-    `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-    <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
-    License: Apache License, Version 2.0,
-    http://www.apache.org/licenses/LICENSE-2.0.
+    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+
+    License: `Apache License, Version 2.0,
+    <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -4315,11 +4295,10 @@ def key_601_CosSin_2009():
 
 
 def key_101_CosSin_2012():
-    """Key 101 CosSin 2012: [Key_2012]_.
+    """Key 101 pt CosSin filter, as published in [Key_2012]_.
 
-    Key 101 pt filter, taken from file *kk101CosSin.txt* from [Key_2012]_,
-    published by the Society of Exploration Geophysicists;
-    `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
+    Taken from file *kk101CosSin.txt* provided with SEG-2012-003_.
+
     License: http://software.seg.org/disclaimer.txt.
 
     """
@@ -4477,11 +4456,10 @@ def key_101_CosSin_2012():
 
 
 def key_201_CosSin_2012():
-    """Key 201 CosSin 2012: [Key_2012]_.
+    """Key 201 pt CosSin filter, as published in [Key_2012]_.
 
-    Key 201 pt filter, taken from file *kk201CosSin.txt* from [Key_2012]_,
-    published by the Society of Exploration Geophysicists;
-    `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
+    Taken from file *kk201CosSin.txt* provided with SEG-2012-003_.
+
     License: http://software.seg.org/disclaimer.txt.
 
     """
