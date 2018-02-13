@@ -269,7 +269,7 @@ Included transforms
 
 **Hankel transform**:
 
-    - Fast Hankel Transform *FHT* ([Gosh_1971]_)
+    - Fast Hankel Transform *FHT* ([Ghosh_1971]_)
     - Quadrature with Extrapolation *QWE* ([Key_2012]_)
     - Adaptive quadrature *QUAD* (from `QUADPACK`)
 
@@ -559,7 +559,7 @@ References |_|
    related and lagged convolutions: ACM Trans. on Math. Softw. (TOMS), 8,
    344--368; DOI: |_| `10.1145/356012.356014
    <http://doi.org/10.1145/356012.356014>`_.
-.. [Gosh_1971] Ghosh, D. P., 1971, The application of linear filter theory to
+.. [Ghosh_1971] Ghosh, D. P., 1971, The application of linear filter theory to
    the direct interpretation of geoelectrical resistivity sounding
    measurements: Geophysical Prospecting, 19, 192--217;
    DOI: |_| `10.1111/j.1365-2478.1971.tb00593.x

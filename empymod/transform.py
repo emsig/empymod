@@ -50,7 +50,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     """Hankel Transform using the Fast Hankel Transform.
 
     The *Fast Hankel Transform* is a *Digital Filter Method*, introduced to
-    geophysics by [Gosh_1971]_, and made popular and wide-spread by
+    geophysics by [Ghosh_1971]_, and made popular and wide-spread by
     [Anderson_1975]_, [Anderson_1979]_, [Anderson_1982]_.
 
     This implementation of the FHT follows [Key_2012]_, equation 6.  Without
