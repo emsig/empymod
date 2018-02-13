@@ -124,12 +124,9 @@ Frequency- and time-domain examples can be found in the
 `empymod/example-notebooks
 <https://github.com/empymod/example-notebooks>`_-repository.
 
-More information and more examples can be found in the following articles:
+A good starting point is [Werthmuller_2017b]_, and more information can be
+found in [Werthmuller_2017]_.
 
-    - `empymod/article-geo2017 <https://github.com/empymod/article-geo2017>`_
-      (doi: `10.1190/geo2016-0626.1 <http://doi.org/10.1190/geo2016-0626.1>`_)
-    - `empymod/article-tle2017 <https://github.com/empymod/article-tle2017>`_
-      (doi: `10.1190/tle36040352.1 <http://doi.org/10.1190/tle36040352.1>`_)
 
 Structure
 '''''''''
