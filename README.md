@@ -57,24 +57,24 @@ A collection of ideas of what could be added or improved in empymod. Please
 get in touch if you would like to tackle one of these problems!
 
 - **Additional modelling routines**
-    - `tdem` (**TEM**)
+    - `tdem` (**TEM**) [[empymod#8](https://github.com/empymod/empymod/issues/8)]  
       Issues that have to be adressed: ramp waveform, windowing, loop
       integration, zero-offset (coincident loop).
         - in-loop
         - coincident loop
         - ...
-    - **Ramp waveform**
-    - **Arbitrary waveform**
-    - Improve the GPR-routine
+    - **Ramp waveform** [[empymod#7](https://github.com/empymod/empymod/issues/7)]
+    - **Arbitrary waveform** [[empymod#7](https://github.com/empymod/empymod/issues/7)]
+    - Improve the GPR-routine [[empymod#9](https://github.com/empymod/empymod/issues/9)]
     - Load and save functions to easily store and load model information
       (resistivity model, acquisition parameters, and modelling parameters)
       together with the modelling data (using `pickle` or `shelve`).
 
 
-- **Inversion**: Inversion routines, preferably a selection of different ones.
+- **Inversion** [[empyscripts#1](https://github.com/empymod/empyscripts/issues/1)]: Inversion routines, preferably a selection of different ones.
 
 
-- **Improve documentation**
+- **Improve documentation** [[empymod#6](https://github.com/empymod/empymod/issues/6), [empyscripts#2](https://github.com/empymod/empyscripts/issues/2)]
     - Move main part from `empymod/__init__.py` to `docs/*.rst`
     - Add actual equations, instead of only references to them
     - Add general EM introduction and derivation
