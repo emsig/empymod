@@ -36,7 +36,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinxcontrib.napoleon',
-    'sphinxcontrib.fulltoc',
 ]
 numpydoc_show_class_members = False
 
