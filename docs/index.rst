@@ -14,9 +14,7 @@ wavenumber-frequency domain, and various Hankel- and Fourier-transform methods
 are included to transform the responses into the space-frequency and space-time
 domains.
 
-
 .. toctree::
-   :numbered:
-   :maxdepth: 2
 
    empymod
+   code

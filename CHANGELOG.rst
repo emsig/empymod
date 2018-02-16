@@ -3,8 +3,6 @@ Changelog
 
 **v1.5.0** - *2018-01-02*
 
-------
-
 - Minimum parameter values can now be set and verified with `utils.set_minimum`
   and `utils.get_minimum`.
 
@@ -17,9 +15,10 @@ Changelog
 
 - Version of manuscript submission to geophysics for the DLF article.
 
-**v1.4.4** - *2017-09-18*
 
 ------
+
+**v1.4.4** - *2017-09-18*
 
 [This was meant to be 1.4.3, but due to a setup/pypi/anaconda-issue I had to
 push it to 1.4.4; so there isn't really a version 1.4.3.]
@@ -38,18 +37,19 @@ push it to 1.4.4; so there isn't really a version 1.4.3.]
 
 - Version of CSEM book.
 
-**v1.4.2** - *2017-06-04*
 
 ------
+
+**v1.4.2** - *2017-06-04*
 
 - Bugfix: Fixed squeeze in `model.analytical` with `solution='dsplit'`.
 
 - Version of final submission of manuscript to Geophysics.
 
 
-**v1.4.1** - *2017-05-30*
-
 ------
+
+**v1.4.1** - *2017-05-30*
 
 [This was meant to be 1.4.0, but due to a setup/pypi/anaconda-issue I had to
 push it to 1.4.1; so there isn't really a version 1.4.0.]
@@ -83,9 +83,9 @@ push it to 1.4.1; so there isn't really a version 1.4.0.]
      only fullspace solution (all for the diffusive approximation).
 
 
-**v1.3.0** - *2017-03-30*
-
 ------
+
+**v1.3.0** - *2017-03-30*
 
 - Add additional transforms and improve QWE:
 
@@ -115,9 +115,9 @@ push it to 1.4.1; so there isn't really a version 1.4.0.]
 - Bug fixes and documentation improvements
 
 
-**v1.2.1** - *2017-03-11*
-
 ------
+
+**v1.2.1** - *2017-03-11*
 
 - Change default filter from `key_401_2009` to `key_201_2009` (because of
   warning regarding 401 pt filter in source code of `DIPOLE1D`.)
@@ -127,9 +127,9 @@ push it to 1.4.1; so there isn't really a version 1.4.0.]
 - Bug fixes
 
 
-**v1.2.0** - *2017-02-02*
-
 ------
+
+**v1.2.0** - *2017-02-02*
 
 - New routine:
    - General modelling routine `bipole` (replaces `srcbipole`): Model the
@@ -161,9 +161,9 @@ push it to 1.4.1; so there isn't really a version 1.4.0.]
 - Bug fixes
 
 
-**v1.1.0** - *2016-12-22*
-
 ------
+
+**v1.1.0** - *2016-12-22*
 
 - New routines:
 
@@ -186,10 +186,8 @@ push it to 1.4.1; so there isn't really a version 1.4.0.]
 - Bug fixes
 
 
+------
+
 **v1.0.0** - *2016-11-29*
 
-------
-
 - Initial release; state of manuscript submission to geophysics.
-
-------
