@@ -3,7 +3,12 @@ Manual
 
 .. automodule:: empymod
 
+.. include:: ../ROADMAP.rst
+
 .. include:: ../CREDITS.rst
+
+.. include:: ../CHANGELOG.rst
+
 
 Code
 ####
