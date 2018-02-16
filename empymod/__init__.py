@@ -29,7 +29,8 @@ python distribution via:
 
 Required are python version 3.4 or higher and the modules `NumPy` and `SciPy`.
 If you want to run parts of the kernel in parallel, the module `numexpr` is
-required additionally (built with Intel's VML).
+required additionally (built with Intel's VML). (See `requirements.txt` for
+more specific information.)
 
 **Note**: Do not use `scipy == 0.19.0`. It has a memory leak in `quad`, see
 `github.com/scipy/scipy/pull/7216 <https://github.com/scipy/scipy/pull/7216>`_.
