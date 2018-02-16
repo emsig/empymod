@@ -15,6 +15,7 @@ are included to transform the responses into the space-frequency and space-time
 domains.
 
 .. toctree::
+   :hidden:
+   :glob:
 
    empymod
-   code
