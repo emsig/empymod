@@ -1,7 +1,12 @@
+Manual
+######
+
 .. automodule:: empymod
 
+.. include:: ../CREDITS.rst
+
 Code
-====
+####
 
 .. automodule:: empymod.model
     :members:

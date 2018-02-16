@@ -32,13 +32,11 @@ from empymod import __version__
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinxcontrib.napoleon',
+    'sphinxcontrib.fulltoc',
 ]
 numpydoc_show_class_members = False
 

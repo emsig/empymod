@@ -15,17 +15,10 @@ are included to transform the responses into the space-frequency and space-time
 domains.
 
 
-Contents:
-
 .. toctree::
+   :caption: Table of Contents
+   :numbered:
+   :maxdepth: 2
+   :hidden:
 
    empymod
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
