@@ -30,7 +30,7 @@ For more information (regarding installation, usage, add-ons, contributing,
 roadmap, bug reports, etc) see
 
 - **Website**: `empymod.github.io <https://empymod.github.io>`_,
-- **Documentation**: `empymod.rtfd.io <https://empymod.rtfd.io>`_,
+- **Documentation**: `empymod.readthedocs.io <https://empymod.readthedocs.io>`_,
 - **Source Code**:
   `github.com/empymod/empymod <https://github.com/empymod/empymod>`_,
 - **Add-ons**:
@@ -62,4 +62,4 @@ License information
 Copyright 2016-2018 Dieter Werthmüller
 
 Licensed under the Apache License, Version 2.0. See the ``LICENSE``- and
-``NOTICE``-files on GitHub or the documentation for more information.
+``NOTICE``-files or the documentation for more information.

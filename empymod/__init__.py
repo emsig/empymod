@@ -137,16 +137,8 @@ Structure
     - **transform.py**: Methods to carry out the required Hankel transform from
       wavenumber to space domain and Fourier transform from frequency to time
       domain.
-    - **filters.py**: Filters for the *Fast Hankel Transform* FHT
-      [Anderson_1982]_, and the *Fourier Sine and Cosine Transforms*
-      [Anderson_1975]_.
-
-
-Missing features
-''''''''''''''''
-
-A list of things that should or could be added and improved can be found
-in the `Roadmap <https://github.com/empymod/empymod#roadmap>`_.
+    - **filters.py**: Filters for the *Digital Linear Filters* DLF (Hankel and
+      Fourier transforms) [Anderson_1982]_, [Anderson_1975]_.
 
 
 Testing
@@ -240,11 +232,11 @@ See the `LICENSE`- and `NOTICE`-files on GitHub for more information.
 Note on speed, memory, and accuracy
 -----------------------------------
 There is the usual trade-off between speed, memory, and accuracy. Very
-generally speaking we can say that the *FHT* is faster than *QWE*, but *QWE* is
+generally speaking we can say that the *DLF* is faster than *QWE*, but *QWE* is
 much easier on memory usage. *QWE* allows you to control the accuracy. A
 standard quadrature in the form of *QUAD* is also provided. *QUAD* is generally
 orders of magnitudes slower, and more fragile depending on the input arguments.
-However, it can provide accurate results where *FHT* and *QWE* fail.
+However, it can provide accurate results where *DLF* and *QWE* fail.
 
 There are two optimisation possibilities included via the ``opt``-flag:
 parallelisation (``opt='parallel'``) and spline interpolation
@@ -262,17 +254,18 @@ Included transforms
 
 **Hankel transform**:
 
-    - Fast Hankel Transform *FHT* ([Ghosh_1971]_)
-    - Quadrature with Extrapolation *QWE* ([Key_2012]_)
-    - Adaptive quadrature *QUAD* (from `QUADPACK`)
+    - Digital Linear Filters *DLF*
+    - Quadrature with Extrapolation *QWE*
+    - Adaptive quadrature *QUAD*
 
 **Fourier transform**:
 
-    - Sine- and Cosine filters ([Anderson_1975]_)
-    - Quadrature with Extrapolation *QWE* ([Key_2012]_)
+    - Digital Linear Filters *DLF*
+    - Quadrature with Extrapolation *QWE*
+    - Logarithmic Fast Fourier Transform *FFTLog*
     - Fast Fourier Transform *FFT*
-    - Logarithmic Fast Fourier Transform *FFTLog* ([Hamilton_2000]_)
 
+Add a note regarding FHT, DLF.
 
 FFTLog
 ......
@@ -464,10 +457,10 @@ benchmark-notebook in the `empymod/example-notebooks
 Spline interpolation
 ''''''''''''''''''''
 If ``opt = 'spline'``, the so-called *lagged convolution* or *splined* variant
-of the *FHT* (depending on ``htarg``) or the *splined* version of the *QWE* are
+of the *DLF* (depending on ``htarg``) or the *splined* version of the *QWE* are
 applied. The spline option should be used with caution, as it is an
 interpolation and therefore less precise than the non-spline version. However,
-it significantly speeds up *QWE*, and massively speeds up *FHT*. (The
+it significantly speeds up *QWE*, and massively speeds up *DLF*. (The
 `numexpr`-version of the spline option is slower than the pure spline one, and
 therefore it is only possible to have either ``'parallel'`` or ``'spline'``
 on.)
@@ -475,12 +468,12 @@ on.)
 Setting ``opt = 'spline'`` is generally faster. Good speed-up is achieved for
 *QWE* by setting ``maxint`` as low as possible. Also, the higher ``nquad`` is,
 the higher the speed-up will be.  The variable ``pts_per_dec`` has also some
-influence. For *FHT*, big improvements are achieved for long FHT-filters and
+influence. For *DLF*, big improvements are achieved for long DLF-filters and
 for many offsets/frequencies (thousands).  Additionally, spline minimizes
 memory requirements a lot.  Speed-up is greater if all source-receiver angles
 are identical.
 
-*FHT*: Default for ``pts_per_dec = None``, which is the original *lagged
+*DLF*: Default for ``pts_per_dec = None``, which is the original *lagged
 convolution*, where the spacing is defined by the filter-base, the transform is
 carried out first followed by spline-interpolation. You can set this parameter
 to an integer, which defines the number of points to evaluate per decade. In
@@ -510,7 +503,7 @@ the parameter `htarg` and `ftarg`.
 Looping
 '''''''
 By default, you can calculate many offsets and many frequencies all in one go,
-vectorized (for the *FHT*), which is the default. The ``loop`` parameter gives
+vectorized (for the *DLF*), which is the default. The ``loop`` parameter gives
 you the possibility to force looping over frequencies or offsets. This
 parameter can have severe effects on both runtime and memory usage. Play around
 with this factor to find the fastest version for your problem at hand. It
