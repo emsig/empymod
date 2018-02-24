@@ -4,10 +4,10 @@ Steps to carry out for a new release
 Note: I really should replace this with an automatic deploy-setup...
 
    1. Update:
-      - `CHANGELOG`
-      - `setup.py`: Version number, download url; DO NOT CHANGE THAT
-      - `empymod/__init__.py`: Check version number, remove '.dev?'.
-      - `README.md`: Remove all batches
+      - ``CHANGELOG``
+      - ``setup.py``: Version number, download url; DO NOT CHANGE THAT
+      - ``empymod/__init__.py``: Check version number, remove '.dev?'.
+      - ``README.md``: Remove all batches
 
    2. Remove any old stuff (just in case)
 
@@ -17,7 +17,7 @@ Note: I really should replace this with an automatic deploy-setup...
 
    4. Get the Zenodo-DOI and add it to release notes
 
-   5. Ensure `pypandoc` and `python3-setuptools` are installed:
+   5. Ensure ``pypandoc`` and ``python3-setuptools`` are installed:
 
         conda install pypandoc
         sudo apt install python3-setuptools
@@ -72,6 +72,6 @@ Note: I really should replace this with an automatic deploy-setup...
         anaconda logout
 
    10. Post-commit changes
-      - `setup.py`: Bump number, add '.dev0' to version number
-      - `empymod/__init__.py`: Bump number, add '.dev0' to version number
-      - `README.md`: Add the current batches (|docs| |tests| |coverage|)
+      - ``setup.py``: Bump number, add '.dev0' to version number
+      - ``empymod/__init__.py``: Bump number, add '.dev0' to version number
+      - ``README.md``: Add the current batches (|docs| |tests| |coverage|)

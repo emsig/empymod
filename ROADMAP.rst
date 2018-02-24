@@ -6,7 +6,7 @@ in touch if you would like to tackle one of these problems!
 
 - **Additional modelling routines**
 
-  - `tdem` (**TEM**) [`empymod#8
+  - ``tdem`` (**TEM**) [`empymod#8
     <https://github.com/empymod/empymod/issues/8>`_]: Issues that have to be
     addressed: ramp waveform, windowing, loop integration, zero-offset
     (coincident loop).
@@ -17,11 +17,13 @@ in touch if you would like to tackle one of these problems!
 
   - **Ramp waveform** [`empymod#7
     <https://github.com/empymod/empymod/issues/7>`_]
-  - **Arbitrary waveform** [`empymod#7 <https://github.com/empymod/empymod/issues/7>`_]
-  - Improve the GPR-routine [`empymod#9 <https://github.com/empymod/empymod/issues/9>`_]
+  - **Arbitrary waveform** [`empymod#7
+    <https://github.com/empymod/empymod/issues/7>`_]
+  - Improve the GPR-routine [`empymod#9
+    <https://github.com/empymod/empymod/issues/9>`_]
   - Load and save functions to easily store and load model information
     (resistivity model, acquisition parameters, and modelling parameters)
-    together with the modelling data (using `pickle` or `shelve`).
+    together with the modelling data (using ``pickle`` or ``shelve``).
 
 
 - **Inversion** [`empyscripts#1
@@ -40,18 +42,18 @@ in touch if you would like to tackle one of these problems!
 
 - Fourier transform
 
-  - Change `fft` to use discrete sine/cosine transforms instead, as all other
+  - Change ``fft`` to use discrete sine/cosine transforms instead, as all other
     Fourier transforms
   - If previous step is successful, clean up the internal decisions
-    (`utils.check_time`) when to use sine/cosine transform (not consistent at
-    the moment, some choice only exists with `ffht` impulse responses, `fqwe`
-    and `fftlog` use sine for impulse, and all three use sine for step-on
-    responses and cosine for step-off responses)
+    (``utils.check_time``) when to use sine/cosine transform (not consistent at
+    the moment, some choice only exists with ``ffht`` impulse responses,
+    ``fqwe`` and ``fftlog`` use sine for impulse, and all three use sine for
+    step-on responses and cosine for step-off responses)
 
 
 - Hankel transform
 
-  - Add the `fht`-module from FFTLog for the Hankel transform.
+  - Add the ``fht``-module from FFTLog for the Hankel transform.
 
 
 - Extend examples (example-notebooks)
@@ -60,12 +62,12 @@ in touch if you would like to tackle one of these problems!
   - Reproduce published results
 
 
-- A `cython`, `numba`, or pure C/C++ implementation of the `kernel` and the
-  `transform` modules. Maybe not worth it, as it may improve speed, but
+- A ``cython``, ``numba``, or pure C/C++ implementation of the ``kernel`` and
+  the ``transform`` modules. Maybe not worth it, as it may improve speed, but
   decrease accessibility. Both at the same time would be nice. A fast
   C/C++-version for calculations (inversions), and a Python-version to tinker
   with for interested folks. (Probably combined with default parallelisation,
-  removing the `numexpr` variant.)
+  removing the ``numexpr`` variant.)
 
 - Abstraction of the code.
 
