@@ -1,4 +1,3 @@
-#######
 empymod
 #######
 
@@ -23,37 +22,37 @@ wavenumber-frequency domain, and various Hankel- and Fourier-transform methods
 are included to transform the responses into the space-frequency and space-time
 domains.
 
+See https://empymod.github.io/#features for a complete list of features.
+
 More information
 ================
 
-For more information (regarding installation, usage, add-ons, contributing,
-roadmap, bug reports, etc) see
+For more information regarding installation, usage, add-ons, contributing,
+roadmap, bug reports, and much more, see
 
-- **Website**: `empymod.github.io <https://empymod.github.io>`_,
-- **Documentation**: `empymod.readthedocs.io <https://empymod.readthedocs.io>`_,
-- **Source Code**:
-  `github.com/empymod/empymod <https://github.com/empymod/empymod>`_,
-- **Add-ons**:
-  `github.com/empymod/empyscripts <https://github.com/empymod/empyscripts>`_,
-- **Examples**:
-  `github.com/empymod/example-notebooks
-  <https://github.com/empymod/example-notebooks>`_.
+- **Website**: https://empymod.github.io,
+- **Documentation empymod**: https://empymod.readthedocs.io,
+- **Documentation add-ons**: https://empyscripts.readthedocs.io,
+- **Source Code**: https://github.com/empymod,
+- **Examples**: https://github.com/empymod/example-notebooks.
 
 
 Citation
 ========
 
 If you publish results for which you used empymod, please give credit by citing
-[Werthmuller_2017]_:
+this article:
 
     Werthmüller, D., 2017, An open-source full 3D electromagnetic modeler for
     1D VTI media in Python: empymod: Geophysics, 82(6), WB9--WB19; DOI:
     `10.1190/geo2016-0626.1 <http://doi.org/10.1190/geo2016-0626.1>`_.
 
-
-All releases have a Zenodo-DOI, provided on the `release-page
-<https://github.com/empymod/empymod/releases>`_. Also consider citing
-[Hunziker_et_al_2015]_ and [Key_2012]_, without which empymod would not exist.
+All releases have a Zenodo-DOI, provided on the
+`release-page <https://github.com/empymod/empymod/releases>`_.
+Also consider citing
+`Hunziker et al. (2015) <https://doi.org/10.1190/geo2013-0411.1>`_ and
+`Key (2012) <https://doi.org/10.1190/geo2011-0237.1>`_, without which
+empymod would not exist.
 
 
 License information

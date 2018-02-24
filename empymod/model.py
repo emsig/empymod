@@ -8,35 +8,35 @@ solution to your specific problem. Use these routines as template to create
 your own, problem-specific modelling routine!
 
 Principal routines:
-    - `bipole`
-    - `dipole`
+    - ``bipole``
+    - ``dipole``
 
-The main routine is `bipole`, which can model bipole source(s) and bipole
+The main routine is ``bipole``, which can model bipole source(s) and bipole
 receiver(s) of arbitrary direction, for electric or magnetic sources and
-receivers, both in frequency and in time. A subset of `bipole` is `dipole`,
+receivers, both in frequency and in time. A subset of ``bipole`` is ``dipole``,
 which models infinitesimal small dipoles along the principal axes x, y, and z.
 
 Further routines are:
 
-    - `analytical`: Calculate analytical fullspace and halfspace solutions.
-    - `wavenumber`: Calculate the electromagnetic wavenumber-domain solution.
-    - `gpr`:        Calculate the Ground-Penetrating Radar (GPR) response.
+    - ``analytical``: Calculate analytical fullspace and halfspace solutions.
+    - ``wavenumber``: Calculate the electromagnetic wavenumber-domain solution.
+    - ``gpr``:        Calculate the Ground-Penetrating Radar (GPR) response.
 
-The `wavenumber` routine can be used if you are interested in the
+The ``wavenumber`` routine can be used if you are interested in the
 wavenumber-domain result, without Hankel nor Fourier transform. It calls
-straight the `kernel`. The `gpr`-routine convolves the frequency-domain result
-with a wavelet, and applies a gain to the time-domain result. This function is
-still experimental.
+straight the ``kernel``. The ``gpr``-routine convolves the frequency-domain
+result with a wavelet, and applies a gain to the time-domain result. This
+function is still experimental.
 
 The modelling routines make use of the following two core routines:
-    - `fem`: Calculate wavenumber-domain electromagnetic field and carry out
-             the Hankel transform to the frequency domain.
-    - `tem`: Carry out the Fourier transform to time domain after `fem`.
+    - ``fem``: Calculate wavenumber-domain electromagnetic field and carry out
+               the Hankel transform to the frequency domain.
+    - ``tem``: Carry out the Fourier transform to time domain after ``fem``.
 
 """
 # Copyright 2016-2018 Dieter Werthmüller
 #
-# This file is part of `empymod`.
+# This file is part of empymod.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License.  You may obtain a copy
@@ -119,7 +119,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
     freqtime : array_like
-        Frequencies f (Hz) if `signal` == None, else times t (s); (f, t > 0).
+        Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
 
     signal : {None, 0, 1, -1}, optional
         Source signal, default is None:
@@ -166,22 +166,23 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         Defaults to True.
 
     ht : {'fht', 'qwe', 'quad'}, optional
-        Flag to choose either the *Fast Hankel Transform* (FHT), the
-        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
-        for the Hankel transform.  Defaults to 'fht'.
+        Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
+        Hankel Transform*), the *Quadrature-With-Extrapolation* (QWE), or a
+        simple *Quadrature* (QUAD) for the Hankel transform.  Defaults to
+        'fht'.
 
     htarg : dict or list, optional
-        Depends on the value for `ht`:
-            - If `ht` = 'fht': [filter, pts_per_dec]:
+        Depends on the value for ``ht``:
+            - If ``ht`` = 'fht': [filter, pts_per_dec]:
 
-                - filter: string of filter name in `empymod.filters` or
+                - filter: string of filter name in ``empymod.filters`` or
                           the filter method itself.
-                          (default: `empymod.filters.key_201_2009()`)
+                          (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade (only relevant if spline=True)
                                If none, standard lagged convolution is used.
                                 (default: None)
 
-            - If `ht` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
+            - If ``ht`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
                                 diff_quad, a, b, limit]:
 
                 - rtol: relative tolerance (default: 1e-12)
@@ -197,7 +198,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - b: upper limit for QUAD (default: last interval from QWE)
                 - limit: limit for quad (default: maxint)
 
-            - If `ht` = 'quad': [atol, rtol, limit, lmin, lmax, pts_per_dec]:
+            - If ``ht`` = 'quad': [atol, rtol, limit, lmin, lmax, pts_per_dec]:
 
                 - rtol: relative tolerance (default: 1e-12)
                 - atol: absolute tolerance (default: 1e-20)
@@ -209,7 +210,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         The values can be provided as dict with the keywords, or as list.
         However, if provided as list, you have to follow the order given above.
-        A few examples, assuming `ht` = `qwe`:
+        A few examples, assuming ``ht`` = ``qwe``:
 
             - Only changing rtol:
                 {'rtol': 1e-4} or [1e-4] or 1e-4
@@ -219,21 +220,22 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 {'diffquad': 10} or ['', '', '', '', '', 10]
 
     ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
-        Only used if `signal` != None. Flag to choose either the Sine- or
-        Cosine-Filter, the Quadrature-With-Extrapolation (QWE), the FFTLog, or
-        the FFT for the Fourier transform.  Defaults to 'sin'.
+        Only used if ``signal`` != None. Flag to choose either the Digital
+        Linear Filter method (Sine- or Cosine-Filter), the
+        Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
+        Fourier transform.  Defaults to 'sin'.
 
     ftarg : dict or list, optional
-        Only used if `signal` !=None. Depends on the value for `ft`:
-            - If `ft` = 'sin' or 'cos': [filter, pts_per_dec]:
+        Only used if ``signal`` !=None. Depends on the value for ``ft``:
+            - If ``ft`` = 'sin' or 'cos': [filter, pts_per_dec]:
 
-                - filter: string of filter name in `empymod.filters` or
+                - filter: string of filter name in ``empymod.filters`` or
                           the filter method itself.
-                          (Default: `empymod.filters.key_201_CosSin_2012()`)
+                          (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade.  If none, standard lagged
                                convolution is used. (Default: None)
 
-            - If `ft` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
+            - If ``ft`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
 
                 - rtol: relative tolerance (default: 1e-8)
                 - atol: absolute tolerance (default: 1e-20)
@@ -246,13 +248,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - b: upper limit for QUAD (default: last interval from QWE)
                 - limit: limit for quad (default: maxint)
 
-            - If `ft` = 'fftlog': [pts_per_dec, add_dec, q]:
+            - If ``ft`` = 'fftlog': [pts_per_dec, add_dec, q]:
 
                 - pts_per_dec: sampels per decade (default: 10)
                 - add_dec: additional decades [left, right] (default: [-2, 1])
                 - q: exponent of power law bias (default: 0); -1 <= q <= 1
 
-            - If `ft` = 'fft': [dfreq, nfreq, ntot]:
+            - If ``ft`` = 'fft': [dfreq, nfreq, ntot]:
 
                 - dfreq: Linear step-size of frequencies (default: 0.002)
                 - nfreq: Number of frequencies (default: 2048)
@@ -269,30 +271,29 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         The values can be provided as dict with the keywords, or as list.
         However, if provided as list, you have to follow the order given above.
-        See `htarg` for a few examples.
+        See ``htarg`` for a few examples.
 
     opt : {None, 'parallel', 'spline'}, optional
         Optimization flag. Defaults to None:
             - None: Normal case, no parallelization nor interpolation is used.
-            - If 'parallel', the package `numexpr` is used to evaluate the most
-              expensive statements. Always check if it actually improves
+            - If 'parallel', the package ``numexpr`` is used to evaluate the
+              most expensive statements. Always check if it actually improves
               performance for a specific problem. It can speed up the
               calculation for big arrays, but will most likely be slower for
               small arrays. It will use all available cores for these specific
-              statements, which all contain `Gamma` in one way or another,
+              statements, which all contain ``Gamma`` in one way or another,
               which has dimensions (#frequencies, #offsets, #layers, #lambdas),
-              therefore can grow pretty big.
-              The module `numexpr` uses by default all available cores up to a
-              maximum of 8. You can change this behaviour to your desired
-              number of threads `nthreads` with
-              `numexpr.set_num_threads(nthreads)`.
+              therefore can grow pretty big. The module ``numexpr`` uses by
+              default all available cores up to a maximum of 8. You can change
+              this behaviour to your desired number of threads ``nthreads``
+              with ``numexpr.set_num_threads(nthreads)``.
             - If 'spline', the *lagged convolution* or *splined* variant of the
-              FHT or the *splined* version of the QWE are used. Use with
+              DLF/FHT or the *splined* version of the QWE are used. Use with
               caution and check with the non-spline version for a specific
               problem. (Can be faster, slower, or plainly wrong, as it uses
               interpolation.) If spline is set it will make use of the
               parameter pts_per_dec that can be defined in htarg. If
-              pts_per_dec is not set for FHT, then the *lagged* version is
+              pts_per_dec is not set for DLF/FHT, then the *lagged* version is
               used, else the *splined*. This option has no effect on QUAD.
 
         The option 'parallel' only affects speed and memory usage, whereas
@@ -321,7 +322,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     Returns
     -------
     EM : ndarray, (nfreq, nrec, nsrc)
-        Frequency- or time-domain EM field (depending on `signal`):
+        Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns B [T] (not H [A/m]!).
 
@@ -370,7 +371,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        mpermH      [-] :  1 1 1 1 1
        mpermV      [-] :  1 1 1 1 1
        frequency  [Hz] :  1
-       Hankel          :  Fast Hankel Transform
+       Hankel          :  DLF (Fast Hankel Transform)
          > Filter      :  Key 201 (2009)
          > pts_per_dec :  Defined by filter (lagged)
        Hankel Opt.     :  None
@@ -596,13 +597,13 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     sources are at the same depth, as well as all receivers are at the same
     depth.
 
-    Use the functions `bipole` to calculate dipoles with arbitrary angles or
+    Use the functions ``bipole`` to calculate dipoles with arbitrary angles or
     bipoles of finite length and arbitrary angle.
 
-    The function `dipole` could be replaced by `bipole` (all there is to do is
-    translate `ab` into `msrc`, `mrec`, `azimuth`'s and `dip`'s). However,
-    `dipole` is kept separately to serve as an example of a simple modelling
-    routine that can serve as a template.
+    The function ``dipole`` could be replaced by ``bipole`` (all there is to do
+    is translate ``ab`` into ``msrc``, ``mrec``, ``azimuth``'s and ``dip``'s).
+    However, ``dipole`` is kept separately to serve as an example of a simple
+    modelling routine that can serve as a template.
 
 
     See Also
@@ -630,7 +631,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
     freqtime : array_like
-        Frequencies f (Hz) if `signal` == None, else times t (s); (f, t > 0).
+        Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
 
     signal : {None, 0, 1, -1}, optional
         Source signal, default is None:
@@ -680,22 +681,23 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         Defaults to True.
 
     ht : {'fht', 'qwe', 'quad'}, optional
-        Flag to choose either the *Fast Hankel Transform* (FHT), the
-        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
-        for the Hankel transform.  Defaults to 'fht'.
+        Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
+        Hankel Transform*), the *Quadrature-With-Extrapolation* (QWE), or a
+        simple *Quadrature* (QUAD) for the Hankel transform.  Defaults to
+        'fht'.
 
     htarg : dict or list, optional
-        Depends on the value for `ht`:
-            - If `ht` = 'fht': [filter, pts_per_dec]:
+        Depends on the value for ``ht``:
+            - If ``ht`` = 'fht': [filter, pts_per_dec]:
 
-                - filter: string of filter name in `empymod.filters` or
+                - filter: string of filter name in ``empymod.filters`` or
                           the filter method itself.
-                          (default: `empymod.filters.key_201_2009()`)
+                          (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade (only relevant if spline=True)
                                If none, standard lagged convolution is used.
                                 (default: None)
 
-            - If `ht` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
+            - If ``ht`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
                                 diff_quad, a, b, limit]:
 
                 - rtol: relative tolerance (default: 1e-12)
@@ -711,7 +713,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - b: upper limit for QUAD (default: last interval from QWE)
                 - limit: limit for quad (default: maxint)
 
-            - If `ht` = 'quad': [atol, rtol, limit, lmin, lmax, pts_per_dec]:
+            - If ``ht`` = 'quad': [atol, rtol, limit, lmin, lmax, pts_per_dec]:
 
                 - rtol: relative tolerance (default: 1e-12)
                 - atol: absolute tolerance (default: 1e-20)
@@ -723,7 +725,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
         The values can be provided as dict with the keywords, or as list.
         However, if provided as list, you have to follow the order given above.
-        A few examples, assuming `ht` = `qwe`:
+        A few examples, assuming ``ht`` = ``qwe``:
 
             - Only changing rtol:
                 {'rtol': 1e-4} or [1e-4] or 1e-4
@@ -733,21 +735,22 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 {'diffquad': 10} or ['', '', '', '', '', 10]
 
     ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
-        Only used if `signal` != None. Flag to choose either the Sine- or
-        Cosine-Filter, the Quadrature-With-Extrapolation (QWE), the FFTLog, or
-        the FFT for the Fourier transform.  Defaults to 'sin'.
+        Only used if ``signal`` != None. Flag to choose either the Digital
+        Linear Filter method (Sine- or Cosine-Filter), the
+        Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
+        Fourier transform.  Defaults to 'sin'.
 
     ftarg : dict or list, optional
-        Only used if `signal` !=None. Depends on the value for `ft`:
-            - If `ft` = 'sin' or 'cos': [filter, pts_per_dec]:
+        Only used if ``signal`` !=None. Depends on the value for ``ft``:
+            - If ``ft`` = 'sin' or 'cos': [filter, pts_per_dec]:
 
-                - filter: string of filter name in `empymod.filters` or
+                - filter: string of filter name in ``empymod.filters`` or
                           the filter method itself.
-                          (Default: `empymod.filters.key_201_CosSin_2012()`)
+                          (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade.  If none, standard lagged
                                convolution is used. (Default: None)
 
-            - If `ft` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
+            - If ``ft`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
 
                 - rtol: relative tolerance (default: 1e-8)
                 - atol: absolute tolerance (default: 1e-20)
@@ -760,13 +763,13 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - b: upper limit for QUAD (default: last interval from QWE)
                 - limit: limit for quad (default: maxint)
 
-            - If `ft` = 'fftlog': [pts_per_dec, add_dec, q]:
+            - If ``ft`` = 'fftlog': [pts_per_dec, add_dec, q]:
 
                 - pts_per_dec: sampels per decade (default: 10)
                 - add_dec: additional decades [left, right] (default: [-2, 1])
                 - q: exponent of power law bias (default: 0); -1 <= q <= 1
 
-            - If `ft` = 'fft': [dfreq, nfreq, ntot]:
+            - If ``ft`` = 'fft': [dfreq, nfreq, ntot]:
 
                 - dfreq: Linear step-size of frequencies (default: 0.002)
                 - nfreq: Number of frequencies (default: 2048)
@@ -783,30 +786,29 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
         The values can be provided as dict with the keywords, or as list.
         However, if provided as list, you have to follow the order given above.
-        See `htarg` for a few examples.
+        See ``htarg`` for a few examples.
 
     opt : {None, 'parallel', 'spline'}, optional
         Optimization flag. Defaults to None:
             - None: Normal case, no parallelization nor interpolation is used.
-            - If 'parallel', the package `numexpr` is used to evaluate the most
-              expensive statements. Always check if it actually improves
+            - If 'parallel', the package ``numexpr`` is used to evaluate the
+              most expensive statements. Always check if it actually improves
               performance for a specific problem. It can speed up the
               calculation for big arrays, but will most likely be slower for
               small arrays. It will use all available cores for these specific
-              statements, which all contain `Gamma` in one way or another,
+              statements, which all contain ``Gamma`` in one way or another,
               which has dimensions (#frequencies, #offsets, #layers, #lambdas),
-              therefore can grow pretty big.
-              The module `numexpr` uses by default all available cores up to a
-              maximum of 8. You can change this behaviour to your desired
-              number of threads `nthreads` with
-              `numexpr.set_num_threads(nthreads)`.
+              therefore can grow pretty big. The module ``numexpr`` uses by
+              default all available cores up to a maximum of 8. You can change
+              this behaviour to your desired number of threads ``nthreads``
+              with ``numexpr.set_num_threads(nthreads)``.
             - If 'spline', the *lagged convolution* or *splined* variant of the
-              FHT or the *splined* version of the QWE are used. Use with
+              DLF/FHT or the *splined* version of the QWE are used. Use with
               caution and check with the non-spline version for a specific
               problem. (Can be faster, slower, or plainly wrong, as it uses
               interpolation.) If spline is set it will make use of the
               parameter pts_per_dec that can be defined in htarg. If
-              pts_per_dec is not set for FHT, then the *lagged* version is
+              pts_per_dec is not set for DLF/FHT, then the *lagged* version is
               used, else the *splined*. This option has no effect on QUAD.
 
         The option 'parallel' only affects speed and memory usage, whereas
@@ -835,7 +837,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     Returns
     -------
     EM : ndarray, (nfreq, nrec, nsrc)
-        Frequency- or time-domain EM field (depending on `signal`):
+        Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns B [T] (not H [A/m]!).
 
@@ -874,7 +876,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     # === 2.  CHECK INPUT ============
 
     # Check times and Fourier Transform arguments, get required frequencies
-    # (freq = freqtime if `signal=None`)
+    # (freq = freqtime if ``signal=None``)
     if signal is not None:
         time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
     else:
@@ -953,24 +955,25 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     In the case of a halfspace the air-interface is located at z = 0 m.
 
-    You can call the functions `fullspace` and `halfspace` in `kernel.py`
+    You can call the functions ``fullspace`` and ``halfspace`` in ``kernel.py``
     directly. This interface is just to provide a consistent interface with the
-    same input parameters as for instance for `dipole`.
+    same input parameters as for instance for ``dipole``.
 
-    This function yields the same result if `solution='fs'` as `dipole`, if the
-    model is a fullspace.
+    This function yields the same result if ``solution='fs'`` as ``dipole``, if
+    the model is a fullspace.
 
     Included are:
-      - Full fullspace solution (`solution='fs'`) for ee-, me-, em-, mm-fields,
-        [Hunziker_et_al_2015]_.
-      - Diffusive fullspace solution (`solution='dfs'`) for ee-fields,
+      - Full fullspace solution (``solution='fs'``) for ee-, me-, em-,
+        mm-fields, [Hunziker_et_al_2015]_.
+      - Diffusive fullspace solution (``solution='dfs'``) for ee-fields,
         [Slob_et_al_2010]_.
-      - Diffusive halfspace solution (`solution='dhs'`) for ee-fields,
+      - Diffusive halfspace solution (``solution='dhs'``) for ee-fields,
         [Slob_et_al_2010]_.
-      - Diffusive direct- and reflected field and airwave (`solution='dsplit'`)
-        for ee-fields, [Slob_et_al_2010]_.
-      - Diffusive direct- and reflected field and airwave (`solution='dtetm'`)
-        for ee-fields, split into TE and TM mode [Slob_et_al_2010]_.
+      - Diffusive direct- and reflected field and airwave
+        (``solution='dsplit'``) for ee-fields, [Slob_et_al_2010]_.
+      - Diffusive direct- and reflected field and airwave
+        (``solution='dtetm'``) for ee-fields, split into TE and TM mode
+        [Slob_et_al_2010]_.
 
     Parameters
     ----------
@@ -983,7 +986,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         Horizontal resistivity rho_h (Ohm.m).
 
     freqtime : array_like
-        Frequencies f (Hz) if `signal` == None, else times t (s); (f, t > 0).
+        Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
 
     solution : str, optional
       Defines which solution is returned:
@@ -1045,7 +1048,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     Returns
     -------
     EM : ndarray, (nfreq, nrec, nsrc)
-        Frequency- or time-domain EM field (depending on `signal`):
+        Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns B [T] (not H [A/m]!).
 
@@ -1059,10 +1062,10 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         The shape of EM is (nfreq, nrec, nsrc). However, single dimensions
         are removed.
 
-        If `solution='dsplit'`, three ndarrays are returned: direct, reflect,
+        If ``solution='dsplit'``, three ndarrays are returned: direct, reflect,
         air.
 
-        If `solution='dtetm'`, five ndarrays are returned: direct_TE,
+        If ``solution='dtetm'``, five ndarrays are returned: direct_TE,
         direct_TM, reflect_TE, reflect_TM, air.
 
 
@@ -1157,15 +1160,15 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
     THIS FUNCTION IS EXPERIMENTAL, USE WITH CAUTION.
 
     It is rather an example how you can calculate GPR responses; however, DO
-    NOT RELY ON IT! It works only well with QUAD or QWE (`quad`, `qwe`) for the
-    Hankel transform, and with FFT (`fft`) for the Fourier transform.
+    NOT RELY ON IT! It works only well with QUAD or QWE (``quad``, ``qwe``) for
+    the Hankel transform, and with FFT (``fft``) for the Fourier transform.
 
-    It calls internally `dipole` for the frequency-domain calculation. It
+    It calls internally ``dipole`` for the frequency-domain calculation. It
     subsequently convolves the response with a Ricker wavelet with central
-    frequency `cf`. If signal!=None, it carries out the Fourier transform and
+    frequency ``cf``. If signal!=None, it carries out the Fourier transform and
     applies a gain to the response.
 
-    For input parameters see the function `dipole`, except for:
+    For input parameters see the function ``dipole``, except for:
 
     Parameters
     ----------

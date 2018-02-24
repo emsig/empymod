@@ -1,34 +1,35 @@
 """
 
-:mod:`filters` -- Digital Filters for FHT
-=========================================
+:mod:`filters` -- Digital Linear Filters
+========================================
 
-Filters for the *Fast Hankel Transform* (FHT, [Anderson_1982]_) and the
-*Fourier Sine and Cosine Transforms* [Anderson_1975]_.
+Filters for the *Digital Linear Filter* (DLF) method for the Hankel
+[Ghosh_1971]_) and the Fourier ([Anderson_1975]_) transforms.
 
-To calculate the `fhtfilter.factor` I used
+To calculate the ``dlf.factor`` I used
 
 .. code-block:: python
 
-    np.around(np.average(fhtfilter.base[1:]/fhtfilter.base[:-1]), 15)
+    np.around(np.average(dlf.base[1:]/dlf.base[:-1]), 15)
 
 
-The filters `kong_61_2007` and `kong_241_2007` from [Kong_2007]_, and
-`key_101_2009`, `key_201_2009`, `key_401_2009`, `key_81_CosSin_2009`,
-`key_241_CosSin_2009`, and `key_601_CosSin_2009` from [Key_2009]_ are taken
-from *DIPOLE1D*, [Key_2009]_, which can be downloaded at 1DCSEM_.
-*DIPOLE1D* is distributed under the license GNU GPL version 3 or later. Kerry
-Key gave his written permission to re-distribute the filters under the Apache
-License, Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November
-2016).
+The filters ``kong_61_2007`` and ``kong_241_2007`` from [Kong_2007]_, and
+``key_101_2009``, ``key_201_2009``, ``key_401_2009``, ``key_81_CosSin_2009``,
+``key_241_CosSin_2009``, and ``key_601_CosSin_2009`` from [Key_2009]_ are taken
+from *DIPOLE1D*, [Key_2009]_, which can be downloaded at
+http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM (1DCSEM_). *DIPOLE1D* is
+distributed under the license GNU GPL version 3 or later. Kerry Key gave his
+written permission to re-distribute the filters under the Apache License,
+Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November 2016).
 
-The filters `anderson_801_1982` from [Anderson_1982]_ and
-`key_51_2012`, `key_101_2012`, `key_201_2012`, `key_101_CosSin_2012`, and
-`key_201_CosSin_2012`, all from [Key_2012]_, are taken from the software
-distributed with [Key_2012]_ and available at SEG-2012-003_.
-These filters are distributed under the SEG license.
+The filters ``anderson_801_1982`` from [Anderson_1982]_ and ``key_51_2012``,
+``key_101_2012``, ``key_201_2012``, ``key_101_CosSin_2012``, and
+``key_201_CosSin_2012``, all from [Key_2012]_, are taken from the software
+distributed with [Key_2012]_ and available at http://software.seg.org/2012/0003
+(SEG-2012-003_). These filters are distributed under the SEG license.
 
-The filter `wer_201_2018` was designed with the add-on `fdesign`.
+The filter ``wer_201_2018`` was designed with the add-on ``fdesign``, see
+https://github.com/empymod/article-fdesign.
 
 .. _1DCSEM: http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM
 .. _SEG-2012-003: http://software.seg.org/2012/0003
@@ -36,7 +37,7 @@ The filter `wer_201_2018` was designed with the add-on `fdesign`.
 """
 # Copyright 2016-2018 Dieter Werthmüller
 #
-# This file is part of `empymod`.
+# This file is part of empymod.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License.  You may obtain a copy
@@ -57,27 +58,27 @@ import numpy as np
 # 0. Filter Class
 
 class DigitalFilter:
-    """Simple Class for Digital Filters."""
+    """Simple Class for Digital Linear Filters."""
     def __init__(self, name):
-        """Add the filter name."""
+        """Add filter name."""
         self.name = name
 
 
-# 1. FHT
+# 1. Hankel DLF
 
 def kong_61_2007():
     """Kong 61 pt Hankel filter, as published in [Kong_2007]_.
 
-    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+    Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
     <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
-    fhtfilter = DigitalFilter('Kong 61')
+    dlf = DigitalFilter('Kong 61')
 
-    fhtfilter.base = np.array([
+    dlf.base = np.array([
             2.3517745856009100e-02, 2.6649097336355482e-02,
             3.0197383422318501e-02, 3.4218118311666032e-02,
             3.8774207831722009e-02, 4.3936933623407420e-02,
@@ -110,9 +111,9 @@ def kong_61_2007():
             3.3115451958692312e+01, 3.7524723159601002e+01,
             4.2521082000062783e+01])
 
-    fhtfilter.factor = np.array([1.1331484530668261])
+    dlf.factor = np.array([1.1331484530668261])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
             1.4463210615326699e+02, -1.1066222143752420e+03,
             3.7030010025325978e+03, -6.8968188464424520e+03,
             7.1663544112656937e+03, -2.4507884783377681e+03,
@@ -145,7 +146,7 @@ def kong_61_2007():
             2.3846917590855061e-04, -6.9102205995825531e-05,
             6.7792635718095777e-06])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
             4.6440396425864918e+01, -4.5034239857914162e+02,
             1.7723440076223640e+03, -3.7559735516994660e+03,
             4.4736494009764137e+03, -2.2476603569606068e+03,
@@ -178,22 +179,22 @@ def kong_61_2007():
             2.2002397354029149e-03, -2.8146036357227600e-04,
             1.8788896009128770e-05])
 
-    return fhtfilter
+    return dlf
 
 
 def kong_241_2007():
     """Kong 241 pt Hankel filter, as published in [Kong_2007]_.
 
-    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+    Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
     <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
-    fhtfilter = DigitalFilter('Kong 241')
+    dlf = DigitalFilter('Kong 241')
 
-    fhtfilter.base = np.array([
+    dlf.base = np.array([
             4.0973497897978643e-04, 4.3725238042414673e-04,
             4.6661782370309847e-04, 4.9795542150327349e-04,
             5.3139762179825294e-04, 5.6708576763830356e-04,
@@ -316,9 +317,9 @@ def kong_241_2007():
             2.1430814452477584e+03, 2.2870087042864643e+03,
             2.4406019776245007e+03])
 
-    fhtfilter.factor = np.array([1.0671590243841931])
+    dlf.factor = np.array([1.0671590243841931])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
             2.0521734894828349e+01, -1.8902686822627982e+02,
             7.3615711333621391e+02, -1.5743636401162100e+03,
             1.9044172285355407e+03, -9.3177949828687565e+02,
@@ -441,7 +442,7 @@ def kong_241_2007():
             -1.9631579670478718e-07, 3.0405955678339503e-08,
             -2.4535953018971818e-09])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
             -6.8036776043707992e+00, 1.2311367914708828e+02,
             -6.0393880274694629e+02, 1.4366739793969700e+03,
             -1.8485584122626103e+03, 1.0200389392810666e+03,
@@ -564,22 +565,22 @@ def kong_241_2007():
             1.0805490301555136e-07, -1.7684735514194769e-08,
             1.5081394131412287e-09])
 
-    return fhtfilter
+    return dlf
 
 
 def key_101_2009():
     """Key 101 pt Hankel filter, as published in [Key_2009]_.
 
-    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+    Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
     <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
-    fhtfilter = DigitalFilter('Key 101 (2009)')
+    dlf = DigitalFilter('Key 101 (2009)')
 
-    fhtfilter.base = np.array([
+    dlf.base = np.array([
         3.182780796509667e-03, 3.570677233218250e-03, 4.005847942090417e-03,
         4.494054401183452e-03, 5.041760259690979e-03, 5.656216913953108e-03,
         6.345559512909110e-03, 7.118914664064660e-03, 7.986521265955502e-03,
@@ -615,9 +616,9 @@ def key_101_2009():
         1.983434254093812e+02, 2.225162204838159e+02, 2.496350371896939e+02,
         2.800589173104007e+02, 3.141906602856942e+02])
 
-    fhtfilter.factor = np.array([1.1218734375719379])
+    dlf.factor = np.array([1.1218734375719379])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
         1.761499629714979e+00, -1.261104080802587e+01, 4.589440735380221e+01,
         -1.137201615271146e+02, 2.171373845748458e+02, -3.427418757004401e+02,
         4.682970092296048e+02, -5.721810218704758e+02, 6.404705872914975e+02,
@@ -653,7 +654,7 @@ def key_101_2009():
         6.748422483369748e-05, -2.590402870915282e-05, 7.676168023731497e-06,
         -1.549433571510781e-06, 1.584912057504873e-07])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
         3.382421751388876e-04, -2.080089427136974e-03, 6.616516890510206e-03,
         -1.444442106541980e-02, 2.445603365138576e-02, -3.439020151920317e-02,
         4.205277853503258e-02, -4.616883971957859e-02, 4.665044563723574e-02,
@@ -689,22 +690,22 @@ def key_101_2009():
         -5.283266194475448e-04, 2.099779511098949e-04, -6.484566005000160e-05,
         1.372984806560325e-05, -1.482645851470641e-06])
 
-    return fhtfilter
+    return dlf
 
 
 def key_201_2009():
     """Key 201 pt Hankel filter, as published in [Key_2009]_.
 
-    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+    Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
     <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
-    fhtfilter = DigitalFilter('Key 201 (2009)')
+    dlf = DigitalFilter('Key 201 (2009)')
 
-    fhtfilter.base = np.array([
+    dlf.base = np.array([
         6.112527611295728e-04, 6.582011330626792e-04, 7.087554594672159e-04,
         7.631927021868981e-04, 8.218110956199024e-04, 8.849317805958155e-04,
         9.529005637454616e-04, 1.026089812002297e-03, 1.104900492614410e-03,
@@ -773,9 +774,9 @@ def key_201_2009():
         1.130030610186370e+03, 1.216824651467729e+03, 1.310285065796017e+03,
         1.410923875989213e+03, 1.519292431702289e+03, 1.635984429995926e+03])
 
-    fhtfilter.factor = np.array([1.0768068054962201])
+    dlf.factor = np.array([1.0768068054962201])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
         1.104702818216325e-01, -3.002860174042879e-01, 0.000000000000000e+00,
         9.304611998317738e-01, -1.237989456789895e+00, 0.000000000000000e+00,
         1.522782496923861e+00, -1.481262207187227e+00, 0.000000000000000e+00,
@@ -844,7 +845,7 @@ def key_201_2009():
         -3.374980009202976e-06, 1.323028566570774e-06, -4.342813347631881e-07,
         1.120529389225740e-07, -2.023679217396607e-08, 1.923133952677995e-09])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
         1.289633927144360e-05, -4.692852957012775e-05, 5.712407500240781e-05,
         0.000000000000000e+00, -5.401898356504400e-05, 0.000000000000000e+00,
         1.163813605855986e-04, -1.341585158986474e-04, 0.000000000000000e+00,
@@ -913,22 +914,22 @@ def key_201_2009():
         -1.184499677743133e-05, 4.678587718668116e-06, -1.544064223784288e-06,
         3.995921803021977e-07, -7.219416019819105e-08, 6.844864105885603e-09])
 
-    return fhtfilter
+    return dlf
 
 
 def key_401_2009():
     """Key 401 pt Hankel filter, as published in [Key_2009]_.
 
-    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+    Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
     <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
-    fhtfilter = DigitalFilter('Key 401 (2009)')
+    dlf = DigitalFilter('Key 401 (2009)')
 
-    fhtfilter.base = np.array([
+    dlf.base = np.array([
         6.825603376334870e-08, 7.375625734276621e-08, 7.969970121723440e-08,
         8.612208106759941e-08, 9.306199062400369e-08, 1.005611335855232e-07,
         1.086645742284082e-07, 1.174210082088922e-07, 1.268830551878997e-07,
@@ -1064,9 +1065,9 @@ def key_401_2009():
         1.454248746767143e+06, 1.571435357331702e+06, 1.698065126589807e+06,
         1.834899005350438e+06, 1.982759263537569e+06])
 
-    fhtfilter.factor = np.array([1.0805822324585601])
+    dlf.factor = np.array([1.0805822324585601])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
         0.000000000000000e+00, 0.000000000000000e+00, 9.824913062932289e-08,
         0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00,
         0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00,
@@ -1202,7 +1203,7 @@ def key_401_2009():
         8.053026529021296e-09, -1.901548822685746e-09, 3.176144531356312e-10,
         -3.147399480514734e-11, 1.181734681811153e-12])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
         0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00,
         -1.761153377678605e-10, 0.000000000000000e+00, 0.000000000000000e+00,
         0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00,
@@ -1337,21 +1338,21 @@ def key_401_2009():
         6.033173947686275e-08, -3.349527235750482e-08, 1.640107598073682e-08,
         -6.856420858188184e-09, 2.340536901536035e-09, -6.097093750212437e-10,
         1.074334228952679e-10, -9.576603341064843e-12])
-    return fhtfilter
+    return dlf
 
 
 def anderson_801_1982():
     """Anderson 801 pt Hankel filter, as published in [Anderson_1982]_.
 
-    Taken from file *wa801Hankel.txt* provided with SEG-2012-003_.
+    Taken from file ``wa801Hankel.txt`` provided with SEG-2012-003_.
 
     License: http://software.seg.org/disclaimer.txt.
 
     """
 
-    fhtfilter = DigitalFilter('Anderson 801')
+    dlf = DigitalFilter('Anderson 801')
 
-    fhtfilter.base = np.array([
+    dlf.base = np.array([
         8.9170998013276122e-14, 9.8549193740053558e-14, 1.0891370292131004e-13,
         1.2036825704856271e-13, 1.3302749714952577e-13, 1.4701812115404721e-13,
         1.6248015192957424e-13, 1.7956833867707853e-13, 1.9845370571306597e-13,
@@ -1621,9 +1622,9 @@ def anderson_801_1982():
         4.0450443093422228e+21, 4.4704653330124248e+21,
         4.9406282763106685e+21])
 
-    fhtfilter.factor = np.array([1.1051709180756479])
+    dlf.factor = np.array([1.1051709180756479])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
         0.21035620538389819885E-28, -0.12644693616088940552E-13,
         0.46157312567885668321E-13, -0.27987033742576678494E-13,
         0.54657649654108409156E-13, -0.26529331099287291499E-13,
@@ -2026,7 +2027,7 @@ def anderson_801_1982():
         0.47175970286618397865E-10, -0.59920514722972034865E-10,
         0.90953607290146280299E-10])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
         -0.23779001100582381051E-28, 0.79721192934236443185E-27,
         0.38325661863384939290E-27, 0.84934033213920264104E-27,
         0.82321643716951481883E-27, 0.11003687170198490196E-26,
@@ -2429,21 +2430,21 @@ def anderson_801_1982():
         0.70176504791510964044E-27, -0.70696084721646144402E-27,
         0.72149205056137611593E-27])
 
-    return fhtfilter
+    return dlf
 
 
 def key_51_2012():
     """Key 51 pt Hankel filter, as published in [Key_2012]_.
 
-    Taken from file *kk51Hankel.txt* provided with SEG-2012-003_.
+    Taken from file ``kk51Hankel.txt`` provided with SEG-2012-003_.
 
     License: http://software.seg.org/disclaimer.txt.
 
     """
 
-    fhtfilter = DigitalFilter('Key 51 (2012)')
+    dlf = DigitalFilter('Key 51 (2012)')
 
-    fhtfilter.base = np.array([
+    dlf.base = np.array([
         4.9915939069102170e-03, 6.1703482511978082e-03, 7.6274629409160176e-03,
         9.4286721829279947e-03, 1.1655233178024955e-02, 1.4407591843112350e-02,
         1.7809914185937643e-02, 2.2015687754376449e-02, 2.7214645856121149e-02,
@@ -2463,9 +2464,9 @@ def key_51_2012():
         1.3110519287294045e+02, 1.6206540689269471e+02,
         2.0033680997479166e+02])
 
-    fhtfilter.factor = np.array([1.2361478850785039])
+    dlf.factor = np.array([1.2361478850785039])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
         6.5314496156480717e-02, -2.2265895125268051e-01,
         4.2794928430042073e-01, -5.8890658905204007e-01,
         6.7897324897038758e-01, -6.8296549495756353e-01,
@@ -2493,7 +2494,7 @@ def key_51_2012():
         -1.5287051174029577e-04, 4.8238483411813232e-05,
         -8.0433917146487977e-06])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
         3.8409924166118657e-05, -9.4382633059055269e-05,
         1.6377612356675232e-04, -1.7853487610334151e-04,
         1.9759569268356316e-04, -1.2796247718553291e-04,
@@ -2521,21 +2522,21 @@ def key_51_2012():
         3.6269079130258285e-03, -1.2668720233377250e-03,
         2.3403502580547994e-04])
 
-    return fhtfilter
+    return dlf
 
 
 def key_101_2012():
     """Key 101 pt Hankel filter, as published in [Key_2012]_.
 
-    Taken from file *kk101Hankel.txt* provided with SEG-2012-003_.
+    Taken from file ``kk101Hankel.txt`` provided with SEG-2012-003_.
 
     License: http://software.seg.org/disclaimer.txt.
 
     """
 
-    fhtfilter = DigitalFilter('Key 101 (2012)')
+    dlf = DigitalFilter('Key 101 (2012)')
 
-    fhtfilter.base = np.array([
+    dlf.base = np.array([
         5.5308437014783363e-04, 6.4259236035555788e-04, 7.4658580837667996e-04,
         8.6740895730700251e-04, 1.0077854290485113e-03, 1.1708796207911744e-03,
         1.3603680375478939e-03, 1.5805221687362171e-03, 1.8363047770289071e-03,
@@ -2571,9 +2572,9 @@ def key_101_2012():
         9.9227471560502534e+02, 1.1528587427833875e+03, 1.3394307643944169e+03,
         1.5561965278371533e+03, 1.8080424144560632e+03])
 
-    fhtfilter.factor = np.array([1.1618342427282831])
+    dlf.factor = np.array([1.1618342427282831])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
         5.1818808036862153e-02, -2.9258492652779172e-01,
         8.7289913080159265e-01, -1.8525183961240297e+00,
         3.2096055660873608e+00, -4.9248158048315069e+00,
@@ -2626,7 +2627,7 @@ def key_101_2012():
         9.1385289919391839e-06, -1.8949818224609619e-06,
         2.0794387557779629e-07])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
         4.1746363961646286e-06, -2.5993370843637242e-05,
         9.2506838353721647e-05, -2.4318740269846489e-04,
         5.2276050788732404e-04, -9.5803859755432658e-04,
@@ -2679,21 +2680,21 @@ def key_101_2012():
         -2.0349222128793154e-06, 4.8072849734177625e-07,
         -6.0462736574031818e-08])
 
-    return fhtfilter
+    return dlf
 
 
 def key_201_2012():
     """Key 201 pt Hankel filter, as published in [Key_2012]_.
 
-    Taken from file *kk201Hankel.txt* provided with SEG-2012-003_.
+    Taken from file ``kk201Hankel.txt`` provided with SEG-2012-003_.
 
     License: http://software.seg.org/disclaimer.txt.
 
     """
 
-    fhtfilter = DigitalFilter('Key 201 (2012)')
+    dlf = DigitalFilter('Key 201 (2012)')
 
-    fhtfilter.base = np.array([
+    dlf.base = np.array([
         4.1185887075357082e-06, 4.6623077830484039e-06, 5.2778064058937756e-06,
         5.9745606155328603e-06, 6.7632974390298035e-06, 7.6561600412698171e-06,
         8.6668946776271221e-06, 9.8110623273521872e-06, 1.1106278265924788e-05,
@@ -2763,9 +2764,9 @@ def key_201_2012():
         1.8947265645880660e+05, 2.1448605423174356e+05,
         2.4280161749832361e+05])
 
-    fhtfilter.factor = np.array([1.132015870999175])
+    dlf.factor = np.array([1.132015870999175])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
         1.5020099209519960e-03, -1.0381698214761684e-02,
         3.6840860097595164e-02, -8.9903380392274704e-02,
         1.7082286536833860e-01, -2.7115749656836280e-01,
@@ -2868,7 +2869,7 @@ def key_201_2012():
         9.5877856096830783e-10, -2.0575286298055636e-10,
         2.2414416956474645e-11])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
         4.7827871332506182e-10, -2.9784175503440788e-09,
         9.7723832770897220e-09, -2.2382340996085809e-08,
         4.0446774329470848e-08, -6.1734815854553919e-08,
@@ -2971,15 +2972,23 @@ def key_201_2012():
         -1.3553176263207053e-07, 3.0748587523233524e-08,
         -3.5668195345476294e-09])
 
-    return fhtfilter
+    return dlf
 
 
 def wer_201_2018():
-    """Werthmüller 201 pt Hankel filter, 2018."""
+    """Werthmüller 201 pt Hankel filter, 2018.
 
-    fhtfilter = DigitalFilter('Werthmüller 201')
+    Designed with the empymod add-on ``fdesign``, see
+    https://github.com/empymod/article-fdesign.
 
-    fhtfilter.base = np.array([
+    License: `Apache License, Version 2.0,
+    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+
+    """
+
+    dlf = DigitalFilter('Werthmüller 201')
+
+    dlf.base = np.array([
         8.653980893285999343e-04, 9.170399868578506730e-04,
         9.717635708540675208e-04, 1.029752738345341345e-03,
         1.091202360259058363e-03, 1.156318936280037154e-03,
@@ -3082,9 +3091,9 @@ def wer_201_2018():
         8.343331198671111792e+01, 8.841212416722630962e+01,
         9.368804274491759543e+01])
 
-    fhtfilter.factor = np.array([1.0596741524693181])
+    dlf.factor = np.array([1.0596741524693181])
 
-    fhtfilter.j0 = np.array([
+    dlf.j0 = np.array([
         2.940900904253498815e+00, -1.601154970027019786e+01,
         3.574488144287594338e+01, -3.775710631592443178e+01,
         9.347313619702582344e+00, 1.903333998229986435e+01,
@@ -3187,7 +3196,7 @@ def wer_201_2018():
         -4.735729642331119566e-06, 4.982902654694162416e-07,
         -2.645962918790746080e-08])
 
-    fhtfilter.j1 = np.array([
+    dlf.j1 = np.array([
         -2.594301879688918743e-03, 2.339490069567079153e-02,
         -9.478827695764932559e-02, 2.269100107268227362e-01,
         -3.508900104631907935e-01, 3.515648778060092017e-01,
@@ -3290,25 +3299,25 @@ def wer_201_2018():
         6.139140918052498045e-06, -6.796809441105533029e-07,
         3.780807126974975489e-08])
 
-    return fhtfilter
+    return dlf
 
 
-# 2. Cosine / Sine
+# 2. Fourier DLF (cosine/sine)
 
 
 def key_81_CosSin_2009():
     """Key 81 pt CosSin filter, as published in [Key_2009]_.
 
-    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+    Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
     <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
-    cossinfilter = DigitalFilter('Key 81 CosSin (2009)')
+    dlf = DigitalFilter('Key 81 CosSin (2009)')
 
-    cossinfilter.base = np.array([
+    dlf.base = np.array([
         3.354626279025119e-04, 4.097349789797864e-04,  5.004514334406104e-04,
         6.112527611295723e-04, 7.465858083766792e-04,  9.118819655545162e-04,
         1.113775147844802e-03, 1.360368037547893e-03,  1.661557273173934e-03,
@@ -3337,9 +3346,9 @@ def key_81_CosSin_2009():
         1.096633158428459e+03, 1.339430764394418e+03,  1.635984429995927e+03,
         1.998195895104119e+03, 2.440601977624501e+03,  2.980957987041728e+03])
 
-    cossinfilter.factor = np.array([1.2214027581601701])
+    dlf.factor = np.array([1.2214027581601701])
 
-    cossinfilter.cos = np.array([
+    dlf.cos = np.array([
         1.746412733678043e-02, -7.658725022064888e-02, 1.761673907472465e-01,
         -2.840940679113589e-01,  3.680388960144733e-01, -4.115498161707958e-01,
         4.181209762362728e-01, -3.967204599348831e-01, 3.608829691008270e-01,
@@ -3369,7 +3378,7 @@ def key_81_CosSin_2009():
         -6.913074254614758e-04,  1.999065225130592e-04,
         -2.955159288961187e-05])
 
-    cossinfilter.sin = np.array([
+    dlf.sin = np.array([
         7.478326513505658e-07, -2.572850425065560e-06, 5.225955618519281e-06,
         -7.352539610140040e-06,  8.768819961093828e-06, -8.560004370841340e-06,
         8.101932279460349e-06, -5.983552716117552e-06, 5.036792825138655e-06,
@@ -3399,22 +3408,22 @@ def key_81_CosSin_2009():
         -2.706562852604888e-06,  8.403636781016683e-07,
         -1.356300450956746e-07])
 
-    return cossinfilter
+    return dlf
 
 
 def key_241_CosSin_2009():
     """Key 241 pt CosSin filter, as published in [Key_2009]_.
 
-    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+    Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
     <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
-    cossinfilter = DigitalFilter('Key 241 CosSin (2009)')
+    dlf = DigitalFilter('Key 241 CosSin (2009)')
 
-    cossinfilter.base = np.array([
+    dlf.base = np.array([
         1.015631471002490e-06, 1.139409969679808e-06, 1.278273779488425e-06,
         1.434061399152754e-06,  1.608835391556724e-06, 1.804909691213134e-06,
         2.024880239788185e-06,  2.271659355282662e-06, 2.548514289903414e-06,
@@ -3497,9 +3506,9 @@ def key_241_CosSin_2009():
         6.973202127822436e+05,  7.823050242024113e+05, 8.776472267317577e+05,
         9.846091112290357e+05])
 
-    cossinfilter.factor = np.array([1.1218734375719379])
+    dlf.factor = np.array([1.1218734375719379])
 
-    cossinfilter.cos = np.array([
+    dlf.cos = np.array([
         2.573985433748149e-03, -2.072044432524625e-02, 8.438091711547871e-02,
         -2.334480374945598e-01,  4.971637805522022e-01, -8.750461405249571e-01,
         1.333415700757027e+00, -1.817857278999438e+00, 2.271742525614601e+00,
@@ -3582,7 +3591,7 @@ def key_241_CosSin_2009():
         -2.239597546920266e-05,  2.103439404619766e-05, -1.807670762071730e-05,
         1.140396792815156e-05])
 
-    cossinfilter.sin = np.array([
+    dlf.sin = np.array([
         1.967005545865218e-10, -1.433611192275181e-09, 5.386453134154996e-09,
         -1.393836398944422e-08,  2.810158973085062e-08, -4.733984167038972e-08,
         6.976700567760687e-08, -9.291356831468874e-08, 1.145563482421100e-07,
@@ -3665,22 +3674,22 @@ def key_241_CosSin_2009():
         2.222370982737331e-05, -2.021079897690936e-05, 1.673161082870818e-05,
         -1.011062914652405e-05])
 
-    return cossinfilter
+    return dlf
 
 
 def key_601_CosSin_2009():
     """Key 601 pt CosSin filter, as published in [Key_2009]_.
 
-    Taken from file *FilterModules.f90* provided with 1DCSEM_.
+    Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
     <http://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
-    cossinfilter = DigitalFilter('Key 601 CosSin (2009)')
+    dlf = DigitalFilter('Key 601 CosSin (2009)')
 
-    cossinfilter.base = np.array([
+    dlf.base = np.array([
         4.193795658379545e-13, 4.611744532326466e-13,  5.071345712552199e-13,
         5.576750220213815e-13, 6.132522762484560e-13,  6.743682960028553e-13,
         7.415750683158400e-13, 8.154795906142572e-13,  8.967493529935761e-13,
@@ -3883,9 +3892,9 @@ def key_601_CosSin_2009():
         1.793159027232996e+12, 1.971863202946070e+12,  2.168376832216971e+12,
         2.384474784797678e+12])
 
-    cossinfilter.factor = np.array([1.0996588551261031])
+    dlf.factor = np.array([1.0996588551261031])
 
-    cossinfilter.cos = np.array([
+    dlf.cos = np.array([
         9.297394385722251e-09, -9.331225377780101e-08, 4.720122900065709e-07,
         -1.613118471395310e-06,  4.212303970960659e-06, -9.009536457681384e-06,
         1.651602857948675e-05, -2.679596886705627e-05, 3.940422339703118e-05,
@@ -4088,7 +4097,7 @@ def key_601_CosSin_2009():
         1.132162520918844e-08, -4.487826026291201e-09, 1.131156449938913e-09,
         -1.373736852774400e-10])
 
-    cossinfilter.sin = np.array([
+    dlf.sin = np.array([
         8.359261159716757e-12, -9.220758632982218e-11, 5.077803827675346e-10,
         -1.867552463969512e-09,  5.172013211121000e-09, -1.150520169188055e-08,
         2.133505606536172e-08, -3.356235702475845e-08, 4.458152579281038e-08,
@@ -4291,21 +4300,21 @@ def key_601_CosSin_2009():
         1.968534210247343e-10, -5.617276256001430e-11, 1.110014404476413e-11,
         -1.138077570686847e-12])
 
-    return cossinfilter
+    return dlf
 
 
 def key_101_CosSin_2012():
     """Key 101 pt CosSin filter, as published in [Key_2012]_.
 
-    Taken from file *kk101CosSin.txt* provided with SEG-2012-003_.
+    Taken from file ``kk101CosSin.txt`` provided with SEG-2012-003_.
 
     License: http://software.seg.org/disclaimer.txt.
 
     """
 
-    cossinfilter = DigitalFilter('Key 101 CosSin (2012)')
+    dlf = DigitalFilter('Key 101 CosSin (2012)')
 
-    cossinfilter.base = np.array([
+    dlf.base = np.array([
         2.0861919529505731e-04, 2.4715373649416861e-04, 2.9280608324001184e-04,
         3.4689098210084990e-04, 4.1096602956932233e-04, 4.8687652944195492e-04,
         5.7680863591051896e-04, 6.8335231283852345e-04, 8.0957592239343885e-04,
@@ -4342,9 +4351,9 @@ def key_101_CosSin_2012():
         4.0460646647905082e+03, 4.7934227652717464e+03
         ])
 
-    cossinfilter.factor = np.array([1.184712347033122])
+    dlf.factor = np.array([1.184712347033122])
 
-    cossinfilter.cos = np.array([
+    dlf.cos = np.array([
         2.8672864360507005e-02, -1.5449802884956709e-01,
         4.2925040863045694e-01, -8.2496971475989445e-01,
         1.2478359182403629e+00, -1.5992674211324920e+00,
@@ -4398,7 +4407,7 @@ def key_101_CosSin_2012():
         1.2936403297967877e-06
         ])
 
-    cossinfilter.sin = np.array([
+    dlf.sin = np.array([
         7.6040317586736167e-07, -3.5855391966011851e-06,
         9.0786150697210513e-06, -1.5826177772027392e-05,
         2.1667095104224339e-05, -2.4639596374368108e-05,
@@ -4452,21 +4461,21 @@ def key_101_CosSin_2012():
         7.2320767464864696e-06
         ])
 
-    return cossinfilter
+    return dlf
 
 
 def key_201_CosSin_2012():
     """Key 201 pt CosSin filter, as published in [Key_2012]_.
 
-    Taken from file *kk201CosSin.txt* provided with SEG-2012-003_.
+    Taken from file ``kk201CosSin.txt`` provided with SEG-2012-003_.
 
     License: http://software.seg.org/disclaimer.txt.
 
     """
 
-    cossinfilter = DigitalFilter('Key 201 CosSin (2012)')
+    dlf = DigitalFilter('Key 201 CosSin (2012)')
 
-    cossinfilter.base = np.array([
+    dlf.base = np.array([
         9.1898135789795544e-07, 1.0560236258145801e-06, 1.2135021985967225e-06,
         1.3944646218148563e-06, 1.6024129035298632e-06, 1.8413712856029165e-06,
         2.1159641213409353e-06, 2.4315053665758195e-06, 2.7941014160203776e-06,
@@ -4536,9 +4545,9 @@ def key_201_CosSin_2012():
         8.2406113574115187e+05, 9.4694851095649926e+05, 1.0881613554026424e+06
         ])
 
-    cossinfilter.factor = np.array([1.149124100003605])
+    dlf.factor = np.array([1.149124100003605])
 
-    cossinfilter.cos = np.array([
+    dlf.cos = np.array([
         4.8963534801291350e-04, -3.2447354678906376e-03,
         1.0952238450063470e-02, -2.5330877509368774e-02,
         4.5603964620893764e-02, -6.8751965018998398e-02,
@@ -4641,7 +4650,7 @@ def key_201_CosSin_2012():
         -1.1775367755450835e-06, 3.6617415171458042e-07,
         -6.1920666642164617e-08])
 
-    cossinfilter.sin = np.array([
+    dlf.sin = np.array([
         -5.8602704468975832e-10, 4.8048608865691248e-09,
         -1.9771446411637653e-08, 5.5269671219669613e-08,
         -1.1943308954933238e-07, 2.1463221286467290e-07,
@@ -4745,4 +4754,4 @@ def key_201_CosSin_2012():
         3.0164202265996216e-09
         ])
 
-    return cossinfilter
+    return dlf

@@ -220,7 +220,7 @@ def test_check_hankel(capsys):
     # verbose
     ht, htarg = utils.check_hankel('fht', None, 4)
     out, _ = capsys.readouterr()
-    assert "   Hankel          :  Fast Hankel Transform\n     > Filter" in out
+    assert "   Hankel          :  DLF (Fast Hankel Transform)\n     > F" in out
     assert "     > pts_per_dec :  Defined by filter (lagged)" in out
     assert ht == 'fht'
     assert htarg[0].name == filters.key_201_2009().name
@@ -426,8 +426,8 @@ def test_check_time(capsys):
     _, f, ft, ftarg = utils.check_time(time, 0, 'ffht', None, 4)
     out, _ = capsys.readouterr()
     outstr = "   time        [s] :  3\n"
-    outstr += "   Fourier         :  Sine-Filter\n     > Filter"
-    assert out[:71] == outstr
+    outstr += "   Fourier         :  DLF (Sine-Filter)\n     > Filter"
+    assert out[:77] == outstr
     assert ft == 'ffht'
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
     assert ftarg[1] is None
@@ -447,8 +447,8 @@ def test_check_time(capsys):
                                       4)
     out, _ = capsys.readouterr()
     outstr = "   time        [s] :  3\n"
-    outstr += "   Fourier         :  Cosine-Filter\n     > Filter"
-    assert out[:73] == outstr
+    outstr += "   Fourier         :  DLF (Cosine-Filter)\n     > Filter"
+    assert out[:79] == outstr
     assert ft == 'ffht'
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
     assert ftarg[1] is None

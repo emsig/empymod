@@ -6,7 +6,7 @@
 Methods to carry out the required Hankel transform from wavenumber to
 frequency domain and Fourier transform from frequency to time domain.
 
-The functions for the QWE and FHT Hankel and Fourier transforms are based on
+The functions for the QWE and DLF Hankel and Fourier transforms are based on
 source files (specified in each function) from the source code distributed with
 [Key_2012]_, which can be found at `software.seg.org/2012/0003
 <http://software.seg.org/2012/0003>`_. These functions are (c) 2012 by Kerry
@@ -17,7 +17,7 @@ directory for more information regarding the involved licenses.
 """
 # Copyright 2016-2018 Dieter Werthmüller
 #
-# This file is part of `empymod`.
+# This file is part of empymod.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License.  You may obtain a copy
@@ -47,15 +47,16 @@ __all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'qwe',
 
 def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         zetaV, xdirect, fhtarg, use_spline, use_ne_eval, msrc, mrec):
-    """Hankel Transform using the Fast Hankel Transform.
+    """Hankel Transform using the Digital Linear Filter method.
 
-    The *Fast Hankel Transform* is a *Digital Filter Method*, introduced to
-    geophysics by [Ghosh_1971]_, and made popular and wide-spread by
-    [Anderson_1975]_, [Anderson_1979]_, [Anderson_1982]_.
+    The *Digital Linear Filter* method was introduced to geophysics by
+    [Ghosh_1971]_, and made popular and wide-spread by [Anderson_1975]_,
+    [Anderson_1979]_, [Anderson_1982]_. The DLF is sometimes referred to as
+    the *Fast Hankel Transform* FHT, from which this routine has its name.
 
-    This implementation of the FHT follows [Key_2012]_, equation 6.  Without
+    This implementation of the DLF follows [Key_2012]_, equation 6.  Without
     going into the mathematical details (which can be found in any of the above
-    papers) and following [Key_2012]_, the FHT method rewrites the Hankel
+    papers) and following [Key_2012]_, the DLF method rewrites the Hankel
     transform of the form
 
     .. math:: F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)\
@@ -71,7 +72,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
     with :math:`l=(n-1)/2`, and :math:`a` is the spacing coefficient.
 
-    This function is loosely based on `get_CSEM1D_FD_FHT.m` from the source
+    This function is loosely based on ``get_CSEM1D_FD_FHT.m`` from the source
     code distributed with [Key_2012]_.
 
     The function is called from one of the modelling routines in :mod:`model`.
@@ -84,7 +85,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         Returns frequency-domain EM response.
 
     kcount : int
-        Kernel count. For FHT, this is 1.
+        Kernel count. For DLF, this is 1.
 
     conv : bool
         Only relevant for QWE/QUAD.
@@ -94,7 +95,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     fhtfilt = fhtarg[0]
     pts_per_dec = fhtarg[1]
 
-    # For FHT, spline for one offset is equals no spline
+    # For DLF, spline for one offset is equals no spline
     if use_spline and off.size == 1:
         use_spline = False
 
@@ -147,13 +148,13 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     factAng = kernel.angle_factor(angle, ab, msrc, mrec)
     one_angle = (factAng - factAng[0] == 0).all()
 
-    # 4. CARRY OUT THE FHT
+    # 4. CARRY OUT THE DLF
     if use_spline and one_angle:  # SPLINE, ALL ANGLES ARE EQUAL
         # If all offsets are in one line from the source, hence have the same
-        # angle, we can combine PJ0 and PJ0b and save one FHT, and combine both
+        # angle, we can combine PJ0 and PJ0b and save one DLF, and combine both
         # into one function to interpolate.
 
-        # 1. FHT
+        # 1. DLF
         EM_int = factAng[0]*np.dot(PJ1, fhtfilt.j1)
         if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
             # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
@@ -168,10 +169,10 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     elif use_spline:  # SPLINE, VARYING ANGLES
         # If not all offsets are in one line from the source, hence do not have
         # the same angle, the whole process has to be done separately for
-        # angle-dependent and angle-independent parts. This means one FHT more,
+        # angle-dependent and angle-independent parts. This means one DLF more,
         # and two (instead of one) functions to interpolate.
 
-        # 1. FHT
+        # 1. DLF
         # Separated in an angle-dependent and a non-dependent part
         EM_noang = np.dot(PJ0, fhtfilt.j0)
         EM_angle = np.dot(PJ1, fhtfilt.j1)
@@ -195,7 +196,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         fEM = (factAng*EM_angle + EM_noang)
 
     else:  # NO SPLINE
-        # Without spline, we can combine PJ0 and PJ0b to save one FHT, even if
+        # Without spline, we can combine PJ0 and PJ0b to save one DLF, even if
         # all offsets have a different angle.
         fEM = factAng*np.dot(PJ1, fhtfilt.j1)
         if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
@@ -224,7 +225,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     .. math:: F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)\
             \mathrm{d}\lambda
 
-    as a quadrature sum which form is similar to the FHT (equation 15),
+    as a quadrature sum which form is similar to the DLF (equation 15),
 
     .. math::   F_i   \\approx \sum^m_{j=1} f(x_j/r)w_j g(x_j) =
                 \sum^m_{j=1} f(x_j/r)\hat{g}(x_j) \ ,
@@ -234,10 +235,10 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     ([Shanks_1955]_, [Wynn_1956]_; implemented with algorithms from
     [Trefethen_2000]_ and [Weniger_1989]_).
 
-    This function is based on `get_CSEM1D_FD_QWE.m`, `qwe.m`, and
-    `getBesselWeights.m` from the source code distributed with [Key_2012]_.
+    This function is based on ``get_CSEM1D_FD_QWE.m``, ``qwe.m``, and
+    ``getBesselWeights.m`` from the source code distributed with [Key_2012]_.
 
-    In the spline-version, `hqwe` checks how steep the decay of the
+    In the spline-version, ``hqwe`` checks how steep the decay of the
     wavenumber-domain result is, and calls QUAD for the very steep interval,
     for which QWE is not suited.
 
@@ -450,16 +451,16 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
 def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
           zetaV, xdirect, quadargs, use_spline, use_ne_eval, msrc, mrec):
-    """Hankel Transform using the QUADPACK library.
+    """Hankel Transform using the ``QUADPACK`` library.
 
-    This routine uses the `scipy.integrate.quad` module, which in turn makes
-    use of the Fortran library `QUADPACK` (`qagse`).
+    This routine uses the ``scipy.integrate.quad`` module, which in turn makes
+    use of the Fortran library ``QUADPACK`` (``qagse``).
 
-    It is massively (orders of magnitudes) slower than either `fht` or `hqwe`,
-    and is mainly here for completeness and comparison purposes. It always uses
-    interpolation in the wavenumber domain, hence it generally will not be as
-    precise as the other methods. However, it might work in some areas where
-    the others fail.
+    It is massively (orders of magnitudes) slower than either ``fht`` or
+    ``hqwe``, and is mainly here for completeness and comparison purposes. It
+    always uses interpolation in the wavenumber domain, hence it generally will
+    not be as precise as the other methods. However, it might work in some
+    areas where the others fail.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -527,22 +528,23 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 # 2. Fourier transforms (frequency -> time)
 
 def ffht(fEM, time, freq, ftarg):
-    """Fourier Transform using a Cosine- or a Sine-filter.
+    """Fourier Transform using the Digital Linear Filter method.
 
-    It follows the Filter methodology [Anderson_1975]_, see `fht` for more
-    information.
+
+    It follows the Filter methodology [Anderson_1975]_, using Cosine- and
+    Sine-filters; see ``fht`` for more information.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
     parameters.
 
-    This function is based on `get_CSEM1D_TD_FHT.m` from the source code
+    This function is based on ``get_CSEM1D_TD_FHT.m`` from the source code
     distributed with [Key_2012]_.
 
     Returns
     -------
     tEM : array
-        Returns time-domain EM response of `fEM` for given `time`.
+        Returns time-domain EM response of ``fEM`` for given ``time``.
 
     conv : bool
         Only relevant for QWE/QUAD.
@@ -565,7 +567,7 @@ def ffht(fEM, time, freq, ftarg):
         # 2. Filter
         tEM = np.dot(ifEM, getattr(fftfilt, ftkind))
 
-    else:  # Standard FHT procedure
+    else:  # Standard DLF procedure
         # Get new times in frequency domain
         _, itime = get_spline_values(fftfilt, time)
 
@@ -591,22 +593,22 @@ def fqwe(fEM, time, freq, qweargs):
     """Fourier Transform using Quadrature-With-Extrapolation.
 
     It follows the QWE methodology [Key_2012]_ for the Hankel transform, see
-    `hqwe` for more information.
+    ``hqwe`` for more information.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
     parameters.
 
-    This function is based on `get_CSEM1D_TD_QWE.m` from the source code
+    This function is based on ``get_CSEM1D_TD_QWE.m`` from the source code
     distributed with [Key_2012]_.
 
-    `fqwe` checks how steep the decay of the frequency-domain result is, and
+    ``fqwe`` checks how steep the decay of the frequency-domain result is, and
     calls QUAD for the very steep interval, for which QWE is not suited.
 
     Returns
     -------
     tEM : array
-        Returns time-domain EM response of `fEM` for given `time`.
+        Returns time-domain EM response of ``fEM`` for given ``time``.
 
     conv : bool
         If true, QWE/QUAD converged. If not, <ftarg> might have to be adjusted.
@@ -668,7 +670,7 @@ def fqwe(fEM, time, freq, qweargs):
     # Carry out SciPy's Quad if required
     if np.any(~doqwe):
         def sEMquad(w, t):
-            """Return scaled, interpolated value of tEM_int for `w`."""
+            """Return scaled, interpolated value of tEM_int for ``w``."""
             return tEM_int(np.log10(w))*sincos(w*t)
 
         # Loop over times that require QUAD
@@ -697,19 +699,19 @@ def fftlog(fEM, time, freq, ftarg):
     FFTLog was presented in Appendix B of [Hamilton_2000]_ and published at
     <http://casa.colorado.edu/~ajsh/FFTLog>.
 
-    This function uses a simplified version of `pyfftlog`, which is a
-    python-version of `FFTLog`. For more details regarding `pyfftlog` see
+    This function uses a simplified version of ``pyfftlog``, which is a
+    python-version of ``FFTLog``. For more details regarding ``pyfftlog`` see
     <https://github.com/prisae/pyfftlog>.
 
-    Not the full flexibility of `FFTLog` is available here: Only the
-    logarithmic FFT (`fftl` in `FFTLog`), not the Hankel transform (`fht` in
-    `FFTLog`). Furthermore, the following parameters are fixed:
+    Not the full flexibility of ``FFTLog`` is available here: Only the
+    logarithmic FFT (``fftl`` in ``FFTLog``), not the Hankel transform (``fht``
+    in ``FFTLog``). Furthermore, the following parameters are fixed:
 
-       - `kr` = 1 (initial value)
-       - `kropt` = 1 (silently adjusts `kr`)
-       - `dir` = 1 (forward)
+       - ``kr`` = 1 (initial value)
+       - ``kropt`` = 1 (silently adjusts ``kr``)
+       - ``dir`` = 1 (forward)
 
-    Furthermore, `q` is restricted to -1 <= q <= 1.
+    Furthermore, ``q`` is restricted to -1 <= q <= 1.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -718,7 +720,7 @@ def fftlog(fEM, time, freq, ftarg):
     Returns
     -------
     tEM : array
-        Returns time-domain EM response of `fEM` for given `time`.
+        Returns time-domain EM response of ``fEM`` for given ``time``.
 
     conv : bool
         Only relevant for QWE/QUAD.
@@ -836,7 +838,7 @@ def fft(fEM, time, freq, ftarg):
     Returns
     -------
     tEM : array
-        Returns time-domain EM response of `fEM` for given `time`.
+        Returns time-domain EM response of ``fEM`` for given ``time``.
 
     conv : bool
         Only relevant for QWE/QUAD.
@@ -875,10 +877,11 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         factAng=None):
     """Quadrature-With-Extrapolation.
 
-    This is the kernel of the QWE method, used for the Hankel (`hqwe`) and the
-    Fourier (`fqwe`) Transforms. See `hqwe` for an extensive description.
+    This is the kernel of the QWE method, used for the Hankel (``hqwe``) and
+    the Fourier (``fqwe``) Transforms. See ``hqwe`` for an extensive
+    description.
 
-    This function is based on `qwe.m` from the source code distributed with
+    This function is based on ``qwe.m`` from the source code distributed with
     [Key_2012]_.
 
     """
@@ -960,7 +963,7 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
     """Quadrature for Hankel transform.
 
     This is the kernel of the QUAD method, used for the Hankel transforms
-    `hquad` and `hqwe` (where the integral is not suited for QWE).
+    ``hquad`` and ``hqwe`` (where the integral is not suited for QWE).
 
     """
 

@@ -3,33 +3,33 @@
 Installation & requirements
 ---------------------------
 
-The easiest way to install the latest stable version of `empymod` is via
-`conda`:
+The easiest way to install the latest stable version of ``empymod`` is via
+``conda``:
 
 .. code-block:: console
 
    > conda install -c prisae empymod
 
-or via `pip`:
+or via ``pip``:
 
 .. code-block:: console
 
    > pip install empymod
 
 Alternatively, you can download the latest version from GitHub and either add
-the path to `empymod` to your python-path variable, or install it in your
+the path to ``empymod`` to your python-path variable, or install it in your
 python distribution via:
 
 .. code-block:: console
 
    > python setup.py install
 
-Required are python version 3.4 or higher and the modules `NumPy` and `SciPy`.
-If you want to run parts of the kernel in parallel, the module `numexpr` is
-required additionally (built with Intel's VML). (See `requirements.txt` for
-more specific information.)
+Required are python version 3.4 or higher and the modules ``NumPy`` and
+``SciPy``. If you want to run parts of the kernel in parallel, the module
+``numexpr`` is required additionally (built with Intel's VML). (See
+``requirements.txt`` for more specific information.)
 
-**Note**: Do not use `scipy == 0.19.0`. It has a memory leak in `quad`, see
+**Note**: Do not use ``scipy == 0.19.0``. It has a memory leak in ``quad``, see
 `github.com/scipy/scipy/pull/7216 <https://github.com/scipy/scipy/pull/7216>`_.
 So if you use QUAD (or potentially QWE) in any of your transforms you might see
 your memory usage going through the roof.
@@ -37,17 +37,17 @@ your memory usage going through the roof.
 
 If you are new to Python I recommend using a Python distribution, which will
 ensure that all dependencies are met, specifically properly compiled versions
-of `NumPy` and `SciPy`; I recommend using Anaconda (version 3.x;
+of ``NumPy`` and ``SciPy``; I recommend using Anaconda (version 3.x;
 `anaconda.com/download <https://www.anaconda.com/download>`_).  If you install
 Anaconda you can simply start the *Anaconda Navigator*, add the channel
-`prisae` and `empymod` will appear in the package list and can be installed
+``prisae`` and ``empymod`` will appear in the package list and can be installed
 with a click.
 
 
 Usage
 '''''
 
-The main modelling routines is `bipole`, which can calculate the
+The main modelling routines is ``bipole``, which can calculate the
 electromagnetic frequency- or time-domain field due to arbitrary finite
 electric or magnetic bipole sources, measured by arbitrary finite electric or
 magnetic bipole receivers. The model is defined by horizontal resistivity and
@@ -85,7 +85,7 @@ default value:
        mpermH      [-] :  1 1 1 1 1
        mpermV      [-] :  1 1 1 1 1
        frequency  [Hz] :  1
-       Hankel          :  Fast Hankel Transform
+       Hankel          :  DLF (Fast Hankel Transform)
          > Filter      :  Key 201 (2009)
          > pts_per_dec :  Defined by filter (lagged)
        Hankel Opt.     :  None
@@ -130,8 +130,8 @@ Structure
 '''''''''
 
     - **model.py**: EM modelling routines.
-    - **utils.py**: Utilities for `model` such as checking input parameters.
-    - **kernel.py**: Kernel of `empymod`, calculates the wavenumber-domain
+    - **utils.py**: Utilities for ``model`` such as checking input parameters.
+    - **kernel.py**: Kernel of ``empymod``, calculates the wavenumber-domain
       electromagnetic response. Plus analytical, frequency-domain full- and
       half-space solutions.
     - **transform.py**: Methods to carry out the required Hankel transform from
@@ -144,8 +144,8 @@ Structure
 Testing
 '''''''
 
-The modeller comes with a test suite using `pytest`. If you want to run
-the tests, just install `pytest` and run it within the `empymod`-top-directory.
+The modeller comes with a test suite using ``pytest``. If you want to run the
+tests, just install ``pytest`` and run it within the ``empymod``-top-directory.
 
 .. code-block:: console
 
@@ -162,21 +162,21 @@ the tests, just install `pytest` and run it within the `empymod`-top-directory.
 
 It should run all tests successfully. Please let me know if not!
 
-Note that installations of `empymod` via conda or pip do not have the
-test-suite included. To run the test-suite you must download `empymod` from
+Note that installations of ``empymod`` via conda or pip do not have the
+test-suite included. To run the test-suite you must download ``empymod`` from
 GitHub.
 
 
 Add-ons
 '''''''
 
-The repository `empyscripts` contains add-ons for `empymod`. These are scripts
-that did not make it into `empymod`. Most likely because they require some sort
-of change to the `empymod` core features, but are only for a very specific use
-cases. Hence it was decided to not implement them in `empymod`. To install them
-just follow the instructions for `empymod`, replacing `empymod` with
-`empyscripts` in the command. You can find more information regarding the
-add-ons directly on `github.com/empymod/empyscripts
+The repository ``empyscripts`` contains add-ons for ``empymod``. These are
+scripts that did not make it into ``empymod``. Most likely because they require
+some sort of change to the ``empymod`` core features, but are only for a very
+specific use cases. Hence it was decided to not implement them in ``empymod``.
+To install them just follow the instructions for ``empymod``, replacing
+``empymod`` with ``empyscripts`` in the command. You can find more information
+regarding the add-ons directly on `github.com/empymod/empyscripts
 <https://github.com/empymod/empyscripts>`_.
 
 
@@ -203,11 +203,11 @@ All releases have a Zenodo-DOI, provided on the
 Notice
 ''''''
 
-This software was initially (till 01/2017) developed with funding from
-*The Mexican National Council of Science and Technology*
-(*Consejo Nacional de Ciencia y Tecnología*, http://www.conacyt.gob.mx),
-carried out at *The Mexican Institute of Petroleum IMP*
-(*Instituto Mexicano del Petróleo*, http://www.gob.mx/imp).
+This software was initially (till 01/2017) developed with funding from *The
+Mexican National Council of Science and Technology* (*Consejo Nacional de
+Ciencia y Tecnología*, http://www.conacyt.gob.mx), carried out at *The Mexican
+Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
+http://www.gob.mx/imp).
 
 
 License
@@ -227,7 +227,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-See the `LICENSE`- and `NOTICE`-files on GitHub for more information.
+See the ``LICENSE``- and ``NOTICE``-files on GitHub for more information.
 
 Note on speed, memory, and accuracy
 -----------------------------------
@@ -244,8 +244,8 @@ parallelisation (``opt='parallel'``) and spline interpolation
 ``opt='parallel'`` only affects speed and memory usage, whereas
 ``opt='spline'`` also affects precision!
 
-I am sure `empymod` could be made much faster with cleverer coding style or
-with the likes of `cython` or `numba`. Suggestions and contributions are
+I am sure ``empymod`` could be made much faster with cleverer coding style or
+with the likes of ``cython`` or ``numba``. Suggestions and contributions are
 welcomed!
 
 
@@ -265,24 +265,23 @@ Included transforms
     - Logarithmic Fast Fourier Transform *FFTLog*
     - Fast Fourier Transform *FFT*
 
-Add a note regarding FHT, DLF.
 
 FFTLog
 ......
 
 FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT originally
-proposed by [Talman_1978]_. The code used by `empymod` was published in
+proposed by [Talman_1978]_. The code used by ``empymod`` was published in
 Appendix B of [Hamilton_2000]_ and is publicly available at
 `casa.colorado.edu/~ajsh/FFTLog <http://casa.colorado.edu/~ajsh/FFTLog>`_.
-From the `FFTLog`-website:
+From the ``FFTLog``-website:
 
 *FFTLog is a set of fortran subroutines that compute the fast Fourier or Hankel
 (= Fourier-Bessel) transform of a periodic sequence of logarithmically spaced
 points.*
 
 FFTlog can be used for the Hankel as well as for the Fourier Transform, but
-currently `empymod` uses it only for the Fourier transform. It uses a
-simplified version of the python implementation of FFTLog, `pyfftlog`
+currently ``empymod`` uses it only for the Fourier transform. It uses a
+simplified version of the python implementation of FFTLog, ``pyfftlog``
 (`github.com/prisae/pyfftlog <https://github.com/prisae/pyfftlog>`_).
 
 [Haines_and_Jones_1988]_ proposed a logarithmic Fourier transform
@@ -340,7 +339,7 @@ the other way, from impulse to step, leads to the divison by :math:`i\omega`.
 (This only holds because we define in accordance with the causality principle
 that :math:`E(r, t \le 0) = 0`).
 
-With the sine/cosine transform (`ft='ffht'/'sin'/'cos'`) you can choose which
+With the sine/cosine transform (``ft='ffht'/'sin'/'cos'``) you can choose which
 one you want for the impulse responses. For the switch-on response, however,
 the sine-transform is enforced, and equally the cosine transform for the
 switch-off response. This is because these two do not need to now the field at
@@ -424,14 +423,14 @@ source and receiver bipoles.
 Parallelisation
 '''''''''''''''
 If ``opt = 'parallel'``, a good dozen of the most time-consuming statements are
-calculated by using the `numexpr` package
+calculated by using the ``numexpr`` package
 (https://github.com/pydata/numexpr/wiki/Numexpr-Users-Guide).  These statements
-are all in the `kernel`-functions `greenfct`, `reflections`, and `fields`, and
-all involve :math:`\Gamma` in one way or another, often calculating square
-roots or exponentials. As :math:`\Gamma` has dimensions (#frequencies,
-#offsets, #layers, #lambdas), it can become fairly big.
+are all in the ``kernel``-functions ``greenfct``, ``reflections``, and
+``fields``, and all involve :math:`\Gamma` in one way or another, often
+calculating square roots or exponentials. As :math:`\Gamma` has dimensions
+(#frequencies, #offsets, #layers, #lambdas), it can become fairly big.
 
-The package `numexpr` has to be built with Intel's VML, otherwise it won't be
+The package ``numexpr`` has to be built with Intel's VML, otherwise it won't be
 used. You can check if it uses VML with
 
 .. code-block:: python
@@ -439,16 +438,16 @@ used. You can check if it uses VML with
     >>> import numexpr
     >>> numexpr.use_vml
 
-The module `numexpr` uses by default all available cores up to a maximum of 8.
-You can change this behaviour to a lower or a higher value with the following
-command (in the example it is changed to 4):
+The module ``numexpr`` uses by default all available cores up to a maximum of
+8. You can change this behaviour to a lower or a higher value with the
+following command (in the example it is changed to 4):
 
 .. code-block:: python
 
     >>> import numexpr
     >>> numexpr.set_num_threads(4)
 
-This parallelisation will make `empymod` faster if you calculate a lot of
+This parallelisation will make ``empymod`` faster if you calculate a lot of
 offsets/frequencies at once, but slower for few offsets/frequencies. Best
 practice is to check first which one is faster. (You can use the
 benchmark-notebook in the `empymod/example-notebooks
@@ -461,8 +460,8 @@ of the *DLF* (depending on ``htarg``) or the *splined* version of the *QWE* are
 applied. The spline option should be used with caution, as it is an
 interpolation and therefore less precise than the non-spline version. However,
 it significantly speeds up *QWE*, and massively speeds up *DLF*. (The
-`numexpr`-version of the spline option is slower than the pure spline one, and
-therefore it is only possible to have either ``'parallel'`` or ``'spline'``
+``numexpr``-version of the spline option is slower than the pure spline one,
+and therefore it is only possible to have either ``'parallel'`` or ``'spline'``
 on.)
 
 Setting ``opt = 'spline'`` is generally faster. Good speed-up is achieved for
@@ -496,21 +495,21 @@ transformations.
 The splined versions of *QWE* check whether the ratio of any two adjacent
 intervals is above a certain threshold (steep end of the wavenumber or
 frequency spectrum). If it is, it carries out *QUAD* for this interval instead
-of *QWE*. The threshold is stored in `diff_quad`, which can be changed within
-the parameter `htarg` and `ftarg`.
+of *QWE*. The threshold is stored in ``diff_quad``, which can be changed within
+the parameter ``htarg`` and ``ftarg``.
 
 
 Looping
 '''''''
-By default, you can calculate many offsets and many frequencies all in one go,
-vectorized (for the *DLF*), which is the default. The ``loop`` parameter gives
-you the possibility to force looping over frequencies or offsets. This
-parameter can have severe effects on both runtime and memory usage. Play around
-with this factor to find the fastest version for your problem at hand. It
-ALWAYS loops over frequencies if ``ht = 'QWE'/'QUAD'`` or if ``opt =
-'spline'``.  All vectorized is very fast if there are few offsets or few
-frequencies. If there are many offsets and many frequencies, looping over the
-smaller of the two will be faster. Choosing the right looping together with
+By default, you can calculate many offsets and many frequencies
+all in one go, vectorized (for the *DLF*), which is the default. The ``loop``
+parameter gives you the possibility to force looping over frequencies or
+offsets. This parameter can have severe effects on both runtime and memory
+usage. Play around with this factor to find the fastest version for your
+problem at hand. It ALWAYS loops over frequencies if ``ht = 'QWE'/'QUAD'`` or
+if ``opt = 'spline'``.  All vectorized is very fast if there are few offsets or
+few frequencies. If there are many offsets and many frequencies, looping over
+the smaller of the two will be faster. Choosing the right looping together with
 ``opt = 'parallel'`` can have a huge influence.
 
 Vertical components
@@ -616,7 +615,7 @@ References |_|
 """
 # Copyright 2016-2018 Dieter Werthmüller
 #
-# This file is part of `empymod`.
+# This file is part of empymod.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License.  You may obtain a copy

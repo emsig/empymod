@@ -3,7 +3,7 @@
 :mod:`utils` -- Utilites
 ========================
 
-Utilities for `model` such as checking input parameters.
+Utilities for ``model`` such as checking input parameters.
 
 This module consists of four groups of functions:
    0. General settings
@@ -14,7 +14,7 @@ This module consists of four groups of functions:
 """
 # Copyright 2016-2018 Dieter Werthmüller
 #
-# This file is part of `empymod`.
+# This file is part of empymod.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License.  You may obtain a copy
@@ -71,7 +71,7 @@ class EMArray(np.ndarray):
         2. Imaginary part of input, if input is pure imaginary.
         3. Complex input.
 
-        In cases 2 and 3, `imagpart` must be None.
+        In cases 2 and 3, ``imagpart`` must be None.
 
     imagpart: array, optional
         Imaginary part of input. Defaults to None.
@@ -83,8 +83,8 @@ class EMArray(np.ndarray):
 
     pha : ndarray
         Phase of the input data, in degrees, lag-defined (increasing with
-        increasing offset.) To get lead-defined phases, multiply `imagpart` by
-        -1 before passing through this function.
+        increasing offset.) To get lead-defined phases, multiply ``imagpart``
+        by -1 before passing through this function.
 
     Examples
     --------
@@ -259,7 +259,7 @@ def check_bipole(inp, name):
         # Check x, y, and z
         inp = chck_dipole(inp, name)
 
-        # Check azimuth and dip (must be floats, otherwise use `bipole`)
+        # Check azimuth and dip (must be floats, otherwise use ``bipole``)
         inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,))
         inp[4] = _check_var(inp[4], float, 1, 'dip', (1,))
 
@@ -425,7 +425,7 @@ def check_hankel(ht, htarg, verb):
         Flag to choose the Hankel transform.
 
     htarg : str or filter from empymod.filters or array_like,
-        Depends on the value for `ht`.
+        Depends on the value for ``ht``.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -466,7 +466,7 @@ def check_hankel(ht, htarg, verb):
 
         # If verbose, print Hankel transform information
         if verb > 2:
-            print("   Hankel          :  Fast Hankel Transform")
+            print("   Hankel          :  DLF (Fast Hankel Transform)")
             print("     > Filter      :  " + fhtfilt.name)
             if pts_per_dec:
                 print("     > pts_per_dec :  " + str(pts_per_dec))
@@ -774,7 +774,7 @@ def check_opt(opt, loop, ht, htarg, verb):
         Flag to choose the Hankel transform.
 
     htarg : array_like,
-        Depends on the value for `ht`.
+        Depends on the value for ``ht``.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -786,7 +786,7 @@ def check_opt(opt, loop, ht, htarg, verb):
         Boolean if to use spline interpolation.
 
     use_ne_eval : bool
-        Boolean if to use `numexpr`.
+        Boolean if to use ``numexpr``.
 
     loop_freq : bool
         Boolean if to loop over frequencies.
@@ -868,7 +868,7 @@ def check_time(time, signal, ft, ftarg, verb):
         Flag for Fourier transform.
 
     ftarg : str or filter from empymod.filters or array_like,
-        Only used if `signal` !=None. Depends on the value for `ft`:
+        Only used if ``signal`` !=None. Depends on the value for ``ft``:
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -935,9 +935,9 @@ def check_time(time, signal, ft, ftarg, verb):
         # If verbose, print Fourier transform information
         if verb > 2:
             if ft == 'sin':
-                print("   Fourier         :  Sine-Filter")
+                print("   Fourier         :  DLF (Sine-Filter)")
             else:
-                print("   Fourier         :  Cosine-Filter")
+                print("   Fourier         :  DLF (Cosine-Filter)")
             print("     > Filter      :  " + fftfilt.name)
             pstr = "     > pts_per_dec :  "
             if pts_per_dec:

@@ -302,7 +302,7 @@ class TestBipole:
 
         fht = bipole(ht='fht', verb=3, **inp)
         out, _ = capsys.readouterr()
-        assert "Hankel          :  Fast Hankel Transform" in out
+        assert "Hankel          :  DLF (Fast Hankel Transform)" in out
 
         qwe = bipole(ht='qwe', verb=3, **inp)
         out, _ = capsys.readouterr()
@@ -332,7 +332,7 @@ class TestBipole:
 
         ffht = bipole(ft='ffht', verb=3, **inp)
         out, _ = capsys.readouterr()
-        assert "Fourier         :  Sine-Filter" in out
+        assert "Fourier         :  DLF (Sine-Filter)" in out
         assert_allclose(ffht, ftl, 1e-2, equal_nan=True)
 
         # FFT: We keep the error-check very low, otherwise we would have to

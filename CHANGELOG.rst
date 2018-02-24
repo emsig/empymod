@@ -1,6 +1,29 @@
 Changelog
 #########
 
+latest
+------
+
+- Documentation:
+
+  - Simplifications: avoid duplication as much as possible between the website
+    (`empymod.github.io <https://empymod.github.io>`_), the manual
+    (`empymod.readthedocs.io <https://empymod.readthedocs.io>`_), and the
+    ``README`` (`github.com/empymod/empymod
+    <https://github.com/empymod/empymod>`_).
+
+    - Website has now only *Features* and *Installation* in full, all other
+        information comes in the form of links.
+    - ``README`` has only information in the form of links.
+    - Manual contains the ``README``, and is basically the main document for all
+        information.
+
+  - Improvements: Change some remaining ``md``-syntax to ``rst``-syntax.
+
+  - FHT -> DLF: replace FHT as much as possible, without breaking backwards
+    compatibility.
+
+
 v1.5.0 - *2018-01-02*
 ---------------------
 
