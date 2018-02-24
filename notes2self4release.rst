@@ -17,9 +17,8 @@ Note: I really should replace this with an automatic deploy-setup...
 
    4. Get the Zenodo-DOI and add it to release notes
 
-   5. Ensure ``pypandoc`` and ``python3-setuptools`` are installed:
+   5. Ensure ``python3-setuptools`` is installed:
 
-        conda install pypandoc
         sudo apt install python3-setuptools
 
    6. Create tar and wheel
