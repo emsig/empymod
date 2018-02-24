@@ -1,51 +1,91 @@
 """
 
-Installation & requirements
----------------------------
+Theory
+------
 
-The easiest way to install the latest stable version of ``empymod`` is via
-``conda``:
+The code is principally based on
+
+- [Hunziker_et_al_2015]_ for the wavenumber-domain calculation (``kernel``),
+- [Key_2012]_ for the DLF and QWE transforms,
+- [Slob_et_al_2010]_ for the analytical half-space solutions, and
+- [Hamilton_2000]_ for the FFTLog.
+
+See these publications and all the others given in the references_, if you are
+interested in the theory on which empymod is based. Another good reference is
+[Ziolkowski_and_Slob]_, which will be published in late 2018. The book derives
+in great detail the equations for layered-Earth CSEM modelling.
+
+
+Installation
+------------
+
+You can install empymod either via ``conda``:
 
 .. code-block:: console
 
-   > conda install -c prisae empymod
+   conda install -c prisae empymod
 
 or via ``pip``:
 
 .. code-block:: console
 
-   > pip install empymod
+   pip install empymod
 
-Alternatively, you can download the latest version from GitHub and either add
-the path to ``empymod`` to your python-path variable, or install it in your
-python distribution via:
+Required are Python version 3.4 or higher and the modules ``NumPy`` and
+``SciPy``. The module ``numexpr`` is required additionally (built with Intel's
+VML) if you want to run parts of the kernel in parallel.
 
-.. code-block:: console
-
-   > python setup.py install
-
-Required are python version 3.4 or higher and the modules ``NumPy`` and
-``SciPy``. If you want to run parts of the kernel in parallel, the module
-``numexpr`` is required additionally (built with Intel's VML). (See
-``requirements.txt`` for more specific information.)
-
-**Note**: Do not use ``scipy == 0.19.0``. It has a memory leak in ``quad``, see
-`github.com/scipy/scipy/pull/7216 <https://github.com/scipy/scipy/pull/7216>`_.
-So if you use QUAD (or potentially QWE) in any of your transforms you might see
-your memory usage going through the roof.
-
+The modeller empymod comes with add-ons (``empyscripts``). These add-ons
+provide some very specific, additional functionalities. To install them just
+follow the instructions for ``empymod``, replacing ``empymod`` with
+``empyscripts`` in the command. You can find more information regarding the
+add-ons directly on `github.com/empymod/empyscripts
+<https://github.com/empymod/empyscripts>`_.
 
 If you are new to Python I recommend using a Python distribution, which will
 ensure that all dependencies are met, specifically properly compiled versions
-of ``NumPy`` and ``SciPy``; I recommend using Anaconda (version 3.x;
-`anaconda.com/download <https://www.anaconda.com/download>`_).  If you install
-Anaconda you can simply start the *Anaconda Navigator*, add the channel
-``prisae`` and ``empymod`` will appear in the package list and can be installed
-with a click.
+of ``NumPy`` and ``SciPy``; I recommend using
+`Anaconda <https://www.anaconda.com/download>`_.  If you install
+[Anaconda](https://www.anaconda.com/download). If you install Anaconda you can
+simply start the *Anaconda Navigator*, add the channel ``prisae`` and both
+``empymod`` and ``empyscripts`` will appear in the package list and can be
+installed with a click.
+
+.. warning::
+
+    Do not use ``scipy == 0.19.0``. It has a memory leak in ``quad``, see
+    `github.com/scipy/scipy/pull/7216
+    <https://github.com/scipy/scipy/pull/7216>`_. So if you use QUAD (or
+    potentially QWE) in any of your transforms you might see your memory usage
+    going through the roof.
 
 
-Usage
-'''''
+The structure of empymod is:
+
+- **model.py**: EM modelling routines.
+- **utils.py**: Utilities for ``model`` such as checking input parameters.
+- **kernel.py**: Kernel of ``empymod``, calculates the wavenumber-domain
+  electromagnetic response. Plus analytical, frequency-domain full- and
+  half-space solutions.
+- **transform.py**: Methods to carry out the required Hankel transform from
+  wavenumber to space domain and Fourier transform from frequency to time
+  domain.
+- **filters.py**: Filters for the *Digital Linear Filters* method DLF (Hankel
+  and Fourier transforms).
+
+
+Usage/Examples
+--------------
+
+A good starting point is [Werthmuller_2017b]_, and more information can be
+found in [Werthmuller_2017]_. There are a lot of examples of its usage
+available, in the form of Jupyter notebooks. Have a look at the following
+repositories:
+
+- Example notebooks: https://github.com/empymod/example-notebooks,
+- Geophysical Tutoriol TLE: https://github.com/empymod/article-tle2017, and
+- Numerical examples of [Ziolkowski_and_Slob]_:
+  https://github.com/empymod/csem-ziolkowski-and-slob.
 
 The main modelling routines is ``bipole``, which can calculate the
 electromagnetic frequency- or time-domain field due to arbitrary finite
@@ -118,47 +158,42 @@ default value:
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
 
-Frequency- and time-domain examples can be found in the
-`empymod/example-notebooks
-<https://github.com/empymod/example-notebooks>`_-repository.
 
-A good starting point is [Werthmuller_2017b]_, and more information can be
-found in [Werthmuller_2017]_.
+Contributing
+------------
 
+New contributions, bug reports, or any kind of feedback is always welcomed!
+Have a look at the Roadmap-section to get an idea of things that could be
+implemented. The best way for interaction is at https://github.com/empymod.
+If you prefer to contact me outside of GitHub use the contact form on my
+personal website, https://werthmuller.org.
 
-Structure
-'''''''''
+To install empymod from source, you can download the latest version from GitHub
+and either add the path to ``empymod`` to your python-path variable, or install
+it in your python distribution via:
 
-    - **model.py**: EM modelling routines.
-    - **utils.py**: Utilities for ``model`` such as checking input parameters.
-    - **kernel.py**: Kernel of ``empymod``, calculates the wavenumber-domain
-      electromagnetic response. Plus analytical, frequency-domain full- and
-      half-space solutions.
-    - **transform.py**: Methods to carry out the required Hankel transform from
-      wavenumber to space domain and Fourier transform from frequency to time
-      domain.
-    - **filters.py**: Filters for the *Digital Linear Filters* DLF (Hankel and
-      Fourier transforms) [Anderson_1982]_, [Anderson_1975]_.
+.. code-block:: console
 
+   python setup.py install
 
-Testing
-'''''''
+Please make sure your code follows the pep8-guidelines by using, for instance,
+the python module ``flake8``, and also that your code is covered with
+appropriate tests. Just get in touch if you have any doubts.
+
 
 The modeller comes with a test suite using ``pytest``. If you want to run the
 tests, just install ``pytest`` and run it within the ``empymod``-top-directory.
 
 .. code-block:: console
 
-    > conda install pytest
-    > # or
-    > pip install pytest
+    > pip install pytest coveralls pytest-flake8
     > # and then
     > cd to/the/empymod/folder  # Ensure you are in the right directory,
     > ls -d */                  # your output should look the same.
     docs/  empymod/  tests/
     > # pytest will find the tests, which are located in the tests-folder.
     > # simply run
-    > pytest
+    > pytest --cov=empymod --flake8
 
 It should run all tests successfully. Please let me know if not!
 
@@ -167,107 +202,25 @@ test-suite included. To run the test-suite you must download ``empymod`` from
 GitHub.
 
 
-Add-ons
-'''''''
+Transforms
+----------
 
-The repository ``empyscripts`` contains add-ons for ``empymod``. These are
-scripts that did not make it into ``empymod``. Most likely because they require
-some sort of change to the ``empymod`` core features, but are only for a very
-specific use cases. Hence it was decided to not implement them in ``empymod``.
-To install them just follow the instructions for ``empymod``, replacing
-``empymod`` with ``empyscripts`` in the command. You can find more information
-regarding the add-ons directly on `github.com/empymod/empyscripts
-<https://github.com/empymod/empyscripts>`_.
+Included **Hankel transforms**:
 
+- Digital Linear Filters *DLF*
+- Quadrature with Extrapolation *QWE*
+- Adaptive quadrature *QUAD*
 
-Info
-----
+Included **Fourier transforms**:
 
-Citation
-''''''''
-
-If you publish results for which you used empymod, please give credit by citing
-this article:
-
-    Werthmüller, D., 2017, An open-source full 3D electromagnetic modeler for
-    1D VTI media in Python: empymod: Geophysics, 82(6), WB9--WB19; DOI:
-    `10.1190/geo2016-0626.1 <http://doi.org/10.1190/geo2016-0626.1>`_.
-
-Also consider citing [Hunziker_et_al_2015]_ and [Key_2012]_, without which
-empymod would not existk
-
-All releases have a Zenodo-DOI, provided on the
-`release-page <https://github.com/empymod/empymod/releases>`_.
-
-
-Notice
-''''''
-
-This software was initially (till 01/2017) developed with funding from *The
-Mexican National Council of Science and Technology* (*Consejo Nacional de
-Ciencia y Tecnología*, http://www.conacyt.gob.mx), carried out at *The Mexican
-Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
-http://www.gob.mx/imp).
-
-
-License
-'''''''
-
-Copyright 2016-2018 Dieter Werthmüller
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-See the ``LICENSE``- and ``NOTICE``-files on GitHub for more information.
-
-Note on speed, memory, and accuracy
------------------------------------
-There is the usual trade-off between speed, memory, and accuracy. Very
-generally speaking we can say that the *DLF* is faster than *QWE*, but *QWE* is
-much easier on memory usage. *QWE* allows you to control the accuracy. A
-standard quadrature in the form of *QUAD* is also provided. *QUAD* is generally
-orders of magnitudes slower, and more fragile depending on the input arguments.
-However, it can provide accurate results where *DLF* and *QWE* fail.
-
-There are two optimisation possibilities included via the ``opt``-flag:
-parallelisation (``opt='parallel'``) and spline interpolation
-(``opt='spline'``).  They are switched off by default. The optimization
-``opt='parallel'`` only affects speed and memory usage, whereas
-``opt='spline'`` also affects precision!
-
-I am sure ``empymod`` could be made much faster with cleverer coding style or
-with the likes of ``cython`` or ``numba``. Suggestions and contributions are
-welcomed!
-
-
-Included transforms
-'''''''''''''''''''
-
-**Hankel transform**:
-
-    - Digital Linear Filters *DLF*
-    - Quadrature with Extrapolation *QWE*
-    - Adaptive quadrature *QUAD*
-
-**Fourier transform**:
-
-    - Digital Linear Filters *DLF*
-    - Quadrature with Extrapolation *QWE*
-    - Logarithmic Fast Fourier Transform *FFTLog*
-    - Fast Fourier Transform *FFT*
+- Digital Linear Filters *DLF*
+- Quadrature with Extrapolation *QWE*
+- Logarithmic Fast Fourier Transform *FFTLog*
+- Fast Fourier Transform *FFT*
 
 
 FFTLog
-......
+''''''
 
 FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT originally
 proposed by [Talman_1978]_. The code used by ``empymod`` was published in
@@ -307,7 +260,7 @@ times.
 
 
 Notes on Fourier Transform
-..........................
+''''''''''''''''''''''''''
 
 The Fourier transform to obtain the space-time domain impulse response from the
 complex-valued space-frequency response can be calculated by either a
@@ -364,6 +317,27 @@ and the step-off by
     E(r, t)^\\text{Step-off} = - \\frac{2}{\pi}\int^\infty_0
                              \Re\\left[\\frac{E(r,\omega)}{i\omega}\\right]\
                              \cos(\omega t)\ \\text{d}\omega \ .
+
+
+Note on speed, memory, and accuracy
+-----------------------------------
+
+There is the usual trade-off between speed, memory, and accuracy. Very
+generally speaking we can say that the *DLF* is faster than *QWE*, but *QWE* is
+much easier on memory usage. *QWE* allows you to control the accuracy. A
+standard quadrature in the form of *QUAD* is also provided. *QUAD* is generally
+orders of magnitudes slower, and more fragile depending on the input arguments.
+However, it can provide accurate results where *DLF* and *QWE* fail.
+
+There are two optimisation possibilities included via the ``opt``-flag:
+parallelisation (``opt='parallel'``) and spline interpolation
+(``opt='spline'``).  They are switched off by default. The optimization
+``opt='parallel'`` only affects speed and memory usage, whereas
+``opt='spline'`` also affects precision!
+
+I am sure ``empymod`` could be made much faster with cleverer coding style or
+with the likes of ``cython`` or ``numba``. Suggestions and contributions are
+welcomed!
 
 
 Depths, Rotation, and Bipole
@@ -526,8 +500,38 @@ The Hankel transforms methods are having sometimes difficulties transforming
 these functions.
 
 
+License
+-------
+
+Copyright 2016-2018 Dieter Werthmüller
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+See the ``LICENSE``- and ``NOTICE``-files on GitHub for more information.
+
+.. note::
+
+    This software was initially (till 01/2017) developed with funding from *The
+    Mexican National Council of Science and Technology* (*Consejo Nacional de
+    Ciencia y Tecnología*, http://www.conacyt.gob.mx), carried out at *The
+    Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
+    http://www.gob.mx/imp).
+
+
 .. |_| unicode:: 0xA0
    :trim:
+
+.. _references:
 
 References |_|
 --------------
@@ -611,6 +615,9 @@ References |_|
    :math:`e_m(S_n)` tranformation: Math. Comput., 10, 91--96;
    DOI: |_| `10.1090/S0025-5718-1956-0084056-6
    <http://doi.org/10.1090/S0025-5718-1956-0084056-6>`_.
+.. [Ziolkowski_and_Slob] Ziolkowski, A., and E. Slob, 2018, Introduction to
+   Controlled-Source Electromagnetic Methods: Cambridge University Press;
+   expected to be published late 2018.
 
 """
 # Copyright 2016-2018 Dieter Werthmüller
