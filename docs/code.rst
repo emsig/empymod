@@ -1,17 +1,3 @@
-:tocdepth: 3
-
-Manual
-######
-
-.. automodule:: empymod
-
-.. include:: ../ROADMAP.rst
-
-.. include:: ../CREDITS.rst
-
-.. include:: ../CHANGELOG.rst
-
-
 Code
 ####
 

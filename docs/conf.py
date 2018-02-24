@@ -63,7 +63,6 @@ description = 'An open-source full 3D electromagnetic modeller for 1D VTI '
 description += 'media in Python'
 html_theme_options = {
     'description': description,
-    'fixed_sidebar': True,
 }
 
 # The name of an image file (relative to this directory) to place at the top
@@ -72,9 +71,6 @@ html_logo = '_static/logo-empymod-plain.png'
 
 # Favicon of the docs.
 html_favicon = '_static/favicon.ico'
-
-# Paths that contain custom static files.
-html_static_path = []
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {

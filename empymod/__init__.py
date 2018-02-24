@@ -1,8 +1,5 @@
 """
 
-The latest version of this documentation can be found at
-https://empymod.readthedocs.io.
-
 Installation & requirements
 ---------------------------
 
@@ -238,9 +235,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-See the *LICENSE*-file in the root directory for a full reprint of the Apache
-License.
-
+See the `LICENSE`- and `NOTICE`-files on GitHub for more information.
 
 Note on speed, memory, and accuracy
 -----------------------------------
