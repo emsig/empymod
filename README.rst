@@ -1,6 +1,8 @@
-empymod
-#######
 
+.. image:: https://github.com/empymod/logo/blob/master/logo-empymod-plain.svg
+   :target: https://empymod.github.io
+   :alt: empymod logo
+   
 .. image:: https://readthedocs.org/projects/empymod/badge/?version=latest
    :target: http://empymod.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
