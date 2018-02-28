@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import time
 from empymod import __version__
 
 
@@ -27,7 +28,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'empymod'
-copyright = '2016-2018, Dieter Werthmüller'
+copyright = u'2016-{}, Dieter Werthmüller'.format(time.strftime("%Y"))
 author = 'Dieter Werthmüller'
 
 # |version| and |release|.
@@ -44,8 +45,7 @@ language = None
 today_fmt = '%d %B %Y'
 
 # List of patterns to ignore, relative to source directory.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store',
-                    'PermissionToRelicenseFilters.txt', '../tests']
+exclude_patterns = ['_build', 'PermissionToRelicenseFilters.txt', '../tests']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
