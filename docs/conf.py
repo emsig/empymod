@@ -65,6 +65,9 @@ html_theme_options = {
     'description': description,
 }
 
+# HTML static path
+html_static_path = ['_static']
+
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 html_logo = '_static/logo-empymod-plain.png'
