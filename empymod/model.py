@@ -964,7 +964,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     Included are:
       - Full fullspace solution (``solution='fs'``) for ee-, me-, em-,
-        mm-fields, [Hunziker_et_al_2015]_.
+        mm-fields, only frequency domain, [Hunziker_et_al_2015]_.
       - Diffusive fullspace solution (``solution='dfs'``) for ee-fields,
         [Slob_et_al_2010]_.
       - Diffusive halfspace solution (``solution='dhs'``) for ee-fields,
@@ -990,7 +990,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     solution : str, optional
       Defines which solution is returned:
-        - 'fs' : Full fullspace solution (ee-, me-, em-, mm-fields).
+        - 'fs' : Full fullspace solution (ee-, me-, em-, mm-fields); f-domain.
         - 'dfs' : Diffusive fullspace solution (ee-fields only).
         - 'dhs' : Diffusive halfspace solution (ee-fields only).
         - 'dsplit' : Diffusive direct- and reflected field and airwave
