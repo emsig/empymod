@@ -463,8 +463,8 @@ can achieve higher precision, normally at the cost of speed.
     problem at hand!
 
 Be aware that *QUAD* (Hankel transform) *always* use the splined version and
-*always* loop over offsets. The same applies for all frequency-to-time
-transformations.
+*always* loop over offsets. All frequency-to-time transformations *always* loop
+over offsets too.
 
 The splined versions of *QWE* check whether the ratio of any two adjacent
 intervals is above a certain threshold (steep end of the wavenumber or

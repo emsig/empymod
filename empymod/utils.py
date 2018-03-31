@@ -458,6 +458,7 @@ def check_hankel(ht, htarg, verb):
         try:
             pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'fht: pts_per_dec', ())
+            pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
         except VariableCatch:
             pts_per_dec = None
 
@@ -511,6 +512,7 @@ def check_hankel(ht, htarg, verb):
                                      'qwe: pts_per_dec', ())
         except VariableCatch:
             pts_per_dec = np.array(80, dtype=int)
+        pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
 
         # diff_quad : 100
         try:
@@ -602,6 +604,7 @@ def check_hankel(ht, htarg, verb):
                                      'quad: pts_per_dec', ())
         except VariableCatch:
             pts_per_dec = np.array(40, dtype=int)
+        pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
 
         # Assemble htarg
         htarg = (rtol, atol, limit, a, b, pts_per_dec)
@@ -926,6 +929,7 @@ def check_time(time, signal, ft, ftarg, verb):
         try:
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      ft + 'pts_per_dec', ())
+            pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
         except VariableCatch:
             pts_per_dec = None
 
@@ -993,6 +997,7 @@ def check_time(time, signal, ft, ftarg, verb):
                                      'qwe: pts_per_dec', ())
         except VariableCatch:
             pts_per_dec = np.array(20, dtype=int)
+        pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
 
         # diff_quad : 100
         try:
@@ -1057,6 +1062,7 @@ def check_time(time, signal, ft, ftarg, verb):
                                      'fftlog: pts_per_dec', ())
         except VariableCatch:
             pts_per_dec = np.array(10, dtype=int)
+        pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
 
         try:  # add_dec
             add_dec = _check_var(ftarg['add_dec'], float, 1, 'fftlog: add_dec',
@@ -1128,6 +1134,7 @@ def check_time(time, signal, ft, ftarg, verb):
         try:
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'fft: pts_per_dec', ())
+            pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
         except VariableCatch:
             pts_per_dec = None
 

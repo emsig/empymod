@@ -559,13 +559,19 @@ def ffht(fEM, time, freq, ftarg):
     else:
         fEM = fEM.real
 
-    if pts_per_dec:  # Use pts_per_dec frequencies per decade
-        # 1. Interpolate in frequency domain
-        sfEM = iuSpline(np.log10(2*np.pi*freq), fEM)
-        ifEM = sfEM(np.log10(fftfilt.base/time[:, None]))
+    if pts_per_dec:
 
-        # 2. Filter
-        tEM = np.dot(ifEM, getattr(fftfilt, ftkind))
+        if pts_per_dec > 0:  # Use pts_per_dec frequencies per decade
+
+            # 1. Interpolate in frequency domain
+            sfEM = iuSpline(np.log10(2*np.pi*freq), fEM)
+            ifEM = sfEM(np.log10(fftfilt.base/time[:, None]))
+
+            # 2. Filter
+            tEM = np.dot(ifEM, getattr(fftfilt, ftkind))
+
+        else:  # No spline at all
+            tEM = np.dot(fEM.reshape(time.size, -1), getattr(fftfilt, ftkind))
 
     else:  # Standard DLF procedure
         # Get new times in frequency domain
@@ -1010,25 +1016,31 @@ def get_spline_values(filt, inp, nr_per_dec=None):
     if not nr_per_dec:
         nr_per_dec = 1/np.log(filt.factor)
 
-    # Get min and max required out-values (depends on filter and inp-value)
-    outmax = filt.base[-1]/inp.min()
-    outmin = filt.base[0]/inp.max()
+    if nr_per_dec < 1:  # Without spline
+        out = (filt.base/(inp[:, None])).ravel()
+        new_inp = inp
+    else:
 
-    # Number of out-values
-    nout = int(np.ceil(np.log(outmax/outmin)*nr_per_dec) + 1)
-    # The cubic InterpolatedUnivariateSpline needs at least 4 points
-    if nout-filt.base.size < 3:
-        nout = filt.base.size+3
+        # Get min and max required out-values (depends on filter and inp-value)
+        outmax = filt.base[-1]/inp.min()
+        outmin = filt.base[0]/inp.max()
 
-    # Calculate output values
-    out = np.exp(np.arange(np.log(outmin), np.log(outmin) + nout/nr_per_dec,
-                           1/nr_per_dec))
+        # Number of out-values
+        nout = int(np.ceil(np.log(outmax/outmin)*nr_per_dec) + 1)
+        # The cubic InterpolatedUnivariateSpline needs at least 4 points
+        if nout-filt.base.size < 3:
+            nout = filt.base.size+3
 
-    # Only necessary if standard spline is used. We need to calculate the new
-    # input values, as spline is carried out in the input domain. Else spline
-    # is carried out in output domain and the new input values are not used.
-    new_inp = inp.max()*np.exp(-np.arange(nout - filt.base.size + 1) /
-                               nr_per_dec)
+        # Calculate output values
+        out = np.exp(np.arange(np.log(outmin), np.log(outmin) +
+                               nout/nr_per_dec, 1/nr_per_dec))
+
+        # Only necessary if standard spline is used. We need to calculate the
+        # new input values, as spline is carried out in the input domain. Else
+        # spline is carried out in output domain and the new input values are
+        # not used.
+        new_inp = inp.max()*np.exp(-np.arange(nout - filt.base.size + 1) /
+                                   nr_per_dec)
 
     # Return output values
     return np.atleast_2d(out), new_inp

@@ -1,6 +1,14 @@
 Changelog
 #########
 
+*latest*
+--------
+
+- [2018-03-31] Digital linear filter (DLF) method for the Fourier transform can
+  now be carried out without spline, providing 0 for `pts_per_dec` (or any
+  integer smaller than 1).
+
+
 v1.5.1 - *2018-02-24*
 ---------------------
 

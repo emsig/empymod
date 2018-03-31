@@ -233,7 +233,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                           the filter method itself.
                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade.  If none, standard lagged
-                               convolution is used. (Default: None)
+                               convolution is used. If smaller than 1, no
+                               interpolation is used at all (Default: None)
 
             - If ``ft`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
 
@@ -748,7 +749,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                           the filter method itself.
                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade.  If none, standard lagged
-                               convolution is used. (Default: None)
+                               convolution is used. If smaller than 1, no
+                               interpolation is used at all (Default: None)
 
             - If ``ft`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
 
