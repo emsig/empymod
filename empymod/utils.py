@@ -929,7 +929,6 @@ def check_time(time, signal, ft, ftarg, verb):
         try:
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      ft + 'pts_per_dec', ())
-            pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
         except VariableCatch:
             pts_per_dec = None
 
