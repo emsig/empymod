@@ -340,6 +340,18 @@ with the likes of ``cython`` or ``numba``. Suggestions and contributions are
 welcomed!
 
 
+Memory
+''''''
+By default ``empymod`` will try to carry out the calculation in one go, without
+looping. If your model has many offsets and many frequencies this can be heavy
+on memory usage. Even more so if you are calculating time-domain responses for
+many times. If you are running out of memory, you should use either
+``loop='off'`` or ``loop='freq'`` to loop over offsets or frequencies,
+respectively. Use ``verb=3`` to see how many offsets and how many frequencies
+are calculated internally.
+
+
+
 Depths, Rotation, and Bipole
 ''''''''''''''''''''''''''''
 **Depths**: Calculation of many source and receiver positions is fastest if
@@ -463,8 +475,7 @@ can achieve higher precision, normally at the cost of speed.
     problem at hand!
 
 Be aware that *QUAD* (Hankel transform) *always* use the splined version and
-*always* loop over offsets. All frequency-to-time transformations *always* loop
-over offsets too.
+*always* loop over offsets.
 
 The splined versions of *QWE* check whether the ratio of any two adjacent
 intervals is above a certain threshold (steep end of the wavenumber or
