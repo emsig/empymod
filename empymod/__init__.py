@@ -475,7 +475,10 @@ can achieve higher precision, normally at the cost of speed.
     problem at hand!
 
 Be aware that *QUAD* (Hankel transform) *always* use the splined version and
-*always* loop over offsets.
+*always* loop over offsets. The Fourier transforms *FFTlog*, *QWE*, and *FFT*
+always use interpolation too, either in the frequency or in the time domain.
+With the *DLF* Fourier transform (sine and cosine transforms) you can choose
+between no interpolation and interpolation (splined or lagged).
 
 The splined versions of *QWE* check whether the ratio of any two adjacent
 intervals is above a certain threshold (steep end of the wavenumber or
