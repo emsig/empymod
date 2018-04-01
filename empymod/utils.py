@@ -458,7 +458,7 @@ def check_hankel(ht, htarg, verb):
         try:
             pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'fht: pts_per_dec', ())
-            pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
+            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
             pts_per_dec = None
 
@@ -510,9 +510,9 @@ def check_hankel(ht, htarg, verb):
         try:
             pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'qwe: pts_per_dec', ())
+            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
             pts_per_dec = np.array(80, dtype=int)
-        pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
 
         # diff_quad : 100
         try:
@@ -602,9 +602,9 @@ def check_hankel(ht, htarg, verb):
         try:
             pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'quad: pts_per_dec', ())
+            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
             pts_per_dec = np.array(40, dtype=int)
-        pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
 
         # Assemble htarg
         htarg = (rtol, atol, limit, a, b, pts_per_dec)
@@ -929,6 +929,10 @@ def check_time(time, signal, ft, ftarg, verb):
         try:
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      ft + 'pts_per_dec', ())
+            # If pts_per_dec is 0 or smaller, set to -1. This means no spline
+            # at all.
+            if pts_per_dec <= 1:
+                pts_per_dec = -1
         except VariableCatch:
             pts_per_dec = None
 
@@ -950,7 +954,11 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # Get required frequencies
         # (multiply time by 2Pi, as calculation is done in angular frequencies)
-        freq, _ = transform.get_spline_values(ftarg[0], 2*np.pi*time, ftarg[1])
+        if pts_per_dec and pts_per_dec < 0:  # No spline at all
+            freq = np.ravel(fftfilt.base/(2*np.pi*time[:, None]))
+        else:
+            freq, _ = transform.get_spline_values(ftarg[0], 2*np.pi*time,
+                                                  ftarg[1])
         freq = np.squeeze(freq)
 
         # Rename ft
@@ -994,9 +1002,9 @@ def check_time(time, signal, ft, ftarg, verb):
         try:  # pts_per_dec
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'qwe: pts_per_dec', ())
+            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
             pts_per_dec = np.array(20, dtype=int)
-        pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
 
         # diff_quad : 100
         try:
@@ -1059,9 +1067,9 @@ def check_time(time, signal, ft, ftarg, verb):
         try:  # pts_per_dec
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'fftlog: pts_per_dec', ())
+            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
             pts_per_dec = np.array(10, dtype=int)
-        pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
 
         try:  # add_dec
             add_dec = _check_var(ftarg['add_dec'], float, 1, 'fftlog: add_dec',
@@ -1133,7 +1141,7 @@ def check_time(time, signal, ft, ftarg, verb):
         try:
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'fft: pts_per_dec', ())
-            pts_per_dec = np.max([pts_per_dec, 1])  # Ensure at least 1
+            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
             pts_per_dec = None
 
@@ -1852,12 +1860,19 @@ def _prnt_min_max_val(var, text, verb):
 
 def _check_min(par, minval, name, unit, verb):
     """Check minimum value of parameter."""
+    scalar = False
+    if par.shape == ():
+        scalar = True
+        par = np.atleast_1d(par)
     ipar = np.where(par < minval)
     par[ipar] = minval
     if verb > 0 and np.size(ipar) != 0:
         print('* WARNING :: ' + name + ' < ' + str(minval) + ' ' + unit +
               ' are set to ' + str(minval) + ' ' + unit + '!')
-    return par
+    if scalar:
+        return np.squeeze(par)
+    else:
+        return par
 
 
 def _check_targ(targ, keys):

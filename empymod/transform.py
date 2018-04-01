@@ -1016,31 +1016,25 @@ def get_spline_values(filt, inp, nr_per_dec=None):
     if not nr_per_dec:
         nr_per_dec = 1/np.log(filt.factor)
 
-    if nr_per_dec < 1:  # Without spline
-        out = (filt.base/(inp[:, None])).ravel()
-        new_inp = inp
-    else:
+    # Get min and max required out-values (depends on filter and inp-value)
+    outmax = filt.base[-1]/inp.min()
+    outmin = filt.base[0]/inp.max()
 
-        # Get min and max required out-values (depends on filter and inp-value)
-        outmax = filt.base[-1]/inp.min()
-        outmin = filt.base[0]/inp.max()
+    # Number of out-values
+    nout = int(np.ceil(np.log(outmax/outmin)*nr_per_dec) + 1)
+    # The cubic InterpolatedUnivariateSpline needs at least 4 points
+    if nout-filt.base.size < 3:
+        nout = filt.base.size+3
 
-        # Number of out-values
-        nout = int(np.ceil(np.log(outmax/outmin)*nr_per_dec) + 1)
-        # The cubic InterpolatedUnivariateSpline needs at least 4 points
-        if nout-filt.base.size < 3:
-            nout = filt.base.size+3
+    # Calculate output values
+    out = np.exp(np.arange(np.log(outmin), np.log(outmin) + nout/nr_per_dec,
+                           1/nr_per_dec))
 
-        # Calculate output values
-        out = np.exp(np.arange(np.log(outmin), np.log(outmin) +
-                               nout/nr_per_dec, 1/nr_per_dec))
-
-        # Only necessary if standard spline is used. We need to calculate the
-        # new input values, as spline is carried out in the input domain. Else
-        # spline is carried out in output domain and the new input values are
-        # not used.
-        new_inp = inp.max()*np.exp(-np.arange(nout - filt.base.size + 1) /
-                                   nr_per_dec)
+    # Only necessary if standard spline is used. We need to calculate the new
+    # input values, as spline is carried out in the input domain. Else spline
+    # is carried out in output domain and the new input values are not used.
+    new_inp = inp.max()*np.exp(-np.arange(nout - filt.base.size + 1) /
+                               nr_per_dec)
 
     # Return output values
     return np.atleast_2d(out), new_inp

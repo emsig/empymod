@@ -487,6 +487,12 @@ def test_check_time(capsys):
     assert ftarg[1] == 50
     assert ftarg[2] == 'cos'
 
+    # ['', 0]
+    _, freq, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': 0}, 0)
+    assert ftarg[1] == -1
+    f_base = filters.key_201_CosSin_2012().base
+    assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
+
     # # QWE # #
     # verbose
     _, f, ft, ftarg = utils.check_time(time, 0, 'qwe', None, 4)
@@ -562,7 +568,7 @@ def test_check_time(capsys):
     assert_allclose(f, fres, rtol=1e-5)
 
     # Several parameters
-    _, _, _, ftarg = utils.check_time(time, -1, 'fftlog', ['', [-3, 4], 2], 0)
+    _, _, _, ftarg = utils.check_time(time, -1, 'fftlog', [10, [-3, 4], 2], 0)
     assert ftarg[0] == 10
     assert_allclose(ftarg[1], np.array([-3.,  4.]))
     assert ftarg[2] == 1  # q > 1 reset to 1...

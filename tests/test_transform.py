@@ -231,13 +231,6 @@ def test_get_spline_values():                            # 9. get_spline_values
     out, _ = transform.get_spline_values(filt, np.array([1, 1.1]), None)
     assert_allclose(out.size, 804)
 
-    # Check one example without spline
-    filt = filters.key_81_CosSin_2009()
-    inp = np.arange(1, 6)
-    out, new_inp = transform.get_spline_values(filt, inp, -1)
-    assert_allclose(inp, new_inp)
-    assert_allclose((filt.base/inp[:, None]).ravel(), np.squeeze(out))
-
 
 def test_fhti():                                                     # 10. fhti
     # Check one example
