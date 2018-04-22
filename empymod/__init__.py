@@ -486,6 +486,10 @@ frequency spectrum). If it is, it carries out *QUAD* for this interval instead
 of *QWE*. The threshold is stored in ``diff_quad``, which can be changed within
 the parameter ``htarg`` and ``ftarg``.
 
+For a graphical explanation of the differences between standard DLF, lagged
+convolution DLF, and splined DLF for the Hankel and the Fourier transforms
+see the notebook ``7a_DLF-Standard-Lagged-Splined`` in the
+`example-notebooks <https://github.com/empymod/example-notebooks>`_ repository.
 
 Looping
 '''''''
