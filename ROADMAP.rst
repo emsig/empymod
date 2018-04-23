@@ -42,6 +42,8 @@ in touch if you would like to tackle one of these problems!
 
 - Fourier transform
 
+  - Include the method outlined by Mulder et al., 2008, Geophysics
+    (piecewise-cubic Hermite interpolation with a FFT).
   - Change ``fft`` to use discrete sine/cosine transforms instead, as all other
     Fourier transforms
   - If previous step is successful, clean up the internal decisions
