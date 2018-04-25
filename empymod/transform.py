@@ -38,8 +38,8 @@ from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
 from . import kernel
 
-__all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'qwe',
-           'get_spline_values', 'fhti']
+__all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
+           'qwe', 'get_spline_values', 'fhti']
 
 
 # 1. Hankel transforms (wavenumber -> frequency)
@@ -94,119 +94,25 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     fhtfilt = fhtarg[0]
     pts_per_dec = fhtarg[1]
 
-    # For DLF, spline for one offset is equals no spline
-    if use_spline and off.size == 1:
-        use_spline = False
-
-    # 1. COMPUTE REQUIRED LAMBDAS for given hankel-filter-base
+    # 1. Compute required lambdas for given hankel-filter-base
     if use_spline:           # Use interpolation
         # Get lambda from offset and filter
-        lambd, ioff = get_spline_values(fhtfilt, off, pts_per_dec)
+        lambd, _ = get_spline_values(fhtfilt, off, pts_per_dec)
 
     else:  # df.base/off
         lambd = fhtfilt.base/off[:, None]
 
-    # 2. CALL THE KERNEL
-    PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
-                                       etaV, zetaH, zetaV, lambd, ab, xdirect,
-                                       msrc, mrec, use_ne_eval)
+    # 2. Call the kernel
+    PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
+                           zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
 
-    if use_spline and pts_per_dec:  # If spline in wnr-domain, interpolate PJ's
-        # Interpolate in wavenumber domain
-        PJ0real = iuSpline(np.log10(lambd), PJ0.real)
-        PJ0imag = iuSpline(np.log10(lambd), PJ0.imag)
-        PJ1real = iuSpline(np.log10(lambd), PJ1.real)
-        PJ1imag = iuSpline(np.log10(lambd), PJ1.imag)
-        PJ0breal = iuSpline(np.log10(lambd), PJ0b.real)
-        PJ0bimag = iuSpline(np.log10(lambd), PJ0b.imag)
-
-        # Overwrite lambd with non-spline lambd
-        lambd = fhtfilt.base/off[:, None]
-
-        # Get fEM-field at required non-spline lambdas
-        PJ0 = PJ0real(np.log10(lambd)) + 1j*PJ0imag(np.log10(lambd))
-        PJ1 = PJ1real(np.log10(lambd)) + 1j*PJ1imag(np.log10(lambd))
-        PJ0b = PJ0breal(np.log10(lambd)) + 1j*PJ0bimag(np.log10(lambd))
-
-        # Set spline to false
-        use_spline = False
-
-    elif use_spline:  # If spline in frequency domain, re-arrange PJ's
-        def rearrange_PJ(PJ, noff, nfilt):
-            """Return re-arranged PJ with shape (noff, nlambd).
-               Each row starts one 'lambda' higher."""
-            outarr = np.concatenate((np.tile(PJ, noff).squeeze(),
-                                    np.zeros(noff)))
-            return outarr.reshape(noff, -1)[:, :nfilt]
-
-        PJ0 = rearrange_PJ(PJ0, ioff.size, fhtfilt.base.size)
-        PJ1 = rearrange_PJ(PJ1, ioff.size, fhtfilt.base.size)
-        PJ0b = rearrange_PJ(PJ0b, ioff.size, fhtfilt.base.size)
-
-    # 3. ANGLE DEPENDENT FACTORS
+    # 3. Angle dependent factors
     factAng = kernel.angle_factor(angle, ab, msrc, mrec)
-    one_angle = (factAng - factAng[0] == 0).all()
 
-    # 4. CARRY OUT THE DLF
-    if use_spline and one_angle:  # SPLINE, ALL ANGLES ARE EQUAL
-        # If all offsets are in one line from the source, hence have the same
-        # angle, we can combine PJ0 and PJ0b and save one DLF, and combine both
-        # into one function to interpolate.
+    # 4. Carry out the dlf
+    fEM = dlf(PJ, lambd, off, fhtarg, factAng, use_spline, ab)
 
-        # 1. DLF
-        EM_int = factAng[0]*np.dot(PJ1, fhtfilt.j1)
-        if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-            # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-            EM_int /= ioff
-        EM_int += np.dot(PJ0 + factAng[0]*PJ0b, fhtfilt.j0)
-
-        # 2. Interpolation
-        real_EM = iuSpline(np.log10(ioff[::-1]), EM_int.real[::-1])
-        imag_EM = iuSpline(np.log10(ioff[::-1]), EM_int.imag[::-1])
-        fEM = real_EM(np.log10(off)) + 1j*imag_EM(np.log10(off))
-
-    elif use_spline:  # SPLINE, VARYING ANGLES
-        # If not all offsets are in one line from the source, hence do not have
-        # the same angle, the whole process has to be done separately for
-        # angle-dependent and angle-independent parts. This means one DLF more,
-        # and two (instead of one) functions to interpolate.
-
-        # 1. DLF
-        # Separated in an angle-dependent and a non-dependent part
-        EM_noang = np.dot(PJ0, fhtfilt.j0)
-        EM_angle = np.dot(PJ1, fhtfilt.j1)
-        if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-            # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-            EM_angle /= ioff
-        EM_angle += np.dot(PJ0b, fhtfilt.j0)
-
-        # 2. Interpolation
-        # Separately on EM_noang and EM_angle
-        real_noang = iuSpline(np.log10(ioff[::-1]), EM_noang.real[::-1])
-        imag_noang = iuSpline(np.log10(ioff[::-1]), EM_noang.imag[::-1])
-        real_angle = iuSpline(np.log10(ioff[::-1]), EM_angle.real[::-1])
-        imag_angle = iuSpline(np.log10(ioff[::-1]), EM_angle.imag[::-1])
-
-        # Get fEM-field at required offsets
-        EM_noang = real_noang(np.log10(off)) + 1j*imag_noang(np.log10(off))
-        EM_angle = real_angle(np.log10(off)) + 1j*imag_angle(np.log10(off))
-
-        # Angle dependency
-        fEM = (factAng*EM_angle + EM_noang)
-
-    else:  # NO SPLINE
-        # Without spline, we can combine PJ0 and PJ0b to save one DLF, even if
-        # all offsets have a different angle.
-        fEM = factAng*np.dot(PJ1, fhtfilt.j1)
-        if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-            # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-            fEM /= off
-        fEM += np.dot(PJ0 + factAng[:, np.newaxis]*PJ0b, fhtfilt.j0)
-
-    # Return the electromagnetic field, normalize by offset
-    # Second argument (1) is the kernel count
-    # (Last argument is only for QWE)
-    return fEM/off, 1, True
+    return fEM, 1, True
 
 
 def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
@@ -550,12 +456,6 @@ def ffht(fEM, time, freq, ftarg):
 
     """
 
-    # Settings depending if cos/sin plus scaling
-    if ftarg[2] == 'sin':
-        fEM = -fEM.imag
-    else:
-        fEM = fEM.real
-
     # Carry out DLF
     tEM = dlf(fEM, 2*np.pi*freq, time, ftarg)
 
@@ -848,20 +748,23 @@ def fft(fEM, time, freq, ftarg):
 
 # 3. Utilities
 
-def dlf(signal, points, out_pts, targ, factAng=None):
+def dlf(signal, points, out_pts, targ, factAng=None, use_spline=None, ab=None):
     """Digital Linear Filter method.
 
     This is the kernel of the DLF method, used for the Hankel (``fht``) and the
     Fourier (``ffht``) Transforms. See ``fht`` for an extensive description.
 
-    It does two things, either the Hankel transform or the Fourier transform:
+    For the Hankel transform, `signal` contains 3 complex wavenumber-domain
+    signals: (PJ0, PJ1, PJ0b), as returned from `kernel.wavenumber` and
+    `factAng` should be provided, as returned from `kernel.angle_factor`. The
+    PJ0-kernel is the part of the wavenumber-domain calculation which contains
+    a zeroth-order Bessel function and does NOT depend on the angle between
+    source and receiver, only on offset. PJ0b and PJ1 are the parts of the
+    wavenumber-domain calculation which contain a zeroth- and first-order
+    Bessel function, respectively, and DO depend on the angle between source
+    and receiver.
 
-    For the Hankel transform, `signal` contains 3 kernels: (PJ0, PJ1, PJ0b), as
-    returned from `kernel.wavenumber` and `factAng` should be provided, as
-    returned from `kernel.angle_factor`.
-
-    For the Fourier transform, `signal` is a real signal, and `factAng` has
-    to be None.
+    For the Fourier transform, `signal` is a complex frequency-domain signal.
 
     This function is based on ``get_CSEM1D_TD_FHT.m`` from the source code
     distributed with [Key_2012]_.
@@ -870,35 +773,154 @@ def dlf(signal, points, out_pts, targ, factAng=None):
     # Get DLF arguments
     filt = targ[0]
     pts_per_dec = targ[1]
-    kind = targ[2]
 
-    # 1. Prepare signal depending on pts_per_dec
-    if not pts_per_dec:  # Lagged convolution (interpolate in output domain)
+    # Hankel flag
+    if isinstance(signal, tuple):
+        # Hankel transform: 3 complex signals, factAng, use_spline, ab
+        hankel = True
+
+        # Check if all angles are the same
+        one_angle = (factAng - factAng[0] == 0).all()
+    else:
+        # Fourier transform: 1 complex signal
+        hankel = False
+        kind = targ[2]
+
+        # Real or -Imag part depending on kind (sine/cosine)
+        if kind == 'sin':
+            signal = -signal.imag
+        else:
+            signal = signal.real
+
+    # Legacy issue:
+    # The different methods are differently implemented in Hankel and Fourier:
+    splined = False
+    lagged = False
+
+    if hankel:  # Hankel: use_spline={True,False}; pts_per_dec={None or nr > 0}
+        if pts_per_dec is None:
+            if use_spline:
+                lagged = True
+        else:
+            splined = True
+
+    else:  # Fourier: pts_per_dec = {none, nr}
+        if pts_per_dec is None:
+            lagged = True
+        elif pts_per_dec > 1:
+            splined = True
+
+    def intp_signal(signal, points, new):
+        """Return `signal` at `points` interpolated at `new`."""
+        real = iuSpline(np.log10(points), signal.real)
+        if hankel:
+            imag = iuSpline(np.log10(points), signal.imag)
+            return real(np.log10(new)) + 1j*imag(np.log10(new))
+        else:
+            return real(np.log10(new))
+
+    # 1. PREPARE SIGNAL
+    if lagged:  # Lagged Convolution DLF: interpolation in output domain
+        # Lagged Convolution DLF: re-arrange signal
 
         # Get interpolation points in output domain domain
         _, int_pts = get_spline_values(filt, out_pts)
 
-        # Re-arranged signal with shape (#out_pts, #points).  Each row starts
-        # one 'point' higher.
-        inp_signal = np.concatenate((np.tile(signal, int_pts.size).squeeze(),
-                                     np.zeros(int_pts.size)))
-        inp_signal = inp_signal.reshape(int_pts.size, -1)[:, :filt.base.size]
+        # Re-arrange signal
+        def rearrange(signal, npoints, nfilt):
+            """Return re-arranged signal with shape (npoints, nfilt).
+               Each row starts one 'point' higher."""
+            outarr = np.concatenate((np.tile(signal, npoints).squeeze(),
+                                    np.zeros(npoints)))
+            return outarr.reshape(npoints, -1)[:, :nfilt]
 
-    elif pts_per_dec < 1:  # Standard DLF procedure
+        if hankel:
+            inp_PJ0 = rearrange(signal[0], int_pts.size, filt.base.size)
+            inp_PJ1 = rearrange(signal[1], int_pts.size, filt.base.size)
+            inp_PJ0b = rearrange(signal[2], int_pts.size, filt.base.size)
+        else:
+            inp_signal = rearrange(signal, int_pts.size, filt.base.size)
 
-        inp_signal = signal.reshape(out_pts.size, -1)
+    elif splined:  # Splined DLF: interpolate in input domain
+        # Splined DLF: interpolate signal here
+        new = filt.base/out_pts[:, None]
+        if hankel:
+            inp_PJ0 = intp_signal(signal[0], points, new)
+            inp_PJ1 = intp_signal(signal[1], points, new)
+            inp_PJ0b = intp_signal(signal[2], points, new)
+        else:
+            inp_signal = intp_signal(signal, points, new)
 
-    else:  # Interpolate in input domain
-        if_signal = iuSpline(np.log10(points), signal)
-        inp_signal = if_signal(np.log10(filt.base/out_pts[:, None]))
+    else:  # Standard DLF: no interpolation
 
-    # 2. Apply DLF
-    out_signal = np.dot(inp_signal, getattr(filt, kind))
+        if hankel:
+            inp_PJ0 = signal[0]
+            inp_PJ1 = signal[1]
+            inp_PJ0b = signal[2]
+        else:
+            inp_signal = signal.reshape(out_pts.size, -1)
 
-    # 3. If lagged convolution, interpolate now to output domain points
-    if not pts_per_dec:
-        int_signal = iuSpline(np.log10((int_pts)[::-1]), out_signal[::-1])
-        out_signal = int_signal(np.log10(out_pts))
+    # 2. APPLY DLF
+    if hankel:  # Hankel transform
+
+        if (splined or lagged) and not one_angle:
+            # Varying angle with either lagged or splined DLF.
+            # If not all offsets are in one line from the source, hence do not
+            # have the same angle, the DLF has to be done separately for
+            # angle-dependent and angle-independent parts.
+            out_signal_noang = np.dot(inp_PJ0, filt.j0)
+            out_signal_angle = np.dot(inp_PJ1, filt.j1)
+            if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+                # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+                if lagged:
+                    out_signal_angle /= int_pts
+                else:
+                    out_signal_angle /= out_pts
+            out_signal_angle += np.dot(inp_PJ0b, filt.j0)
+
+            if splined:
+                # If splined we can add them here, as the interpolation
+                # is already done.
+                out_signal = factAng*out_signal_angle + out_signal_noang
+
+        elif lagged and one_angle:
+            # If all offsets are in one line from the source, hence have the
+            # same angle, we can combine PJ0 and PJ0b and save one DLF, and
+            # combine both into one function to interpolate.
+            out_signal = factAng[0]*np.dot(inp_PJ1, filt.j1)
+            if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+                # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+                out_signal /= int_pts
+            out_signal += np.dot(inp_PJ0+factAng[0]*inp_PJ0b, filt.j0)
+
+        else:
+            # With the standard DLF (one_angle or not), and with the splined
+            # DLF but one_angle, we can combine PJ0 and PJ0b to save one DLF.
+            out_signal = factAng*np.dot(inp_PJ1, filt.j1)
+            if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+                # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+                out_signal /= out_pts
+            out_signal += np.dot(inp_PJ0 +
+                                 factAng[:, np.newaxis]*inp_PJ0b, filt.j0)
+
+    else:  # Fourier transform
+        out_signal = np.dot(inp_signal, getattr(filt, kind))
+
+    # 3. IF LAGGED CONVOLUTION, INTERPOLATE NOW TO OUTPUT DOMAIN POINTS
+    if lagged:
+
+        # Reversed interpolation points
+        rint_pts = int_pts[::-1]
+
+        if hankel and not one_angle:  # Separately on EM_noang and EM_angle
+            EM_noang = intp_signal(out_signal_noang[::-1], rint_pts, out_pts)
+            EM_angle = intp_signal(out_signal_angle[::-1], rint_pts, out_pts)
+
+            # Angle dependency
+            out_signal = (factAng*EM_angle + EM_noang)
+
+        else:  # Hankel with one_angle or Fourier
+            out_signal = intp_signal(out_signal[::-1], rint_pts, out_pts)
 
     # Return the signal in the output domain
     return out_signal/out_pts

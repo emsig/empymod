@@ -4,6 +4,10 @@ Changelog
 *latest*
 --------
 
+- [2018-04-25] Combine kernel from `fht` and `ffht` into `dlf`, hence
+  separate DLF from other calculations, as is done with QWE (`qwe` for `hqwe`
+  and `fqwe`).
+
 - [2018-04-25] Bug fix regarding `transform.get_spline_values`; a DLF with
   `pts_per_dec` can now be shorter then the corresponding filter.
 
