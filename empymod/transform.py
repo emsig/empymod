@@ -1012,19 +1012,34 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
 def get_spline_values(filt, inp, nr_per_dec=None):
     """Return required calculation points."""
 
-    # If number per decade (nr_per_dec) is not provided, filter.factor is used
-    if not nr_per_dec:
-        nr_per_dec = 1/np.log(filt.factor)
-
     # Get min and max required out-values (depends on filter and inp-value)
     outmax = filt.base[-1]/inp.min()
     outmin = filt.base[0]/inp.max()
 
-    # Number of out-values
-    nout = int(np.ceil(np.log(outmax/outmin)*nr_per_dec) + 1)
-    # The cubic InterpolatedUnivariateSpline needs at least 4 points
-    if nout-filt.base.size < 3:
-        nout = filt.base.size+3
+    # Define number of out-values, depending if nr_per_dec or not
+    def nr_of_out(outmax, outmin, nr_per_dec):
+        """Number of out-values."""
+        return int(np.ceil(np.log(outmax/outmin)*nr_per_dec) + 1)
+
+    # If number per decade (nr_per_dec) is not provided, filter.factor is used
+    if not nr_per_dec:
+        nr_per_dec = 1/np.log(filt.factor)
+
+        nout = nr_of_out(outmax, outmin, nr_per_dec)
+
+        # The cubic InterpolatedUnivariateSpline needs at least 4 points. As
+        # nr_per_dec is not provided, interpolation happens in output domain,
+        # so `new_inp` needs to have at least 4 points.
+        if nout-filt.base.size < 3:
+            nout = filt.base.size+3
+    else:
+        nout = nr_of_out(outmax, outmin, nr_per_dec)
+        # The cubic InterpolatedUnivariateSpline needs at least 4 points. As
+        # nr_per_dec is provided, interpolation happens in input domain, so
+        # `out` needs to have at least 4 points. This should always be the
+        # case, we're just overly cautious here.
+        if nout < 4:
+            nout = 4
 
     # Calculate output values
     out = np.exp(np.arange(np.log(outmin), np.log(outmin) + nout/nr_per_dec,

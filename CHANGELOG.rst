@@ -4,6 +4,9 @@ Changelog
 *latest*
 --------
 
+- [2018-04-25] Bug fix regarding `transform.get_spline_values`; a DLF with
+  `pts_per_dec` can now be shorter then the corresponding filter.
+
 - [2018-03-31] Digital linear filter (DLF) method for the Fourier transform can
   now be carried out without spline, providing 0 for `pts_per_dec` (or any
   integer smaller than 1).
