@@ -44,7 +44,6 @@ __all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'qwe',
 
 # 1. Hankel transforms (wavenumber -> frequency)
 
-
 def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         zetaV, xdirect, fhtarg, use_spline, use_ne_eval, msrc, mrec):
     """Hankel Transform using the Digital Linear Filter method.
@@ -550,49 +549,19 @@ def ffht(fEM, time, freq, ftarg):
         Only relevant for QWE/QUAD.
 
     """
-    # Get ftarg values
-    fftfilt, pts_per_dec, ftkind = ftarg
 
     # Settings depending if cos/sin plus scaling
-    if ftkind == 'sin':
+    if ftarg[2] == 'sin':
         fEM = -fEM.imag
     else:
         fEM = fEM.real
 
-    if pts_per_dec:
-
-        if pts_per_dec > 0:  # Use pts_per_dec frequencies per decade
-
-            # 1. Interpolate in frequency domain
-            sfEM = iuSpline(np.log10(2*np.pi*freq), fEM)
-            ifEM = sfEM(np.log10(fftfilt.base/time[:, None]))
-
-            # 2. Filter
-            tEM = np.dot(ifEM, getattr(fftfilt, ftkind))
-
-        else:  # No spline at all
-            tEM = np.dot(fEM.reshape(time.size, -1), getattr(fftfilt, ftkind))
-
-    else:  # Standard DLF procedure
-        # Get new times in frequency domain
-        _, itime = get_spline_values(fftfilt, time)
-
-        # Re-arranged fEM with shape (ntime, nfreq).  Each row starts one
-        # 'freq' higher.
-        fEM = np.concatenate((np.tile(fEM, itime.size).squeeze(),
-                             np.zeros(itime.size)))
-        fEM = fEM.reshape(itime.size, -1)[:, :fftfilt.base.size]
-
-        # 1. Filter
-        stEM = np.dot(fEM, getattr(fftfilt, ftkind))
-
-        # 2. Interpolate in time domain
-        itEM = iuSpline(np.log10((itime)[::-1]), stEM[::-1])
-        tEM = itEM(np.log10(time))
+    # Carry out DLF
+    tEM = dlf(fEM, 2*np.pi*freq, time, ftarg)
 
     # Return the electromagnetic time domain field
     # (Second argument is only for QWE)
-    return tEM/time, True
+    return tEM, True
 
 
 def fqwe(fEM, time, freq, qweargs):
@@ -878,6 +847,62 @@ def fft(fEM, time, freq, ftarg):
 
 
 # 3. Utilities
+
+def dlf(signal, points, out_pts, targ, factAng=None):
+    """Digital Linear Filter method.
+
+    This is the kernel of the DLF method, used for the Hankel (``fht``) and the
+    Fourier (``ffht``) Transforms. See ``fht`` for an extensive description.
+
+    It does two things, either the Hankel transform or the Fourier transform:
+
+    For the Hankel transform, `signal` contains 3 kernels: (PJ0, PJ1, PJ0b), as
+    returned from `kernel.wavenumber` and `factAng` should be provided, as
+    returned from `kernel.angle_factor`.
+
+    For the Fourier transform, `signal` is a real signal, and `factAng` has
+    to be None.
+
+    This function is based on ``get_CSEM1D_TD_FHT.m`` from the source code
+    distributed with [Key_2012]_.
+
+    """
+    # Get DLF arguments
+    filt = targ[0]
+    pts_per_dec = targ[1]
+    kind = targ[2]
+
+    # 1. Prepare signal depending on pts_per_dec
+    if not pts_per_dec:  # Lagged convolution (interpolate in output domain)
+
+        # Get interpolation points in output domain domain
+        _, int_pts = get_spline_values(filt, out_pts)
+
+        # Re-arranged signal with shape (#out_pts, #points).  Each row starts
+        # one 'point' higher.
+        inp_signal = np.concatenate((np.tile(signal, int_pts.size).squeeze(),
+                                     np.zeros(int_pts.size)))
+        inp_signal = inp_signal.reshape(int_pts.size, -1)[:, :filt.base.size]
+
+    elif pts_per_dec < 1:  # Standard DLF procedure
+
+        inp_signal = signal.reshape(out_pts.size, -1)
+
+    else:  # Interpolate in input domain
+        if_signal = iuSpline(np.log10(points), signal)
+        inp_signal = if_signal(np.log10(filt.base/out_pts[:, None]))
+
+    # 2. Apply DLF
+    out_signal = np.dot(inp_signal, getattr(filt, kind))
+
+    # 3. If lagged convolution, interpolate now to output domain points
+    if not pts_per_dec:
+        int_signal = iuSpline(np.log10((int_pts)[::-1]), out_signal[::-1])
+        out_signal = int_signal(np.log10(out_pts))
+
+    # Return the signal in the output domain
+    return out_signal/out_pts
+
 
 def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         factAng=None):
