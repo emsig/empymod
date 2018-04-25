@@ -234,7 +234,7 @@ def test_get_spline_values():                            # 9. get_spline_values
     # Check a hypothetical short filter, with small pts_per_dec, and ensure
     # at least four points are returned
     filt = filters.DigitalFilter('shortest')
-    filt.base = np.array([0.1, 1])
+    filt.base = np.array([1., 1.1])
     out, new_inp = transform.get_spline_values(filt, np.array([1.]), 1)
     assert_allclose(out.size, 4)
 
