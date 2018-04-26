@@ -1,19 +1,21 @@
 Changelog
 #########
 
-*latest*
---------
+v1.5.2 - *2018-04-25*
+---------------------
 
-- [2018-04-25] Combine kernel from `fht` and `ffht` into `dlf`, hence
-  separate DLF from other calculations, as is done with QWE (`qwe` for `hqwe`
-  and `fqwe`).
+- DLF improvements:
 
-- [2018-04-25] Bug fix regarding `transform.get_spline_values`; a DLF with
-  `pts_per_dec` can now be shorter then the corresponding filter.
+    - Digital linear filter (DLF) method for the Fourier transform can now be
+      carried out without spline, providing 0 for ``pts_per_dec`` (or any
+      integer smaller than 1).
 
-- [2018-03-31] Digital linear filter (DLF) method for the Fourier transform can
-  now be carried out without spline, providing 0 for `pts_per_dec` (or any
-  integer smaller than 1).
+    - Combine kernel from ``fht`` and ``ffht`` into ``dlf``, hence separate DLF
+      from other calculations, as is done with QWE (``qwe`` for ``hqwe`` and
+      ``fqwe``).
+
+    - Bug fix regarding ``transform.get_spline_values``; a DLF with
+      ``pts_per_dec`` can now be shorter then the corresponding filter.
 
 
 v1.5.1 - *2018-02-24*
