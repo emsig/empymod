@@ -995,3 +995,26 @@ def test_minimum():
     assert d['min_off'] == 1
     assert d['min_param'] == 1e-4
     assert d['min_angle'] == 1e-5
+
+
+def test_spline_backwards_hankel():
+    out1, out2 = utils.spline_backwards_hankel('fht', None, None)
+    assert out1 == {'pts_per_dec': 0}
+    assert out2 is None
+
+    out1, out2 = utils.spline_backwards_hankel('fht', {'pts_per_dec': 45},
+                                               'parallel')
+    assert out1 == {'pts_per_dec': 45}
+    assert out2 == 'parallel'
+
+    out1, out2 = utils.spline_backwards_hankel('fht', None, 'spline')
+    assert out1 == {'pts_per_dec': -1}
+    assert out2 is None
+
+    out1, out2 = utils.spline_backwards_hankel('qwe', None, 'spline')
+    assert out1 == {'pts_per_dec': 80}
+    assert out2 is None
+
+    out1, out2 = utils.spline_backwards_hankel('qwe', None, None)
+    assert out1 == {'pts_per_dec': 0}
+    assert out2 is None

@@ -52,7 +52,9 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         assert_allclose(np.squeeze(wvnr0), np.squeeze(freq0))
 
     # # # 1. Spline; One angle # # #
-    options = utils.check_opt('spline', None, htype, htarg, 0)
+    htarg, opt = utils.spline_backwards_hankel(htype, None, 'spline')
+    ht, htarg = utils.check_hankel(htype, htarg, 0)
+    options = utils.check_opt(None, None, htype, htarg, 0)
     use_ne_eval, loop_freq, loop_off = options
     if htype == 'hquad':  # Lower atol to ensure convergence
         ht, htarg = utils.check_hankel('quad', [1e-8], 0)
@@ -72,7 +74,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
     rec, nrec = utils.check_dipole(rec, 'rec', 0)
     off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
     if htype == 'hqwe':  # Put a very low diff_quad, to test it.; lower err
-        ht, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, '', .1,
+        ht, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, 80, .1,
                                                1e-6, .1, 1000], 0)
 
     # Analytical frequency-domain solution
@@ -90,7 +92,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
     if htype == 'fht':
         ht, htarg = utils.check_hankel('fht', ['key_201_2012', 20], 0)
     elif htype == 'hqwe':
-        ht, htarg = utils.check_hankel('qwe', ['', '', '', '', 100], 0)
+        ht, htarg = utils.check_hankel('qwe', ['', '', '', 80, 100], 0)
     if htype != 'hquad':  # hquad is always pts_per_dec
         # Analytical frequency-domain solution
         wvnr3, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
@@ -108,7 +110,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
     rec, nrec = utils.check_dipole(rec, 'rec', 0)
     off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
     if htype == 'hqwe':
-        ht, htarg = utils.check_hankel('qwe', ['', '', '', 200, ''], 0)
+        ht, htarg = utils.check_hankel('qwe', ['', '', '', 200, 80], 0)
     elif htype == 'hquad':
         ht, htarg = utils.check_hankel('quad', None, 0)
     # Analytical frequency-domain solution
@@ -326,6 +328,9 @@ def test_dlf():                                                       # 10. dlf
         if i > 1:
             finp *= -1
 
+        if ftarg[1] == 0:
+            finp = finp.reshape(t.size, -1)
+
         tEM = transform.dlf(finp, 2*np.pi*dat['f'], t, ftarg[0], ftarg[1],
                             kind=ftarg[2])
         assert_allclose(tEM*2/np.pi, tres, rtol=1e-3)
@@ -384,7 +389,27 @@ def test_dlf():                                                       # 10. dlf
     # Compare
     assert_allclose(np.squeeze(fEM1), np.squeeze(freq1), rtol=1e-4)
 
-    # # # 2. Lagged; Multi angle # # #
+    # # # 2.a Lagged; One angle # # #
+    rec = [np.arange(1, 11)*500, np.arange(-5, 5)*0, 300]
+    rec, nrec = utils.check_dipole(rec, 'rec', 0)
+    off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
+
+    # fht calculation
+    lambd, _ = transform.get_spline_values(fhtfilt, off, -1)
+    PJ2 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
+                            zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
+    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+
+    # dlf calculation
+    fEM2 = transform.dlf(PJ2, lambd, off, fhtfilt, -1, factAng=factAng, ab=ab)
+
+    # Analytical frequency-domain solution
+    freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
+                             ab, msrc, mrec)
+    # Compare
+    assert_allclose(np.squeeze(fEM2), np.squeeze(freq2), rtol=1e-4)
+
+    # # # 2.b Lagged; Multi angle # # #
     rec = [np.arange(1, 11)*500, np.arange(-5, 5)*200, 300]
     rec, nrec = utils.check_dipole(rec, 'rec', 0)
     off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)

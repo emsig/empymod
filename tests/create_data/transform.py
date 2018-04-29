@@ -71,7 +71,7 @@ fftlog2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
 # # C -- FFHT # #
 # Signal = 0
-_, f, _, ftarg = utils.check_time(t, 0, 'cos', None, 0)
+_, f, _, ftarg = utils.check_time(t, 0, 'cos', {'pts_per_dec': 0}, 0)
 fEM = test_freq(res, off, f)
 ffht0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1

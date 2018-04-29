@@ -178,9 +178,14 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - filter: string of filter name in ``empymod.filters`` or
                           the filter method itself.
                           (default: ``empymod.filters.key_201_2009()``)
-                - pts_per_dec: points per decade (only relevant if spline=True)
-                               If none, standard lagged convolution is used.
-                                (default: None)
+                - pts_per_dec: points per decade; (default: 0)
+                    - If 0: Standard DLF.
+                    - If < 0: Lagged Convolution DLF.
+                    - If > 0: Splined DLF
+
+                    Use with caution and check with the non-spline version for
+                    a specific problem. (Can be faster, slower, or plainly
+                    wrong, as it uses interpolation.)
 
             - If ``ht`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
                                 diff_quad, a, b, limit]:
@@ -190,8 +195,14 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - nquad: order of Gaussian quadrature (default: 51)
                 - maxint: maximum number of partial integral intervals
                           (default: 40)
-                - pts_per_dec: points per decade; only relevant if opt='spline'
-                               (default: 80)
+                - pts_per_dec: points per decade; (default: 0)
+                    - If 0, no interpolation is used.
+                    - If > 0, interpolation is used.
+
+                    Use with caution and check with the non-spline version for
+                    a specific problem. (Can be faster, slower, or plainly
+                    wrong, as it uses interpolation.)
+
                 - diff_quad: criteria when to swap to QUAD (only relevant if
                   opt='spline') (default: 100)
                 - a: lower limit for QUAD (default: first interval from QWE)
@@ -232,9 +243,15 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - filter: string of filter name in ``empymod.filters`` or
                           the filter method itself.
                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
-                - pts_per_dec: points per decade.  If none, standard lagged
-                               convolution is used. If <1, no interpolation is
-                               used at all. (Default: None)
+                - pts_per_dec: points per decade; (default: -1)
+                    - If 0: Standard DLF.
+                    - If < 0: Lagged Convolution DLF.
+                    - If > 0: Splined DLF
+
+                    Use with caution and check with the non-spline version for
+                    a specific problem. (Can be faster, slower, or plainly
+                    wrong, as it uses interpolation.)
+
 
             - If ``ft`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
 
@@ -274,7 +291,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         However, if provided as list, you have to follow the order given above.
         See ``htarg`` for a few examples.
 
-    opt : {None, 'parallel', 'spline'}, optional
+    opt : {None, 'parallel'}, optional
         Optimization flag. Defaults to None:
             - None: Normal case, no parallelization nor interpolation is used.
             - If 'parallel', the package ``numexpr`` is used to evaluate the
@@ -288,14 +305,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
               default all available cores up to a maximum of 8. You can change
               this behaviour to your desired number of threads ``nthreads``
               with ``numexpr.set_num_threads(nthreads)``.
-            - If 'spline', the *lagged convolution* or *splined* variant of the
-              DLF/FHT or the *splined* version of the QWE are used. Use with
-              caution and check with the non-spline version for a specific
-              problem. (Can be faster, slower, or plainly wrong, as it uses
-              interpolation.) If spline is set it will make use of the
-              parameter pts_per_dec that can be defined in htarg. If
-              pts_per_dec is not set for DLF/FHT, then the *lagged* version is
-              used, else the *splined*. This option has no effect on QUAD.
+            - The value 'spline' is deprecated and will be removed. See
+              ``htarg`` instead for the interpolated versions.
 
         The option 'parallel' only affects speed and memory usage, whereas
         'spline' also affects precision!  Please read the note in the *README*
@@ -374,8 +385,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        frequency  [Hz] :  1
        Hankel          :  DLF (Fast Hankel Transform)
          > Filter      :  Key 201 (2009)
-         > pts_per_dec :  Defined by filter (lagged)
-       Hankel Opt.     :  None
+         > DLF type    :  Standard
+       Kernel Opt.     :  None
        Loop over       :  None (all vectorized)
        Source(s)       :  1 bipole(s)
          > intpts      :  1 (as dipole)
@@ -696,9 +707,14 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - filter: string of filter name in ``empymod.filters`` or
                           the filter method itself.
                           (default: ``empymod.filters.key_201_2009()``)
-                - pts_per_dec: points per decade (only relevant if spline=True)
-                               If none, standard lagged convolution is used.
-                                (default: None)
+                - pts_per_dec: points per decade; (default: 0)
+                    - If 0: Standard DLF.
+                    - If < 0: Lagged Convolution DLF.
+                    - If > 0: Splined DLF
+
+                    Use with caution and check with the non-spline version for
+                    a specific problem. (Can be faster, slower, or plainly
+                    wrong, as it uses interpolation.)
 
             - If ``ht`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
                                 diff_quad, a, b, limit]:
@@ -708,8 +724,14 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - nquad: order of Gaussian quadrature (default: 51)
                 - maxint: maximum number of partial integral intervals
                           (default: 40)
-                - pts_per_dec: points per decade; only relevant if opt='spline'
-                               (default: 80)
+                - pts_per_dec: points per decade; (default: 0)
+                    - If 0, no interpolation is used.
+                    - If > 0, interpolation is used.
+
+                    Use with caution and check with the non-spline version for
+                    a specific problem. (Can be faster, slower, or plainly
+                    wrong, as it uses interpolation.)
+
                 - diff_quad: criteria when to swap to QUAD (only relevant if
                   opt='spline') (default: 100)
                 - a: lower limit for QUAD (default: first interval from QWE)
@@ -750,9 +772,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - filter: string of filter name in ``empymod.filters`` or
                           the filter method itself.
                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
-                - pts_per_dec: points per decade.  If none, standard lagged
-                               convolution is used.  If <1, no interpolation is
-                               used at all. (Default: None)
+                - pts_per_dec: points per decade; (default: -1)
+                    - If 0: Standard DLF.
+                    - If < 0: Lagged Convolution DLF.
+                    - If > 0: Splined DLF
 
             - If ``ft`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
 
@@ -792,7 +815,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         However, if provided as list, you have to follow the order given above.
         See ``htarg`` for a few examples.
 
-    opt : {None, 'parallel', 'spline'}, optional
+    opt : {None, 'parallel'}, optional
         Optimization flag. Defaults to None:
             - None: Normal case, no parallelization nor interpolation is used.
             - If 'parallel', the package ``numexpr`` is used to evaluate the
@@ -806,14 +829,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
               default all available cores up to a maximum of 8. You can change
               this behaviour to your desired number of threads ``nthreads``
               with ``numexpr.set_num_threads(nthreads)``.
-            - If 'spline', the *lagged convolution* or *splined* variant of the
-              DLF/FHT or the *splined* version of the QWE are used. Use with
-              caution and check with the non-spline version for a specific
-              problem. (Can be faster, slower, or plainly wrong, as it uses
-              interpolation.) If spline is set it will make use of the
-              parameter pts_per_dec that can be defined in htarg. If
-              pts_per_dec is not set for DLF/FHT, then the *lagged* version is
-              used, else the *splined*. This option has no effect on QUAD.
+            - The value 'spline' is deprecated and will be removed. See
+              ``htarg`` instead for the interpolated versions.
 
         The option 'parallel' only affects speed and memory usage, whereas
         'spline' also affects precision!  Please read the note in the *README*

@@ -1900,9 +1900,10 @@ def spline_backwards_hankel(ht, htarg, opt):
         # We have to check the Lagged Convolution DLF and the Standard DLF; the
         # Splined DLF did not change
         if opt == 'spline':
-            mesg = ("The use of `opt='spline'` is deprecated and will be " +
-                    "removed in v2.0.0; use the corresponding setting in " +
-                    "`htarg`.")
+
+            mesg = ("\n    The use of `opt='spline'` is deprecated and will " +
+                    "be removed\n    in v2.0.0; use the corresponding " +
+                    "setting in `htarg`.")
             warnings.warn(mesg, DeprecationWarning)
 
             opt = None
