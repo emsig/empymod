@@ -45,7 +45,7 @@ __all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
 # 1. Hankel transforms (wavenumber -> frequency)
 
 def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
-        zetaV, xdirect, fhtarg, use_spline, use_ne_eval, msrc, mrec):
+        zetaV, xdirect, fhtarg, use_ne_eval, msrc, mrec):
     """Hankel Transform using the Digital Linear Filter method.
 
     The *Digital Linear Filter* method was introduced to geophysics by
@@ -95,12 +95,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     pts_per_dec = fhtarg[1]
 
     # 1. Compute required lambdas for given hankel-filter-base
-    if use_spline:           # Use interpolation
-        # Get lambda from offset and filter
-        lambd, _ = get_spline_values(fhtfilt, off, pts_per_dec)
-
-    else:  # df.base/off
-        lambd = fhtfilt.base/off[:, None]
+    lambd, _ = get_spline_values(fhtfilt, off, pts_per_dec)
 
     # 2. Call the kernel
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
@@ -110,23 +105,13 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # 4. Carry out the dlf
-
-    # Legacy issue; distinguish between standard DLF, lagged convolution DLF,
-    # and splined DLF:
-    splined = False
-    lagged = False
-    if pts_per_dec is not None:
-        splined = True
-    elif use_spline:
-        lagged = True
-
-    fEM = dlf(PJ, lambd, off, fhtfilt, lagged, splined, factAng=factAng, ab=ab)
+    fEM = dlf(PJ, lambd, off, fhtfilt, pts_per_dec, factAng=factAng, ab=ab)
 
     return fEM, 1, True
 
 
 def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
-         zetaV, xdirect, qweargs, use_spline, use_ne_eval, msrc, mrec):
+         zetaV, xdirect, qweargs, use_ne_eval, msrc, mrec):
     """Hankel Transform using Quadrature-With-Extrapolation.
 
     *Quadrature-With-Extrapolation* was introduced to geophysics by
@@ -235,7 +220,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # Call and return QWE, depending if spline or not
-    if use_spline:  # If spline, we calculate all kernels here
+    if pts_per_dec != 0:  # If spline, we calculate all kernels here
         # New lambda, from min to max required lambda with pts_per_dec
         start = np.log10(lambd.min())
         stop = np.log10(lambd.max())
@@ -365,7 +350,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
 
 def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
-          zetaV, xdirect, quadargs, use_spline, use_ne_eval, msrc, mrec):
+          zetaV, xdirect, quadargs, use_ne_eval, msrc, mrec):
     """Hankel Transform using the ``QUADPACK`` library.
 
     This routine uses the ``scipy.integrate.quad`` module, which in turn makes
@@ -470,21 +455,12 @@ def ffht(fEM, time, freq, ftarg):
     pts_per_dec = ftarg[1]
     kind = ftarg[2]  # Sine (`sin`) or cosine (`cos`)
 
-    # Legacy issue; distinguish between standard DLF, lagged convolution DLF,
-    # and splined DLF:
-    splined = False
-    lagged = False
-    if pts_per_dec is None:
-        lagged = True
-    elif pts_per_dec > 1:
-        splined = True
-
     # Cast into Standard DLF format
-    if not lagged and not splined:
+    if pts_per_dec == 0:
         fEM = fEM.reshape(time.size, -1)
 
     # Carry out DLF
-    tEM = dlf(fEM, 2*np.pi*freq, time, ffhtfilt, lagged, splined, kind=kind)
+    tEM = dlf(fEM, 2*np.pi*freq, time, ffhtfilt, pts_per_dec, kind=kind)
 
     # Return the electromagnetic time domain field
     # (Second argument is only for QWE)
@@ -775,8 +751,8 @@ def fft(fEM, time, freq, ftarg):
 
 # 3. Utilities
 
-def dlf(signal, points, out_pts, filt, lagged, splined, kind=None,
-        factAng=None, ab=None):
+def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
+        ab=None):
     """Digital Linear Filter method.
 
     This is the kernel of the DLF method, used for the Hankel (``fht``) and the
@@ -831,11 +807,11 @@ def dlf(signal, points, out_pts, filt, lagged, splined, kind=None,
         return out
 
     # 1. PREPARE SIGNAL
-    if lagged:  # Lagged Convolution DLF: interpolation in output domain
+    if pts_per_dec < 0:  # Lagged Convolution DLF: interp. in output domain
         # Lagged Convolution DLF: re-arrange signal
 
         # Get interpolation points in output domain
-        _, int_pts = get_spline_values(filt, out_pts)
+        _, int_pts = get_spline_values(filt, out_pts, pts_per_dec)
 
         # If Lagged Convolution Hankel DLF and one_angle:
         # create factAng with this one angle and size int_pts
@@ -848,7 +824,7 @@ def dlf(signal, points, out_pts, filt, lagged, splined, kind=None,
                                      np.zeros(int_pts.size)))
             signal[i] = tmp_sig.reshape(int_pts.size, -1)[:, :filt.base.size]
 
-    elif splined:  # Splined DLF: interpolate in input domain
+    elif pts_per_dec > 0:  # Splined DLF: interpolate in input domain
         # Splined DLF: interpolate signal here
         new = filt.base/out_pts[:, None]
         signal = [spline(x, points, new) for x in signal]
@@ -857,7 +833,7 @@ def dlf(signal, points, out_pts, filt, lagged, splined, kind=None,
     if hankel:  # Hankel transform
         inp_PJ0, inp_PJ1, inp_PJ0b = signal
 
-        if (splined or lagged) and not one_angle:
+        if pts_per_dec != 0 and not one_angle:
             # Varying angle with either lagged or splined DLF.
             # If not all offsets are in one line from the source, hence do not
             # have the same angle, the DLF has to be done separately for
@@ -866,13 +842,13 @@ def dlf(signal, points, out_pts, filt, lagged, splined, kind=None,
             out_angle = np.dot(inp_PJ1, filt.j1)
             if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
                 # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-                if lagged:
+                if pts_per_dec < 0:  # Lagged Convolution
                     out_angle /= int_pts
-                else:
+                else:  # Splined
                     out_angle /= out_pts
             out_angle += np.dot(inp_PJ0b, filt.j0)
 
-            if splined:
+            if pts_per_dec > 0:
                 # If splined we can add them here, as the interpolation
                 # is already done.
                 out_signal = factAng*out_angle + out_noang
@@ -883,9 +859,9 @@ def dlf(signal, points, out_pts, filt, lagged, splined, kind=None,
             out_signal = factAng*np.dot(inp_PJ1, filt.j1)
             if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
                 # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-                if lagged:
+                if pts_per_dec < 0:  # Lagged Convolution
                     out_signal /= int_pts
-                else:
+                else:  # Splined
                     out_signal /= out_pts
             out_signal += np.dot(inp_PJ0 + factAng[:, np.newaxis]*inp_PJ0b,
                                  filt.j0)
@@ -894,7 +870,7 @@ def dlf(signal, points, out_pts, filt, lagged, splined, kind=None,
         out_signal = np.dot(signal[0], getattr(filt, kind))
 
     # 3. IF LAGGED CONVOLUTION, INTERPOLATE NOW TO OUTPUT DOMAIN POINTS
-    if lagged:
+    if pts_per_dec < 0:
 
         if not one_angle:  # Separately on out_noang and out_angle
             int_noang = spline(out_noang[::-1], int_pts[::-1], out_pts)
@@ -1043,44 +1019,53 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
 def get_spline_values(filt, inp, nr_per_dec=None):
     """Return required calculation points."""
 
+    # Standard DLF
+    if nr_per_dec == 0:
+        return filt.base/inp[:, None], inp
+
     # Get min and max required out-values (depends on filter and inp-value)
     outmax = filt.base[-1]/inp.min()
     outmin = filt.base[0]/inp.max()
 
-    # Define number of out-values, depending if nr_per_dec or not
-    def nr_of_out(outmax, outmin, nr_per_dec):
+    # Define number of out-values, depending on pts_per_dec
+    def nr_of_out(outmax, outmin, pts_per_dec):
         """Number of out-values."""
-        return int(np.ceil(np.log(outmax/outmin)*nr_per_dec) + 1)
+        return int(np.ceil(np.log(outmax/outmin)*pts_per_dec) + 1)
 
-    # If number per decade (nr_per_dec) is not provided, filter.factor is used
-    if not nr_per_dec:
-        nr_per_dec = 1/np.log(filt.factor)
+    # Get pts_per_dec
+    if nr_per_dec < 0:  # Lagged Convolution DLF
+        pts_per_dec = 1/np.log(filt.factor)
 
-        nout = nr_of_out(outmax, outmin, nr_per_dec)
+    else:  # Splined DLF
+        pts_per_dec = nr_per_dec
 
-        # The cubic InterpolatedUnivariateSpline needs at least 4 points. As
-        # nr_per_dec is not provided, interpolation happens in output domain,
-        # so `new_inp` needs to have at least 4 points.
+    # Calculate number of output values
+    nout = nr_of_out(outmax, outmin, pts_per_dec)
+
+    # Min-nout check, becaus the cubic InterpolatedUnivariateSpline needs at
+    # least 4 points.
+    if nr_per_dec < 0:  # Lagged Convolution DLF
+        # Lagged Convolution DLF interpolates in output domain, so `new_inp`
+        # needs to have at least 4 points.
         if nout-filt.base.size < 3:
             nout = filt.base.size+3
-    else:
-        nout = nr_of_out(outmax, outmin, nr_per_dec)
-        # The cubic InterpolatedUnivariateSpline needs at least 4 points. As
-        # nr_per_dec is provided, interpolation happens in input domain, so
-        # `out` needs to have at least 4 points. This should always be the
-        # case, we're just overly cautious here.
+
+    else:  # Splined DLF
+        # Splined DLF interpolates in input domain, so `out` needs to have at
+        # least 4 points. This should always be the case, we're just overly
+        # cautious here.
         if nout < 4:
             nout = 4
 
     # Calculate output values
-    out = np.exp(np.arange(np.log(outmin), np.log(outmin) + nout/nr_per_dec,
-                           1/nr_per_dec))
+    out = np.exp(np.arange(np.log(outmin), np.log(outmin) + nout/pts_per_dec,
+                           1/pts_per_dec))
 
     # Only necessary if standard spline is used. We need to calculate the new
     # input values, as spline is carried out in the input domain. Else spline
     # is carried out in output domain and the new input values are not used.
     new_inp = inp.max()*np.exp(-np.arange(nout - filt.base.size + 1) /
-                               nr_per_dec)
+                               pts_per_dec)
 
     # Return output values
     return np.atleast_2d(out), new_inp

@@ -259,19 +259,19 @@ class TestBipole:
 
         non = bipole(opt=None, verb=3, **inp)
         out, _ = capsys.readouterr()
-        assert "Hankel Opt.     :  None" in out
+        assert "Kernel Opt.     :  None" in out
 
         par = bipole(opt='parallel', verb=3, **inp)
         out, _ = capsys.readouterr()
         if use_ne_eval and use_vml:
-            assert "Hankel Opt.     :  Use parallel" in out
+            assert "Kernel Opt.     :  Use parallel" in out
         else:
-            assert "Hankel Opt.     :  None" in out
+            assert "Kernel Opt.     :  None" in out
         assert_allclose(non, par, equal_nan=True)
 
         spl = bipole(opt='spline', verb=3, **inp)
         out, _ = capsys.readouterr()
-        assert "Hankel Opt.     :  Use spline" in out
+        assert "> DLF type    :  Lagged Convolution" in out
         assert_allclose(non, spl, 1e-3, 1e-22, True)
 
     def test_loop(self, capsys):
@@ -300,11 +300,11 @@ class TestBipole:
                'freqtime': [1.34, 23, 31], 'src': [0, 0, 0, 0, 90],
                'rec': [[200, 300, 400], [3000, 4000, 5000], 120, 90, 0]}
 
-        fht = bipole(ht='fht', verb=3, **inp)
+        fht = bipole(ht='fht', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  DLF (Fast Hankel Transform)" in out
 
-        qwe = bipole(ht='qwe', verb=3, **inp)
+        qwe = bipole(ht='qwe', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  Quadrature-with-Extrapolation" in out
         assert_allclose(fht, qwe, equal_nan=True)

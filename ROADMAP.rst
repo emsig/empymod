@@ -24,6 +24,8 @@ in touch if you would like to tackle one of these problems!
   - Load and save functions to easily store and load model information
     (resistivity model, acquisition parameters, and modelling parameters)
     together with the modelling data (using ``pickle`` or ``shelve``).
+    Better than after the abstraction [`empymod#14
+  <https://github.com/empymod/empymod/issues/14>`_].
 
 
 - **Inversion** [`empyscripts#1
@@ -56,6 +58,8 @@ in touch if you would like to tackle one of these problems!
 - Hankel transform
 
   - Add the ``fht``-module from FFTLog for the Hankel transform.
+  - Include the method outlined by Mulder et al., 2008, Geophysics
+    (piecewise-cubic Hermite interpolation with a FFT).
 
 
 - Extend examples (example-notebooks)
@@ -71,7 +75,8 @@ in touch if you would like to tackle one of these problems!
   with for interested folks. (Probably combined with default parallelisation,
   removing the ``numexpr`` variant.)
 
-- Abstraction of the code.
+- Abstraction of the code [`empymod#14
+  <https://github.com/empymod/empymod/issues/14>`_].
 
 - GUI.
 

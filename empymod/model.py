@@ -58,7 +58,7 @@ from .utils import (check_time, check_time_only, check_model, check_frequency,
                     check_hankel, check_opt, check_dipole, check_bipole,
                     check_ab, check_solution, get_abs, get_geo_fact,
                     get_azm_dip, get_off_ang, get_layer_nr, printstartfinish,
-                    conv_warning)
+                    conv_warning, spline_backwards_hankel)
 
 __all__ = ['bipole', 'dipole', 'analytical', 'gpr', 'wavenumber', 'fem', 'tem']
 
@@ -411,6 +411,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # === 2.  CHECK INPUT ============
 
+    # Backwards compatibility
+    htarg, opt = spline_backwards_hankel(ht, htarg, opt)
+
     # Check times and Fourier Transform arguments and get required frequencies
     if signal is None:
         freq = freqtime
@@ -431,8 +434,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     ht, htarg = check_hankel(ht, htarg, verb)
 
     # Check optimization
-    optimization = check_opt(opt, loop, ht, htarg, verb)
-    use_spline, use_ne_eval, loop_freq, loop_off = optimization
+    use_ne_eval, loop_freq, loop_off = check_opt(opt, loop, ht, htarg, verb)
 
     # Check src and rec, get flags if dipole or not
     # nsrcz/nrecz are number of unique src/rec-pole depths
@@ -507,8 +509,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     # Gather variables
                     finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq,
                             etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht,
-                            htarg, use_spline, use_ne_eval, msrc, mrec,
-                            loop_freq, loop_off, conv)
+                            htarg, use_ne_eval, msrc, mrec, loop_freq,
+                            loop_off, conv)
 
                     # Pre-allocate temporary EM array for ab-loop
                     abEM = np.zeros((freq.size, isrz), dtype=complex)
@@ -877,6 +879,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # === 2.  CHECK INPUT ============
 
+    # Backwards compatibility
+    htarg, opt = spline_backwards_hankel(ht, htarg, opt)
+
     # Check times and Fourier Transform arguments, get required frequencies
     # (freq = freqtime if ``signal=None``)
     if signal is not None:
@@ -898,8 +903,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     ht, htarg = check_hankel(ht, htarg, verb)
 
     # Check optimization
-    optimization = check_opt(opt, loop, ht, htarg, verb)
-    use_spline, use_ne_eval, loop_freq, loop_off = optimization
+    use_ne_eval, loop_freq, loop_off = check_opt(opt, loop, ht, htarg, verb)
 
     # Check src-rec configuration
     # => Get flags if src or rec or both are magnetic (msrc, mrec)
@@ -920,8 +924,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # Collect variables for fem
     inp = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
-           etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_spline,
-           use_ne_eval, msrc, mrec, loop_freq, loop_off)
+           etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_ne_eval,
+           msrc, mrec, loop_freq, loop_off)
     EM, kcount, conv = fem(*inp)
 
     # In case of QWE/QUAD, print Warning if not converged
@@ -1410,8 +1414,8 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 # Core modelling routines
 
 def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
-        zetaV, xdirect, isfullspace, ht, htarg, use_spline, use_ne_eval, msrc,
-        mrec, loop_freq, loop_off, conv=True):
+        zetaV, xdirect, isfullspace, ht, htarg, use_ne_eval, msrc, mrec,
+        loop_freq, loop_off, conv=True):
     """Return the electromagnetic frequency-domain response.
 
     This function is called from one of the above modelling routines. No
@@ -1450,7 +1454,7 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
                 out = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
                            etaH[None, i, :], etaV[None, i, :],
                            zetaH[None, i, :], zetaV[None, i, :], xdirect,
-                           htarg, use_spline, use_ne_eval, msrc, mrec)
+                           htarg, use_ne_eval, msrc, mrec)
                 fEM[None, i, :] += out[0]
                 kcount += out[1]
                 conv *= out[2]
@@ -1459,14 +1463,14 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
             for i in range(off.size):
                 out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
                            angle[None, i], depth, ab, etaH, etaV, zetaH, zetaV,
-                           xdirect, htarg, use_spline, use_ne_eval, msrc, mrec)
+                           xdirect, htarg, use_ne_eval, msrc, mrec)
                 fEM[:, None, i] += out[0]
                 kcount += out[1]
                 conv *= out[2]
         else:
             out = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
-                       etaV, zetaH, zetaV, xdirect, htarg, use_spline,
-                       use_ne_eval, msrc, mrec)
+                       etaV, zetaH, zetaV, xdirect, htarg, use_ne_eval, msrc,
+                       mrec)
             fEM += out[0]
             kcount += out[1]
             conv *= out[2]

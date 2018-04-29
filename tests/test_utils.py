@@ -221,27 +221,33 @@ def test_check_hankel(capsys):
     ht, htarg = utils.check_hankel('fht', None, 4)
     out, _ = capsys.readouterr()
     assert "   Hankel          :  DLF (Fast Hankel Transform)\n     > F" in out
-    assert "     > pts_per_dec :  Defined by filter (lagged)" in out
+    assert "     > DLF type    :  Standard" in out
     assert ht == 'fht'
     assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] is None
+    assert htarg[1] is 0
 
     # [filter str]
     _, htarg = utils.check_hankel('fht', 'key_201_2009', 0)
     assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] is None
+    assert htarg[1] is 0
     # [filter inst]
     _, htarg = utils.check_hankel('fht', filters.kong_61_2007(), 0)
     assert htarg[0].name == filters.kong_61_2007().name
-    assert htarg[1] is None
-    # ['', pts_per_dec]
+    assert htarg[1] is 0
+    # ['', pts_per_dec]  :: list
     _, htarg = utils.check_hankel('fht', ['', 20], 0)
     assert htarg[0].name == filters.key_201_2009().name
     assert htarg[1] == 20
+    # ['', pts_per_dec]  :: dict
+    _, htarg = utils.check_hankel('fht', {'pts_per_dec': -1}, 4)
+    out, _ = capsys.readouterr()
+    assert "     > DLF type    :  Lagged Convolution" in out
+    assert htarg[0].name == filters.key_201_2009().name
+    assert htarg[1] == -1
     # [filter str, pts_per_dec]
     _, htarg = utils.check_hankel('fht', ['key_201_2009', 20], 4)
     out, _ = capsys.readouterr()
-    assert "     > pts_per_dec :  20" in out
+    assert "     > DLF type    :  Splined, 20 pts/dec" in out
     assert htarg[0].name == filters.key_201_2009().name
     assert htarg[1] == 20
 
@@ -250,9 +256,9 @@ def test_check_hankel(capsys):
     ht, htarg = utils.check_hankel('qwe', None, 4)
     out, _ = capsys.readouterr()
     outstr = "   Hankel          :  Quadrature-with-Extrapolation\n     > rtol"
-    assert out[:63] == outstr
+    assert outstr in out
     assert ht == 'hqwe'
-    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 80, 100])
+    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 0, 100])
     assert htarg[-3] is None
     assert htarg[-2] is None
     assert htarg[-1] is None
@@ -260,7 +266,7 @@ def test_check_hankel(capsys):
     # only last argument
     _, htarg = utils.check_hankel('qwe', ['', '', '', '', '', '', '', '', 30],
                                   0)
-    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 80, 100])
+    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 0, 100])
     assert htarg[-3] is None
     assert htarg[-2] is None
     assert htarg[-1] == 30
@@ -279,7 +285,7 @@ def test_check_hankel(capsys):
     ht, htarg = utils.check_hankel('quad', None, 4)
     out, _ = capsys.readouterr()
     outstr = "   Hankel          :  Quadrature\n     > rtol"
-    assert out[:44] == outstr
+    assert outstr in out
     assert ht == 'hquad'
     assert_allclose(htarg, [1e-12, 1e-20, 500, 1e-6, 0.1, 40])
 
@@ -355,67 +361,44 @@ def test_check_opt(capsys):
                 np.array(33)]
 
     res = utils.check_opt(None, None, 'fht', fhtarg, 4)
-    assert_allclose(res, (False, False, False, False))
+    assert_allclose(res, (False, False, False))
     out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  None\n   Loop over       :  None"
+    outstr = "   Kernel Opt.     :  None\n   Loop over       :  None"
     assert out[:53] == outstr
 
     res = utils.check_opt(None, 'off', 'hqwe', qwehtarg, 4)
-    assert_allclose(res, (False, False, True, False))
+    assert_allclose(res, (False, True, False))
     out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  None\n   Loop over       :  Freq"
+    outstr = "   Kernel Opt.     :  None\n   Loop over       :  Freq"
     assert out[:53] == outstr
 
     res = utils.check_opt('parallel', 'off', 'fht', fhtarg, 4)
-    assert_allclose(res[0], False)
     if use_vml:
-        assert_allclose(callable(res[1]), True)
-        outstr = "   Hankel Opt.     :  Use parallel\n   Loop over       :  Of"
+        assert_allclose(callable(res[0]), True)
+        outstr = "   Kernel Opt.     :  Use parallel\n   Loop over       :  Of"
     elif not use_ne_eval:
-        assert_allclose(callable(res[1]), False)
+        assert_allclose(callable(res[0]), False)
         outstr = "* WARNING :: `numexpr` is not installed, `opt=='parallel'` "
     else:
-        assert_allclose(callable(res[1]), False)
+        assert_allclose(callable(res[0]), False)
         outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"
-    assert_allclose(res[2:], (False, True))
+    assert_allclose(res[1:], (False, True))
     out, _ = capsys.readouterr()
     assert out[:59] == outstr
 
     res = utils.check_opt('parallel', 'freq', 'hqwe', qwehtarg, 4)
-    assert_allclose(res[0], False)
     if use_vml:
-        assert_allclose(callable(res[1]), True)
-        outstr = "   Hankel Opt.     :  Use parallel\n   Loop over       :  Fr"
+        assert_allclose(callable(res[0]), True)
+        outstr = "   Kernel Opt.     :  Use parallel\n   Loop over       :  Fr"
     elif not use_ne_eval:
-        assert_allclose(callable(res[1]), False)
+        assert_allclose(callable(res[0]), False)
         outstr = "* WARNING :: `numexpr` is not installed, `opt=='parallel'` "
     else:
-        assert_allclose(callable(res[1]), False)
+        assert_allclose(callable(res[0]), False)
         outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"
-    assert_allclose(res[2:], (True, False))
+    assert_allclose(res[1:], (True, False))
     out, _ = capsys.readouterr()
     assert out[:59] == outstr
-
-    res = utils.check_opt('spline', None, 'fht', fhtarg, 4)
-    assert_allclose(res, (True, False, True, False))
-    out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  Use spline\n"
-    outstr += "   Loop over       :  Frequencies\n"
-    assert out == outstr
-
-    res = utils.check_opt('spline', None, 'fht', [fhtarg[0], None], 4)
-    assert_allclose(res, (True, False, True, False))
-    out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  Use spline\n"
-    outstr += "   Loop over       :  Frequencies\n"
-    assert out == outstr
-
-    res = utils.check_opt('spline', None, 'hqwe', qwehtarg, 4)
-    assert_allclose(res, (True, False, True, False))
-    out, _ = capsys.readouterr()
-    outstr = "   Hankel Opt.     :  Use spline\n"
-    outstr += "   Loop over       :  Frequencies\n"
-    assert out == outstr
 
 
 def test_check_time(capsys):
@@ -425,12 +408,12 @@ def test_check_time(capsys):
     # verbose
     _, f, ft, ftarg = utils.check_time(time, 0, 'ffht', None, 4)
     out, _ = capsys.readouterr()
-    outstr = "   time        [s] :  3\n"
-    outstr += "   Fourier         :  DLF (Sine-Filter)\n     > Filter"
-    assert out[:77] == outstr
+    assert "   time        [s] :  3" in out
+    assert "   Fourier         :  DLF (Sine-Filter)" in out
+    assert "> DLF type    :  Lagged Convolution" in out
     assert ft == 'ffht'
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] is None
+    assert ftarg[1] is -1
     f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
                    7.39786458e-08, 8.50106448e-08, 9.76877807e-08,
                    1.12255383e-07, 1.28995366e-07, 1.48231684e-07])
@@ -451,13 +434,7 @@ def test_check_time(capsys):
     assert out[:79] == outstr
     assert ft == 'ffht'
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] is None
-    f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
-                   7.39786458e-08, 8.50106448e-08, 9.76877807e-08,
-                   1.12255383e-07, 1.28995366e-07, 1.48231684e-07])
-    f2 = np.array([2.88109455e+04, 3.31073518e+04, 3.80444558e+04,
-                   4.37178011e+04, 5.02371788e+04, 5.77287529e+04,
-                   6.63375012e+04, 7.62300213e+04, 8.75977547e+04])
+    assert ftarg[1] is -1
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 201+3)
@@ -467,7 +444,7 @@ def test_check_time(capsys):
     _, _, _, ftarg = utils.check_time(time, 1, 'sin',
                                       filters.key_201_CosSin_2012(), 0)
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] is None
+    assert ftarg[1] is -1
     assert ftarg[2] == 'sin'
 
     # ['', pts_per_dec]
@@ -477,21 +454,39 @@ def test_check_time(capsys):
     assert ftarg[1] == 30
     assert ftarg[2] == 'sin'
     out, _ = capsys.readouterr()
-    outstr = "     > pts_per_dec :  30"
-    assert out[-25:-1] == outstr
+    assert "     > DLF type    :  Splined, 30 pts/dec" in out
 
     # [filter str, pts_per_dec]
     _, _, _, ftarg = utils.check_time(time, 0, 'cos',
-                                      ['key_81_CosSin_2009', 50], 0)
+                                      ['key_81_CosSin_2009', -1], 4)
+    out, _ = capsys.readouterr()
+    assert "     > DLF type    :  Lagged Convolution" in out
+    assert ftarg[0].name == filters.key_81_CosSin_2009().name
+    assert ftarg[1] == -1
+    assert ftarg[2] == 'cos'
+
+    # ['', 0]
+    _, freq, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': 0}, 4)
+    out, _ = capsys.readouterr()
+    assert "     > DLF type    :  Standard" in out
+    assert ftarg[1] == 0
+    f_base = filters.key_201_CosSin_2012().base
+    assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
+
+    # [filter str, pts_per_dec] :: dict, deprecated
+    _, _, _, ftarg = utils.check_time(time, 0, 'cos',
+                                      {'fftfilt': 'key_81_CosSin_2009',
+                                       'pts_per_dec': 50}, 0)
     assert ftarg[0].name == filters.key_81_CosSin_2009().name
     assert ftarg[1] == 50
     assert ftarg[2] == 'cos'
 
-    # ['', 0]
-    _, freq, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': 0}, 0)
+    # ['', 0]  :: dict, deprecated
+    _, f, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': None}, 0)
     assert ftarg[1] == -1
-    f_base = filters.key_201_CosSin_2012().base
-    assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
+    assert_allclose(f[:9], f1)
+    assert_allclose(f[-9:], f2)
+    assert_allclose(f.size, 204)
 
     # # QWE # #
     # verbose

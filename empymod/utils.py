@@ -29,6 +29,7 @@ This module consists of four groups of functions:
 # the License.
 
 
+import warnings
 import numpy as np
 from scipy import special
 from datetime import timedelta
@@ -43,7 +44,8 @@ __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
            'check_frequency', 'check_hankel', 'check_opt', 'check_dipole',
            'check_bipole', 'check_ab', 'check_solution', 'get_abs',
            'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
-           'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum']
+           'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum',
+           'spline_backwards_hankel']
 
 # 0. General settings
 
@@ -454,13 +456,12 @@ def check_hankel(ht, htarg, verb):
         except VariableCatch:
             fhtfilt = filters.key_201_2009()
 
-        # Check pts_per_dec; defaults to None
+        # Check pts_per_dec; defaults to 0
         try:
             pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'fht: pts_per_dec', ())
-            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
-            pts_per_dec = None
+            pts_per_dec = 0
 
         # Assemble htarg
         htarg = (fhtfilt, pts_per_dec)
@@ -469,10 +470,13 @@ def check_hankel(ht, htarg, verb):
         if verb > 2:
             print("   Hankel          :  DLF (Fast Hankel Transform)")
             print("     > Filter      :  " + fhtfilt.name)
-            if pts_per_dec:
-                print("     > pts_per_dec :  " + str(pts_per_dec))
+            pstr = "     > DLF type    :  "
+            if pts_per_dec < 0:
+                print(pstr + "Lagged Convolution")
+            elif pts_per_dec > 0:
+                print(pstr + "Splined, " + str(pts_per_dec) + " pts/dec")
             else:
-                print("     > pts_per_dec :  Defined by filter (lagged)")
+                print(pstr + "Standard")
 
     elif ht in ['qwe', 'hqwe']:
         # Rename ht
@@ -506,13 +510,13 @@ def check_hankel(ht, htarg, verb):
         except VariableCatch:
             maxint = np.array(100, dtype=int)
 
-        # pts_per_dec : 80
+        # pts_per_dec : 0  # No spline
         try:
             pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'qwe: pts_per_dec', ())
-            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
+            pts_per_dec = _check_min(pts_per_dec, 0, 'pts_per_dec', '', verb)
         except VariableCatch:
-            pts_per_dec = np.array(80, dtype=int)
+            pts_per_dec = np.array(0, dtype=int)
 
         # diff_quad : 100
         try:
@@ -767,8 +771,8 @@ def check_opt(opt, loop, ht, htarg, verb):
 
     Parameters
     ----------
-    opt : {None, 'parallel', 'spline'}
-        Optimization flag.
+    opt : {None, 'parallel'}
+        Optimization flag; use ``numexpr`` or not.
 
     loop : {None, 'freq', 'off'}
         Loop flag.
@@ -785,9 +789,6 @@ def check_opt(opt, loop, ht, htarg, verb):
 
     Returns
     -------
-    use_spline : bool
-        Boolean if to use spline interpolation.
-
     use_ne_eval : bool
         Boolean if to use ``numexpr``.
 
@@ -799,12 +800,10 @@ def check_opt(opt, loop, ht, htarg, verb):
 
     """
     # Check optimization flag
-    if opt == 'spline':
-        use_spline, use_ne_eval = True, False
-    elif opt == 'parallel':
-        use_spline, use_ne_eval = False, True
+    if opt == 'parallel':
+        use_ne_eval = True
     else:
-        use_spline, use_ne_eval = False, False
+        use_ne_eval = False
 
     # Try to import numexpr
     if use_ne_eval:
@@ -822,7 +821,12 @@ def check_opt(opt, loop, ht, htarg, verb):
                       "`opt=='parallel'` has no effect.")
 
     # Define if to loop over frequencies or over offsets
-    if ht in ['hqwe', 'hquad'] or use_spline:
+    lagged_fht = False
+    if ht == 'fht':
+        if htarg[1] < 0:
+            lagged_fht = True
+
+    if ht in ['hqwe', 'hquad'] or lagged_fht:
         loop_freq = True
         loop_off = False
     else:
@@ -831,12 +835,10 @@ def check_opt(opt, loop, ht, htarg, verb):
 
     # If verbose, print optimization information
     if verb > 2:
-        if use_spline:
-            print("   Hankel Opt.     :  Use spline")
-        elif use_ne_eval:
-            print("   Hankel Opt.     :  Use parallel")
+        if use_ne_eval:
+            print("   Kernel Opt.     :  Use parallel")
         else:
-            print("   Hankel Opt.     :  None")
+            print("   Kernel Opt.     :  None")
 
         if loop_off:
             print("   Loop over       :  Offsets")
@@ -845,7 +847,7 @@ def check_opt(opt, loop, ht, htarg, verb):
         else:
             print("   Loop over       :  None (all vectorized)")
 
-    return use_spline, use_ne_eval, loop_freq, loop_off
+    return use_ne_eval, loop_freq, loop_off
 
 
 def check_time(time, signal, ft, ftarg, verb):
@@ -925,16 +927,12 @@ def check_time(time, signal, ft, ftarg, verb):
         except VariableCatch:
             fftfilt = filters.key_201_CosSin_2012()
 
-        # Check pts_per_dec; defaults to None
+        # Check pts_per_dec; defaults to -1
         try:
             pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      ft + 'pts_per_dec', ())
-            # If pts_per_dec is 0 or smaller, set to -1. This means no spline
-            # at all.
-            if pts_per_dec <= 1:
-                pts_per_dec = -1
         except VariableCatch:
-            pts_per_dec = None
+            pts_per_dec = -1
 
         # Assemble ftarg
         ftarg = (fftfilt, pts_per_dec, ft)
@@ -946,15 +944,17 @@ def check_time(time, signal, ft, ftarg, verb):
             else:
                 print("   Fourier         :  DLF (Cosine-Filter)")
             print("     > Filter      :  " + fftfilt.name)
-            pstr = "     > pts_per_dec :  "
-            if pts_per_dec:
-                print(pstr + str(pts_per_dec))
+            pstr = "     > DLF type    :  "
+            if pts_per_dec < 0:
+                print(pstr + "Lagged Convolution")
+            elif pts_per_dec > 0:
+                print(pstr + "Splined, " + str(pts_per_dec) + " pts/dec")
             else:
-                print(pstr + 'Defined by filter (lagged)')
+                print(pstr + "Standard")
 
         # Get required frequencies
         # (multiply time by 2Pi, as calculation is done in angular frequencies)
-        if pts_per_dec and pts_per_dec < 0:  # No spline at all
+        if pts_per_dec == 0:  # Standard DLF, no spline at all
             freq = np.ravel(fftfilt.base/(2*np.pi*time[:, None]))
         else:
             freq, _ = transform.get_spline_values(ftarg[0], 2*np.pi*time,
@@ -1884,3 +1884,42 @@ def _check_targ(targ, keys):
     if isinstance(targ, (list, tuple)):  # Put list into dict
         targ = {keys[i]: targ[i] for i in range(min(len(targ), len(keys)))}
     return targ
+
+
+# 5. Backwards compatibility
+
+def spline_backwards_hankel(ht, htarg, opt):
+    """Check opt if deprecated 'spline' is used.
+
+    Returns corrected htarg, opt.
+    """
+    # Only relevant for 'fht'
+    if ht == 'fht':
+        htarg = _check_targ(htarg, ['fhtfilt', 'pts_per_dec'])
+
+        # We have to check the Lagged Convolution DLF and the Standard DLF; the
+        # Splined DLF did not change
+        if opt == 'spline':
+            mesg = ("The use of `opt='spline'` is deprecated and will be " +
+                    "removed in v2.0.0; use the corresponding setting in " +
+                    "`htarg`.")
+            warnings.warn(mesg, DeprecationWarning)
+
+            opt = None
+            if 'pts_per_dec' not in htarg:   # Lagged Convolution DLF
+                htarg['pts_per_dec'] = -1
+        else:  # `opt='parallel'` or `opt=None`
+            if 'pts_per_dec' not in htarg:
+                htarg['pts_per_dec'] = 0     # Standard DLF
+
+    elif ht in ['qwe', 'hqwe']:
+        htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
+                            'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
+        if opt == 'spline':
+            if 'pts_per_dec' not in htarg:
+                htarg['pts_per_dec'] = 80  # Splined QWE; old default value
+            opt = None
+        else:
+            htarg['pts_per_dec'] = 0  # Standard QWE
+
+    return htarg, opt
