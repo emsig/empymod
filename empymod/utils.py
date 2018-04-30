@@ -1893,6 +1893,9 @@ def spline_backwards_hankel(ht, htarg, opt):
 
     Returns corrected htarg, opt.
     """
+    # Ensure ht is all lowercase
+    ht = ht.lower()
+
     # Only relevant for 'fht'
     if ht == 'fht':
         htarg = _check_targ(htarg, ['fhtfilt', 'pts_per_dec'])

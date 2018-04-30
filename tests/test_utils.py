@@ -1007,7 +1007,7 @@ def test_spline_backwards_hankel():
     assert out1 == {'pts_per_dec': 45}
     assert out2 == 'parallel'
 
-    out1, out2 = utils.spline_backwards_hankel('fht', None, 'spline')
+    out1, out2 = utils.spline_backwards_hankel('FHT', None, 'spline')
     assert out1 == {'pts_per_dec': -1}
     assert out2 is None
 
@@ -1015,6 +1015,6 @@ def test_spline_backwards_hankel():
     assert out1 == {'pts_per_dec': 80}
     assert out2 is None
 
-    out1, out2 = utils.spline_backwards_hankel('qwe', None, None)
+    out1, out2 = utils.spline_backwards_hankel('QWE', None, None)
     assert out1 == {'pts_per_dec': 0}
     assert out2 is None
