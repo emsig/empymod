@@ -336,108 +336,118 @@ def test_dlf():                                                       # 10. dlf
         assert_allclose(tEM*2/np.pi, tres, rtol=1e-3)
 
     # Check DLF for Hankel
-    model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
-    depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
-    frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
-                                      mpermV, 0)
-    freq, etaH, etaV, zetaH, zetaV = frequency
-    src = [0, 0, 0]
-    src, nsrc = utils.check_dipole(src, 'src', 0)
-    ab, msrc, mrec = utils.check_ab(11, 0)
-    ht, htarg = utils.check_hankel('fht', None, 0)
-    options = utils.check_opt(None, None, ht, htarg, 0)
-    use_ne_eval, loop_freq, loop_off = options
-    xdirect = False  # Important, as we want to compare wavenumber-frequency!
-    rec = [np.arange(1, 11)*500, np.zeros(10), 300]
-    rec, nrec = utils.check_dipole(rec, 'rec', 0)
-    off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
-    lsrc, zsrc = utils.get_layer_nr(src, depth)
-    lrec, zrec = utils.get_layer_nr(rec, depth)
-    fhtfilt = htarg[0]
-    pts_per_dec = htarg[1]
+    for ab in [12, 22, 13, 33]:
+        model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
+        depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
+        frequency = utils.check_frequency(1, res, aniso, epermH, epermV,
+                                          mpermH, mpermV, 0)
+        freq, etaH, etaV, zetaH, zetaV = frequency
+        src = [0, 0, 0]
+        src, nsrc = utils.check_dipole(src, 'src', 0)
+        ab, msrc, mrec = utils.check_ab(ab, 0)
+        ht, htarg = utils.check_hankel('fht', None, 0)
+        options = utils.check_opt(None, None, ht, htarg, 0)
+        use_ne_eval, loop_freq, loop_off = options
+        xdirect = False  # Important, as we want to comp. wavenumber-frequency!
+        rec = [np.arange(1, 11)*500, np.zeros(10), 300]
+        rec, nrec = utils.check_dipole(rec, 'rec', 0)
+        off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
+        lsrc, zsrc = utils.get_layer_nr(src, depth)
+        lrec, zrec = utils.get_layer_nr(rec, depth)
+        fhtfilt = htarg[0]
+        pts_per_dec = htarg[1]
 
-    # # # 0. No Spline # # #
+        # # # 0. No Spline # # #
 
-    # fht calculation
-    lambd = fhtfilt.base/off[:, None]
-    PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                           zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+        # fht calculation
+        lambd = fhtfilt.base/off[:, None]
+        PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
+                               zetaH, zetaV, lambd, ab, xdirect, msrc, mrec,
+                               use_ne_eval)
+        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
-    # dlf calculation
-    fEM0 = transform.dlf(PJ, lambd, off, fhtfilt, 0, factAng=factAng, ab=ab)
+        # dlf calculation
+        fEM0 = transform.dlf(PJ, lambd, off, fhtfilt, 0, factAng=factAng,
+                             ab=ab)
 
-    # Analytical frequency-domain solution
-    freq1 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
-                             zetaV, ab, msrc, mrec)
-    # Compare
-    assert_allclose(np.squeeze(fEM0), np.squeeze(freq1))
+        # Analytical frequency-domain solution
+        freq1 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
+                                 zetaV, ab, msrc, mrec)
+        # Compare
+        assert_allclose(np.squeeze(fEM0), np.squeeze(freq1))
 
-    # # # 1. Spline; One angle # # #
-    options = utils.check_opt('spline', None, ht, htarg, 0)
-    use_ne_eval, loop_freq, loop_off = options
+        # # # 1. Spline; One angle # # #
+        options = utils.check_opt('spline', None, ht, htarg, 0)
+        use_ne_eval, loop_freq, loop_off = options
 
-    # fht calculation
-    lambd, _ = transform.get_spline_values(fhtfilt, off, pts_per_dec)
-    PJ1 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                            zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
+        # fht calculation
+        lambd, _ = transform.get_spline_values(fhtfilt, off, pts_per_dec)
+        PJ1 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
+                                zetaH, zetaV, lambd, ab, xdirect, msrc, mrec,
+                                use_ne_eval)
 
-    # dlf calculation
-    fEM1 = transform.dlf(PJ1, lambd, off, fhtfilt, pts_per_dec,
-                         factAng=factAng, ab=ab)
+        # dlf calculation
+        fEM1 = transform.dlf(PJ1, lambd, off, fhtfilt, pts_per_dec,
+                             factAng=factAng, ab=ab)
 
-    # Compare
-    assert_allclose(np.squeeze(fEM1), np.squeeze(freq1), rtol=1e-4)
+        # Compare
+        assert_allclose(np.squeeze(fEM1), np.squeeze(freq1), rtol=1e-4)
 
-    # # # 2.a Lagged; One angle # # #
-    rec = [np.arange(1, 11)*500, np.arange(-5, 5)*0, 300]
-    rec, nrec = utils.check_dipole(rec, 'rec', 0)
-    off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
+        # # # 2.a Lagged; One angle # # #
+        rec = [np.arange(1, 11)*500, np.arange(-5, 5)*0, 300]
+        rec, nrec = utils.check_dipole(rec, 'rec', 0)
+        off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
 
-    # fht calculation
-    lambd, _ = transform.get_spline_values(fhtfilt, off, -1)
-    PJ2 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                            zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+        # fht calculation
+        lambd, _ = transform.get_spline_values(fhtfilt, off, -1)
+        PJ2 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
+                                zetaH, zetaV, lambd, ab, xdirect, msrc, mrec,
+                                use_ne_eval)
+        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
-    # dlf calculation
-    fEM2 = transform.dlf(PJ2, lambd, off, fhtfilt, -1, factAng=factAng, ab=ab)
+        # dlf calculation
+        fEM2 = transform.dlf(PJ2, lambd, off, fhtfilt, -1, factAng=factAng,
+                             ab=ab)
 
-    # Analytical frequency-domain solution
-    freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
-                             ab, msrc, mrec)
-    # Compare
-    assert_allclose(np.squeeze(fEM2), np.squeeze(freq2), rtol=1e-4)
+        # Analytical frequency-domain solution
+        freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
+                                 zetaV, ab, msrc, mrec)
+        # Compare
+        assert_allclose(np.squeeze(fEM2), np.squeeze(freq2), rtol=1e-4)
 
-    # # # 2.b Lagged; Multi angle # # #
-    rec = [np.arange(1, 11)*500, np.arange(-5, 5)*200, 300]
-    rec, nrec = utils.check_dipole(rec, 'rec', 0)
-    off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
+        # # # 2.b Lagged; Multi angle # # #
+        rec = [np.arange(1, 11)*500, np.arange(-5, 5)*200, 300]
+        rec, nrec = utils.check_dipole(rec, 'rec', 0)
+        off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
 
-    # fht calculation
-    lambd, _ = transform.get_spline_values(fhtfilt, off, -1)
-    PJ2 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                            zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+        # fht calculation
+        lambd, _ = transform.get_spline_values(fhtfilt, off, -1)
+        PJ2 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
+                                zetaH, zetaV, lambd, ab, xdirect, msrc, mrec,
+                                use_ne_eval)
+        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
-    # dlf calculation
-    fEM2 = transform.dlf(PJ2, lambd, off, fhtfilt, -1, factAng=factAng, ab=ab)
+        # dlf calculation
+        fEM2 = transform.dlf(PJ2, lambd, off, fhtfilt, -1, factAng=factAng,
+                             ab=ab)
 
-    # Analytical frequency-domain solution
-    freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
-                             ab, msrc, mrec)
-    # Compare
-    assert_allclose(np.squeeze(fEM2), np.squeeze(freq2), rtol=1e-4)
+        # Analytical frequency-domain solution
+        freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
+                                 zetaV, ab, msrc, mrec)
+        # Compare
+        assert_allclose(np.squeeze(fEM2), np.squeeze(freq2), rtol=1e-4)
 
-    # # # 3. Spline; Multi angle # # #
+        # # # 3. Spline; Multi angle # # #
 
-    lambd, _ = transform.get_spline_values(fhtfilt, off, 10)
-    # fht calculation
-    PJ3 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                            zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
+        lambd, _ = transform.get_spline_values(fhtfilt, off, 10)
+        # fht calculation
+        PJ3 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
+                                zetaH, zetaV, lambd, ab, xdirect, msrc, mrec,
+                                use_ne_eval)
 
-    # dlf calculation
-    fEM3 = transform.dlf(PJ3, lambd, off, fhtfilt, 10, factAng=factAng, ab=ab)
+        # dlf calculation
+        fEM3 = transform.dlf(PJ3, lambd, off, fhtfilt, 10, factAng=factAng,
+                             ab=ab)
 
-    # Compare
-    assert_allclose(np.squeeze(fEM3), np.squeeze(freq2), rtol=1e-4)
+        # Compare
+        assert_allclose(np.squeeze(fEM3), np.squeeze(freq2), rtol=1e-3)

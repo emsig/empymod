@@ -1,6 +1,44 @@
 Changelog
 #########
 
+*latest*
+-------
+
+- Improved Hankel DLF
+  [`empymod#11 <https://github.com/empymod/empymod/issues/11>`_].
+  `empymod.kernel.wavenumber` always returns three kernels, `PJ0`, `PJ1`, and
+  `PJ0b`. The first one is angle-independent, the latter two depend on the
+  angle. Now, depending of what source-receiver configuration is chosen, some
+  of these might be zero. If-statements were now included to avoid the
+  calculation of the DLF for 0-kernels, which improves speed for these cases.
+  Only ``np.dot`` is avoided; ideally, interpolation should be avoided too.
+
+- Unified DLF arguments
+  [`empymod#10 <https://github.com/empymod/empymod/issues/10>`_].
+
+    These changes are backwards compatible for all main modelling routines
+    in ``empymod.model``. However, they are not backwards compatible for the
+    following routines:
+    - ``empymod.model.fem`` (removed ``use_spline``),
+    - ``empymod.transform.fht`` (removed ``use_spline``),
+    - ``empymod.transform.hqwe`` (removed ``use_spline``),
+    - ``empymod.transform.quad`` (removed ``use_spline``),
+    - ``empymod.transform.dlf`` (``lagged``, ``splined`` repl. by
+      ``pts_per_dec``),
+    - ``empymod.utils.check_opt`` (no longer returns ``use_spline``),
+    - ``empymod.utils.check_hankel`` (changes in ``pts_per_dec``), and
+    - ``empymod.utils.check_time`` (changes in ``pts_per_dec``).
+
+    The function ``empymod.utils.spline_backwards_hankel`` can be used for
+    backwards compatibility.
+
+    Now the Hankel and Fourier DLF have the same behaviour for
+    ``pts_per_dec``:
+    - ``pts_per_dec = 0``: Standard DLF,
+    - ``pts_per_dec < 0``: Lagged Convolution DLF, and
+    - ``pts_per_dec > 0``: Splined DLF.
+
+
 v1.5.2 - *2018-04-25*
 ---------------------
 
