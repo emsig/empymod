@@ -360,35 +360,19 @@ def test_check_opt(capsys):
     qwehtarg = [np.array(1e-12), np.array(1e-30), np.array(51), np.array(100),
                 np.array(33)]
 
-    # v Backwards compatibility
-    opt1 = None
-    ht1 = 'fht'
-    htarg1, opt1 = utils.spline_backwards_hankel(ht1, fhtarg, opt1)
-    ht1, htarg1 = utils.check_hankel(ht1, htarg1, 0)
-    # ^ Backwards compatibility
-    res = utils.check_opt(opt1, None, ht1, htarg1, 4)
-    assert_allclose(res, (False, False, False))
-    out, _ = capsys.readouterr()
-    outstr = "   Kernel Opt.     :  None\n   Loop over       :  None"
-    assert out[:53] == outstr
-
-    # v Backwards compatibility
-    ht2 = 'hqwe'
-    htarg2, opt2 = utils.spline_backwards_hankel(ht2, qwehtarg, opt1)
-    ht2, htarg2 = utils.check_hankel(ht2, htarg2, 0)
-    # ^ Backwards compatibility
-    res = utils.check_opt(opt2, 'off', ht2, htarg2, 4)
+    res = utils.check_opt(None, None, 'fht', fhtarg, 4)
     assert_allclose(res, (False, True, False))
     out, _ = capsys.readouterr()
     outstr = "   Kernel Opt.     :  None\n   Loop over       :  Freq"
     assert out[:53] == outstr
 
-    # v Backwards compatibility
-    opt3 = 'parallel'
-    htarg3, opt3 = utils.spline_backwards_hankel(ht1, fhtarg, opt3)
-    ht3, htarg3 = utils.check_hankel(ht1, htarg3, 0)
-    # ^ Backwards compatibility
-    res = utils.check_opt(opt3, 'off', ht1, htarg3, 4)
+    res = utils.check_opt(None, 'off', 'hqwe', qwehtarg, 4)
+    assert_allclose(res, (False, True, False))
+    out, _ = capsys.readouterr()
+    outstr = "   Kernel Opt.     :  None\n   Loop over       :  Freq"
+    assert out[:53] == outstr
+
+    res = utils.check_opt('parallel', 'off', 'fht', [fhtarg[0], 0], 4)
     if use_vml:
         assert_allclose(callable(res[0]), True)
         outstr = "   Kernel Opt.     :  Use parallel\n   Loop over       :  Of"
@@ -1015,12 +999,12 @@ def test_minimum():
 
 def test_spline_backwards_hankel():
     out1, out2 = utils.spline_backwards_hankel('fht', None, None)
-    assert out1 == {'pts_per_dec': 0}
+    assert out1 == {}
     assert out2 is None
 
     out1, out2 = utils.spline_backwards_hankel('fht', {'pts_per_dec': 45},
                                                'parallel')
-    assert out1 == {'pts_per_dec': 0}
+    assert out1 == {'pts_per_dec': 45}
     assert out2 == 'parallel'
 
     out1, out2 = utils.spline_backwards_hankel('FHT', None, 'spline')
@@ -1032,5 +1016,5 @@ def test_spline_backwards_hankel():
     assert out2 is None
 
     out1, out2 = utils.spline_backwards_hankel('QWE', None, None)
-    assert out1 == {'pts_per_dec': 0}
+    assert out1 == {}
     assert out2 is None

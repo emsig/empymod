@@ -10,14 +10,14 @@ Changelog
   `PJ0b`. The first one is angle-independent, the latter two depend on the
   angle. Now, depending of what source-receiver configuration is chosen, some
   of these might be zero. If-statements were now included to avoid the
-  calculation of the DLF for 0-kernels, which improves speed for these cases.
-  Only ``np.dot`` is avoided; ideally, interpolation should be avoided too.
+  calculation of the DLF, interpolation, and reshaping for 0-kernels, which
+  improves speed for these cases.
 
 - Unified DLF arguments
   [`empymod#10 <https://github.com/empymod/empymod/issues/10>`_].
 
-    These changes are backwards compatible for all main modelling routines
-    in ``empymod.model``. However, they are not backwards compatible for the
+    These changes are backwards compatible for all main modelling routines in
+    ``empymod.model``. However, they are not backwards compatible for the
     following routines:
     - ``empymod.model.fem`` (removed ``use_spline``),
     - ``empymod.transform.fht`` (removed ``use_spline``),
@@ -37,6 +37,11 @@ Changelog
     - ``pts_per_dec = 0``: Standard DLF,
     - ``pts_per_dec < 0``: Lagged Convolution DLF, and
     - ``pts_per_dec > 0``: Splined DLF.
+
+    **There is one exception** which is not backwards compatible: Before,
+    if ``opt=None`` and ``htarg={pts_per_dec: != 0}``, the ``pts_per_dec`` was
+    not used for the FHT and the QWE. New, this will be used according to the
+    above definitions.
 
 
 v1.5.2 - *2018-04-25*

@@ -829,15 +829,24 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
         # Re-arrange signal
         for i, val in enumerate(signal):
-            tmp_sig = np.concatenate((np.tile(val, int_pts.size).squeeze(),
-                                     np.zeros(int_pts.size)))
-            signal[i] = tmp_sig.reshape(int_pts.size, -1)[:, :filt.base.size]
+            if k_used[i]:  # Only if kernel contains info
+                tmp_sig = np.concatenate((np.tile(val, int_pts.size).squeeze(),
+                                         np.zeros(int_pts.size)))
+                signal[i] = tmp_sig.reshape(int_pts.size, -1)[:,
+                                                              :filt.base.size]
+            else:
+                signal[i] = np.zeros((int_pts.size, filt.base.size),
+                                     dtype=complex)
 
     elif pts_per_dec > 0:  # Splined DLF: interpolate in input domain
         # Splined DLF: interpolate signal here
         new = filt.base/out_pts[:, None]
         for i, val in enumerate(signal):
-            signal[i] = spline(val, points, new)
+            if k_used[i]:  # Only if kernel contains info
+                signal[i] = spline(val, points, new)
+            else:
+                signal[i] = np.zeros((out_pts.size, filt.base.size),
+                                     dtype=complex)
 
     # 2. APPLY DLF
     if hankel:  # Hankel transform
@@ -853,12 +862,12 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             # have the same angle, the DLF has to be done separately for
             # angle-dependent and angle-independent parts.
 
-            if k_used[0]:
+            if k_used[0]:  # Only if kernel contains info
                 out_noang = np.dot(inp_PJ0, filt.j0)
             else:
                 out_noang = alt_pre[:]
 
-            if k_used[1]:
+            if k_used[1]:  # Only if kernel contains info
                 out_angle = np.dot(inp_PJ1, filt.j1)
                 if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
                     # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
@@ -869,7 +878,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             else:
                 out_angle = alt_pre[:]
 
-            if k_used[2]:
+            if k_used[2]:  # Only if kernel contains info
                 out_angle += np.dot(inp_PJ0b, filt.j0)
 
             if pts_per_dec > 0:
@@ -881,7 +890,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             # With the standard DLF (one_angle or not), and with the splined
             # DLF but one_angle, we can combine PJ0 and PJ0b to save one DLF.
 
-            if k_used[1]:
+            if k_used[1]:  # Only if kernel contains info
                 out_signal = factAng*np.dot(inp_PJ1, filt.j1)
                 if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
                     # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
@@ -892,7 +901,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             else:
                 out_signal = alt_pre[:]
 
-            if k_used[0] or k_used[2]:
+            if k_used[0] or k_used[2]:  # Only if kernel contains info
                 out_signal += np.dot(inp_PJ0 + factAng[:, np.newaxis]*inp_PJ0b,
                                      filt.j0)
 
@@ -904,8 +913,14 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
         if not one_angle:  # Separately on out_noang and out_angle
 
-            int_noang = spline(out_noang[::-1], int_pts[::-1], out_pts)
-            int_angle = spline(out_angle[::-1], int_pts[::-1], out_pts)
+            if k_used[0]:  # Only if kernel contains info
+                int_noang = spline(out_noang[::-1], int_pts[::-1], out_pts)
+            else:
+                int_noang = np.zeros(out_pts.shape, dtype=complex)
+            if k_used[1] or k_used[2]:  # Only if kernel contains info
+                int_angle = spline(out_angle[::-1], int_pts[::-1], out_pts)
+            else:
+                int_angle = np.zeros(out_pts.shape, dtype=complex)
 
             # Angle dependency
             out_signal = (factAng*int_angle + int_noang)

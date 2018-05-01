@@ -1926,7 +1926,4 @@ def spline_backwards_hankel(ht, htarg, opt):
                 elif ht in ['qwe', 'hqwe']:
                     htarg['pts_per_dec'] = 80  # Splined QWE; old default value
 
-        else:  # `opt='parallel'` or `opt=None`
-            htarg['pts_per_dec'] = 0  # Standard QWE
-
     return htarg, opt
