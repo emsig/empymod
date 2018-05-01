@@ -24,7 +24,7 @@ Changelog
   - ``empymod.transform.hqwe`` (removed ``use_spline``),
   - ``empymod.transform.quad`` (removed ``use_spline``),
   - ``empymod.transform.dlf`` (``lagged``, ``splined`` repl. by
-    ``pts_per_dec``),
+  ``pts_per_dec``),
   - ``empymod.utils.check_opt`` (no longer returns ``use_spline``),
   - ``empymod.utils.check_hankel`` (changes in ``pts_per_dec``), and
   - ``empymod.utils.check_time`` (changes in ``pts_per_dec``).

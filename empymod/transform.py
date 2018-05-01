@@ -867,16 +867,15 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             else:
                 out_noang = alt_pre[:]
 
-            if k_used[1]:  # Only if kernel contains info
-                out_angle = np.dot(inp_PJ1, filt.j1)
-                if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-                    # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-                    if pts_per_dec < 0:  # Lagged Convolution
-                        out_angle /= int_pts
-                    else:  # Splined
-                        out_angle /= out_pts
-            else:
-                out_angle = alt_pre[:]
+            # J1 is always used except for ab=33; however ab=33 is
+            # angle-independent, so we don't have to check here.
+            out_angle = np.dot(inp_PJ1, filt.j1)
+            if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+                # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+                if pts_per_dec < 0:  # Lagged Convolution
+                    out_angle /= int_pts
+                else:  # Splined
+                    out_angle /= out_pts
 
             if k_used[2]:  # Only if kernel contains info
                 out_angle += np.dot(inp_PJ0b, filt.j0)
@@ -917,10 +916,10 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
                 int_noang = spline(out_noang[::-1], int_pts[::-1], out_pts)
             else:
                 int_noang = np.zeros(out_pts.shape, dtype=complex)
-            if k_used[1] or k_used[2]:  # Only if kernel contains info
-                int_angle = spline(out_angle[::-1], int_pts[::-1], out_pts)
-            else:
-                int_angle = np.zeros(out_pts.shape, dtype=complex)
+
+            # J1 or J2 are always used except for ab=33; however ab=33 is
+            # angle-independent, so we don't have to check here.
+            int_angle = spline(out_angle[::-1], int_pts[::-1], out_pts)
 
             # Angle dependency
             out_signal = (factAng*int_angle + int_noang)
