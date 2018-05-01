@@ -16,32 +16,33 @@ Changelog
 - Unified DLF arguments
   [`empymod#10 <https://github.com/empymod/empymod/issues/10>`_].
 
-    These changes are backwards compatible for all main modelling routines in
-    ``empymod.model``. However, they are not backwards compatible for the
-    following routines:
-    - ``empymod.model.fem`` (removed ``use_spline``),
-    - ``empymod.transform.fht`` (removed ``use_spline``),
-    - ``empymod.transform.hqwe`` (removed ``use_spline``),
-    - ``empymod.transform.quad`` (removed ``use_spline``),
-    - ``empymod.transform.dlf`` (``lagged``, ``splined`` repl. by
-      ``pts_per_dec``),
-    - ``empymod.utils.check_opt`` (no longer returns ``use_spline``),
-    - ``empymod.utils.check_hankel`` (changes in ``pts_per_dec``), and
-    - ``empymod.utils.check_time`` (changes in ``pts_per_dec``).
+  These changes are backwards compatible for all main modelling routines in
+  ``empymod.model``. However, they are not backwards compatible for the
+  following routines:
+  - ``empymod.model.fem`` (removed ``use_spline``),
+  - ``empymod.transform.fht`` (removed ``use_spline``),
+  - ``empymod.transform.hqwe`` (removed ``use_spline``),
+  - ``empymod.transform.quad`` (removed ``use_spline``),
+  - ``empymod.transform.dlf`` (``lagged``, ``splined`` repl. by
+    ``pts_per_dec``),
+  - ``empymod.utils.check_opt`` (no longer returns ``use_spline``),
+  - ``empymod.utils.check_hankel`` (changes in ``pts_per_dec``), and
+  - ``empymod.utils.check_time`` (changes in ``pts_per_dec``).
 
-    The function ``empymod.utils.spline_backwards_hankel`` can be used for
-    backwards compatibility.
+  The function ``empymod.utils.spline_backwards_hankel`` can be used for
+  backwards compatibility.
 
-    Now the Hankel and Fourier DLF have the same behaviour for
-    ``pts_per_dec``:
-    - ``pts_per_dec = 0``: Standard DLF,
-    - ``pts_per_dec < 0``: Lagged Convolution DLF, and
-    - ``pts_per_dec > 0``: Splined DLF.
+  Now the Hankel and Fourier DLF have the same behaviour for ``pts_per_dec``:
+  - ``pts_per_dec = 0``: Standard DLF,
+  - ``pts_per_dec < 0``: Lagged Convolution DLF, and
+  - ``pts_per_dec > 0``: Splined DLF.
 
-    **There is one exception** which is not backwards compatible: Before,
-    if ``opt=None`` and ``htarg={pts_per_dec: != 0}``, the ``pts_per_dec`` was
-    not used for the FHT and the QWE. New, this will be used according to the
-    above definitions.
+  **There is one exception** which is not backwards compatible: Before, if
+  ``opt=None`` and ``htarg={pts_per_dec: != 0}``, the ``pts_per_dec`` was not
+  used for the FHT and the QWE. New, this will be used according to the above
+  definitions.
+
+- Bugfix in ``model.wavenumber`` for ``ab=36`` (zeroes).
 
 
 v1.5.2 - *2018-04-25*

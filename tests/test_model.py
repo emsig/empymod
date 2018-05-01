@@ -555,6 +555,12 @@ def test_wavenumber():
     assert_allclose(w_res0, res['PJ0'])
     assert_allclose(w_res1, res['PJ1'])
 
+    # Check that ab=36 returns zeros
+    res['inp']['ab'] = 36
+    w_res0, w_res1 = wavenumber(**res['inp'])
+    assert_allclose(w_res0, np.zeros(res['PJ0'].shape, dtype=complex))
+    assert_allclose(w_res1, np.zeros(res['PJ1'].shape, dtype=complex))
+
 
 def test_fem():
     # Just ensure functionality stays the same, with one example.

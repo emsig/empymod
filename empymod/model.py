@@ -1389,7 +1389,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     # Check frequency => get etaH, etaV, zetaH, and zetaV
     f = check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb)
-    _, etaH, etaV, zetaH, zetaV = f  # (output freq not required)
+    freq, etaH, etaV, zetaH, zetaV = f
 
     # Check src-rec configuration
     # => Get flags if src or rec or both are magnetic (msrc, mrec)
@@ -1408,6 +1408,11 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     lrec, zrec = get_layer_nr(rec, depth)
 
     # === 3. EM-FIELD CALCULATION ============
+
+    # If <ab> = 36 (or 63), field is zero
+    if ab_calc in [36, ]:
+        out = np.zeros((freq.size, off.size, wavenumber.size), dtype=complex)
+        return np.squeeze(out), np.squeeze(out)
 
     # Calculate wavenumber response
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
