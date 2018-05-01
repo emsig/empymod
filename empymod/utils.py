@@ -821,12 +821,12 @@ def check_opt(opt, loop, ht, htarg, verb):
                       "`opt=='parallel'` has no effect.")
 
     # Define if to loop over frequencies or over offsets
-    lagged_fht = False
+    lagged_splined_fht = False
     if ht == 'fht':
-        if htarg[1] < 0:
-            lagged_fht = True
+        if htarg[1] != 0:
+            lagged_splined_fht = True
 
-    if ht in ['hqwe', 'hquad'] or lagged_fht:
+    if ht in ['hqwe', 'hquad'] or lagged_splined_fht:
         loop_freq = True
         loop_off = False
     else:
@@ -1896,34 +1896,37 @@ def spline_backwards_hankel(ht, htarg, opt):
     # Ensure ht is all lowercase
     ht = ht.lower()
 
-    # Only relevant for 'fht'
-    if ht == 'fht':
-        htarg = _check_targ(htarg, ['fhtfilt', 'pts_per_dec'])
+    # Only relevant for 'fht' and 'hqwe', not for 'quad'
+    if ht in ['fht', 'qwe', 'hqwe']:
 
-        # We have to check the Lagged Convolution DLF and the Standard DLF; the
-        # Splined DLF did not change
+        # Get corresponding htarg
+        if ht == 'fht':
+            htarg = _check_targ(htarg, ['fhtfilt', 'pts_per_dec'])
+        elif ht in ['qwe', 'hqwe']:
+            htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
+                                'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
+
+        # If spline (qwe, fht) or lagged (fht)
         if opt == 'spline':
 
+            # Issue warning
             mesg = ("\n    The use of `opt='spline'` is deprecated and will " +
                     "be removed\n    in v2.0.0; use the corresponding " +
                     "setting in `htarg`.")
             warnings.warn(mesg, DeprecationWarning)
 
+            # Reset opt
             opt = None
-            if 'pts_per_dec' not in htarg:   # Lagged Convolution DLF
-                htarg['pts_per_dec'] = -1
-        else:  # `opt='parallel'` or `opt=None`
-            if 'pts_per_dec' not in htarg:
-                htarg['pts_per_dec'] = 0     # Standard DLF
 
-    elif ht in ['qwe', 'hqwe']:
-        htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
-                            'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
-        if opt == 'spline':
+            # Check pts_per_dec; set to old default values if not given
             if 'pts_per_dec' not in htarg:
-                htarg['pts_per_dec'] = 80  # Splined QWE; old default value
-            opt = None
-        else:
+                if ht == 'fht':
+                    htarg['pts_per_dec'] = -1  # Lagged Convolution DLF
+
+                elif ht in ['qwe', 'hqwe']:
+                    htarg['pts_per_dec'] = 80  # Splined QWE; old default value
+
+        else:  # `opt='parallel'` or `opt=None`
             htarg['pts_per_dec'] = 0  # Standard QWE
 
     return htarg, opt
