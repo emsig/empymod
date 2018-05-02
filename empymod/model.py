@@ -159,10 +159,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         Default is 0.
 
-    xdirect : bool, optional
+    xdirect : bool or None, optional
         If True and source and receiver are in the same layer, the direct field
         is calculated analytically in the frequency domain, if False it is
-        calculated in the wavenumber domain.
+        calculated in the wavenumber domain. If None, the direct field is
+        excluded from the calculation, and only reflected fields are returned.
         Defaults to True.
 
     ht : {'fht', 'qwe', 'quad'}, optional
@@ -688,10 +689,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res. Default is ones.
 
-    xdirect : bool, optional
+    xdirect : bool or None, optional
         If True and source and receiver are in the same layer, the direct field
         is calculated analytically in the frequency domain, if False it is
-        calculated in the wavenumber domain.
+        calculated in the wavenumber domain. If None, the direct field is
+        excluded from the calculation, and only reflected fields are returned.
         Defaults to True.
 
     ht : {'fht', 'qwe', 'quad'}, optional
@@ -1467,15 +1469,22 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
                                 etaV[:, lrec], zetaH[:, lrec], zetaV[:, lrec],
                                 ab, msrc, mrec)
 
+    # If `xdirect = None` we set it here to True, so it is NOT calculated in
+    # the wavenumber domain. (Only reflected fields are returned.)
+    if xdirect is None:
+        xdir = True
+    else:
+        xdir = xdirect
+
     # If not full-space with xdirect calculate fEM-field
-    if not isfullspace*xdirect:
+    if not isfullspace*xdir:
         calc = getattr(transform, ht)
         if loop_freq:
 
             for i in range(freq.size):
                 out = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
                            etaH[None, i, :], etaV[None, i, :],
-                           zetaH[None, i, :], zetaV[None, i, :], xdirect,
+                           zetaH[None, i, :], zetaV[None, i, :], xdir,
                            htarg, use_ne_eval, msrc, mrec)
                 fEM[None, i, :] += out[0]
                 kcount += out[1]
@@ -1485,13 +1494,13 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
             for i in range(off.size):
                 out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
                            angle[None, i], depth, ab, etaH, etaV, zetaH, zetaV,
-                           xdirect, htarg, use_ne_eval, msrc, mrec)
+                           xdir, htarg, use_ne_eval, msrc, mrec)
                 fEM[:, None, i] += out[0]
                 kcount += out[1]
                 conv *= out[2]
         else:
             out = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
-                       etaV, zetaH, zetaV, xdirect, htarg, use_ne_eval, msrc,
+                       etaV, zetaH, zetaV, xdir, htarg, use_ne_eval, msrc,
                        mrec)
             fEM += out[0]
             kcount += out[1]
