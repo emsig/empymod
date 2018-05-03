@@ -5,10 +5,10 @@ latest
 ------
 
 - Add the possibility to calculate secondary fields only (excluding the direct
-  field) by passing the argument `xdirect=None`. The complete
-  `xdiret`-signature is now (only affects calculation if src and rec are in the
+  field) by passing the argument ``xdirect=None``. The complete
+  ``xdirect``-signature is now (only affects calculation if src and rec are in the
   same layer):
-  
+
   - If True, direct field is calculated analytically in the frequency domain.
   - If False, direct field is calculated in the wavenumber domain.
   - If None, direct field is excluded from the calculation, and only reflected
@@ -24,10 +24,10 @@ are affected.
 
 - Improved Hankel DLF
   [`empymod#11 <https://github.com/empymod/empymod/issues/11>`_].
-  `empymod.kernel.wavenumber` always returns three kernels, `PJ0`, `PJ1`, and
-  `PJ0b`. The first one is angle-independent, the latter two depend on the
-  angle. Now, depending of what source-receiver configuration is chosen, some
-  of these might be zero. If-statements were now included to avoid the
+  ``empymod.kernel.wavenumber`` always returns three kernels, ``PJ0``, ``PJ1``,
+  and ``PJ0b``. The first one is angle-independent, the latter two depend on
+  the angle. Now, depending of what source-receiver configuration is chosen,
+  some of these might be zero. If-statements were now included to avoid the
   calculation of the DLF, interpolation, and reshaping for 0-kernels, which
   improves speed for these cases.
 
@@ -37,7 +37,7 @@ are affected.
   These changes are backwards compatible for all main modelling routines in
   ``empymod.model``. However, they are not backwards compatible for the
   following routines:
-  
+
   - ``empymod.model.fem`` (removed ``use_spline``),
   - ``empymod.transform.fht`` (removed ``use_spline``),
   - ``empymod.transform.hqwe`` (removed ``use_spline``),
