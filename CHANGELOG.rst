@@ -1,6 +1,20 @@
 Changelog
 #########
 
+latest
+------
+
+- Add the possibility to calculate secondary fields only (excluding the direct
+  field) by passing the argument `xdirect=None`. The complete
+  `xdiret`-signature is now (only affects calculation if src and rec are in the
+  same layer):
+  
+  - If True, direct field is calculated analytically in the frequency domain.
+  - If False, direct field is calculated in the wavenumber domain.
+  - If None, direct field is excluded from the calculation, and only reflected
+    fields are returned (secondary field).
+
+
 v1.6.0 - *2018-05-01*
 ---------------------
 
@@ -23,6 +37,7 @@ are affected.
   These changes are backwards compatible for all main modelling routines in
   ``empymod.model``. However, they are not backwards compatible for the
   following routines:
+  
   - ``empymod.model.fem`` (removed ``use_spline``),
   - ``empymod.transform.fht`` (removed ``use_spline``),
   - ``empymod.transform.hqwe`` (removed ``use_spline``),
@@ -36,6 +51,7 @@ are affected.
   backwards compatibility.
 
   Now the Hankel and Fourier DLF have the same behaviour for ``pts_per_dec``:
+  
   - ``pts_per_dec = 0``: Standard DLF,
   - ``pts_per_dec < 0``: Lagged Convolution DLF, and
   - ``pts_per_dec > 0``: Splined DLF.
