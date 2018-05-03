@@ -6,8 +6,8 @@ latest
 
 - Add the possibility to calculate secondary fields only (excluding the direct
   field) by passing the argument ``xdirect=None``. The complete
-  ``xdirect``-signature is now (only affects calculation if src and rec are in the
-  same layer):
+  ``xdirect``-signature is now (only affects calculation if src and rec are in
+  the same layer):
 
   - If True, direct field is calculated analytically in the frequency domain.
   - If False, direct field is calculated in the wavenumber domain.
@@ -51,7 +51,7 @@ are affected.
   backwards compatibility.
 
   Now the Hankel and Fourier DLF have the same behaviour for ``pts_per_dec``:
-  
+
   - ``pts_per_dec = 0``: Standard DLF,
   - ``pts_per_dec < 0``: Lagged Convolution DLF, and
   - ``pts_per_dec > 0``: Splined DLF.
@@ -93,10 +93,10 @@ v1.5.1 - *2018-02-24*
     <https://github.com/empymod/empymod>`_).
 
     - Website has now only *Features* and *Installation* in full, all other
-        information comes in the form of links.
+      information comes in the form of links.
     - ``README`` has only information in the form of links.
-    - Manual contains the ``README``, and is basically the main document for all
-        information.
+    - Manual contains the ``README``, and is basically the main document for
+      all information.
 
   - Improvements: Change some remaining ``md``-syntax to ``rst``-syntax.
 
