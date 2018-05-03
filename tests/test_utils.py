@@ -302,12 +302,13 @@ def test_check_hankel(capsys):
 
 
 def test_check_model(capsys):
-    # Normal case
+    # Normal case; xdirect=True (default)
     res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
-                            [1, 1], True, 1)
+                            [1, 1], True, 3)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = res
     out, _ = capsys.readouterr()
-    assert out[:32] == "* WARNING :: Parameter epermH < "
+    assert "* WARNING :: Parameter epermH < " in out
+    assert "   direct field    :  Calc. in frequency domain" in out
     assert_allclose(depth, [-np.infty, 0])
     assert_allclose(res, [1e20, 20])
     assert_allclose(aniso, [1, 2])
@@ -316,6 +317,18 @@ def test_check_model(capsys):
     assert_allclose(mpermH, [10, 1])
     assert_allclose(mpermV, [1, 1])
     assert_allclose(isfullspace, False)
+
+    # xdirect=False
+    res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
+                            [1, 1], False, 3)
+    out, _ = capsys.readouterr()
+    assert "   direct field    :  Calc. in wavenumber domain" in out
+
+    # xdirect=None
+    res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
+                            [1, 1], None, 3)
+    out, _ = capsys.readouterr()
+    assert "   direct field    :  Not calculated (secondary field)" in out
 
     # Check -np.infty is added to depth
     out = utils.check_model([], 2, 1, 1, 1, 1, 1, True, 1)
@@ -331,16 +344,16 @@ def test_check_model(capsys):
     out, _ = capsys.readouterr()
     outstr1 = "   depth       [m] :  0\n   res     [Ohm.m] :  1 1\n   aniso"
     outstr2 = "S A FULLSPACE; returning analytical frequency-domain solution\n"
-    assert out[:58] == outstr1
-    assert out[-62:] == outstr2
+    assert outstr1 in out
+    assert outstr2 in out
 
     # Check fullspace if only one value, w\o xdirect
     utils.check_model([], 1, 2, 10, 1, 2, 3, True, 4)
     out, _ = capsys.readouterr()
-    assert out[-62:] == outstr2
+    assert outstr2 in out
     utils.check_model([], 1, 2, 10, 1, 2, 3, False, 4)
     out, _ = capsys.readouterr()
-    assert out[-21:] == "MODEL IS A FULLSPACE\n"
+    assert "MODEL IS A FULLSPACE\n" in out
 
     # Increasing depth
     with pytest.raises(ValueError):

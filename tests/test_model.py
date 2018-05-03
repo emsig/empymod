@@ -578,6 +578,28 @@ def test_tem():
         tEM, _ = tem(**res['inp'])
         assert_allclose(tEM, res['EM'])
 
+    # Test `xdirect=None` through analytical/dipole-comparison with a simple
+    # model
+
+    # Fullspace model
+    inp = {'src': [[0, -100], [0, -200], 200],
+           'rec': [np.arange(1, 11)*500, np.arange(1, 11)*100, 300],
+           'freqtime': [0.1, 1, 10], 'res': 1}
+    fEM_fs = analytical(**inp)
+
+    # Add two layers
+    inp['depth'] = [0, 500]
+    inp['res'] = [10, 1, 30]
+    fEM_tot1 = dipole(xdirect=False, **inp)
+    fEM_tot2 = dipole(xdirect=True, **inp)
+    fEM_secondary = dipole(xdirect=None, **inp)
+
+    # `xdirect=False` and `xdirect=True` have to agree
+    assert_allclose(fEM_tot2, fEM_tot1)
+
+    # Total field minus minus direct field equals secondary field
+    assert_allclose(fEM_tot1 - fEM_fs, fEM_secondary)
+
 
 def test_regres():
     # Comparison to self (regression test)

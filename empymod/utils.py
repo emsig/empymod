@@ -759,6 +759,15 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
         else:
             print("\n>  MODEL IS A FULLSPACE")
 
+    # Print xdirect info
+    if verb > 2:
+        if xdirect is None:
+            print("   direct field    :  Not calculated (secondary field)")
+        elif xdirect:
+            print("   direct field    :  Calc. in frequency domain")
+        else:
+            print("   direct field    :  Calc. in wavenumber domain")
+
     return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
 
 

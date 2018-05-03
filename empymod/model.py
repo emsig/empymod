@@ -160,10 +160,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         Default is 0.
 
     xdirect : bool or None, optional
-        If True and source and receiver are in the same layer, the direct field
-        is calculated analytically in the frequency domain, if False it is
-        calculated in the wavenumber domain. If None, the direct field is
-        excluded from the calculation, and only reflected fields are returned.
+        Direct field calculation (only if src and rec are in the same layer):
+          - If True, direct field is calculated analytically in the frequency
+            domain.
+          - If False, direct field is calculated in the wavenumber domain.
+          - If None, direct field is excluded from the calculation, and only
+            reflected fields are returned (secondary field).
+
         Defaults to True.
 
     ht : {'fht', 'qwe', 'quad'}, optional
@@ -690,10 +693,13 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         #mpermH = #mpermV = #res. Default is ones.
 
     xdirect : bool or None, optional
-        If True and source and receiver are in the same layer, the direct field
-        is calculated analytically in the frequency domain, if False it is
-        calculated in the wavenumber domain. If None, the direct field is
-        excluded from the calculation, and only reflected fields are returned.
+        Direct field calculation (only if src and rec are in the same layer):
+          - If True, direct field is calculated analytically in the frequency
+            domain.
+          - If False, direct field is calculated in the wavenumber domain.
+          - If None, direct field is excluded from the calculation, and only
+            reflected fields are returned (secondary field).
+
         Defaults to True.
 
     ht : {'fht', 'qwe', 'quad'}, optional
