@@ -14,6 +14,8 @@ latest
   - If None, direct field is excluded from the calculation, and only reflected
     fields are returned (secondary field).
 
+- Bugfix in ``model.analytical`` for ``ab=[36, 63]`` (zeroes).
+
 
 v1.6.0 - *2018-05-01*
 ---------------------
@@ -61,7 +63,7 @@ are affected.
   used for the FHT and the QWE. New, this will be used according to the above
   definitions.
 
-- Bugfix in ``model.wavenumber`` for ``ab=36`` (zeroes).
+- Bugfix in ``model.wavenumber`` for ``ab=[36, 63]`` (zeroes).
 
 
 v1.5.2 - *2018-04-25*
