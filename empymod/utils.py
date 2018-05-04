@@ -189,8 +189,8 @@ def check_ab(ab, verb):
 
     # Print actual calculated <ab>
     if verb > 2:
-        if ab_calc in [36, ]:
-            print("\n>  <ab> IS "+str(ab_calc)+" WHICH IS ZERO; returning")
+        if ab in [36, 63]:
+            print("\n>  <ab> IS "+str(ab)+" WHICH IS ZERO; returning")
         else:
             print("   Calculated ab   : ", ab_calc)
 

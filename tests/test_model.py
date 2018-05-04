@@ -504,30 +504,36 @@ def test_analytical():
     dip_res = dipole(depth=[], **model)
     ana_res = analytical(**model)
     assert_allclose(dip_res, ana_res)
+    # \= Check 36/63
+    model['ab'] = 63
+    ana_res2 = analytical(**model)
+    assert_allclose(ana_res.shape, ana_res.shape)
+    assert np.count_nonzero(ana_res2) == 0
 
     # 2. halfspace
-    model = {'src': [500, -100, 5],
-             'rec': [0, 1000, 20],
-             'res': 6.71,
-             'aniso': 1.2,
-             'freqtime': 10,
-             'signal': 1,
-             'ab': 12,
-             'verb': 0}
-    # Check dhs, dsplit, and dtetm
-    ana_res = analytical(solution='dhs', **model)
-    res1, res2, res3 = analytical(solution='dsplit', **model)
-    dTE, dTM, rTE, rTM, air = analytical(solution='dtetm', **model)
-    model['res'] = [2e14, model['res']]
-    model['aniso'] = [1, model['aniso']]
-    dip_res = dipole(depth=0, **model)
-    # Check dhs, dsplit
-    assert_allclose(dip_res, ana_res, rtol=1e-4)
-    assert_allclose(ana_res, res1+res2+res3)
-    # Check dsplit and dtetm
-    assert_allclose(res1, dTE+dTM)
-    assert_allclose(res2, rTE+rTM)
-    assert_allclose(res3, air)
+    for signal in [0, 1]:  # Frequency, Time
+        model = {'src': [500, -100, 5],
+                 'rec': [0, 1000, 20],
+                 'res': 6.71,
+                 'aniso': 1.2,
+                 'freqtime': 1,
+                 'signal': signal,
+                 'ab': 12,
+                 'verb': 0}
+        # Check dhs, dsplit, and dtetm
+        ana_res = analytical(solution='dhs', **model)
+        res1, res2, res3 = analytical(solution='dsplit', **model)
+        dTE, dTM, rTE, rTM, air = analytical(solution='dtetm', **model)
+        model['res'] = [2e14, model['res']]
+        model['aniso'] = [1, model['aniso']]
+        dip_res = dipole(depth=0, **model)
+        # Check dhs, dsplit
+        assert_allclose(dip_res, ana_res, rtol=1e-3)
+        assert_allclose(ana_res, res1+res2+res3)
+        # Check dsplit and dtetm
+        assert_allclose(res1, dTE+dTM)
+        assert_allclose(res2, rTE+rTM)
+        assert_allclose(res3, air)
 
 
 def test_gpr(capsys):

@@ -1159,8 +1159,14 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         EM = kernel.halfspace(off, angle, zsrc, zrec, etaH, etaV,
                               freqtime[:, None], ab_calc, signal, solution)
     else:
-        EM = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
-                              ab_calc, msrc, mrec)
+        if ab_calc not in [36, ]:
+            EM = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
+                                  zetaV, ab_calc, msrc, mrec)
+        else:
+            # If <ab> = 36 (or 63), field is zero
+            # In `bipole` and in `dipole`, this is taken care of in `fem`. Here
+            # we have to take care of it separately
+            EM = np.zeros((freqtime.size*nrec*nsrc), dtype=complex)
 
     # Squeeze
     if solution[1:] == 'split':
@@ -1418,22 +1424,26 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     # === 3. EM-FIELD CALCULATION ============
 
     # If <ab> = 36 (or 63), field is zero
+    # In `bipole` and in `dipole`, this is taken care of in `fem`. Here we
+    # have to take care of it separately
     if ab_calc in [36, ]:
-        out = np.zeros((freq.size, off.size, wavenumber.size), dtype=complex)
-        return np.squeeze(out), np.squeeze(out)
+        PJ0 = np.zeros((freq.size, off.size, wavenumber.size), dtype=complex)
+        PJ1 = PJ0.copy()
 
-    # Calculate wavenumber response
-    PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
-                                       etaV, zetaH, zetaV,
-                                       np.atleast_2d(wavenumber), ab_calc,
-                                       False, msrc, mrec, False)
+    else:  # Regular calculation
 
-    # Collect output
-    PJ1 = factAng[:, np.newaxis]*PJ1
-    if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-        # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-        PJ1 /= off[:, None]
-    PJ0 = PJ0 + factAng[:, np.newaxis]*PJ0b
+        # Calculate wavenumber response
+        PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
+                                           etaV, zetaH, zetaV,
+                                           np.atleast_2d(wavenumber), ab_calc,
+                                           False, msrc, mrec, False)
+
+        # Collect output
+        PJ1 = factAng[:, np.newaxis]*PJ1
+        if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+            # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+            PJ1 /= off[:, None]
+        PJ0 = PJ0 + factAng[:, np.newaxis]*PJ0b
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, 1)
