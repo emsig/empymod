@@ -24,7 +24,7 @@ in touch if you would like to tackle one of these problems!
   - Load and save functions to easily store and load model information
     (resistivity model, acquisition parameters, and modelling parameters)
     together with the modelling data (using ``pickle`` or ``shelve``).
-    Better than after the abstraction
+    Probably easier after implementation of the abstraction
     [`empymod#14 <https://github.com/empymod/empymod/issues/14>`_].
 
 
@@ -44,8 +44,6 @@ in touch if you would like to tackle one of these problems!
 
 - Fourier transform
 
-  - Include the method outlined by Mulder et al., 2008, Geophysics
-    (piecewise-cubic Hermite interpolation with a FFT).
   - Change ``fft`` to use discrete sine/cosine transforms instead, as all other
     Fourier transforms
   - If previous step is successful, clean up the internal decisions
@@ -58,8 +56,11 @@ in touch if you would like to tackle one of these problems!
 - Hankel transform
 
   - Add the ``fht``-module from FFTLog for the Hankel transform.
+
+- Hankel and Fourier transform
   - Include the method outlined by Mulder et al., 2008, Geophysics
-    (piecewise-cubic Hermite interpolation with a FFT).
+    (piecewise-cubic Hermite interpolation with a FFT) to try to further
+    speed-up the splined versions.
 
 
 - Extend examples (example-notebooks)

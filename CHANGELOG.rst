@@ -1,8 +1,8 @@
 Changelog
 #########
 
-latest
-------
+v1.6.1 - *2018-05-05*
+---------------------
 
 - Add the possibility to calculate secondary fields only (excluding the direct
   field) by passing the argument ``xdirect=None``. The complete
@@ -14,7 +14,8 @@ latest
   - If None, direct field is excluded from the calculation, and only reflected
     fields are returned (secondary field).
 
-- Bugfix in ``model.analytical`` for ``ab=[36, 63]`` (zeroes).
+- Bugfix in ``model.analytical`` for ``ab=[36, 63]`` (zeroes)
+  [`empymod#16 <https://github.com/empymod/empymod/issues/16>`_].
 
 
 v1.6.0 - *2018-05-01*
