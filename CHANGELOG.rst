@@ -4,9 +4,7 @@ Changelog
 lates
 -----
 
-- `kernel`:
-
-  - Simplify `angle_factor`.
+- Simplify `kernel.wavenumber` and `kernel.angle_factor`.
 
 v1.6.1 - *2018-05-05*
 ---------------------

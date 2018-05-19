@@ -89,59 +89,45 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     """
 
     # ** CALCULATE GREEN'S FUNCTIONS
-    # Shape of PTM, PTE: (noffs, nfilt)
+    # Shape of PTM, PTE: (nfreq, noffs, nfilt)
     PTM, PTE = greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
                         zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
 
-    # ** AB-SPECIFIC FACTORS AND CALCULATION OF PTOT'S
-    # These are the factors from outside the integrals
-    # Eqs 105-107, 111-116, 119-121, 123-128
+    # ** AB-SPECIFIC COLLECTION OF PJ0, PJ1, AND PJ0b
 
-    # Factors
-    if ab in [11, 12, 21, 22, 14, 15, 24, 25]:
-        fact1 = 1/2
-        fact2 = 1/2
-        if ab in [14, 22]:
-            fact1 *= -1
-        if ab in [24, ]:
-            fact2 *= -1
-        elif ab in [12, 21, 14, 25]:
-            fact2 *= 0
-    elif ab in [13, 23, 31, 32, 33, 34, 35, 16, 26]:
-        fact1 = 1
-        fact2 = 0
-        if ab in [34, 26]:
-            fact1 *= -1
+    # Pre-allocate output
+    PJ0 = np.zeros_like(PTM)
+    PJ1 = np.zeros_like(PTM)
+    PJ0b = np.zeros_like(PTM)
 
-    # Calculate Ptot1 and Ptot2
-    Ptot1 = fact1*(PTM + PTE)/(4*np.pi)
-    Ptot2 = fact2*(PTM - PTE)/(4*np.pi)
-
-    # Group Ptot1 and Ptot2 into PJ0 and PJ1 for J0/J1 Hankel Transform
-    if ab in [11, 12, 21, 22, 14, 24, 15, 25]:    # Eqs 105, 106, 111, 112,
-        # J2(kr) = 2/(kr)*J1(kr) - J0(kr)         #     119, 120, 123, 124
-        PJ0b = Ptot1*lambd
-        PJ1 = -2*Ptot1
-        if ab in [11, 22, 24, 15]:
-            PJ0 = Ptot2*lambd
-        else:
-            PJ0 = Ptot2  # 0s
-
-    elif ab in [13, 23, 31, 32, 34, 35, 16, 26]:  # Eqs 107, 113, 114, 115,
-        PJ0 = Ptot2   # 0s                        # .   121, 125, 126, 127
-        PJ1 = Ptot1*lambd*lambd
-        PJ0b = Ptot2  # 0s
-
-    elif ab in [33, ]:                            # Eq 116
-        PJ0 = Ptot1*lambd*lambd*lambd
-        PJ1 = Ptot2   # 0s
-        PJ0b = Ptot2  # 0s
+    # Calculate Ptot which is used in all cases
+    Ptot = (PTM + PTE)/(4*np.pi)
 
     # If rec is magnetic switch sign (reciprocity MM/ME => EE/EM).
     if mrec:
-        PJ0 *= -1
-        PJ1 *= -1
-        PJ0b *= -1
+        sign = -1
+    else:
+        sign = 1
+
+    # Group into PJ0 and PJ1 for J0/J1 Hankel Transform
+    if ab in [11, 12, 21, 22, 14, 24, 15, 25]:    # Eqs 105, 106, 111, 112,
+        # J2(kr) = 2/(kr)*J1(kr) - J0(kr)         #     119, 120, 123, 124
+        if ab in [14, 22]:
+            sign *= -1
+        PJ0b = sign/2*Ptot*lambd
+        PJ1 = -sign*Ptot
+        if ab in [11, 22, 24, 15]:
+            if ab in [22, 24]:
+                sign *= -1
+            PJ0 = sign*(PTM - PTE)/(8*np.pi)*lambd
+
+    elif ab in [13, 23, 31, 32, 34, 35, 16, 26]:  # Eqs 107, 113, 114, 115,
+        PJ1 = sign*Ptot*lambd*lambd               # .   121, 125, 126, 127
+        if ab in [34, 26]:
+            PJ1 *= -1
+
+    elif ab in [33, ]:                            # Eq 116
+        PJ0 = sign*Ptot*lambd*lambd*lambd
 
     # Return PJ0, PJ1, PJ0b
     return PJ0, PJ1, PJ0b
