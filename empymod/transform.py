@@ -902,7 +902,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
             # for just j0 kernel
             if k_used[0] and ~k_used[2]:  # Only if kernel contains info
-                out_signal += np.dot(inp_PJ0 + filt.j0)
+                out_signal += np.dot(inp_PJ0, filt.j0)
 
             elif k_used[0] or k_used[2]:  # Only if kernel contains info
                 out_signal += np.dot(inp_PJ0 + factAng[:, np.newaxis]*inp_PJ0b,
