@@ -609,11 +609,16 @@ def angle_factor(angle, ab, msrc, mrec):
     if ab in [33, ]:
         return np.ones(angle.size)
 
-    # Reciprocity switch for magnetic receivers
-    if mrec and not msrc:  # If src is electric, swap src and rec (ME => EM).
-        # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z)
-        angle += np.pi
+    # Evaluation angle
+    eval_angle = angle.copy()
 
+    # Add pi if receiver is magnetic (reciprocity), but not if source is
+    # electric, because then source and receiver are swapped, ME => EM:
+    # G^me_ab(s, r, e, z) = -G^em_ba(r, s, e, z).
+    if mrec and not msrc:
+        eval_angle += np.pi
+
+    # Define fct (cos/sin) and angles to be tested
     if ab in [11, 22, 15, 24, 13, 31, 26, 35]:
         fct = np.cos
         test_ang_1 = np.pi/2
@@ -624,21 +629,14 @@ def angle_factor(angle, ab, msrc, mrec):
         test_ang_2 = 2*np.pi
 
     if ab in [11, 22, 15, 24, 12, 21, 14, 25]:
-        eangle = 2*angle
-    else:
-        eangle = angle
+        eval_angle *= 2
 
     # Get factor
-    factAng = fct(eangle)
+    factAng = fct(eval_angle)
 
-    # Ensure cos([pi/2, 3pi/2]) and sin([pi, 2pi]) are zero (floating point
-    # issue)
-    factAng[np.isclose(np.abs(eangle), test_ang_1, 1e-10, 1e-14)] = 0
-    factAng[np.isclose(np.abs(eangle), test_ang_2, 1e-10, 1e-14)] = 0
-
-    # Reset
-    if mrec and not msrc:
-        angle -= np.pi
+    # Ensure cos([pi/2, 3pi/2]) and sin([pi, 2pi]) are zero (floating pt issue)
+    factAng[np.isclose(np.abs(eval_angle), test_ang_1, 1e-10, 1e-14)] = 0
+    factAng[np.isclose(np.abs(eval_angle), test_ang_2, 1e-10, 1e-14)] = 0
 
     return factAng
 
