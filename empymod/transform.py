@@ -823,7 +823,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     if sum(k_used) == 0:
         return np.zeros(signal[inp_index].shape[:-1], dtype=dtype)
     elif hankel:  # Get index of a non-zero kernel
-        inp_index = np.arange(3)[k_used][0]
+        inp_index = np.arange(3)[np.array(k_used)][0]
 
     # Interpolation function
     def spline(values, points, new):
