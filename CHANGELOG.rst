@@ -4,7 +4,20 @@ Changelog
 lates
 -----
 
-- Simplify `kernel.wavenumber` and `kernel.angle_factor`.
+- `transform`:
+
+  - `dlf`:
+
+    - Improved by avoiding unnecessary multiplications/summations for empty
+      kernels and applying the angle factor only if it is not 1.
+    - Empty/unused kernels can now be input as `None`, e.g. `signal=(PJ0, None,
+      None)`.
+    - `factAng` is new optional for the Hankel transform, as is `ab`.
+
+- `kernel`:
+
+  - Simplify `wavenumber`
+  - Simplify `angle_factor`
 
 v1.6.1 - *2018-05-05*
 ---------------------

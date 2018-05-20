@@ -760,13 +760,14 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
     For the Hankel transform, `signal` contains 3 complex wavenumber-domain
     signals: (PJ0, PJ1, PJ0b), as returned from `kernel.wavenumber`. The Hankel
-    DLF requires two additional parameters: `factAng`, as returned from
+    DLF has two additional, optional parameters: `factAng`, as returned from
     `kernel.angle_factor`, and `ab`. The PJ0-kernel is the part of the
     wavenumber-domain calculation which contains a zeroth-order Bessel function
     and does NOT depend on the angle between source and receiver, only on
     offset. PJ0b and PJ1 are the parts of the wavenumber-domain calculation
     which contain a zeroth- and first-order Bessel function, respectively, and
-    DO depend on the angle between source and receiver.
+    can depend on the angle between source and receiver. PJ0, PJ1, or PJ0b can
+    also be None, if they are not used.
 
     For the Fourier transform, `signal` is a complex frequency-domain signal.
     The Fourier DLF requires one additional parameter, `kind`, which will be
@@ -775,11 +776,17 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     """
     # 0. HANKEL/FOURIER-DEPENDING SETTINGS
     if isinstance(signal, tuple):
-        # Hankel transform: 3 complex signals; needs factAng, ab
+        # Hankel transform: 3 complex signals; respects `factAng` and `ab`
         hankel = True
+        dtype = complex
 
         # Check if all angles are the same
+        if factAng is None:
+            factAng = np.array([1])
         one_angle = (factAng - factAng[0] == 0).all()
+        angle_is_one = one_angle and factAng[0] == 1.0
+        if one_angle:
+            factAng = factAng[0]
 
         # Cast to list
         signal = list(signal)
@@ -787,6 +794,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     else:
         # Fourier transform: 1 complex signal; needs kind
         hankel = False
+        dtype = float
 
         # Fourier independent of Angle
         one_angle = True
@@ -805,7 +813,17 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     # Get kernels with information, to avoid unnecessary calculation
     k_used = list()
     for i, val in enumerate(signal):
-        k_used.append(0 != np.count_nonzero(signal[i]))
+        if val is None:
+            k_used.append(False)
+        else:
+            inp_index = i  # Index of a kernel that is not None
+            k_used.append(0 != np.count_nonzero(val))
+
+    # If all kernels are zero, return zero
+    if sum(k_used) == 0:
+        return np.zeros(signal[inp_index].shape[:-1], dtype=dtype)
+    elif hankel:  # Get index of a non-zero kernel
+        inp_index = np.arange(3)[k_used][0]
 
     # Interpolation function
     def spline(values, points, new):
@@ -822,11 +840,6 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         # Get interpolation points in output domain
         _, int_pts = get_spline_values(filt, out_pts, pts_per_dec)
 
-        # If Lagged Convolution Hankel DLF and one_angle:
-        # create factAng with this one angle and size int_pts
-        if hankel and one_angle:
-            factAng = np.ones(int_pts.shape)*factAng[0]
-
         # Re-arrange signal
         for i, val in enumerate(signal):
             if k_used[i]:  # Only if kernel contains info
@@ -834,9 +847,6 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
                                          np.zeros(int_pts.size)))
                 signal[i] = tmp_sig.reshape(int_pts.size, -1)[:,
                                                               :filt.base.size]
-            else:
-                signal[i] = np.zeros((int_pts.size, filt.base.size),
-                                     dtype=complex)
 
     elif pts_per_dec > 0:  # Splined DLF: interpolate in input domain
         # Splined DLF: interpolate signal here
@@ -844,9 +854,6 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         for i, val in enumerate(signal):
             if k_used[i]:  # Only if kernel contains info
                 signal[i] = spline(val, points, new)
-            else:
-                signal[i] = np.zeros((out_pts.size, filt.base.size),
-                                     dtype=complex)
 
     # 2. APPLY DLF
     if hankel:  # Hankel transform
@@ -854,30 +861,30 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
         # If Kernel is all zeroes we just put zeroes instead of carrying out
         # the DLF
-        alt_pre = np.zeros(signal[0].shape[:-1], dtype=complex)
+        alt_pre = np.zeros(signal[inp_index].shape[:-1], dtype=complex)
 
         if pts_per_dec != 0 and not one_angle:
             # Varying angle with either lagged or splined DLF.
             # If not all offsets are in one line from the source, hence do not
             # have the same angle, the DLF has to be done separately for
             # angle-dependent and angle-independent parts.
+            out_angle = alt_pre.copy()
+            out_noang = alt_pre.copy()
 
-            if k_used[0]:  # Only if kernel contains info
-                out_noang = np.dot(inp_PJ0, filt.j0)
-            else:
-                out_noang = alt_pre[:]
+            # Do transform for the used kernels
+            if k_used[0]:  # J0
+                out_noang += np.dot(inp_PJ0, filt.j0)
 
-            # J1 is always used except for ab=33; however ab=33 is
-            # angle-independent, so we don't have to check here.
-            out_angle = np.dot(inp_PJ1, filt.j1)
-            if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-                # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-                if pts_per_dec < 0:  # Lagged Convolution
-                    out_angle /= int_pts
-                else:  # Splined
-                    out_angle /= out_pts
+            if k_used[1]:  # J1
+                out_angle += np.dot(inp_PJ1, filt.j1)
+                if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+                    # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+                    if pts_per_dec < 0:  # Lagged Convolution
+                        out_angle /= int_pts
+                    else:  # Splined
+                        out_angle /= out_pts
 
-            if k_used[2]:  # Only if kernel contains info
+            if k_used[2]:  # J0b
                 out_angle += np.dot(inp_PJ0b, filt.j0)
 
             if pts_per_dec > 0:
@@ -888,21 +895,27 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         else:
             # With the standard DLF (one_angle or not), and with the splined
             # DLF but one_angle, we can combine PJ0 and PJ0b to save one DLF.
+            out_signal = alt_pre.copy()
 
-            if k_used[1]:  # Only if kernel contains info
-                out_signal = factAng*np.dot(inp_PJ1, filt.j1)
+            # Do transform for the used kernels
+            if k_used[1]:  # J1
+                out_signal += np.dot(inp_PJ1, filt.j1)
                 if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
                     # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
                     if pts_per_dec < 0:  # Lagged Convolution
                         out_signal /= int_pts
                     else:  # Splined
                         out_signal /= out_pts
-            else:
-                out_signal = alt_pre[:]
 
-            if k_used[0] or k_used[2]:  # Only if kernel contains info
-                out_signal += np.dot(inp_PJ0 + factAng[:, np.newaxis]*inp_PJ0b,
-                                     filt.j0)
+            if k_used[2]:  # J0b
+                out_signal += np.dot(inp_PJ0b, filt.j0)
+
+            # Angle factor
+            if not angle_is_one:
+                out_signal *= factAng
+
+            if k_used[0]:  # J0
+                out_signal += np.dot(inp_PJ0, filt.j0)
 
     else:  # Fourier transform
         out_signal = np.dot(signal[0], getattr(filt, kind))
@@ -922,7 +935,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             int_angle = spline(out_angle[::-1], int_pts[::-1], out_pts)
 
             # Angle dependency
-            out_signal = (factAng*int_angle + int_noang)
+            out_signal = factAng*int_angle + int_noang
 
         else:  # If only one angle or Fourier
             out_signal = spline(out_signal[::-1], int_pts[::-1], out_pts)

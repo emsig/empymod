@@ -364,7 +364,23 @@ def test_dlf():                                                       # 10. dlf
         PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                zetaH, zetaV, lambd, ab, xdirect, msrc, mrec,
                                use_ne_eval)
-        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+
+        # Angle factor, one example with None instead of 1's.
+        if ab != 13:
+            factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+        else:
+            factAng = None
+
+        # Test some PJ's with None
+        if ab == 13:
+            PJ = None, PJ[1], None
+        elif ab == 33:
+            PJ = PJ[0], None, None
+
+        # The result for ab=12 is 0, because PJ0=0, and the angle is 0.
+        # We use this to test all-zero kernels by setting PJ1 and PJ0b to None.
+        if ab == 12:
+            PJ = PJ[0], None, None
 
         # dlf calculation
         fEM0 = transform.dlf(PJ, lambd, off, fhtfilt, 0, factAng=factAng,
