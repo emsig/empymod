@@ -783,7 +783,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         # Check if all angles are the same
         if factAng is None:
             factAng = np.array([1])
-        one_angle = (factAng - factAng[0] == 0).all()
+        one_angle = 0 == np.count_nonzero(factAng - factAng[0])
         angle_is_one = one_angle and factAng[0] == 1.0
         if one_angle:
             factAng = factAng[0]
