@@ -5,6 +5,16 @@
    
 ----
 
+.. image:: https://readthedocs.org/projects/empymod/badge/?version=latest
+   :target: http://empymod.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+.. image:: https://travis-ci.org/empymod/empymod.svg?branch=master
+   :target: https://travis-ci.org/empymod/empymod
+   :alt: Travis-CI
+.. image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
+   :target: https://coveralls.io/github/empymod/empymod?branch=master
+   :alt: Coveralls
+
 .. sphinx-inclusion-marker
 
 The electromagnetic modeller **empymod** can model electric or magnetic
