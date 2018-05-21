@@ -219,28 +219,58 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # Angle dependent factors
     factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
-    # Call and return QWE, depending if spline or not
-    if pts_per_dec != 0:  # If spline, we calculate all kernels here
-        # New lambda, from min to max required lambda with pts_per_dec
-        start = np.log10(lambd.min())
-        stop = np.log10(lambd.max())
+    # The following lines until
+    #       "Call and return QWE, depending if spline or not"
+    # are part of the splined routine. However, we calculate it here to get
+    # the non-zero kernels, `k_used`.
+
+    # New lambda, from min to max required lambda with pts_per_dec
+    start = np.log10(lambd.min())
+    stop = np.log10(lambd.max())
+
+    # If not spline, we just calculate three lambdas to check
+    if pts_per_dec == 0:
+        ilambd = np.logspace(start, stop, 3)
+    else:
         ilambd = np.logspace(start, stop, (stop-start)*pts_per_dec + 1)
 
-        # Call the kernel
-        PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
-                                           etaH[None, :], etaV[None, :],
-                                           zetaH[None, :], zetaV[None, :],
-                                           np.atleast_2d(ilambd), ab, xdirect,
-                                           msrc, mrec, use_ne_eval)
+    # Call the kernel
+    PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
+                                       etaH[None, :], etaV[None, :],
+                                       zetaH[None, :], zetaV[None, :],
+                                       np.atleast_2d(ilambd), ab, xdirect,
+                                       msrc, mrec, use_ne_eval)
+
+    # Check which kernels have information
+    k_used = list()
+    for val in (PJ0, PJ1, PJ0b):
+        k_used.append(np.any(val != 0))
+
+    # Call and return QWE, depending if spline or not
+    if pts_per_dec != 0:  # If spline, we calculate all kernels here
 
         # Interpolation : Has to be done separately on each PJ,
         # in order to work with multiple offsets which have different angles.
-        sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
-        sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
-        sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
-        sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
-        sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
-        sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
+        if k_used[0]:
+            sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
+            sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
+        else:
+            sPJ0r = None
+            sPJ0i = None
+
+        if k_used[1]:
+            sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
+            sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
+        else:
+            sPJ1r = None
+            sPJ1i = None
+
+        if k_used[2]:
+            sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
+            sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
+        else:
+            sPJ0br = None
+            sPJ0bi = None
 
         # Get quadargs: diff_quad, a, b, limit
         diff_quad, a, b, limit = qweargs[5:]
@@ -262,12 +292,22 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         # as QWE is not designed for these intervals.
         check0 = np.log10(intervals[:, :-1])
         check1 = np.log10(intervals[:, 1:])
-        doqwe = np.all((np.abs(sPJ0r(check0) + 1j*sPJ0i(check0) +
-                        sPJ1r(check0) + 1j*sPJ1i(check0) +
-                        sPJ0br(check0) + 1j*sPJ0bi(check0)) /
-                        np.abs(sPJ0r(check1) + 1j*sPJ0i(check1) +
-                        sPJ1r(check1) + 1j*sPJ1i(check1) +
-                        sPJ0br(check1) + 1j*sPJ0bi(check1)) < diff_quad), 1)
+        numerator = np.zeros((off.size, maxint), dtype=complex)
+        denominator = np.zeros((off.size, maxint), dtype=complex)
+
+        if k_used[0]:
+            numerator += sPJ0r(check0) + 1j*sPJ0i(check0)
+            denominator += sPJ0r(check1) + 1j*sPJ0i(check1)
+
+        if k_used[1]:
+            numerator += sPJ1r(check0) + 1j*sPJ1i(check0)
+            denominator += sPJ1r(check1) + 1j*sPJ1i(check1)
+
+        if k_used[2]:
+            numerator += sPJ0br(check0) + 1j*sPJ0bi(check0)
+            denominator += sPJ0br(check1) + 1j*sPJ0bi(check1)
+
+        doqwe = np.all((np.abs(numerator)/np.abs(denominator) < diff_quad), 1)
 
         # Pre-allocate output array
         fEM = np.zeros(off.size, dtype=complex)
@@ -294,21 +334,29 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
         if np.any(doqwe):
             # Get EM-field at required offsets
-            sPJ0 = sPJ0r(np.log10(lambd)) + 1j*sPJ0i(np.log10(lambd))
-            sPJ1 = sPJ1r(np.log10(lambd)) + 1j*sPJ1i(np.log10(lambd))
-            sPJ0b = sPJ0br(np.log10(lambd)) + 1j*sPJ0bi(np.log10(lambd))
+            if k_used[0]:
+                sPJ0 = sPJ0r(np.log10(lambd)) + 1j*sPJ0i(np.log10(lambd))
+            if k_used[1]:
+                sPJ1 = sPJ1r(np.log10(lambd)) + 1j*sPJ1i(np.log10(lambd))
+            if k_used[2]:
+                sPJ0b = sPJ0br(np.log10(lambd)) + 1j*sPJ0bi(np.log10(lambd))
 
             # Carry out and return the Hankel transform for this interval
-            sEM = np.sum(np.reshape(sPJ1*BJ1, (off.size, nquad, -1),
-                         order='F'), 1)
-            if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-                # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-                sEM /= np.atleast_1d(off[:, np.newaxis])
-            sEM += np.sum(np.reshape(sPJ0b*BJ0, (off.size, nquad, -1),
-                                     order='F'), 1)
-            sEM *= factAng[:, np.newaxis]
-            sEM += np.sum(np.reshape(sPJ0*BJ0, (off.size, nquad, -1),
-                                     order='F'), 1)
+            sEM = np.zeros_like(numerator, dtype=complex)
+            if k_used[1]:
+                sEM += np.sum(np.reshape(sPJ1*BJ1, (off.size, nquad, -1),
+                              order='F'), 1)
+                if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+                    # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+                    sEM /= np.atleast_1d(off[:, np.newaxis])
+            if k_used[2]:
+                sEM += np.sum(np.reshape(sPJ0b*BJ0, (off.size, nquad, -1),
+                                         order='F'), 1)
+            if k_used[1] or k_used[2]:
+                sEM *= factAng[:, np.newaxis]
+            if k_used[0]:
+                sEM += np.sum(np.reshape(sPJ0*BJ0, (off.size, nquad, -1),
+                                         order='F'), 1)
 
             getkernel = sEM[doqwe, :]
 
@@ -333,12 +381,16 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
                                                use_ne_eval)
 
             # Carry out and return the Hankel transform for this interval
-            gEM = inpfang*np.dot(PJ1[0, :], BJ1[iB])
-            if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-                # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-                gEM /= np.atleast_1d(inpoff)
-            gEM += inpfang*np.dot(PJ0b[0, :], BJ0[iB])
-            gEM += np.dot(PJ0[0, :], BJ0[iB])
+            gEM = np.zeros_like(inpoff, dtype=complex)
+            if k_used[1]:
+                gEM += inpfang*np.dot(PJ1[0, :], BJ1[iB])
+                if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+                    # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+                    gEM /= np.atleast_1d(inpoff)
+            if k_used[2]:
+                gEM += inpfang*np.dot(PJ0b[0, :], BJ0[iB])
+            if k_used[0]:
+                gEM += np.dot(PJ0[0, :], BJ0[iB])
 
             return gEM
 
