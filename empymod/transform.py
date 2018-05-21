@@ -395,14 +395,27 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
 
     # Interpolation in wavenumber domain: Has to be done separately on each PJ,
     # in order to work with multiple offsets which have different angles.
-    sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
-    sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
+    # We check if the kernels are zero, to avoid unnecessary calculations.
+    if np.any(PJ0 != 0):
+        sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
+        sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
+    else:
+        sPJ0r = None
+        sPJ0i = None
 
-    sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
-    sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
+    if np.any(PJ1 != 0):
+        sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
+        sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
+    else:
+        sPJ1r = None
+        sPJ1i = None
 
-    sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
-    sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
+    if np.any(PJ0b != 0):
+        sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
+        sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
+    else:
+        sPJ0br = None
+        sPJ0bi = None
 
     # Get the angle factor
     factAng = kernel.angle_factor(angle, ab, msrc, mrec)
@@ -783,7 +796,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         # Check if all angles are the same
         if factAng is None:
             factAng = np.array([1])
-        one_angle = 0 == np.count_nonzero(factAng - factAng[0])
+        one_angle = not np.any(factAng != factAng[0])
         angle_is_one = one_angle and factAng[0] == 1.0
         if one_angle:
             factAng = factAng[0]
@@ -817,7 +830,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             k_used.append(False)
         else:
             inp_index = i  # Index of a kernel that is not None
-            k_used.append(0 != np.count_nonzero(val))
+            k_used.append(np.any(val != 0))
 
     # If all kernels are zero, return zero
     if sum(k_used) == 0:
@@ -1039,39 +1052,57 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
     """
 
     # Define the quadrature kernels
-    def quad0(klambd, sPJ, sPJb, koff, kang):
-        """Quadrature for J0."""
-        tP0 = sPJ(np.log10(klambd)) + kang*sPJb(np.log10(klambd))
-        return tP0*special.j0(koff*klambd)
+    def quad_PJ0(klambd, sPJ0, koff):
+        """Quadrature for PJ0."""
+        return sPJ0(np.log10(klambd))*special.j0(koff*klambd)
 
-    def quad1(klambd, sPJ, ab, koff, kang):
-        """Quadrature for J1."""
-        tP1 = kang*sPJ(np.log10(klambd))
+    def quad_PJ1(klambd, sPJ1, ab, koff, kang):
+        """Quadrature for PJ1."""
+
+        tP1 = kang*sPJ1(np.log10(klambd))
         if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
             # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
             tP1 /= koff
+
         return tP1*special.j1(koff*klambd)
 
-    # Carry out quadrature of J0
-    iargs = (sPJ0r, sPJ0br, off, factAng)
-    fr0 = integrate.quad(quad0, args=iargs, full_output=1, **iinp)
-    iargs = (sPJ0i, sPJ0bi, off, factAng)
-    fi0 = integrate.quad(quad0, args=iargs, full_output=1, **iinp)
+    def quad_PJ0b(klambd, sPJ0b, koff, kang):
+        """Quadrature for PJ0b."""
+        return kang*sPJ0b(np.log10(klambd))*special.j0(koff*klambd)
 
-    # Carry out quadrature of J1
-    iargs = (sPJ1r, ab, off, factAng)
-    fr1 = integrate.quad(quad1, args=iargs, full_output=1, **iinp)
-    iargs = (sPJ1i, ab, off, factAng)
-    fi1 = integrate.quad(quad1, args=iargs, full_output=1, **iinp)
+    # Pre-allocate output
+    conv = True
+    out = np.array([0.0+0.0j])
 
-    # If there is a fourth output from QUAD, it means it did not converge
-    if np.any(np.array([len(fr0), len(fi0), len(fr1), len(fi1)]) > 3):
-        conv = False
-    else:
-        conv = True
+    # Carry out quadrature for required kernels
+    iinp['full_output'] = 1
+
+    if sPJ0r is not None:
+        re = integrate.quad(quad_PJ0, args=(sPJ0r, off), **iinp)
+        im = integrate.quad(quad_PJ0, args=(sPJ0i, off), **iinp)
+        out += re[0] + 1j*im[0]
+        # If there is a fourth output from QUAD, it means it did not converge
+        if (len(re) or len(im)) > 3:
+            conv = False
+
+    if sPJ1r is not None:
+        re = integrate.quad(quad_PJ1, args=(sPJ1r, ab, off, factAng), **iinp)
+        im = integrate.quad(quad_PJ1, args=(sPJ1i, ab, off, factAng), **iinp)
+        out += re[0] + 1j*im[0]
+        # If there is a fourth output from QUAD, it means it did not converge
+        if (len(re) or len(im)) > 3:
+            conv = False
+
+    if sPJ0br is not None:
+        re = integrate.quad(quad_PJ0b, args=(sPJ0br, off, factAng), **iinp)
+        im = integrate.quad(quad_PJ0b, args=(sPJ0bi, off, factAng), **iinp)
+        out += re[0] + 1j*im[0]
+        # If there is a fourth output from QUAD, it means it did not converge
+        if (len(re) or len(im)) > 3:
+            conv = False
 
     # Collect the results
-    return fr0[0] + fr1[0] + 1j*(fi0[0] + fi1[0]), conv
+    return out, conv
 
 
 def get_spline_values(filt, inp, nr_per_dec=None):

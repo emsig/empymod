@@ -14,6 +14,9 @@ lates
       None)`.
     - `factAng` is new optional for the Hankel transform, as is `ab`.
 
+  - `hquad`, `quad`: Avoids unnecessary calculations for zero kernels,
+    improving speed for these cases.
+
 - `kernel`:
 
   - Simplify `wavenumber`
