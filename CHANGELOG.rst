@@ -1,32 +1,42 @@
 Changelog
 #########
 
-lates
------
+v1.6.2 - *2018-05-21*
+---------------------
 
-- `transform`:
+These changes should make calculations using ``QWE`` and ``QUAD`` for the
+Hankel transform for cases which do not require all kernels faster; sometimes
+as much as twice as fast. However, it might make calculations which do require
+all kernels a tad slower, as more checks had to be included. (Related to
+[`empymod#11 <https://github.com/empymod/empymod/issues/11>`_]; basically
+including for ``QWE`` and ``QUAD`` what was included for ``DLF`` in version
+1.6.0.)
 
-  - `dlf`:
+- ``transform``:
+
+  - ``dlf``:
 
     - Improved by avoiding unnecessary multiplications/summations for empty
       kernels and applying the angle factor only if it is not 1.
-    - Empty/unused kernels can now be input as `None`, e.g. `signal=(PJ0, None,
-      None)`.
-    - `factAng` is new optional for the Hankel transform, as is `ab`.
+    - Empty/unused kernels can now be input as ``None``, e.g. ``signal=(PJ0,
+      None, None)``.
+    - ``factAng`` is new optional for the Hankel transform, as is ``ab``.
 
-  - `hqwe`: Avoids unnecessary calculations for zero kernels, improving speed
+  - ``hqwe``: Avoids unnecessary calculations for zero kernels, improving speed
     for these cases.
 
-  - `hquad`, `quad`: Avoids unnecessary calculations for zero kernels,
+  - ``hquad``, ``quad``: Avoids unnecessary calculations for zero kernels,
     improving speed for these cases.
 
-- `kernel`:
+- ``kernel``:
 
-  - Simplify `wavenumber`
-  - Simplify `angle_factor`
+  - Simplify ``wavenumber``
+  - Simplify ``angle_factor``
 
 v1.6.1 - *2018-05-05*
 ---------------------
+
+Secondary field calculation.
 
 - Add the possibility to calculate secondary fields only (excluding the direct
   field) by passing the argument ``xdirect=None``. The complete
