@@ -1,6 +1,12 @@
 Changelog
 #########
 
+latest
+------
+
+- Move optional import (``numexpr``) to the beginning of the file
+
+
 v1.6.2 - *2018-05-21*
 ---------------------
 
@@ -32,6 +38,7 @@ including for ``QWE`` and ``QUAD`` what was included for ``DLF`` in version
 
   - Simplify ``wavenumber``
   - Simplify ``angle_factor``
+
 
 v1.6.1 - *2018-05-05*
 ---------------------

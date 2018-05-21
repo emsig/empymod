@@ -29,6 +29,7 @@ This module consists of four groups of functions:
 # the License.
 
 
+# Mandatory imports
 import warnings
 import numpy as np
 from scipy import special
@@ -37,6 +38,15 @@ from timeit import default_timer
 from scipy.constants import mu_0       # Magn. permeability of free space [H/m]
 from scipy.constants import epsilon_0  # Elec. permittivity of free space [F/m]
 
+# Optional imports
+try:
+    from numexpr import use_vml, evaluate
+    if not use_vml:  # Check Intel's Vector Math Library
+        use_vml = False
+except ImportError:
+    evaluate = False
+
+# Relative imports
 from . import filters, transform
 
 
@@ -808,23 +818,23 @@ def check_opt(opt, loop, ht, htarg, verb):
         Boolean if to loop over offsets.
 
     """
-    # Check optimization flag
-    if opt == 'parallel':
-        use_ne_eval = True
-    else:
-        use_ne_eval = False
+    global use_vml, evaluate
 
-    # Try to import numexpr
-    if use_ne_eval:
-        try:
-            from numexpr import use_vml, evaluate as use_ne_eval
-            if not use_vml:  # Ensure Intel's Vector Math Library
-                use_ne_eval = False
+    # Check optimization flag
+    use_ne_eval = False
+    if opt == 'parallel':
+
+        # Check numexpr
+        if evaluate:
+
+            # Ensure Intel's Vector Math Library
+            if use_vml:
+                use_ne_eval = evaluate
+            else:
                 if verb > 0:
                     print("* WARNING :: `numexpr` is not installed with VML," +
                           " `opt=='parallel'` has no effect.")
-        except ImportError:
-            use_ne_eval = False
+        else:
             if verb > 0:
                 print("* WARNING :: `numexpr` is not installed, " +
                       "`opt=='parallel'` has no effect.")
