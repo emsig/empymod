@@ -1124,7 +1124,7 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
 
     # Pre-allocate output
     conv = True
-    out = np.array([0.0+0.0j])
+    out = np.array(0.0+0.0j)
 
     # Carry out quadrature for required kernels
     iinp['full_output'] = 1
