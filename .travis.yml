@@ -24,6 +24,10 @@ install:
   - pip install coveralls pytest-flake8
   - python setup.py install
 
+before_script:
+  - echo ""
+  - conda install numexpr
+
 script: pytest --cov=empymod --flake8
 
 after_success: coveralls
