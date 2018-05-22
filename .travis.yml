@@ -5,7 +5,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  - "2"  # Dummy: Run Python 3.6 without any soft dependency
+  - "3.3"  # Dummy: Run Python 3.6 without any soft dependency
 install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
@@ -20,7 +20,7 @@ install:
   - conda info -a
 
   # Take care of dummy version for test without soft dependencies
-  - if [ ${TRAVIS_PYTHON_VERSION} == "2" ]; then
+  - if [ ${TRAVIS_PYTHON_VERSION:2:3} == "3" ]; then
       TRAVIS_PYTHON_VERSION="3.6";
       SOFT_DEP="";
     else
