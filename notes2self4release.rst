@@ -46,7 +46,7 @@ Note: I really should replace this with an automatic deploy-setup...
         bash miniconda.sh -b -p /opt/miniconda/miniconda
         export PATH="/opt/miniconda/miniconda/bin:$PATH"
         conda update conda
-        conda install conda-build anaconda-client
+        conda install -y conda-build anaconda-client
         conda config --set anaconda_upload yes
         anaconda login
 

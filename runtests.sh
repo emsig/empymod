@@ -20,7 +20,7 @@ where:
 CHAN=defaults
 PYTHON3VERSION="4 5 6"
 PRINT="/dev/null"
-PCKGS="numpy scipy python-dateutil setuptools pytest pytest-cov"
+PCKGS="numpy scipy pytest pytest-cov"
 NMXPR="numexpr"
 STR2="**  WITH numexpr  "
 
