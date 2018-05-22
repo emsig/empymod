@@ -5,7 +5,8 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  - "3.3"  # Dummy: Run Python 3.6 without any soft dependency
+  - "3.6.0"  # Dummy: Python 3.6 without any soft dependency; hence no numexpr
+  - "3.6.1"  # Dummy: Python 3.6 with conda-forge; hence no VML
 install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
@@ -20,11 +21,17 @@ install:
   - conda info -a
 
   # Take care of dummy version for test without soft dependencies
-  - if [ ${TRAVIS_PYTHON_VERSION:2:3} == "3" ]; then
+  - if [ ${TRAVIS_PYTHON_VERSION:4:5} == "0" ]; then
       TRAVIS_PYTHON_VERSION="3.6";
       SOFT_DEP="";
+      CHAN="defaults";
+    elif [ ${TRAVIS_PYTHON_VERSION:4:5} == "1" ]; then
+      TRAVIS_PYTHON_VERSION="3.6";
+      SOFT_DEP="numexpr";
+      CHAN="conda-forge";
     else
       SOFT_DEP="numexpr";
+      CHAN="defaults";
     fi
 
   # Install and activate environment, install packages
