@@ -40,11 +40,16 @@ from scipy.constants import epsilon_0  # Elec. permittivity of free space [F/m]
 
 # Optional imports
 try:
-    from numexpr import use_vml, evaluate
-    if not use_vml:  # Check Intel's Vector Math Library
-        use_vml = False
+    import numexpr
+    # Ensure Intel's Vector Math Library
+    if not numexpr.use_vml:
+        numexpr = False
+        numexpr_msg = "* WARNING :: `numexpr` is not installed with VML, "
+        numexpr_msg += "`opt=='parallel'` has no effect."
 except ImportError:
-    evaluate = False
+    numexpr = False
+    numexpr_msg = "* WARNING :: `numexpr` is not installed, "
+    numexpr_msg += "`opt=='parallel'` has no effect."
 
 # Relative imports
 from . import filters, transform
@@ -818,26 +823,14 @@ def check_opt(opt, loop, ht, htarg, verb):
         Boolean if to loop over offsets.
 
     """
-    global use_vml, evaluate
 
     # Check optimization flag
     use_ne_eval = False
     if opt == 'parallel':
-
-        # Check numexpr
-        if evaluate:
-
-            # Ensure Intel's Vector Math Library
-            if use_vml:
-                use_ne_eval = evaluate
-            else:
-                if verb > 0:
-                    print("* WARNING :: `numexpr` is not installed with VML," +
-                          " `opt=='parallel'` has no effect.")
-        else:
-            if verb > 0:
-                print("* WARNING :: `numexpr` is not installed, " +
-                      "`opt=='parallel'` has no effect.")
+        if numexpr:
+            use_ne_eval = numexpr.evaluate
+        elif verb > 0:
+            print(numexpr_msg)
 
     # Define if to loop over frequencies or over offsets
     lagged_splined_fht = False

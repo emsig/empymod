@@ -6,6 +6,9 @@ latest
 
 - Move optional import (``numexpr``) to the beginning of the file
 
+- Broaden namespace of ``empymod``. All public functions from the sub-modules
+  are now available under ``empymod`` directly.
+
 
 v1.6.2 - *2018-05-21*
 ---------------------
