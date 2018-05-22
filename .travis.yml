@@ -5,6 +5,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "2"  # Dummy: Run Python 3.6 without any soft dependency
 install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
@@ -18,11 +19,20 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy numexpr pytest pytest-cov
+  # Take care of dummy version for test without soft dependencies
+  - if [ ${TRAVIS_PYTHON_VERSION} == "2" ]; then
+      TRAVIS_PYTHON_VERSION="3.6";
+      SOFT_DEP="";
+    else
+      SOFT_DEP="numexpr";
+    fi
+
+  # Install and activate environment, install packages
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pytest pytest-cov $SOFT_DEP
   - source activate test-environment
   - pip install coveralls pytest-flake8
   - python setup.py install
+
 
 script: pytest --cov=empymod --flake8
 
