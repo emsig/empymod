@@ -19,7 +19,7 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numexpr numpy python-dateutil scipy setuptools pytest pytest-cov
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy numexpr pytest pytest-cov
   - source activate test-environment
   - pip install coveralls pytest-flake8
   - python setup.py install

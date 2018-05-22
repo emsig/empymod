@@ -23,5 +23,8 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
-    install_requires=['numpy', 'scipy'],
+    install_requires=[
+        'numpy',
+        'scipy!=0.19.0'
+    ],
 )
