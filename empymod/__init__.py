@@ -657,9 +657,24 @@ References |_|
 # License for the specific language governing permissions and limitations under
 # the License.
 
-# Import main modelling routines to make them available as primary functions
-from .model import bipole, dipole, analytical
-__all__ = ['bipole', 'dipole', 'analytical']
+# Import all modules
+from . import model
+from . import utils
+from . import filters
+from . import transform
+from . import kernel
+
+# Import all functions
+from .model import *      # noqa
+from .utils import *      # noqa
+from .filters import *    # noqa
+from .transform import *  # noqa
+from .kernel import *     # noqa
+
+# Make only a selection available to __all__ to not clutter the namespace
+__all__ = ['filters', 'kernel', 'model', 'transform', 'utils']
+__all__.extend(model.__all__)
+__all__.extend(['EMArray', 'set_minimum', 'get_minimum'])
 
 # Version
 __version__ = '1.6.3.dev0'
