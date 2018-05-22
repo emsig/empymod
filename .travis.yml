@@ -35,7 +35,7 @@ install:
     fi
 
   # Install and activate environment, install packages
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pytest pytest-cov $SOFT_DEP
+  - conda create -q -n test-environment -c $CHAN python=$TRAVIS_PYTHON_VERSION numpy scipy pytest pytest-cov $SOFT_DEP
   - source activate test-environment
   - pip install coveralls pytest-flake8
   - python setup.py install
