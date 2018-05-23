@@ -4,7 +4,6 @@
 import time
 from empymod import __version__
 
-autodoc_mock_imports = ["matplotlib"]
 
 # -- General configuration ------------------------------------------------
 

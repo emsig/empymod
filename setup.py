@@ -15,7 +15,7 @@ setup(
     url='https://empymod.github.io',
     download_url='https://github.com/empymod/empymod/tarball/v1.6.2',
     license='Apache License V2.0',
-    packages=['empymod'],
+    packages=['empymod', 'empymod.scripts'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: Apache Software License',
