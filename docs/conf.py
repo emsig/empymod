@@ -12,6 +12,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
+    'numpydoc',
     'sphinxcontrib.napoleon',
 ]
 numpydoc_show_class_members = False

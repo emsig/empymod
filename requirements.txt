@@ -1,4 +1,15 @@
 numpy
-scipy != 0.19.0
 sphinx
 sphinxcontrib-napoleon
+
+# sphinx fixed at 1.6.7; fails otherwise at the moment
+# github.com/rtfd/readthedocs.org/issues/4057
+sphinx==1.6.7
+
+# numpydoc fixed at 0.6; 0.7.0 breaks citations
+# github.com/numpy/numpydoc/issues/177
+numpydoc == 0.6
+
+# scipy 0.19.0 has a memory leak in quad
+# github.com/scipy/scipy/pull/7216
+scipy != 0.19.0
