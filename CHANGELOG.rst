@@ -1,8 +1,10 @@
 Changelog
 #########
 
-latest
-------
+latest - will be v1.7.0
+-----------------------
+
+- Merge ``empyscripts`` into ``empymod.scripts``.
 
 - Move optional import (``numexpr``) to the beginning of the file
 

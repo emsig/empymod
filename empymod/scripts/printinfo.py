@@ -15,8 +15,8 @@ Always shown are the OS, number of CPU(s), ``numpy``, ``scipy``, ``empymod``,
 ``sys.version``, and time/date.
 
 Additionally shown are, if they can be imported, ``IPython``, ``matplotlib``,
-and ``numexpr``. If ``numexpr`` can be imported it shows additionally VML
-information.
+and ``numexpr``. If ``numexpr`` was installed with VML it shows that
+information too.
 
 All modules provided in ``add_pckg`` are also shown. They have to be imported
 before ``versions`` is called.
@@ -167,7 +167,7 @@ def versions_html(add_pckg=[], ncol=3):
     html = colspan(html, sys.version, ncol)
 
     # vml version
-    if numexpr:
+    if numexpr and numexpr.use_vml:
         html = colspan(html, numexpr.get_vml_version(), ncol)
 
     # Date and time info as title
@@ -203,7 +203,7 @@ def versions_text(add_pckg=[]):
         text += '  '+txt+'\n'
 
     # vml version
-    if numexpr:
+    if numexpr and numexpr.use_vml:
         text += '\n'
         for txt in textwrap.wrap(numexpr.get_vml_version(), n-4):
             text += '  '+txt+'\n'
