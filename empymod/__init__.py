@@ -677,15 +677,15 @@ from .filters import *    # noqa
 from .transform import *  # noqa
 from .kernel import *     # noqa
 
-# Import scripts, versions
+# Import sub-modules without their functions
 from . import scripts
-from .scripts.printinfo import versions  # noqa
+from .scripts import *    # noqa
 
 # Make only a selection available to __all__ to not clutter the namespace
 __all__ = ['filters', 'kernel', 'model', 'transform', 'utils', 'scripts']
 __all__.extend(model.__all__)
 __all__.extend(['EMArray', 'set_minimum', 'get_minimum'])  # From utils
-__all__.extend(['versions'])  # From scipts.printinfo
+__all__.extend(scripts.__all__)
 
 # Version
 __version__ = '1.6.3.dev1'

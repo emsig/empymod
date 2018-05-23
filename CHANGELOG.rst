@@ -6,10 +6,22 @@ latest - will be v1.7.0
 
 - Merge ``empyscripts`` into ``empymod.scripts``.
 
-- Move optional import (``numexpr``) to the beginning of the file
+- Clear separation between mandatory and optional imports:
 
-- Broaden namespace of ``empymod``. All public functions from the sub-modules
-  are now available under ``empymod`` directly.
+  - Mandatory:
+
+    - ``numpy``
+    - ``scipy``
+
+  - Optional:
+
+    - ``matplotlib`` (for ``empymod.scripts.fdesign``)
+    - ``numexpr`` (for ``empymod.kernel``)
+    - ``IPython`` (for ``empymod.scripts.printinfo``)
+
+- Broaden namespace of ``empymod``. All public functions from the various
+  modules and the modules from ``empymod.scripts`` are now available under
+  ``empymod`` directly.
 
 
 v1.6.2 - *2018-05-21*
