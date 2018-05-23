@@ -126,13 +126,17 @@ def versions_html(add_pckg=[], ncol=4):
     ncol = int(ncol)
 
     # Define html-styles
-    style1 = " style='border: 2px solid #fff; text-align: left;'"
-    style2 = " style='background-color: #ccc; border: 2px solid #fff;'"
+    border = "border: 2px solid #fff;'"
 
-    def colspan(html, txt, ncol):
+    def colspan(html, txt, ncol, nrow):
         """Print txt in a row spanning whole table."""
         html += "  <tr>\n"
-        html += "     <td" + style1 + " colspan='"
+        html += "     <td style='text-align: center; "
+        if nrow == 0:
+            html += "font-weight: bold; font-size: 1.2em; "
+        elif nrow % 2 == 0:
+            html += "background-color: #ddd;"
+        html += border + " colspan='"
         html += str(2*ncol)+"'>%s</td>\n" % txt
         html += "  </tr>\n"
         return html
@@ -143,15 +147,21 @@ def versions_html(add_pckg=[], ncol=4):
         # Check if we have to start a new row
         if i > 0 and i % ncol == 0:
             html += "  </tr>\n"
-            html += "  <tr" + style1 + ">\n"
+            html += "  <tr>\n"
 
-        html += "    <td" + style2 + ">%s</td>\n" % version
-        html += "    <td" + style1 + ">%s</td>\n" % name
+        html += "    <td style='text-align: right; background-color: #ccc; "
+        html += border + ">%s</td>\n" % version
+
+        html += "    <td style='text-align: left; "
+        html += border + ">%s</td>\n" % name
 
         return html, i+1
 
     # Start html-table
     html = "<table style='border: 3px solid #ddd;'>\n"
+
+    # Date and time info as title
+    html = colspan(html, time.strftime('%a %b %d %H:%M:%S %Y %Z'), ncol, 0)
 
     # OS and CPUs
     html += "  <tr>\n"
@@ -164,14 +174,11 @@ def versions_html(add_pckg=[], ncol=4):
     html += "  </tr>\n"
 
     # sys.version
-    html = colspan(html, sys.version, ncol)
+    html = colspan(html, sys.version, ncol, 1)
 
     # vml version
     if numexpr and numexpr.use_vml:
-        html = colspan(html, numexpr.get_vml_version(), ncol)
-
-    # Date and time info as title
-    html = colspan(html, time.strftime('%a %b %d %H:%M:%S %Y %Z'), ncol)
+        html = colspan(html, numexpr.get_vml_version(), ncol, 2)
 
     # Finish table
     html += "</table>"

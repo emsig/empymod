@@ -62,8 +62,9 @@ def test_versions(capsys):
         assert out4c is None
 
     # Check row of provided package, with number
-    teststr = "<td style='background-color: #ccc; border: 2px solid #fff;'>"
+    teststr = "<td style='text-align: right; background-color: #ccc; "
+    teststr += "border: 2px solid #fff;'>"
     teststr += pytest.__version__
     teststr += "</td>\n    <td style='"
-    teststr += "border: 2px solid #fff; text-align: left;'>pytest</td>"
+    teststr += "text-align: left; border: 2px solid #fff;'>pytest</td>"
     assert teststr in out4
