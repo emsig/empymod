@@ -1,7 +1,3 @@
-"""
-Documentation for ``empymod.scripts``, the add-ons for ``empymod``.
-
-"""
 # Copyright 2017-2018 Dieter Werthmüller
 #
 # This file is part of empymod.

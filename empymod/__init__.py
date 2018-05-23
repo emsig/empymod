@@ -688,4 +688,4 @@ __all__.extend(['EMArray', 'set_minimum', 'get_minimum'])  # From utils
 __all__.extend(['versions'])  # From scipts.printinfo
 
 # Version
-__version__ = '1.6.3.dev0'
+__version__ = '1.6.3.dev1'

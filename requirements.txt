@@ -1,6 +1,5 @@
 ### Without Version Specifiers
 numpy
-numexpr
 python-dateutil
 sphinxcontrib-napoleon
 #
