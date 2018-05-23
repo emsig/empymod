@@ -28,9 +28,8 @@ in touch if you would like to tackle one of these problems!
     [`empymod#14 <https://github.com/empymod/empymod/issues/14>`_].
 
 
-- **Inversion** [`empyscripts#1
-  <https://github.com/empymod/empyscripts/issues/1>`_]: Inversion routines,
-  preferably a selection of different ones.
+- **Inversion** [`empymod#20 <https://github.com/empymod/empymod/issues/20>`_]:
+  Inversion routines, preferably a selection of different ones.
 
 
 - Additional (semi-)analytical functions (where possible)
