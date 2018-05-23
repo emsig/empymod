@@ -12,6 +12,12 @@ try:
 except ImportError:
     plt = False
 
+# Check VML
+try:
+    from numexpr import use_vml
+except ImportError:
+    use_vml = False
+
 from empymod import filters, model
 from empymod.scripts import fdesign
 
@@ -138,6 +144,8 @@ class TestFiguresMatplotlib:
         fdesign.plot_result(dat6[1], dat6[2], cvar='r')
         return plt.gcf()
 
+    @pytest.mark.xfail(not use_vml,
+                       reason="Slightly different result without VML")
     @pytest.mark.mpl_image_compare(remove_text=True)
     def test_call_qc_transform_pairs1(self):
         # plot_transform_pair "normal" case
@@ -150,6 +158,8 @@ class TestFiguresMatplotlib:
                                          fI, fC, r, (0, 0, 2), np.real)
         return plt.gcf()
 
+    @pytest.mark.xfail(not use_vml,
+                       reason="Slightly different result without VML")
     @pytest.mark.mpl_image_compare(remove_text=True)
     def test_call_qc_transform_pairs2(self):
         # plot_transform_pair J2

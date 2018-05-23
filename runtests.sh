@@ -13,6 +13,7 @@ where:
     -c : Use channel 'conda-forge' instead of channel 'defaults'.
     -p : Print output of conda.
     -n : Run tests without numexpr/matplotlib/IPython.
+    -d : Delete environments after tests
 
 "
 
@@ -25,9 +26,11 @@ NMXPR="numexpr matplotlib IPython"
 STR2="**  WITH numexpr/matplotlib/IPython  "
 PROPS="--mpl --flake8"
 INST="pytest-flake8 pytest-mpl"
+SD="soft-dep"
 
 # Get Optional Input
 while getopts "hv:cpn" opt; do
+
   case $opt in
     h) echo "$usage"
        exit
@@ -42,6 +45,9 @@ while getopts "hv:cpn" opt; do
        STR2="**  NO numexpr/matplotlib/IPython  "
        PROPS="--flake8"
        INST="pytest-flake8"
+       SD=""
+       ;;
+    d) DELETE=true
        ;;
     :) printf "missing argument for -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
@@ -54,8 +60,12 @@ while getopts "hv:cpn" opt; do
   esac
 done
 
+
 # Loop over Python versions
 for i in ${PYTHON3VERSION[@]}; do
+
+  # Environment name
+  NAME=test_3${i}_${CHAN}_${SD}
 
   # Print info
   STR="  PYTHON 3."${i}"  **  Channel "$CHAN"  $STR2"
@@ -71,21 +81,27 @@ for i in ${PYTHON3VERSION[@]}; do
   printf "\e[0m\n"
 
   # Create venv, with channel CHAN
-  conda create -y -n test_3${i} -c $CHAN python=3.${i} $PCKGS $NMXPR &> $PRINT
+  if [ ! -d "$HOME/anaconda3/envs"+$NAME ]; then
+    conda create -y -n $NAME -c $CHAN python=3.${i} $PCKGS $NMXPR &> $PRINT
+  fi
 
   # Activate venv
-  source activate test_3${i}
+  source activate $NAME
 
   # Install flake8
-  pip install $INST &> $PRINT
+  if [ ! -d "$HOME/anaconda3/envs"+$NAME ]; then
+    pip install $INST &> $PRINT
+  fi
 
   # Run tests
   pytest --cov=empymod $PROPS
 
   # De-activate venv
-  source deactivate test_3${i}
+  source deactivate $NAME
 
   # Remove venv
-  conda remove -y -n test_3${i} --all &> $PRINT
+  if [ "$DELETE" = true ] ; then
+    conda remove -y -n $NAME --all &> $PRINT
+  fi
 
 done
