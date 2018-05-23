@@ -669,23 +669,21 @@ from . import utils
 from . import filters
 from . import transform
 from . import kernel
-
-# Import all functions
-from .model import *      # noqa
-from .utils import *      # noqa
-from .filters import *    # noqa
-from .transform import *  # noqa
-from .kernel import *     # noqa
-
-# Import sub-modules without their functions
 from . import scripts
-from .scripts import *    # noqa
+
+# Import all functions, except the filters
+from .model import *      # noqa  maint. in model.__all__
+from .utils import *      # noqa  maint. in utils.__all__
+from .filters import DigitalFilter
+from .transform import *  # noqa  maint. in transform.__all__
+from .kernel import *     # noqa  maint. in kernel.__all__
+from .scripts import *    # noqa  maint. in scripts.__init__.__all__
 
 # Make only a selection available to __all__ to not clutter the namespace
-__all__ = ['filters', 'kernel', 'model', 'transform', 'utils', 'scripts']
-__all__.extend(model.__all__)
-__all__.extend(['EMArray', 'set_minimum', 'get_minimum'])  # From utils
-__all__.extend(scripts.__all__)
+# Maybe also to discourage the use of `from empymod import *`.
+__all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts',
+           'bipole', 'dipole', 'EMarray', 'set_minimum', 'get_minimum',
+           'DigitalFilter']
 
 # Version
 __version__ = '1.6.3.dev1'
