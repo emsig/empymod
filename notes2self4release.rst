@@ -30,6 +30,9 @@ Note: I really should replace this with an automatic deploy-setup...
 
         twine upload dist/* -r testpypi
 
+      Optionally test it already in conda if skeleton builds:
+        conda skeleton pypi --pypi-url https://test.pypi.io/pypi/ empymod
+
    8. Push it to PyPi (requires ~/.pypircs)
 
         twine upload dist/*

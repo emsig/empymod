@@ -1,0 +1,303 @@
+\documentclass[fontsize=9pt, parskip=half, notitlepage, fleqn]{scrartcl}
+
+\usepackage[UKenglish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{amssymb, amsmath, amsfonts, amsthm, empheq}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{xspace}
+\usepackage{siunitx}
+\usepackage[margin=3cm]{geometry}
+\usepackage{natbib}
+
+\frenchspacing
+
+% So equation numbers are not coloured
+\makeatletter
+\renewcommand\tagform@[1]{%
+   \maketag@@@{\normalcolor\ignorespaces(#1)\unskip\@@italiccorr}}
+\makeatother
+
+\newcommand{\bkcol}[1]{\textcolor{MidnightBlue}{#1\xspace}}
+\newcommand{\hun}{\textsc{Hun15}\xspace}
+\newcommand{\book}{\bkcol{\textsc{Book}}\xspace}
+\newcommand{\empymod}{\texttt{empymod}\xspace}
+\newcommand{\tmtemod}{\texttt{tmtemod.py}\xspace}
+\newcommand{\mr}[1]{\mathrm{#1}}
+
+\begin{document}
+\setlength{\jot}{10pt}  % Increase spacing between equations
+
+\section*{Adjust Hunziker et al. (2015) for TM/TE-split}
+
+{\ttfamily \small Version 1.0, \today
+
+\hun refers to \cite{GEO.15.Hunziker}, \book refers to the derivation of
+\cite{CUP.17.Ziolkowski}.}
+
+The modeller \empymod returns the total field, hence not distinguishing between
+TM and TE mode, and even less between up- and down-going fields. The reason
+behind this is simple: The derivation of \hun, on which \empymod is based,
+returns the total field. Internally it also calculates TM and TE modes, and
+sums these up. However, the separation into TM and TE mode introduces a
+singularity at $\kappa = 0$. It has no contribution in the space-frequency
+domain to the total fields, but it introduces non-physical events in each mode
+with opposite sign (so they cancel each other out in the total field). In
+order to obtain the correct TM and TE contributions one has to remove these
+non-physical parts.
+
+To remove the non-physical part we use the file \tmtemod in this
+directory. This routine is basically a heavily simplified version of \empymod
+with the following limitations:
+\begin{itemize}
+  \item x-directed electric sources and electric receivers;
+  \item only frequency domain;
+  \item direct field is always calculated in the wavenumber-domain;
+  \item the Fast Hankel transform is used with a 201\,pt filter;
+  \item source and receivers have to be in the same layer;
+  \item the model must have more than one layer (there is only direct field
+    contribution anyway for a fullspace); and
+  \item electric permittivity and magnetic permeability are isotropic.
+\end{itemize}
+
+So \tmtemod returns the signal separated into TM$^{++}$, TM$^{+-}$, TM$^{-+}$,
+TM$^{--}$, TE$^{++}$, TE$^{+-}$, TE$^{-+}$, and TE$^{--}$ as well as the direct
+field TM and TE contributions. The first superscript denotes the direction in
+which the field diffuses towards the receiver and the second superscript
+denotes the direction in which the field diffuses away from the source. For
+both the plus-sign indicates the field diffuses in the downward direction and
+the minus-sign indicates the field diffuses in the upward direction. The
+routine uses \empymod wherever possible, see the corresponding functions in
+\empymod for more explanation and documentation regarding input parameters.
+
+We start with equation (105) in \hun:
+%
+\begin{align}
+  \hat{G}^{ee}_{xx}(\boldsymbol{x}, \boldsymbol{x'}, \omega)& =
+  \hat{G}^{ee;i}_{xx;s}(\boldsymbol{x}-\boldsymbol{x'}, \omega)
+  + \frac{1}{8\pi}\int^\infty_{\kappa=0}
+  \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}-
+  \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
+  J_0(\kappa r)\kappa\,\mr{d}\kappa \nonumber\\
+  %
+  &\quad - \frac{\cos(2\phi)}{8\pi}\int^\infty_{\kappa=0}
+  \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} +
+  \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
+  J_2(\kappa r)\kappa\,\mr{d}\kappa \ .
+\end{align}
+%
+
+Ignoring the incident field, and using $J_2 = \frac{2}{\kappa r}J_1 - J_0$ to
+avoid $J_2$-integrals, we get
+%
+\begin{align}
+  \hat{G}^{ee}_{xx}(\boldsymbol{x}, \boldsymbol{x'}, \omega)& =
+  \frac{1}{8\pi}\int^\infty_{\kappa=0}
+  \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}-
+  \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
+  J_0(\kappa r)\kappa\,\mr{d}\kappa \nonumber\\
+  %
+  &\quad + \frac{\cos(2\phi)}{8\pi}\int^\infty_{\kappa=0}
+  \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} +
+  \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
+  J_0(\kappa r)\kappa\,\mr{d}\kappa \nonumber\\
+  %
+  &\quad - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+  \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} +
+  \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
+  J_1(\kappa r)\,\mr{d}\kappa \ .
+\end{align}
+%
+
+From this the TM- and TE-parts follow as
+%
+\begin{align}
+  \mr{TE}& = \frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
+  \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}
+  J_0(\kappa r)\kappa\,\mr{d}\kappa 
+   - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+  \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}
+  J_1(\kappa r)\,\mr{d}\kappa \ , \\
+  %
+  \mr{TM}& = \frac{\cos(2\phi)+1}{8\pi}\int^\infty_{\kappa=0}
+  \frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}
+  J_0(\kappa r)\kappa\,\mr{d}\kappa
+  - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+  \frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}
+  J_1(\kappa r)\,\mr{d}\kappa \ .
+\end{align}
+%
+
+Equations (108) and (109) in \hun yield the required parameters
+$\tilde{g}^{tm}_{hh;s}$ and $\tilde{g}^{te}_{zz;s}$,
+%
+\begin{align}
+  \tilde{g}^{tm}_{hh;s}& = P^{u-}_s W^u_s + P^{d-}_s W^d_s \ , \\
+  \tilde{g}^{te}_{zz;s}& = \bar{P}^{u+}_s \bar{W}^u_s +
+                           \bar{P}^{d+}_s \bar{W}^d_s \ .
+\end{align}
+%
+
+The parameters $P^{u\pm}_s$ and $P^{d\pm}_s$ are given in equations (81) and
+(82), $\bar{P}^{u\pm}_s$ and $\bar{P}^{d\pm}_s$ in equations (A-8) and (A-9);
+$W^u_s$ and $W^d_s$ in equation (74). This yields
+%
+\begin{align}
+  \tilde{g}^{te}_{zz;s} &=
+  %
+  \frac{\bar{R}_s^+}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(z_s-z+d^+)] +
+    \bar{R}_s^-\exp[-\bar{\Gamma}_s(z_s-z+d_s+d^-)]\right\} \nonumber \\
+  %
+  &\quad +
+    \frac{\bar{R}_s^-}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(z-z_{s-1}+d^-)]+
+    \bar{R}_s^+\exp[-\bar{\Gamma}_s(z-z_{s-1}+d_s+d^+)]\right\}\nonumber \ ,\\
+  %
+  &=\frac{\bar{R}_s^+}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(2z_s-z-z')] +
+    \bar{R}_s^-\exp[-\bar{\Gamma}_s(z'-z+2d_s)]\right\} \nonumber \\
+  %
+  &\quad +
+  \frac{\bar{R}_s^-}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(z+z'-2z_{s-1})]+
+  \bar{R}_s^+\exp[-\bar{\Gamma}_s(z-z'+2d_s)]\right\}\ ,
+  %
+\end{align}
+%
+where $d^\pm$ is taken from the text below equation (67). There are four terms
+in the right-hand side, two in the first line and two in the second line. The
+first term in the first line is the integrand of TE$^{+-}$, the second term in
+the first line corresponds to TE$^{++}$, the first term in the second line is
+TE$^{-+}$, and the second term in the second line is TE$^{--}$.
+
+If we look at TE$^{+-}$, we have
+%
+\begin{equation}
+  \tilde{g}^{te+-}_{zz;s} =
+  \frac{\bar{R}_s^+}{\bar{M}_s}\exp[-\bar{\Gamma}_s(2z_s-z-z')] \ ,
+  %
+\end{equation}
+%
+and therefore
+%
+\begin{align}
+  \mr{TE}^{+-}& = \frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
+  \frac{\zeta_s \bar{R}_s^+}{\bar{\Gamma}_s\bar{M}_s}
+  \exp[-\bar{\Gamma}_s(2z_s-z-z')]
+  J_0(\kappa r)\kappa\,\mr{d}\kappa \nonumber \\
+  &\quad - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+  \frac{\zeta_s \bar{R}_s^+}{\bar{\Gamma}_s\bar{M}_s}
+  \exp[-\bar{\Gamma}_s(2z_s-z-z')]
+  J_1(\kappa r)\,\mr{d}\kappa \ .
+  \label{eq:hunte}
+\end{align}
+%
+
+We can compare this to equation (4.165) in \book, with $\hat{I}^e_x=1$ and
+slightly re-arranging it to look more alike, we get
+%
+\bkcol{
+\begin{align}
+  \hat{E}^{+-}_{xx;H} &= \frac{y^2}{4\pi r^2}
+  \int^\infty_{\kappa=0} \frac{\zeta_1}{\Gamma_1} 
+  \frac{R^-_{H;1}}{M_{H;1}}
+  \exp(-\Gamma_1 h^{+-})J_0(\kappa r)\kappa\rm{d}\kappa \nonumber \\
+  %
+  &\quad + \frac{x^2-y^2}{4\pi r^3}
+  \int^\infty_{\kappa=0} \frac{\zeta_1}{\Gamma_1} 
+  \left(\frac{R^-_{H;1}}{M_{H;1}} -
+  \frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}\right)
+  \exp(-\Gamma_1 h^{+-})J_1(\kappa r)\rm{d}\kappa \nonumber \\
+  %
+  &\quad - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}
+  \exp(-\gamma_1 R^{+-}) \ .
+  \label{eq:bookte}
+\end{align}
+}
+
+The equation is marked in \bkcol{blue} to make it clear that the symbols and
+parameters in \hun and in \book are not exactly the same.
+
+The difference between equations \ref{eq:hunte} and \ref{eq:bookte} is that the
+first one contains non-physical contributions. These have opposite signs in
+TM$^{+-}$ and TE$^{+-}$, and therefore cancel each other out. But if we want to
+know the specific contributions from TM and TE we have to remove them. The
+non-physical contributions only affect the $J_1$-integrals, and only for
+$\kappa = 0$.
+
+The following lists for all 8 cases the term that has to be removed, in the
+notation of \book (for the notation as in \hun see the implementation in
+\tmtemod):
+%
+\bkcol{
+\begin{align}
+  TE^{++} &= + \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{\exp(-\gamma_1 |h^-|) }{M_{H;1}(\kappa=0)} \ ,
+  \label{eq:1}\\
+  %
+  TE^{-+} &= - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^+_{H;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{H;1}(\kappa=0)}\ , 
+  \label{eq:2}\\
+  %
+  TE^{+-} &= - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{H;1}(\kappa=0)}\ , 
+  \label{eq:3}\\
+  %
+  TE^{--} &= + \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^+_{H;1}(\kappa=0)R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
+  {M_{H;1}(\kappa=0)}\ , 
+  \label{eq:4}\\
+  %
+  %
+  TM^{++} &= - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{\exp(-\gamma_1 |h^-|) }{M_{V;1}(\kappa=0)}\ , 
+  \label{eq:5}\\
+  %
+  TM^{-+} &= - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^+_{V;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{V;1}(\kappa=0)}\ , 
+  \label{eq:6}\\
+  %
+  TM^{+-} &= - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{V;1}(\kappa=0)}\ , 
+  \label{eq:7}\\
+  %
+  TM^{--} &= - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^+_{V;1}(\kappa=0)R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
+  {M_{V;1}(\kappa=0)} \ .
+  \label{eq:8}
+\end{align}
+}
+
+Note that in equations \ref{eq:1} and \ref{eq:4} the correction terms have
+opposite sign as those in equations \ref{eq:5} and \ref{eq:8} because at
+$\kappa=0$ the TM and TE mode correction terms are equal. Also note that in
+equations \ref{eq:2} and \ref{eq:3} the correction terms have the same sign as
+those in equations \ref{eq:6} and \ref{eq:7} because at $\kappa=0$ the TM and
+TE mode reflection responses in those terms are equal but with opposite sign:
+\bkcol{$R^\pm_{V;1}(\kappa=0) = -R^\pm_{V;1}(\kappa=0)$}. 
+
+\hun uses $\phi$, whereas \book uses $x$, $y$, for which we can use
+%
+\begin{equation}
+  \cos(2\phi) = -\frac{x^2-y^2}{r^2} \ .
+  \label{eq:phixy}
+\end{equation}
+
+
+% REFERENCES
+\bibliographystyle{seg}
+\begin{thebibliography}{}
+\itemsep0pt
+
+\bibitem[Hunziker et~al., 2015]{GEO.15.Hunziker}
+Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic response in
+  a layered vertical transverse isotropic medium: A new look at an old problem:
+  Geophysics, {\bf 80}, F1--F18, doi: 10.1190/geo2013-0411.1.
+
+\bibitem[Ziolkowski and Slob, 2017]{CUP.17.Ziolkowski}
+Ziolkowski, A. and E. Slob, 2017, CSEM book (TODO, add citation once the book
+  is out): Cambridge University Press.  ISBN: ??????.
+
+\end{thebibliography}
+
+\end{document}
+

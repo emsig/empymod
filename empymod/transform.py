@@ -49,7 +49,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     """Hankel Transform using the Digital Linear Filter method.
 
     The *Digital Linear Filter* method was introduced to geophysics by
-    [Ghosh_1971]_, and made popular and wide-spread by [Anderson_1975]_,
+    [Ghosh_1970]_, and made popular and wide-spread by [Anderson_1975]_,
     [Anderson_1979]_, [Anderson_1982]_. The DLF is sometimes referred to as
     the *Fast Hankel Transform* FHT, from which this routine has its name.
 

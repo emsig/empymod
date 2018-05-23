@@ -4,7 +4,7 @@
 ========================================
 
 Filters for the *Digital Linear Filter* (DLF) method for the Hankel
-[Ghosh_1971]_) and the Fourier ([Anderson_1975]_) transforms.
+[Ghosh_1970]_) and the Fourier ([Anderson_1975]_) transforms.
 
 To calculate the ``dlf.factor`` I used
 

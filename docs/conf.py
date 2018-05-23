@@ -45,7 +45,8 @@ language = None
 today_fmt = '%d %B %Y'
 
 # List of patterns to ignore, relative to source directory.
-exclude_patterns = ['_build', 'PermissionToRelicenseFilters.txt', '../tests']
+exclude_patterns = ['_build', 'PermissionToRelicenseFilters.txt',
+                    'LaTeX', '../tests']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'

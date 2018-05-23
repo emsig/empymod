@@ -12,8 +12,8 @@ The code is principally based on
 
 See these publications and all the others given in the references_, if you are
 interested in the theory on which empymod is based. Another good reference is
-[Ziolkowski_and_Slob]_, which will be published in late 2018. The book derives
-in great detail the equations for layered-Earth CSEM modelling.
+[Ziolkowski_and_Slob_2018]_, which will be published in late 2018. The book
+derives in great detail the equations for layered-Earth CSEM modelling.
 
 
 Installation
@@ -35,21 +35,18 @@ Required are Python version 3.4 or higher and the modules ``NumPy`` and
 ``SciPy``. The module ``numexpr`` is required additionally (built with Intel's
 VML) if you want to run parts of the kernel in parallel.
 
-The modeller empymod comes with add-ons (``empyscripts``). These add-ons
-provide some very specific, additional functionalities. To install them just
-follow the instructions for ``empymod``, replacing ``empymod`` with
-``empyscripts`` in the command. You can find more information regarding the
-add-ons directly on `github.com/empymod/empyscripts
-<https://github.com/empymod/empyscripts>`_.
+The modeller empymod comes with add-ons (``empymod.scripts``). These add-ons
+provide some very specific, additional functionalities. Some of these add-ons
+have additional, optional dependencies for other modules such as
+``matplotlib``. See the *Add-ons*-section for their documentation.
 
 If you are new to Python I recommend using a Python distribution, which will
 ensure that all dependencies are met, specifically properly compiled versions
 of ``NumPy`` and ``SciPy``; I recommend using
 `Anaconda <https://www.anaconda.com/download>`_.  If you install
 [Anaconda](https://www.anaconda.com/download). If you install Anaconda you can
-simply start the *Anaconda Navigator*, add the channel ``prisae`` and both
-``empymod`` and ``empyscripts`` will appear in the package list and can be
-installed with a click.
+simply start the *Anaconda Navigator*, add the channel ``prisae`` and
+``empymod`` will appear in the package list and can be installed with a click.
 
 .. warning::
 
@@ -84,7 +81,7 @@ repositories:
 
 - Example notebooks: https://github.com/empymod/example-notebooks,
 - Geophysical Tutoriol TLE: https://github.com/empymod/article-tle2017, and
-- Numerical examples of [Ziolkowski_and_Slob]_:
+- Numerical examples of [Ziolkowski_and_Slob_2018]_:
   https://github.com/empymod/csem-ziolkowski-and-slob.
 
 The main modelling routines is ``bipole``, which can calculate the
@@ -438,6 +435,7 @@ Spline interpolation
 ''''''''''''''''''''
 Both Hankel and Fourier DLF have three options, which can be controlled via
 the ``htarg['pts_per_dec']`` and ``ftarg['pts_per_dec']`` parameters:
+
     - ``pts_per_dec=0`` : *Standard DLF*;
     - ``pts_per_dec<0`` : *Lagged Convolution DLF*: Spacing defined by filter
       base, interpolation is carried out in the input domain;
@@ -557,10 +555,10 @@ See the ``LICENSE``- and ``NOTICE``-files on GitHub for more information.
 References |_|
 --------------
 
-.. [Anderson_1975] Anderson, W.L., 1975, Improved digital filters for
-   evaluating Fourier and Hankel transform integrals:
-   USGS Unnumbered Series;
-   `<http://pubs.usgs.gov/unnumbered/70045426/report.pdf>`_.
+.. [Anderson_1975] Anderson, W. L., 1975, Improved digital filters for
+   evaluating Fourier and Hankel transform integrals: USGS, PB242800;
+   `pubs.er.usgs.gov/publication/70045426
+   <https://pubs.er.usgs.gov/publication/70045426>`_.
 .. [Anderson_1979] Anderson, W. L., 1979, Numerical integration of related
    Hankel transforms of orders 0 and 1 by adaptive digital filtering:
    Geophysics, 44, 1287--1305; DOI: |_| `10.1190/1.1441007
@@ -569,18 +567,26 @@ References |_|
    related and lagged convolutions: ACM Trans. on Math. Softw. (TOMS), 8,
    344--368; DOI: |_| `10.1145/356012.356014
    <http://doi.org/10.1145/356012.356014>`_.
-.. [Ghosh_1971] Ghosh, D. P., 1971, The application of linear filter theory to
-   the direct interpretation of geoelectrical resistivity sounding
-   measurements: Geophysical Prospecting, 19, 192--217;
-   DOI: |_| `10.1111/j.1365-2478.1971.tb00593.x
-   <http://doi.org/10.1111/j.1365-2478.1971.tb00593.x>`_.
+.. [Chave_and_Cox_1982] Chave, A. D., and C. S. Cox, 1982, Controlled
+   electromagnetic sources for measuring electrical conductivity beneath the
+   oceans: 1. forward problem and model study: Journal of Geophysical Research,
+   87, 5327--5338; DOI: |_| `10.1029/JB087iB07p05327
+   <http://doi.org/10.1029/JB087iB07p05327>`_.
+.. [Ghosh_1970] Ghosh, D. P.,  1970, The application of linear filter theory to
+   the direct interpretation of geoelectrical resistivity measurements: Ph.D.
+   Thesis, TU Delft; UUID: |_| `88a568bb-ebee-4d7b-92df-6639b42da2b2
+   <http://resolver.tudelft.nl/uuid:88a568bb-ebee-4d7b-92df-6639b42da2b2>`_.
+.. [Guptasarma_and_Singh_1997] Guptasarma, D., and B. Singh, 1997, New digital
+   linear filters for Hankel J0 and J1 transforms: Geophysical Prospecting, 45,
+   745--762; DOI: |_| `10.1046/j.1365-2478.1997.500292.x
+   <http://dx.doi.org/10.1046/j.1365-2478.1997.500292.x>`_.
 .. [Haines_and_Jones_1988] Haines, G. V., and A. G. Jones, 1988, Logarithmic
    Fourier transformation: Geophysical Journal, 92, 171--178;
    DOI: |_| `10.1111/j.1365-246X.1988.tb01131.x
    <http://doi.org/10.1111/j.1365-246X.1988.tb01131.x>`_.
 .. [Hamilton_2000] Hamilton, A. J. S., 2000, Uncorrelated modes of the
    non-linear power spectrum: Monthly Notices of the Royal Astronomical
-   Society, 312, pages 257-284; DOI: |_| `10.1046/j.1365-8711.2000.03071.x
+   Society, 312, pages 257--284; DOI: |_| `10.1046/j.1365-8711.2000.03071.x
    <http://doi.org/10.1046/j.1365-8711.2000.03071.x>`_; Website of FFTLog:
    `casa.colorado.edu/~ajsh/FFTLog <http://casa.colorado.edu/~ajsh/FFTLog>`_.
 .. [Hunziker_et_al_2015] Hunziker, J., J. Thorbecke, and E. Slob, 2015, The
@@ -613,7 +619,7 @@ References |_|
    <http://doi.org/10.2528/PIER10052807>`_.
 .. [Talman_1978] Talman, J. D., 1978, Numerical Fourier and Bessel transforms
     in logarithmic variables: Journal of Computational Physics, 29, pages
-    35-48; DOI: |_| `10.1016/0021-9991(78)90107-9
+    35--48; DOI: |_| `10.1016/0021-9991(78)90107-9
     <http://doi.org/10.1016/0021-9991(78)90107-9>`_.
 .. [Trefethen_2000] Trefethen, L. N., 2000, Spectral methods in MATLAB: Society
    for Industrial and Applied Mathematics (SIAM), volume 10 of Software,
@@ -626,18 +632,18 @@ References |_|
    arXiv: |_| `abs/math/0306302 <https://arxiv.org/abs/math/0306302>`_.
 .. [Werthmuller_2017] Werthmüller, D., 2017, An open-source full 3D
    electromagnetic modeler for 1D VTI media in Python: empymod: Geophysics,
-   82(6), WB9-WB19; DOI: |_| `10.1190/geo2016-0626.1
+   82(6), WB9--WB19; DOI: |_| `10.1190/geo2016-0626.1
    <http://doi.org/10.1190/geo2016-0626.1>`_.
 .. [Werthmuller_2017b] Werthmüller, D., 2017, Getting started with
    controlled-source electromagnetic 1D modeling: The Leading Edge, 36,
-   352-355;
+   352--355;
    DOI: |_| `10.1190/tle36040352.1 <http://doi.org/10.1190/tle36040352.1>`_.
 .. [Wynn_1956] Wynn, P., 1956, On a device for computing the
    :math:`e_m(S_n)` tranformation: Math. Comput., 10, 91--96;
    DOI: |_| `10.1090/S0025-5718-1956-0084056-6
    <http://doi.org/10.1090/S0025-5718-1956-0084056-6>`_.
-.. [Ziolkowski_and_Slob] Ziolkowski, A., and E. Slob, 2018, Introduction to
-   Controlled-Source Electromagnetic Methods: Cambridge University Press;
+.. [Ziolkowski_and_Slob_2018] Ziolkowski, A., and E. Slob, 2018, Introduction
+   to Controlled-Source Electromagnetic Methods: Cambridge University Press;
    expected to be published late 2018.
 
 """
@@ -671,10 +677,15 @@ from .filters import *    # noqa
 from .transform import *  # noqa
 from .kernel import *     # noqa
 
+# Import scripts, versions
+from . import scripts
+from .scripts.printinfo import versions  # noqa
+
 # Make only a selection available to __all__ to not clutter the namespace
-__all__ = ['filters', 'kernel', 'model', 'transform', 'utils']
+__all__ = ['filters', 'kernel', 'model', 'transform', 'utils', 'scripts']
 __all__.extend(model.__all__)
-__all__.extend(['EMArray', 'set_minimum', 'get_minimum'])
+__all__.extend(['EMArray', 'set_minimum', 'get_minimum'])  # From utils
+__all__.extend(['versions'])  # From scipts.printinfo
 
 # Version
 __version__ = '1.6.3.dev0'

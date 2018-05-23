@@ -15,4 +15,3 @@ Code
 
 .. automodule:: empymod.utils
     :members:
-

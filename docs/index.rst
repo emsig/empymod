@@ -17,3 +17,4 @@ Version: |version| ~ Date: |today|
    changelog
    credits
    code
+   addons

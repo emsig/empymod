@@ -1,0 +1,332 @@
+\documentclass[fontsize=9pt, parskip=half, notitlepage, fleqn]{scrartcl}
+
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{verbatim}
+
+\usepackage[UKenglish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{amssymb, amsmath, amsfonts, amsthm, empheq}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{xspace}
+\usepackage{siunitx}
+\usepackage[margin=3cm]{geometry}
+\usepackage{natbib}
+\usepackage[pdftex,final,allcolors=myblue,colorlinks,breaklinks=True]{hyperref}
+
+\frenchspacing
+\definecolor{myblue}{rgb}{0,0,.8} % {0,0,.8}
+\newcommand{\mr}[1]{\mathrm{#1}}
+
+\title{Digital Linear Filter (DLF) design}
+\author{Dieter Werthmüller}
+\subtitle{Some notes regarding the \texttt{fdesign} add-on for \texttt{empymod}}
+
+\begin{document}
+\maketitle
+
+\section{About and Info}
+
+The add-on \texttt{fdesign} can be used to design digital linear filters for
+the Hankel or Fourier transform, or for any linear transform. For this included
+or provided theoretical transform pairs can be used. Alternatively, one can use
+the EM modeller \texttt{empymod} \citep{GEO.17.Werthmuller} to use the
+responses to an arbitrary 1D model as numerical transform pair.
+
+More information can be found in the following places:
+
+\begin{itemize}
+  \item The article about \texttt{fdesign} is in the repo
+    \href{https://github.com/empymod/article-fdesign}{github.com/empymod/article-fdesign}
+  \item Example notebooks to design a filter can be found in the repo
+    \href{https://github.com/empymod/example-notebooks}{github.com/empymod/example-notebooks}
+\end{itemize}
+
+
+The methodology of \texttt{fdesign} is based upon \cite{GP.07.Kong}. The whole
+project of \texttt{fdesign} started with the Matlab scripts from Kerry Key,
+which he used to design his filters for \cite{GEO.09.Key, GEO.12.Key}. Fruitful
+discussions with Evert Slob and Kerry Key improved the add-on substantially.
+
+Note that the use of \texttt{empymod} to create numerical transform pairs is,
+as of now, only implemented for the Hankel transform (via
+\texttt{fdesign.empy\_hankel}).
+
+\section{Implemented analytical transform pairs}
+
+The following tables list the transform pairs which are implemented by default.
+Any other transform pair can be provided as input. A transform pair is defined
+in the following way:
+\begin{verbatim}
+    from empyscripts.fdesign import Ghosh
+
+    def my_tp_pair(var):
+        """My transform pair."""
+
+        def lhs(l):
+            return func(l, var)
+
+        def rhs(r):
+            return func(r, var)
+
+        return Ghosh(name, lhs, rhs)
+\end{verbatim}
+
+Here, \texttt{name} must be one of \texttt{j0}, \texttt{j1}, \texttt{sin}, or
+\texttt{cos}, depending what type of transform pair it is. Additional variables
+are provided with \texttt{var}. The evaluation points of the \texttt{lhs} are
+denoted by \texttt{l}, and the evaluation points of the \texttt{rhs} are
+denoted as \texttt{r}. As an example here the implemented transform pair
+\texttt{j0\_1}:
+\begin{verbatim}
+    def j0_1(a=1):
+        """Hankel transform pair J0_1 ([Anderson_1975]_)."""
+
+        def lhs(l):
+            return l*np.exp(-a*l**2)
+
+        def rhs(r):
+            return np.exp(-r**2/(4*a))/(2*a)
+
+        return Ghosh('j0', lhs, rhs)
+\end{verbatim}
+
+\subsection{Implemented Hankel transforms}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{lp{2.6cm}X}
+  Name & Reference & Transform pair \\
+\toprule
+   %
+  j0\_1& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,l \exp\left(-al^2\right) J_0(lr)\,\mr{d}l =
+    \frac{\exp\left(\frac{-r^2}{4a}\right)}{2a}
+    \label{eq:j0_1}
+  \end{equation}
+  } \\
+   %
+  j0\_2& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,\exp\left(-al\right) J_0(lr)\,\mr{d}l =
+    \frac{1}{\sqrt{a^2+r^2}}
+    \label{eq:j0_2}
+  \end{equation}
+  } \\
+   %
+  j0\_3&
+  \noindent\parbox[c]{\hsize}{\cite{GP.97.Guptasarma}}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,l\exp\left(-al\right) J_0(lr)\,\mr{d}l =
+    \frac{a}{(a^2 + r^2)^{3/2}}
+    \label{eq:j0_3}
+  \end{equation}
+  } \\
+   %
+  j0\_4&
+  \noindent\parbox[c]{\hsize}{\cite{JGR.82.Chave}}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,\frac{l}{\beta} \exp\left(-\beta z_\mr{v} \right)
+    J_0(lr)\,\mr{d}l =
+    \frac{\exp\left(-\gamma R\right)}{R}
+    \label{eq:j0_4}
+  \end{equation}
+  } \\
+   %
+  j0\_5&
+  \noindent\parbox[c]{\hsize}{\cite{JGR.82.Chave}}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,l \exp\left(-\beta z_\mr{v} \right)
+    J_0(lr)\,\mr{d}l =
+    \frac{ z_\mr{v} (\gamma R + 1)}{R^3}\exp\left(-\gamma R\right)
+    \label{eq:j0_4}
+  \end{equation}
+  } \\
+   %
+  j1\_1& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,l^2 \exp\left(-al^2\right) J_1(lr)\,\mr{d}l =
+    \frac{r}{4a^2} \exp\left(-\frac{r^2}{4a}\right)
+    \label{eq:j1_1}
+  \end{equation}
+  } \\
+   %
+  j1\_2& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,\exp\left(-al\right) J_1(lr)\,\mr{d}l =
+    \frac{\sqrt{a^2+r^2}-a}{r\sqrt{a^2 + r^2}}
+    \label{eq:j1_2}
+  \end{equation}
+  } \\
+   %
+  j1\_3& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,l \exp\left(-al\right) J_1(lr)\,\mr{d}l =
+    \frac{r}{(a^2 + r^2)^{3/2}}
+    \label{eq:j1_3}
+  \end{equation}
+  } \\
+   %
+  j1\_4&
+  \noindent\parbox[c]{\hsize}{\cite{JGR.82.Chave}}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,\frac{l^2}{\beta} \exp\left(-\beta z_\mr{v} \right)
+    J_1(lr)\,\mr{d}l =
+    \frac{r(\gamma R+1)}{R^3}\exp\left(-\gamma R\right)
+    \label{eq:j1_4}
+  \end{equation}
+  } \\
+   %
+  j1\_5&
+  \noindent\parbox[c]{\hsize}{\cite{JGR.82.Chave}}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,l^2 \exp\left(-\beta z_\mr{v} \right)
+    J_1(lr)\,\mr{d}l =
+    \frac{r z_\mr{v} (\gamma^2R^2+3\gamma R+3)}{R^5}\exp\left(-\gamma R\right)
+    \label{eq:j1_4}
+  \end{equation}
+  } \\
+\end{tabularx}
+
+\begin{align}
+  a&>0,\quad r>0\\
+  %
+  z_\mr{v} &= |z_\mr{rec} - z_\mr{src}|\\
+%
+  R &= \sqrt{r^2 + z_\mr{v}^2}\\
+%
+    \gamma &= \sqrt{2j\pi\mu_0f/\rho}\\
+%
+    \beta &= \sqrt{l^2 + \gamma^2}\\
+  \label{eq:symb}
+\end{align}
+
+
+\subsection{Implemented Fourier transforms}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{llX}
+  Name & Reference & Transform pair \\
+\toprule
+   %
+  sin\_1& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,l\exp\left(-a^2l^2\right) \sin(lr)\,\mr{d}l =
+    \frac{\sqrt{\pi}r}{4a^3} \exp\left(-\frac{r^2}{4a^2}\right)
+    \label{eq:sin_1}
+  \end{equation}
+  } \\
+   %
+  sin\_2& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,\exp\left(-al\right) \sin(lr)\,\mr{d}l =
+    \frac{r}{a^2 + r^2}
+    \label{eq:sin_2}
+  \end{equation}
+  } \\
+   %
+  sin\_3& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,\frac{l}{a^2+l^2} \sin(lr)\,\mr{d}l =
+    \frac{\pi}{2} \exp\left(-ar\right)
+    \label{eq:sin_3}
+  \end{equation}
+  } \\
+   %
+  cos\_1& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,\exp\left(-a^2l^2\right) \cos(lr)\,\mr{d}l =
+    \frac{\sqrt{\pi}}{2a} \exp\left(-\frac{r^2}{4a^2}\right)
+    \label{eq:cos_1}
+  \end{equation}
+  } \\
+   %
+  cos\_2& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,\exp\left(-al\right) \cos(lr)\,\mr{d}l =
+    \frac{a}{a^2 + r^2}
+    \label{eq:cos_2}
+  \end{equation}
+  } \\
+   %
+  cos\_3& \cite{USGS.75.Anderson}&
+  \noindent\parbox[c]{\hsize}{
+  \begin{equation}
+    \int^\infty_0\,\frac{1}{a^2+l^2} \cos(lr)\,\mr{d}l =
+    \frac{\pi}{2a} \exp\left(-ar\right)
+    \label{eq:cos_3}
+  \end{equation}
+  } \\
+   %
+\end{tabularx}
+
+%% ~ REFERENCES
+\begin{thebibliography}{}
+\itemsep0pt
+
+\bibitem[Anderson, 1975]{USGS.75.Anderson}
+Anderson, W.~L.,  1975, Improved digital filters for evaluating {F}ourier and
+  {H}ankel transform integrals:
+\newblock USGS, {\bf PB242800};
+  \href{https://pubs.er.usgs.gov/publication/70045426}{https://pubs.er.usgs.gov/publication/70045426}.
+
+\bibitem[Chave and Cox, 1982]{JGR.82.Chave}
+Chave, A.~D., and C.~S. Cox,  1982, Controlled electromagnetic sources for
+  measuring electrical conductivity beneath the oceans: 1. forward problem and
+  model study: Journal of Geophysical Research,
+\newblock {\bf 87}, 5327--5338;
+  \href{http://doi.org/10.1029/JB087iB07p05327}{doi: 10.1029/JB087iB07p05327}.
+
+\bibitem[Guptasarma and Singh, 1997]{GP.97.Guptasarma}
+Guptasarma, D., and B. Singh,  1997, New digital linear filters for {H}ankel
+  {J}0 and {J}1 transforms: Geophysical Prospecting,
+\newblock {\bf 45}, 745--762;
+  \href{http://doi.org/10.1046/j.1365-2478.1997.500292.x}{doi:
+  10.1046/10.1046/j.1365-2478.1997.500292.x}.
+
+\bibitem[Kong, 2007]{GP.07.Kong}
+Kong, F.~N.,  2007, Hankel transform filters for dipole antenna radiation in a
+  conductive medium: Geophysical Prospecting, {\bf 55}, 83--89.
+\newblock (\href{http://doi.org/10.1111/j.1365-2478.2006.00585.x}{doi:
+  10.1111/j.1365-2478.2006.00585.x}).
+
+\bibitem[Key, 2009]{GEO.09.Key}
+Key, K.,  2009, {1D} inversion of multicomponent, multifrequency marine {CSEM}
+  data: {M}ethodology and synthetic studies for resolving thin resistive
+  layers: Geophysics, {\bf 74}, F9--F20.
+\newblock (\href{http://doi.org/10.1190/1.3058434}{doi: 10.1190/1.3058434}).
+
+\bibitem[Key, 2012]{GEO.12.Key}
+--------, 2012, Is the fast {H}ankel transform faster than quadrature?:
+  Geophysics, {\bf 77}, F21--F30.
+\newblock (\href{http://doi.org/10.1190/GEO2011-0237.1}{doi:
+  10.1190/GEO2011-0237.1}).
+
+\bibitem[Werthmüller, 2017]{GEO.17.Werthmuller}
+Werthmüller, D.,  2017, An open-source full {3D} electromagnetic modeler for
+  {1D} {VTI} media in {P}ython: empymod: Geophysics, {\bf 82}, WB9--WB19..
+\newblock (\href{http://doi.org/10.1190/geo2016-0626.1}{doi:
+  10.1190/geo2016-0626.1}).
+
+
+\end{thebibliography}
+
+\end{document}
+

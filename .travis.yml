@@ -5,7 +5,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  - "3.6.0"  # Dummy: Python 3.6 without numexpr
+  - "3.6.0"  # Dummy: Python 3.6 without numexpr, matplotlib, IPython
   - "3.6.1"  # Dummy: Python 3.6 with conda-forge (hence no VML)
 install:
   - sudo apt-get update
@@ -25,22 +25,28 @@ install:
       TRAVIS_PYTHON_VERSION="3.6";
       SOFT_DEP="";
       CHAN="defaults";
+      INST="";
+      TEST="";
     elif [ ${TRAVIS_PYTHON_VERSION:4:5} == "1" ]; then
       TRAVIS_PYTHON_VERSION="3.6";
-      SOFT_DEP="numexpr";
+      SOFT_DEP="numexpr matplotlib IPython";
       CHAN="conda-forge";
+      INST="pytest-mpl";
+      TEST="--mpl";
     else
-      SOFT_DEP="numexpr";
+      SOFT_DEP="numexpr matplotlib IPython";
       CHAN="defaults";
+      INST="pytest-mpl";
+      TEST="--mpl";
     fi
 
   # Install and activate environment, install packages
   - conda create -q -n test-environment -c $CHAN python=$TRAVIS_PYTHON_VERSION numpy scipy pytest pytest-cov $SOFT_DEP
   - source activate test-environment
-  - pip install coveralls pytest-flake8
+  - pip install coveralls pytest-flake8 $INST
   - python setup.py install
 
 
-script: pytest --cov=empymod --flake8
+script: pytest --cov=empymod --flake8 $TEST
 
 after_success: coveralls

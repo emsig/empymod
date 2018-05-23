@@ -12,7 +12,7 @@ where:
     -v : Python 3.x version, e.g. '-v 5' for Python 3.5. Default: '4 5 6'.
     -c : Use channel 'conda-forge' instead of channel 'defaults'.
     -p : Print output of conda.
-    -n : Run tests without numexpr.
+    -n : Run tests without numexpr/matplotlib/IPython.
 
 "
 
@@ -21,8 +21,10 @@ CHAN=defaults
 PYTHON3VERSION="4 5 6"
 PRINT="/dev/null"
 PCKGS="numpy scipy pytest pytest-cov"
-NMXPR="numexpr"
-STR2="**  WITH numexpr  "
+NMXPR="numexpr matplotlib IPython"
+STR2="**  WITH numexpr/matplotlib/IPython  "
+PROPS="--mpl --flake8"
+INST="pytest-flake8 pytest-mpl"
 
 # Get Optional Input
 while getopts "hv:cpn" opt; do
@@ -37,7 +39,9 @@ while getopts "hv:cpn" opt; do
     p) PRINT="/dev/tty"
        ;;
     n) NMXPR=""
-       STR2="**  NO numexpr  "
+       STR2="**  NO numexpr/matplotlib/IPython  "
+       PROPS="--flake8"
+       INST="pytest-flake8"
        ;;
     :) printf "missing argument for -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
@@ -73,10 +77,10 @@ for i in ${PYTHON3VERSION[@]}; do
   source activate test_3${i}
 
   # Install flake8
-  pip install pytest-flake8 &> $PRINT
+  pip install $INST &> $PRINT
 
   # Run tests
-  pytest --cov=empymod --flake8
+  pytest --cov=empymod $PROPS
 
   # De-activate venv
   source deactivate test_3${i}

@@ -58,6 +58,7 @@ in touch if you would like to tackle one of these problems!
   - Add the ``fht``-module from FFTLog for the Hankel transform.
 
 - Hankel and Fourier transform
+
   - Include the method outlined by Mulder et al., 2008, Geophysics
     (piecewise-cubic Hermite interpolation with a FFT) to try to further
     speed-up the splined versions.

@@ -31,12 +31,11 @@ See https://empymod.github.io/#features for a complete list of features.
 More information
 ================
 
-For more information regarding installation, usage, add-ons, contributing,
-roadmap, bug reports, and much more, see
+For more information regarding installation, usage, contributing, roadmap, bug
+reports, and much more, see
 
 - **Website**: https://empymod.github.io,
 - **Documentation empymod**: https://empymod.readthedocs.io,
-- **Documentation add-ons**: https://empyscripts.readthedocs.io,
 - **Source Code**: https://github.com/empymod,
 - **Examples**: https://github.com/empymod/example-notebooks.
 
