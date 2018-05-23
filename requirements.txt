@@ -1,5 +1,4 @@
 numpy
-sphinx
 sphinxcontrib-napoleon
 
 # sphinx fixed at 1.6.7; fails otherwise at the moment
