@@ -177,11 +177,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [filter, pts_per_dec]:
+            - If ``ht`` = 'fht': [fhtfilt, pts_per_dec]:
 
-                - filter: string of filter name in ``empymod.filters`` or
-                          the filter method itself.
-                          (default: ``empymod.filters.key_201_2009()``)
+                - fhtfilt: string of filter name in ``empymod.filters`` or
+                           the filter method itself.
+                           (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -242,11 +242,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [filter, pts_per_dec]:
+            - If ``ft`` = 'sin' or 'cos': [fftfilt, pts_per_dec]:
 
-                - filter: string of filter name in ``empymod.filters`` or
-                          the filter method itself.
-                          (Default: ``empymod.filters.key_201_CosSin_2012()``)
+                - fftfilt: string of filter name in ``empymod.filters`` or
+                           the filter method itself.
+                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade; (default: -1)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -710,11 +710,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [filter, pts_per_dec]:
+            - If ``ht`` = 'fht': [fhtfilt, pts_per_dec]:
 
-                - filter: string of filter name in ``empymod.filters`` or
-                          the filter method itself.
-                          (default: ``empymod.filters.key_201_2009()``)
+                - fhtfilt: string of filter name in ``empymod.filters`` or
+                           the filter method itself.
+                           (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -775,11 +775,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [filter, pts_per_dec]:
+            - If ``ft`` = 'sin' or 'cos': [fftfilt, pts_per_dec]:
 
-                - filter: string of filter name in ``empymod.filters`` or
-                          the filter method itself.
-                          (Default: ``empymod.filters.key_201_CosSin_2012()``)
+                - fftfilt: string of filter name in ``empymod.filters`` or
+                           the filter method itself.
+                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade; (default: -1)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
