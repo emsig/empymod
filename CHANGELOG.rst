@@ -1,10 +1,10 @@
 Changelog
 #########
 
-latest - will be v1.7.0
------------------------
+v1.7.0 - *2018-05-23*
+---------------------
 
-- Merge ``empyscripts`` into ``empymod.scripts``.
+Merge ``empyscripts`` into ``empymod`` under ``empymod.scripts``.
 
 - Clear separation between mandatory and optional imports:
 
@@ -15,8 +15,8 @@ latest - will be v1.7.0
 
   - Optional:
 
-    - ``matplotlib`` (for ``empymod.scripts.fdesign``)
     - ``numexpr`` (for ``empymod.kernel``)
+    - ``matplotlib`` (for ``empymod.scripts.fdesign``)
     - ``IPython`` (for ``empymod.scripts.printinfo``)
 
 - Broaden namespace of ``empymod``. All public functions from the various
@@ -130,16 +130,16 @@ v1.5.2 - *2018-04-25*
 
 - DLF improvements:
 
-    - Digital linear filter (DLF) method for the Fourier transform can now be
-      carried out without spline, providing 0 for ``pts_per_dec`` (or any
-      integer smaller than 1).
+  - Digital linear filter (DLF) method for the Fourier transform can now be
+    carried out without spline, providing 0 for ``pts_per_dec`` (or any
+    integer smaller than 1).
 
-    - Combine kernel from ``fht`` and ``ffht`` into ``dlf``, hence separate DLF
-      from other calculations, as is done with QWE (``qwe`` for ``hqwe`` and
-      ``fqwe``).
+  - Combine kernel from ``fht`` and ``ffht`` into ``dlf``, hence separate DLF
+    from other calculations, as is done with QWE (``qwe`` for ``hqwe`` and
+    ``fqwe``).
 
-    - Bug fix regarding ``transform.get_spline_values``; a DLF with
-      ``pts_per_dec`` can now be shorter then the corresponding filter.
+  - Bug fix regarding ``transform.get_spline_values``; a DLF with
+    ``pts_per_dec`` can now be shorter then the corresponding filter.
 
 
 v1.5.1 - *2018-02-24*
