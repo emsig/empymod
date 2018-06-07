@@ -15,8 +15,7 @@ Always shown are the OS, number of CPU(s), ``numpy``, ``scipy``, ``empymod``,
 ``sys.version``, and time/date.
 
 Additionally shown are, if they can be imported, ``IPython``, ``matplotlib``,
-and ``numexpr``. If ``numexpr`` was installed with VML it shows that
-information too.
+and ``numexpr``. It also shows MKL information, if available.
 
 All modules provided in ``add_pckg`` are also shown. They have to be imported
 before ``versions`` is called.
@@ -175,6 +174,12 @@ def versions_html(add_pckg=[], ncol=4):
     # Loop over packages
     for pckg in _get_packages(add_pckg):
         html, i = cols(html, pckg.__version__, pckg.__name__, ncol, i)
+    # Fill up the row
+    while i % ncol != 0:
+        html += "    <td style= " + border + "></td>\n"
+        html += "    <td style= " + border + "></td>\n"
+        i += 1
+    # Finish row
     html += "  </tr>\n"
 
     # sys.version
@@ -200,6 +205,9 @@ def versions_text(add_pckg=[]):
     n = 54
     text = '\n' + n*'-' + '\n'
 
+    # Date and time info as title
+    text += time.strftime('  %a %b %d %H:%M:%S %Y %Z\n\n')
+
     # OS and CPUs
     text += '{:>15}'.format(platform.system())+' : OS\n'
     text += '{:>15}'.format(multiprocessing.cpu_count())+' : CPU(s)\n'
@@ -218,9 +226,6 @@ def versions_text(add_pckg=[]):
         text += '\n'
         for txt in textwrap.wrap(mkl.get_version_string(), n-4):
             text += '  '+txt+'\n'
-
-    # Date and time info as title
-    text += time.strftime('\n  %a %b %d %H:%M:%S %Y %Z\n')
 
     # Finish
     text += n*'-'
