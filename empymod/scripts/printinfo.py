@@ -49,6 +49,10 @@ try:
     import numexpr
 except ImportError:
     numexpr = False
+try:
+    import mkl
+except ImportError:
+    mkl = False
 
 __all__ = ['versions', 'versions_html', 'versions_text']
 
@@ -176,9 +180,9 @@ def versions_html(add_pckg=[], ncol=4):
     # sys.version
     html = colspan(html, sys.version, ncol, 1)
 
-    # vml version
-    if numexpr and numexpr.use_vml:
-        html = colspan(html, numexpr.get_vml_version(), ncol, 2)
+    # mkl version
+    if mkl:
+        html = colspan(html, mkl.get_version_string(), ncol, 2)
 
     # Finish table
     html += "</table>"
@@ -209,10 +213,10 @@ def versions_text(add_pckg=[]):
     for txt in textwrap.wrap(sys.version, n-4):
         text += '  '+txt+'\n'
 
-    # vml version
-    if numexpr and numexpr.use_vml:
+    # mkl version
+    if mkl:
         text += '\n'
-        for txt in textwrap.wrap(numexpr.get_vml_version(), n-4):
+        for txt in textwrap.wrap(mkl.get_version_string(), n-4):
             text += '  '+txt+'\n'
 
     # Date and time info as title
