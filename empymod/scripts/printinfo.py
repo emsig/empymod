@@ -119,7 +119,7 @@ def versions(mode='print', add_pckg=[], ncol=4):
         print(versions_text(add_pckg))
 
 
-def versions_html(add_pckg=[], ncol=4):
+def versions_html(add_pckg=None, ncol=4):
     """HTML version.
 
     See ``versions`` for details.
@@ -195,7 +195,7 @@ def versions_html(add_pckg=[], ncol=4):
     return html
 
 
-def versions_text(add_pckg=[]):
+def versions_text(add_pckg=None):
     """Plain-text version.
 
     See ``versions`` for details.
@@ -236,18 +236,25 @@ def versions_text(add_pckg=[]):
 def _get_packages(add_pckg):
     """Create list of packages."""
 
-    # Cast add_pckg
-    if isinstance(add_pckg, tuple):
-        add_pckg = list(add_pckg)
+    # Mandatory packages
+    pckgs = [numpy, scipy, empymod]
 
-    if not isinstance(add_pckg, list):
-        add_pckg = [add_pckg, ]
-
-    # Create package-list
-    pckgs = [numpy, scipy, empymod]                # Mandatory ones
-    for module in [IPython, numexpr, matplotlib]:  # Optional ones
+    # Optional packages
+    for module in [IPython, numexpr, matplotlib]:
         if module:
             pckgs += [module]
-    pckgs += add_pckg  # Add the ones from the input
+
+    # Cast and add add_pckg
+    if add_pckg is not None:
+
+        # Cast add_pckg
+        if isinstance(add_pckg, tuple):
+            add_pckg = list(add_pckg)
+
+        if not isinstance(add_pckg, list):
+            add_pckg = [add_pckg, ]
+
+        # Add add_pckg
+        pckgs += add_pckg
 
     return pckgs

@@ -4,7 +4,8 @@ Changelog
 *latest*
 --------
 
-- ``printinfo``: Print MKL-info (if available) independently of ``numexpr``.
+- ``printinfo``: Generally improved; prints now MKL-info (if available)
+  independently of ``numexpr``.
 
 v1.7.0 - *2018-05-23*
 ---------------------
