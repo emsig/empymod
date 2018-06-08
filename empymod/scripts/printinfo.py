@@ -50,8 +50,12 @@ except ImportError:
     numexpr = False
 try:
     import mkl
+    mklinfo = mkl.get_version_string()
 except ImportError:
-    mkl = False
+    if numexpr:
+        mklinfo = numexpr.get_vml_version()
+    else:
+        mklinfo = False
 
 __all__ = ['versions', 'versions_html', 'versions_text']
 
@@ -186,8 +190,8 @@ def versions_html(add_pckg=None, ncol=4):
     html = colspan(html, sys.version, ncol, 1)
 
     # mkl version
-    if mkl:
-        html = colspan(html, mkl.get_version_string(), ncol, 2)
+    if mklinfo:
+        html = colspan(html, mklinfo, ncol, 2)
 
     # Finish table
     html += "</table>"
@@ -222,9 +226,9 @@ def versions_text(add_pckg=None):
         text += '  '+txt+'\n'
 
     # mkl version
-    if mkl:
+    if mklinfo:
         text += '\n'
-        for txt in textwrap.wrap(mkl.get_version_string(), n-4):
+        for txt in textwrap.wrap(mklinfo, n-4):
             text += '  '+txt+'\n'
 
     # Finish
