@@ -50,12 +50,16 @@ except ImportError:
     numexpr = False
 try:
     import mkl
-    mklinfo = mkl.get_version_string()
 except ImportError:
-    if numexpr:
-        mklinfo = numexpr.get_vml_version()
-    else:
-        mklinfo = False
+    mkl = False
+
+# Get mkl info from numexpr or mkl, if available
+if mkl:
+    mklinfo = numexpr.get_vml_version()
+elif numexpr:
+    mklinfo = mkl.get_version_string()
+else:
+    mklinfo = False
 
 __all__ = ['versions', 'versions_html', 'versions_text']
 

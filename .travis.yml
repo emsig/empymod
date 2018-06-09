@@ -23,7 +23,7 @@ install:
   # Take care of dummy versions
   - if [ ${TRAVIS_PYTHON_VERSION:4:5} == "0" ]; then
       TRAVIS_PYTHON_VERSION="3.6";
-      SOFT_DEP="mkl mkl-service";
+      SOFT_DEP="";
       CHAN="defaults";
       INST="";
       TEST="";
@@ -34,7 +34,7 @@ install:
       INST="pytest-mpl";
       TEST="--mpl";
     else
-      SOFT_DEP="numexpr matplotlib IPython";
+      SOFT_DEP="mkl mkl-service numexpr matplotlib IPython";
       CHAN="defaults";
       INST="pytest-mpl";
       TEST="--mpl";
