@@ -55,9 +55,9 @@ except ImportError:
 
 # Get mkl info from numexpr or mkl, if available
 if mkl:
-    mklinfo = mkl.get_vml_version()
+    mklinfo = mkl.get_version_string()
 elif numexpr:
-    mklinfo = numexpr.get_version_string()
+    mklinfo = numexpr.get_vml_version()
 else:
     mklinfo = False
 
