@@ -370,22 +370,20 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
                 rlocb = e_zHb*Gamb
                 rloc = (rloca - rlocb)/(rloca + rlocb)
 
-            # In first layer term = 0
+            # In first layer tRef = rloc
             if iz == layer_count[0]:
-                term = np.full_like(rloc, 0+0j)
+                tRef = rloc.copy()
             else:
                 ddepth = depth[iz+1+pm]-depth[iz+pm]
                 iGam = Gam[:, :, iz+pm, :]
+
+                # Eqs 64, A-11
                 if use_ne_eval:
                     term = use_ne_eval("tRef*exp(-2*iGam*ddepth)")
+                    tRef = use_ne_eval("(rloc + term)/(1 + rloc*term)")
                 else:
                     term = tRef*np.exp(-2*iGam*ddepth)  # NOQA
-
-            # Eqs 64, A-11
-            if use_ne_eval:
-                tRef = use_ne_eval("(rloc + term)/(1 + rloc*term)")
-            else:
-                tRef = (rloc + term)/(1 + rloc*term)
+                    tRef = (rloc + term)/(1 + rloc*term)
 
             # The global reflection coefficient is given back for all layers
             # between and including src- and rec-layer

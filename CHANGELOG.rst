@@ -7,6 +7,8 @@ Changelog
 - ``printinfo``: Generally improved; prints now MKL-info (if available)
   independently of ``numexpr``.
 
+- Simplification of ``kernel.reflections`` through re-arranging.
+
 v1.7.0 - *2018-05-23*
 ---------------------
 
