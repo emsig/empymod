@@ -4,6 +4,15 @@ Changelog
 *latest*
 --------
 
+- Change in ``empymod.utils``:
+
+  - Renamed ``_min_param`` to ``_min_res``.
+  - Anisotropy ``aniso`` is no longer directly checked for its minimum value.
+    Instead, res*aniso**2, hence vertical resistivity, is checked with
+    ``_min_res``, and anisotropy is subsequently re-calculated from it.
+  - The parameters ``epermH``, ``epermV``, ``mpermH``, and ``mpermV`` can now
+    be set to 0 (or any positive value) and do not depend on ``_min_param``.
+
 - ``printinfo``: Generally improved; prints now MKL-info (if available)
   independently of ``numexpr``.
 

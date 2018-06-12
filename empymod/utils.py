@@ -68,7 +68,7 @@ _min_freq = 1e-20   # Minimum frequency  [Hz]
 _min_time = 1e-20   # Minimum time       [s]
 _min_off = 1e-3     # Minimum offset     [m]
 #                   # > Also used to round src- & rec-coordinates (1e-3 => mm)
-_min_param = 1e-20  # Minimum model param (aniso, [m/e]perm[H/V]) to avoid 0
+_min_res = 1e-20    # Minimum value for horizontal/vertical resistivity
 _min_angle = 1e-10  # Angle factors smaller than that are set to 0
 
 # Define all errors we want to catch with the variable-checks and setting of
@@ -706,7 +706,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
         and mpermV are in all layers the same).
 
     """
-    global _min_param
+    global _min_res
 
     # Check depth
     depth = _check_var(depth, float, 1, 'depth')
@@ -726,26 +726,30 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
     # Cast and check resistivity
     res = _check_var(res, float, 1, 'res', depth.shape)
-    # => min_param can be set with utils.set_min
-    res = _check_min(res, _min_param, 'Resistivities', 'Ohm.m', verb)
+    # => min_res can be set with utils.set_min
+    res = _check_min(res, _min_res, 'Resistivities', 'Ohm.m', verb)
 
-    # Check anisotropy, electric permittivity, and magnetic permeability
-    def check_inp(var, name):
+    # Check optional parameters anisotropy, electric permittivity, and magnetic
+    # permeability
+    def check_inp(var, name, min_val):
         """Param-check function. Default to ones if not provided"""
         if not np.any(var):
             return np.ones(depth.size)
         else:
             param = _check_var(var, float, 1, name, depth.shape)
-            # => min_param can be set with utils.set_min
-            param = _check_min(param, _min_param, 'Parameter ' + name, '',
-                               verb)
+            if name == 'aniso':  # Convert aniso into vertical resistivity
+                param = param**2*res
+            param = _check_min(param, min_val, 'Parameter ' + name, '', verb)
+            if name == 'aniso':  # Convert vert. resistivity back to aniso
+                param = np.sqrt(param/res)
             return param
 
-    aniso = check_inp(aniso, 'aniso')
-    epermH = check_inp(epermH, 'epermH')
-    epermV = check_inp(epermV, 'epermV')
-    mpermH = check_inp(mpermH, 'mpermH')
-    mpermV = check_inp(mpermV, 'mpermV')
+    # => min_res can be set with utils.set_min
+    aniso = check_inp(aniso, 'aniso', _min_res)
+    epermH = check_inp(epermH, 'epermH', 0.0)
+    epermV = check_inp(epermV, 'epermV', 0.0)
+    mpermH = check_inp(mpermH, 'mpermH', 0.0)
+    mpermV = check_inp(mpermV, 'mpermV', 0.0)
 
     # Print model parameters
     if verb > 2:
@@ -1755,7 +1759,7 @@ def conv_warning(conv, targ, name, verb):
 
 # 3. Set/get min values
 
-def set_minimum(min_freq=None, min_time=None, min_off=None, min_param=None,
+def set_minimum(min_freq=None, min_time=None, min_off=None, min_res=None,
                 min_angle=None):
     """
     Set minimum values of parameters.
@@ -1771,8 +1775,8 @@ def set_minimum(min_freq=None, min_time=None, min_off=None, min_param=None,
     min_off : float, optional
         Minimum offset [m] (default 1e-3 m).
         Also used to round src- & rec-coordinates.
-    min_param : float, optional
-        Minimum aniso, [m/e]perm[H/V] [-] (default 1e-20).
+    min_res : float, optional
+        Minimum horizontal and vertical resistivity [Ohm.m] (default 1e-20).
     min_angle : float, optional
         Minimum angle [-] (default 1e-10).
 
@@ -1783,7 +1787,7 @@ def set_minimum(min_freq=None, min_time=None, min_off=None, min_param=None,
 
     """
 
-    global _min_freq, _min_time, _min_off, _min_param, _min_angle
+    global _min_freq, _min_time, _min_off, _min_res, _min_angle
 
     if min_freq is not None:
         _min_freq = min_freq
@@ -1791,8 +1795,8 @@ def set_minimum(min_freq=None, min_time=None, min_off=None, min_param=None,
         _min_time = min_time
     if min_off is not None:
         _min_off = min_off
-    if min_param is not None:
-        _min_param = min_param
+    if min_res is not None:
+        _min_res = min_res
     if min_angle is not None:
         _min_angle = min_angle
 
@@ -1809,7 +1813,7 @@ def get_minimum():
           - min_freq : float
           - min_time : float
           - min_off : float
-          - min_param : float
+          - min_res : float
           - min_angle : float
 
         For a full description of these options, see `set_minimum`.
@@ -1823,7 +1827,7 @@ def get_minimum():
     d = dict(min_freq=_min_freq,
              min_time=_min_time,
              min_off=_min_off,
-             min_param=_min_param,
+             min_res=_min_res,
              min_angle=_min_angle)
     return d
 

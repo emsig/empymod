@@ -303,16 +303,16 @@ def test_check_hankel(capsys):
 
 def test_check_model(capsys):
     # Normal case; xdirect=True (default)
-    res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
+    res = utils.check_model(0, [1e20, 20], [1, 0], [0, 1], [50, 80], [10, 1],
                             [1, 1], True, 3)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = res
     out, _ = capsys.readouterr()
-    assert "* WARNING :: Parameter epermH < " in out
+    assert "* WARNING :: Parameter aniso < " in out
     assert "   direct field    :  Calc. in frequency domain" in out
     assert_allclose(depth, [-np.infty, 0])
     assert_allclose(res, [1e20, 20])
-    assert_allclose(aniso, [1, 2])
-    assert_allclose(epermH, [1e-20, 1])
+    assert_allclose(aniso, [1, np.sqrt(1e-20/20)])
+    assert_allclose(epermH, [0, 1])
     assert_allclose(epermV, [50, 80])
     assert_allclose(mpermH, [10, 1])
     assert_allclose(mpermV, [1, 1])
@@ -995,7 +995,7 @@ def test_minimum():
     assert d['min_freq'] == 1e-20
     assert d['min_time'] == 1e-20
     assert d['min_off'] == 1e-3
-    assert d['min_param'] == 1e-20
+    assert d['min_res'] == 1e-20
     assert d['min_angle'] == 1e-10
 
     # Set all default values to new values
@@ -1006,7 +1006,7 @@ def test_minimum():
     assert d['min_freq'] == 1e-2
     assert d['min_time'] == 1e-3
     assert d['min_off'] == 1
-    assert d['min_param'] == 1e-4
+    assert d['min_res'] == 1e-4
     assert d['min_angle'] == 1e-5
 
 
