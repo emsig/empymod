@@ -64,7 +64,7 @@ else:
 __all__ = ['versions', 'versions_html', 'versions_text']
 
 
-def versions(mode='print', add_pckg=[], ncol=4):
+def versions(mode='print', add_pckg=None, ncol=4):
     """Return date, time, and version information.
 
     Print or return date, time, and package version information in any
