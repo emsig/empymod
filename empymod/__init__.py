@@ -214,6 +214,45 @@ Included **Fourier transforms**:
 - Fast Fourier Transform *FFT*
 
 
+Digital Linear Filters
+''''''''''''''''''''''
+The module ``empymod.filters`` comes with many DLFs for the Hankel and the
+Fourier transform. If you want to export one of these filters to plain ascii
+files you can use the ``tofile``-routine of each filter:
+
+.. code-block:: python
+
+    >>> import empymod
+    >>> # Load a filter
+    >>> filt = empymod.filters.wer_201_2018()
+    >>> # Save it to pure ascii-files
+    >>> filt.tofile()
+    >>> # This will save the following three files:
+    >>> #    ./filters/wer_201_2018_base.txt
+    >>> #    ./filters/wer_201_2018_j0.txt
+    >>> #    ./filters/wer_201_2018_j1.txt
+
+Similarly, if you want to use an own filter you can do that as well. The filter
+base and the filter coefficient have to be stored in separate files:
+
+.. code-block:: python
+
+    >>> import empymod
+    >>> # Create an empty filter;
+    >>> # Name has to be the base of the text files
+    >>> filt = empymod.filters.DigitalFilter('my-filter')
+    >>> # Load the ascii-files
+    >>> filt.fromfile()
+    >>> # This will load the following three files:
+    >>> #    ./filters/my-filter_base.txt
+    >>> #    ./filters/my-filter_j0.txt
+    >>> #    ./filters/my-filter_j1.txt
+    >>> # and store them in filt.base, filt.j0, and filt.j1.
+
+The path can be adjusted by providing ``tofile`` and ``fromfile`` with a
+``path``-argument.
+
+
 FFTLog
 ''''''
 

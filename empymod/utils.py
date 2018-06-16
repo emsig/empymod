@@ -733,7 +733,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     # permeability
     def check_inp(var, name, min_val):
         """Param-check function. Default to ones if not provided"""
-        if not np.any(var):
+        if var is None:
             return np.ones(depth.size)
         else:
             param = _check_var(var, float, 1, name, depth.shape)

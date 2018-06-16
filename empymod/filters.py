@@ -52,16 +52,100 @@ https://github.com/empymod/article-fdesign.
 # the License.
 
 
+import os
 import numpy as np
 
 
-# 0. Filter Class
+# 0. Filter Class and saving/loading routines
 
 class DigitalFilter:
     """Simple Class for Digital Linear Filters."""
-    def __init__(self, name):
+    def __init__(self, name, savename=None):
         """Add filter name."""
         self.name = name
+        if savename is None:
+            self.savename = name
+        else:
+            self.savename = savename
+
+    def tofile(self, path='filters'):
+        """Save filter values to ascii-files.
+
+        Store the filter base and the filter coefficients in separate files
+        in the directory `path`; `path` can be a relative or absolute path.
+
+        Examples
+        --------
+        >>> import empymod
+        >>> # Load a filter
+        >>> filt = empymod.filters.wer_201_2018()
+        >>> # Save it to pure ascii-files
+        >>> filt.tofile()
+        >>> # This will save the following three files:
+        >>> #    ./filters/wer_201_2018_base.txt
+        >>> #    ./filters/wer_201_2018_j0.txt
+        >>> #    ./filters/wer_201_2018_j1.txt
+
+        """
+
+        # Get name of filter
+        name = self.savename
+
+        # Get absolute path, create if it doesn't exist
+        path = os.path.abspath(path)
+        os.makedirs(path, exist_ok=True)
+
+        # Save filter base
+        basefile = os.path.join(path, name + '_base.txt')
+        with open(basefile, 'w') as f:
+            self.base.tofile(f, sep="\n")
+
+        # Save filter coefficients
+        for val in ['j0', 'j1', 'sin', 'cos']:
+            if hasattr(self, val):
+                attrfile = os.path.join(path, name + '_' + val + '.txt')
+                with open(attrfile, 'w') as f:
+                    getattr(self, val).tofile(f, sep="\n")
+
+    def fromfile(self, path='filters'):
+        """Load filter values from ascii-files.
+
+        Load filter base and filter coefficients from ascii files in the
+        directory `path`; `path` can be a relative or absolute path.
+
+        Examples
+        --------
+        >>> import empymod
+        >>> # Create an empty filter;
+        >>> # Name has to be the base of the text files
+        >>> filt = empymod.filters.DigitalFilter('my-filter')
+        >>> # Load the ascii-files
+        >>> filt.fromfile()
+        >>> # This will load the following three files:
+        >>> #    ./filters/my-filter_base.txt
+        >>> #    ./filters/my-filter_j0.txt
+        >>> #    ./filters/my-filter_j1.txt
+        >>> # and store them in filt.base, filt.j0, and filt.j1.
+
+        """
+
+        # Get name of filter
+        name = self.savename
+
+        # Get absolute path, create if it doesn't exist
+        path = os.path.abspath(path)
+
+        # Get filter base
+        basefile = os.path.join(path, name + '_base.txt')
+        with open(basefile, 'r') as f:
+            self.base = np.fromfile(f, sep="\n")
+
+        # Get filter coefficients
+        for val in ['j0', 'j1', 'sin', 'cos']:
+            attrfile = os.path.join(path, name + '_' + val + '.txt')
+            if os.path.isfile(attrfile):
+                with open(attrfile, 'r') as f:
+                    setattr(self, val, np.fromfile(f, sep="\n"))
 
 
 # 1. Hankel DLF
@@ -76,7 +160,7 @@ def kong_61_2007():
 
     """
 
-    dlf = DigitalFilter('Kong 61')
+    dlf = DigitalFilter('Kong 61', 'kong_61_2007')
 
     dlf.base = np.array([
             2.3517745856009100e-02, 2.6649097336355482e-02,
@@ -192,7 +276,7 @@ def kong_241_2007():
 
     """
 
-    dlf = DigitalFilter('Kong 241')
+    dlf = DigitalFilter('Kong 241', 'kong_241_2007')
 
     dlf.base = np.array([
             4.0973497897978643e-04, 4.3725238042414673e-04,
@@ -578,7 +662,7 @@ def key_101_2009():
 
     """
 
-    dlf = DigitalFilter('Key 101 (2009)')
+    dlf = DigitalFilter('Key 101 (2009)', 'key_101_2009')
 
     dlf.base = np.array([
         3.182780796509667e-03, 3.570677233218250e-03, 4.005847942090417e-03,
@@ -703,7 +787,7 @@ def key_201_2009():
 
     """
 
-    dlf = DigitalFilter('Key 201 (2009)')
+    dlf = DigitalFilter('Key 201 (2009)', 'key_201_2009')
 
     dlf.base = np.array([
         6.112527611295728e-04, 6.582011330626792e-04, 7.087554594672159e-04,
@@ -927,7 +1011,7 @@ def key_401_2009():
 
     """
 
-    dlf = DigitalFilter('Key 401 (2009)')
+    dlf = DigitalFilter('Key 401 (2009)', 'key_401_2009')
 
     dlf.base = np.array([
         6.825603376334870e-08, 7.375625734276621e-08, 7.969970121723440e-08,
@@ -1350,7 +1434,7 @@ def anderson_801_1982():
 
     """
 
-    dlf = DigitalFilter('Anderson 801')
+    dlf = DigitalFilter('Anderson 801', 'anderson_801_1982')
 
     dlf.base = np.array([
         8.9170998013276122e-14, 9.8549193740053558e-14, 1.0891370292131004e-13,
@@ -2442,7 +2526,7 @@ def key_51_2012():
 
     """
 
-    dlf = DigitalFilter('Key 51 (2012)')
+    dlf = DigitalFilter('Key 51 (2012)', 'key_51_2012')
 
     dlf.base = np.array([
         4.9915939069102170e-03, 6.1703482511978082e-03, 7.6274629409160176e-03,
@@ -2534,7 +2618,7 @@ def key_101_2012():
 
     """
 
-    dlf = DigitalFilter('Key 101 (2012)')
+    dlf = DigitalFilter('Key 101 (2012)', 'key_101_2012')
 
     dlf.base = np.array([
         5.5308437014783363e-04, 6.4259236035555788e-04, 7.4658580837667996e-04,
@@ -2692,7 +2776,7 @@ def key_201_2012():
 
     """
 
-    dlf = DigitalFilter('Key 201 (2012)')
+    dlf = DigitalFilter('Key 201 (2012)', 'key_201_2012')
 
     dlf.base = np.array([
         4.1185887075357082e-06, 4.6623077830484039e-06, 5.2778064058937756e-06,
@@ -2986,7 +3070,7 @@ def wer_201_2018():
 
     """
 
-    dlf = DigitalFilter('Werthmüller 201')
+    dlf = DigitalFilter('Werthmüller 201', 'wer_201_2018')
 
     dlf.base = np.array([
         8.653980893285999343e-04, 9.170399868578506730e-04,
@@ -3315,7 +3399,7 @@ def key_81_CosSin_2009():
 
     """
 
-    dlf = DigitalFilter('Key 81 CosSin (2009)')
+    dlf = DigitalFilter('Key 81 CosSin (2009)', 'key_81_CosSin_2009')
 
     dlf.base = np.array([
         3.354626279025119e-04, 4.097349789797864e-04,  5.004514334406104e-04,
@@ -3421,7 +3505,7 @@ def key_241_CosSin_2009():
 
     """
 
-    dlf = DigitalFilter('Key 241 CosSin (2009)')
+    dlf = DigitalFilter('Key 241 CosSin (2009)', 'key_241_CosSin_2009')
 
     dlf.base = np.array([
         1.015631471002490e-06, 1.139409969679808e-06, 1.278273779488425e-06,
@@ -3687,7 +3771,7 @@ def key_601_CosSin_2009():
 
     """
 
-    dlf = DigitalFilter('Key 601 CosSin (2009)')
+    dlf = DigitalFilter('Key 601 CosSin (2009)', 'key_601_CosSin_2009')
 
     dlf.base = np.array([
         4.193795658379545e-13, 4.611744532326466e-13,  5.071345712552199e-13,
@@ -4312,7 +4396,7 @@ def key_101_CosSin_2012():
 
     """
 
-    dlf = DigitalFilter('Key 101 CosSin (2012)')
+    dlf = DigitalFilter('Key 101 CosSin (2012)', 'key_101_CosSin_2012')
 
     dlf.base = np.array([
         2.0861919529505731e-04, 2.4715373649416861e-04, 2.9280608324001184e-04,
@@ -4473,7 +4557,7 @@ def key_201_CosSin_2012():
 
     """
 
-    dlf = DigitalFilter('Key 201 CosSin (2012)')
+    dlf = DigitalFilter('Key 201 CosSin (2012)', 'key_201_CosSin_2012')
 
     dlf.base = np.array([
         9.1898135789795544e-07, 1.0560236258145801e-06, 1.2135021985967225e-06,

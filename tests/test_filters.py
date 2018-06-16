@@ -1,13 +1,40 @@
+import os
+import sys
+import pytest
 import numpy as np
 from numpy.testing import assert_allclose
 
 from empymod import filters
 
 
-def test_digitalfilter():                                    # 1. DigitalFilter
+def test_digitalfilter():                                   # 1.a DigitalFilter
     # Assure a DigitalFilter has attribute 'name'.
-    out = filters.DigitalFilter('test')
-    assert out.name == 'test'
+    out1 = filters.DigitalFilter('test')
+    out2 = filters.DigitalFilter('test', 'savenametest')
+    assert out1.name == 'test'
+    assert out1.savename == out1.name
+    assert out1.name == out2.name
+    assert out2.savename == 'savenametest'
+
+
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason="tmpdir seems to fail for Python<3.6.")
+def test_storeandsave(tmpdir):                                  # 1.b Save/Load
+    # Store a filter
+    inpfilt = filters.wer_201_2018()
+    inpfilt.savename = 'savetest'
+    inpfilt.tofile(tmpdir)
+    assert len(tmpdir.listdir()) == 3
+    assert os.path.isfile(os.path.join(tmpdir, 'savetest_base.txt')) is True
+    assert os.path.isfile(os.path.join(tmpdir, 'savetest_j0.txt')) is True
+    assert os.path.isfile(os.path.join(tmpdir, 'savetest_j1.txt')) is True
+
+    # Load a filter
+    outfilt = filters.DigitalFilter('savetest')
+    outfilt.fromfile(tmpdir)
+    assert_allclose(outfilt.base, inpfilt.base)
+    assert_allclose(outfilt.j0, inpfilt.j0)
+    assert_allclose(outfilt.j1, inpfilt.j1)
 
 
 def test_fhtfilters():                                         # 2. FHT filters

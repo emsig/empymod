@@ -4,6 +4,9 @@ Changelog
 *latest*
 --------
 
+- New routines in ``empymod.filters.DigitalFilter``: Filters can now be saved
+  to or loaded from pure ascii-files.
+
 - Change in ``empymod.utils``:
 
   - Renamed ``_min_param`` to ``_min_res``.
