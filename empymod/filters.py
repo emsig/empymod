@@ -147,6 +147,9 @@ class DigitalFilter:
                 with open(attrfile, 'r') as f:
                     setattr(self, val, np.fromfile(f, sep="\n"))
 
+        # Add factor
+        self.factor = np.around(np.average(self.base[1:]/self.base[:-1]), 15)
+
 
 # 1. Hankel DLF
 

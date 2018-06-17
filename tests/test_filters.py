@@ -35,6 +35,7 @@ def test_storeandsave(tmpdir):                                  # 1.b Save/Load
     assert_allclose(outfilt.base, inpfilt.base)
     assert_allclose(outfilt.j0, inpfilt.j0)
     assert_allclose(outfilt.j1, inpfilt.j1)
+    assert_allclose(outfilt.factor, inpfilt.factor)
 
 
 def test_fhtfilters():                                         # 2. FHT filters
