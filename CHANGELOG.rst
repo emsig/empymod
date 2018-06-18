@@ -7,6 +7,11 @@ Changelog
 - New routines in ``empymod.filters.DigitalFilter``: Filters can now be saved
   to or loaded from pure ascii-files.
 
+- Filters and inversion result from ``empymod.scripts.fdesign`` are now by
+  default saved in plain text. The filters with their internal routine, the
+  inversion result with ``np.savetxt``. Compressed saving can be achieved by
+  giving a name with a '.gz'-ending.
+
 - Change in ``empymod.utils``:
 
   - Renamed ``_min_param`` to ``_min_res``.

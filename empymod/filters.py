@@ -132,7 +132,7 @@ class DigitalFilter:
         # Get name of filter
         name = self.savename
 
-        # Get absolute path, create if it doesn't exist
+        # Get absolute path
         path = os.path.abspath(path)
 
         # Get filter base

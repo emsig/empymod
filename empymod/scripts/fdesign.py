@@ -218,7 +218,6 @@ Implemented Fourier transforms
 # the License.
 
 import os
-import shelve
 import numpy as np
 from copy import deepcopy as dc
 from scipy.constants import mu_0
@@ -247,7 +246,7 @@ __all__ = ['design', 'save_filter', 'load_filter', 'plot_result',
 
 def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
            cvar='amp', error=0.01, name=None, full_output=False, finish=False,
-           save=True, verb=2, plot=1):
+           save=True, path='filters', verb=2, plot=1):
     """Digital linear filter (DLF) design
 
     This routine can be used to design digital linear filters for the Hankel or
@@ -324,8 +323,14 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
         interested in the actually provided spacing/shift-values.
 
     save : bool, optional
-        If True, best filter is saved to ./filters/name.dir/.bak/.dat with
-        shelve. Can be loaded with fdesign.load_filter(name).
+        If True, best filter is saved to plain text files in ./filters/. Can be
+        loaded with fdesign.load_filter(name). If full, the inversion output is
+        stored too. You can add '.gz' to `name`, which will then save the full
+        inversion output in a compressed file instead of plain text.
+
+    path : string, optional
+        Absolute or relative path where output will be saved if `save=True`.
+        Default is 'filters'.
 
     verb : {0, 1, 2}, optional
         Level of verbosity, default is 2:
@@ -416,6 +421,12 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
                  args=(n, fI, fC, r, r_def, error, reim, cvar, verb, plot,
                        log), finish=finish)
 
+    # Add cvar-information to full: 0 for 'amp', 1 for 'r'
+    if cvar == 'r':
+        full += (1, )
+    else:
+        full += (0, )
+
     # Finish output from brute/fmin; depending if finish or not
     if verb > 1:
         print('')
@@ -427,7 +438,7 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
 
     # If verbose, print result
     if verb > 1:
-        print_result(dlf, full, cvar)
+        print_result(dlf, full)
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0)
@@ -435,7 +446,7 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
     # If plot, show result
     if plot > 0:
         print('* QC: Overview of brute-force inversion:')
-        plot_result(dlf, full, cvar, False)
+        plot_result(dlf, full, False)
         if plot > 1:
             print('* QC: Inversion result of best filter (minimum amplitude):')
             _get_min_val(full[0], n, fI, fC, r, r_def, error, reim, cvar, 0,
@@ -444,9 +455,9 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
     # Save if desired
     if save:
         if full_output:
-            save_filter(name, dlf, full)
+            save_filter(name, dlf, full, path=path)
         else:
-            save_filter(name, dlf)
+            save_filter(name, dlf, path=path)
 
     # Output, depending on full_output
     if full_output:
@@ -455,38 +466,116 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
         return dlf
 
 
-def save_filter(name, filt, full=None):
-    """Save DLF-filter to shelve."""
-    os.makedirs('./filters', exist_ok=True)
-    with shelve.open('filters/'+name) as shfilt:
-        shfilt['dlf'] = filt
-        if full:
-            shfilt['out'] = full
+def save_filter(name, filt, full=None, path='filters'):
+    """Save DLF-filter and inversion output to plain text files."""
 
+    # First we'll save the filter using its internal routine.
+    # This will create the directory ./filters if it doesn't exist already.
+    filt.tofile(path)
 
-def load_filter(name, full=False):
-    """Load saved DLF-filter from shelve."""
-    with shelve.open('filters/'+name) as shfilt:
-        if full:
-            try:
-                return shfilt['dlf'], shfilt['out']
-            except KeyError:
-                return shfilt['dlf']
+    # If full, we store the inversion output
+    if full:
+
+        # Get file name
+        path = os.path.abspath(path)
+        if len(name.split('.')) == 2:
+            suffix = '.gz'
         else:
-            return shfilt['dlf']
+            suffix = ''
+        fullfile = os.path.join(path, name.split('.')[0]+'_full.txt' + suffix)
+
+        # Get number of spacing and shift values
+        nspace, nshift = full[3].shape
+
+        # Create header
+        header = 'Full inversion output from empymod.fdesign.design\n'
+        header += 'Line 11: Nr of spacing values\n'
+        header += 'Line 12: Nr of shift values\n'
+        header += 'Line 13: Best spacing value\n'
+        header += 'Line 14: Best shift value\n'
+        header += 'Line 15: Min amplitude or max offset\n'
+
+        header += 'Lines 16-{}: Spacing matrix '.format(nspace+15)
+        header += '({} x {})\n'.format(nspace, nshift)
+
+        header += 'Lines {}-{}: Spacing matrix '.format(nspace+16, 2*nspace+15)
+        header += '({} x {})\n'.format(nspace, nshift)
+
+        header += 'Lines {}-{}: Spacing '.format(2*nspace+16, 3*nspace+15)
+        header += 'matrix ({} x {})\n'.format(nspace, nshift)
+
+        header += 'Line {}: Integer: 0: min amp, 1: max r'.format(3*nspace+16)
+
+        # Create arrays; put single values in arrays of nshift values
+        nr_spacing = np.r_[nspace, np.zeros(nshift-1)]
+        nr_shift = np.r_[nshift, np.zeros(nshift-1)]
+        best_spacing = np.r_[full[0][0], np.zeros(nshift-1)]
+        best_shift = np.r_[full[0][1], np.zeros(nshift-1)]
+        min_value = np.r_[np.atleast_1d(full[1]), np.zeros(nshift-1)]
+        min_max = np.r_[full[4], np.zeros(nshift-1)]
+
+        # Collect all in one array
+        fullsave = np.vstack((nr_spacing, nr_shift, best_spacing, best_shift,
+                              min_value, full[2][0], full[2][1], full[3],
+                              min_max))
+
+        # Save array
+        np.savetxt(fullfile, fullsave, header=header)
+
+
+def load_filter(name, full=False, path='filters'):
+    """Load saved DLF-filter and inversion output from text files."""
+
+    # First we'll get the filter using its internal routine.
+    filt = DigitalFilter(name.split('.')[0])
+    filt.fromfile(path)
+
+    # If full, we get the inversion output
+    if full:
+        # Try to get the inversion result. If files are not found, most likely
+        # because they were not stored, we only return the filter
+        try:
+            # Get file name
+            path = os.path.abspath(path)
+            if len(name.split('.')) == 2:
+                suffix = '.gz'
+            else:
+                suffix = ''
+            fullfile = os.path.join(path, name.split('.')[0] +
+                                    '_full.txt' + suffix)
+
+            # Read data
+            out = np.loadtxt(fullfile)
+
+        except IOError:
+            return filt
+
+        # Collect inversion-result tuple
+        nspace = int(out[0][0])
+        nshift = int(out[1][0])
+
+        space_shift_matrix = np.zeros((2, nspace, nshift))
+        space_shift_matrix[0, :, :] = out[5:nspace+5, :]
+        space_shift_matrix[1, :, :] = out[nspace+5:2*nspace+5, :]
+
+        out = (np.array([out[2][0], out[3][0]]), out[4][0], space_shift_matrix,
+               out[2*nspace+5:3*nspace+5, :], int(out[3*nspace+5, 0]))
+
+        return filt, out
+    else:
+        return filt
 
 
 # 2 PLOTTING ROUTINES (for QC or direct use)
 
 # # 2.a Public plotting routines for QC or direct use
 
-def plot_result(filt, full, cvar='amp', prntres=True):
+def plot_result(filt, full, prntres=True):
     """QC the inversion result.
 
     Parameters
     ----------
     - filt, full as returned from fdesign.design with full_output=True
-    - cvar as used for fdesign.design.
     - If prntres is True, it calls fdesign.print_result as well.
 
     """
@@ -496,7 +585,7 @@ def plot_result(filt, full, cvar='amp', prntres=True):
         return
 
     if prntres:
-        print_result(filt, full, cvar)
+        print_result(filt, full)
 
     # Get spacing and shift values from full output of brute
     spacing = full[2][0, :, 0]
@@ -512,12 +601,12 @@ def plot_result(filt, full, cvar='amp', prntres=True):
     # Figure of minfield, depending if spacing/shift are vectors or floats
     if spacing.size > 1 or shift.size > 1:
         plt.subplot(121)
-        if cvar == 'amp':
+        if full[4] == 0:  # Min amp
             plt.title("Minimal recovered fields")
             ylabel = 'Minimal recovered amplitude (log10)'
             field = np.log10(minfield)
             cmap = plt.cm.viridis
-        else:
+        else:  # Max r
             plt.title("Maximum recovered r")
             ylabel = 'Maximum recovered r'
             field = 1/minfield
@@ -559,22 +648,21 @@ def plot_result(filt, full, cvar='amp', prntres=True):
     plt.show()
 
 
-def print_result(filt, full=None, cvar='amp'):
+def print_result(filt, full=None):
     """Print best filter information.
 
     Parameters
     ----------
     - filt, full as returned from fdesign.design with full_output=True
-    - cvar as used for fdesign.design.
 
     """
     print('   Filter length   : %d' % filt.base.size)
     print('   Best filter')
 
     if full:  # If full provided, we have more information
-        if cvar == 'amp':
+        if full[4] == 0:  # Min amp
             print('   > Min field     : %g' % full[1])
-        else:
+        else:  # Max amp
             r = 1/full[1]
             print('   > Max r         : %g' % r)
         spacing = full[0][0]
@@ -1211,7 +1299,7 @@ def _calculate_filter(n, spacing, shift, fI, r_def, reim, name):
     k = base/r[:, None]
 
     # Create filter instance
-    dlf = DigitalFilter(name)
+    dlf = DigitalFilter(name.split('.')[0])
     dlf.base = base
     dlf.factor = np.around(np.average(base[1:]/base[:-1]), 15)
 

@@ -67,10 +67,11 @@ def test_design():
     assert_allclose(out4[1], dat4[2][1], rtol=1e-3)
     assert_allclose(out4[2], dat4[2][2])
     assert_allclose(out4[3], dat4[2][3], rtol=1e-3)
-    # Clean-up
-    os.remove('./filters/tmpfilter.bak')
-    os.remove('./filters/tmpfilter.dat')
-    os.remove('./filters/tmpfilter.dir')
+    # Clean-up  # Should be replaced eventually by tmpdir
+    os.remove('./filters/tmpfilter_base.txt')
+    os.remove('./filters/tmpfilter_j0.txt')
+    os.remove('./filters/tmpfilter_j1.txt')
+    os.remove('./filters/tmpfilter_full.txt')
 
     # 4.b Without full output and all the other default inputs
     dat4[0]['full_output'] = False
@@ -79,10 +80,10 @@ def test_design():
     del dat4[0]['r']
     dat4[0]['reim'] = np.imag  # Set once to imag
     fdesign.design(fI=fI, verb=2, plot=0, **dat4[0])
-    # Clean-up
-    os.remove('./filters/dlf_201.bak')
-    os.remove('./filters/dlf_201.dat')
-    os.remove('./filters/dlf_201.dir')
+    # Clean-up  # Should be replaced eventually by tmpdir
+    os.remove('./filters/dlf_201_base.txt')
+    os.remove('./filters/dlf_201_j0.txt')
+    os.remove('./filters/dlf_201_j1.txt')
 
     # 5. j2 for fI
     with pytest.raises(ValueError):
@@ -90,26 +91,37 @@ def test_design():
         fdesign.design(fI=fI2, verb=0, plot=0, **dat4[0])
 
 
-def test_save_filter():
-    # Here we only save two pseudo-filters. In
-    # test_load_filter we check, if they were saved correctly
-    fdesign.save_filter('one', 1, 2)
-    fdesign.save_filter('two', 1)
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason="tmpdir seems to fail for Python<3.6.")
+def test_save_load_filter(tmpdir):
+    # Save two filters, with and without inversion result. In test_load_filter
+    # we check, if they were saved correctly
+    dat1 = DATA['case1'][()]
+    dat1[1].name = 'one'
+    dat1[1].savename = 'one'
+    dat2 = DATA['case2'][()]
+    dat2[1].name = 'two'
+    dat2[1].savename = 'two'
+    fdesign.save_filter('one', dat1[1], dat1[2], path=tmpdir)
+    fdesign.save_filter('one.gz', dat1[1], dat1[2], path=tmpdir)  # Check gz
+    fdesign.save_filter('two', dat2[1], path=tmpdir)
 
+    # Check the filters and inversion output saved in test_save_filter
+    dat1 = DATA['case1'][()]
+    dat2 = DATA['case2'][()]
+    filt, out = fdesign.load_filter('one', True, path=tmpdir)
+    _, _ = fdesign.load_filter('one.gz', True, path=tmpdir)  # Check gz works
+    assert_allclose(filt.base, dat1[1].base)
+    assert_allclose(out[0], dat1[2][0])
+    assert_allclose(out[1], dat1[2][1])
+    assert_allclose(out[2], dat1[2][2])
+    assert_allclose(out[3], dat1[2][3])
+    assert_allclose(out[4], dat1[2][4])
 
-def test_load_filter():
-    # Check the pseudo-filters saved in test_save_filter
-    filt, out = fdesign.load_filter('one', True)
-    assert filt == 1
-    assert out == 2
-    filt = fdesign.load_filter('two', True)
-    assert filt == 1
-    filt = fdesign.load_filter('two')
-    assert filt == 1
-    # Clean-up
-    for name in ['one', 'two']:
-        for ending in ['.bak', '.dir', '.dat']:
-            os.remove('./filters/'+name+ending)
+    filt = fdesign.load_filter('two', True, path=tmpdir)
+    assert_allclose(filt.base, dat2[1].base)
+    filt = fdesign.load_filter('two', path=tmpdir)
+    assert_allclose(filt.base, dat2[1].base)
 
 
 @pytest.mark.skipif(not plt, reason="Matplotlib not installed.")
@@ -127,7 +139,7 @@ class TestFiguresMatplotlib:
 
         # plot_result for min amplitude
         dat1 = DATA['case1'][()]
-        fdesign.plot_result(dat1[1], dat1[2], cvar='amp', prntres=True)
+        fdesign.plot_result(dat1[1], dat1[2], prntres=True)
         return plt.gcf()
 
     @pytest.mark.mpl_image_compare(remove_text=True)
@@ -141,7 +153,7 @@ class TestFiguresMatplotlib:
     def test_plot_result3(self):
         # plot_result several shifts one spacing for max r
         dat6 = DATA['case6'][()]
-        fdesign.plot_result(dat6[1], dat6[2], cvar='r')
+        fdesign.plot_result(dat6[1], dat6[2])
         return plt.gcf()
 
     @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
@@ -256,7 +268,7 @@ class TestFiguresNoMatplotlib:
 def test_print_data(capsys):
     # Test full with min amplitude with case 2
     dat1 = DATA['case2'][()]
-    fdesign.print_result(dat1[1], dat1[2], cvar='amp')
+    fdesign.print_result(dat1[1], dat1[2])
     out, _ = capsys.readouterr()
     assert "Filter length   : 201" in out
     assert "Best filter" in out
@@ -267,7 +279,7 @@ def test_print_data(capsys):
 
     # Test full with max r with case 3
     dat2 = DATA['case4'][()]
-    fdesign.print_result(dat2[1], dat2[2], cvar=dat2[0]['cvar'])
+    fdesign.print_result(dat2[1], dat2[2])
     out, _ = capsys.readouterr()
     assert "Filter length   : 201" in out
     assert "Best filter" in out
