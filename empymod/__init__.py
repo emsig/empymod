@@ -557,16 +557,19 @@ are in the same layer to calculate
 The Hankel transforms methods are having sometimes difficulties transforming
 these functions.
 
-Land CSEM
-'''''''''
-The code suffers from a numerical instability if source and receiver are
-located at the surface between air and subsurface. This issue, for which double
-precision is not enough, occurs in the wavenumber-frequency domain an then
-propagates through to the space-frequency and space-time domains. To avoid the
-issue simply set ``epermH[0] = epermV[0] = 0``, hence the relative electric
-permittivity of the air to zero. This trick obviously uses the diffusive
-approximation for the air-layer, it therefore will not work for very high
-frequencies (MHz and higher).
+Time-domain land CSEM
+'''''''''''''''''''''
+The derivation, as it stands, has a near-singular behaviour in the
+wavenumber-frequency domain when :math:`\kappa^2 = \omega^2\epsilon\mu`. This
+can be a problem for land-domain CSEM calculations if source and receiver are
+located at the surface between air and subsurface. Because most transforms do
+not sample the wavenumber-frequency domain sufficiently to catch this
+near-singular behaviour (hence not smooth), which then creates noise at early
+times where the signal should be zero. To avoid the issue simply set
+``epermH[0] = epermV[0] = 0``, hence the relative electric permittivity of the
+air to zero. This trick obviously uses the diffusive approximation for the
+air-layer, it therefore will not work for very high frequencies (e.g., GPR
+calculations).
 
 
 License
