@@ -1,8 +1,8 @@
 Changelog
 #########
 
-*latest*
---------
+v1.7.1 - *2018-06-19*
+---------------------
 
 - New routines in ``empymod.filters.DigitalFilter``: Filters can now be saved
   to or loaded from pure ascii-files.
@@ -25,6 +25,11 @@ Changelog
   independently of ``numexpr``.
 
 - Simplification of ``kernel.reflections`` through re-arranging.
+
+- Bug fixes
+
+- Version of re-submission of the DLF article to geophysics.
+
 
 v1.7.0 - *2018-05-23*
 ---------------------
