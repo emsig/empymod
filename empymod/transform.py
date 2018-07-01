@@ -244,7 +244,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # Check which kernels have information
     k_used = list()
     for val in (PJ0, PJ1, PJ0b):
-        k_used.append(np.any(val != 0))
+        k_used.append(np.any(val))
 
     # Call and return QWE, depending if spline or not
     if pts_per_dec != 0:  # If spline, we calculate all kernels here
@@ -882,7 +882,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             k_used.append(False)
         else:
             inp_index = i  # Index of a kernel that is not None
-            k_used.append(np.any(val != 0))
+            k_used.append(np.any(val))
 
     # If all kernels are zero, return zero
     if sum(k_used) == 0:
