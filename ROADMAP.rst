@@ -74,7 +74,8 @@ in touch if you would like to tackle one of these problems!
   decrease accessibility. Both at the same time would be nice. A fast
   C/C++-version for calculations (inversions), and a Python-version to tinker
   with for interested folks. (Probably combined with default parallelisation,
-  removing the ``numexpr`` variant.)
+  removing the ``numexpr`` variant.) *Probably not. See closed issue*
+  [`empymod#21 <https://github.com/empymod/empymod/issues/21>`_].
 
 - Abstraction of the code [`empymod#14
   <https://github.com/empymod/empymod/issues/14>`_].
