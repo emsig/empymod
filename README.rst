@@ -35,7 +35,7 @@ For more information regarding installation, usage, contributing, roadmap, bug
 reports, and much more, see
 
 - **Website**: https://empymod.github.io,
-- **Documentation empymod**: https://empymod.readthedocs.io,
+- **Documentation**: https://empymod.readthedocs.io,
 - **Source Code**: https://github.com/empymod,
 - **Examples**: https://github.com/empymod/example-notebooks.
 
