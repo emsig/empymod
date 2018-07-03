@@ -1,6 +1,12 @@
 Changelog
 #########
 
+latest
+------
+
+- Various simplifications and cleaning of the code base.
+
+
 v1.7.1 - *2018-06-19*
 ---------------------
 

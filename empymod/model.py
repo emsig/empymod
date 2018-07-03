@@ -554,34 +554,24 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 # Add this source element, with weight from integration
                 sEM += rEM*srcg_w[isg]
 
-            # Get required [s]tart- and [e]nd-[i]ndices, and [st]ep
-            if nrec == nrecz:
-                if nsrc == nsrcz:  # Case 1: Looped over each src and each rec
-                    si = isz*nrec + irz
-                    ei = si + 1
-                    st = 1
-                else:              # Case 2: Looped over each rec
-                    si = irz
-                    ei = nsrc*nrec
-                    st = nrec
-            else:
-                if nsrc == nsrcz:  # Case 3: Looped over each src
-                    si = isz*nrec
-                    ei = si + nrec
-                    st = 1
-                else:              # Case 4: All in one go
-                    si = 0
-                    ei = nsrc*nrec
-                    st = 1
-
-            # Get required scaling from src-strength and src/rec-length
+            # Scale signal for src-strength and src/rec-lengths
             src_rec_w = 1
             if strength > 0:
                 src_rec_w *= np.repeat(src_w, irec)
                 src_rec_w *= np.tile(rec_w, isrc)
+            sEM *= src_rec_w
 
             # Add this src-rec signal
-            EM[:, si:ei:st] = sEM*src_rec_w
+            if nrec == nrecz:
+                if nsrc == nsrcz:  # Case 1: Looped over each src and each rec
+                    EM[:, isz*nrec+irz:isz*nrec+irz+1] = sEM
+                else:              # Case 2: Looped over each rec
+                    EM[:, irz:nsrc*nrec:nrec] = sEM
+            else:
+                if nsrc == nsrcz:  # Case 3: Looped over each src
+                    EM[:, isz*nrec:nrec*(isz+1)] = sEM
+                else:              # Case 4: All in one go
+                    EM = sEM
 
     # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
