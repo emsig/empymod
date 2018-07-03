@@ -12,12 +12,6 @@ try:
 except ImportError:
     plt = False
 
-# Check VML
-try:
-    from numexpr import use_vml
-except ImportError:
-    use_vml = False
-
 from empymod import filters, model
 from empymod.scripts import fdesign
 
