@@ -4,7 +4,11 @@ Changelog
 latest
 ------
 
-- Various simplifications and cleaning of the code base.
+- Small improvements:
+
+  - Various simplifications or cleaning of the code base.
+  - Small change (for speed) in check if kernels are empty in ``transform.dlf``
+    and ``transform.qwe``.
 
 
 v1.7.1 - *2018-06-19*
