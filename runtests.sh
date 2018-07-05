@@ -2,7 +2,7 @@
 
 # Help text
 usage="
-$(basename "$0") [-hcpn] [-v VERSION(S)]
+$(basename "$0") [-hcpnd] [-v VERSION(S)]
 
 Run pytest for empymod locally in an isolated venv before submitting to
 GitHub/Travis-CI; by default for all supported python versions of empymod.
@@ -29,7 +29,7 @@ INST="pytest-flake8 pytest-mpl"
 SD="soft-dep"
 
 # Get Optional Input
-while getopts "hv:cpn" opt; do
+while getopts "hv:cpnd" opt; do
 
   case $opt in
     h) echo "$usage"
@@ -81,7 +81,7 @@ for i in ${PYTHON3VERSION[@]}; do
   printf "\e[0m\n"
 
   # Create venv, with channel CHAN
-  if [ ! -d "$HOME/anaconda3/envs"+$NAME ]; then
+  if [ ! -d "$HOME/anaconda3/envs/$NAME" ]; then
     conda create -y -n $NAME -c $CHAN python=3.${i} $PCKGS $NMXPR &> $PRINT
   fi
 
