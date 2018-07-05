@@ -26,7 +26,7 @@ NMXPR="numexpr matplotlib IPython"
 STR2="**  WITH numexpr/matplotlib/IPython  "
 PROPS="--mpl --flake8"
 INST="pytest-flake8 pytest-mpl"
-SD="soft-dep"
+SD="_soft-dep"
 
 # Get Optional Input
 while getopts "hv:cpnd" opt; do
@@ -65,7 +65,7 @@ done
 for i in ${PYTHON3VERSION[@]}; do
 
   # Environment name
-  NAME=test_3${i}_${CHAN}_${SD}
+  NAME=test_3${i}_${CHAN}${SD}
 
   # Print info
   STR="  PYTHON 3."${i}"  **  Channel "$CHAN"  $STR2"
@@ -94,14 +94,14 @@ for i in ${PYTHON3VERSION[@]}; do
   fi
 
   # Run tests
-  pytest --cov=empymod $PROPS
+#  pytest --cov=empymod $PROPS
 
   # De-activate venv
   source deactivate $NAME
 
   # Remove venv
-  if [ "$DELETE" = true ] ; then
-    conda remove -y -n $NAME --all &> $PRINT
-  fi
+#  if [ "$DELETE" = true ] ; then
+#    conda remove -y -n $NAME --all &> $PRINT
+#  fi
 
 done
