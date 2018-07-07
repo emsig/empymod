@@ -13,7 +13,8 @@ in touch if you would like to tackle one of these problems!
 
     - in-loop
     - coincident loop
-    - ...
+    - loop-loop
+    - arbitrary shaped loops
 
   - **Ramp waveform** [`empymod#7
     <https://github.com/empymod/empymod/issues/7>`_]
@@ -31,6 +32,9 @@ in touch if you would like to tackle one of these problems!
 - **Inversion** [`empymod#20 <https://github.com/empymod/empymod/issues/20>`_]:
   Inversion routines, preferably a selection of different ones.
 
+    - Add some clever checks, e.g. as in Key (2012): abort loops if the field
+      is strongly attenuated.
+
 
 - Additional (semi-)analytical functions (where possible)
 
@@ -41,26 +45,29 @@ in touch if you would like to tackle one of these problems!
   - Complete half-space
 
 
-- Fourier transform
+- Transforms
 
-  - Change ``fft`` to use discrete sine/cosine transforms instead, as all other
-    Fourier transforms
-  - If previous step is successful, clean up the internal decisions
-    (``utils.check_time``) when to use sine/cosine transform (not consistent at
-    the moment, some choice only exists with ``ffht`` impulse responses,
-    ``fqwe`` and ``fftlog`` use sine for impulse, and all three use sine for
-    step-on responses and cosine for step-off responses)
+  - Fourier
+
+    - Change ``fft`` to use discrete sine/cosine transforms instead, as all
+      other Fourier transforms
+    - If previous step is successful, clean up the internal decisions
+      (``utils.check_time``) when to use sine/cosine transform (not consistent
+      at the moment, some choice only exists with ``ffht`` impulse responses,
+      ``fqwe`` and ``fftlog`` use sine for impulse, and all three use sine for
+      step-on responses and cosine for step-off responses)
 
 
-- Hankel transform
+  - Hankel
 
-  - Add the ``fht``-module from FFTLog for the Hankel transform.
+    - Add the ``fht``-module from FFTLog for the Hankel transform.
 
-- Hankel and Fourier transform
 
-  - Include the method outlined by Mulder et al., 2008, Geophysics
-    (piecewise-cubic Hermite interpolation with a FFT) to try to further
-    speed-up the splined versions.
+  - Hankel and Fourier
+
+    - Include the method outlined by Mulder et al., 2008, Geophysics
+      (piecewise-cubic Hermite interpolation with a FFT) to try to further
+      speed-up the splined versions.
 
 
 - Extend examples (example-notebooks)
@@ -71,18 +78,16 @@ in touch if you would like to tackle one of these problems!
 
 - A ``cython``, ``numba``, or pure C/C++ implementation of the ``kernel`` and
   the ``transform`` modules. Maybe not worth it, as it may improve speed, but
-  decrease accessibility. Both at the same time would be nice. A fast
+  decrease readability. Both at the same time would be nice. A fast
   C/C++-version for calculations (inversions), and a Python-version to tinker
   with for interested folks. (Probably combined with default parallelisation,
-  removing the ``numexpr`` variant.) *Probably not. See closed issue*
+  removing the ``numexpr`` variant.)
+  *Probably not. See closed issue*
   [`empymod#21 <https://github.com/empymod/empymod/issues/21>`_].
 
-- Abstraction of the code [`empymod#14
-  <https://github.com/empymod/empymod/issues/14>`_].
+- Abstraction of the code
+  [`empymod#14 <https://github.com/empymod/empymod/issues/14>`_].
 
 - GUI.
-
-- Add some clever checks, e.g. as in Key (2012): abort loops if the field is
-  strongly attenuated (more relevant if once an inversion is implemented).
 
 - Move empymod from channel 'prisae' to 'conda-forge' (pros/cons?).
