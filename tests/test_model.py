@@ -465,6 +465,45 @@ class TestBipole:
         assert_allclose(bip[:, 0, 1], dip3)
         assert_allclose(bip[:, 1, 1], dip4)
 
+    def test_multisrc_multirec(self):
+        # Check that a multi-source, multi-receiver results in the same as if
+        # calculated on their own.
+
+        # General model parameters
+        model = {
+            'depth': [0, 1000],
+            'res': [2e14, 0.3, 1],
+            'freqtime': 1,
+            'verb': 0}
+
+        # Multi-src (0) and single sources (1), (2)
+        src0 = [[0, 100], [50, 200], [0, 10], [200, -30],
+                [950, 930], [955, 900]]
+        src1 = [0, 50, 0, 200, 950, 955]
+        src2 = [100, 200, 10, -30, 930, 900]
+
+        # Multi-rec (0) and single receivers (1), (2)
+        rec0 = [[4000, 5000], [4100, 5200], [0, 100], [100, 250],
+                [950, 990], [990, 1000]]
+        rec1 = [4000, 4100, 0, 100, 950, 990]
+        rec2 = [5000, 5200, 100, 250, 990, 1000]
+
+        # Calculate the multi-src/multi-rec result
+        out0f = bipole(src=src0, rec=rec0, signal=None, **model)
+        out0t = bipole(src=src0, rec=rec0, signal=0, **model)
+
+        # Calculate the single-src/single-rec correspondents
+        out1f = np.zeros((2, 2), dtype=complex)
+        out1t = np.zeros((2, 2))
+        for i, rec in enumerate([rec1, rec2]):
+            for ii, src in enumerate([src1, src2]):
+                out1f[i, ii] = bipole(src=src, rec=rec, signal=None, **model)
+                out1t[i, ii] = bipole(src=src, rec=rec, signal=0, **model)
+
+        # Check them
+        assert_allclose(out0f, out1f)
+        assert_allclose(out0t, out1t)
+
 
 def test_dipole():
     # As this is a subset of bipole, just run two tests to ensure

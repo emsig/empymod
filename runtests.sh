@@ -94,14 +94,14 @@ for i in ${PYTHON3VERSION[@]}; do
   fi
 
   # Run tests
-#  pytest --cov=empymod $PROPS
+  pytest --cov=empymod $PROPS
 
   # De-activate venv
   source deactivate $NAME
 
   # Remove venv
-#  if [ "$DELETE" = true ] ; then
-#    conda remove -y -n $NAME --all &> $PRINT
-#  fi
+  if [ "$DELETE" = true ] ; then
+    conda remove -y -n $NAME --all &> $PRINT
+  fi
 
 done

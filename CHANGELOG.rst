@@ -4,6 +4,12 @@ Changelog
 latest
 ------
 
+- Bug-fixes
+
+  - Fixed a bug in ``bipole`` for time-domain responses with several receivers
+    or sources with different depths. (Simply failed, as wrong dimension was
+    provided to ``tem``).
+
 - Small improvements:
 
   - Various simplifications or cleaning of the code base.

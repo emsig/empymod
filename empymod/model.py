@@ -578,7 +578,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Do f->t transform if required
     if signal is not None:
-        EM, conv = tem(EM, off, freq, time, signal, ft, ftarg)
+        EM, conv = tem(EM, EM[0, :], freq, time, signal, ft, ftarg)
 
         # In case of QWE/QUAD, print Warning if not converged
         conv_warning(conv, ftarg, 'Fourier', verb)
