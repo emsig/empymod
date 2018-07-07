@@ -82,9 +82,6 @@ in touch if you would like to tackle one of these problems!
 
 - GUI.
 
-- Add a benchmark suite, e.g. http://asv.readthedocs.io, in addition to the
-  testing suite.
-
 - Add some clever checks, e.g. as in Key (2012): abort loops if the field is
   strongly attenuated (more relevant if once an inversion is implemented).
 

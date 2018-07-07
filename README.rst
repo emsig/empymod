@@ -14,6 +14,9 @@
 .. image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
    :target: https://coveralls.io/github/empymod/empymod?branch=master
    :alt: Coveralls
+.. image:: https://img.shields.io/badge/benchmarked%20by-asv-brightgreen.svg?style=flat
+   :target: https://empymod.github.io/asv
+   :alt: Airspeed Velocity
 
 .. sphinx-inclusion-marker
 

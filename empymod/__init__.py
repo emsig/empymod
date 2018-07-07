@@ -176,25 +176,33 @@ the python module ``flake8``, and also that your code is covered with
 appropriate tests. Just get in touch if you have any doubts.
 
 
+Tests and benchmarks
+--------------------
+
 The modeller comes with a test suite using ``pytest``. If you want to run the
 tests, just install ``pytest`` and run it within the ``empymod``-top-directory.
 
 .. code-block:: console
 
-    > pip install pytest coveralls pytest-flake8
+    > pip install pytest coveralls pytest-flake8 pytest-mpl
     > # and then
     > cd to/the/empymod/folder  # Ensure you are in the right directory,
     > ls -d */                  # your output should look the same.
     docs/  empymod/  tests/
     > # pytest will find the tests, which are located in the tests-folder.
     > # simply run
-    > pytest --cov=empymod --flake8
+    > pytest --cov=empymod --flake8 --mpl
 
 It should run all tests successfully. Please let me know if not!
 
 Note that installations of ``empymod`` via conda or pip do not have the
 test-suite included. To run the test-suite you must download ``empymod`` from
 GitHub.
+
+There is also a benchmark suite using *airspeed velocity*, located in the
+`empymod/asv <https://github.com/empymod/asv>`_-repository. The result of my
+machine can be found on `empymod.github.io/asv
+<https://empymod.github.io/asv>`_.
 
 
 Transforms
