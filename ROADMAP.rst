@@ -32,8 +32,8 @@ in touch if you would like to tackle one of these problems!
 - **Inversion** [`empymod#20 <https://github.com/empymod/empymod/issues/20>`_]:
   Inversion routines, preferably a selection of different ones.
 
-    - Add some clever checks, e.g. as in Key (2012): abort loops if the field
-      is strongly attenuated.
+  - Add some clever checks, e.g. as in Key (2012): abort loops if the field
+    is strongly attenuated.
 
 
 - Additional (semi-)analytical functions (where possible)
