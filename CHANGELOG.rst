@@ -5,8 +5,8 @@ Changelog
 v1.7.2 - *2018-07-07*
 ---------------------
 
-- Benchmarks: ``empymod`` has now a benchmark suite, see [`empymod/asv
-  <https://github.com/empymod/asv>`_];
+- Benchmarks: ``empymod`` has now a benchmark suite, see `empymod/asv
+  <https://github.com/empymod/asv>`_.
 
 - Fixed a bug in ``bipole`` for time-domain responses with several receivers or
   sources with different depths. (Simply failed, as wrong dimension was
