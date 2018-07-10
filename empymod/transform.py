@@ -848,11 +848,15 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
         # Check if all angles are the same
         if factAng is None:
+            has_angle_factors = False
             factAng = np.array([1])
-        one_angle = not np.any(factAng != factAng[0])
-        angle_is_one = one_angle and factAng[0] == 1.0
-        if one_angle:
-            factAng = factAng[0]
+        else:
+            one_angle = not np.any(factAng != factAng[0])
+            if one_angle:
+                has_angle_factors = factAng[0] != 1.0
+                factAng = factAng[0]
+            else:
+                has_angle_factors = True
 
         # Cast to list
         signal = list(signal)
@@ -892,6 +896,9 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         return np.zeros(signal[inp_index].shape[:-1], dtype=dtype)
     elif hankel:  # Get index of a non-zero kernel
         inp_index = np.arange(3)[np.array(k_used)][0]
+
+        # Set has_angle_factors to False if no angle-dependent kernel is used
+        has_angle_factors *= bool(sum(k_used[1:]))
 
     # Interpolation function
     def spline(values, points, new):
@@ -958,7 +965,11 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             if pts_per_dec > 0:
                 # If splined we can add them here, as the interpolation
                 # is already done.
-                out_signal = factAng*out_angle + out_noang
+
+                # Angle dependency
+                if has_angle_factors:
+                    out_angle *= factAng
+                out_signal = out_angle + out_noang
 
         else:
             # With the standard DLF (one_angle or not), and with the splined
@@ -978,8 +989,8 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             if k_used[2]:  # J0b
                 out_signal += np.dot(inp_PJ0b, filt.j0)
 
-            # Angle factor
-            if not angle_is_one:
+            # Angle dependency
+            if has_angle_factors:
                 out_signal *= factAng
 
             if k_used[0]:  # J0
@@ -1003,7 +1014,9 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             int_angle = spline(out_angle[::-1], int_pts[::-1], out_pts)
 
             # Angle dependency
-            out_signal = factAng*int_angle + int_noang
+            if has_angle_factors:
+                int_angle *= factAng
+            out_signal = int_angle + int_noang
 
         else:  # If only one angle or Fourier
             out_signal = spline(out_signal[::-1], int_pts[::-1], out_pts)
