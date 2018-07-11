@@ -851,7 +851,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
             has_angle_factors = False
             factAng = np.array([1])
         else:
-            one_angle = not np.any(factAng != factAng[0])
+            one_angle = factAng.min() == factAng.max()
             if one_angle:
                 has_angle_factors = factAng[0] != 1.0
                 factAng = factAng[0]
