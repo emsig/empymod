@@ -34,7 +34,7 @@ def test_design():
     # only affects the edge-cases, not the best result we are looking for.
     # However, we have to limit the following comparison on the edges:
     ii = np.maximum.reduce([dat1[2][3], out1[3]]) < 1e-5
-    assert_allclose(out1[3][ii], dat1[2][3][ii], rtol=1e-3)
+    assert_allclose(out1[3][ii], dat1[2][3][ii], rtol=1e-2)
 
     # 2. Specific model with only one spacing/shift
     dat2 = DATA['case2'][()]
