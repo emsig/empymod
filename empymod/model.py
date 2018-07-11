@@ -1413,27 +1413,37 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     # === 3. EM-FIELD CALCULATION ============
 
+    # Pre-allocate
+    if off.size == 1 and np.ndim(wavenumber) == 2:
+        PJ0 = np.zeros((freq.size, wavenumber.shape[0], wavenumber.shape[1]),
+                       dtype=complex)
+        PJ1 = np.zeros((freq.size, wavenumber.shape[0], wavenumber.shape[1]),
+                       dtype=complex)
+    else:
+        PJ0 = np.zeros((freq.size, off.size, wavenumber.size), dtype=complex)
+        PJ1 = np.zeros((freq.size, off.size, wavenumber.size), dtype=complex)
+
     # If <ab> = 36 (or 63), field is zero
     # In `bipole` and in `dipole`, this is taken care of in `fem`. Here we
     # have to take care of it separately
-    if ab_calc in [36, ]:
-        PJ0 = np.zeros((freq.size, off.size, wavenumber.size), dtype=complex)
-        PJ1 = PJ0.copy()
-
-    else:  # Regular calculation
+    if ab_calc not in [36, ]:
 
         # Calculate wavenumber response
-        PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
-                                           etaV, zetaH, zetaV,
-                                           np.atleast_2d(wavenumber), ab_calc,
-                                           False, msrc, mrec, False)
+        J0, J1, J0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
+                                        etaV, zetaH, zetaV,
+                                        np.atleast_2d(wavenumber), ab_calc,
+                                        False, msrc, mrec, False)
 
         # Collect output
-        PJ1 = factAng[:, np.newaxis]*PJ1
-        if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
-            # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
-            PJ1 /= off[:, None]
-        PJ0 = PJ0 + factAng[:, np.newaxis]*PJ0b
+        if J1 is not None:
+            PJ1 += factAng[:, np.newaxis]*J1
+            if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
+                # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
+                PJ1 /= off[:, None]
+        if J0 is not None:
+            PJ0 += J0
+        if J0b is not None:
+            PJ0 += factAng[:, np.newaxis]*J0b
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, 1)

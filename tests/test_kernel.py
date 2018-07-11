@@ -30,9 +30,21 @@ def test_wavenumber():                                          # 1. wavenumber
     dat = DATAKERNEL['wave'][()]
     for key, val in dat.items():
         out = kernel.wavenumber(ab=val[0], msrc=val[1], mrec=val[2], **val[3])
-        assert_allclose(out[0], val[4][0])
-        assert_allclose(out[1], val[4][1])
-        assert_allclose(out[2], val[4][2])
+
+        if val[0] in [11, 22, 24, 15, 33]:
+            assert_allclose(out[0], val[4][0])
+        else:
+            assert out[0] is None
+
+        if val[0] == 33:
+            assert out[1] is None
+        else:
+            assert_allclose(out[1], val[4][1])
+
+        if val[0] in [11, 22, 24, 15, 12, 21, 14, 25]:
+            assert_allclose(out[2], val[4][2])
+        else:
+            assert out[2] is None
 
 
 def test_greenfct():                                              # 2. greenfct

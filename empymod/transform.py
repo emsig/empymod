@@ -242,10 +242,10 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
                                        msrc, mrec, use_ne_eval)
 
     # Check which kernels have information
-    # We check 100-200 elements, not the whole array (for speed)
-    k_used = list()
-    for val in (PJ0, PJ1, PJ0b):
-        k_used.append(np.any(val.ravel()[::val.size//200+1]))
+    k_used = [True, True, True]
+    for i, val in enumerate((PJ0, PJ1, PJ0b)):
+        if val is None:
+            k_used[i] = False
 
     # Call and return QWE, depending if spline or not
     if pts_per_dec != 0:  # If spline, we calculate all kernels here
@@ -449,21 +449,21 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # Interpolation in wavenumber domain: Has to be done separately on each PJ,
     # in order to work with multiple offsets which have different angles.
     # We check if the kernels are zero, to avoid unnecessary calculations.
-    if np.any(PJ0 != 0):
+    if PJ0 is not None:
         sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
         sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
     else:
         sPJ0r = None
         sPJ0i = None
 
-    if np.any(PJ1 != 0):
+    if PJ1 is not None:
         sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
         sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
     else:
         sPJ1r = None
         sPJ1i = None
 
-    if np.any(PJ0b != 0):
+    if PJ0b is not None:
         sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
         sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
     else:
@@ -844,7 +844,6 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     if isinstance(signal, tuple):
         # Hankel transform: 3 complex signals; respects `factAng` and `ab`
         hankel = True
-        dtype = complex
 
         # Check if all angles are the same
         if factAng is None:
@@ -861,10 +860,20 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         # Cast to list
         signal = list(signal)
 
+        # Get kernels with information, to avoid unnecessary calculation
+        k_used = [True, True, True]
+        for i, val in enumerate(signal):
+            if val is None:
+                k_used[i] = False
+            else:  # Index of a kernel that is not None
+                inp_index = i
+
+        # Set has_angle_factors to False if no angle-dep. kernel is used
+        has_angle_factors *= bool(sum(k_used[1:]))
+
     else:
         # Fourier transform: 1 complex signal; needs kind
         hankel = False
-        dtype = float
 
         # Fourier independent of Angle
         one_angle = True
@@ -878,27 +887,9 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         # Cast to list
         signal = [signal, ]
 
+        k_used = [True, ]
+
     # 1. PREPARE SIGNALS
-
-    # Get kernels with information, to avoid unnecessary calculation
-    k_used = list()
-    for i, val in enumerate(signal):
-        if val is None:
-            k_used.append(False)
-        else:
-            # Index of a kernel that is not None
-            inp_index = i
-            # We check 100-200 elements, not the whole array (for speed)
-            k_used.append(np.any(val.ravel()[::val.size//200+1]))
-
-    # If all kernels are zero, return zero
-    if sum(k_used) == 0:
-        return np.zeros(signal[inp_index].shape[:-1], dtype=dtype)
-    elif hankel:  # Get index of a non-zero kernel
-        inp_index = np.arange(3)[np.array(k_used)][0]
-
-        # Set has_angle_factors to False if no angle-dependent kernel is used
-        has_angle_factors *= bool(sum(k_used[1:]))
 
     # Interpolation function
     def spline(values, points, new):

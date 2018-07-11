@@ -96,9 +96,9 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     # ** AB-SPECIFIC COLLECTION OF PJ0, PJ1, AND PJ0b
 
     # Pre-allocate output
-    PJ0 = np.zeros_like(PTM)
-    PJ1 = np.zeros_like(PTM)
-    PJ0b = np.zeros_like(PTM)
+    PJ0 = None
+    PJ1 = None
+    PJ0b = None
 
     # Calculate Ptot which is used in all cases
     Ptot = (PTM + PTE)/(4*np.pi)
