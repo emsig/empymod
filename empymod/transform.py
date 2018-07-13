@@ -253,22 +253,22 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         # Interpolation : Has to be done separately on each PJ,
         # in order to work with multiple offsets which have different angles.
         if k_used[0]:
-            sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
-            sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
+            sPJ0r = iuSpline(np.log(ilambd), PJ0.real)
+            sPJ0i = iuSpline(np.log(ilambd), PJ0.imag)
         else:
             sPJ0r = None
             sPJ0i = None
 
         if k_used[1]:
-            sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
-            sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
+            sPJ1r = iuSpline(np.log(ilambd), PJ1.real)
+            sPJ1i = iuSpline(np.log(ilambd), PJ1.imag)
         else:
             sPJ1r = None
             sPJ1i = None
 
         if k_used[2]:
-            sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
-            sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
+            sPJ0br = iuSpline(np.log(ilambd), PJ0b.real)
+            sPJ0bi = iuSpline(np.log(ilambd), PJ0b.imag)
         else:
             sPJ0br = None
             sPJ0bi = None
@@ -291,8 +291,8 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         # Check if we use QWE or SciPy's QUAD
         # If there are any steep decays within an interval we have to use QUAD,
         # as QWE is not designed for these intervals.
-        check0 = np.log10(intervals[:, :-1])
-        check1 = np.log10(intervals[:, 1:])
+        check0 = np.log(intervals[:, :-1])
+        check1 = np.log(intervals[:, 1:])
         numerator = np.zeros((off.size, maxint), dtype=complex)
         denominator = np.zeros((off.size, maxint), dtype=complex)
 
@@ -336,11 +336,11 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
         if np.any(doqwe):
             # Get EM-field at required offsets
             if k_used[0]:
-                sPJ0 = sPJ0r(np.log10(lambd)) + 1j*sPJ0i(np.log10(lambd))
+                sPJ0 = sPJ0r(np.log(lambd)) + 1j*sPJ0i(np.log(lambd))
             if k_used[1]:
-                sPJ1 = sPJ1r(np.log10(lambd)) + 1j*sPJ1i(np.log10(lambd))
+                sPJ1 = sPJ1r(np.log(lambd)) + 1j*sPJ1i(np.log(lambd))
             if k_used[2]:
-                sPJ0b = sPJ0br(np.log10(lambd)) + 1j*sPJ0bi(np.log10(lambd))
+                sPJ0b = sPJ0br(np.log(lambd)) + 1j*sPJ0bi(np.log(lambd))
 
             # Carry out and return the Hankel transform for this interval
             sEM = np.zeros_like(numerator, dtype=complex)
@@ -450,22 +450,22 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # in order to work with multiple offsets which have different angles.
     # We check if the kernels are zero, to avoid unnecessary calculations.
     if PJ0 is not None:
-        sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
-        sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
+        sPJ0r = iuSpline(np.log(ilambd), PJ0.real)
+        sPJ0i = iuSpline(np.log(ilambd), PJ0.imag)
     else:
         sPJ0r = None
         sPJ0i = None
 
     if PJ1 is not None:
-        sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
-        sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
+        sPJ1r = iuSpline(np.log(ilambd), PJ1.real)
+        sPJ1i = iuSpline(np.log(ilambd), PJ1.imag)
     else:
         sPJ1r = None
         sPJ1i = None
 
     if PJ0b is not None:
-        sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
-        sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
+        sPJ0br = iuSpline(np.log(ilambd), PJ0b.real)
+        sPJ0bi = iuSpline(np.log(ilambd), PJ0b.imag)
     else:
         sPJ0br = None
         sPJ0bi = None
@@ -577,14 +577,14 @@ def fqwe(fEM, time, freq, qweargs):
     SS = sincos(Bx)*np.tile(g_w, maxint)
 
     # Interpolate in frequency domain
-    tEM_rint = iuSpline(np.log10(2*np.pi*freq), fEM.real)
-    tEM_iint = iuSpline(np.log10(2*np.pi*freq), -fEM.imag)
+    tEM_rint = iuSpline(np.log(2*np.pi*freq), fEM.real)
+    tEM_iint = iuSpline(np.log(2*np.pi*freq), -fEM.imag)
 
     # Check if we use QWE or SciPy's QUAD
     # If there are any steep decays within an interval we have to use QUAD, as
     # QWE is not designed for these intervals.
-    check0 = np.log10(intervals[:, :-1])
-    check1 = np.log10(intervals[:, 1:])
+    check0 = np.log(intervals[:, :-1])
+    check1 = np.log(intervals[:, 1:])
     doqwe = np.all((np.abs(tEM_rint(check0) + 1j*tEM_iint(check0)) /
                    np.abs(tEM_rint(check1) + 1j*tEM_iint(check1)) < diff_quad),
                    1)
@@ -615,7 +615,7 @@ def fqwe(fEM, time, freq, qweargs):
     if np.any(~doqwe):
         def sEMquad(w, t):
             """Return scaled, interpolated value of tEM_int for ``w``."""
-            return tEM_int(np.log10(w))*sincos(w*t)
+            return tEM_int(np.log(w))*sincos(w*t)
 
         # Loop over times that require QUAD
         for i in np.where(~doqwe)[0]:
@@ -629,7 +629,7 @@ def fqwe(fEM, time, freq, qweargs):
 
     # Carry out QWE for 'well-behaved' intervals
     if np.any(doqwe):
-        sEM = tEM_int(np.log10(Bx/time[doqwe, None]))*SS
+        sEM = tEM_int(np.log(Bx/time[doqwe, None]))*SS
         tEM[doqwe], _, tc = qwe(rtol, atol, maxint, sEM, intervals[doqwe, :])
         conv *= tc
 
@@ -765,8 +765,8 @@ def fftlog(fEM, time, freq, ftarg):
                        np.log(rk)/2.0))
 
     # Interpolate for the desired times
-    ttEM = iuSpline(np.log10(tcalc), a)
-    tEM = ttEM(np.log10(time))
+    ttEM = iuSpline(np.log(tcalc), a)
+    tEM = ttEM(np.log(time))
 
     # (Second argument is only for QWE)
     return tEM, True
@@ -793,10 +793,10 @@ def fft(fEM, time, freq, ftarg):
 
     # If pts_per_dec, we have first to interpolate fEM to required freqs
     if pts_per_dec:
-        sfEMr = iuSpline(np.log10(freq), fEM.real)
-        sfEMi = iuSpline(np.log10(freq), fEM.imag)
+        sfEMr = iuSpline(np.log(freq), fEM.real)
+        sfEMi = iuSpline(np.log(freq), fEM.imag)
         freq = np.arange(1, nfreq+1)*dfreq
-        fEM = sfEMr(np.log10(freq)) + 1j*sfEMi(np.log10(freq))
+        fEM = sfEMr(np.log(freq)) + 1j*sfEMi(np.log(freq))
 
     # Pad the frequency result
     fEM = np.pad(fEM, (0, ntot-nfreq), 'linear_ramp')
@@ -893,10 +893,10 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
     # Interpolation function
     def spline(values, points, new):
-        """Return `values` at `points` interpolated in log10 at `new`."""
-        out = iuSpline(np.log10(points), values.real)(np.log10(new))
+        """Return `values` at `points` interpolated in log at `new`."""
+        out = iuSpline(np.log(points), values.real)(np.log(new))
         if hankel:
-            out = out+1j*iuSpline(np.log10(points), values.imag)(np.log10(new))
+            out = out+1j*iuSpline(np.log(points), values.imag)(np.log(new))
         return out
 
     # Re-arranging and interpolation before DLF
@@ -1113,12 +1113,12 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
     # Define the quadrature kernels
     def quad_PJ0(klambd, sPJ0, koff):
         """Quadrature for PJ0."""
-        return sPJ0(np.log10(klambd))*special.j0(koff*klambd)
+        return sPJ0(np.log(klambd))*special.j0(koff*klambd)
 
     def quad_PJ1(klambd, sPJ1, ab, koff, kang):
         """Quadrature for PJ1."""
 
-        tP1 = kang*sPJ1(np.log10(klambd))
+        tP1 = kang*sPJ1(np.log(klambd))
         if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
             # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
             tP1 /= koff
@@ -1127,7 +1127,7 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
 
     def quad_PJ0b(klambd, sPJ0b, koff, kang):
         """Quadrature for PJ0b."""
-        return kang*sPJ0b(np.log10(klambd))*special.j0(koff*klambd)
+        return kang*sPJ0b(np.log(klambd))*special.j0(koff*klambd)
 
     # Pre-allocate output
     conv = True

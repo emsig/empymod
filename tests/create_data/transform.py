@@ -220,20 +220,20 @@ freqres = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                            ab, msrc, mrec)
 # The following is a condensed version of transform.hquad
 rtol, atol, limit, a, b, pts_per_dec = htarg
-la = np.log10(a)
-lb = np.log10(b)
-ilambd = np.logspace(la, lb, (lb-la)*pts_per_dec + 1)
+la = np.log(a)
+lb = np.log(b)
+ilambd = np.logspace(la, lb, (lb-la)*pts_per_dec + 1, base=np.e)
 PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
                                    etaH[None, :], etaV[None, :],
                                    zetaH[None, :], zetaV[None, :],
                                    np.atleast_2d(ilambd), ab, False, msrc,
                                    mrec, False)
-sPJ0r = iuSpline(np.log10(ilambd), PJ0.real)
-sPJ0i = iuSpline(np.log10(ilambd), PJ0.imag)
-sPJ1r = iuSpline(np.log10(ilambd), PJ1.real)
-sPJ1i = iuSpline(np.log10(ilambd), PJ1.imag)
-sPJ0br = iuSpline(np.log10(ilambd), PJ0b.real)
-sPJ0bi = iuSpline(np.log10(ilambd), PJ0b.imag)
+sPJ0r = iuSpline(np.log(ilambd), PJ0.real)
+sPJ0i = iuSpline(np.log(ilambd), PJ0.imag)
+sPJ1r = iuSpline(np.log(ilambd), PJ1.real)
+sPJ1i = iuSpline(np.log(ilambd), PJ1.imag)
+sPJ0br = iuSpline(np.log(ilambd), PJ0b.real)
+sPJ0bi = iuSpline(np.log(ilambd), PJ0b.imag)
 factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 iinp = {'a': a, 'b': b, 'epsabs': atol, 'epsrel': rtol, 'limit': limit}
 quad = {'inp': {'sPJ0r': sPJ0r, 'sPJ0i': sPJ0i, 'sPJ1r': sPJ1r, 'sPJ1i': sPJ1i,
