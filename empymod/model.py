@@ -187,10 +187,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     - If < 0: Lagged Convolution DLF.
                     - If > 0: Splined DLF
 
-                    Use with caution and check with the non-spline version for
-                    a specific problem. (Can be faster, slower, or plainly
-                    wrong, as it uses interpolation.)
-
             - If ``ht`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
                                 diff_quad, a, b, limit]:
 
@@ -202,10 +198,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0, no interpolation is used.
                     - If > 0, interpolation is used.
-
-                    Use with caution and check with the non-spline version for
-                    a specific problem. (Can be faster, slower, or plainly
-                    wrong, as it uses interpolation.)
 
                 - diff_quad: criteria when to swap to QUAD (only relevant if
                   opt='spline') (default: 100)
@@ -251,10 +243,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
                     - If > 0: Splined DLF
-
-                    Use with caution and check with the non-spline version for
-                    a specific problem. (Can be faster, slower, or plainly
-                    wrong, as it uses interpolation.)
 
 
             - If ``ft`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec]:
@@ -710,10 +698,6 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                     - If < 0: Lagged Convolution DLF.
                     - If > 0: Splined DLF
 
-                    Use with caution and check with the non-spline version for
-                    a specific problem. (Can be faster, slower, or plainly
-                    wrong, as it uses interpolation.)
-
             - If ``ht`` = 'qwe': [rtol, atol, nquad, maxint, pts_per_dec,
                                 diff_quad, a, b, limit]:
 
@@ -725,10 +709,6 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0, no interpolation is used.
                     - If > 0, interpolation is used.
-
-                    Use with caution and check with the non-spline version for
-                    a specific problem. (Can be faster, slower, or plainly
-                    wrong, as it uses interpolation.)
 
                 - diff_quad: criteria when to swap to QUAD (only relevant if
                   opt='spline') (default: 100)

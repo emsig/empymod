@@ -200,9 +200,10 @@ test-suite included. To run the test-suite you must download ``empymod`` from
 GitHub.
 
 There is also a benchmark suite using *airspeed velocity*, located in the
-`empymod/asv <https://github.com/empymod/asv>`_-repository. The result of my
-machine can be found on `empymod.github.io/asv
-<https://empymod.github.io/asv>`_.
+`empymod/asv <https://github.com/empymod/asv>`_-repository. The results of my
+machine can be found in the `empymod/bench
+<https://github.com/empymod/bench>`_, its rendered version at
+`empymod.github.io/asv <https://empymod.github.io/asv>`_.
 
 
 Transforms
@@ -478,8 +479,8 @@ practice is to check first which one is faster. (You can use the
 benchmark-notebook in the `empymod/example-notebooks
 <https://github.com/empymod/example-notebooks>`_-repository.)
 
-Spline interpolation
-''''''''''''''''''''
+Lagged Convolution and Splined Transforms
+'''''''''''''''''''''''''''''''''''''''''
 Both Hankel and Fourier DLF have three options, which can be controlled via
 the ``htarg['pts_per_dec']`` and ``ftarg['pts_per_dec']`` parameters:
 
@@ -492,37 +493,31 @@ the ``htarg['pts_per_dec']`` and ``ftarg['pts_per_dec']`` parameters:
 Similarly, interpolation can be used for ``QWE`` by setting ``pts_per_dec`` to
 a value bigger than 0.
 
-The spline option should be used with caution, as it is an interpolation and
-therefore less precise than the non-spline version. However, it significantly
-speeds up *QWE*, and massively speeds up *DLF*. (Note that the
-``numexpr``-version of the spline option is slower than the pure spline one.)
+The Lagged Convolution and Splined options should be used with caution, as they
+use interpolation and are therefore less precise than the standard version.
+However, they can significantly speed up *QWE*, and massively speed up *DLF*.
+Additionally, the interpolated versions minimizes memory requirements a lot.
+Speed-up is greater if all source-receiver angles are identical. Note that
+setting ``pts_per_dec`` to something else than 0 to calculate only one offset
+(Hankel) or only one time (Fourier) will be slower than using the standard
+version. Similarly, the standard version is usually the fastest when using the
+``parallel`` option (``numexpr``).
 
-Using the splined options is generally faster. Good speed-up is achieved for
-*QWE* by setting ``maxint`` as low as possible. Also, the higher ``nquad`` is,
-the higher the speed-up will be.  The variable ``pts_per_dec`` has also some
-influence. For *DLF*, big improvements are achieved for long DLF-filters and
-for many offsets/frequencies (thousands).  Additionally, spline minimizes
-memory requirements a lot.  Speed-up is greater if all source-receiver angles
-are identical.
+*QWE*: Good speed-up is also achieved for *QWE* by setting ``maxint`` as low as
+possible. Also, the higher ``nquad`` is, the higher the speed-up will be.
 
-*DLF*: Default for Hankel DLF ``pts_per_dec = 0``, which is the original
-*lagged convolution*, where the spacing is defined by the filter-base, the
-transform is carried out first followed by spline-interpolation. You can set
-this parameter to an integer, which defines the number of points to evaluate
-per decade. In this case the spline-interpolation is carried out first,
-followed by the transformation. The original *lagged convolution* is generally
-the fastest for a very good precision. However, by setting ``pts_per_dec``
-appropriately one can achieve higher precision, normally at the cost of speed.
+*DLF*: Big improvements are achieved for long DLF-filters and for many
+offsets/frequencies (thousands).
 
 .. warning::
 
-    Keep in mind that it uses interpolation, and is therefore not as
-    accurate as the non-spline version.  Use with caution and always compare
-    with the non-spline version if you can apply the spline-version to your
-    problem at hand!
+    Keep in mind that setting ``pts_per_dec`` to something else than 0 uses
+    interpolation, and is therefore not as accurate as the standard version.
+    Use with caution and always compare with the standard version to verify
+    if you can apply interpolation to your problem at hand!
 
 Be aware that *QUAD* (Hankel transform) *always* use the splined version and
-*always* loop over offsets. The Fourier transforms *FFTlog*, *QWE*, and *FFT*
+*always* loops over offsets. The Fourier transforms *FFTlog*, *QWE*, and *FFT*
 always use interpolation too, either in the frequency or in the time domain.
 With the *DLF* Fourier transform (sine and cosine transforms) you can choose
 between no interpolation and interpolation (splined or lagged).
@@ -546,11 +541,12 @@ parameter gives you the possibility to force looping over frequencies or
 offsets. This parameter can have severe effects on both runtime and memory
 usage. Play around with this factor to find the fastest version for your
 problem at hand. It ALWAYS loops over frequencies if ``ht = 'QWE'/'QUAD'`` or
-if ``ht = 'FHT'`` and ``pts_per_dec<0`` (Lagged Convolution Hankel DLF). All
-vectorized is very fast if there are few offsets or few frequencies. If there
-are many offsets and many frequencies, looping over the smaller of the two will
-be faster. Choosing the right looping together with ``opt = 'parallel'`` can
-have a huge influence.
+if ``ht = 'FHT'`` and ``pts_per_dec!=0`` (Lagged Convolution or Splined Hankel
+DLF). All vectorized is very fast if there are few offsets or few frequencies.
+If there are many offsets and many frequencies, looping over the smaller of the
+two will be faster. Choosing the right looping together with ``opt =
+'parallel'`` can have a huge influence.
+
 
 Vertical components
 '''''''''''''''''''
@@ -564,6 +560,9 @@ are in the same layer to calculate
 
 The Hankel transforms methods are having sometimes difficulties transforming
 these functions.
+
+However, in all other cases it will be faster if you set ``xdirect = False``.
+
 
 Time-domain land CSEM
 '''''''''''''''''''''
