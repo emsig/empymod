@@ -2,20 +2,25 @@ Changelog
 #########
 
 
-*latest*
---------
+v1.7.3 - *2018-07-16*
+---------------------
 
-- Kernels which do not exist for a given ``ab`` are now returned as ``None``
-  from ``kernel.wavenumber`` instead of arrays of zeroes. This permits for some
-  time saving for the cases where one or two of the three kernels do not exist.
-  This change is backwards incompatible if you directly used
-  ``kernel.wavenumber``. Nothing changes for the user-facing routines in
-  ``model``.
+- Small improvements related to speed as a result of the benchmarks introduced
+  in v1.7.2:
 
-- Adjustments in ``transform`` with regards to the ``None`` returned by
-  ``kernel.wavenumber``. The kernels are not checked anymore if they are all
-  zeroes (which can be slow for big arrays). If they are not None, they will be
-  processed. Various small improvements to ``transform.dlf``.
+  - Kernels which do not exist for a given ``ab`` are now returned as ``None``
+    from ``kernel.wavenumber`` instead of arrays of zeroes. This permits for
+    some time saving in the transforms. This change is backwards incompatible
+    if you directly used ``kernel.wavenumber``. Nothing changes for the
+    user-facing routines in ``model``.
+
+  - Adjustments in ``transform`` with regard to the ``None`` returned by
+    ``kernel.wavenumber``. The kernels are not checked anymore if they are all
+    zeroes (which can be slow for big arrays). If they are not None, they will
+    be processed.
+
+  - Various small improvements for speed to ``transform.dlf`` (i.e.
+    ``factAng``; ``log10``/``log``; re-arranging).
 
 
 v1.7.2 - *2018-07-07*

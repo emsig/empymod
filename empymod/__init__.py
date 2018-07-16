@@ -746,4 +746,4 @@ __all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts',
            'DigitalFilter']
 
 # Version
-__version__ = '1.7.3.dev0'
+__version__ = '1.7.3'
