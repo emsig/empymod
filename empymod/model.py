@@ -19,10 +19,10 @@ which models infinitesimal small dipoles along the principal axes x, y, and z.
 Further routines are:
 
     - ``analytical``: Calculate analytical fullspace and halfspace solutions.
-    - ``wavenumber``: Calculate the electromagnetic wavenumber-domain solution.
+    - ``dipole_k``:   Calculate the electromagnetic wavenumber-domain solution.
     - ``gpr``:        Calculate the Ground-Penetrating Radar (GPR) response.
 
-The ``wavenumber`` routine can be used if you are interested in the
+The ``dipole_k`` routine can be used if you are interested in the
 wavenumber-domain result, without Hankel nor Fourier transform. It calls
 straight the ``kernel``. The ``gpr``-routine convolves the frequency-domain
 result with a wavelet, and applies a gain to the time-domain result. This
@@ -51,6 +51,7 @@ The modelling routines make use of the following two core routines:
 # the License.
 
 
+import warnings
 import numpy as np
 
 from . import kernel, transform
@@ -60,7 +61,8 @@ from .utils import (check_time, check_time_only, check_model, check_frequency,
                     get_azm_dip, get_off_ang, get_layer_nr, printstartfinish,
                     conv_warning, spline_backwards_hankel)
 
-__all__ = ['bipole', 'dipole', 'analytical', 'gpr', 'wavenumber', 'fem', 'tem']
+__all__ = ['bipole', 'dipole', 'analytical', 'gpr', 'dipole_k', 'fem', 'tem',
+           'wavenumber']
 
 
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
@@ -1240,8 +1242,8 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
     return EM
 
 
-def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
-               epermH=None, epermV=None, mpermH=None, mpermV=None, verb=2):
+def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
+             epermH=None, epermV=None, mpermH=None, mpermV=None, verb=2):
     """Return the electromagnetic wavenumber-domain field.
 
     Calculate the electromagnetic wavenumber-domain field due to infinitesimal
@@ -1339,14 +1341,14 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     Examples
     --------
     >>> import numpy as np
-    >>> from empymod.model import wavenumber
+    >>> from empymod.model import dipole_k
     >>> src = [0, 0, 100]
     >>> rec = [5000, 0, 200]
     >>> depth = [0, 300, 1000, 1050]
     >>> res = [1e20, .3, 1, 50, 1]
     >>> freq = 1
     >>> wavenrs = np.logspace(-3.7, -3.6, 10)
-    >>> PJ0, PJ1 = wavenumber(src, rec, depth, res, freq, wavenrs, verb=0)
+    >>> PJ0, PJ1 = dipole_k(src, rec, depth, res, freq, wavenrs, verb=0)
     >>> print(PJ0)
     [ -1.02638329e-08 +4.91531529e-09j  -1.05289724e-08 +5.04222413e-09j
       -1.08009148e-08 +5.17238608e-09j  -1.10798310e-08 +5.30588284e-09j
@@ -1429,6 +1431,19 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     printstartfinish(verb, t0, 1)
 
     return np.squeeze(PJ0), np.squeeze(PJ1)
+
+
+def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
+               epermH=None, epermV=None, mpermH=None, mpermV=None, verb=2):
+    """Depreciated. Use `dipole_k` instead."""
+
+    # Issue warning
+    mesg = ("\n    The use of `model.wavenumber` is deprecated and will " +
+            "be removed;\n    use `model.dipole_k` instead.")
+    warnings.warn(mesg, DeprecationWarning)
+
+    return dipole_k(src, rec, depth, res, freq, wavenumber, ab, aniso, epermH,
+                    epermV, mpermH, mpermV, verb)
 
 
 # Core modelling routines

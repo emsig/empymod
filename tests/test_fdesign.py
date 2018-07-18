@@ -376,11 +376,11 @@ def test_empy_hankel():
                              freqtime=f, verb=0, **model1)
     out4c = model.analytical([0, 0, zsrc], [r, r*0, zrec], freqtime=f, verb=0,
                              ab=31, **model1)
-    out4d, _ = model.wavenumber(src=[0, 0, zsrc],
-                                rec=[1/np.sqrt(2), 1/np.sqrt(2), zrec],
-                                freq=f, depth=[], wavenumber=1/r, **model1)
-    _, out4e = model.wavenumber(src=[0, 0, zsrc], ab=31, rec=[1, 0, zrec],
-                                freq=f, depth=[], wavenumber=1/r, **model1)
+    out4d, _ = model.dipole_k(src=[0, 0, zsrc],
+                              rec=[1/np.sqrt(2), 1/np.sqrt(2), zrec],
+                              freq=f, depth=[], wavenumber=1/r, **model1)
+    _, out4e = model.dipole_k(src=[0, 0, zsrc], ab=31, rec=[1, 0, zrec],
+                              freq=f, depth=[], wavenumber=1/r, **model1)
     assert_allclose(out4a[0].rhs(r), out4b)
     assert_allclose(out4a[1].rhs(r), out4c)
     assert_allclose(out4a[0].lhs(1/r), out4d)
@@ -401,9 +401,9 @@ def test_empy_hankel():
     out5a = fdesign.empy_hankel('j2', zsrc, zrec, freqtime=f, **model2)
     out5b = model.dipole([0, 0, zsrc], [r/np.sqrt(2), r/np.sqrt(2), zrec],
                          freqtime=f, verb=0, ab=12, **model2)
-    out5c, out5d = model.wavenumber(src=[0, 0, zsrc],
-                                    rec=[1/np.sqrt(2), 1/np.sqrt(2), zrec],
-                                    ab=12, freq=f, wavenumber=1/r, **model2)
+    out5c, out5d = model.dipole_k(src=[0, 0, zsrc],
+                                  rec=[1/np.sqrt(2), 1/np.sqrt(2), zrec],
+                                  ab=12, freq=f, wavenumber=1/r, **model2)
     assert_allclose(out5a.rhs(r), out5b)
     assert_allclose(out5a.lhs(1/r)[0], out5c)
     assert_allclose(out5a.lhs(1/r)[1], out5d)

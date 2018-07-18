@@ -14,7 +14,7 @@ except ImportError:
 # the __init__.py-file.
 from empymod import bipole, dipole, analytical
 # Import rest from model
-from empymod.model import gpr, wavenumber, fem, tem
+from empymod.model import gpr, dipole_k, wavenumber, fem, tem
 from empymod.kernel import fullspace, halfspace
 
 # These are kind of macro-tests, as they check the final results.
@@ -592,17 +592,22 @@ def test_gpr(capsys):
     assert_allclose(gprout[:, 0, :], gprout2b)
 
 
-def test_wavenumber():
+def test_dipole_k():
     # This is like `frequency`, without the Hankel transform. We just run a
     # test here, to check that it remains the status quo.
     res = DATAEMPYMOD['wout'][()]
-    w_res0, w_res1 = wavenumber(**res['inp'])
+    w_res0, w_res1 = dipole_k(**res['inp'])
     assert_allclose(w_res0, res['PJ0'])
     assert_allclose(w_res1, res['PJ1'])
 
+    # Test depreciated model.wavenumber
+    w_res0b, w_res1b = wavenumber(**res['inp'])
+    assert_allclose(w_res0, w_res0b)
+    assert_allclose(w_res1, w_res1b)
+
     # Check that ab=36 returns zeros
     res['inp']['ab'] = 36
-    w_res0, w_res1 = wavenumber(**res['inp'])
+    w_res0, w_res1 = dipole_k(**res['inp'])
     assert_allclose(w_res0, np.zeros(res['PJ0'].shape, dtype=complex))
     assert_allclose(w_res1, np.zeros(res['PJ1'].shape, dtype=complex))
 

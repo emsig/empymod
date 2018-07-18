@@ -1,10 +1,10 @@
 """Create data for
-   - test_model:: test_self, test_gpr, and test_wavenumber
+   - test_model:: test_self, test_gpr, and test_dipole_k
    - test_kernel:: test_fullspace and test_halfspace."""
 import numpy as np
 from copy import deepcopy as dc
 from scipy.constants import epsilon_0, mu_0
-from empymod.model import bipole, wavenumber, gpr
+from empymod.model import bipole, dipole_k, gpr
 from empymod.kernel import halfspace, fullspace
 
 
@@ -135,7 +135,7 @@ winp = {'src': [330, -200, 500],
         'mpermH': [1, 20, 50],
         'mpermV': [1, 30, 4],
         'verb': 0}
-PJ0, PJ1 = wavenumber(**winp)
+PJ0, PJ1 = dipole_k(**winp)
 
 # # C -- FULLSPACE # #
 # More or less random values, to test a wide range of models.

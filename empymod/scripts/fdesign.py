@@ -231,7 +231,7 @@ except ImportError:
     plt_msg = "* WARNING :: `matplotlib` is not installed, no figures shown."
 
 from ..filters import DigitalFilter
-from ..model import dipole, wavenumber
+from ..model import dipole, dipole_k
 from ..filters import key_201_2009 as j0j1filt
 from ..filters import key_201_CosSin_2012 as sincosfilt
 from ..utils import printstartfinish, timedelta, default_timer
@@ -1186,10 +1186,10 @@ def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=[], aniso=None,
                      htarg=htarg, freqtime=freqtime, **model)
         return out
 
-    # lhs: empymod.model.wavenumber
+    # lhs: empymod.model.dipole_k
     def lhs(k):
-        lhs0, lhs1 = wavenumber(rec=[x, y, zrec], wavenumber=k, verb=verblhs,
-                                freq=freqtime, **model)
+        lhs0, lhs1 = dipole_k(rec=[x, y, zrec], wavenumber=k, verb=verblhs,
+                              freq=freqtime, **model)
         if ftype == 'j0':
             return lhs0
         elif ftype == 'j1':

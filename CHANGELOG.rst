@@ -2,6 +2,16 @@ Changelog
 #########
 
 
+*latest*
+--------
+
+- ``model.wavenumber`` renamed to ``model.dipole_k`` to avoid name clash with
+  ``kernel.wavenumber``. For now ``model.wavenumber`` continues to exist, but
+  raises a depreciation warning.
+
+- ``xdirect`` default value changed from ``True`` to ``False``.
+
+
 v1.7.3 - *2018-07-16*
 ---------------------
 
