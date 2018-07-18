@@ -67,7 +67,7 @@ __all__ = ['bipole', 'dipole', 'analytical', 'gpr', 'dipole_k', 'fem', 'tem',
 
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
-           srcpts=1, mrec=False, recpts=1, strength=0, xdirect=True,
+           srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
            verb=2):
     """Return the electromagnetic field due to an electromagnetic source.
@@ -169,7 +169,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           - If None, direct field is excluded from the calculation, and only
             reflected fields are returned (secondary field).
 
-        Defaults to True.
+        Defaults to False.
 
     ht : {'fht', 'qwe', 'quad'}, optional
         Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
@@ -583,7 +583,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
-           epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=True,
+           epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
            verb=2):
     """Return the electromagnetic field due to a dipole source.
@@ -680,7 +680,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
           - If None, direct field is excluded from the calculation, and only
             reflected fields are returned (secondary field).
 
-        Defaults to True.
+        Defaults to False.
 
     ht : {'fht', 'qwe', 'quad'}, optional
         Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
@@ -1161,7 +1161,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
 
 def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
-        epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=True,
+        epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
         ht='quad', htarg=None, ft='fft', ftarg=None, opt=None, loop=None,
         verb=2):
     """Return the Ground-Penetrating Radar signal.

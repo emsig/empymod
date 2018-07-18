@@ -548,10 +548,14 @@ two will be faster. Choosing the right looping together with ``opt =
 'parallel'`` can have a huge influence.
 
 
-Vertical components
-'''''''''''''''''''
-It is advised to use ``xdirect = True`` (the default) if source and receiver
-are in the same layer to calculate
+Vertical components and ``xdirect``
+'''''''''''''''''''''''''''''''''''
+Calculating the direct field in the wavenumber-frequency domain
+(``xdirect=False``; the default) is generally faster than calculating it in the
+frequency-space domain (``xdirect=True``).
+
+However, using ``xdirect = True`` can improve the result (if source and
+receiver are in the same layer) to calculate:
 
     - the vertical electric field due to a vertical electric source,
     - configurations that involve vertical magnetic components (source or
@@ -560,8 +564,6 @@ are in the same layer to calculate
 
 The Hankel transforms methods are having sometimes difficulties transforming
 these functions.
-
-However, in all other cases it will be faster if you set ``xdirect = False``.
 
 
 Time-domain land CSEM

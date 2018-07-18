@@ -1182,8 +1182,8 @@ def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=[], aniso=None,
     # rhs: empymod.model.dipole
     # If depth=[], the analytical full-space solution will be used internally
     def rhs(r):
-        out = dipole(rec=[r*x, r*y, zrec], ht='qwe', verb=verbrhs,
-                     htarg=htarg, freqtime=freqtime, **model)
+        out = dipole(rec=[r*x, r*y, zrec], ht='qwe', xdirect=True,
+                     verb=verbrhs, htarg=htarg, freqtime=freqtime, **model)
         return out
 
     # lhs: empymod.model.dipole_k
