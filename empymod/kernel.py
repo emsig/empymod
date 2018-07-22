@@ -34,11 +34,7 @@ root directory for more information regarding the involved licenses.
 
 
 import numpy as np
-
-# Imports for halfspace solution
-from scipy.special import ive, kve  # Modified Bessel functions
-from scipy.special import erfc      # Complementary error function
-from scipy.constants import mu_0    # Magn. perm.y of free space  [H/m]
+from scipy import special  # Only used for halfspace solution
 
 np.seterr(all='ignore')
 
@@ -834,8 +830,8 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
     # Other defined parameters
     rh = np.sqrt(xco**2 + yco**2)  # Horizontal distance in space
-    hp = np.abs(zrec + zsrc)       # Physical vertical distance
-    hm = np.abs(zrec - zsrc)
+    hp = abs(zrec + zsrc)          # Physical vertical distance
+    hm = abs(zrec - zsrc)
     hsp = hp*aniso                 # Scaled vertical distance
     hsm = hm*aniso
     rp = np.sqrt(xco**2 + yco**2 + hp**2)    # Physical distance
@@ -843,6 +839,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     rsp = np.sqrt(xco**2 + yco**2 + hsp**2)  # Scaled distance
     rsm = np.sqrt(xco**2 + yco**2 + hsm**2)
     #
+    mu_0 = 4e-7*np.pi                   # Magn. perm. of free space  [H/m]
     tp = mu_0*rp**2/(res*4)             # Diffusion time
     tm = mu_0*rm**2/(res*4)
     tsp = mu_0*rsp**2/(res*aniso**2*4)  # Scaled diffusion time
@@ -856,14 +853,6 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         delta = 1
     else:
         delta = 0
-
-    # src-rec type
-    if ab == 33:
-        srcrec = 3
-    elif ab in [13, 23, 31, 32]:
-        srcrec = 2
-    else:
-        srcrec = 1
 
     # Define alpha/beta; swap if necessary
     x = xco
@@ -899,12 +888,12 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         fs2p = s*fs0p
         fs2m = s*fs0m
 
-    elif np.abs(signal) == 1:  # Time-domain step response
+    elif abs(signal) == 1:  # Time-domain step response
         # Replace F(m) with F(m-2)
-        f0p = erfc(np.sqrt(tp/time))
-        f0m = erfc(np.sqrt(tm/time))
-        fs0p = erfc(np.sqrt(tsp/time))
-        fs0m = erfc(np.sqrt(tsm/time))
+        f0p = special.erfc(np.sqrt(tp/time))
+        f0m = special.erfc(np.sqrt(tm/time))
+        fs0p = special.erfc(np.sqrt(tsp/time))
+        fs0m = special.erfc(np.sqrt(tsm/time))
 
         f1p = np.exp(-tp/time)/np.sqrt(np.pi*time)
         f1m = np.exp(-tm/time)/np.sqrt(np.pi*time)
@@ -946,7 +935,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     g2p = np.zeros(np.shape(x), dtype=dtype)
     air = np.zeros(np.shape(f0p), dtype=dtype)
 
-    if srcrec == 1:  # 1. {alpha, beta}
+    if ab in [11, 12, 21, 22]:  # 1. {alpha, beta}
         # Get indices for singularities
         izr = rh == 0         # index where rh = 0
         iir = np.invert(izr)  # invert of izr
@@ -995,11 +984,11 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         # Bessel functions for airwave
         def BI(gamH, hp, nr, xim):
             """Return BI_nr."""
-            return np.exp(-np.real(gamH)*hp)*ive(nr, xim)
+            return np.exp(-np.real(gamH)*hp)*special.ive(nr, xim)
 
         def BK(xip, nr):
             """Return BK_nr."""
-            return np.exp(-1j*np.imag(xip))*kve(nr, xip)
+            return np.exp(-1j*np.imag(xip))*special.kve(nr, xip)
 
         # Airwave calculation
         def airwave(s, hp, rp, res, fab, delta):
@@ -1032,7 +1021,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         if signal is None:  # Frequency-domain
             air = airwave(s, hp, rp, res, fab, delta)
 
-        elif np.abs(signal) == 1:  # Time-domain step response
+        elif abs(signal) == 1:  # Time-domain step response
             # Solution for step-response air-wave is not analytical, but uses
             # the Gaver-Stehfest method.
             K = 16
@@ -1056,13 +1045,13 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
             thp = mu_0*hp**2/(4*res)
             trh = mu_0*rh**2/(8*res)
             P1 = (mu_0**2*hp*np.exp(-thp/time))/(res*32*np.pi*time**3)
-            P2 = 2*(delta - (x*y)/rh**2)*ive(1, trh/time)
+            P2 = 2*(delta - (x*y)/rh**2)*special.ive(1, trh/time)
             P3 = mu_0/(2*res*time)*(rh**2*delta - x*y)-delta
-            P4 = ive(0, trh/time) - ive(1, trh/time)
+            P4 = special.ive(0, trh/time) - special.ive(1, trh/time)
 
             air = P1*(P2 - P3*P4)
 
-    elif srcrec == 2:  # 2. {3, alpha}, {alpha, 3}
+    elif ab in [13, 23, 31, 32]:  # 2. {3, alpha}, {alpha, 3}
         # TM-mode
         gs0m = 3*x*res*aniso**3*(zrec - zsrc)/(4*np.pi*rsm**5)
         gs0p = rev*3*x*res*aniso**3*hp/(4*np.pi*rsp**5)
@@ -1072,7 +1061,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         gs2m = mu_0*x*aniso*(zrec - zsrc)/(4*np.pi*rsm**3)
         gs2p = rev*mu_0*x*aniso*hp/(4*np.pi*rsp**3)
 
-    elif srcrec == 3:  # 3. {3, 3}
+    elif ab == 33:  # 3. {3, 3}
         # TM-mode
         gs0m = res*aniso**3*(3*hsm**2 - rsm**2)/(4*np.pi*rsm**5)
         gs0p = -res*aniso**3*(3*hsp**2 - rsp**2)/(4*np.pi*rsp**5)

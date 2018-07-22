@@ -35,8 +35,7 @@ import numpy as np
 from scipy import special
 from datetime import timedelta
 from timeit import default_timer
-from scipy.constants import mu_0       # Magn. permeability of free space [H/m]
-from scipy.constants import epsilon_0  # Elec. permittivity of free space [F/m]
+
 
 # Optional imports
 try:
@@ -421,6 +420,10 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
         _prnt_min_max_val(freq, "   frequency  [Hz] : ", verb)
 
     # Calculate eta and zeta (horizontal and vertical)
+    c = 299792458              # Speed of light m/s
+    mu_0 = 4e-7*np.pi          # Magn. permeability of free space [H/m]
+    epsilon_0 = 1./(mu_0*c*c)  # Elec. permittivity of free space [F/m]
+
     etaH = 1/res + np.outer(2j*np.pi*freq, epermH*epsilon_0)
     etaV = 1/(res*aniso*aniso) + np.outer(2j*np.pi*freq, epermV*epsilon_0)
     zetaH = np.outer(2j*np.pi*freq, mpermH*mu_0)
