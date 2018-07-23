@@ -373,8 +373,8 @@ orders of magnitudes slower, and more fragile depending on the input arguments.
 However, it can provide accurate results where *DLF* and *QWE* fail.
 
 Parts of the kernel can run in parallel using `numexpr`. This option is
-activated by setting ``opt='parallel'`` (see subsection `Parallelisation
-<#parallelisation>`_). It is switched off by default.
+activated by setting ``opt='parallel'`` (see subsection :ref:`Parallelisation
+<parallelisation>`). It is switched off by default.
 
 
 Memory
@@ -442,6 +442,8 @@ source and receiver bipoles.
     |           2250 |      5 |  arb. | arb. |     5 |  arb. | arb. |      10 |
     +----------------+--------+-------+------+-------+-------+------+---------+
 
+
+.. _parallelisation:
 
 Parallelisation
 '''''''''''''''
