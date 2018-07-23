@@ -356,17 +356,17 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
         for iz in layer_count:
 
             # Eqs 65, A-12
-            iGam = Gam[:, :, iz+pm, :]
+            e_zHa = e_zH[:, None, iz+pm, None]
+            Gama = Gam[:, :, iz, :]
+            e_zHb = e_zH[:, None, iz, None]
+            Gamb = Gam[:, :, iz+pm, :]
             if use_ne_eval:
-                e_zHa = e_zH[:, None, iz+pm, None]  # NOQA
-                Gama = Gam[:, :, iz, :]  # NOQA
-                e_zHb = e_zH[:, None, iz, None]  # NOQA
-                rlocstr = "(e_zHa*Gama - e_zHb*iGam)/(e_zHa*Gama + e_zHb*iGam)"
+                rlocstr = "(e_zHa*Gama - e_zHb*Gamb)/(e_zHa*Gama + e_zHb*Gamb)"
                 rloc = use_ne_eval(rlocstr)
             else:
-                rloc = e_zH[:, None, iz+pm, None]*Gam[:, :, iz, :]
-                tloc = e_zH[:, None, iz, None]*iGam
-                np.divide(rloc - tloc, rloc + tloc, out=rloc)
+                rloca = e_zHa*Gama
+                rlocb = e_zHb*Gamb
+                rloc = (rloca - rlocb)/(rloca + rlocb)
 
             # In first layer tRef = rloc
             if iz == layer_count[0]:
@@ -376,11 +376,11 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
 
                 # Eqs 64, A-11
                 if use_ne_eval:
-                    tRef = use_ne_eval("tRef*exp(-2*iGam*ddepth)")
-                    tRef = use_ne_eval("(rloc + tRef)/(1 + rloc*tRef)")
+                    term = use_ne_eval("tRef*exp(-2*Gamb*ddepth)")
+                    tRef = use_ne_eval("(rloc + term)/(1 + rloc*term)")
                 else:
-                    tRef *= np.exp(-2*iGam*ddepth)
-                    np.divide(rloc + tRef, 1 + rloc*tRef, out=tRef)
+                    term = tRef*np.exp(-2*Gamb*ddepth)  # NOQA
+                    tRef = (rloc + term)/(1 + rloc*term)
 
             # The global reflection coefficient is given back for all layers
             # between and including src- and rec-layer
