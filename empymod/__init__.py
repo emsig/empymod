@@ -372,12 +372,9 @@ standard quadrature in the form of *QUAD* is also provided. *QUAD* is generally
 orders of magnitudes slower, and more fragile depending on the input arguments.
 However, it can provide accurate results where *DLF* and *QWE* fail.
 
-The kernel can run in parallel using `numexpr`. This option is activated by
-setting ``opt='parallel'``. It is switched off by default.
-
-I am sure ``empymod`` could be made much faster with cleverer coding style or
-with the likes of ``cython`` or ``numba``. Suggestions and contributions are
-welcomed!
+Parts of the kernel can run in parallel using `numexpr`. This option is
+activated by setting ``opt='parallel'`` (see subsection `Parallelisation
+<#parallelisation>`_). It is switched off by default.
 
 
 Memory
@@ -448,7 +445,7 @@ source and receiver bipoles.
 
 Parallelisation
 '''''''''''''''
-If ``opt = 'parallel'``, a good dozen of the most time-consuming statements are
+If ``opt = 'parallel'``, six (*) of the most time-consuming statements are
 calculated by using the ``numexpr`` package
 (https://github.com/pydata/numexpr/wiki/Numexpr-Users-Guide).  These statements
 are all in the ``kernel``-functions ``greenfct``, ``reflections``, and
@@ -473,11 +470,24 @@ following command (in the example it is changed to 4):
     >>> import numexpr
     >>> numexpr.set_num_threads(4)
 
-This parallelisation will make ``empymod`` faster if you calculate a lot of
-offsets/frequencies at once, but slower for few offsets/frequencies. Best
-practice is to check first which one is faster. (You can use the
-benchmark-notebook in the `empymod/example-notebooks
+This parallelisation will make ``empymod`` faster (by using more threads) if
+you calculate a lot of offsets/frequencies at once, but slower for few
+offsets/frequencies. Best practice is to check first which one is faster. (You
+can use the benchmark-notebook in the `empymod/example-notebooks
 <https://github.com/empymod/example-notebooks>`_-repository.)
+
+(*) These statements are (following the notation of [Hunziker_et_al_2015]_):
+:math:`\Gamma` (below eq. 19); :math:`W^{u, d}_n` (eq. 74), :math:`r^\pm_n`
+(eq. 65); :math:`R^\pm_n` (eq. 64); :math:`P^{u, d; \pm}_s` (eq. 81);
+:math:`M_s` (eq. 82), and their corresponding bar-ed versions provided in the
+appendix (e.g. :math:`\\bar{\Gamma}`). In big models, more than 95 % of the
+calculation is spent in the calculation of these six equations, and most of the
+time therefore in ``np.sqrt`` and ``np.exp``, or generally in
+``numpy``-``ufuncs`` which are implemented and executed in compiled C-code. For
+smaller models or if transforms with interpolations are used then all the other
+parts also start to play a role. However, those models generally execute
+comparably fast.
+
 
 Lagged Convolution and Splined Transforms
 '''''''''''''''''''''''''''''''''''''''''
