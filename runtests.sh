@@ -9,7 +9,7 @@ GitHub/Travis-CI; by default for all supported python versions of empymod.
 
 where:
     -h : Show this help text.
-    -v : Python 3.x version, e.g. '-v 5' for Python 3.5. Default: '4 5 6'.
+    -v : Python 3.x version, e.g. '-v 5' for Python 3.5. Default: '4 5 6 7'.
     -c : Use channel 'conda-forge' instead of channel 'defaults'.
     -p : Print output of conda.
     -n : Run tests without numexpr/matplotlib/IPython.
@@ -94,7 +94,9 @@ for i in ${PYTHON3VERSION[@]}; do
   fi
 
   # Run tests
+  cp tests/matplotlibrc .
   pytest --cov=empymod $PROPS
+  rm matplotlibrc
 
   # De-activate venv
   source deactivate $NAME

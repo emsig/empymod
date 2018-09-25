@@ -727,11 +727,10 @@ def _plot_transform_pairs(fCI, r, k, tit):
         print(plt_msg)
         return
 
-    plt.figure("Transform pairs", figsize=(9.5, 6))
-    plt.subplots_adjust(wspace=.3, hspace=.4)
-
-    # Adjust subplot-number, depending on fI, fC
+    # Create figure; adjust subplot-number, depending on fI, fC
     if tit == 'fC':
+        plt.figure("Transform pairs", figsize=(9.5, 6))
+        plt.subplots_adjust(wspace=.3, hspace=.4)
         nr = 0
     else:
         nr = 2
