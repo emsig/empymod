@@ -5,6 +5,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
   - "3.6.0"  # Dummy: Python 3.6 without numexpr, matplotlib, IPython
   - "3.6.1"  # Dummy: Python 3.6 with conda-forge (hence no VML)
 install:
