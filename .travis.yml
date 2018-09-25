@@ -45,6 +45,7 @@ install:
   - source activate test-environment
   - pip install coveralls pytest-flake8 $INST
   - python setup.py install
+  - cp tests/matplotlibrc .
 
 
 script: pytest --cov=empymod --flake8 $TEST
