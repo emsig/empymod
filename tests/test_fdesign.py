@@ -253,11 +253,6 @@ class TestFiguresNoMatplotlib:
         out, _ = capsys.readouterr()
         assert "* WARNING :: `matplotlib` is not installed, no " in out
 
-    def test_plot_transform_pairs(self, capsys):
-        fdesign._plot_transform_pairs(1, 2, 3, 4)
-        out, _ = capsys.readouterr()
-        assert "* WARNING :: `matplotlib` is not installed, no " in out
-
 
 def test_print_data(capsys):
     # Test full with min amplitude with case 2

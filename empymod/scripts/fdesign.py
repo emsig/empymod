@@ -711,33 +711,27 @@ def _call_qc_transform_pairs(n, ispacing, ishift, fI, fC, r, r_def, reim):
                      r_def[2]*n)
 
     # Plot QC
-    _plot_transform_pairs(fC, r, k, 'fC')
+    fig, axs = plt.subplots(figsize=(9.5, 6), nrows=2, ncols=2,
+                            num="Transform pairs")
+    axs = axs.ravel()
+    plt.subplots_adjust(wspace=.3, hspace=.4)
+
+    _plot_transform_pairs(fC, r, k, axs[:2], 'fC')
     if reim == np.real:
         tit = 'RE(fI)'
     else:
         tit = 'IM(fI)'
-    _plot_transform_pairs(fI, rI, kI, tit)
+    _plot_transform_pairs(fI, rI, kI, axs[2:], tit)
+
+    fig.canvas.draw()  # To force draw in notebook while running
+    plt.show()
 
 
-def _plot_transform_pairs(fCI, r, k, tit):
+def _plot_transform_pairs(fCI, r, k, axes, tit):
     """Plot the input transform pairs."""
 
-    # Check matplotlib (soft dependency)
-    if not plt:
-        print(plt_msg)
-        return
-
-    # Create figure; adjust subplot-number, depending on fI, fC
-    if tit == 'fC':
-        plt.figure("Transform pairs", figsize=(9.5, 6))
-        plt.subplots_adjust(wspace=.3, hspace=.4)
-        nr = 0
-    else:
-        plt.figure("Transform pairs")
-        nr = 2
-
     # Plot lhs
-    plt.subplot(221+nr)
+    plt.sca(axes[0])
     plt.title('|' + tit + ' lhs|')
     for f in fCI:
         if f.name == 'j2':
@@ -746,12 +740,12 @@ def _plot_transform_pairs(fCI, r, k, tit):
             plt.loglog(k, np.abs(lhs[1]), lw=2, label='j1')
         else:
             plt.loglog(k, np.abs(f.lhs(k)), lw=2, label=f.name)
-    if nr > 0:
+    if tit != 'fC':
         plt.xlabel('l')
     plt.legend(loc='best')
 
     # Plot rhs
-    plt.subplot(222+nr)
+    plt.sca(axes[1])
     plt.title('|' + tit + ' rhs|')
 
     # Transform pair rhs
@@ -778,14 +772,10 @@ def _plot_transform_pairs(fCI, r, k, tit):
 
         plt.loglog(r, np.abs(kr), '-.', lw=2, label=filt.name)
 
-    if nr > 0:
+    if tit != 'fC':
         plt.xlabel('r')
 
     plt.legend(loc='best')
-
-    if tit != 'fC':
-        plt.gcf().canvas.draw()  # To force draw in notebook while running
-        plt.show()
 
 
 def _plot_inversion(f, rhs, r, k, imin, spacing, shift, cvar):
