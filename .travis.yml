@@ -1,12 +1,21 @@
 # http://conda.pydata.org/docs/travis.html
 language: python
-python:
-  # We don't actually use the Travis Python, but this keeps it organized.
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  - "3.6.0"  # Dummy: Python 3.6 without numexpr, matplotlib, IPython
-  - "3.6.1"  # Dummy: Python 3.6 with conda-forge (hence no VML)
+
+matrix:
+  include:
+    - python: 3.4
+      env: MINICONDA_PYTHON_VERSION=3.4 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
+    - python: 3.5
+      env: MINICONDA_PYTHON_VERSION=3.5 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
+    - python: 3.6
+      env: MINICONDA_PYTHON_VERSION=3.6 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
+    - python: 3.6  # => 3.7
+      env: MINICONDA_PYTHON_VERSION=3.7 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
+    - python: 3.6  # => 3.6 with conda-forg
+      env: MINICONDA_PYTHON_VERSION=3.6 SOFT_DEP="numexpr matplotlib IPython" CHAN="conda-forge" INST="pytest-mpl" TEST="--mpl"
+    - python: 3.6  # => 3.6 with without matplotlib, numexpr, IPython
+      env: MINICONDA_PYTHON_VERSION=3.6 TRAVIS_PYTHON_VERSION="3.6" SOFT_DEP="" CHAN="defaults" INST="" TEST=""
+
 install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
@@ -20,28 +29,8 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  # Take care of dummy versions
-  - if [ ${TRAVIS_PYTHON_VERSION:4:5} == "0" ]; then
-      TRAVIS_PYTHON_VERSION="3.6";
-      SOFT_DEP="";
-      CHAN="defaults";
-      INST="";
-      TEST="";
-    elif [ ${TRAVIS_PYTHON_VERSION:4:5} == "1" ]; then
-      TRAVIS_PYTHON_VERSION="3.6";
-      SOFT_DEP="numexpr matplotlib IPython";
-      CHAN="conda-forge";
-      INST="pytest-mpl";
-      TEST="--mpl";
-    else
-      SOFT_DEP="mkl mkl-service numexpr matplotlib IPython";
-      CHAN="defaults";
-      INST="pytest-mpl";
-      TEST="--mpl";
-    fi
-
   # Install and activate environment, install packages
-  - conda create -q -n test-environment -c $CHAN python=$TRAVIS_PYTHON_VERSION numpy scipy pytest pytest-cov $SOFT_DEP
+  - conda create -q -n test-environment -c $CHAN python=$MINICONDA_PYTHON_VERSION numpy scipy pytest pytest-cov $SOFT_DEP
   - source activate test-environment
   - pip install coveralls pytest-flake8 $INST
   - python setup.py install
