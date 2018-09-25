@@ -782,8 +782,10 @@ def _plot_transform_pairs(fCI, r, k, tit):
         plt.xlabel('r')
 
     plt.legend(loc='best')
-    plt.gcf().canvas.draw()  # To force draw in notebook while running
-    plt.show()
+
+    if tit != 'fC':
+        plt.gcf().canvas.draw()  # To force draw in notebook while running
+        plt.show()
 
 
 def _plot_inversion(f, rhs, r, k, imin, spacing, shift, cvar):
