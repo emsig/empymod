@@ -733,6 +733,7 @@ def _plot_transform_pairs(fCI, r, k, tit):
         plt.subplots_adjust(wspace=.3, hspace=.4)
         nr = 0
     else:
+        plt.figure("Transform pairs")
         nr = 2
 
     # Plot lhs
