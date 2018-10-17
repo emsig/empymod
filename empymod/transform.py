@@ -95,7 +95,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     pts_per_dec = fhtarg[1]
 
     # 1. Compute required lambdas for given hankel-filter-base
-    lambd, _ = get_spline_values(fhtfilt, off, pts_per_dec)
+    lambd, int_pts = get_spline_values(fhtfilt, off, pts_per_dec)
 
     # 2. Call the kernel
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
@@ -105,7 +105,8 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # 4. Carry out the dlf
-    fEM = dlf(PJ, lambd, off, fhtfilt, pts_per_dec, factAng=factAng, ab=ab)
+    fEM = dlf(PJ, lambd, off, fhtfilt, pts_per_dec, factAng=factAng, ab=ab,
+              int_pts=int_pts)
 
     return fEM, 1, True
 
@@ -818,7 +819,7 @@ def fft(fEM, time, freq, ftarg):
 # 3. Utilities
 
 def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
-        ab=None):
+        ab=None, int_pts=None):
     """Digital Linear Filter method.
 
     This is the kernel of the DLF method, used for the Hankel (``fht``) and the
@@ -903,7 +904,8 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         # Lagged Convolution DLF: re-arrange signal
 
         # Get interpolation points in output domain
-        _, int_pts = get_spline_values(filt, out_pts, pts_per_dec)
+        if int_pts is None:
+            _, int_pts = get_spline_values(filt, out_pts, pts_per_dec)
 
         # Re-arrange signal
         for i, val in enumerate(signal):

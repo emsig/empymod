@@ -6,22 +6,22 @@ in touch if you would like to tackle one of these problems!
 
 - **Additional modelling routines**
 
-  - ``tdem`` (**TEM**) [`empymod#8
-    <https://github.com/empymod/empymod/issues/8>`_]: Issues that have to be
-    addressed: ramp waveform, windowing, loop integration, zero-offset
-    (coincident loop).
+  - ``tdem`` (**TEM**)
+    [`empymod#8 <https://github.com/empymod/empymod/issues/8>`_]:
+    Issues that have to be addressed: ramp waveform, windowing, loop
+    integration, zero-offset (coincident loop).
 
     - in-loop
     - coincident loop
     - loop-loop
     - arbitrary shaped loops
 
-  - **Ramp waveform** [`empymod#7
-    <https://github.com/empymod/empymod/issues/7>`_]
-  - **Arbitrary waveform** [`empymod#7
-    <https://github.com/empymod/empymod/issues/7>`_]
-  - Improve the GPR-routine [`empymod#9
-    <https://github.com/empymod/empymod/issues/9>`_]
+  - **Ramp waveform**
+    [`empymod#7 <https://github.com/empymod/empymod/issues/7>`_]
+  - **Arbitrary waveform**
+    [`empymod#7 <https://github.com/empymod/empymod/issues/7>`_]
+  - Improve the GPR-routine
+    [`empymod#9 <https://github.com/empymod/empymod/issues/9>`_]
   - Load and save functions to easily store and load model information
     (resistivity model, acquisition parameters, and modelling parameters)
     together with the modelling data (using ``pickle`` or ``shelve``).
@@ -61,6 +61,13 @@ in touch if you would like to tackle one of these problems!
   - Hankel
 
     - Add the ``fht``-module from FFTLog for the Hankel transform.
+    - Move ``lambd``-calculation outside of ``empymod.transform``, to avoid
+      repetition if looped over frequencies.
+      [`empymod#26 <https://github.com/empymod/empymod/issues/26>`_].
+    - Pass ``factAng`` instead of ``angle`` to ``empymod.transform``, to avoid
+      repetition if looped over frequencies or offsets.
+      (Move ``angle_factor`` from ``kernel`` to ``utils``?)
+      [`empymod#26 <https://github.com/empymod/empymod/issues/26>`_].
 
 
   - Hankel and Fourier

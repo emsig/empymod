@@ -11,6 +11,9 @@ Changelog
 
 - ``xdirect`` default value changed from ``True`` to ``False``.
 
+- Possibility to provide interpolated points (``int_pts``) to
+  ``transform.dlf``.
+
 
 v1.7.3 - *2018-07-16*
 ---------------------
