@@ -1487,13 +1487,16 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
     else:
         xdir = xdirect
 
+    # Get angle dependent factors
+    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+
     # If not full-space with xdirect calculate fEM-field
     if not isfullspace*xdir:
         calc = getattr(transform, ht)
         if loop_freq:
 
             for i in range(freq.size):
-                out = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
+                out = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
                            etaH[None, i, :], etaV[None, i, :],
                            zetaH[None, i, :], zetaV[None, i, :], xdir,
                            htarg, use_ne_eval, msrc, mrec)
@@ -1504,13 +1507,13 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         elif loop_off:
             for i in range(off.size):
                 out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
-                           angle[None, i], depth, ab, etaH, etaV, zetaH, zetaV,
-                           xdir, htarg, use_ne_eval, msrc, mrec)
+                           factAng[None, i], depth, ab, etaH, etaV, zetaH,
+                           zetaV, xdir, htarg, use_ne_eval, msrc, mrec)
                 fEM[:, None, i] += out[0]
                 kcount += out[1]
                 conv *= out[2]
         else:
-            out = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH,
+            out = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH,
                        etaV, zetaH, zetaV, xdir, htarg, use_ne_eval, msrc,
                        mrec)
             fEM += out[0]

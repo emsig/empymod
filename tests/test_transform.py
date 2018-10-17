@@ -36,13 +36,14 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         rec = [np.arange(1, 11)*500, np.zeros(10), 300]
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
+        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
         lsrc, zsrc = utils.get_layer_nr(src, depth)
         lrec, zrec = utils.get_layer_nr(rec, depth)
 
         # # # 0. No Spline # # #
         if htype != 'hquad':  # hquad is always using spline
             # Wavenumber solution plus transform
-            wvnr0, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth,
+            wvnr0, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth,
                                   ab, etaH, etaV, zetaH, zetaV, xdirect, htarg,
                                   False, msrc, mrec)
             # Analytical frequency-domain solution
@@ -60,7 +61,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         if htype == 'hquad':  # Lower atol to ensure convergence
             ht, htarg = utils.check_hankel('quad', [1e-8], 0)
         # Wavenumber solution plus transform
-        wvnr1, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
+        wvnr1, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
                               etaH, etaV, zetaH, zetaV, xdirect, htarg, False,
                               msrc, mrec)
         # Analytical frequency-domain solution
@@ -77,12 +78,13 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         rec = [np.arange(1, 11)*500, np.arange(-5, 5)*200, 300]
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
+        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
         if htype == 'hqwe':  # Put a very low diff_quad, to test it.; lower err
             ht, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, 80, .1,
                                                    1e-6, .1, 1000], 0)
 
         # Analytical frequency-domain solution
-        wvnr2, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
+        wvnr2, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
                               etaH, etaV, zetaH, zetaV, xdirect, htarg, False,
                               msrc, mrec)
         # Analytical frequency-domain solution
@@ -99,7 +101,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
             ht, htarg = utils.check_hankel('qwe', ['', '', '', 80, 100], 0)
         if htype != 'hquad':  # hquad is always pts_per_dec
             # Analytical frequency-domain solution
-            wvnr3, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth,
+            wvnr3, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth,
                                   ab, etaH, etaV, zetaH, zetaV, xdirect, htarg,
                                   False, msrc, mrec)
             # Analytical frequency-domain solution
@@ -113,12 +115,13 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         rec = [5000, 0, 300]
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
+        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
         if htype == 'hqwe':
             ht, htarg = utils.check_hankel('qwe', ['', '', '', 200, 80], 0)
         elif htype == 'hquad':
             ht, htarg = utils.check_hankel('quad', None, 0)
         # Analytical frequency-domain solution
-        wvnr4, _, conv = calc(zsrc, zrec, lsrc, lrec, off, angle, depth, ab,
+        wvnr4, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
                               etaH, etaV, zetaH, zetaV, xdirect, htarg, False,
                               msrc, mrec)
         # Analytical frequency-domain solution

@@ -44,7 +44,7 @@ __all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
 
 # 1. Hankel transforms (wavenumber -> frequency)
 
-def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
+def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
         zetaV, xdirect, fhtarg, use_ne_eval, msrc, mrec):
     """Hankel Transform using the Digital Linear Filter method.
 
@@ -101,17 +101,14 @@ def fht(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
                            zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
 
-    # 3. Angle dependent factors
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
-
-    # 4. Carry out the dlf
+    # 3. Carry out the dlf
     fEM = dlf(PJ, lambd, off, fhtfilt, pts_per_dec, factAng=factAng, ab=ab,
               int_pts=int_pts)
 
     return fEM, 1, True
 
 
-def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
+def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
          zetaV, xdirect, qweargs, use_ne_eval, msrc, mrec):
     """Hankel Transform using Quadrature-With-Extrapolation.
 
@@ -216,9 +213,6 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     # Intervals and lambdas for all offset
     intervals = xint/off[:, None]
     lambd = Bx/off[:, None]
-
-    # Angle dependent factors
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # The following lines until
     #       "Call and return QWE, depending if spline or not"
@@ -403,7 +397,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     return fEM, kcount, conv
 
 
-def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
+def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
           zetaV, xdirect, quadargs, use_ne_eval, msrc, mrec):
     """Hankel Transform using the ``QUADPACK`` library.
 
@@ -470,9 +464,6 @@ def hquad(zsrc, zrec, lsrc, lrec, off, angle, depth, ab, etaH, etaV, zetaH,
     else:
         sPJ0br = None
         sPJ0bi = None
-
-    # Get the angle factor
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # Pre-allocate output array
     fEM = np.zeros(off.size, dtype=complex)

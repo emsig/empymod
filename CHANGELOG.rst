@@ -14,6 +14,13 @@ Changelog
 - Possibility to provide interpolated points (``int_pts``) to
   ``transform.dlf``.
 
+- ``empymod.fem`` now passes ``factAng`` to ``empymod.transform``, not
+  ``angle``; this saves some time if looped over offsets or frequencies, as it
+  is not repeatedly calculated within ``empymod.transform``. This change is
+  backwards incompatible if you directly used ``transform.fht``,
+  ``transform.hqwe``, or ``transform.hquad``. Nothing changes for the
+  user-facing routines in ``model``.
+
 
 v1.7.3 - *2018-07-16*
 ---------------------

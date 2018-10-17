@@ -64,10 +64,6 @@ in touch if you would like to tackle one of these problems!
     - Move ``lambd``-calculation outside of ``empymod.transform``, to avoid
       repetition if looped over frequencies.
       [`empymod#26 <https://github.com/empymod/empymod/issues/26>`_].
-    - Pass ``factAng`` instead of ``angle`` to ``empymod.transform``, to avoid
-      repetition if looped over frequencies or offsets.
-      (Move ``angle_factor`` from ``kernel`` to ``utils``?)
-      [`empymod#26 <https://github.com/empymod/empymod/issues/26>`_].
 
 
   - Hankel and Fourier
