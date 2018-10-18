@@ -90,12 +90,11 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
         Only relevant for QWE/QUAD.
 
     """
-    # Get fhtargs
+    # 1. Get fhtargs
     fhtfilt = fhtarg[0]
     pts_per_dec = fhtarg[1]
-
-    # 1. Compute required lambdas for given hankel-filter-base
-    lambd, int_pts = get_spline_values(fhtfilt, off, pts_per_dec)
+    lambd = fhtarg[2]
+    int_pts = fhtarg[3]
 
     # 2. Call the kernel
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
@@ -883,18 +882,18 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     # 1. PREPARE SIGNALS
 
     # Interpolation function
-    def spline(values, points, new):
-        """Return `values` at `points` interpolated in log at `new`."""
-        out = iuSpline(np.log(points), values.real)(np.log(new))
+    def spline(values, points, int_pts):
+        """Return `values` at `points` interpolated in log at `int_pts`."""
+        out = iuSpline(np.log(points), values.real)(np.log(int_pts))
         if hankel:
-            out = out+1j*iuSpline(np.log(points), values.imag)(np.log(new))
+            out = out+1j*iuSpline(np.log(points), values.imag)(np.log(int_pts))
         return out
 
     # Re-arranging and interpolation before DLF
     if pts_per_dec < 0:  # Lagged Convolution DLF: interp. in output domain
         # Lagged Convolution DLF: re-arrange signal
 
-        # Get interpolation points in output domain
+        # Get interpolation points, if not provided # (backwards compatibility)
         if int_pts is None:
             _, int_pts = get_spline_values(filt, out_pts, pts_per_dec)
 
@@ -907,11 +906,15 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
                                                               :filt.base.size]
 
     elif pts_per_dec > 0:  # Splined DLF: interpolate in input domain
-        # Splined DLF: interpolate signal here
-        new = filt.base/out_pts[:, None]
+        # Splined DLF; interpolate in input domain
+
+        # Get interpolation points, if not provided (backwards compatibility)
+        if int_pts is None:
+            int_pts = filt.base/out_pts[:, None]
+
         for i, val in enumerate(signal):
             if k_used[i]:  # Only if kernel contains info
-                signal[i] = spline(val, points, new)
+                signal[i] = spline(val, points, int_pts)
 
     # 2. APPLY DLF
     if hankel:  # Hankel transform
@@ -1198,11 +1201,15 @@ def get_spline_values(filt, inp, nr_per_dec=None):
     out = np.exp(np.arange(np.log(outmin), np.log(outmin) + nout/pts_per_dec,
                            1/pts_per_dec))
 
-    # Only necessary if standard spline is used. We need to calculate the new
-    # input values, as spline is carried out in the input domain. Else spline
-    # is carried out in output domain and the new input values are not used.
-    new_inp = inp.max()*np.exp(-np.arange(nout - filt.base.size + 1) /
-                               pts_per_dec)
+    if nr_per_dec < 0:
+        # If lagged convolution is used, we calculate the new input values, as
+        # spline is carried out in the input domain.
+        new_inp = inp.max()*np.exp(-np.arange(nout - filt.base.size + 1) /
+                                   pts_per_dec)
+    else:
+        # If spline is used, interpolation is carried out in output domain and
+        # we calculate the intermediate values.
+        new_inp = filt.base/inp[:, None]
 
     # Return output values
     return np.atleast_2d(out), new_inp

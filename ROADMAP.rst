@@ -61,9 +61,6 @@ in touch if you would like to tackle one of these problems!
   - Hankel
 
     - Add the ``fht``-module from FFTLog for the Hankel transform.
-    - Move ``lambd``-calculation outside of ``empymod.transform``, to avoid
-      repetition if looped over frequencies.
-      [`empymod#26 <https://github.com/empymod/empymod/issues/26>`_].
 
 
   - Hankel and Fourier

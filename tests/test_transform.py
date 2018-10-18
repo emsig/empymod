@@ -43,6 +43,13 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         # # # 0. No Spline # # #
         if htype != 'hquad':  # hquad is always using spline
             # Wavenumber solution plus transform
+
+            # Adjust htarg for fht
+            if htype == 'fht':
+                lambd, int_pts = transform.get_spline_values(htarg[0], off,
+                                                             htarg[1])
+                htarg = (htarg[0], htarg[1], lambd, int_pts)
+
             wvnr0, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth,
                                   ab, etaH, etaV, zetaH, zetaV, xdirect, htarg,
                                   False, msrc, mrec)
@@ -60,6 +67,11 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         use_ne_eval, loop_freq, loop_off = options
         if htype == 'hquad':  # Lower atol to ensure convergence
             ht, htarg = utils.check_hankel('quad', [1e-8], 0)
+        elif htype == 'fht':  # Adjust htarg for fht
+            lambd, int_pts = transform.get_spline_values(htarg[0], off,
+                                                         htarg[1])
+            htarg = (htarg[0], htarg[1], lambd, int_pts)
+
         # Wavenumber solution plus transform
         wvnr1, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
                               etaH, etaV, zetaH, zetaV, xdirect, htarg, False,
@@ -82,6 +94,10 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         if htype == 'hqwe':  # Put a very low diff_quad, to test it.; lower err
             ht, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, 80, .1,
                                                    1e-6, .1, 1000], 0)
+        elif htype == 'fht':  # Adjust htarg for fht
+            lambd, int_pts = transform.get_spline_values(htarg[0], off,
+                                                         htarg[1])
+            htarg = (htarg[0], htarg[1], lambd, int_pts)
 
         # Analytical frequency-domain solution
         wvnr2, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
@@ -97,6 +113,9 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         # # # 3. Spline; pts_per_dec # # #
         if htype == 'fht':
             ht, htarg = utils.check_hankel('fht', ['key_201_2012', 20], 0)
+            lambd, int_pts = transform.get_spline_values(htarg[0], off,
+                                                         htarg[1])
+            htarg = (htarg[0], htarg[1], lambd, int_pts)
         elif htype == 'hqwe':
             ht, htarg = utils.check_hankel('qwe', ['', '', '', 80, 100], 0)
         if htype != 'hquad':  # hquad is always pts_per_dec
@@ -120,6 +139,10 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
             ht, htarg = utils.check_hankel('qwe', ['', '', '', 200, 80], 0)
         elif htype == 'hquad':
             ht, htarg = utils.check_hankel('quad', None, 0)
+        elif htype == 'fht':
+            lambd, int_pts = transform.get_spline_values(htarg[0], off,
+                                                         htarg[1])
+            htarg = (htarg[0], htarg[1], lambd, int_pts)
         # Analytical frequency-domain solution
         wvnr4, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
                               etaH, etaV, zetaH, zetaV, xdirect, htarg, False,

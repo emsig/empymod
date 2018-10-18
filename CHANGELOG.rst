@@ -21,6 +21,11 @@ Changelog
   ``transform.hqwe``, or ``transform.hquad``. Nothing changes for the
   user-facing routines in ``model``.
 
+- Use ``get_spline_values`` in ``empymod.fem`` for Hankel DLF, instead of in
+  ``empymod.fht``. Gives a speed-up if looped over offsets or frequencies.
+  Should be in ``utils``, but that would be heavily backwards incompatible.
+  Move there in version 2.0.
+
 
 v1.7.3 - *2018-07-16*
 ---------------------
