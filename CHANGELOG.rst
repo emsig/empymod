@@ -14,12 +14,13 @@ Changelog
 - Possibility to provide interpolated points (``int_pts``) to
   ``transform.dlf``.
 
+The following changes are backwards incompatible if you directly used
+``transform.fht``, ``transform.hqwe``, or ``transform.hquad``. Nothing changes
+for the user-facing routines in ``model``:
+
 - ``empymod.fem`` now passes ``factAng`` to ``empymod.transform``, not
   ``angle``; this saves some time if looped over offsets or frequencies, as it
-  is not repeatedly calculated within ``empymod.transform``. This change is
-  backwards incompatible if you directly used ``transform.fht``,
-  ``transform.hqwe``, or ``transform.hquad``. Nothing changes for the
-  user-facing routines in ``model``.
+  is not repeatedly calculated within ``empymod.transform``.
 
 - Use ``get_spline_values`` in ``empymod.fem`` for Hankel DLF, instead of in
   ``empymod.fht``. Gives a speed-up if looped over offsets or frequencies.

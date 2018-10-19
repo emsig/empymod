@@ -777,7 +777,6 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
             e_zH = etaH
             e_zV = etaV
         else:
-            zrec, zsrc = zsrc, zrec
             R = RTE
             lGam = lGamTE
             uGam = uGamTE
@@ -1080,7 +1079,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     reflect_TE = g0p*f0p + g1p*f1p + g2p*f2p
     reflect = reflect_TM + reflect_TE
 
-    # If switch-on, subtract switch-on from DC value
+    # If switch-off, subtract switch-on from DC value
     if signal == -1:
         direct_TM = direct_TM[-1]-direct_TM[:-1]
         direct_TE = direct_TE[-1]-direct_TE[:-1]

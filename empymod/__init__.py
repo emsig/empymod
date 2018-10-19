@@ -592,6 +592,17 @@ air to zero. This trick obviously uses the diffusive approximation for the
 air-layer, it therefore will not work for very high frequencies (e.g., GPR
 calculations).
 
+This trick works fine for all horizontal components, but not so much for the
+vertical component. But then it is not feasible to have a vertical source or
+receiver *exactly* at the surface. A few tips for these cases: The receiver can
+be put pretty close to the surface (a few millimeters), but the source has to
+be put down a meter or two, more for the case of vertical source AND receiver,
+less for vertical source OR receiver. The results are generally better if the
+source is put deeper than the receiver. In either case, the best is to first
+test the survey layout against the analytical result (using
+``empymod.analytical`` with ``solution='dhs'``) for a half-space, and
+subsequently model more complex cases.
+
 
 License
 -------
