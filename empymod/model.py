@@ -1321,10 +1321,6 @@ def cole_cole(src, rec, depth, cond_0, cond_8, cond_tau, cond_c, freqtime,
     cond_tau = _check_var(cond_tau, float, 1, 'cond_tau', depth.shape)
     cond_c = _check_var(cond_c, float, 1, 'cond_c', depth.shape)
 
-    c = 299792458              # Speed of light m/s
-    mu_0 = 4e-7*np.pi          # Magn. permeability of free space [H/m]
-    epsilon_0 = 1./(mu_0*c*c)  # Elec. permittivity of free space [F/m]
-
     # Currently, etaH/etaV are calculated like this:
     # etaH = 1/res + np.outer(2j*np.pi*freq, epermH*epsilon_0)
     # etaV = 1/(res*aniso*aniso) + np.outer(2j*np.pi*freq, epermV*epsilon_0)
@@ -1337,7 +1333,7 @@ def cole_cole(src, rec, depth, cond_0, cond_8, cond_tau, cond_c, freqtime,
     comp_cond += cond_8
 
     # Add el. permittivity part to comp_cond
-    etaH = comp_cond  + 1j*etaH.imag
+    etaH = comp_cond + 1j*etaH.imag
 
     # At the moment this is only for isotropic media, so we copy etaH to etaV:
     etaV = etaH.copy()
