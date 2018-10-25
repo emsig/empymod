@@ -32,9 +32,10 @@ def test_design():
     # np.linalg(.qr) can have roundoff errors which are not deterministic,
     # which can yield different results for badly conditioned matrices. This
     # only affects the edge-cases, not the best result we are looking for.
-    # However, we have to limit the following comparison on the edges:
-    ii = np.maximum.reduce([dat1[2][3], out1[3]]) < 1e-5
-    assert_allclose(out1[3][ii], dat1[2][3][ii], rtol=1e-1)
+    # However, we have to limit the following comparison; we check that at
+    # least 50% are within a relative error of 0.1%.
+    rate = np.sum(np.abs((out1[3] - dat1[2][3])/dat1[2][3]) < 1e-3)
+    assert rate > out1[3].size/2
 
     # 2. Specific model with only one spacing/shift
     dat2 = DATA['case2'][()]
