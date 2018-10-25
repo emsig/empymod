@@ -1,4 +1,4 @@
-"""Create data for
+r"""Create data for
    - test_model:: test_self, test_gpr, and test_dipole_k
    - test_kernel:: test_fullspace and test_halfspace."""
 import numpy as np

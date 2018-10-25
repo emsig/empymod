@@ -1,4 +1,4 @@
-"""Create data for test_transform."""
+r"""Create data for test_transform."""
 import numpy as np
 from scipy.constants import mu_0
 from scipy import special
@@ -14,7 +14,7 @@ from empymod import utils, kernel
 # and ftarg can be relaxed by still getting a better precision!
 
 def test_freq(res, off, f):
-    """Frequency domain analytical half-space solution.
+    r"""Frequency domain analytical half-space solution.
     - Source at x = y = z = 0 m
     - Receiver at y = z = 0 m; x = off
     - Resistivity of halfspace res
@@ -25,7 +25,7 @@ def test_freq(res, off, f):
 
 
 def test_time(res, off, t, signal):
-    """Time domain analytical half-space solution.
+    r"""Time domain analytical half-space solution.
     - Source at x = y = z = 0 m
     - Receiver at y = z = 0 m; x = off
     - Resistivity of halfspace res

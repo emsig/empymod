@@ -1,4 +1,4 @@
-"""
+r"""
 :mod:`tmtemod` -- Calculate up- and down-going TM and TE modes
 ==============================================================
 
@@ -333,7 +333,7 @@ __all__ = ['dipole']
 
 def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
            verb=2):
-    """Return the electromagnetic field due to a dipole source.
+    r"""Return the electromagnetic field due to a dipole source.
 
     This is a modified version of ``empymod.model.dipole()``. It returns the
     separated contributions of TM--, TM-+, TM+-, TM++, TMdirect, TE--, TE-+,
@@ -487,7 +487,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
     ds = ddepth[lsrc+1] - ddepth[lsrc]
 
     def get_rp_rm(z_eta):
-        """Return Rp, Rm, Ms."""
+        r"""Return Rp, Rm, Ms."""
 
         # Get Rp/Rm for lambd=0
         Rp, Rm = reflections(depth, z_eta, Gam, lrec, lsrc, False)
@@ -538,7 +538,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
 
 
 def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd):
-    """Calculate Green's function for TM and TE.
+    r"""Calculate Green's function for TM and TE.
 
     This is a modified version of empymod.kernel.greenfct(). See the original
     version for more information.
@@ -596,7 +596,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd):
 
 
 def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, TM):
-    """Calculate Pu+, Pu-, Pd+, Pd-.
+    r"""Calculate Pu+, Pu-, Pd+, Pd-.
 
     This is a modified version of empymod.kernel.fields(). See the original
     version for more information.

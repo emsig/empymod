@@ -1,4 +1,4 @@
-"""Create data for test_model::test_green3d."""
+r"""Create data for test_model::test_green3d."""
 import numpy as np
 from external import green3d
 

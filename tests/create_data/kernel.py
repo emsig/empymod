@@ -1,4 +1,4 @@
-"""Create data for kernel tests. Kernel tests are just securing status quo."""
+r"""Create data for kernel tests. Kernel tests are just securing status quo."""
 import numpy as np
 from copy import deepcopy
 from scipy.constants import mu_0, epsilon_0

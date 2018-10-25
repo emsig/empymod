@@ -1,4 +1,4 @@
-"""
+r"""
 
 :mod:`kernel` -- Kernel calculation
 ===================================
@@ -46,7 +46,7 @@ __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
 
 def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                ab, xdirect, msrc, mrec, use_ne_eval):
-    """Calculate wavenumber domain solution.
+    r"""Calculate wavenumber domain solution.
 
     Return the wavenumber domain solutions ``PJ0``, ``PJ1``, and ``PJ0b``,
     which have to be transformed with a Hankel transform to the frequency
@@ -131,7 +131,7 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
 def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
              ab, xdirect, msrc, mrec, use_ne_eval):
-    """Calculate Green's function for TM and TE.
+    r"""Calculate Green's function for TM and TE.
 
     .. math:: \\tilde{g}^{tm}_{hh}, \\tilde{g}^{tm}_{hz},
               \\tilde{g}^{tm}_{zh}, \\tilde{g}^{tm}_{zz},
@@ -314,7 +314,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
 
 def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
-    """Calculate Rp, Rm.
+    r"""Calculate Rp, Rm.
 
     .. math:: R^\pm_n, \\bar{R}^\pm_n
 
@@ -403,7 +403,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
 
 
 def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
-    """Calculate Pu+, Pu-, Pd+, Pd-.
+    r"""Calculate Pu+, Pu-, Pd+, Pd-.
 
     .. math:: P^{u\pm}_s, P^{d\pm}_s, \\bar{P}^{u\pm}_s, \\bar{P}^{d\pm}_s;
           P^{u\pm}_{s-1}, P^{u\pm}_n, \\bar{P}^{u\pm}_{s-1}, \\bar{P}^{u\pm}_n;
@@ -568,7 +568,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
 # Angle Factor
 
 def angle_factor(angle, ab, msrc, mrec):
-    """Return the angle-dependent factor.
+    r"""Return the angle-dependent factor.
 
     The whole calculation in the wavenumber domain is only a function of the
     distance between the source and the receiver, it is independent of the
@@ -624,7 +624,7 @@ def angle_factor(angle, ab, msrc, mrec):
 
 def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
               mrec):
-    """Analytical full-space solutions in the frequency domain.
+    r"""Analytical full-space solutions in the frequency domain.
 
     .. math:: \\hat{G}^{ee}_{\\alpha\\beta}, \\hat{G}^{ee}_{3\\alpha},
               \\hat{G}^{ee}_{33}, \\hat{G}^{em}_{\\alpha\\beta},
@@ -795,7 +795,7 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
 
 def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
               solution='dhs'):
-    """Return frequency- or time-space domain VTI half-space solution.
+    r"""Return frequency- or time-space domain VTI half-space solution.
 
     Calculates the frequency- or time-space domain electromagnetic response for
     a half-space below air using the diffusive approximation, as given in
@@ -982,16 +982,16 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
         # Bessel functions for airwave
         def BI(gamH, hp, nr, xim):
-            """Return BI_nr."""
+            r"""Return BI_nr."""
             return np.exp(-np.real(gamH)*hp)*special.ive(nr, xim)
 
         def BK(xip, nr):
-            """Return BK_nr."""
+            r"""Return BK_nr."""
             return np.exp(-1j*np.imag(xip))*special.kve(nr, xip)
 
         # Airwave calculation
         def airwave(s, hp, rp, res, fab, delta):
-            """Return airwave."""
+            r"""Return airwave."""
             # Parameters
             zeta = s*mu_0
             gamH = np.sqrt(zeta/res)
@@ -1029,7 +1029,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
             fn = np.vectorize(np.math.factorial)
 
             def coeff_dk(k, K):
-                """Return coefficients Dk for k, K."""
+                r"""Return coefficients Dk for k, K."""
                 n = np.arange(int((k+1)/2), np.min([k, K/2])+.5, 1, dtype=int)
                 Dk = n**(K/2)*fn(2*n)
                 Dk /= fn(n)*fn(n-1)*fn(k-n)*fn(2*n-k)*fn(K/2-n)

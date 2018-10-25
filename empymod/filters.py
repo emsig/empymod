@@ -1,4 +1,4 @@
-"""
+r"""
 
 :mod:`filters` -- Digital Linear Filters
 ========================================
@@ -59,9 +59,9 @@ import numpy as np
 # 0. Filter Class and saving/loading routines
 
 class DigitalFilter:
-    """Simple Class for Digital Linear Filters."""
+    r"""Simple Class for Digital Linear Filters."""
     def __init__(self, name, savename=None):
-        """Add filter name."""
+        r"""Add filter name."""
         self.name = name
         if savename is None:
             self.savename = name
@@ -69,7 +69,7 @@ class DigitalFilter:
             self.savename = savename
 
     def tofile(self, path='filters'):
-        """Save filter values to ascii-files.
+        r"""Save filter values to ascii-files.
 
         Store the filter base and the filter coefficients in separate files
         in the directory `path`; `path` can be a relative or absolute path.
@@ -108,7 +108,7 @@ class DigitalFilter:
                     getattr(self, val).tofile(f, sep="\n")
 
     def fromfile(self, path='filters'):
-        """Load filter values from ascii-files.
+        r"""Load filter values from ascii-files.
 
         Load filter base and filter coefficients from ascii files in the
         directory `path`; `path` can be a relative or absolute path.
@@ -154,7 +154,7 @@ class DigitalFilter:
 # 1. Hankel DLF
 
 def kong_61_2007():
-    """Kong 61 pt Hankel filter, as published in [Kong_2007]_.
+    r"""Kong 61 pt Hankel filter, as published in [Kong_2007]_.
 
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
@@ -270,7 +270,7 @@ def kong_61_2007():
 
 
 def kong_241_2007():
-    """Kong 241 pt Hankel filter, as published in [Kong_2007]_.
+    r"""Kong 241 pt Hankel filter, as published in [Kong_2007]_.
 
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
@@ -656,7 +656,7 @@ def kong_241_2007():
 
 
 def key_101_2009():
-    """Key 101 pt Hankel filter, as published in [Key_2009]_.
+    r"""Key 101 pt Hankel filter, as published in [Key_2009]_.
 
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
@@ -781,7 +781,7 @@ def key_101_2009():
 
 
 def key_201_2009():
-    """Key 201 pt Hankel filter, as published in [Key_2009]_.
+    r"""Key 201 pt Hankel filter, as published in [Key_2009]_.
 
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
@@ -1005,7 +1005,7 @@ def key_201_2009():
 
 
 def key_401_2009():
-    """Key 401 pt Hankel filter, as published in [Key_2009]_.
+    r"""Key 401 pt Hankel filter, as published in [Key_2009]_.
 
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
@@ -1429,7 +1429,7 @@ def key_401_2009():
 
 
 def anderson_801_1982():
-    """Anderson 801 pt Hankel filter, as published in [Anderson_1982]_.
+    r"""Anderson 801 pt Hankel filter, as published in [Anderson_1982]_.
 
     Taken from file ``wa801Hankel.txt`` provided with SEG-2012-003_.
 
@@ -2521,7 +2521,7 @@ def anderson_801_1982():
 
 
 def key_51_2012():
-    """Key 51 pt Hankel filter, as published in [Key_2012]_.
+    r"""Key 51 pt Hankel filter, as published in [Key_2012]_.
 
     Taken from file ``kk51Hankel.txt`` provided with SEG-2012-003_.
 
@@ -2613,7 +2613,7 @@ def key_51_2012():
 
 
 def key_101_2012():
-    """Key 101 pt Hankel filter, as published in [Key_2012]_.
+    r"""Key 101 pt Hankel filter, as published in [Key_2012]_.
 
     Taken from file ``kk101Hankel.txt`` provided with SEG-2012-003_.
 
@@ -2771,7 +2771,7 @@ def key_101_2012():
 
 
 def key_201_2012():
-    """Key 201 pt Hankel filter, as published in [Key_2012]_.
+    r"""Key 201 pt Hankel filter, as published in [Key_2012]_.
 
     Taken from file ``kk201Hankel.txt`` provided with SEG-2012-003_.
 
@@ -3063,7 +3063,7 @@ def key_201_2012():
 
 
 def wer_201_2018():
-    """Werthmüller 201 pt Hankel filter, 2018.
+    r"""Werthmüller 201 pt Hankel filter, 2018.
 
     Designed with the empymod add-on ``fdesign``, see
     https://github.com/empymod/article-fdesign.
@@ -3393,7 +3393,7 @@ def wer_201_2018():
 
 
 def key_81_CosSin_2009():
-    """Key 81 pt CosSin filter, as published in [Key_2009]_.
+    r"""Key 81 pt CosSin filter, as published in [Key_2009]_.
 
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
@@ -3499,7 +3499,7 @@ def key_81_CosSin_2009():
 
 
 def key_241_CosSin_2009():
-    """Key 241 pt CosSin filter, as published in [Key_2009]_.
+    r"""Key 241 pt CosSin filter, as published in [Key_2009]_.
 
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
@@ -3765,7 +3765,7 @@ def key_241_CosSin_2009():
 
 
 def key_601_CosSin_2009():
-    """Key 601 pt CosSin filter, as published in [Key_2009]_.
+    r"""Key 601 pt CosSin filter, as published in [Key_2009]_.
 
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
@@ -4391,7 +4391,7 @@ def key_601_CosSin_2009():
 
 
 def key_101_CosSin_2012():
-    """Key 101 pt CosSin filter, as published in [Key_2012]_.
+    r"""Key 101 pt CosSin filter, as published in [Key_2012]_.
 
     Taken from file ``kk101CosSin.txt`` provided with SEG-2012-003_.
 
@@ -4552,7 +4552,7 @@ def key_101_CosSin_2012():
 
 
 def key_201_CosSin_2012():
-    """Key 201 pt CosSin filter, as published in [Key_2012]_.
+    r"""Key 201 pt CosSin filter, as published in [Key_2012]_.
 
     Taken from file ``kk201CosSin.txt`` provided with SEG-2012-003_.
 

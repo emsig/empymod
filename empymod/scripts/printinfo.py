@@ -1,4 +1,4 @@
-"""
+r"""
 :mod:`printinfo` -- Tools to print date, time, and version information
 ======================================================================
 
@@ -80,7 +80,7 @@ __all__ = ['versions', 'versions_html', 'versions_text']
 
 
 def versions(mode='print', add_pckg=None, ncol=4):
-    """Return date, time, and version information.
+    r"""Return date, time, and version information.
 
     Print or return date, time, and package version information in any
     environment (Jupyter notebook, IPython console, Python console, QT
@@ -143,7 +143,7 @@ def versions(mode='print', add_pckg=None, ncol=4):
 
 
 def versions_html(add_pckg=None, ncol=4):
-    """HTML version.
+    r"""HTML version.
 
     See ``versions`` for details.
     """
@@ -155,7 +155,7 @@ def versions_html(add_pckg=None, ncol=4):
     border = "border: 2px solid #fff;'"
 
     def colspan(html, txt, ncol, nrow):
-        """Print txt in a row spanning whole table."""
+        r"""Print txt in a row spanning whole table."""
         html += "  <tr>\n"
         html += "     <td style='text-align: center; "
         if nrow == 0:
@@ -168,7 +168,7 @@ def versions_html(add_pckg=None, ncol=4):
         return html
 
     def cols(html, version, name, ncol, i):
-        """Print package information in two cells."""
+        r"""Print package information in two cells."""
 
         # Check if we have to start a new row
         if i > 0 and i % ncol == 0:
@@ -219,7 +219,7 @@ def versions_html(add_pckg=None, ncol=4):
 
 
 def versions_text(add_pckg=None):
-    """Plain-text version.
+    r"""Plain-text version.
 
     See ``versions`` for details.
     """
@@ -257,7 +257,7 @@ def versions_text(add_pckg=None):
 
 
 def _get_packages(add_pckg):
-    """Create list of packages."""
+    r"""Create list of packages."""
 
     # Mandatory packages
     pckgs = [numpy, scipy, empymod]

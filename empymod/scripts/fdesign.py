@@ -1,4 +1,4 @@
-"""
+r"""
 :mod:`fdesign` -- Digital Linear Filter (DLF) design
 ====================================================
 
@@ -247,7 +247,7 @@ __all__ = ['design', 'save_filter', 'load_filter', 'plot_result',
 def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
            cvar='amp', error=0.01, name=None, full_output=False, finish=False,
            save=True, path='filters', verb=2, plot=1):
-    """Digital linear filter (DLF) design
+    r"""Digital linear filter (DLF) design
 
     This routine can be used to design digital linear filters for the Hankel or
     Fourier transform, or for any linear transform ([Ghosh_1970]_). For this
@@ -467,7 +467,7 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
 
 
 def save_filter(name, filt, full=None, path='filters'):
-    """Save DLF-filter and inversion output to plain text files."""
+    r"""Save DLF-filter and inversion output to plain text files."""
 
     # First we'll save the filter using its internal routine.
     # This will create the directory ./filters if it doesn't exist already.
@@ -524,7 +524,7 @@ def save_filter(name, filt, full=None, path='filters'):
 
 
 def load_filter(name, full=False, path='filters'):
-    """Load saved DLF-filter and inversion output from text files."""
+    r"""Load saved DLF-filter and inversion output from text files."""
 
     # First we'll get the filter using its internal routine.
     filt = DigitalFilter(name.split('.')[0])
@@ -571,14 +571,14 @@ def load_filter(name, full=False, path='filters'):
 # # 2.a Public plotting routines for QC or direct use
 
 def plot_result(filt, full, prntres=True):
-    """QC the inversion result.
+    r"""QC the inversion result.
 
     Parameters
     ----------
     - filt, full as returned from fdesign.design with full_output=True
     - If prntres is True, it calls fdesign.print_result as well.
 
-    """
+    r"""
     # Check matplotlib (soft dependency)
     if not plt:
         print(plt_msg)
@@ -649,7 +649,7 @@ def plot_result(filt, full, prntres=True):
 
 
 def print_result(filt, full=None):
-    """Print best filter information.
+    r"""Print best filter information.
 
     Parameters
     ----------
@@ -681,7 +681,7 @@ def print_result(filt, full=None):
 # # 2.b Private plotting routines for QC
 
 def _call_qc_transform_pairs(n, ispacing, ishift, fI, fC, r, r_def, reim):
-    """QC the input transform pairs."""
+    r"""QC the input transform pairs."""
     print('* QC: Input transform-pairs:')
     print('  fC: x-range defined through ``n``, ``spacing``, ``shift``, and ' +
           '``r``-parameters; b-range defined through ``r``-parameter.')
@@ -728,7 +728,7 @@ def _call_qc_transform_pairs(n, ispacing, ishift, fI, fC, r, r_def, reim):
 
 
 def _plot_transform_pairs(fCI, r, k, axes, tit):
-    """Plot the input transform pairs."""
+    r"""Plot the input transform pairs."""
 
     # Plot lhs
     plt.sca(axes[0])
@@ -779,7 +779,7 @@ def _plot_transform_pairs(fCI, r, k, axes, tit):
 
 
 def _plot_inversion(f, rhs, r, k, imin, spacing, shift, cvar):
-    """QC the resulting filter."""
+    r"""QC the resulting filter."""
 
     # Check matplotlib (soft dependency)
     if not plt:
@@ -832,13 +832,13 @@ def _plot_inversion(f, rhs, r, k, imin, spacing, shift, cvar):
 # 3. ANALYTICAL TRANSFORM PAIRS
 
 class Ghosh:
-    """Simple Class for Theoretical Transform Pairs.
+    r"""Simple Class for Theoretical Transform Pairs.
 
     Named after D. P. Ghosh, honouring his 1970 Ph.D. thesis with which he
     introduced the digital filter method to geophysics ([Ghosh_1970]_).
     """
     def __init__(self, name, lhs, rhs):
-        """Add the filter name, lhs, and rhs."""
+        r"""Add the filter name, lhs, and rhs."""
         self.name = name
         self.lhs = lhs
         self.rhs = rhs
@@ -847,7 +847,7 @@ class Ghosh:
 # # 3.a Hankel J0 transform pairs
 
 def j0_1(a=1):
-    """Hankel transform pair J0_1 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J0_1 ([Anderson_1975]_)."""
 
     def lhs(x):
         return x*np.exp(-a*x**2)
@@ -859,7 +859,7 @@ def j0_1(a=1):
 
 
 def j0_2(a=1):
-    """Hankel transform pair J0_2 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J0_2 ([Anderson_1975]_)."""
 
     def lhs(x):
         return np.exp(-a*x)
@@ -871,7 +871,7 @@ def j0_2(a=1):
 
 
 def j0_3(a=1):
-    """Hankel transform pair J0_3 ([Guptasarma_and_Singh_1997]_)."""
+    r"""Hankel transform pair J0_3 ([Guptasarma_and_Singh_1997]_)."""
 
     def lhs(x):
         return x*np.exp(-a*x)
@@ -883,7 +883,7 @@ def j0_3(a=1):
 
 
 def j0_4(f=1, rho=0.3, z=50):
-    """Hankel transform pair J0_4 ([Chave_and_Cox_1982]_).
+    r"""Hankel transform pair J0_4 ([Chave_and_Cox_1982]_).
 
     Parameters
     ----------
@@ -910,7 +910,7 @@ def j0_4(f=1, rho=0.3, z=50):
 
 
 def j0_5(f=1, rho=0.3, z=50):
-    """Hankel transform pair J0_5 ([Chave_and_Cox_1982]_).
+    r"""Hankel transform pair J0_5 ([Chave_and_Cox_1982]_).
 
     Parameters
     ----------
@@ -939,7 +939,7 @@ def j0_5(f=1, rho=0.3, z=50):
 # # 3.b Hankel J1 transform pairs
 
 def j1_1(a=1):
-    """Hankel transform pair J1_1 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J1_1 ([Anderson_1975]_)."""
 
     def lhs(x):
         return x**2*np.exp(-a*x**2)
@@ -951,7 +951,7 @@ def j1_1(a=1):
 
 
 def j1_2(a=1):
-    """Hankel transform pair J1_2 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J1_2 ([Anderson_1975]_)."""
 
     def lhs(x):
         return np.exp(-a*x)
@@ -963,7 +963,7 @@ def j1_2(a=1):
 
 
 def j1_3(a=1):
-    """Hankel transform pair J1_3 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J1_3 ([Anderson_1975]_)."""
 
     def lhs(x):
         return x*np.exp(-a*x)
@@ -975,7 +975,7 @@ def j1_3(a=1):
 
 
 def j1_4(f=1, rho=0.3, z=50):
-    """Hankel transform pair J1_4 ([Chave_and_Cox_1982]_).
+    r"""Hankel transform pair J1_4 ([Chave_and_Cox_1982]_).
 
     Parameters
     ----------
@@ -1002,7 +1002,7 @@ def j1_4(f=1, rho=0.3, z=50):
 
 
 def j1_5(f=1, rho=0.3, z=50):
-    """Hankel transform pair J1_5 ([Chave_and_Cox_1982]_).
+    r"""Hankel transform pair J1_5 ([Chave_and_Cox_1982]_).
 
     Parameters
     ----------
@@ -1031,7 +1031,7 @@ def j1_5(f=1, rho=0.3, z=50):
 # # 3.c Fourier sine transform pairs
 
 def sin_1(a=1):
-    """Fourier sine transform pair sin_1 ([Anderson_1975]_)."""
+    r"""Fourier sine transform pair sin_1 ([Anderson_1975]_)."""
 
     def lhs(x):
         return x*np.exp(-a**2*x**2)
@@ -1043,7 +1043,7 @@ def sin_1(a=1):
 
 
 def sin_2(a=1):
-    """Fourier sine transform pair sin_2 ([Anderson_1975]_)."""
+    r"""Fourier sine transform pair sin_2 ([Anderson_1975]_)."""
 
     def lhs(x):
         return np.exp(-a*x)
@@ -1055,7 +1055,7 @@ def sin_2(a=1):
 
 
 def sin_3(a=1):
-    """Fourier sine transform pair sin_3 ([Anderson_1975]_)."""
+    r"""Fourier sine transform pair sin_3 ([Anderson_1975]_)."""
 
     def lhs(x):
         return x/(a**2 + x**2)
@@ -1069,7 +1069,7 @@ def sin_3(a=1):
 # # 3.d Fourier cosine transform pairs
 
 def cos_1(a=1):
-    """Fourier cosine transform pair cos_1 ([Anderson_1975]_)."""
+    r"""Fourier cosine transform pair cos_1 ([Anderson_1975]_)."""
 
     def lhs(x):
         return np.exp(-a**2*x**2)
@@ -1081,7 +1081,7 @@ def cos_1(a=1):
 
 
 def cos_2(a=1):
-    """Fourier cosine transform pair cos_2 ([Anderson_1975]_)."""
+    r"""Fourier cosine transform pair cos_2 ([Anderson_1975]_)."""
 
     def lhs(x):
         return np.exp(-a*x)
@@ -1093,7 +1093,7 @@ def cos_2(a=1):
 
 
 def cos_3(a=1):
-    """Fourier cosine transform pair cos_3 ([Anderson_1975]_)."""
+    r"""Fourier cosine transform pair cos_3 ([Anderson_1975]_)."""
 
     def lhs(x):
         return 1/(a**2 + x**2)
@@ -1109,7 +1109,7 @@ def cos_3(a=1):
 def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=[], aniso=None,
                 epermH=None, epermV=None, mpermH=None, mpermV=None,
                 htarg=None, verblhs=0, verbrhs=0):
-    """Numerical transform pair with empymod.
+    r"""Numerical transform pair with empymod.
 
     All parameters except ``ftype``, ``verblhs``, and ``verbrhs`` correspond to
     the input parameters to ``empymod.dipole``. See there for more information.
@@ -1195,7 +1195,7 @@ def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=[], aniso=None,
 # 4. NON-USER-FACING ROUTINES
 
 def _get_min_val(spaceshift, *params):
-    """Calculate minimum resolved amplitude or maximum r."""
+    r"""Calculate minimum resolved amplitude or maximum r."""
 
     # Get parameters from tuples
     spacing, shift = spaceshift
@@ -1277,7 +1277,7 @@ def _get_min_val(spaceshift, *params):
 
 
 def _calculate_filter(n, spacing, shift, fI, r_def, reim, name):
-    """Calculate filter for this spacing, shift, n."""
+    r"""Calculate filter for this spacing, shift, n."""
 
     # Base :: For this n/spacing/shift
     base = np.exp(spacing*(np.arange(n)-n//2) + shift)
@@ -1317,7 +1317,7 @@ def _calculate_filter(n, spacing, shift, fI, r_def, reim, name):
 
 
 def _ls2ar(inp, strinp):
-    """Convert float or linspace-input to arange/slice-input for brute."""
+    r"""Convert float or linspace-input to arange/slice-input for brute."""
 
     # Check if input is 1 or 3 elements (float, list, tuple, array)
     if np.size(inp) == 1:
@@ -1343,7 +1343,7 @@ def _ls2ar(inp, strinp):
 
 
 def _print_count(log):
-    """Print run-count information."""
+    r"""Print run-count information."""
     log['cnt2'] += 1                   # Current number
     cp = log['cnt2']/log['totnr']*100  # Percentage
 

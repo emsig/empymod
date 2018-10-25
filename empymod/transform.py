@@ -1,4 +1,4 @@
-"""
+r"""
 
 :mod:`transform` -- Hankel and Fourier Transforms
 =================================================
@@ -46,7 +46,7 @@ __all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
 
 def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
         zetaV, xdirect, fhtarg, use_ne_eval, msrc, mrec):
-    """Hankel Transform using the Digital Linear Filter method.
+    r"""Hankel Transform using the Digital Linear Filter method.
 
     The *Digital Linear Filter* method was introduced to geophysics by
     [Ghosh_1970]_, and made popular and wide-spread by [Anderson_1975]_,
@@ -109,7 +109,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
 def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
          zetaV, xdirect, qweargs, use_ne_eval, msrc, mrec):
-    """Hankel Transform using Quadrature-With-Extrapolation.
+    r"""Hankel Transform using Quadrature-With-Extrapolation.
 
     *Quadrature-With-Extrapolation* was introduced to geophysics by
     [Key_2012]_. It is one of many so-called *ISE* methods to solve Hankel
@@ -362,7 +362,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
     else:  # If not spline, we define the wavenumber-kernel here
         def getkernel(i, inplambd, inpoff, inpfang):
-            """Return wavenumber-domain-kernel as a fct of interval i."""
+            r"""Return wavenumber-domain-kernel as a fct of interval i."""
 
             # Indices and factor for this interval
             iB = i*nquad + np.arange(nquad)
@@ -398,7 +398,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
 def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
           zetaV, xdirect, quadargs, use_ne_eval, msrc, mrec):
-    """Hankel Transform using the ``QUADPACK`` library.
+    r"""Hankel Transform using the ``QUADPACK`` library.
 
     This routine uses the ``scipy.integrate.quad`` module, which in turn makes
     use of the Fortran library ``QUADPACK`` (``qagse``).
@@ -485,7 +485,7 @@ def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 # 2. Fourier transforms (frequency -> time)
 
 def ffht(fEM, time, freq, ftarg):
-    """Fourier Transform using the Digital Linear Filter method.
+    r"""Fourier Transform using the Digital Linear Filter method.
 
 
     It follows the Filter methodology [Anderson_1975]_, using Cosine- and
@@ -525,7 +525,7 @@ def ffht(fEM, time, freq, ftarg):
 
 
 def fqwe(fEM, time, freq, qweargs):
-    """Fourier Transform using Quadrature-With-Extrapolation.
+    r"""Fourier Transform using Quadrature-With-Extrapolation.
 
     It follows the QWE methodology [Key_2012]_ for the Hankel transform, see
     ``hqwe`` for more information.
@@ -605,7 +605,7 @@ def fqwe(fEM, time, freq, qweargs):
     # Carry out SciPy's Quad if required
     if np.any(~doqwe):
         def sEMquad(w, t):
-            """Return scaled, interpolated value of tEM_int for ``w``."""
+            r"""Return scaled, interpolated value of tEM_int for ``w``."""
             return tEM_int(np.log(w))*sincos(w*t)
 
         # Loop over times that require QUAD
@@ -628,7 +628,7 @@ def fqwe(fEM, time, freq, qweargs):
 
 
 def fftlog(fEM, time, freq, ftarg):
-    """Fourier Transform using FFTLog.
+    r"""Fourier Transform using FFTLog.
 
     FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT.
     FFTLog was presented in Appendix B of [Hamilton_2000]_ and published at
@@ -764,7 +764,7 @@ def fftlog(fEM, time, freq, ftarg):
 
 
 def fft(fEM, time, freq, ftarg):
-    """Fourier Transform using the Fast Fourier Transform.
+    r"""Fourier Transform using the Fast Fourier Transform.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -810,7 +810,7 @@ def fft(fEM, time, freq, ftarg):
 
 def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
         ab=None, int_pts=None):
-    """Digital Linear Filter method.
+    r"""Digital Linear Filter method.
 
     This is the kernel of the DLF method, used for the Hankel (``fht``) and the
     Fourier (``ffht``) Transforms. See ``fht`` for an extensive description.
@@ -883,7 +883,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
     # Interpolation function
     def spline(values, points, int_pts):
-        """Return `values` at `points` interpolated in log at `int_pts`."""
+        r"""Return `values` at `points` interpolated in log at `int_pts`."""
         out = iuSpline(np.log(points), values.real)(np.log(int_pts))
         if hankel:
             out = out+1j*iuSpline(np.log(points), values.imag)(np.log(int_pts))
@@ -1010,7 +1010,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
 def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         factAng=None):
-    """Quadrature-With-Extrapolation.
+    r"""Quadrature-With-Extrapolation.
 
     This is the kernel of the QWE method, used for the Hankel (``hqwe``) and
     the Fourier (``fqwe``) Transforms. See ``hqwe`` for an extensive
@@ -1021,7 +1021,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
 
     """
     def getweights(i, inpint):
-        """Return weights for this interval."""
+        r"""Return weights for this interval."""
         return (np.atleast_2d(inpint)[:,  i+1] - np.atleast_2d(inpint)[:, i])/2
 
     # 1. Calculate the first interval for all offsets
@@ -1095,7 +1095,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
 
 
 def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
-    """Quadrature for Hankel transform.
+    r"""Quadrature for Hankel transform.
 
     This is the kernel of the QUAD method, used for the Hankel transforms
     ``hquad`` and ``hqwe`` (where the integral is not suited for QWE).
@@ -1104,11 +1104,11 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
 
     # Define the quadrature kernels
     def quad_PJ0(klambd, sPJ0, koff):
-        """Quadrature for PJ0."""
+        r"""Quadrature for PJ0."""
         return sPJ0(np.log(klambd))*special.j0(koff*klambd)
 
     def quad_PJ1(klambd, sPJ1, ab, koff, kang):
-        """Quadrature for PJ1."""
+        r"""Quadrature for PJ1."""
 
         tP1 = kang*sPJ1(np.log(klambd))
         if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
@@ -1118,7 +1118,7 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
         return tP1*special.j1(koff*klambd)
 
     def quad_PJ0b(klambd, sPJ0b, koff, kang):
-        """Quadrature for PJ0b."""
+        r"""Quadrature for PJ0b."""
         return kang*sPJ0b(np.log(klambd))*special.j0(koff*klambd)
 
     # Pre-allocate output
@@ -1157,7 +1157,7 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
 
 
 def get_spline_values(filt, inp, nr_per_dec=None):
-    """Return required calculation points."""
+    r"""Return required calculation points."""
 
     # Standard DLF
     if nr_per_dec == 0:
@@ -1169,7 +1169,7 @@ def get_spline_values(filt, inp, nr_per_dec=None):
 
     # Define number of out-values, depending on pts_per_dec
     def nr_of_out(outmax, outmin, pts_per_dec):
-        """Number of out-values."""
+        r"""Number of out-values."""
         return int(np.ceil(np.log(outmax/outmin)*pts_per_dec) + 1)
 
     # Get pts_per_dec
@@ -1216,7 +1216,7 @@ def get_spline_values(filt, inp, nr_per_dec=None):
 
 
 def fhti(rmin, rmax, n, q, mu):
-    """Return parameters required for FFTLog."""
+    r"""Return parameters required for FFTLog."""
 
     # Central point log10(r_c) of periodic interval
     logrc = (rmin + rmax)/2
