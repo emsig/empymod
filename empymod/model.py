@@ -120,6 +120,20 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     res : array_like
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
+        Alternatively, res can be a dictionary. In that case it must contain
+        two mandatory entries, ``res`` and ``func``. The first one is
+        resistivity as defined above, the second one is a function with the
+        following signature:
+
+            def func(inp, freq, aniso, etaH, etaV):
+                # Here you can define your function to adjust etaH, etaV.
+                return etaH, etaV
+
+        Here, ``inp`` is the dictionary you provide instead of resistivity res.
+
+        This can be particular useful to implement, e.g., a Cole-Cole model to
+        calculate IP.
+
     freqtime : array_like
         Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
 
@@ -427,9 +441,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Check layer parameters
     if isinstance(res, dict):
-        cond, res = res, 1/np.array(res['res'])
+        res_dict, res = res, 1/np.array(res['res'])
     else:
-        cond = {}
+        res_dict = {}
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
                         xdirect, verb)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
@@ -440,8 +454,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     freq, etaH, etaV, zetaH, zetaV = frequency
 
     # Re-calculate etaH/etaV using a provided Cole-Cole model
-    if 'func' in cond:
-        etaH, etaV = cond['func'](cond, freq, aniso, etaH, etaV)
+    if 'func' in res_dict:
+        etaH, etaV = res_dict['func'](res_dict, freq, aniso, etaH, etaV)
 
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, verb)
@@ -635,6 +649,20 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     res : array_like
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
+
+        Alternatively, res can be a dictionary. In that case it must contain
+        two mandatory entries, ``res`` and ``func``. The first one is
+        resistivity as defined above, the second one is a function with the
+        following signature:
+
+            def func(inp, freq, aniso, etaH, etaV):
+                # Here you can define your function to adjust etaH, etaV.
+                return etaH, etaV
+
+        Here, ``inp`` is the dictionary you provide instead of resistivity res.
+
+        This can be particular useful to implement, e.g., a Cole-Cole model to
+        calculate IP.
 
     freqtime : array_like
         Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
@@ -896,9 +924,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # Check layer parameters
     if isinstance(res, dict):
-        cond, res = res, 1/np.array(res['res'])
+        res_dict, res = res, 1/np.array(res['res'])
     else:
-        cond = {}
+        res_dict = {}
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
                         xdirect, verb)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
@@ -909,8 +937,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     freq, etaH, etaV, zetaH, zetaV = frequency
 
     # Re-calculate etaH/etaV using a provided Cole-Cole model
-    if 'func' in cond:
-        etaH, etaV = cond['func'](cond, freq, aniso, etaH, etaV)
+    if 'func' in res_dict:
+        etaH, etaV = res_dict['func'](res_dict, freq, aniso, etaH, etaV)
 
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, verb)
