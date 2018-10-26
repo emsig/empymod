@@ -441,7 +441,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Check layer parameters
     if isinstance(res, dict):
-        res_dict, res = res, 1/np.array(res['res'])
+        res_dict, res = res, np.array(res['res'])
     else:
         res_dict = {}
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
@@ -924,7 +924,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # Check layer parameters
     if isinstance(res, dict):
-        res_dict, res = res, 1/np.array(res['res'])
+        res_dict, res = res, np.array(res['res'])
     else:
         res_dict = {}
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,

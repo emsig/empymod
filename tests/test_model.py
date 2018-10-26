@@ -504,6 +504,28 @@ class TestBipole:
         assert_allclose(out0f, out1f)
         assert_allclose(out0t, out1t)
 
+    def test_cole_cole(self):
+        # Check with a dummy-fct that the post etaH/etaV-code insertion works.
+        def cole_cole(inp, freq, aniso, etaH, etaV):
+            # Dummy function to check if it works; just doubling the real part
+            etaH = etaH.real*2 + 1j*etaH.imag
+            etaV = etaV.real*2 + 1j*etaV.imag
+
+            return etaH, etaV
+
+        model = {'src': [0, 0, 500, 0, 0], 'rec': [500, 0, 600, 0, 0],
+                 'depth': [0, 550], 'freqtime': [0.1, 1, 10]}
+        cc = {'res': [4, 20, 10], 'func': cole_cole}
+
+        # Frequency domain
+        standard = bipole(res=[2, 10, 5], **model)
+        colecole = bipole(res=cc, **model)
+        assert_allclose(standard, colecole)
+        # Time domain
+        standard = bipole(res=[2, 10, 5], signal=0, **model)
+        colecole = bipole(res=cc, signal=0, **model)
+        assert_allclose(standard, colecole)
+
 
 def test_dipole():
     # As this is a subset of bipole, just run two tests to ensure
@@ -529,6 +551,29 @@ def test_dipole():
                      [rec[0], rec[1], rec[2], 90, 0], msrc=True, freqtime=t,
                      signal=1, verb=0, **model)
     assert_allclose(dip_res, bip_res)
+
+    # 3. Cole-cole
+    # Check with a dummy-fct that the post etaH/etaV-code insertion works.
+
+    def cole_cole(inp, freq, aniso, etaH, etaV):
+        # Dummy function to check if it works; just doubling the real part
+        etaH = etaH.real*2 + 1j*etaH.imag
+        etaV = etaV.real*2 + 1j*etaV.imag
+
+        return etaH, etaV
+
+    model = {'src': [0, 0, 500], 'rec': [500, 0, 600], 'depth': [0, 550],
+             'freqtime': [0.1, 1, 10]}
+    cc = {'res': [4, 20, 10], 'func': cole_cole}
+
+    # Frequency domain
+    standard = dipole(res=[2, 10, 5], **model)
+    colecole = dipole(res=cc, **model)
+    assert_allclose(standard, colecole)
+    # Time domain
+    standard = dipole(res=[2, 10, 5], signal=0, **model)
+    colecole = dipole(res=cc, signal=0, **model)
+    assert_allclose(standard, colecole)
 
 
 def test_analytical():
