@@ -2,8 +2,16 @@ Changelog
 #########
 
 
-*latest*
---------
+v1.8.0 - *2018-10-26*
+---------------------
+
+- ``model.bipole``, ``model.dipole``, and ``model.analytical`` have now a hook
+  which users can exploit to insert their own calculation of ``etaH``,
+  ``etaV``, ``zetaH``, and ``zetaV``. This can be used, for instance, to model
+  a Cole-Cole IP survey. See the manual or the example-notebooks for more
+  information.
+
+  - /prisae/empymod-notebooks -> /empymod/example-notebooks
 
 - ``model.wavenumber`` renamed to ``model.dipole_k`` to avoid name clash with
   ``kernel.wavenumber``. For now ``model.wavenumber`` continues to exist, but
