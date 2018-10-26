@@ -17,6 +17,9 @@
 .. image:: https://img.shields.io/badge/benchmarked%20by-asv-brightgreen.svg?style=flat
    :target: https://empymod.github.io/asv
    :alt: Airspeed Velocity
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.593094.svg
+   :target: https://doi.org/10.5281/zenodo.593094
+   :alt: Zenodo DOI
 
 .. sphinx-inclusion-marker
 

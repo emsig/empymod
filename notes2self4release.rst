@@ -58,12 +58,14 @@ Note: I really should replace this with an automatic deploy-setup...
         conda build --python 3.4 empymod
         conda build --python 3.5 empymod
         conda build --python 3.6 empymod
+        conda build --python 3.7 empymod
 
         # Convert for all platforms
 
         conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py34_0.tar.bz2
         conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py35_0.tar.bz2
         conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py36_0.tar.bz2
+        conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py37_0.tar.bz2
 
         # Upload them
         anaconda upload osx-64/*
