@@ -646,6 +646,42 @@ def test_analytical():
         assert_allclose(res2, rTE+rTM)
         assert_allclose(res3, air)
 
+    # 3. Check user-hook for eta/zeta
+    def func_eta(inp, pdict):
+        # Dummy function to check if it works.
+        etaH = pdict['etaH'].real*inp['fact'] + 1j*pdict['etaH'].imag
+        etaV = pdict['etaV'].real*inp['fact'] + 1j*pdict['etaV'].imag
+
+        return etaH, etaV
+
+    def func_zeta(inp, pdict):
+        # Dummy function to check if it works.
+        etaH = pdict['zetaH']/inp['fact']
+        etaV = pdict['zetaV']/inp['fact']
+
+        return etaH, etaV
+
+    model = {'src': [0, 0, 500], 'rec': [500, 0, 600],
+             'freqtime': [0.1, 1, 10]}
+    res = 10
+    fact = 2
+    eta = {'res': fact*res, 'fact': fact, 'func_eta': func_eta}
+    zeta = {'res': res, 'fact': fact, 'func_zeta': func_zeta}
+
+    # Frequency domain fs
+    standard = analytical(res=res, **model)
+    outeta = analytical(res=eta, **model)
+    assert_allclose(standard, outeta)
+    outzeta = analytical(res=zeta, mpermH=fact, mpermV=fact, **model)
+    assert_allclose(standard, outzeta)
+    # Time domain dhs
+    standard = analytical(res=res, solution='dhs', signal=0, **model)
+    outeta = analytical(res=eta, solution='dhs', signal=0, **model)
+    assert_allclose(standard, outeta)
+    outzeta = analytical(res=zeta, solution='dhs',
+                         signal=0, mpermH=fact, mpermV=fact, **model)
+    assert_allclose(standard, outzeta)
+
 
 def test_gpr(capsys):
     # empymod is not really designed for GPR, you would rather do that straight

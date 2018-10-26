@@ -1010,6 +1010,11 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     res : float
         Horizontal resistivity rho_h (Ohm.m).
 
+        Alternatively, res can be a dictionary. See the main manual of empymod
+        too see how to exploit this hook to re-calculate etaH, etaV, zetaH, and
+        zetaV, which can be used to, for instance, use the Cole-Cole model for
+        IP.
+
     freqtime : array_like
         Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
 
@@ -1128,6 +1133,12 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     frequency = check_frequency(freqtime, res, aniso, epermH, epermV, mpermH,
                                 mpermV, verb)
     freqtime, etaH, etaV, zetaH, zetaV = frequency
+
+    # Update etaH/etaV and zetaH/zetaV according to user-provided model
+    if isinstance(res, dict) and 'func_eta' in res:
+        etaH, etaV = res['func_eta'](res, locals())
+    if isinstance(res, dict) and 'func_zeta' in res:
+        zetaH, zetaV = res['func_zeta'](res, locals())
 
     # Check src-rec configuration
     # => Get flags if src or rec or both are magnetic (msrc, mrec)
