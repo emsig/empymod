@@ -410,6 +410,10 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     """
     global _min_freq
 
+    # Check if the user provided a model for etaH/etaV/zetaH/zetaV
+    if isinstance(res, dict):
+        res = res['res']
+
     # Check frequency
     freq = _check_var(freq, float, 1, 'freq')
 
@@ -727,6 +731,12 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
               ' <depth> provided: ' + _strvar(depth))
         raise ValueError('depth')
 
+    # Check if the user provided a model for etaH/etaV/zetaH/zetaV
+    if isinstance(res, dict):
+        res_dict, res = res, res['res']
+    else:
+        res_dict = False
+
     # Cast and check resistivity
     res = _check_var(res, float, 1, 'res', depth.shape)
     # => min_res can be set with utils.set_min
@@ -772,6 +782,22 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     isoep = (epermH - epermH[0] == 0).all()*(epermV - epermV[0] == 0).all()
     isomp = (mpermH - mpermH[0] == 0).all()*(mpermV - mpermV[0] == 0).all()
     isfullspace = isores*isoep*isomp
+
+    # Check parameters of user-provided parameters
+    if res_dict:
+        # Switch off fullspace-option
+        isfullspace = False
+
+        # Loop over key, value pair and check
+        for key, value in res_dict.items():
+            if key not in ['res', 'func_eta', 'func_zeta']:
+                res_dict[key] = check_inp(value, key, None)
+
+        # Put res back
+        res_dict['res'] = res
+
+        # store res_dict back to res
+        res = res_dict
 
     # Print fullspace info
     if verb > 2 and isfullspace:
@@ -1883,11 +1909,12 @@ def _check_min(par, minval, name, unit, verb):
     if par.shape == ():
         scalar = True
         par = np.atleast_1d(par)
-    ipar = np.where(par < minval)
-    par[ipar] = minval
-    if verb > 0 and np.size(ipar) != 0:
-        print('* WARNING :: ' + name + ' < ' + str(minval) + ' ' + unit +
-              ' are set to ' + str(minval) + ' ' + unit + '!')
+    if minval is not None:
+        ipar = np.where(par < minval)
+        par[ipar] = minval
+        if verb > 0 and np.size(ipar) != 0:
+            print('* WARNING :: ' + name + ' < ' + str(minval) + ' ' + unit +
+                  ' are set to ' + str(minval) + ' ' + unit + '!')
     if scalar:
         return np.squeeze(par)
     else:

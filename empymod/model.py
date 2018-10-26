@@ -120,19 +120,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     res : array_like
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
-        Alternatively, res can be a dictionary. In that case it must contain
-        two mandatory entries, ``res`` and ``func``. The first one is
-        resistivity as defined above, the second one is a function with the
-        following signature:
-
-            def func(inp, freq, aniso, etaH, etaV):
-                # Here you can define your function to adjust etaH, etaV.
-                return etaH, etaV
-
-        Here, ``inp`` is the dictionary you provide instead of resistivity res.
-
-        This can be particular useful to implement, e.g., a Cole-Cole model to
-        calculate IP.
+        Alternatively, res can be a dictionary. See the main manual of empymod
+        too see how to exploit this hook to re-calculate etaH, etaV, zetaH, and
+        zetaV, which can be used to, for instance, use the Cole-Cole model for
+        IP.
 
     freqtime : array_like
         Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
@@ -440,10 +431,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
 
     # Check layer parameters
-    if isinstance(res, dict):
-        res_dict, res = res, np.array(res['res'])
-    else:
-        res_dict = {}
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
                         xdirect, verb)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
@@ -453,9 +440,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                                 mpermV, verb)
     freq, etaH, etaV, zetaH, zetaV = frequency
 
-    # Re-calculate etaH/etaV using a provided Cole-Cole model
-    if 'func' in res_dict:
-        etaH, etaV = res_dict['func'](res_dict, freq, aniso, etaH, etaV)
+    # Update etaH/etaV and zetaH/zetaV according to user-provided model
+    if isinstance(res, dict) and 'func_eta' in res:
+        etaH, etaV = res['func_eta'](res, locals())
+    if isinstance(res, dict) and 'func_zeta' in res:
+        zetaH, zetaV = res['func_zeta'](res, locals())
 
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, verb)
@@ -650,19 +639,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     res : array_like
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
-        Alternatively, res can be a dictionary. In that case it must contain
-        two mandatory entries, ``res`` and ``func``. The first one is
-        resistivity as defined above, the second one is a function with the
-        following signature:
-
-            def func(inp, freq, aniso, etaH, etaV):
-                # Here you can define your function to adjust etaH, etaV.
-                return etaH, etaV
-
-        Here, ``inp`` is the dictionary you provide instead of resistivity res.
-
-        This can be particular useful to implement, e.g., a Cole-Cole model to
-        calculate IP.
+        Alternatively, res can be a dictionary. See the main manual of empymod
+        too see how to exploit this hook to re-calculate etaH, etaV, zetaH, and
+        zetaV, which can be used to, for instance, use the Cole-Cole model for
+        IP.
 
     freqtime : array_like
         Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
@@ -923,10 +903,6 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         freq = freqtime
 
     # Check layer parameters
-    if isinstance(res, dict):
-        res_dict, res = res, np.array(res['res'])
-    else:
-        res_dict = {}
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
                         xdirect, verb)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
@@ -936,9 +912,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                                 mpermV, verb)
     freq, etaH, etaV, zetaH, zetaV = frequency
 
-    # Re-calculate etaH/etaV using a provided Cole-Cole model
-    if 'func' in res_dict:
-        etaH, etaV = res_dict['func'](res_dict, freq, aniso, etaH, etaV)
+    # Update etaH/etaV and zetaH/zetaV according to user-provided model
+    if isinstance(res, dict) and 'func_eta' in res:
+        etaH, etaV = res['func_eta'](res, locals())
+    if isinstance(res, dict) and 'func_zeta' in res:
+        zetaH, zetaV = res['func_zeta'](res, locals())
 
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, verb)

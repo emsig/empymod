@@ -505,26 +505,41 @@ class TestBipole:
         assert_allclose(out0t, out1t)
 
     def test_cole_cole(self):
-        # Check with a dummy-fct that the post etaH/etaV-code insertion works.
-        def cole_cole(inp, freq, aniso, etaH, etaV):
-            # Dummy function to check if it works; just doubling the real part
-            etaH = etaH.real*2 + 1j*etaH.imag
-            etaV = etaV.real*2 + 1j*etaV.imag
+        # Check user-hook for eta/zeta
+
+        def func_eta(inp, pdict):
+            # Dummy function to check if it works.
+            etaH = pdict['etaH'].real*inp['fact'] + 1j*pdict['etaH'].imag
+            etaV = pdict['etaV'].real*inp['fact'] + 1j*pdict['etaV'].imag
+
+            return etaH, etaV
+
+        def func_zeta(inp, pdict):
+            # Dummy function to check if it works.
+            etaH = pdict['zetaH']/inp['fact']
+            etaV = pdict['zetaV']/inp['fact']
 
             return etaH, etaV
 
         model = {'src': [0, 0, 500, 0, 0], 'rec': [500, 0, 600, 0, 0],
                  'depth': [0, 550], 'freqtime': [0.1, 1, 10]}
-        cc = {'res': [4, 20, 10], 'func': cole_cole}
+        res = np.array([2, 10, 5])
+        fact = np.array([2, 2, 2])
+        eta = {'res': fact*res, 'fact': fact, 'func_eta': func_eta}
+        zeta = {'res': res, 'fact': fact, 'func_zeta': func_zeta}
 
         # Frequency domain
-        standard = bipole(res=[2, 10, 5], **model)
-        colecole = bipole(res=cc, **model)
-        assert_allclose(standard, colecole)
+        standard = bipole(res=res, **model)
+        outeta = bipole(res=eta, **model)
+        assert_allclose(standard, outeta)
+        outzeta = bipole(res=zeta, mpermH=fact, mpermV=fact, **model)
+        assert_allclose(standard, outzeta)
         # Time domain
-        standard = bipole(res=[2, 10, 5], signal=0, **model)
-        colecole = bipole(res=cc, signal=0, **model)
-        assert_allclose(standard, colecole)
+        standard = bipole(res=res, signal=0, **model)
+        outeta = bipole(res=eta, signal=0, **model)
+        assert_allclose(standard, outeta)
+        outzeta = bipole(res=zeta, signal=0, mpermH=fact, mpermV=fact, **model)
+        assert_allclose(standard, outzeta)
 
 
 def test_dipole():
@@ -552,28 +567,40 @@ def test_dipole():
                      signal=1, verb=0, **model)
     assert_allclose(dip_res, bip_res)
 
-    # 3. Cole-cole
-    # Check with a dummy-fct that the post etaH/etaV-code insertion works.
+    # 3. Check user-hook for eta/zeta
+    def func_eta(inp, pdict):
+        # Dummy function to check if it works.
+        etaH = pdict['etaH'].real*inp['fact'] + 1j*pdict['etaH'].imag
+        etaV = pdict['etaV'].real*inp['fact'] + 1j*pdict['etaV'].imag
 
-    def cole_cole(inp, freq, aniso, etaH, etaV):
-        # Dummy function to check if it works; just doubling the real part
-        etaH = etaH.real*2 + 1j*etaH.imag
-        etaV = etaV.real*2 + 1j*etaV.imag
+        return etaH, etaV
+
+    def func_zeta(inp, pdict):
+        # Dummy function to check if it works.
+        etaH = pdict['zetaH']/inp['fact']
+        etaV = pdict['zetaV']/inp['fact']
 
         return etaH, etaV
 
     model = {'src': [0, 0, 500], 'rec': [500, 0, 600], 'depth': [0, 550],
              'freqtime': [0.1, 1, 10]}
-    cc = {'res': [4, 20, 10], 'func': cole_cole}
+    res = np.array([2, 10, 5])
+    fact = np.array([2, 2, 2])
+    eta = {'res': fact*res, 'fact': fact, 'func_eta': func_eta}
+    zeta = {'res': res, 'fact': fact, 'func_zeta': func_zeta}
 
     # Frequency domain
-    standard = dipole(res=[2, 10, 5], **model)
-    colecole = dipole(res=cc, **model)
-    assert_allclose(standard, colecole)
+    standard = dipole(res=res, **model)
+    outeta = dipole(res=eta, **model)
+    assert_allclose(standard, outeta)
+    outzeta = dipole(res=zeta, mpermH=fact, mpermV=fact, **model)
+    assert_allclose(standard, outzeta)
     # Time domain
-    standard = dipole(res=[2, 10, 5], signal=0, **model)
-    colecole = dipole(res=cc, signal=0, **model)
-    assert_allclose(standard, colecole)
+    standard = dipole(res=res, signal=0, **model)
+    outeta = dipole(res=eta, signal=0, **model)
+    assert_allclose(standard, outeta)
+    outzeta = dipole(res=zeta, signal=0, mpermH=fact, mpermV=fact, **model)
+    assert_allclose(standard, outzeta)
 
 
 def test_analytical():
