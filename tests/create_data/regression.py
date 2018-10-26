@@ -1,4 +1,4 @@
-"""1836 models for a regression test with status quo.
+r"""1836 models for a regression test with status quo.
 
 The model generation is closely related to ./emmod.py.
 

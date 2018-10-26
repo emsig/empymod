@@ -1,4 +1,4 @@
-"""
+r"""
 
 Theory
 ------
@@ -153,6 +153,60 @@ default value:
        1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j
        1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
+
+
+Hook for user-defined calculation of :math:`\eta` and :math:`\zeta`
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+In principal it is always best to write your own modelling routine if you want
+to adjust something. Just copy ``empymod.dipole`` or ``empymod.bipole`` as a
+template, and modify it to your needs. Since ``empymod v1.7.4``, however, there
+is a hook which allows you to modify :math:`\eta_h, \eta_v, \zeta_h`, and
+:math:`\zeta_v` quite easily.
+
+The trick is to provide a dictionary (we name it ``inp`` here) instead of the
+resistivity vector in ``res``. This dictionary, ``inp``, has two mandatory plus
+optional entries:
+
+- ``res``: the resistivity vector you would have provided normally (mandatory).
+- A function name, which has to be either or both of (mandatory)
+
+    - ``func_eta``: To adjust ``etaH`` and ``etaV``, or
+    - ``func_zeta``: to adjust ``zetaH`` and ``zetaV``.
+
+- In addition, you have to provide all parameters you use in
+  ``func_eta``/``func_zeta`` and are not already provided to ``empymod``. All
+  additional parameters must have #layers elements.
+
+The functions ``func_eta`` and ``func_zeta`` must have the following
+characteristics:
+
+- The signature is ``func(inp, p_dict)``, where
+
+    - ``inp`` is the dictionary you provide, and
+    - ``p_dict`` is a dictionary that contains all parameters so far calculated
+      in empymod [``locals()``].
+
+- It must return ``etaH, etaV`` if ``func_eta``, or ``zetaH, zetaV`` if
+  ``func_zeta``.
+
+**Dummy example**
+
+.. code-block:: python
+
+    def my_new_eta(inp, p_dict):
+        # Your calculations, using the parameters you provided
+        # in `inp` and the parameters from empymod in `p_dict`.
+        # In the example line below, we provide, e.g.,  inp['tau']
+        return etaH, etaV
+
+And then you call ``empymod`` with ``res={'res': res-array, 'tau': tau,
+'func_eta': my_new_eta}``.
+
+Have a look at the example ``2d_Cole-Cole-IP`` in the `example-notebooks
+<https://github.com/empymod/example-notebooks>`_ repository, where this hook is
+exploited to use the Cole-Cole model for IP calculation.
+
 
 Contributing
 ------------

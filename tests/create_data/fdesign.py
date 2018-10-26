@@ -1,4 +1,4 @@
-"""Create data for test_fdesign."""
+r"""Create data for test_fdesign."""
 import numpy as np
 from copy import deepcopy as dc
 from empymod.scripts import fdesign

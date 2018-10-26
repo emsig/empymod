@@ -1,4 +1,4 @@
-"""
+r"""
 
 :mod:`utils` -- Utilites
 ========================
@@ -78,7 +78,7 @@ VariableCatch = (LookupError, AttributeError, ValueError, TypeError, NameError)
 # 1. Class EMArray
 
 class EMArray(np.ndarray):
-    """Subclassing an ndarray: add *amplitude* <amp> and *phase* <pha>.
+    r"""Subclassing an ndarray: add *amplitude* <amp> and *phase* <pha>.
 
     Parameters
     ----------
@@ -115,7 +115,7 @@ class EMArray(np.ndarray):
     """
 
     def __new__(cls, realpart, imagpart=None):
-        """Create a new EMArray."""
+        r"""Create a new EMArray."""
 
         # Create complex obj
         if np.any(imagpart):
@@ -140,7 +140,7 @@ class EMArray(np.ndarray):
 # 2.a <Check>s (alphabetically)
 
 def check_ab(ab, verb):
-    """Check source-receiver configuration.
+    r"""Check source-receiver configuration.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`. Consult these modelling routines for a detailed description
@@ -212,7 +212,7 @@ def check_ab(ab, verb):
 
 
 def check_bipole(inp, name):
-    """Check di-/bipole parameters.
+    r"""Check di-/bipole parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -245,7 +245,7 @@ def check_bipole(inp, name):
     """
 
     def chck_dipole(inp, name):
-        """Check inp for shape and type."""
+        r"""Check inp for shape and type."""
         # Check x
         inp[0] = _check_var(inp[0], float, 1, name+'-x')
 
@@ -315,7 +315,7 @@ def check_bipole(inp, name):
 
 
 def check_dipole(inp, name, verb):
-    """Check dipole parameters.
+    r"""Check dipole parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -366,7 +366,7 @@ def check_dipole(inp, name, verb):
 
 
 def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
-    """Calculate frequency-dependent parameters.
+    r"""Calculate frequency-dependent parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -410,6 +410,10 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     """
     global _min_freq
 
+    # Check if the user provided a model for etaH/etaV/zetaH/zetaV
+    if isinstance(res, dict):
+        res = res['res']
+
     # Check frequency
     freq = _check_var(freq, float, 1, 'freq')
 
@@ -433,7 +437,7 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
 
 
 def check_hankel(ht, htarg, verb):
-    """Check Hankel transform parameters.
+    r"""Check Hankel transform parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -651,7 +655,7 @@ def check_hankel(ht, htarg, verb):
 
 def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
                 verb):
-    """Check the model: depth and corresponding layer parameters.
+    r"""Check the model: depth and corresponding layer parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -727,6 +731,12 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
               ' <depth> provided: ' + _strvar(depth))
         raise ValueError('depth')
 
+    # Check if the user provided a model for etaH/etaV/zetaH/zetaV
+    if isinstance(res, dict):
+        res_dict, res = res, res['res']
+    else:
+        res_dict = False
+
     # Cast and check resistivity
     res = _check_var(res, float, 1, 'res', depth.shape)
     # => min_res can be set with utils.set_min
@@ -735,7 +745,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     # Check optional parameters anisotropy, electric permittivity, and magnetic
     # permeability
     def check_inp(var, name, min_val):
-        """Param-check function. Default to ones if not provided"""
+        r"""Param-check function. Default to ones if not provided"""
         if var is None:
             return np.ones(depth.size)
         else:
@@ -773,6 +783,22 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     isomp = (mpermH - mpermH[0] == 0).all()*(mpermV - mpermV[0] == 0).all()
     isfullspace = isores*isoep*isomp
 
+    # Check parameters of user-provided parameters
+    if res_dict:
+        # Switch off fullspace-option
+        isfullspace = False
+
+        # Loop over key, value pair and check
+        for key, value in res_dict.items():
+            if key not in ['res', 'func_eta', 'func_zeta']:
+                res_dict[key] = check_inp(value, key, None)
+
+        # Put res back
+        res_dict['res'] = res
+
+        # store res_dict back to res
+        res = res_dict
+
     # Print fullspace info
     if verb > 2 and isfullspace:
         if xdirect:
@@ -794,7 +820,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
 
 def check_opt(opt, loop, ht, htarg, verb):
-    """Check optimization parameters.
+    r"""Check optimization parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -870,7 +896,7 @@ def check_opt(opt, loop, ht, htarg, verb):
 
 
 def check_time(time, signal, ft, ftarg, verb):
-    """Check time domain specific input parameters.
+    r"""Check time domain specific input parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -1195,7 +1221,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
 
 def check_time_only(time, signal, verb):
-    """Check time and signal parameters.
+    r"""Check time and signal parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -1244,7 +1270,7 @@ def check_time_only(time, signal, verb):
 
 
 def check_solution(solution, signal, ab, msrc, mrec):
-    """Check required solution with parameters.
+    r"""Check required solution with parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`. Consult these modelling routines for a detailed description
@@ -1290,7 +1316,7 @@ def check_solution(solution, signal, ab, msrc, mrec):
 # 2.b <Get>s (alphabetically)
 
 def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
-    """Get required ab's for given angles.
+    r"""Get required ab's for given angles.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -1379,7 +1405,7 @@ def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
 
 
 def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
-    """Get required geometrical scaling factor for given angles.
+    r"""Get required geometrical scaling factor for given angles.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -1415,7 +1441,7 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
         fis, fir = fir, fis
 
     def gfact(bp, azm, dip):
-        """Geometrical factor of source or receiver."""
+        r"""Geometrical factor of source or receiver."""
         if bp in [1, 4]:    # x-directed
             return np.cos(azm)*np.cos(dip)
         elif bp in [2, 5]:  # y-directed
@@ -1436,7 +1462,7 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
 
 
 def get_layer_nr(inp, depth):
-    """Get number of layer in which inp resides.
+    r"""Get number of layer in which inp resides.
 
     Note:
     If zinp is on a layer interface, the layer above the interface is chosen.
@@ -1480,7 +1506,7 @@ def get_layer_nr(inp, depth):
 
 
 def get_off_ang(src, rec, nsrc, nrec, verb):
-    """Get depths, offsets, angles, hence spatial input parameters.
+    r"""Get depths, offsets, angles, hence spatial input parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -1534,7 +1560,7 @@ def get_off_ang(src, rec, nsrc, nrec, verb):
 
 
 def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
-    """Get angles, interpolation weights and normalization weights.
+    r"""Get angles, interpolation weights and normalization weights.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -1737,7 +1763,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
 
 def printstartfinish(verb, inp=None, kcount=None):
-    """Print start and finish with time measure and kernel count."""
+    r"""Print start and finish with time measure and kernel count."""
     if inp:
         if verb > 1:
             ttxt = str(timedelta(seconds=default_timer() - inp))
@@ -1753,7 +1779,7 @@ def printstartfinish(verb, inp=None, kcount=None):
 
 
 def conv_warning(conv, targ, name, verb):
-    """Print error if QWE/QUAD did not converge at least once."""
+    r"""Print error if QWE/QUAD did not converge at least once."""
     if verb > 0 and not conv:
         print('* WARNING :: ' + name +
               '-quadrature did not converge at least once;\n             ' +
@@ -1764,7 +1790,7 @@ def conv_warning(conv, targ, name, verb):
 
 def set_minimum(min_freq=None, min_time=None, min_off=None, min_res=None,
                 min_angle=None):
-    """
+    r"""
     Set minimum values of parameters.
 
     The given parameters are set to its minimum value if they are smaller.
@@ -1805,7 +1831,7 @@ def set_minimum(min_freq=None, min_time=None, min_off=None, min_res=None,
 
 
 def get_minimum():
-    """
+    r"""
     Return the current minimum values.
 
     Returns
@@ -1838,7 +1864,7 @@ def get_minimum():
 # 4. Internal utilities
 
 def _check_shape(var, name, shape, shape2=None):
-    """Check that <var> has shape <shape>; if false raise ValueError(name)"""
+    r"""Check that <var> has shape <shape>; if false raise ValueError(name)"""
     varshape = np.shape(var)
     if shape != varshape:
         if shape2:
@@ -1854,7 +1880,7 @@ def _check_shape(var, name, shape, shape2=None):
 
 
 def _check_var(var, dtype, ndmin, name, shape=None, shape2=None):
-    """Return variable as array of dtype, ndmin; shape-checked."""
+    r"""Return variable as array of dtype, ndmin; shape-checked."""
     var = np.array(var, dtype=dtype, copy=True, ndmin=ndmin)
     if shape:
         _check_shape(var, name, shape, shape2)
@@ -1862,12 +1888,12 @@ def _check_var(var, dtype, ndmin, name, shape=None, shape2=None):
 
 
 def _strvar(a, prec='{:G}'):
-    """Return variable as a string to print, with given precision."""
+    r"""Return variable as a string to print, with given precision."""
     return ' '.join([prec.format(i) for i in np.atleast_1d(a)])
 
 
 def _prnt_min_max_val(var, text, verb):
-    """Print variable; if more than three, just min/max, unless verb > 3."""
+    r"""Print variable; if more than three, just min/max, unless verb > 3."""
     if var.size > 3:
         print(text, _strvar(var.min()), "-", _strvar(var.max()),
               ":", _strvar(var.size), " [min-max; #]")
@@ -1878,16 +1904,17 @@ def _prnt_min_max_val(var, text, verb):
 
 
 def _check_min(par, minval, name, unit, verb):
-    """Check minimum value of parameter."""
+    r"""Check minimum value of parameter."""
     scalar = False
     if par.shape == ():
         scalar = True
         par = np.atleast_1d(par)
-    ipar = np.where(par < minval)
-    par[ipar] = minval
-    if verb > 0 and np.size(ipar) != 0:
-        print('* WARNING :: ' + name + ' < ' + str(minval) + ' ' + unit +
-              ' are set to ' + str(minval) + ' ' + unit + '!')
+    if minval is not None:
+        ipar = np.where(par < minval)
+        par[ipar] = minval
+        if verb > 0 and np.size(ipar) != 0:
+            print('* WARNING :: ' + name + ' < ' + str(minval) + ' ' + unit +
+                  ' are set to ' + str(minval) + ' ' + unit + '!')
     if scalar:
         return np.squeeze(par)
     else:
@@ -1895,7 +1922,7 @@ def _check_min(par, minval, name, unit, verb):
 
 
 def _check_targ(targ, keys):
-    """Check format of htarg/ftarg and return dict."""
+    r"""Check format of htarg/ftarg and return dict."""
     if not targ:  # If None
         targ = {}
     elif not isinstance(targ, (list, tuple, dict)):  # If only one value
@@ -1908,10 +1935,10 @@ def _check_targ(targ, keys):
 # 5. Backwards compatibility
 
 def spline_backwards_hankel(ht, htarg, opt):
-    """Check opt if deprecated 'spline' is used.
+    r"""Check opt if deprecated 'spline' is used.
 
     Returns corrected htarg, opt.
-    """
+    r"""
     # Ensure ht is all lowercase
     ht = ht.lower()
 

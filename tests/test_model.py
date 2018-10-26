@@ -504,6 +504,43 @@ class TestBipole:
         assert_allclose(out0f, out1f)
         assert_allclose(out0t, out1t)
 
+    def test_cole_cole(self):
+        # Check user-hook for eta/zeta
+
+        def func_eta(inp, pdict):
+            # Dummy function to check if it works.
+            etaH = pdict['etaH'].real*inp['fact'] + 1j*pdict['etaH'].imag
+            etaV = pdict['etaV'].real*inp['fact'] + 1j*pdict['etaV'].imag
+
+            return etaH, etaV
+
+        def func_zeta(inp, pdict):
+            # Dummy function to check if it works.
+            etaH = pdict['zetaH']/inp['fact']
+            etaV = pdict['zetaV']/inp['fact']
+
+            return etaH, etaV
+
+        model = {'src': [0, 0, 500, 0, 0], 'rec': [500, 0, 600, 0, 0],
+                 'depth': [0, 550], 'freqtime': [0.1, 1, 10]}
+        res = np.array([2, 10, 5])
+        fact = np.array([2, 2, 2])
+        eta = {'res': fact*res, 'fact': fact, 'func_eta': func_eta}
+        zeta = {'res': res, 'fact': fact, 'func_zeta': func_zeta}
+
+        # Frequency domain
+        standard = bipole(res=res, **model)
+        outeta = bipole(res=eta, **model)
+        assert_allclose(standard, outeta)
+        outzeta = bipole(res=zeta, mpermH=fact, mpermV=fact, **model)
+        assert_allclose(standard, outzeta)
+        # Time domain
+        standard = bipole(res=res, signal=0, **model)
+        outeta = bipole(res=eta, signal=0, **model)
+        assert_allclose(standard, outeta)
+        outzeta = bipole(res=zeta, signal=0, mpermH=fact, mpermV=fact, **model)
+        assert_allclose(standard, outzeta)
+
 
 def test_dipole():
     # As this is a subset of bipole, just run two tests to ensure
@@ -529,6 +566,41 @@ def test_dipole():
                      [rec[0], rec[1], rec[2], 90, 0], msrc=True, freqtime=t,
                      signal=1, verb=0, **model)
     assert_allclose(dip_res, bip_res)
+
+    # 3. Check user-hook for eta/zeta
+    def func_eta(inp, pdict):
+        # Dummy function to check if it works.
+        etaH = pdict['etaH'].real*inp['fact'] + 1j*pdict['etaH'].imag
+        etaV = pdict['etaV'].real*inp['fact'] + 1j*pdict['etaV'].imag
+
+        return etaH, etaV
+
+    def func_zeta(inp, pdict):
+        # Dummy function to check if it works.
+        etaH = pdict['zetaH']/inp['fact']
+        etaV = pdict['zetaV']/inp['fact']
+
+        return etaH, etaV
+
+    model = {'src': [0, 0, 500], 'rec': [500, 0, 600], 'depth': [0, 550],
+             'freqtime': [0.1, 1, 10]}
+    res = np.array([2, 10, 5])
+    fact = np.array([2, 2, 2])
+    eta = {'res': fact*res, 'fact': fact, 'func_eta': func_eta}
+    zeta = {'res': res, 'fact': fact, 'func_zeta': func_zeta}
+
+    # Frequency domain
+    standard = dipole(res=res, **model)
+    outeta = dipole(res=eta, **model)
+    assert_allclose(standard, outeta)
+    outzeta = dipole(res=zeta, mpermH=fact, mpermV=fact, **model)
+    assert_allclose(standard, outzeta)
+    # Time domain
+    standard = dipole(res=res, signal=0, **model)
+    outeta = dipole(res=eta, signal=0, **model)
+    assert_allclose(standard, outeta)
+    outzeta = dipole(res=zeta, signal=0, mpermH=fact, mpermV=fact, **model)
+    assert_allclose(standard, outzeta)
 
 
 def test_analytical():
@@ -573,6 +645,42 @@ def test_analytical():
         assert_allclose(res1, dTE+dTM)
         assert_allclose(res2, rTE+rTM)
         assert_allclose(res3, air)
+
+    # 3. Check user-hook for eta/zeta
+    def func_eta(inp, pdict):
+        # Dummy function to check if it works.
+        etaH = pdict['etaH'].real*inp['fact'] + 1j*pdict['etaH'].imag
+        etaV = pdict['etaV'].real*inp['fact'] + 1j*pdict['etaV'].imag
+
+        return etaH, etaV
+
+    def func_zeta(inp, pdict):
+        # Dummy function to check if it works.
+        etaH = pdict['zetaH']/inp['fact']
+        etaV = pdict['zetaV']/inp['fact']
+
+        return etaH, etaV
+
+    model = {'src': [0, 0, 500], 'rec': [500, 0, 600],
+             'freqtime': [0.1, 1, 10]}
+    res = 10
+    fact = 2
+    eta = {'res': fact*res, 'fact': fact, 'func_eta': func_eta}
+    zeta = {'res': res, 'fact': fact, 'func_zeta': func_zeta}
+
+    # Frequency domain fs
+    standard = analytical(res=res, **model)
+    outeta = analytical(res=eta, **model)
+    assert_allclose(standard, outeta)
+    outzeta = analytical(res=zeta, mpermH=fact, mpermV=fact, **model)
+    assert_allclose(standard, outzeta)
+    # Time domain dhs
+    standard = analytical(res=res, solution='dhs', signal=0, **model)
+    outeta = analytical(res=eta, solution='dhs', signal=0, **model)
+    assert_allclose(standard, outeta)
+    outzeta = analytical(res=zeta, solution='dhs',
+                         signal=0, mpermH=fact, mpermV=fact, **model)
+    assert_allclose(standard, outzeta)
 
 
 def test_gpr(capsys):

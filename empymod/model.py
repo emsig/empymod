@@ -1,4 +1,4 @@
-"""
+r"""
 
 :mod:`model` -- Model EM-responses
 ==================================
@@ -70,7 +70,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
            verb=2):
-    """Return the electromagnetic field due to an electromagnetic source.
+    r"""Return the electromagnetic field due to an electromagnetic source.
 
     Calculate the electromagnetic frequency- or time-domain field due to
     arbitrary finite electric or magnetic bipole sources, measured by arbitrary
@@ -119,6 +119,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     res : array_like
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
+
+        Alternatively, res can be a dictionary. See the main manual of empymod
+        too see how to exploit this hook to re-calculate etaH, etaV, zetaH, and
+        zetaV, which can be used to, for instance, use the Cole-Cole model for
+        IP.
 
     freqtime : array_like
         Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
@@ -435,6 +440,12 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                                 mpermV, verb)
     freq, etaH, etaV, zetaH, zetaV = frequency
 
+    # Update etaH/etaV and zetaH/zetaV according to user-provided model
+    if isinstance(res, dict) and 'func_eta' in res:
+        etaH, etaV = res['func_eta'](res, locals())
+    if isinstance(res, dict) and 'func_zeta' in res:
+        zetaH, zetaV = res['func_zeta'](res, locals())
+
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, verb)
 
@@ -586,7 +597,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
            verb=2):
-    """Return the electromagnetic field due to a dipole source.
+    r"""Return the electromagnetic field due to a dipole source.
 
     Calculate the electromagnetic frequency- or time-domain field due to
     infinitesimal small electric or magnetic dipole source(s), measured by
@@ -627,6 +638,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     res : array_like
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
+
+        Alternatively, res can be a dictionary. See the main manual of empymod
+        too see how to exploit this hook to re-calculate etaH, etaV, zetaH, and
+        zetaV, which can be used to, for instance, use the Cole-Cole model for
+        IP.
 
     freqtime : array_like
         Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
@@ -896,6 +912,12 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                                 mpermV, verb)
     freq, etaH, etaV, zetaH, zetaV = frequency
 
+    # Update etaH/etaV and zetaH/zetaV according to user-provided model
+    if isinstance(res, dict) and 'func_eta' in res:
+        etaH, etaV = res['func_eta'](res, locals())
+    if isinstance(res, dict) and 'func_zeta' in res:
+        zetaH, zetaV = res['func_zeta'](res, locals())
+
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, verb)
 
@@ -947,7 +969,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
                aniso=None, epermH=None, epermV=None, mpermH=None, mpermV=None,
                verb=2):
-    """Return the analytical full- or half-space solution.
+    r"""Return the analytical full- or half-space solution.
 
     Calculate the electromagnetic frequency- or time-domain field due to
     infinitesimal small electric or magnetic dipole source(s), measured by
@@ -987,6 +1009,11 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     res : float
         Horizontal resistivity rho_h (Ohm.m).
+
+        Alternatively, res can be a dictionary. See the main manual of empymod
+        too see how to exploit this hook to re-calculate etaH, etaV, zetaH, and
+        zetaV, which can be used to, for instance, use the Cole-Cole model for
+        IP.
 
     freqtime : array_like
         Frequencies f (Hz) if ``signal`` == None, else times t (s); (f, t > 0).
@@ -1107,6 +1134,12 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
                                 mpermV, verb)
     freqtime, etaH, etaV, zetaH, zetaV = frequency
 
+    # Update etaH/etaV and zetaH/zetaV according to user-provided model
+    if isinstance(res, dict) and 'func_eta' in res:
+        etaH, etaV = res['func_eta'](res, locals())
+    if isinstance(res, dict) and 'func_zeta' in res:
+        zetaH, zetaV = res['func_zeta'](res, locals())
+
     # Check src-rec configuration
     # => Get flags if src or rec or both are magnetic (msrc, mrec)
     ab_calc, msrc, mrec = check_ab(ab, verb)
@@ -1164,7 +1197,7 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
         epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
         ht='quad', htarg=None, ft='fft', ftarg=None, opt=None, loop=None,
         verb=2):
-    """Return the Ground-Penetrating Radar signal.
+    r"""Return the Ground-Penetrating Radar signal.
 
     THIS FUNCTION IS EXPERIMENTAL, USE WITH CAUTION.
 
@@ -1244,7 +1277,7 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
 
 def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
              epermH=None, epermV=None, mpermH=None, mpermV=None, verb=2):
-    """Return the electromagnetic wavenumber-domain field.
+    r"""Return the electromagnetic wavenumber-domain field.
 
     Calculate the electromagnetic wavenumber-domain field due to infinitesimal
     small electric or magnetic dipole source(s), measured by infinitesimal
@@ -1435,7 +1468,7 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
 def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
                epermH=None, epermV=None, mpermH=None, mpermV=None, verb=2):
-    """Depreciated. Use `dipole_k` instead."""
+    r"""Depreciated. Use `dipole_k` instead."""
 
     # Issue warning
     mesg = ("\n    The use of `model.wavenumber` is deprecated and will " +
@@ -1451,7 +1484,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         zetaV, xdirect, isfullspace, ht, htarg, use_ne_eval, msrc, mrec,
         loop_freq, loop_off, conv=True):
-    """Return the electromagnetic frequency-domain response.
+    r"""Return the electromagnetic frequency-domain response.
 
     This function is called from one of the above modelling routines. No
     input-check is carried out here. See the main description of :mod:`model`
@@ -1539,7 +1572,7 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
 
 
 def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
-    """Return the time-domain response of the frequency-domain response fEM.
+    r"""Return the time-domain response of the frequency-domain response fEM.
 
     This function is called from one of the above modelling routines. No
     input-check is carried out here. See the main description of :mod:`model`

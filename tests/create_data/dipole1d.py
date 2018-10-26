@@ -1,4 +1,4 @@
-"""Create data for test_model::test_dipole1d."""
+r"""Create data for test_model::test_dipole1d."""
 import numpy as np
 from external import dipole1d
 

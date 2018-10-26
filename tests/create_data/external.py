@@ -1,4 +1,4 @@
-"""Routines to create data from external modellers, for comparison purposes.
+r"""Routines to create data from external modellers, for comparison purposes.
 
 - DIPOLE1D: You must have Dipole1D installed and it must be in your system
   path; http://software.seg.org/2012/0003.
@@ -27,7 +27,7 @@ from os.path import join, dirname
 
 
 class ChDir(object):
-    """Step into a directory temporarily.
+    r"""Step into a directory temporarily.
 
     Taken from:
     pythonadventures.wordpress.com/2013/12/15/
@@ -47,7 +47,7 @@ class ChDir(object):
 
 
 def green3d(src, rec, depth, res, freq, aniso, par, strength=0):
-    """Run model with green3d (CEMI).
+    r"""Run model with green3d (CEMI).
 
     You must have Green3D installed (for which you need to be a member of the
     CEMI consortium). The following files must be in the folder
@@ -120,7 +120,7 @@ def green3d(src, rec, depth, res, freq, aniso, par, strength=0):
 
 
 def dipole1d(src, rec, depth, res, freq, srcpts=5):
-    """Run model with dipole1d (Scripps).
+    r"""Run model with dipole1d (Scripps).
 
     You must have Dipole1D installed and it must be in your system path.
 
@@ -206,7 +206,7 @@ def dipole1d(src, rec, depth, res, freq, srcpts=5):
 def emmod(dx, nx, dy, ny, src, rec, depth, res, freq, aniso, epermV, epermH,
           mpermV, mpermH, ab, nd=1000, startlogx=-6, deltalogx=0.5, nlogx=24,
           kmax=10, c1=0, c2=0.001, maxpt=1000, dopchip=0, xdirect=0):
-    """Run model with emmod (Hunziker et al, 2015).
+    r"""Run model with emmod (Hunziker et al, 2015).
 
     You must have EMmod installed and it must be in your system path.
 

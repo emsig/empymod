@@ -11,7 +11,7 @@ matrix:
       env: MINICONDA_PYTHON_VERSION=3.6 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
     - python: 3.6  # => 3.7
       env: MINICONDA_PYTHON_VERSION=3.7 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
-    - python: 3.6  # => 3.6 with conda-forg
+    - python: 3.6  # => 3.6 with conda-forge
       env: MINICONDA_PYTHON_VERSION=3.6 SOFT_DEP="numexpr matplotlib IPython" CHAN="conda-forge" INST="pytest-mpl" TEST="--mpl"
     - python: 3.6  # => 3.6 with without matplotlib, numexpr, IPython
       env: MINICONDA_PYTHON_VERSION=3.6 TRAVIS_PYTHON_VERSION="3.6" SOFT_DEP="" CHAN="defaults" INST="" TEST=""

@@ -1,4 +1,4 @@
-"""Test data for test_model::TestBipole::test_emmod.
+r"""Test data for test_model::TestBipole::test_emmod.
 
 Model parameters
 
