@@ -9,7 +9,7 @@ GitHub/Travis-CI; by default for all supported python versions of empymod.
 
 where:
     -h : Show this help text.
-    -v : Python 3.x version, e.g. '-v 5' for Python 3.5. Default: '4 5 6 7'.
+    -v : Python 3.x version, e.g. '-v 6' for Python 3.6. Default: '5 6 7'.
     -c : Use channel 'conda-forge' instead of channel 'defaults'.
     -p : Print output of conda.
     -n : Run tests without numexpr/matplotlib/IPython.
@@ -19,7 +19,7 @@ where:
 
 # Set default values
 CHAN=defaults
-PYTHON3VERSION="4 5 6 7"
+PYTHON3VERSION="5 6 7"
 PRINT="/dev/null"
 PCKGS="numpy scipy pytest pytest-cov"
 NMXPR="numexpr matplotlib IPython"

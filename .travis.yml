@@ -3,18 +3,16 @@ language: python
 
 matrix:
   include:
-    - python: 3.4
-      env: MINICONDA_PYTHON_VERSION=3.4 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
     - python: 3.5
-      env: MINICONDA_PYTHON_VERSION=3.5 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
+      env: PYTHON=3.5 PCKGS="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" TEST="--mpl" INST="pytest-mpl"
     - python: 3.6
-      env: MINICONDA_PYTHON_VERSION=3.6 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
+      env: PYTHON=3.6 PCKGS="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" TEST="--mpl" INST="pytest-mpl"
     - python: 3.6  # => 3.7
-      env: MINICONDA_PYTHON_VERSION=3.7 SOFT_DEP="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" INST="pytest-mpl" TEST="--mpl"
+      env: PYTHON=3.7 PCKGS="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" TEST="--mpl" INST="pytest-mpl"
     - python: 3.6  # => 3.6 with conda-forge
-      env: MINICONDA_PYTHON_VERSION=3.6 SOFT_DEP="numexpr matplotlib IPython" CHAN="conda-forge" INST="pytest-mpl" TEST="--mpl"
+      env: PYTHON=3.6 PCKGS="numexpr matplotlib IPython" CHAN="conda-forge" TEST="--mpl" INST="pytest-mpl"
     - python: 3.6  # => 3.6 with without matplotlib, numexpr, IPython
-      env: MINICONDA_PYTHON_VERSION=3.6 TRAVIS_PYTHON_VERSION="3.6" SOFT_DEP="" CHAN="defaults" INST="" TEST=""
+      env: PYTHON=3.6 PCKGS="" CHAN="defaults" TEST="" INST=""
 
 install:
   - sudo apt-get update
@@ -30,7 +28,7 @@ install:
   - conda info -a
 
   # Install and activate environment, install packages
-  - conda create -q -n test-environment -c $CHAN python=$MINICONDA_PYTHON_VERSION numpy scipy pytest pytest-cov $SOFT_DEP
+  - conda create -q -n test-environment -c $CHAN python=$PYTHON numpy scipy pytest pytest-cov $PCKGS
   - source activate test-environment
   - pip install coveralls pytest-flake8 $INST
   - python setup.py install

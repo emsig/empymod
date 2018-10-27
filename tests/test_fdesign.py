@@ -120,8 +120,6 @@ def test_save_load_filter(tmpdir):
 
 
 @pytest.mark.skipif(not plt, reason="Matplotlib not installed.")
-@pytest.mark.skipif(sys.version_info < (3, 5),
-                    reason="Plots are slightly different in Python 3.4.")
 class TestFiguresMatplotlib:
 
     @pytest.mark.mpl_image_compare(remove_text=True)
