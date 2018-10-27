@@ -205,7 +205,9 @@ And then you call ``empymod`` with ``res={'res': res-array, 'tau': tau,
 
 Have a look at the example ``2d_Cole-Cole-IP`` in the `example-notebooks
 <https://github.com/empymod/example-notebooks>`_ repository, where this hook is
-exploited to use the Cole-Cole model for IP calculation.
+exploited in the low-frequency range to use the Cole-Cole model for IP
+calculation. It could also be used in the high-frequency range to model
+dielectricity.
 
 
 Contributing
