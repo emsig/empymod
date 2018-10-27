@@ -70,7 +70,7 @@ class TestBipole:
         # Comparison to EMmod (Hunziker et al., 2015)
         # Comparison f = [0.013, 1.25, 130] Hz.; 11 models, 34 ab's, f altern.
         dat = EMMOD['res'][()]
-        for key, val in dat.items():
+        for _, val in dat.items():
             res = bipole(**val[0])
             assert_allclose(res, val[1], 3e-2, 1e-17, True)
 
@@ -763,6 +763,6 @@ def test_regres():
     # Comparison to self (regression test)
     # 1836 cases; f = [0.01, 1, 100] Hz.; 18 models, 34 ab's, f altern.
     dat = REGRES['res'][()]
-    for key, val in dat.items():
+    for _, val in dat.items():
         res = dipole(**val[0])
         assert_allclose(res, val[1], 3e-2, 1e-17, True)

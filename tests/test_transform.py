@@ -21,17 +21,15 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
     # frequency-domain fullspace solution
     calc = getattr(transform, htype)
     model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
-    depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
+    depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = model
     frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
                                       mpermV, 0)
-    freq, etaH, etaV, zetaH, zetaV = frequency
+    _, etaH, etaV, zetaH, zetaV = frequency
     src = [0, 0, 0]
     src, nsrc = utils.check_dipole(src, 'src', 0)
     for ab_inp in [11, 12, 13, 33]:
         ab, msrc, mrec = utils.check_ab(ab_inp, 0)
-        ht, htarg = utils.check_hankel(htype, None, 0)
-        options = utils.check_opt(None, None, htype, htarg, 0)
-        use_ne_eval, loop_freq, loop_off = options
+        _, htarg = utils.check_hankel(htype, None, 0)
         xdirect = False  # Important, as we want to compare wavenr-frequency!
         rec = [np.arange(1, 11)*500, np.zeros(10), 300]
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
@@ -61,10 +59,8 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
             assert_allclose(np.squeeze(wvnr0), np.squeeze(freq0))
 
         # # # 1. Spline; One angle # # #
-        htarg, opt = utils.spline_backwards_hankel(htype, None, 'spline')
+        htarg, _ = utils.spline_backwards_hankel(htype, None, 'spline')
         ht, htarg = utils.check_hankel(htype, htarg, 0)
-        options = utils.check_opt(None, None, htype, htarg, 0)
-        use_ne_eval, loop_freq, loop_off = options
         if htype == 'hquad':  # Lower atol to ensure convergence
             ht, htarg = utils.check_hankel('quad', [1e-8], 0)
         elif htype == 'fht':  # Adjust htarg for fht
@@ -368,7 +364,7 @@ def test_dlf():                                                       # 10. dlf
     # Check DLF for Hankel
     for ab in [12, 22, 13, 33]:
         model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
-        depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
+        depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = model
         frequency = utils.check_frequency(1, res, aniso, epermH, epermV,
                                           mpermH, mpermV, 0)
         freq, etaH, etaV, zetaH, zetaV = frequency

@@ -24,7 +24,7 @@ def test_design():
     # 1. General case with various spacing and shifts
     fI = (fdesign.j0_1(5), fdesign.j1_1(5))
     dat1 = DATA['case1'][()]
-    filt1, out1 = fdesign.design(fI=fI, verb=0, plot=0, **dat1[0])
+    _, out1 = fdesign.design(fI=fI, verb=0, plot=0, **dat1[0])
     assert_allclose(out1[0], dat1[2][0])
     assert_allclose(out1[1], dat1[2][1], rtol=1e-3)
     assert_allclose(out1[2], dat1[2][2])
@@ -39,7 +39,7 @@ def test_design():
 
     # 2. Specific model with only one spacing/shift
     dat2 = DATA['case2'][()]
-    filt2, out2 = fdesign.design(fI=fI, verb=0, plot=0, **dat2[0])
+    _, out2 = fdesign.design(fI=fI, verb=0, plot=0, **dat2[0])
     assert_allclose(out2[0], dat2[2][0])
     assert_allclose(out2[1], dat2[2][1], rtol=1e-3)
     assert_allclose(out2[2], dat2[2][2])
@@ -47,7 +47,7 @@ def test_design():
 
     # 3. Same, with only one transform
     dat2b = DATA['case3'][()]
-    filt2b, out2b = fdesign.design(fI=fI[0], verb=0, plot=0, **dat2b[0])
+    _, out2b = fdesign.design(fI=fI[0], verb=0, plot=0, **dat2b[0])
     assert_allclose(out2b[0], dat2b[2][0])
     assert_allclose(out2b[1], dat2b[2][1], rtol=1e-3)
     assert_allclose(out2b[2], dat2b[2][2])
@@ -57,7 +57,7 @@ def test_design():
     dat4 = DATA['case4'][()]
     dat4[0]['save'] = True
     dat4[0]['name'] = 'tmpfilter'
-    filt4, out4 = fdesign.design(fI=fI, verb=0, plot=0, **dat4[0])
+    _, out4 = fdesign.design(fI=fI, verb=0, plot=0, **dat4[0])
     assert_allclose(out4[0], dat4[2][0])
     assert_allclose(out4[1], dat4[2][1], rtol=1e-3)
     assert_allclose(out4[2], dat4[2][2])
