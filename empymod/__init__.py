@@ -823,7 +823,7 @@ from .scripts import *    # noqa  maint. in scripts.__init__.__all__
 # Make only a selection available to __all__ to not clutter the namespace
 # Maybe also to discourage the use of `from empymod import *`.
 __all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts',
-           'bipole', 'dipole', 'EMarray', 'set_minimum', 'get_minimum',
+           'bipole', 'dipole', 'EMArray', 'set_minimum', 'get_minimum',
            'DigitalFilter']
 
 # Version
