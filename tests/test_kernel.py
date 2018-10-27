@@ -28,7 +28,7 @@ DATAKERNEL = np.load(join(dirname(__file__), 'data/kernel.npz'))
 
 def test_wavenumber():                                          # 1. wavenumber
     dat = DATAKERNEL['wave'][()]
-    for key, val in dat.items():
+    for _, val in dat.items():
         out = kernel.wavenumber(ab=val[0], msrc=val[1], mrec=val[2], **val[3])
 
         if val[0] in [11, 22, 24, 15, 33]:
@@ -49,7 +49,7 @@ def test_wavenumber():                                          # 1. wavenumber
 
 def test_greenfct():                                              # 2. greenfct
     dat = DATAKERNEL['green'][()]
-    for key, val in dat.items():
+    for _, val in dat.items():
         for i in [3, 5, 7]:
             ab = val[0]
             msrc = val[1]
@@ -66,7 +66,7 @@ def test_greenfct():                                              # 2. greenfct
 
 def test_reflections():                                        # 3. reflections
     dat = DATAKERNEL['refl'][()]
-    for key, val in dat.items():
+    for _, val in dat.items():
         Rp, Rm = kernel.reflections(**val[0])
         assert_allclose(Rp, val[1])
         assert_allclose(Rm, val[2])
@@ -78,7 +78,7 @@ def test_reflections():                                        # 3. reflections
 
 def test_fields():                                                  # 4. fields
     dat = DATAKERNEL['fields'][()]
-    for key, val in dat.items():
+    for _, val in dat.items():
         for i in [2, 4, 6, 8, 10]:
             ab = val[0]
             TM = val[1]

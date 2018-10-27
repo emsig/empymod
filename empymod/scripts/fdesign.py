@@ -1106,7 +1106,7 @@ def cos_3(a=1):
 
 # # 3.e Modeller
 
-def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=[], aniso=None,
+def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=None, aniso=None,
                 epermH=None, epermV=None, mpermH=None, mpermV=None,
                 htarg=None, verblhs=0, verbrhs=0):
     r"""Numerical transform pair with empymod.
@@ -1114,8 +1114,8 @@ def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=[], aniso=None,
     All parameters except ``ftype``, ``verblhs``, and ``verbrhs`` correspond to
     the input parameters to ``empymod.dipole``. See there for more information.
 
-    Note that if depth=[], the analytical full-space solutions will be used
-    (much faster).
+    Note that if depth=None or [], the analytical full-space solutions will be
+    used (much faster).
 
     Parameters
     ----------

@@ -487,7 +487,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
     ds = ddepth[lsrc+1] - ddepth[lsrc]
 
     def get_rp_rm(z_eta):
-        r"""Return Rp, Rm, Ms."""
+        r"""Return Rp, Rm."""
 
         # Get Rp/Rm for lambd=0
         Rp, Rm = reflections(depth, z_eta, Gam, lrec, lsrc, False)
@@ -505,10 +505,10 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
         Ms = 1 - Rp*Rm*np.exp(-2*iGam*ds)
         npfct = factAng*zetaH[:, lsrc]/(fact*off*lgam*Ms)
 
-        return Rp, Rm, Ms, npfct
+        return Rp, Rm, npfct
 
     # TE modes TE[uu, ud, du, dd]
-    Rp, Rm, Ms, npfct = get_rp_rm(zetaH)
+    Rp, Rm, npfct = get_rp_rm(zetaH)
 
     PTE[0] += npfct*Rp*Rm*np.exp(-lgam*(2*ds - zrec + zsrc))
     PTE[1] += npfct*Rp*np.exp(-lgam*(2*ddepth[lrec+1] - zrec - zsrc))
@@ -516,7 +516,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
     PTE[3] += npfct*Rp*Rm*np.exp(-lgam*(2*ds + zrec - zsrc))
 
     # TM modes TM[uu, ud, du, dd]
-    Rp, Rm, Ms, npfct = get_rp_rm(etaH)
+    Rp, Rm, npfct = get_rp_rm(etaH)
 
     PTM[0] -= npfct*Rp*Rm*np.exp(-lgam*(2*ds - zrec + zsrc))
     PTM[1] += npfct*Rp*np.exp(-lgam*(2*ddepth[lrec+1] - zrec - zsrc))

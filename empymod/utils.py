@@ -716,6 +716,8 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     global _min_res
 
     # Check depth
+    if depth is None:
+        depth = []
     depth = _check_var(depth, float, 1, 'depth')
 
     # Add -infinity at the beginning

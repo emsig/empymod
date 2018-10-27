@@ -43,8 +43,8 @@ def test_check_ab(capsys):
            15, 25, 35, 21, 22, 23, 16, 26, 36, 31, 32, 33]
     omsrc = np.array([[False, ]*3 + [True, ]*3]*6).ravel()
     omrec = [False, ]*18 + [True, ]*18
-    for i in range(len(iab)):
-        ab, msrc, mrec = utils.check_ab(iab[i], 0)
+    for i, val in enumerate(iab):
+        ab, msrc, mrec = utils.check_ab(val, 0)
         assert ab == oab[i]
         assert msrc == omsrc[i]
         assert mrec == omrec[i]
@@ -833,12 +833,12 @@ def test_get_azm_dip(capsys):
 
 def test_printstartfinish(capsys):
     t0 = utils.printstartfinish(0)
-    assert type(t0) == float
+    assert isinstance(t0, float)
     out, _ = capsys.readouterr()
     assert out == ""
 
     t0 = utils.printstartfinish(3)
-    assert type(t0) == float
+    assert isinstance(t0, float)
     out, _ = capsys.readouterr()
     assert out == "\n:: empymod START  ::\n\n"
 

@@ -68,7 +68,7 @@ for i in ${PYTHON3VERSION[@]}; do
   NAME=test_3${i}_${CHAN}${SD}
 
   # Print info
-  STR="  PYTHON 3."${i}"  **  Channel "$CHAN"  $STR2"
+  STR="  PYTHON 3.${i}  **  Channel $CHAN  $STR2"
   LENGTH=$(( ($(tput cols) - ${#STR}) / 2 - 2 ))
   printf "\n  "
   printf '\e[1m\e[34m%*s' "${LENGTH}" '' | tr ' ' -
