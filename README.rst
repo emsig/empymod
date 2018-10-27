@@ -71,3 +71,8 @@ Copyright 2016-2018 Dieter Werthmüller
 
 Licensed under the Apache License, Version 2.0. See the ``LICENSE``- and
 ``NOTICE``-files or the documentation for more information.
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/1c8609e6b30a45fa8bfa773093135c76
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/prisae/empymod?utm_source=github.com&utm_medium=referral&utm_content=empymod/empymod&utm_campaign=Badge_Grade_Dashboard
