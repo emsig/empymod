@@ -60,9 +60,9 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
 
         # # # 1. Spline; One angle # # #
         htarg, _ = utils.spline_backwards_hankel(htype, None, 'spline')
-        ht, htarg = utils.check_hankel(htype, htarg, 0)
+        _, htarg = utils.check_hankel(htype, htarg, 0)
         if htype == 'hquad':  # Lower atol to ensure convergence
-            ht, htarg = utils.check_hankel('quad', [1e-8], 0)
+            _, htarg = utils.check_hankel('quad', [1e-8], 0)
         elif htype == 'fht':  # Adjust htarg for fht
             lambd, int_pts = transform.get_spline_values(htarg[0], off,
                                                          htarg[1])
@@ -88,8 +88,8 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
         factAng = kernel.angle_factor(angle, ab, msrc, mrec)
         if htype == 'hqwe':  # Put a very low diff_quad, to test it.; lower err
-            ht, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, 80, .1,
-                                                   1e-6, .1, 1000], 0)
+            _, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, 80, .1,
+                                                  1e-6, .1, 1000], 0)
         elif htype == 'fht':  # Adjust htarg for fht
             lambd, int_pts = transform.get_spline_values(htarg[0], off,
                                                          htarg[1])
@@ -108,12 +108,12 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
 
         # # # 3. Spline; pts_per_dec # # #
         if htype == 'fht':
-            ht, htarg = utils.check_hankel('fht', ['key_201_2012', 20], 0)
+            _, htarg = utils.check_hankel('fht', ['key_201_2012', 20], 0)
             lambd, int_pts = transform.get_spline_values(htarg[0], off,
                                                          htarg[1])
             htarg = (htarg[0], htarg[1], lambd, int_pts)
         elif htype == 'hqwe':
-            ht, htarg = utils.check_hankel('qwe', ['', '', '', 80, 100], 0)
+            _, htarg = utils.check_hankel('qwe', ['', '', '', 80, 100], 0)
         if htype != 'hquad':  # hquad is always pts_per_dec
             # Analytical frequency-domain solution
             wvnr3, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth,
@@ -132,9 +132,9 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
         factAng = kernel.angle_factor(angle, ab, msrc, mrec)
         if htype == 'hqwe':
-            ht, htarg = utils.check_hankel('qwe', ['', '', '', 200, 80], 0)
+            _, htarg = utils.check_hankel('qwe', ['', '', '', 200, 80], 0)
         elif htype == 'hquad':
-            ht, htarg = utils.check_hankel('quad', None, 0)
+            _, htarg = utils.check_hankel('quad', None, 0)
         elif htype == 'fht':
             lambd, int_pts = transform.get_spline_values(htarg[0], off,
                                                          htarg[1])
@@ -367,13 +367,12 @@ def test_dlf():                                                       # 10. dlf
         depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = model
         frequency = utils.check_frequency(1, res, aniso, epermH, epermV,
                                           mpermH, mpermV, 0)
-        freq, etaH, etaV, zetaH, zetaV = frequency
+        _, etaH, etaV, zetaH, zetaV = frequency
         src = [0, 0, 0]
         src, nsrc = utils.check_dipole(src, 'src', 0)
         ab, msrc, mrec = utils.check_ab(ab, 0)
         ht, htarg = utils.check_hankel('fht', None, 0)
-        options = utils.check_opt(None, None, ht, htarg, 0)
-        use_ne_eval, loop_freq, loop_off = options
+        use_ne_eval, _, _ = utils.check_opt(None, None, ht, htarg, 0)
         xdirect = False  # Important, as we want to comp. wavenumber-frequency!
         rec = [np.arange(1, 11)*500, np.zeros(10), 300]
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
@@ -408,8 +407,7 @@ def test_dlf():                                                       # 10. dlf
         assert_allclose(np.squeeze(fEM0), np.squeeze(freq1))
 
         # # # 1. Spline; One angle # # #
-        options = utils.check_opt('spline', None, ht, htarg, 0)
-        use_ne_eval, loop_freq, loop_off = options
+        use_ne_eval, _, _ = utils.check_opt('spline', None, ht, htarg, 0)
 
         # fht calculation
         lambd, _ = transform.get_spline_values(fhtfilt, off, pts_per_dec)
