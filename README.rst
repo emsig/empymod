@@ -6,7 +6,7 @@
 ----
 
 .. image:: https://readthedocs.org/projects/empymod/badge/?version=latest
-   :target: http://empymod.readthedocs.io/en/latest/?badge=latest
+   :target: http://empymod.readthedocs.io/en/latest
    :alt: Documentation Status
 .. image:: https://travis-ci.org/empymod/empymod.svg?branch=master
    :target: https://travis-ci.org/empymod/empymod
@@ -14,6 +14,9 @@
 .. image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
    :target: https://coveralls.io/github/empymod/empymod?branch=master
    :alt: Coveralls
+.. image:: https://api.codacy.com/project/badge/Grade/b28ed3989ed248fe95e34288e43667b9
+   :target: https://www.codacy.com/app/prisae/empymod
+   :alt: Codacy
 .. image:: https://img.shields.io/badge/benchmarked%20by-asv-brightgreen.svg?style=flat
    :target: https://empymod.github.io/asv
    :alt: Airspeed Velocity
