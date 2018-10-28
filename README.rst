@@ -14,10 +14,10 @@
 .. image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
    :target: https://coveralls.io/github/empymod/empymod?branch=master
    :alt: Coveralls
-.. image:: https://api.codacy.com/project/badge/Grade/b28ed3989ed248fe95e34288e43667b9
+.. image:: https://img.shields.io/codacy/grade/b28ed3989ed248fe95e34288e43667b9/master.svg
    :target: https://www.codacy.com/app/prisae/empymod
    :alt: Codacy
-.. image:: https://img.shields.io/badge/benchmarked%20by-asv-brightgreen.svg?style=flat
+.. image:: https://img.shields.io/badge/benchmark-asv-blue.svg?style=flat
    :target: https://empymod.github.io/asv
    :alt: Airspeed Velocity
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.593094.svg
