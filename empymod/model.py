@@ -337,9 +337,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns B [T] (not H [A/m]!).
 
-        In the case of the impulse time-domain response, the unit is further
-        divided by seconds [1/s].
-
         However, source and receiver are normalised (unless strength != 0). So
         for instance in the electric case the source strength is 1 A and its
         length is 1 m. So the electric field could also be written as
@@ -858,9 +855,6 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns B [T] (not H [A/m]!).
 
-        In the case of the impulse time-domain response, the unit is further
-        divided by seconds [1/s].
-
         However, source and receiver are normalised. So for instance in the
         electric case the source strength is 1 A and its length is 1 m. So the
         electric field could also be written as [V/(A.m2)].
@@ -1081,9 +1075,6 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns B [T] (not H [A/m]!).
-
-        In the case of the impulse time-domain response, the unit is further
-        divided by seconds [1/s].
 
         However, source and receiver are normalised. So for instance in the
         electric case the source strength is 1 A and its length is 1 m. So the
