@@ -76,105 +76,105 @@ We start with equation (105) in *Hun15*:
 
 .. math::
 
-    \hat{G}^{ee}_{xx}(\\boldsymbol{x}, \\boldsymbol{x'}, \omega) =
-    \hat{G}^{ee;i}_{xx;s}(\\boldsymbol{x}-\\boldsymbol{x'}, \omega)
-    + \\frac{1}{8\pi}\int^\infty_{\kappa=0}
-    \left(\\frac{\Gamma_s \\tilde{g}^{tm}_{hh;s}}{\eta_s} -
-    \\frac{\zeta_s \\tilde{g}^{te}_{zz;s}}{\\bar{\Gamma}_s}\\right)
+    \hat{G}^{ee}_{xx}(\boldsymbol{x}, \boldsymbol{x'}, \omega) =
+    \hat{G}^{ee;i}_{xx;s}(\boldsymbol{x}-\boldsymbol{x'}, \omega)
+    + \frac{1}{8\pi}\int^\infty_{\kappa=0}
+    \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} -
+    \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
     J_0(\kappa r)\kappa d \kappa
 
 .. math::
 
-    - \\frac{\cos(2\phi)}{8\pi}\int^\infty_{\kappa=0}
-    \left(\\frac{\Gamma_s \\tilde{g}^{tm}_{hh;s}}{\eta_s} +
-    \\frac{\zeta_s \\tilde{g}^{te}_{zz;s}}{\\bar{\Gamma}_s}\\right)
+    - \frac{\cos(2\phi)}{8\pi}\int^\infty_{\kappa=0}
+    \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} +
+    \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
     J_2(\kappa r)\kappa d \kappa .
 
 Ignoring the incident field, and using
-:math:`J_2 = \\frac{2}{\kappa r}J_1 - J_0` to avoid
+:math:`J_2 = \frac{2}{\kappa r}J_1 - J_0` to avoid
 :math:`J_2`-integrals, we get
 
 .. math::
 
-    \hat{G}^{ee}_{xx}(\\boldsymbol{x}, \\boldsymbol{x'}, \omega) =
-    \\frac{1}{8\pi}\int^\infty_{\kappa=0}
-    \left(\\frac{\Gamma_s \\tilde{g}^{tm}_{hh;s}}{\eta_s}-
-    \\frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\\bar{\Gamma}_s}\\right)
+    \hat{G}^{ee}_{xx}(\boldsymbol{x}, \boldsymbol{x'}, \omega) =
+    \frac{1}{8\pi}\int^\infty_{\kappa=0}
+    \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}-
+    \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
     J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
 
 .. math::
 
-    + \\frac{\cos(2\phi)}{8\pi}\int^\infty_{\kappa=0}
-    \left(\\frac{\Gamma_s \\tilde{g}^{tm}_{hh;s}}{\eta_s} +
-    \\frac{\zeta_s \\tilde{g}^{te}_{zz;s}}{\\bar{\Gamma}_s}\\right)
+    + \frac{\cos(2\phi)}{8\pi}\int^\infty_{\kappa=0}
+    \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} +
+    \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
     J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
 
 .. math::
 
-    - \\frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
-    \left(\\frac{\Gamma_s \\tilde{g}^{tm}_{hh;s}}{\eta_s} +
-    \\frac{\zeta_s \\tilde{g}^{te}_{zz;s}}{\\bar{\Gamma}_s}\\right)
+    - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+    \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} +
+    \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}\right)
     J_1(\kappa r)\,{\mathrm{d}}\kappa .
 
 From this the TM- and TE-parts follow as
 
 .. math::
 
-     {\mathrm{TE}} = \\frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
-     \\frac{\zeta_s \\tilde{g}^{te}_{zz;s}}{\\bar{\Gamma}_s}
+     {\mathrm{TE}} = \frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
+     \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}
      J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
-      - \\frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
-     \\frac{\zeta_s \\tilde{g}^{te}_{zz;s}}{\\bar{\Gamma}_s}
+      - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+     \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}
      J_1(\kappa r)\,{\mathrm{d}}\kappa ,
 
 .. math::
 
-       {\mathrm{TM}} = \\frac{\cos(2\phi)+1}{8\pi}\int^\infty_{\kappa=0}
-     \\frac{\Gamma_s \\tilde{g}^{tm}_{hh;s}}{\eta_s}
+       {\mathrm{TM}} = \frac{\cos(2\phi)+1}{8\pi}\int^\infty_{\kappa=0}
+     \frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}
      J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
-     - \\frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
-     \\frac{\Gamma_s \\tilde{g}^{tm}_{hh;s}}{\eta_s}
+     - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+     \frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}
      J_1(\kappa r)\,{\mathrm{d}}\kappa .
 
 Equations (108) and (109) in Hun15 yield the required parameters
-:math:`\\tilde{g}^{tm}_{hh;s}` and :math:`\\tilde{g}^{te}_{zz;s}`,
+:math:`\tilde{g}^{tm}_{hh;s}` and :math:`\tilde{g}^{te}_{zz;s}`,
 
 .. math::
 
-     \\tilde{g}^{tm}_{hh;s} = P^{u-}_s W^u_s + P^{d-}_s W^d_s ,
+     \tilde{g}^{tm}_{hh;s} = P^{u-}_s W^u_s + P^{d-}_s W^d_s ,
 
 .. math::
 
-     \\tilde{g}^{te}_{zz;s} = \\bar{P}^{u+}_s \\bar{W}^u_s +
-                              \\bar{P}^{d+}_s \\bar{W}^d_s \ .
+     \tilde{g}^{te}_{zz;s} = \bar{P}^{u+}_s \bar{W}^u_s +
+                              \bar{P}^{d+}_s \bar{W}^d_s \ .
 
 The parameters :math:`P^{u\pm}_s` and :math:`P^{d\pm}_s` are given in equations
-(81) and (82), :math:`\\bar{P}^{u\pm}_s` and :math:`\\bar{P}^{d\pm}_s` in
+(81) and (82), :math:`\bar{P}^{u\pm}_s` and :math:`\bar{P}^{d\pm}_s` in
 equations (A-8) and (A-9); :math:`W^u_s` and :math:`W^d_s` in equation (74)
 in Hun15. This yields
 
 .. math::
 
-     \\tilde{g}^{te}_{zz;s} =
-     \\frac{\\bar{R}_s^+}{\\bar{M}_s}\left\{\exp[-\\bar{\Gamma}_s(z_s-z+d^+)] +
-     \\bar{R}_s^-\exp[-\\bar{\Gamma}_s(z_s-z+d_s+d^-)]\\right\}
+     \tilde{g}^{te}_{zz;s} =
+     \frac{\bar{R}_s^+}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(z_s-z+d^+)] +
+     \bar{R}_s^-\exp[-\bar{\Gamma}_s(z_s-z+d_s+d^-)]\right\}
 
 .. math::
 
-     + \\frac{\\bar{R}_s^-}{\\bar{M}_s}
-     \left\{\exp[-\\bar{\Gamma}_s(z-z_{s-1}+d^-)]+
-     \\bar{R}_s^+\exp[-\\bar{\Gamma}_s(z-z_{s-1}+d_s+d^+)]\\right\} ,
+     + \frac{\bar{R}_s^-}{\bar{M}_s}
+     \left\{\exp[-\bar{\Gamma}_s(z-z_{s-1}+d^-)]+
+     \bar{R}_s^+\exp[-\bar{\Gamma}_s(z-z_{s-1}+d_s+d^+)]\right\} ,
 
 .. math::
 
-     =\\frac{\\bar{R}_s^+}{\\bar{M}_s}\left\{\exp[-\\bar{\Gamma}_s(2z_s-z-z')]
-     + \\bar{R}_s^-\exp[-\\bar{\Gamma}_s(z'-z+2d_s)]\\right\}
+     =\frac{\bar{R}_s^+}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(2z_s-z-z')]
+     + \bar{R}_s^-\exp[-\bar{\Gamma}_s(z'-z+2d_s)]\right\}
 
 .. math::
 
-     + \\frac{\\bar{R}_s^-}{\\bar{M}_s}
-     \left\{\exp[-\\bar{\Gamma}_s(z+z'-2z_{s-1})]+
-     \\bar{R}_s^+\exp[-\\bar{\Gamma}_s(z-z'+2d_s)]\\right\} ,
+     + \frac{\bar{R}_s^-}{\bar{M}_s}
+     \left\{\exp[-\bar{\Gamma}_s(z+z'-2z_{s-1})]+
+     \bar{R}_s^+\exp[-\bar{\Gamma}_s(z-z'+2d_s)]\right\} ,
 
 
 where :math:`d^\pm` is taken from the text below equation (67). There are four
@@ -187,23 +187,23 @@ If we look at TE+-, we have
 
 .. math::
 
-   \\tilde{g}^{te+-}_{zz;s} =
-   \\frac{\\bar{R}_s^+}{\\bar{M}_s}\exp[-\\bar{\Gamma}_s(2z_s-z-z')] \ ,
+   \tilde{g}^{te+-}_{zz;s} =
+   \frac{\bar{R}_s^+}{\bar{M}_s}\exp[-\bar{\Gamma}_s(2z_s-z-z')] \ ,
 
 
 and therefore
 
 .. math::
 
-   {\mathrm{TE}}^{+-} = \\frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
-   \\frac{\zeta_s \\bar{R}_s^+}{\\bar{\Gamma}_s\\bar{M}_s}
-   \exp[-\\bar{\Gamma}_s(2z_s-z-z')]
+   {\mathrm{TE}}^{+-} = \frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
+   \frac{\zeta_s \bar{R}_s^+}{\bar{\Gamma}_s\bar{M}_s}
+   \exp[-\bar{\Gamma}_s(2z_s-z-z')]
    J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
 
 .. math::
-   - \\frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
-   \\frac{\zeta_s \\bar{R}_s^+}{\\bar{\Gamma}_s\\bar{M}_s}
-   \exp[-\\bar{\Gamma}_s(2z_s-z-z')]
+   - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+   \frac{\zeta_s \bar{R}_s^+}{\bar{\Gamma}_s\bar{M}_s}
+   \exp[-\bar{\Gamma}_s(2z_s-z-z')]
    J_1(\kappa r)\,{\mathrm{d}}\kappa .
 
 We can compare this to equation (4.165) in Zio18, with :math:`\hat{I}^e_x=1`
@@ -211,24 +211,24 @@ and slightly re-arranging it to look more alike, we get
 
 .. math::
 
-   \hat{E}^{+-}_{xx;H} = \\frac{y^2}{4\pi r^2}
-   \int^\infty_{\kappa=0} \\frac{\zeta_1}{\Gamma_1}
-   \\frac{R^-_{H;1}}{M_{H;1}}
+   \hat{E}^{+-}_{xx;H} = \frac{y^2}{4\pi r^2}
+   \int^\infty_{\kappa=0} \frac{\zeta_1}{\Gamma_1}
+   \frac{R^-_{H;1}}{M_{H;1}}
    \exp(-\Gamma_1 h^{+-})J_0(\kappa r)\kappa d\kappa
 
 .. math::
 
-  + \\frac{x^2-y^2}{4\pi r^3}
-  \int^\infty_{\kappa=0} \\frac{\zeta_1}{\Gamma_1}
-  \left(\\frac{R^-_{H;1}}{M_{H;1}} -
-  \\frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}\\right)
+  + \frac{x^2-y^2}{4\pi r^3}
+  \int^\infty_{\kappa=0} \frac{\zeta_1}{\Gamma_1}
+  \left(\frac{R^-_{H;1}}{M_{H;1}} -
+  \frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}\right)
   \exp(-\Gamma_1 h^{+-})J_1(\kappa r) d\kappa
 
 
 .. math::
 
-   - \\frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-   \\frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}
+   - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+   \frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}
    \exp(-\gamma_1 R^{+-}) .
 
 The notation in this equation follows Zio18.
@@ -246,44 +246,44 @@ notation of Zio18 (for the notation as in Hun15 see the implementation in
 
 .. math::
 
-  TE^{++} = + \\frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \\frac{\exp(-\gamma_1 |h^-|) }{M_{H;1}(\kappa=0)} ,
+  TE^{++} = + \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{\exp(-\gamma_1 |h^-|) }{M_{H;1}(\kappa=0)} ,
 
 .. math::
 
-  TE^{-+} = - \\frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \\frac{R^+_{H;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{H;1}(\kappa=0)} ,
+  TE^{-+} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^+_{H;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{H;1}(\kappa=0)} ,
 
 .. math::
 
-  TE^{+-} = - \\frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \\frac{R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{H;1}(\kappa=0)} ,
+  TE^{+-} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{H;1}(\kappa=0)} ,
 
 .. math::
 
-  TE^{--} = + \\frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \\frac{R^+_{H;1}(\kappa=0)R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
+  TE^{--} = + \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^+_{H;1}(\kappa=0)R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
   {M_{H;1}(\kappa=0)} ,
 
 .. math::
 
-  TM^{++} = - \\frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \\frac{\exp(-\gamma_1 |h^-|) }{M_{V;1}(\kappa=0)} ,
+  TM^{++} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{\exp(-\gamma_1 |h^-|) }{M_{V;1}(\kappa=0)} ,
 
 .. math::
 
-  TM^{-+} = - \\frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \\frac{R^+_{V;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{V;1}(\kappa=0)} ,
+  TM^{-+} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^+_{V;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{V;1}(\kappa=0)} ,
 
 .. math::
 
-  TM^{+-} = - \\frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \\frac{R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{V;1}(\kappa=0)} ,
+  TM^{+-} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{V;1}(\kappa=0)} ,
 
 .. math::
 
-  TM^{--} = - \\frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \\frac{R^+_{V;1}(\kappa=0)R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
+  TM^{--} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+  \frac{R^+_{V;1}(\kappa=0)R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
   {M_{V;1}(\kappa=0)} .
 
 
@@ -301,7 +301,7 @@ can use
 
 .. math::
 
-   \cos(2\phi) = -\\frac{x^2-y^2}{r^2} \ .
+   \cos(2\phi) = -\frac{x^2-y^2}{r^2} \ .
 
 
 """

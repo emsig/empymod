@@ -63,7 +63,7 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     Bessel functions of order 0 and 1 only. This is achieved by applying the
     recurrence formula
 
-    .. math:: J_2(kr) = \\frac{2}{kr} J_1(kr) - J_0(kr) \ .
+    .. math:: J_2(kr) = \frac{2}{kr} J_1(kr) - J_0(kr) \ .
 
 
     .. note::
@@ -133,9 +133,9 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
              ab, xdirect, msrc, mrec, use_ne_eval):
     r"""Calculate Green's function for TM and TE.
 
-    .. math:: \\tilde{g}^{tm}_{hh}, \\tilde{g}^{tm}_{hz},
-              \\tilde{g}^{tm}_{zh}, \\tilde{g}^{tm}_{zz},
-              \\tilde{g}^{te}_{hh}, \\tilde{g}^{te}_{zz}
+    .. math:: \tilde{g}^{tm}_{hh}, \tilde{g}^{tm}_{hz},
+              \tilde{g}^{tm}_{zh}, \tilde{g}^{tm}_{zz},
+              \tilde{g}^{te}_{hh}, \tilde{g}^{te}_{zz}
 
     This function corresponds to equations 108--110, 117/118, 122; 89--94,
     A18--A23, B13--B15; 97--102 A26--A31, and B16--B18 in
@@ -316,7 +316,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
     r"""Calculate Rp, Rm.
 
-    .. math:: R^\pm_n, \\bar{R}^\pm_n
+    .. math:: R^\pm_n, \bar{R}^\pm_n
 
     This function corresponds to equations 64/65 and A-11/A-12 in
     [Hunziker_et_al_2015]_, and loosely to the corresponding files ``Rmin.F90``
@@ -405,9 +405,9 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
 def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
     r"""Calculate Pu+, Pu-, Pd+, Pd-.
 
-    .. math:: P^{u\pm}_s, P^{d\pm}_s, \\bar{P}^{u\pm}_s, \\bar{P}^{d\pm}_s;
-          P^{u\pm}_{s-1}, P^{u\pm}_n, \\bar{P}^{u\pm}_{s-1}, \\bar{P}^{u\pm}_n;
-          P^{d\pm}_{s+1}, P^{d\pm}_n, \\bar{P}^{d\pm}_{s+1}, \\bar{P}^{d\pm}_n
+    .. math:: P^{u\pm}_s, P^{d\pm}_s, \bar{P}^{u\pm}_s, \bar{P}^{d\pm}_s;
+          P^{u\pm}_{s-1}, P^{u\pm}_n, \bar{P}^{u\pm}_{s-1}, \bar{P}^{u\pm}_n;
+          P^{d\pm}_{s+1}, P^{d\pm}_n, \bar{P}^{d\pm}_{s+1}, \bar{P}^{d\pm}_n
 
     This function corresponds to equations 81/82, 95/96, 103/104, A-8/A-9,
     A-24/A-25, and A-32/A-33 in [Hunziker_et_al_2015]_, and loosely to the
@@ -626,9 +626,9 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
               mrec):
     r"""Analytical full-space solutions in the frequency domain.
 
-    .. math:: \\hat{G}^{ee}_{\\alpha\\beta}, \\hat{G}^{ee}_{3\\alpha},
-              \\hat{G}^{ee}_{33}, \\hat{G}^{em}_{\\alpha\\beta},
-              \\hat{G}^{em}_{\\alpha 3}
+    .. math:: \hat{G}^{ee}_{\alpha\beta}, \hat{G}^{ee}_{3\alpha},
+              \hat{G}^{ee}_{33}, \hat{G}^{em}_{\alpha\beta},
+              \hat{G}^{em}_{\alpha 3}
 
     This function corresponds to equations 45--50 in [Hunziker_et_al_2015]_,
     and loosely to the corresponding files ``Gin11.F90``, ``Gin12.F90``,

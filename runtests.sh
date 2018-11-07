@@ -2,7 +2,7 @@
 
 # Help text
 usage="
-$(basename "$0") [-hcpnd] [-v VERSION(S)]
+$(basename "$0") [-hcpndw] [-v VERSION(S)]
 
 Run pytest for empymod locally in an isolated venv before submitting to
 GitHub/Travis-CI; by default for all supported python versions of empymod.
@@ -14,6 +14,7 @@ where:
     -p : Print output of conda.
     -n : Run tests without numexpr/matplotlib/IPython.
     -d : Delete environments after tests
+    -w : Disable warnings
 
 "
 
@@ -27,6 +28,7 @@ STR2="**  WITH numexpr/matplotlib/IPython  "
 PROPS="--mpl --flake8"
 INST="pytest-flake8 pytest-mpl"
 SD="_soft-dep"
+WARN=""
 
 # Get Optional Input
 while getopts "hv:cpnd" opt; do
@@ -48,6 +50,8 @@ while getopts "hv:cpnd" opt; do
        SD=""
        ;;
     d) DELETE=true
+       ;;
+    w) WARN="--disable-warnings"
        ;;
     :) printf "missing argument for -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
@@ -95,7 +99,7 @@ for i in ${PYTHON3VERSION[@]}; do
 
   # Run tests
   cp tests/matplotlibrc .
-  pytest --cov=empymod $PROPS
+  pytest --cov=empymod $PROPS $WARN
   rm matplotlibrc
 
   # De-activate venv

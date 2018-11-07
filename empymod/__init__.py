@@ -368,10 +368,10 @@ part,
 
 .. math::
 
-    E(r, t)^\\text{Impulse} &= \ \\frac{2}{\pi}\int^\infty_0 \Re[E(r, \omega)]\
-                        \cos(\omega t)\ \\text{d}\omega \ , \\\\
-            &= -\\frac{2}{\pi}\int^\infty_0 \Im[E(r, \omega)]\
-                \sin(\omega t)\ \\text{d}\omega \ ,
+    E(r, t)^\text{Impulse} &= \ \frac{2}{\pi}\int^\infty_0 \Re[E(r, \omega)]\
+                        \cos(\omega t)\ \text{d}\omega \ , \\
+            &= -\frac{2}{\pi}\int^\infty_0 \Im[E(r, \omega)]\
+                \sin(\omega t)\ \text{d}\omega \ ,
 
 see, e.g., [Anderson_1975]_ or [Key_2012]_. Quadrature-with-extrapolation,
 FFTLog, and obviously the sine/cosine-transform all make use of this split.
@@ -383,10 +383,10 @@ step-response,
 
 .. math::
 
-    E(r, t)^\\text{Impulse} =
-                        \\frac{\partial\ E(r, t)^\\text{step}}{\partial t}\ .
+    E(r, t)^\text{Impulse} =
+                        \frac{\partial\ E(r, t)^\text{step}}{\partial t}\ .
 
-Using :math:`\\frac{\partial}{\partial t} \Leftrightarrow i\omega` and going
+Using :math:`\frac{\partial}{\partial t} \Leftrightarrow i\omega` and going
 the other way, from impulse to step, leads to the divison by :math:`i\omega`.
 (This only holds because we define in accordance with the causality principle
 that :math:`E(r, t \le 0) = 0`).
@@ -405,17 +405,17 @@ For completeness sake, the step-on response is given by
 
 .. math::
 
-    E(r, t)^\\text{Step-on} = - \\frac{2}{\pi}\int^\infty_0
-                            \Im\\left[\\frac{E(r,\omega)}{i \omega}\\right]\
-                            \sin(\omega t)\ \\text{d}\omega \ ,
+    E(r, t)^\text{Step-on} = - \frac{2}{\pi}\int^\infty_0
+                            \Im\left[\frac{E(r,\omega)}{i \omega}\right]\
+                            \sin(\omega t)\ \text{d}\omega \ ,
 
 and the step-off by
 
 .. math::
 
-    E(r, t)^\\text{Step-off} = - \\frac{2}{\pi}\int^\infty_0
-                             \Re\\left[\\frac{E(r,\omega)}{i\omega}\\right]\
-                             \cos(\omega t)\ \\text{d}\omega \ .
+    E(r, t)^\text{Step-off} = - \frac{2}{\pi}\int^\infty_0
+                             \Re\left[\frac{E(r,\omega)}{i\omega}\right]\
+                             \cos(\omega t)\ \text{d}\omega \ .
 
 
 Note on speed, memory, and accuracy
@@ -538,7 +538,7 @@ can use the benchmark-notebook in the `empymod/example-notebooks
 :math:`\Gamma` (below eq. 19); :math:`W^{u, d}_n` (eq. 74), :math:`r^\pm_n`
 (eq. 65); :math:`R^\pm_n` (eq. 64); :math:`P^{u, d; \pm}_s` (eq. 81);
 :math:`M_s` (eq. 82), and their corresponding bar-ed versions provided in the
-appendix (e.g. :math:`\\bar{\Gamma}`). In big models, more than 95 % of the
+appendix (e.g. :math:`\bar{\Gamma}`). In big models, more than 95 % of the
 calculation is spent in the calculation of these six equations, and most of the
 time therefore in ``np.sqrt`` and ``np.exp``, or generally in
 ``numpy``-``ufuncs`` which are implemented and executed in compiled C-code. For

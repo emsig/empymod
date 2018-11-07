@@ -74,84 +74,84 @@ Implemented Hankel transforms
 
   .. math::
 
-      \\int^\\infty_0 l \\exp\\left(-al^2\\right) J_0(lr) dl =
-      \\frac{\\exp\\left(\\frac{-r^2}{4a}\\right)}{2a}
+      \int^\infty_0 l \exp\left(-al^2\right) J_0(lr) dl =
+      \frac{\exp\left(\frac{-r^2}{4a}\right)}{2a}
 
 - ``j0_2`` [Anderson_1975]_
 
   .. math::
 
-      \\int^\\infty_0 \\exp\\left(-al\\right) J_0(lr) dl =
-      \\frac{1}{\\sqrt{a^2+r^2}}
+      \int^\infty_0 \exp\left(-al\right) J_0(lr) dl =
+      \frac{1}{\sqrt{a^2+r^2}}
 
 - ``j0_3`` [Guptasarma_and_Singh_1997]_
 
   .. math::
 
-      \\int^\\infty_0 l\\exp\\left(-al\\right) J_0(lr) dl =
-      \\frac{a}{(a^2 + r^2)^{3/2}}
+      \int^\infty_0 l\exp\left(-al\right) J_0(lr) dl =
+      \frac{a}{(a^2 + r^2)^{3/2}}
 
 - ``j0_4`` [Chave_and_Cox_1982]_
 
   .. math::
 
-      \\int^\\infty_0 \\frac{l}{\\beta} \\exp\\left(-\\beta z_v \\right)
+      \int^\infty_0 \frac{l}{\beta} \exp\left(-\beta z_v \right)
       J_0(lr) dl =
-      \\frac{\\exp\\left(-\\gamma R\\right)}{R}
+      \frac{\exp\left(-\gamma R\right)}{R}
 
 - ``j0_5`` [Chave_and_Cox_1982]_
 
   .. math::
 
-    \\int^\\infty_0 l \\exp\\left(-\\beta z_v \\right)
+    \int^\infty_0 l \exp\left(-\beta z_v \right)
     J_0(lr) dl =
-    \\frac{ z_v (\\gamma R + 1)}{R^3}\\exp\\left(-\\gamma R\\right)
+    \frac{ z_v (\gamma R + 1)}{R^3}\exp\left(-\gamma R\right)
 
 - ``j1_1`` [Anderson_1975]_
 
   .. math::
 
-    \\int^\\infty_0 l^2 \\exp\\left(-al^2\\right) J_1(lr) dl =
-    \\frac{r}{4a^2} \\exp\\left(-\\frac{r^2}{4a}\\right)
+    \int^\infty_0 l^2 \exp\left(-al^2\right) J_1(lr) dl =
+    \frac{r}{4a^2} \exp\left(-\frac{r^2}{4a}\right)
 
 
 - ``j1_2`` [Anderson_1975]_
 
   .. math::
 
-    \\int^\\infty_0 \\exp\\left(-al\\right) J_1(lr) dl =
-    \\frac{\\sqrt{a^2+r^2}-a}{r\\sqrt{a^2 + r^2}}
+    \int^\infty_0 \exp\left(-al\right) J_1(lr) dl =
+    \frac{\sqrt{a^2+r^2}-a}{r\sqrt{a^2 + r^2}}
 
 - ``j1_3`` [Anderson_1975]_
 
   .. math::
 
-    \\int^\\infty_0 l \\exp\\left(-al\\right) J_1(lr) dl =
-    \\frac{r}{(a^2 + r^2)^{3/2}}
+    \int^\infty_0 l \exp\left(-al\right) J_1(lr) dl =
+    \frac{r}{(a^2 + r^2)^{3/2}}
 
 - ``j1_4`` [Chave_and_Cox_1982]_
 
   .. math::
 
-    \\int^\\infty_0 \\frac{l^2}{\\beta} \\exp\\left(-\\beta z_v \\right)
+    \int^\infty_0 \frac{l^2}{\beta} \exp\left(-\beta z_v \right)
     J_1(lr) dl =
-    \\frac{r(\\gamma R+1)}{R^3}\\exp\\left(-\\gamma R\\right)
+    \frac{r(\gamma R+1)}{R^3}\exp\left(-\gamma R\right)
 
 - ``j1_5`` [Chave_and_Cox_1982]_
 
   .. math::
 
-    \\int^\\infty_0 l^2 \\exp\\left(-\\beta z_v \\right)
+    \int^\infty_0 l^2 \exp\left(-\beta z_v \right)
     J_1(lr) dl =
-    \\frac{r z_v(\\gamma^2R^2+3\\gamma R+3)}{R^5}\\exp\\left(-\\gamma R\\right)
+    \frac{r z_v(\gamma^2R^2+3\gamma R+3)}{R^5}\exp\left(-\gamma R\right)
 
 Where
 
 .. math:: a >0, r>0
 .. math:: z_v = |z_{rec} - z_{src}|
-.. math:: R = \\sqrt{r^2 + z_v^2}
-.. math:: \\gamma = \\sqrt{2j\\pi\\mu_0f/\\rho}
-.. math:: \\beta = \\sqrt{l^2 + \\gamma^2}
+.. math:: R = \sqrt{r^2 + z_v^2}
+.. math:: \gamma = \sqrt{2j\pi\mu_0f/\rho}
+.. math:: \beta = \sqrt{l^2 + \gamma^2}
 
 
 Implemented Fourier transforms
@@ -161,43 +161,43 @@ Implemented Fourier transforms
 
   .. math::
 
-    \\int^\\infty_0 l\\exp\\left(-a^2l^2\\right) \\sin(lr) dl =
-    \\frac{\\sqrt{\\pi}r}{4a^3} \\exp\\left(-\\frac{r^2}{4a^2}\\right)
+    \int^\infty_0 l\exp\left(-a^2l^2\right) \sin(lr) dl =
+    \frac{\sqrt{\pi}r}{4a^3} \exp\left(-\frac{r^2}{4a^2}\right)
 
 - ``sin_2`` [Anderson_1975]_
 
   .. math::
 
-    \\int^\\infty_0 \\exp\\left(-al\\right) \\sin(lr) dl =
-    \\frac{r}{a^2 + r^2}
+    \int^\infty_0 \exp\left(-al\right) \sin(lr) dl =
+    \frac{r}{a^2 + r^2}
 
 - ``sin_3`` [Anderson_1975]_
 
   .. math::
 
-    \\int^\\infty_0 \\frac{l}{a^2+l^2} \\sin(lr) dl =
-    \\frac{\\pi}{2} \\exp\\left(-ar\\right)
+    \int^\infty_0 \frac{l}{a^2+l^2} \sin(lr) dl =
+    \frac{\pi}{2} \exp\left(-ar\right)
 
 - ``cos_1`` [Anderson_1975]_
 
   .. math::
 
-    \\int^\\infty_0 \\exp\\left(-a^2l^2\\right) \\cos(lr) dl =
-    \\frac{\\sqrt{\\pi}}{2a} \\exp\\left(-\\frac{r^2}{4a^2}\\right)
+    \int^\infty_0 \exp\left(-a^2l^2\right) \cos(lr) dl =
+    \frac{\sqrt{\pi}}{2a} \exp\left(-\frac{r^2}{4a^2}\right)
 
 - ``cos_2`` [Anderson_1975]_
 
   .. math::
 
-    \\int^\\infty_0 \\exp\\left(-al\\right) \\cos(lr) dl =
-    \\frac{a}{a^2 + r^2}
+    \int^\infty_0 \exp\left(-al\right) \cos(lr) dl =
+    \frac{a}{a^2 + r^2}
 
 - ``cos_3`` [Anderson_1975]_
 
   .. math::
 
-    \\int^\\infty_0 \\frac{1}{a^2+l^2} \\cos(lr) dl =
-    \\frac{\\pi}{2a} \\exp\\left(-ar\\right)
+    \int^\infty_0 \frac{1}{a^2+l^2} \cos(lr) dl =
+    \frac{\pi}{2a} \exp\left(-ar\right)
 
 
 """

@@ -124,7 +124,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
     as a quadrature sum which form is similar to the DLF (equation 15),
 
-    .. math::   F_i   \\approx \sum^m_{j=1} f(x_j/r)w_j g(x_j) =
+    .. math::   F_i   \approx \sum^m_{j=1} f(x_j/r)w_j g(x_j) =
                 \sum^m_{j=1} f(x_j/r)\hat{g}(x_j) \ ,
 
     but with various bells and whistles applied (using the so-called Shanks
