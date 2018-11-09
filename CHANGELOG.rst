@@ -1,6 +1,13 @@
 Changelog
 #########
 
+latest
+------
+
+- Many little improvements in the documentation.
+- Some improvements through the use of codacy.
+- Remove testing of Python 3.4.
+
 
 v1.8.0 - *2018-10-26*
 ---------------------

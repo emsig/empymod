@@ -5,7 +5,7 @@ r"""
 This add-on for ``empymod`` adjusts [Hunziker_et_al_2015]_ for TM/TE-split. The
 development was initiated by the development of
 https://github.com/empymod/csem-ziolkowski-and-slob
-([Ziolkowski_and_Slob_2018]_).
+([Ziolkowski_and_Slob_2019]_).
 
 This is a stripped-down version of ``empymod`` with a lot of simplifications
 but an important addition. The modeller ``empymod`` returns the total field,
@@ -69,8 +69,8 @@ possible, see the corresponding functions in ``empymod`` for more explanation
 and documentation regarding input parameters.
 
 Please note that the notation in [Hunziker_et_al_2015]_ differs from the
-notation in [Ziolkowski_and_Slob_2018]_. I specify therefore always, which
-notification applies, either *Hun15* or *Zio18*.
+notation in [Ziolkowski_and_Slob_2019]_. I specify therefore always, which
+notification applies, either *Hun15* or *Zio19*.
 
 We start with equation (105) in *Hun15*:
 
@@ -206,7 +206,7 @@ and therefore
    \exp[-\bar{\Gamma}_s(2z_s-z-z')]
    J_1(\kappa r)\,{\mathrm{d}}\kappa .
 
-We can compare this to equation (4.165) in Zio18, with :math:`\hat{I}^e_x=1`
+We can compare this to equation (4.165) in Zio19, with :math:`\hat{I}^e_x=1`
 and slightly re-arranging it to look more alike, we get
 
 .. math::
@@ -231,7 +231,7 @@ and slightly re-arranging it to look more alike, we get
    \frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}
    \exp(-\gamma_1 R^{+-}) .
 
-The notation in this equation follows Zio18.
+The notation in this equation follows Zio19.
 
 The difference between the two previous equations is that the first one
 contains non-physical contributions. These have opposite signs in TM+- and
@@ -241,7 +241,7 @@ contributions only affect the :math:`J_1`-integrals, and only for :math:`\kappa
 = 0`.
 
 The following lists for all 8 cases the term that has to be removed, in the
-notation of Zio18 (for the notation as in Hun15 see the implementation in
+notation of Zio19 (for the notation as in Hun15 see the implementation in
 ``tmtemod.py``):
 
 .. math::
@@ -296,7 +296,7 @@ and seventh equations because at :math:`\kappa=0` the TM and TE mode reflection
 responses in those terms are equal but with opposite sign:
 :math:`R^\pm_{V;1}(\kappa=0) = -R^\pm_{V;1}(\kappa=0)`.
 
-Hun15 uses :math:`\phi`, whereas Zio18 uses :math:`x`, :math:`y`, for which we
+Hun15 uses :math:`\phi`, whereas Zio19 uses :math:`x`, :math:`y`, for which we
 can use
 
 .. math::

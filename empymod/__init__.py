@@ -12,8 +12,8 @@ The code is principally based on
 
 See these publications and all the others given in the references_, if you are
 interested in the theory on which empymod is based. Another good reference is
-[Ziolkowski_and_Slob_2018]_, which will be published in late 2018. The book
-derives in great detail the equations for layered-Earth CSEM modelling.
+[Ziolkowski_and_Slob_2019]_. The book derives in great detail the equations for
+layered-Earth CSEM modelling.
 
 
 Installation
@@ -81,7 +81,7 @@ repositories:
 
 - Example notebooks: https://github.com/empymod/example-notebooks,
 - Geophysical Tutoriol TLE: https://github.com/empymod/article-tle2017, and
-- Numerical examples of [Ziolkowski_and_Slob_2018]_:
+- Numerical examples of [Ziolkowski_and_Slob_2019]_:
   https://github.com/empymod/csem-ziolkowski-and-slob.
 
 The main modelling routines is ``bipole``, which can calculate the
@@ -783,10 +783,9 @@ References |_|
    :math:`e_m(S_n)` tranformation: Math. Comput., 10, 91--96;
    DOI: |_| `10.1090/S0025-5718-1956-0084056-6
    <http://doi.org/10.1090/S0025-5718-1956-0084056-6>`_.
-.. [Ziolkowski_and_Slob_2018] Ziolkowski, A., and E. Slob, 2018, Introduction
+.. [Ziolkowski_and_Slob_2019] Ziolkowski, A., and E. Slob, 2019, Introduction
    to Controlled-Source Electromagnetic Methods: Cambridge University Press;
-   expected to be published late 2018.
-
+   ISBN: |_| `9781107058620 <https://www.cambridge.org/9781107058620>`_.
 """
 # Copyright 2016-2018 Dieter Werthmüller
 #
