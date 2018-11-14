@@ -31,7 +31,7 @@ SD="_soft-dep"
 WARN=""
 
 # Get Optional Input
-while getopts "hv:cpnd" opt; do
+while getopts "hv:cpndw" opt; do
 
   case $opt in
     h) echo "$usage"

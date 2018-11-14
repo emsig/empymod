@@ -55,6 +55,12 @@ https://github.com/empymod/article-fdesign.
 import os
 import numpy as np
 
+__all__ = ['DigitalFilter', 'kong_61_2007', 'kong_241_2007', 'key_101_2009',
+           'key_201_2009', 'key_401_2009', 'anderson_801_1982', 'key_51_2012',
+           'key_101_2012', 'key_201_2012', 'wer_201_2018',
+           'key_81_CosSin_2009', 'key_241_CosSin_2009', 'key_601_CosSin_2009',
+           'key_101_CosSin_2012', 'key_201_CosSin_2012']
+
 
 # 0. Filter Class and saving/loading routines
 
