@@ -1,12 +1,15 @@
 Changelog
 #########
 
-latest
-------
+v1.8.1 - *2018-11-20*
+---------------------
 
 - Many little improvements in the documentation.
-- Some improvements through the use of codacy.
-- Remove testing of Python 3.4.
+- Some code improvements through the use of codacy.
+- Remove testing of Python 3.4; officially supported are now Python 3.5-3.7.
+- Version of the `filter article <https://github.com/empymod/article-fdesign>`_
+  (DLF) in geophysics and of the `CSEM book
+  <https://github.com/empymod/csem-ziolkowski-and-slob>`_.
 
 
 v1.8.0 - *2018-10-26*
@@ -307,8 +310,6 @@ push it to 1.4.4; so there isn't really a version 1.4.3.]
   response) and subtracting it from the DC value.
 
 - Bug fixes
-
-- Version of CSEM book.
 
 
 v1.4.2 - *2017-06-04*
