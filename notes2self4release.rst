@@ -32,7 +32,7 @@ Steps to carry out for a new release
        twine upload dist/* -r testpypi
 
    Optionally test it already in conda if skeleton builds::
-   
+
        conda skeleton pypi --pypi-url https://test.pypi.io/pypi/ empymod
 
 8. Push it to PyPi (requires ~/.pypircs)::
@@ -55,28 +55,28 @@ Steps to carry out for a new release
           conda install -y conda-build anaconda-client
           conda config --set anaconda_upload yes
           anaconda login
-   
+
    2. Now to the conda-build part::
-      
+
           conda skeleton pypi empymod
           conda build --python 3.5 empymod
           conda build --python 3.6 empymod
           conda build --python 3.7 empymod
 
    3. Convert for all platforms::
-   
+
           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py35_0.tar.bz2
           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py36_0.tar.bz2
           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py37_0.tar.bz2
 
    4. Upload them::
-   
+
           anaconda upload osx-64/*
           anaconda upload win-*/*
           anaconda upload linux-32/*
 
    5. Logout::
-   
+
           anaconda logout
 
 10. Post-commit changes

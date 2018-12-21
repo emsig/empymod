@@ -1,7 +1,10 @@
+# Directories
 __pycache__/
 
+# Sphinx
 _build/
 
+# Pytest and coverage related
 htmlcov
 .coverage
 .coverage.*
