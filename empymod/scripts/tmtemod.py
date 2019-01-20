@@ -305,7 +305,7 @@ can use
 
 
 """
-# Copyright 2017-2018 Dieter Werthmüller
+# Copyright 2017-2019 Dieter Werthmüller
 #
 # This file is part of empymod.
 #

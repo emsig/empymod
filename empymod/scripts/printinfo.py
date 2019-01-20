@@ -21,7 +21,7 @@ All modules provided in ``add_pckg`` are also shown. They have to be imported
 before ``versions`` is called.
 
 """
-# Copyright 2016-2018 Dieter Werthmüller
+# Copyright 2016-2019 Dieter Werthmüller
 #
 # This file is part of empymod.
 #

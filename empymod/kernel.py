@@ -16,7 +16,7 @@ http://software.seg.org/disclaimer.txt.  Please read the NOTICE-file in the
 root directory for more information regarding the involved licenses.
 
 """
-# Copyright 2016-2018 Dieter Werthmüller
+# Copyright 2016-2019 Dieter Werthmüller
 #
 # This file is part of empymod.
 #

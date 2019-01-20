@@ -663,7 +663,7 @@ subsequently model more complex cases.
 License
 -------
 
-Copyright 2016-2018 Dieter Werthmüller
+Copyright 2016-2019 Dieter Werthmüller
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -787,7 +787,7 @@ References |_|
    to Controlled-Source Electromagnetic Methods: Cambridge University Press;
    ISBN: |_| `9781107058620 <https://www.cambridge.org/9781107058620>`_.
 """
-# Copyright 2016-2018 Dieter Werthmüller
+# Copyright 2016-2019 Dieter Werthmüller
 #
 # This file is part of empymod.
 #
