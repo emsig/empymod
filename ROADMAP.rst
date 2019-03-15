@@ -79,6 +79,8 @@ in touch if you would like to tackle one of these problems!
 - Abstraction of the code
   [`empymod#14 <https://github.com/empymod/empymod/issues/14>`_].
 
+- Replace (and extend) the use of ``numexpr`` with ``numba``.
+
 - GUI.
 
 - Move empymod from channel 'prisae' to 'conda-forge' (pros/cons?).
