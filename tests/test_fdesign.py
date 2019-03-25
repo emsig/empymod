@@ -172,8 +172,8 @@ class TestFiguresMatplotlib:
                                          fI, [fC, ], r, (0, 0, 2), np.imag)
         return plt.gcf()
 
-    @pytest.mark.mpl_image_compare(remove_text=True)
-    def test_call_qc_transform_pairs3(self, tolerance=6):
+    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
+    def test_call_qc_transform_pairs3(self):
         # plot_transform_pair Sine/Cosine
         r = np.logspace(1, 2, 50)
         fI = (fdesign.sin_1(), fdesign.cos_1())
