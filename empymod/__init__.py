@@ -813,7 +813,9 @@ from . import scripts
 
 # Import all functions, except the filters
 from .model import *      # noqa  maint. in model.__all__
+from .model import bipole, dipole
 from .utils import *      # noqa  maint. in utils.__all__
+from .utils import EMArray, set_minimum, get_minimum
 from .filters import DigitalFilter
 from .transform import *  # noqa  maint. in transform.__all__
 from .kernel import *     # noqa  maint. in kernel.__all__

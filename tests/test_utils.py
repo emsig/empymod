@@ -224,16 +224,16 @@ def test_check_hankel(capsys):
     assert "     > DLF type    :  Standard" in out
     assert ht == 'fht'
     assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] is 0
+    assert htarg[1] == 0
 
     # [filter str]
     _, htarg = utils.check_hankel('fht', 'key_201_2009', 0)
     assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] is 0
+    assert htarg[1] == 0
     # [filter inst]
     _, htarg = utils.check_hankel('fht', filters.kong_61_2007(), 0)
     assert htarg[0].name == filters.kong_61_2007().name
-    assert htarg[1] is 0
+    assert htarg[1] == 0
     # ['', pts_per_dec]  :: list
     _, htarg = utils.check_hankel('fht', ['', 20], 0)
     assert htarg[0].name == filters.key_201_2009().name

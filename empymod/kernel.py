@@ -501,8 +501,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
                     P *= Rmp/(1 - Rmp*Rpm*np.exp(-2*iGam*ds))
 
         else:           # rec above (up) / below (down) src layer
-                        # Eqs  95/96,  A-24/A-25 for rec above src layer
-                        # Eqs 103/104, A-32/A-33 for rec below src layer
+            #           # Eqs  95/96,  A-24/A-25 for rec above src layer
+            #           # Eqs 103/104, A-32/A-33 for rec below src layer
 
             # First compute P_{s-1} (up) / P_{s+1} (down)
             iRpm = Rpm[:, :, rsrcl, :]
