@@ -79,6 +79,55 @@ else:
 __all__ = ['versions', 'versions_html', 'versions_text']
 
 
+class Versions:
+
+    def __init__(self, add_pckg=None, ncol=4):
+        r"""Print date, time, and version information.
+
+        Print date, time, and package version information in any environment
+        (Jupyter notebook, IPython console, Python console, QT console), either
+        as html-table (notebook) or as plain text (anywhere).
+
+        This script was heavily inspired by:
+
+            - ipynbtools.py from qutip https://github.com/qutip
+            - watermark.py from https://github.com/rasbt/watermark
+
+        This is a wrapper for ``versions_html`` and ``versions_text``.
+
+        Parameters
+        ----------
+        add_pckg : packages, optional
+            Package or list of packages to add to output information (must be
+            imported beforehand).
+
+        ncol : int, optional
+            Number of package-columns in html table; only has effect if
+            ``mode='HTML'`` or ``mode='html'``. Defaults to 3.
+
+
+        Examples
+        --------
+        >>> import pytest
+        >>> import dateutil
+        >>> from empymod import Versions
+        >>> Versions()                            # Default values
+        >>> Versions(pytest)                      # Provide additional package
+        >>> Versions([pytest, dateutil], ncol=5)  # Set nr of columns
+
+        """
+        self.add_pckg = add_pckg
+        self.ncol = ncol
+
+    def __repr__(self):
+        """Plain text information."""
+        return versions_text(self.add_pckg)
+
+    def _repr_html_(self):
+        """HTML-rendered versions information."""
+        return versions_html(self.add_pckg, self.ncol)
+
+
 def versions(mode='print', add_pckg=None, ncol=4):
     r"""Return date, time, and version information.
 

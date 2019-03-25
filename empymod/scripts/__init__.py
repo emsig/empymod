@@ -17,6 +17,6 @@
 from . import tmtemod
 from . import fdesign
 from . import printinfo
-from .printinfo import versions
+from .printinfo import versions, Versions
 
-__all__ = ['tmtemod', 'fdesign', 'printinfo', 'versions']
+__all__ = ['tmtemod', 'fdesign', 'printinfo', 'versions', 'Versions']
