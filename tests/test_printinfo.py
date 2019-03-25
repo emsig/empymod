@@ -32,7 +32,7 @@ def test_versions(capsys):
 
     # They have to be the same, except time (run at slightly different times)
     assert out1b[75:] == out2[75:]
-    assert Va[80:500] == out2[80:500]  # Line-wrapping is different at end..
+    assert Va[85:400] == out2[85:400]  # Line-wrapping is different at end..
 
     # Check the 'Pretty'/'plain'-version, providing a package as list
     out3 = versions('plain', add_pckg=[pip, ])

@@ -76,7 +76,7 @@ elif numexpr:
 else:
     mklinfo = False
 
-__all__ = ['versions', 'versions_html', 'versions_text']
+__all__ = ['Versions', 'versions', 'versions_html', 'versions_text']
 
 
 class Versions:
