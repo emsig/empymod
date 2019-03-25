@@ -173,7 +173,7 @@ class TestFiguresMatplotlib:
         return plt.gcf()
 
     @pytest.mark.mpl_image_compare(remove_text=True)
-    def test_call_qc_transform_pairs3(self):
+    def test_call_qc_transform_pairs3(self, tolerance=6):
         # plot_transform_pair Sine/Cosine
         r = np.logspace(1, 2, 50)
         fI = (fdesign.sin_1(), fdesign.cos_1())
