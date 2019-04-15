@@ -1197,16 +1197,19 @@ def get_spline_values(filt, inp, nr_per_dec=None):
         if nout < 4:
             nout = 4
 
-    # Calculate output values
-    out = np.exp(np.arange(np.log(outmin), np.log(outmin) + nout/pts_per_dec,
-                           1/pts_per_dec))
-
     if nr_per_dec < 0:
+        # Calculate output values
+        out = np.exp(np.arange(np.log(outmin), np.log(outmin) +
+                               nout/pts_per_dec, 1/pts_per_dec))
         # If lagged convolution is used, we calculate the new input values, as
         # spline is carried out in the input domain.
         new_inp = inp.max()*np.exp(-np.arange(nout - filt.base.size + 1) /
                                    pts_per_dec)
     else:
+        # Calculate output values
+        out = 10**np.arange(np.log10(outmin), np.log10(outmin) +
+                            nout/pts_per_dec, 1/pts_per_dec)
+
         # If spline is used, interpolation is carried out in output domain and
         # we calculate the intermediate values.
         new_inp = filt.base/inp[:, None]
