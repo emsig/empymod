@@ -1167,20 +1167,18 @@ def get_spline_values(filt, inp, nr_per_dec=None):
     outmax = filt.base[-1]/inp.min()
     outmin = filt.base[0]/inp.max()
 
-    # Define number of out-values, depending on pts_per_dec
-    def nr_of_out(outmax, outmin, pts_per_dec):
-        r"""Number of out-values."""
-        return int(np.ceil(np.log(outmax/outmin)*pts_per_dec) + 1)
-
-    # Get pts_per_dec
+    # Get pts_per_dec and define number of out-values, depending on pts_per_dec
     if nr_per_dec < 0:  # Lagged Convolution DLF
         pts_per_dec = 1/np.log(filt.factor)
+
+        # Calculate number of output values
+        nout = int(np.ceil(np.log(outmax/outmin)*pts_per_dec) + 1)
 
     else:  # Splined DLF
         pts_per_dec = nr_per_dec
 
-    # Calculate number of output values
-    nout = nr_of_out(outmax, outmin, pts_per_dec)
+        # Calculate number of output values
+        nout = int(np.ceil(np.log10(outmax/outmin)*pts_per_dec) + 1)
 
     # Min-nout check, becaus the cubic InterpolatedUnivariateSpline needs at
     # least 4 points.

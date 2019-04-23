@@ -1,6 +1,15 @@
 Changelog
 #########
 
+*latest*
+--------
+
+- ``pts_per_dec`` are now floats, not integers, which gives more flexibility.
+- Bugfix: ``pts_per_dec`` for DLF was actually points per ``e``, not per
+  decade, as the natural logarithm was used.
+- New ``Versions``-class; improvement over the ``versions``-function, as it
+  automatically detects if it can print html or not.
+
 v1.8.1 - *2018-11-20*
 ---------------------
 

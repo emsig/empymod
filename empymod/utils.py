@@ -1883,6 +1883,8 @@ def _check_shape(var, name, shape, shape2=None):
 
 def _check_var(var, dtype, ndmin, name, shape=None, shape2=None):
     r"""Return variable as array of dtype, ndmin; shape-checked."""
+    if var is None:
+        raise ValueError
     var = np.array(var, dtype=dtype, copy=True, ndmin=ndmin)
     if shape:
         _check_shape(var, name, shape, shape2)

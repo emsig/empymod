@@ -468,14 +468,14 @@ def test_dlf():                                                       # 10. dlf
 
         # # # 3. Spline; Multi angle # # #
 
-        lambd, _ = transform.get_spline_values(fhtfilt, off, 10)
+        lambd, _ = transform.get_spline_values(fhtfilt, off, 30)
         # fht calculation
         PJ3 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                 zetaH, zetaV, lambd, ab, xdirect, msrc, mrec,
                                 use_ne_eval)
 
         # dlf calculation
-        fEM3 = transform.dlf(PJ3, lambd, off, fhtfilt, 10, factAng=factAng,
+        fEM3 = transform.dlf(PJ3, lambd, off, fhtfilt, 30, factAng=factAng,
                              ab=ab)
 
         # Compare
