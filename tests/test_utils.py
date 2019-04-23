@@ -247,7 +247,7 @@ def test_check_hankel(capsys):
     # [filter str, pts_per_dec]
     _, htarg = utils.check_hankel('fht', ['key_201_2009', 20], 4)
     out, _ = capsys.readouterr()
-    assert "     > DLF type    :  Splined, 20 pts/dec" in out
+    assert "     > DLF type    :  Splined, 20.0 pts/dec" in out
     assert htarg[0].name == filters.key_201_2009().name
     assert htarg[1] == 20
 
@@ -467,7 +467,7 @@ def test_check_time(capsys):
     assert ftarg[1] == 30
     assert ftarg[2] == 'sin'
     out, _ = capsys.readouterr()
-    assert "     > DLF type    :  Splined, 30 pts/dec" in out
+    assert "     > DLF type    :  Splined, 30.0 pts/dec" in out
 
     # [filter str, pts_per_dec]
     _, _, _, ftarg = utils.check_time(time, 0, 'cos',

@@ -1167,20 +1167,18 @@ def get_spline_values(filt, inp, nr_per_dec=None):
     outmax = filt.base[-1]/inp.min()
     outmin = filt.base[0]/inp.max()
 
-    # Define number of out-values, depending on pts_per_dec
-    def nr_of_out(outmax, outmin, pts_per_dec):
-        r"""Number of out-values."""
-        return int(np.ceil(np.log(outmax/outmin)*pts_per_dec) + 1)
-
-    # Get pts_per_dec
+    # Get pts_per_dec and define number of out-values, depending on pts_per_dec
     if nr_per_dec < 0:  # Lagged Convolution DLF
         pts_per_dec = 1/np.log(filt.factor)
+
+        # Calculate number of output values
+        nout = int(np.ceil(np.log(outmax/outmin)*pts_per_dec) + 1)
 
     else:  # Splined DLF
         pts_per_dec = nr_per_dec
 
-    # Calculate number of output values
-    nout = nr_of_out(outmax, outmin, pts_per_dec)
+        # Calculate number of output values
+        nout = int(np.ceil(np.log10(outmax/outmin)*pts_per_dec) + 1)
 
     # Min-nout check, becaus the cubic InterpolatedUnivariateSpline needs at
     # least 4 points.
@@ -1197,16 +1195,19 @@ def get_spline_values(filt, inp, nr_per_dec=None):
         if nout < 4:
             nout = 4
 
-    # Calculate output values
-    out = np.exp(np.arange(np.log(outmin), np.log(outmin) + nout/pts_per_dec,
-                           1/pts_per_dec))
-
     if nr_per_dec < 0:
+        # Calculate output values
+        out = np.exp(np.arange(np.log(outmin), np.log(outmin) +
+                               nout/pts_per_dec, 1/pts_per_dec))
         # If lagged convolution is used, we calculate the new input values, as
         # spline is carried out in the input domain.
         new_inp = inp.max()*np.exp(-np.arange(nout - filt.base.size + 1) /
                                    pts_per_dec)
     else:
+        # Calculate output values
+        out = 10**np.arange(np.log10(outmin), np.log10(outmin) +
+                            nout/pts_per_dec, 1/pts_per_dec)
+
         # If spline is used, interpolation is carried out in output domain and
         # we calculate the intermediate values.
         new_inp = filt.base/inp[:, None]
