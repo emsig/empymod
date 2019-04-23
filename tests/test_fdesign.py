@@ -149,7 +149,7 @@ class TestFiguresMatplotlib:
         fdesign.plot_result(dat6[1], dat6[2])
         return plt.gcf()
 
-    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
+    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=8)
     def test_call_qc_transform_pairs1(self):
         # plot_transform_pair "normal" case
         r = np.logspace(1, 2, 50)
