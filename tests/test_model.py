@@ -24,17 +24,23 @@ from empymod.kernel import fullspace, halfspace
 
 # Load required data
 # Data generated with create_self.py
-DATAEMPYMOD = np.load(join(dirname(__file__), 'data/empymod.npz'))
+DATAEMPYMOD = np.load(join(dirname(__file__), 'data/empymod.npz'),
+                      allow_pickle=True)
 # Data generated with create_data/fem_tem.py
-DATAFEMTEM = np.load(join(dirname(__file__), 'data/fem_tem.npz'))
+DATAFEMTEM = np.load(join(dirname(__file__), 'data/fem_tem.npz'),
+                     allow_pickle=True)
 # Data generated with create_data/green3d.py
-GREEN3D = np.load(join(dirname(__file__), 'data/green3d.npz'))
+GREEN3D = np.load(join(dirname(__file__), 'data/green3d.npz'),
+                  allow_pickle=True)
 # Data generated with create_data/dipole1d.py
-DIPOLE1D = np.load(join(dirname(__file__), 'data/dipole1d.npz'))
+DIPOLE1D = np.load(join(dirname(__file__), 'data/dipole1d.npz'),
+                   allow_pickle=True)
 # Data generated with create_data/emmod.py
-EMMOD = np.load(join(dirname(__file__), 'data/emmod.npz'))
+EMMOD = np.load(join(dirname(__file__), 'data/emmod.npz'),
+                allow_pickle=True)
 # Data generated with create_data/regression.py
-REGRES = np.load(join(dirname(__file__), 'data/regression.npz'))
+REGRES = np.load(join(dirname(__file__), 'data/regression.npz'),
+                 allow_pickle=True)
 
 
 class TestBipole:

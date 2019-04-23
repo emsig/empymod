@@ -12,7 +12,8 @@ from empymod import transform, filters, kernel, utils
 
 # Load required data
 # Data generated with create_data/transform.py
-DATA = np.load(join(dirname(__file__), 'data/transform.npz'))
+DATA = np.load(join(dirname(__file__), 'data/transform.npz'),
+               allow_pickle=True)
 
 
 @pytest.mark.parametrize("htype", ['fht', 'hqwe', 'hquad'])

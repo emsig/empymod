@@ -17,7 +17,7 @@ from empymod.scripts import fdesign
 
 # Load required data
 # Data generated with create_data/fdesign.py
-DATA = np.load(join(dirname(__file__), 'data/fdesign.npz'))
+DATA = np.load(join(dirname(__file__), 'data/fdesign.npz'), allow_pickle=True)
 
 
 def test_design():
