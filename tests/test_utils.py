@@ -496,10 +496,10 @@ def test_check_time(capsys):
 
     # ['', 0]  :: dict, deprecated
     _, f, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': None}, 0)
-#     assert ftarg[1] == -1
-#     assert_allclose(f[:9], f1)
-#     assert_allclose(f[-9:], f2)
-#     assert_allclose(f.size, 204)
+    assert ftarg[1] == -1
+    assert_allclose(f[:9], f1)
+    assert_allclose(f[-9:], f2)
+    assert_allclose(f.size, 204)
 
     # # QWE # #
     # verbose

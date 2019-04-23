@@ -9,6 +9,8 @@ Changelog
   decade, as the natural logarithm was used.
 - New ``Versions``-class; improvement over the ``versions``-function, as it
   automatically detects if it can print html or not.
+- Maintenance: Update ``np.load`` in tests with ``allow_pickle=True`` for
+  changes in numpy v1.16.3.
 
 v1.8.1 - *2018-11-20*
 ---------------------
