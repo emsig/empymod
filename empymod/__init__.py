@@ -79,7 +79,7 @@ found in [Werthmuller_2017]_. There are a lot of examples of its usage
 available, in the form of Jupyter notebooks. Have a look at the following
 repositories:
 
-- Example notebooks: https://github.com/empymod/example-notebooks,
+- Example notebooks: https://github.com/empymod/empymod-examples,
 - Geophysical Tutoriol TLE: https://github.com/empymod/article-tle2017, and
 - Numerical examples of [Ziolkowski_and_Slob_2019]_:
   https://github.com/empymod/csem-ziolkowski-and-slob.
@@ -203,8 +203,8 @@ characteristics:
 And then you call ``empymod`` with ``res={'res': res-array, 'tau': tau,
 'func_eta': my_new_eta}``.
 
-Have a look at the example ``2d_Cole-Cole-IP`` in the `example-notebooks
-<https://github.com/empymod/example-notebooks>`_ repository, where this hook is
+Have a look at the example ``2d_Cole-Cole-IP`` in the `empymod-examples
+<https://github.com/empymod/empymod-examples>`_ repository, where this hook is
 exploited in the low-frequency range to use the Cole-Cole model for IP
 calculation. It could also be used in the high-frequency range to model
 dielectricity.
@@ -531,8 +531,8 @@ following command (in the example it is changed to 4):
 This parallelisation will make ``empymod`` faster (by using more threads) if
 you calculate a lot of offsets/frequencies at once, but slower for few
 offsets/frequencies. Best practice is to check first which one is faster. (You
-can use the benchmark-notebook in the `empymod/example-notebooks
-<https://github.com/empymod/example-notebooks>`_-repository.)
+can use the benchmark-notebook in the `empymod/empymod-examples
+<https://github.com/empymod/empymod-examples>`_-repository.)
 
 (*) These statements are (following the notation of [Hunziker_et_al_2015]_):
 :math:`\Gamma` (below eq. 19); :math:`W^{u, d}_n` (eq. 74), :math:`r^\pm_n`
@@ -599,7 +599,7 @@ the parameter ``htarg`` and ``ftarg``.
 For a graphical explanation of the differences between standard DLF, lagged
 convolution DLF, and splined DLF for the Hankel and the Fourier transforms
 see the notebook ``7a_DLF-Standard-Lagged-Splined`` in the
-`example-notebooks <https://github.com/empymod/example-notebooks>`_ repository.
+`empymod-examples <https://github.com/empymod/empymod-examples>`_ repository.
 
 Looping
 '''''''

@@ -13,7 +13,7 @@ More information can be found in the following places:
 - The article about fdesign is in the repo
   https://github.com/empymod/article-fdesign
 - Example notebooks to design a filter can be found in the repo
-  https://github.com/empymod/example-notebooks
+  https://github.com/empymod/empymod-examples
 
 This filter designing tool uses the direct matrix inversion method as described
 in [Kong_2007]_ and is based on scripts by [Key_2012]_. The whole project of
@@ -262,8 +262,8 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
     substantially.
 
     Example notebooks of its usage can be found in the repo
-    `github.com/empymod/example-notebooks
-    <https://github.com/empymod/example-notebooks>`_.
+    `github.com/empymod/empymod-examples
+    <https://github.com/empymod/empymod-examples>`_.
 
     Parameters
     ----------
