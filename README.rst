@@ -18,7 +18,7 @@
    :target: https://www.codacy.com/app/prisae/empymod
    :alt: Codacy
 .. image:: https://img.shields.io/badge/benchmark-asv-blue.svg?style=flat
-   :target: https://empymod.github.io/asv
+   :target: https://empymod.github.io/empymod-asv
    :alt: Airspeed Velocity
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.593094.svg
    :target: https://doi.org/10.5281/zenodo.593094
