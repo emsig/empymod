@@ -44,6 +44,7 @@ import numpy
 import scipy
 import textwrap
 import platform
+import warnings
 import multiprocessing
 
 # empymod
@@ -52,7 +53,6 @@ import empymod
 # Optional modules
 try:
     import IPython
-    from IPython.display import HTML, Pretty
 except ImportError:
     IPython = False
 try:
@@ -76,10 +76,11 @@ elif numexpr:
 else:
     mklinfo = False
 
-__all__ = ['Versions', 'versions', 'versions_html', 'versions_text']
+__all__ = ['Versions', 'versions']
 
 
 class Versions:
+    """Version information."""
 
     def __init__(self, add_pckg=None, ncol=4):
         r"""Print date, time, and version information.
@@ -92,8 +93,6 @@ class Versions:
 
             - ipynbtools.py from qutip https://github.com/qutip
             - watermark.py from https://github.com/rasbt/watermark
-
-        This is a wrapper for ``versions_html`` and ``versions_text``.
 
         Parameters
         ----------
@@ -121,212 +120,145 @@ class Versions:
 
     def __repr__(self):
         """Plain text information."""
-        return versions_text(self.add_pckg)
+
+        # Width for text-version
+        n = 54
+        text = '\n' + n*'-' + '\n'
+
+        # Date and time info as title
+        text += time.strftime('  %a %b %d %H:%M:%S %Y %Z\n\n')
+
+        # OS and CPUs
+        text += '{:>15}'.format(platform.system())+' : OS\n'
+        text += '{:>15}'.format(multiprocessing.cpu_count())+' : CPU(s)\n'
+
+        # Loop over packages
+        for pckg in self._get_packages(self.add_pckg):
+            text += '{:>15} : {}\n'.format(pckg.__version__, pckg.__name__)
+
+        # sys.version
+        text += '\n'
+        for txt in textwrap.wrap(sys.version, n-4):
+            text += '  '+txt+'\n'
+
+        # mkl version
+        if mklinfo:
+            text += '\n'
+            for txt in textwrap.wrap(mklinfo, n-4):
+                text += '  '+txt+'\n'
+
+        # Finish
+        text += n*'-'
+
+        return text
 
     def _repr_html_(self):
         """HTML-rendered versions information."""
-        return versions_html(self.add_pckg, self.ncol)
+        # Check ncol
+        ncol = int(self.ncol)
 
+        # Define html-styles
+        border = "border: 2px solid #fff;'"
 
-def versions(mode='print', add_pckg=None, ncol=4):
-    r"""Return date, time, and version information.
+        def colspan(html, txt, ncol, nrow):
+            r"""Print txt in a row spanning whole table."""
+            html += "  <tr>\n"
+            html += "     <td style='text-align: center; "
+            if nrow == 0:
+                html += "font-weight: bold; font-size: 1.2em; "
+            elif nrow % 2 == 0:
+                html += "background-color: #ddd;"
+            html += border + " colspan='"
+            html += str(2*ncol)+"'>%s</td>\n" % txt
+            html += "  </tr>\n"
+            return html
 
-    Print or return date, time, and package version information in any
-    environment (Jupyter notebook, IPython console, Python console, QT
-    console), either as html-table (notebook) or as plain text (anywhere).
+        def cols(html, version, name, ncol, i):
+            r"""Print package information in two cells."""
 
-    This script was heavily inspired by:
+            # Check if we have to start a new row
+            if i > 0 and i % ncol == 0:
+                html += "  </tr>\n"
+                html += "  <tr>\n"
 
-        - ipynbtools.py from qutip https://github.com/qutip
-        - watermark.py from https://github.com/rasbt/watermark
+            html += "    <td style='text-align: right; background-color: "
+            html += "#ccc; " + border + ">%s</td>\n" % version
 
-    This is a wrapper for ``versions_html`` and ``versions_text``.
+            html += "    <td style='text-align: left; "
+            html += border + ">%s</td>\n" % name
 
-    Parameters
-    ----------
-    mode : string, optional; {<'print'>, 'HTML', 'Pretty', 'plain', 'html'}
-        Defaults to 'print':
-            - 'print': Prints text-version to stdout, nothing returned.
-            - 'HTML': Returns html-version as IPython.display.HTML(html).
-            - 'html': Returns html-version as plain text.
-            - 'Pretty': Returns text-version as IPython.display.Pretty(text).
-            - 'plain': Returns text-version as plain text.
+            return html, i+1
 
-        'HTML' and 'Pretty' require IPython.
+        # Start html-table
+        html = "<table style='border: 3px solid #ddd;'>\n"
 
-    add_pckg : packages, optional
-        Package or list of packages to add to output information (must be
-        imported beforehand).
+        # Date and time info as title
+        html = colspan(html, time.strftime('%a %b %d %H:%M:%S %Y %Z'), ncol, 0)
 
-    ncol : int, optional
-        Number of package-columns in html table; only has effect if
-        ``mode='HTML'`` or ``mode='html'``. Defaults to 3.
-
-
-    Returns
-    -------
-    Depending on ``mode`` (HTML-instance; plain text; html as plain text; or
-    nothing, only printing to stdout).
-
-
-    Examples
-    --------
-    >>> import pytest
-    >>> import dateutil
-    >>> from empymod import versions
-    >>> versions()                 # Default values
-    >>> versions('plain', pytest)  # Provide additional package
-    >>> versions('HTML', [pytest, dateutil], ncol=5)  # HTML
-
-    """
-    if mode == 'html':
-        return versions_html(add_pckg, ncol)
-    elif mode == 'plain':
-        return versions_text(add_pckg)
-    elif mode == 'Pretty' and IPython:
-        return Pretty(versions_text(add_pckg))
-    elif mode == 'HTML' and IPython:
-        return HTML(versions_html(add_pckg, ncol))
-    else:
-        print(versions_text(add_pckg))
-
-
-def versions_html(add_pckg=None, ncol=4):
-    r"""HTML version.
-
-    See ``versions`` for details.
-    """
-
-    # Check ncol
-    ncol = int(ncol)
-
-    # Define html-styles
-    border = "border: 2px solid #fff;'"
-
-    def colspan(html, txt, ncol, nrow):
-        r"""Print txt in a row spanning whole table."""
+        # OS and CPUs
         html += "  <tr>\n"
-        html += "     <td style='text-align: center; "
-        if nrow == 0:
-            html += "font-weight: bold; font-size: 1.2em; "
-        elif nrow % 2 == 0:
-            html += "background-color: #ddd;"
-        html += border + " colspan='"
-        html += str(2*ncol)+"'>%s</td>\n" % txt
+        html, i = cols(html, platform.system(), 'OS', ncol, 0)
+        html, i = cols(html, multiprocessing.cpu_count(), 'CPU(s)', ncol, i)
+
+        # Loop over packages
+        for pckg in self._get_packages(self.add_pckg):
+            html, i = cols(html, pckg.__version__, pckg.__name__, ncol, i)
+        # Fill up the row
+        while i % ncol != 0:
+            html += "    <td style= " + border + "></td>\n"
+            html += "    <td style= " + border + "></td>\n"
+            i += 1
+        # Finish row
         html += "  </tr>\n"
+
+        # sys.version
+        html = colspan(html, sys.version, ncol, 1)
+
+        # mkl version
+        if mklinfo:
+            html = colspan(html, mklinfo, ncol, 2)
+
+        # Finish table
+        html += "</table>"
+
         return html
 
-    def cols(html, version, name, ncol, i):
-        r"""Print package information in two cells."""
+    @staticmethod
+    def _get_packages(add_pckg):
+        r"""Create list of packages."""
 
-        # Check if we have to start a new row
-        if i > 0 and i % ncol == 0:
-            html += "  </tr>\n"
-            html += "  <tr>\n"
+        # Mandatory packages
+        pckgs = [numpy, scipy, empymod]
 
-        html += "    <td style='text-align: right; background-color: #ccc; "
-        html += border + ">%s</td>\n" % version
+        # Optional packages
+        for module in [IPython, numexpr, matplotlib]:
+            if module:
+                pckgs += [module]
 
-        html += "    <td style='text-align: left; "
-        html += border + ">%s</td>\n" % name
+        # Cast and add add_pckg
+        if add_pckg is not None:
 
-        return html, i+1
+            # Cast add_pckg
+            if isinstance(add_pckg, tuple):
+                add_pckg = list(add_pckg)
 
-    # Start html-table
-    html = "<table style='border: 3px solid #ddd;'>\n"
+            if not isinstance(add_pckg, list):
+                add_pckg = [add_pckg, ]
 
-    # Date and time info as title
-    html = colspan(html, time.strftime('%a %b %d %H:%M:%S %Y %Z'), ncol, 0)
+            # Add add_pckg
+            pckgs += add_pckg
 
-    # OS and CPUs
-    html += "  <tr>\n"
-    html, i = cols(html, platform.system(), 'OS', ncol, 0)
-    html, i = cols(html, multiprocessing.cpu_count(), 'CPU(s)', ncol, i)
-
-    # Loop over packages
-    for pckg in _get_packages(add_pckg):
-        html, i = cols(html, pckg.__version__, pckg.__name__, ncol, i)
-    # Fill up the row
-    while i % ncol != 0:
-        html += "    <td style= " + border + "></td>\n"
-        html += "    <td style= " + border + "></td>\n"
-        i += 1
-    # Finish row
-    html += "  </tr>\n"
-
-    # sys.version
-    html = colspan(html, sys.version, ncol, 1)
-
-    # mkl version
-    if mklinfo:
-        html = colspan(html, mklinfo, ncol, 2)
-
-    # Finish table
-    html += "</table>"
-
-    return html
+        return pckgs
 
 
-def versions_text(add_pckg=None):
-    r"""Plain-text version.
+def versions(mode=None, add_pckg=None, ncol=4):
+    r"""Old func-way of class `Versions`, here for backwards compatibility.
 
-    See ``versions`` for details.
+    ``mode`` is not used any longer, dummy here.
     """
+    # Issue warning
+    mesg = ("\n    Func `versions` is deprecated and will " +
+            "be removed; use Class `Versions` instead.")
+    warnings.warn(mesg, DeprecationWarning)
 
-    # Width for text-version
-    n = 54
-    text = '\n' + n*'-' + '\n'
-
-    # Date and time info as title
-    text += time.strftime('  %a %b %d %H:%M:%S %Y %Z\n\n')
-
-    # OS and CPUs
-    text += '{:>15}'.format(platform.system())+' : OS\n'
-    text += '{:>15}'.format(multiprocessing.cpu_count())+' : CPU(s)\n'
-
-    # Loop over packages
-    for pckg in _get_packages(add_pckg):
-        text += '{:>15} : {}\n'.format(pckg.__version__, pckg.__name__)
-
-    # sys.version
-    text += '\n'
-    for txt in textwrap.wrap(sys.version, n-4):
-        text += '  '+txt+'\n'
-
-    # mkl version
-    if mklinfo:
-        text += '\n'
-        for txt in textwrap.wrap(mklinfo, n-4):
-            text += '  '+txt+'\n'
-
-    # Finish
-    text += n*'-'
-
-    return text
-
-
-def _get_packages(add_pckg):
-    r"""Create list of packages."""
-
-    # Mandatory packages
-    pckgs = [numpy, scipy, empymod]
-
-    # Optional packages
-    for module in [IPython, numexpr, matplotlib]:
-        if module:
-            pckgs += [module]
-
-    # Cast and add add_pckg
-    if add_pckg is not None:
-
-        # Cast add_pckg
-        if isinstance(add_pckg, tuple):
-            add_pckg = list(add_pckg)
-
-        if not isinstance(add_pckg, list):
-            add_pckg = [add_pckg, ]
-
-        # Add add_pckg
-        pckgs += add_pckg
-
-    return pckgs
+    return Versions(add_pckg, ncol)

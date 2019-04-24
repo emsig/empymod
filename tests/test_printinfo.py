@@ -6,68 +6,29 @@ try:
 except ImportError:
     IPython = False
 
-from empymod.scripts import versions, Versions, printinfo
+from empymod.scripts import versions, Versions
 
 
 def test_versions(capsys):
 
     # Check the default
-    versions()
-    out1, _ = capsys.readouterr()
+    out1 = Versions().__repr__()
 
     # Check one of the standard packages
     assert 'numpy' in out1
 
     # Check the 'auto'-version, providing a package
-    versions(add_pckg=pip)
-    out1b, _ = capsys.readouterr()
+    out1b = Versions(add_pckg=(pip, )).__repr__()
 
     # Check the provided package, with number
     assert pip.__version__ + ' : pip' in out1b
 
-    # Check the 'text'-version, providing a package as tuple
-    versions('print', add_pckg=(pip, ))
-    out2, _ = capsys.readouterr()
-    Va = Versions(add_pckg=(pip, )).__repr__()
-
-    # They have to be the same, except time (run at slightly different times)
-    assert out1b[75:] == out2[75:]
-    assert Va[85:200] == out2[85:200]  # Line-wrapping is different at end..
-
-    # Check the 'Pretty'/'plain'-version, providing a package as list
-    out3 = versions('plain', add_pckg=[pip, ])
-    out3b = printinfo.versions_text(add_pckg=[pip, ])
-    out3c = versions('Pretty', add_pckg=[pip, ])
-
-    # They have to be the same, except time (run at slightly different times)
-    assert out3[75:] == out3b[75:]
-    if IPython:
-        assert out3[75:] == out3c.data[75:]
-    else:
-        assert out3c is None
-
-    # Check one of the standard packages
-    assert 'numpy' in out3
-
-    # Check the provided package, with number
-    assert pip.__version__ + ' : pip' in out3
-
-    # Check 'HTML'/'html'-version, providing a package as a list
-    out4 = versions('html', add_pckg=[pip])
-    out4b = printinfo.versions_html(add_pckg=[pip])
-    out4c = versions('HTML', add_pckg=[pip])
-    Vb = Versions(add_pckg=[pip])._repr_html_()
-    assert out4b == Vb
-
-    assert 'numpy' in out4
-    assert 'td style=' in out4
-
-    # They have to be the same, except time (run at slightly different times)
-    assert out4[50:] == out4b[50:]
-    if IPython:
-        assert out4[50:] == out4c.data[50:]
-    else:
-        assert out4c is None
+    # Check html-version, providing a package as a list
+    out2 = Versions(add_pckg=[pip, ])._repr_html_()
+    out2b = versions('HTML', add_pckg=pip)._repr_html_()  # Backwards test
+    assert out2b == out2
+    assert 'numpy' in out2
+    assert 'td style=' in out2
 
     # Check row of provided package, with number
     teststr = "<td style='text-align: right; background-color: #ccc; "
@@ -75,4 +36,4 @@ def test_versions(capsys):
     teststr += pip.__version__
     teststr += "</td>\n    <td style='"
     teststr += "text-align: left; border: 2px solid #fff;'>pip</td>"
-    assert teststr in out4
+    assert teststr in out2
