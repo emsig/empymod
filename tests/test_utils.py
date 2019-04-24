@@ -426,7 +426,7 @@ def test_check_time(capsys):
     assert "> DLF type    :  Lagged Convolution" in out
     assert ft == 'ffht'
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] is -1
+    assert ftarg[1] == -1
     f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
                    7.39786458e-08, 8.50106448e-08, 9.76877807e-08,
                    1.12255383e-07, 1.28995366e-07, 1.48231684e-07])
@@ -447,7 +447,7 @@ def test_check_time(capsys):
     assert out[:79] == outstr
     assert ft == 'ffht'
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] is -1
+    assert ftarg[1] == -1
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 201+3)
@@ -457,7 +457,7 @@ def test_check_time(capsys):
     _, _, _, ftarg = utils.check_time(time, 1, 'sin',
                                       filters.key_201_CosSin_2012(), 0)
     assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] is -1
+    assert ftarg[1] == -1
     assert ftarg[2] == 'sin'
 
     # ['', pts_per_dec]

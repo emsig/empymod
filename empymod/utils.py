@@ -483,7 +483,7 @@ def check_hankel(ht, htarg, verb):
             pts_per_dec = _check_var(htarg['pts_per_dec'], float, 0,
                                      'fht: pts_per_dec', ())
         except VariableCatch:
-            pts_per_dec = 0
+            pts_per_dec = 0.0
 
         # Assemble htarg
         htarg = (fhtfilt, pts_per_dec)
@@ -534,7 +534,7 @@ def check_hankel(ht, htarg, verb):
 
         # pts_per_dec : 0  # No spline
         try:
-            pts_per_dec = _check_var(htarg['pts_per_dec'], float, 0,
+            pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'qwe: pts_per_dec', ())
             pts_per_dec = _check_min(pts_per_dec, 0, 'pts_per_dec', '', verb)
         except VariableCatch:
@@ -626,7 +626,7 @@ def check_hankel(ht, htarg, verb):
 
         # pts_per_dec : 40
         try:
-            pts_per_dec = _check_var(htarg['pts_per_dec'], float, 0,
+            pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
                                      'quad: pts_per_dec', ())
             pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
@@ -979,7 +979,7 @@ def check_time(time, signal, ft, ftarg, verb):
             pts_per_dec = _check_var(ftarg['pts_per_dec'], float, 0,
                                      ft + 'pts_per_dec', ())
         except VariableCatch:
-            pts_per_dec = -1
+            pts_per_dec = -1.0
 
         # Assemble ftarg
         ftarg = (fftfilt, pts_per_dec, ft)
@@ -1047,7 +1047,7 @@ def check_time(time, signal, ft, ftarg, verb):
             maxint = np.array(200, dtype=int)
 
         try:  # pts_per_dec
-            pts_per_dec = _check_var(ftarg['pts_per_dec'], float, 0,
+            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'qwe: pts_per_dec', ())
             pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
@@ -1112,7 +1112,7 @@ def check_time(time, signal, ft, ftarg, verb):
                                     'tcalc', 'dlnr', 'kr', 'rk'])
 
         try:  # pts_per_dec
-            pts_per_dec = _check_var(ftarg['pts_per_dec'], float, 0,
+            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'fftlog: pts_per_dec', ())
             pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
@@ -1186,7 +1186,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # Check pts_per_dec; defaults to None
         try:
-            pts_per_dec = _check_var(ftarg['pts_per_dec'], float, 0,
+            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
                                      'fft: pts_per_dec', ())
             pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
         except VariableCatch:
