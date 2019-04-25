@@ -1001,11 +1001,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # Get required frequencies
         # (multiply time by 2Pi, as calculation is done in angular frequencies)
-        if pts_per_dec == 0:  # Standard DLF, no spline at all
-            freq = np.ravel(fftfilt.base/(2*np.pi*time[:, None]))
-        else:
-            freq, _ = transform.get_spline_values(ftarg[0], 2*np.pi*time,
-                                                  ftarg[1])
+        freq, _ = transform.get_spline_values(ftarg[0], 2*np.pi*time, ftarg[1])
         freq = np.squeeze(freq)
 
         # Rename ft
