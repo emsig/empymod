@@ -1,7 +1,12 @@
-Steps to carry out for a new release
-====================================
+Maintainers Guide
+=================
 
-**Note:** I really should replace this with an automatic deploy-setup...
+A release is currently done completely manually, no automatic deployment is
+set up.
+
+
+Making a release
+----------------
 
 1. Update:
 
@@ -10,24 +15,28 @@ Steps to carry out for a new release
    - ``empymod/__init__.py``: Check version number, remove '.dev?'.
    - ``README.md``: Remove all batches
 
-2. Remove any old stuff (just in case)::
+2. Check syntax of README::
+
+       python setup.py --long-description | rst2html.py --no-raw > index.html
+
+3. Remove any old stuff (just in case)::
 
        rm -rf build/ dist/ empymod.egg-info/
 
-3. Push it to GitHub, create a release tagging it
+4. Push it to GitHub, create a release tagging it
 
-4. Get the Zenodo-DOI and add it to release notes
+5. Get the Zenodo-DOI and add it to release notes
 
-5. Ensure ``python3-setuptools`` is installed::
+6. Ensure ``python3-setuptools`` is installed::
 
        sudo apt install python3-setuptools
 
-6. Create tar and wheel::
+7. Create tar and wheel::
 
        python setup.py sdist
        python setup.py bdist_wheel
 
-7. Test it on testpypi (requires ~/.pypirc)::
+8. Test it on testpypi (requires ~/.pypirc)::
 
        twine upload dist/* -r testpypi
 
@@ -35,11 +44,11 @@ Steps to carry out for a new release
 
        conda skeleton pypi --pypi-url https://test.pypi.io/pypi/ empymod
 
-8. Push it to PyPi (requires ~/.pypircs)::
+9. Push it to PyPi (requires ~/.pypircs)::
 
    ``twine upload dist/*``
 
-9. conda build
+10. conda build
 
    Has to be done outside of ~/, because conda skeleton cannot handle, at the
    moment, the encrypted home.
