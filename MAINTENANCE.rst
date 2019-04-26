@@ -38,7 +38,7 @@ Making a release
 
 8. Test it on testpypi (requires ~/.pypirc)::
 
-       twine upload dist/* -r testpypi
+       ~/anaconda3/bin/twine upload dist/* -r testpypi
 
    Optionally test it already in conda if skeleton builds::
 
@@ -46,13 +46,13 @@ Making a release
 
 9. Push it to PyPi (requires ~/.pypircs)::
 
-   ``twine upload dist/*``
+       ~/anaconda3/bin/twine upload dist/*
 
 10. conda build
 
-   Has to be done outside of ~/, because conda skeleton cannot handle, at the
-   moment, the encrypted home.
-   https://conda.io/docs/build_tutorials/pkgs.html
+    Has to be done outside of ~/, because conda skeleton cannot handle, at the
+    moment, the encrypted home
+    (https://conda.io/docs/build_tutorials/pkgs.html).
 
 
    1. Install miniconda in /opt::
