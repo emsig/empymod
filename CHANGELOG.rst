@@ -19,6 +19,9 @@ Changelog
     `empymod.github.io/empymod-asv <https://empymod.github.io/empymod-asv>`_).
   - /empymod/bench -> /empymod/empymod-bench
 
+- Move manual from ``empymod/__init__.py`` to the ``docs/manual.rst``, and the
+  references to its own file. Change reference style.
+
 v1.8.1 - *2018-11-20*
 ---------------------
 
