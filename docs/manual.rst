@@ -675,11 +675,3 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 See the ``LICENSE``- and ``NOTICE``-files on GitHub for more information.
-
-.. note::
-
-    This software was initially (till 01/2017) developed with funding from *The
-    Mexican National Council of Science and Technology* (*Consejo Nacional de
-    Ciencia y Tecnología*, http://www.conacyt.gob.mx), carried out at *The
-    Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
-    http://www.gob.mx/imp).

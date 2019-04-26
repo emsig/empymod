@@ -19,3 +19,12 @@ Thanks to
   development of the add-on ``fdesign`` (see
   `github.com/empymod/article-fdesign
   <https://github.com/empymod/article-fdesign>`_).
+
+
+.. note::
+
+    This software was initially (till 01/2017) developed with funding from *The
+    Mexican National Council of Science and Technology* (*Consejo Nacional de
+    Ciencia y Tecnología*, http://www.conacyt.gob.mx), carried out at *The
+    Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
+    http://www.gob.mx/imp).

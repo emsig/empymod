@@ -1,8 +1,8 @@
 Changelog
 #########
 
-*latest*
---------
+v1.8.2 - *2019-04-26*
+---------------------
 
 - ``pts_per_dec`` are now floats, not integers, which gives more flexibility.
 - Bugfix: ``pts_per_dec`` for DLF was actually points per ``e``, not per
@@ -14,13 +14,15 @@ Changelog
 - Lots of changes to accommodate ``emg3d`` within the ``empymod``-org:
 
   - Adjust website, move stuff from website into README.md.
-  - /empymod/example-notebooks -> /empymod/empymod-examples
+  - /empymod/example-notebooks -> /empymod/empymod-examples.
   - /empymod/asv -> /empymod/empymod-asv (and therefore now available at
     `empymod.github.io/empymod-asv <https://empymod.github.io/empymod-asv>`_).
-  - /empymod/bench -> /empymod/empymod-bench
+  - /empymod/bench -> /empymod/empymod-bench.
 
 - Move manual from ``empymod/__init__.py`` to the ``docs/manual.rst``, and the
   references to its own file. Change reference style.
+- Move credits for initial funding from the license-section of the manual to
+  CREDITS.rst, where it belongs.
 
 v1.8.1 - *2018-11-20*
 ---------------------
