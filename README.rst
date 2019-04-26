@@ -35,8 +35,6 @@ wavenumber-frequency domain, and various Hankel- and Fourier-transform methods
 are included to transform the responses into the space-frequency and space-time
 domains.
 
-See https://empymod.github.io/#features for a complete list of features.
-
 
 More information
 ================
