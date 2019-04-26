@@ -37,6 +37,7 @@ domains.
 
 See https://empymod.github.io/#features for a complete list of features.
 
+
 More information
 ================
 
@@ -47,6 +48,85 @@ reports, and much more, see
 - **Documentation**: https://empymod.readthedocs.io,
 - **Source Code**: https://github.com/empymod,
 - **Examples**: https://github.com/empymod/empymod-examples.
+
+
+Features
+========
+
+- Calculates the complete (diffusion and wave phenomena) 3D electromagnetic
+  field in a layered-earth model including vertical transverse isotropic (VTI)
+  resistivity, VTI electric permittivity, and VTI magnetic permeability, for
+  electric and magnetic sources as well as electric and magnetic receivers.
+
+- Modelling routines:
+
+  - ``bipole``: arbitrary oriented, finite length bipoles with given source
+    strength; space-frequency and space-time domains.
+  - ``dipole``: infinitesimal small dipoles oriented along the principal axes,
+    normalized field; space-frequency and space-time domains.
+  - ``wavenumber``: as ``dipole``, but returns the wavenumber-frequency domain
+    response.
+  - ``gpr``: calculates the ground-penetrating radar response for given central
+    frequency, using a Ricker wavelet (experimental).
+  - ``analytical``: interface to the analytical, space-frequency and space-time
+    domain solutions.
+
+- Hankel transforms (wavenumber-frequency to space-frequency transform):
+
+  - Digital Linear Filters DLF (using included filters or providing own ones)
+  - Quadrature with extrapolation QWE
+  - Adaptive quadrature QUAD
+
+- Fourier transforms (space-frequency to space-time transform):
+  - Digital Linear Filters DLF (using included filters or providing own ones)
+  - Quadrature with extrapolation QWE
+  - Logarithmic Fast Fourier Transform FFTLog
+  - Fast Fourier Transform FFT
+
+- Analytical, space-frequency and space-time domain solutions:
+
+  - Complete full-space (electric and magnetic sources and receivers);
+    space-frequency domain
+  - Diffusive half-space (electric sources and receivers); space-frequency and
+    space-time domains:
+
+    - Direct wave (= diffusive full-space solution)
+    - Reflected wave
+    - Airwave (semi-analytical in the case of step responses)
+
+- Add-ons (``empymod.scripts``):
+
+  The add-ons for empymod provide some very specific, additional
+  functionalities:
+
+  - ``tmtemod``: Return up- and down-going TM/TE-mode contributions for
+    x-directed electric sources and receivers, which are located in the same
+    layer.
+  - ``fdesign``: Design digital linear filters for the Hankel and Fourier
+    transforms.
+  - ``printinfo``: Can be used to show date, time, and package version
+    information at the end of a notebook or a script.
+
+
+Installation
+============
+
+You can install empymod either via ``conda``:
+
+.. code-block:: console
+
+   conda install -c prisae empymod
+
+or via ``pip``:
+
+.. code-block:: console
+
+   pip install empymod
+
+Required are Python version 3.5 or higher and the modules `NumPy` and `SciPy`.
+Consult the installation notes in the `manual
+<https://empymod.readthedocs.io/en/stable/manual.html#installation>`_ for more
+information regarding installation and requirements.
 
 
 Citation
