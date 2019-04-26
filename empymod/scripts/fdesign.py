@@ -3,7 +3,7 @@ r"""
 ====================================================
 
 The add-on fdesign can be used to design digital linear filters for the Hankel
-or Fourier transform, or for any linear transform ([Ghosh_1970]_). For this
+or Fourier transform, or for any linear transform ([Ghos70]_). For this
 included or provided theoretical transform pairs can be used. Alternatively,
 one can use the EM modeller empymod to use the responses to an arbitrary 1D
 model as numerical transform pair.
@@ -13,13 +13,13 @@ More information can be found in the following places:
 - The article about fdesign is in the repo
   https://github.com/empymod/article-fdesign
 - Example notebooks to design a filter can be found in the repo
-  https://github.com/empymod/example-notebooks
+  https://github.com/empymod/empymod-examples
 
 This filter designing tool uses the direct matrix inversion method as described
-in [Kong_2007]_ and is based on scripts by [Key_2012]_. The whole project of
+in [Kong07]_ and is based on scripts by [Key12]_. The whole project of
 ``fdesign`` started with the Matlab scripts from Kerry Key, which he used to
-design his filters for [Key_2009]_, [Key_2012]_. Fruitful discussions with
-Evert Slob and Kerry Key improved the add-on substantially.
+design his filters for [Key09]_, [Key12]_. Fruitful discussions with Evert Slob
+and Kerry Key improved the add-on substantially.
 
 Note that the use of empymod to create numerical transform pairs is, as of now,
 only implemented for the Hankel transform.
@@ -56,7 +56,7 @@ implemented transform pair ``j0_1``
 .. code-block:: python
 
    def j0_1(a=1):
-       '''Hankel transform pair J0_1 ([Anderson_1975]_).'''
+       '''Hankel transform pair J0_1 ([Ande75]_).'''
 
        def lhs(l):
            return l*np.exp(-a*l**2)
@@ -70,28 +70,28 @@ implemented transform pair ``j0_1``
 Implemented Hankel transforms
 -----------------------------
 
-- ``j0_1`` [Anderson_1975]_
+- ``j0_1`` [Ande75]_
 
   .. math::
 
       \int^\infty_0 l \exp\left(-al^2\right) J_0(lr) dl =
       \frac{\exp\left(\frac{-r^2}{4a}\right)}{2a}
 
-- ``j0_2`` [Anderson_1975]_
+- ``j0_2`` [Ande75]_
 
   .. math::
 
       \int^\infty_0 \exp\left(-al\right) J_0(lr) dl =
       \frac{1}{\sqrt{a^2+r^2}}
 
-- ``j0_3`` [Guptasarma_and_Singh_1997]_
+- ``j0_3`` [GuSi97]_
 
   .. math::
 
       \int^\infty_0 l\exp\left(-al\right) J_0(lr) dl =
       \frac{a}{(a^2 + r^2)^{3/2}}
 
-- ``j0_4`` [Chave_and_Cox_1982]_
+- ``j0_4`` [ChCo82]_
 
   .. math::
 
@@ -99,7 +99,7 @@ Implemented Hankel transforms
       J_0(lr) dl =
       \frac{\exp\left(-\gamma R\right)}{R}
 
-- ``j0_5`` [Chave_and_Cox_1982]_
+- ``j0_5`` [ChCo82]_
 
   .. math::
 
@@ -107,7 +107,7 @@ Implemented Hankel transforms
     J_0(lr) dl =
     \frac{ z_v (\gamma R + 1)}{R^3}\exp\left(-\gamma R\right)
 
-- ``j1_1`` [Anderson_1975]_
+- ``j1_1`` [Ande75]_
 
   .. math::
 
@@ -115,21 +115,21 @@ Implemented Hankel transforms
     \frac{r}{4a^2} \exp\left(-\frac{r^2}{4a}\right)
 
 
-- ``j1_2`` [Anderson_1975]_
+- ``j1_2`` [Ande75]_
 
   .. math::
 
     \int^\infty_0 \exp\left(-al\right) J_1(lr) dl =
     \frac{\sqrt{a^2+r^2}-a}{r\sqrt{a^2 + r^2}}
 
-- ``j1_3`` [Anderson_1975]_
+- ``j1_3`` [Ande75]_
 
   .. math::
 
     \int^\infty_0 l \exp\left(-al\right) J_1(lr) dl =
     \frac{r}{(a^2 + r^2)^{3/2}}
 
-- ``j1_4`` [Chave_and_Cox_1982]_
+- ``j1_4`` [ChCo82]_
 
   .. math::
 
@@ -137,7 +137,7 @@ Implemented Hankel transforms
     J_1(lr) dl =
     \frac{r(\gamma R+1)}{R^3}\exp\left(-\gamma R\right)
 
-- ``j1_5`` [Chave_and_Cox_1982]_
+- ``j1_5`` [ChCo82]_
 
   .. math::
 
@@ -157,42 +157,42 @@ Where
 Implemented Fourier transforms
 ------------------------------
 
-- ``sin_1`` [Anderson_1975]_
+- ``sin_1`` [Ande75]_
 
   .. math::
 
     \int^\infty_0 l\exp\left(-a^2l^2\right) \sin(lr) dl =
     \frac{\sqrt{\pi}r}{4a^3} \exp\left(-\frac{r^2}{4a^2}\right)
 
-- ``sin_2`` [Anderson_1975]_
+- ``sin_2`` [Ande75]_
 
   .. math::
 
     \int^\infty_0 \exp\left(-al\right) \sin(lr) dl =
     \frac{r}{a^2 + r^2}
 
-- ``sin_3`` [Anderson_1975]_
+- ``sin_3`` [Ande75]_
 
   .. math::
 
     \int^\infty_0 \frac{l}{a^2+l^2} \sin(lr) dl =
     \frac{\pi}{2} \exp\left(-ar\right)
 
-- ``cos_1`` [Anderson_1975]_
+- ``cos_1`` [Ande75]_
 
   .. math::
 
     \int^\infty_0 \exp\left(-a^2l^2\right) \cos(lr) dl =
     \frac{\sqrt{\pi}}{2a} \exp\left(-\frac{r^2}{4a^2}\right)
 
-- ``cos_2`` [Anderson_1975]_
+- ``cos_2`` [Ande75]_
 
   .. math::
 
     \int^\infty_0 \exp\left(-al\right) \cos(lr) dl =
     \frac{a}{a^2 + r^2}
 
-- ``cos_3`` [Anderson_1975]_
+- ``cos_3`` [Ande75]_
 
   .. math::
 
@@ -250,20 +250,20 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
     r"""Digital linear filter (DLF) design
 
     This routine can be used to design digital linear filters for the Hankel or
-    Fourier transform, or for any linear transform ([Ghosh_1970]_). For this
+    Fourier transform, or for any linear transform ([Ghos70]_). For this
     included or provided theoretical transform pairs can be used.
     Alternatively, one can use the EM modeller empymod to use the responses to
     an arbitrary 1D model as numerical transform pair.
 
     This filter designing tool uses the direct matrix inversion method as
-    described in [Kong_2007]_ and is based on scripts by [Key_2012]_. The tool
-    is an add-on to the electromagnetic modeller empymod [Werthmuller_2017]_.
-    Fruitful discussions with Evert Slob and Kerry Key improved the add-on
+    described in [Kong07]_ and is based on scripts by [Key12]_. The tool is an
+    add-on to the electromagnetic modeller empymod [Wert17]_. Fruitful
+    discussions with Evert Slob and Kerry Key improved the add-on
     substantially.
 
     Example notebooks of its usage can be found in the repo
-    `github.com/empymod/example-notebooks
-    <https://github.com/empymod/example-notebooks>`_.
+    `github.com/empymod/empymod-examples
+    <https://github.com/empymod/empymod-examples>`_.
 
     Parameters
     ----------
@@ -835,7 +835,7 @@ class Ghosh:
     r"""Simple Class for Theoretical Transform Pairs.
 
     Named after D. P. Ghosh, honouring his 1970 Ph.D. thesis with which he
-    introduced the digital filter method to geophysics ([Ghosh_1970]_).
+    introduced the digital filter method to geophysics ([Ghos70]_).
     """
     def __init__(self, name, lhs, rhs):
         r"""Add the filter name, lhs, and rhs."""
@@ -847,7 +847,7 @@ class Ghosh:
 # # 3.a Hankel J0 transform pairs
 
 def j0_1(a=1):
-    r"""Hankel transform pair J0_1 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J0_1 ([Ande75]_)."""
 
     def lhs(x):
         return x*np.exp(-a*x**2)
@@ -859,7 +859,7 @@ def j0_1(a=1):
 
 
 def j0_2(a=1):
-    r"""Hankel transform pair J0_2 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J0_2 ([Ande75]_)."""
 
     def lhs(x):
         return np.exp(-a*x)
@@ -871,7 +871,7 @@ def j0_2(a=1):
 
 
 def j0_3(a=1):
-    r"""Hankel transform pair J0_3 ([Guptasarma_and_Singh_1997]_)."""
+    r"""Hankel transform pair J0_3 ([GuSi97]_)."""
 
     def lhs(x):
         return x*np.exp(-a*x)
@@ -883,7 +883,7 @@ def j0_3(a=1):
 
 
 def j0_4(f=1, rho=0.3, z=50):
-    r"""Hankel transform pair J0_4 ([Chave_and_Cox_1982]_).
+    r"""Hankel transform pair J0_4 ([ChCo82]_).
 
     Parameters
     ----------
@@ -910,7 +910,7 @@ def j0_4(f=1, rho=0.3, z=50):
 
 
 def j0_5(f=1, rho=0.3, z=50):
-    r"""Hankel transform pair J0_5 ([Chave_and_Cox_1982]_).
+    r"""Hankel transform pair J0_5 ([ChCo82]_).
 
     Parameters
     ----------
@@ -939,7 +939,7 @@ def j0_5(f=1, rho=0.3, z=50):
 # # 3.b Hankel J1 transform pairs
 
 def j1_1(a=1):
-    r"""Hankel transform pair J1_1 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J1_1 ([Ande75]_)."""
 
     def lhs(x):
         return x**2*np.exp(-a*x**2)
@@ -951,7 +951,7 @@ def j1_1(a=1):
 
 
 def j1_2(a=1):
-    r"""Hankel transform pair J1_2 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J1_2 ([Ande75]_)."""
 
     def lhs(x):
         return np.exp(-a*x)
@@ -963,7 +963,7 @@ def j1_2(a=1):
 
 
 def j1_3(a=1):
-    r"""Hankel transform pair J1_3 ([Anderson_1975]_)."""
+    r"""Hankel transform pair J1_3 ([Ande75]_)."""
 
     def lhs(x):
         return x*np.exp(-a*x)
@@ -975,7 +975,7 @@ def j1_3(a=1):
 
 
 def j1_4(f=1, rho=0.3, z=50):
-    r"""Hankel transform pair J1_4 ([Chave_and_Cox_1982]_).
+    r"""Hankel transform pair J1_4 ([ChCo82]_).
 
     Parameters
     ----------
@@ -1002,7 +1002,7 @@ def j1_4(f=1, rho=0.3, z=50):
 
 
 def j1_5(f=1, rho=0.3, z=50):
-    r"""Hankel transform pair J1_5 ([Chave_and_Cox_1982]_).
+    r"""Hankel transform pair J1_5 ([ChCo82]_).
 
     Parameters
     ----------
@@ -1031,7 +1031,7 @@ def j1_5(f=1, rho=0.3, z=50):
 # # 3.c Fourier sine transform pairs
 
 def sin_1(a=1):
-    r"""Fourier sine transform pair sin_1 ([Anderson_1975]_)."""
+    r"""Fourier sine transform pair sin_1 ([Ande75]_)."""
 
     def lhs(x):
         return x*np.exp(-a**2*x**2)
@@ -1043,7 +1043,7 @@ def sin_1(a=1):
 
 
 def sin_2(a=1):
-    r"""Fourier sine transform pair sin_2 ([Anderson_1975]_)."""
+    r"""Fourier sine transform pair sin_2 ([Ande75]_)."""
 
     def lhs(x):
         return np.exp(-a*x)
@@ -1055,7 +1055,7 @@ def sin_2(a=1):
 
 
 def sin_3(a=1):
-    r"""Fourier sine transform pair sin_3 ([Anderson_1975]_)."""
+    r"""Fourier sine transform pair sin_3 ([Ande75]_)."""
 
     def lhs(x):
         return x/(a**2 + x**2)
@@ -1069,7 +1069,7 @@ def sin_3(a=1):
 # # 3.d Fourier cosine transform pairs
 
 def cos_1(a=1):
-    r"""Fourier cosine transform pair cos_1 ([Anderson_1975]_)."""
+    r"""Fourier cosine transform pair cos_1 ([Ande75]_)."""
 
     def lhs(x):
         return np.exp(-a**2*x**2)
@@ -1081,7 +1081,7 @@ def cos_1(a=1):
 
 
 def cos_2(a=1):
-    r"""Fourier cosine transform pair cos_2 ([Anderson_1975]_)."""
+    r"""Fourier cosine transform pair cos_2 ([Ande75]_)."""
 
     def lhs(x):
         return np.exp(-a*x)
@@ -1093,7 +1093,7 @@ def cos_2(a=1):
 
 
 def cos_3(a=1):
-    r"""Fourier cosine transform pair cos_3 ([Anderson_1975]_)."""
+    r"""Fourier cosine transform pair cos_3 ([Ande75]_)."""
 
     def lhs(x):
         return 1/(a**2 + x**2)

@@ -11,6 +11,16 @@ Changelog
   automatically detects if it can print html or not.
 - Maintenance: Update ``np.load`` in tests with ``allow_pickle=True`` for
   changes in numpy v1.16.3.
+- Lots of changes to accommodate ``emg3d`` within the ``empymod``-org:
+
+  - Adjust website, move stuff from website into README.md.
+  - /empymod/example-notebooks -> /empymod/empymod-examples
+  - /empymod/asv -> /empymod/empymod-asv (and therefore now available at
+    `empymod.github.io/empymod-asv <https://empymod.github.io/empymod-asv>`_).
+  - /empymod/bench -> /empymod/empymod-bench
+
+- Move manual from ``empymod/__init__.py`` to the ``docs/manual.rst``, and the
+  references to its own file. Change reference style.
 
 v1.8.1 - *2018-11-20*
 ---------------------
