@@ -18,3 +18,4 @@ Version: |version| ~ Date: |today|
    credits
    code
    addons
+   references

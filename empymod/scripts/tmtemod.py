@@ -2,18 +2,17 @@ r"""
 :mod:`tmtemod` -- Calculate up- and down-going TM and TE modes
 ==============================================================
 
-This add-on for ``empymod`` adjusts [Hunziker_et_al_2015]_ for TM/TE-split. The
-development was initiated by the development of
-https://github.com/empymod/csem-ziolkowski-and-slob
-([Ziolkowski_and_Slob_2019]_).
+This add-on for ``empymod`` adjusts [HuTS15]_ for TM/TE-split. The development
+was initiated by the development of
+https://github.com/empymod/csem-ziolkowski-and-slob ([ZiSl19]_).
 
 This is a stripped-down version of ``empymod`` with a lot of simplifications
 but an important addition. The modeller ``empymod`` returns the total field,
 hence not distinguishing between TM and TE mode, and even less between up- and
 down-going fields. The reason behind this is simple: The derivation of
-[Hunziker_et_al_2015]_, on which ``empymod`` is based, returns the total field.
-In this derivation each mode (TM and TE) contains non-physical contributions.
-The non-physical contributions have opposite signs in TM and TE, so they cancel
+[HuTS15]_, on which ``empymod`` is based, returns the total field. In this
+derivation each mode (TM and TE) contains non-physical contributions. The
+non-physical contributions have opposite signs in TM and TE, so they cancel
 each other out in the total field. However, in order to obtain the correct TM
 and TE contributions one has to remove these non-physical parts.
 
@@ -45,14 +44,13 @@ important limitations:
 Theory
 ------
 
-The derivation of [Hunziker_et_al_2015]_, on which ``empymod`` is based,
-returns the total field. Internally it also calculates TM and TE modes, and
-sums these up. However, the separation into TM and TE mode introduces a
-singularity at :math:`\kappa = 0`. It has no contribution in the
-space-frequency domain to the total fields, but it introduces non-physical
-events in each mode with opposite sign (so they cancel each other out in the
-total field). In order to obtain the correct TM and TE contributions one has to
-remove these non-physical parts.
+The derivation of [HuTS15]_, on which ``empymod`` is based, returns the total
+field. Internally it also calculates TM and TE modes, and sums these up.
+However, the separation into TM and TE mode introduces a singularity at
+:math:`\kappa = 0`. It has no contribution in the space-frequency domain to the
+total fields, but it introduces non-physical events in each mode with opposite
+sign (so they cancel each other out in the total field). In order to obtain the
+correct TM and TE contributions one has to remove these non-physical parts.
 
 To remove the non-physical part we use the file ``tmtemod.py`` in this
 directory. This routine is basically a heavily simplified version of
@@ -68,9 +66,9 @@ diffuses in the upward direction. The routine uses ``empymod`` wherever
 possible, see the corresponding functions in ``empymod`` for more explanation
 and documentation regarding input parameters.
 
-Please note that the notation in [Hunziker_et_al_2015]_ differs from the
-notation in [Ziolkowski_and_Slob_2019]_. I specify therefore always, which
-notification applies, either *Hun15* or *Zio19*.
+Please note that the notation in [HuTS15]_ differs from the notation in
+[ZiSl19]_. I specify therefore always, which notification applies, either
+*Hun15* or *Zio19*.
 
 We start with equation (105) in *Hun15*:
 

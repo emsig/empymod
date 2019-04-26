@@ -8,7 +8,7 @@ frequency domain and Fourier transform from frequency to time domain.
 
 The functions for the QWE and DLF Hankel and Fourier transforms are based on
 source files (specified in each function) from the source code distributed with
-[Key_2012]_, which can be found at `software.seg.org/2012/0003
+[Key12]_, which can be found at `software.seg.org/2012/0003
 <http://software.seg.org/2012/0003>`_. These functions are (c) 2012 by Kerry
 Key and the Society of Exploration Geophysicists,
 http://software.seg.org/disclaimer.txt. Please read the NOTICE-file in the root
@@ -49,13 +49,13 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     r"""Hankel Transform using the Digital Linear Filter method.
 
     The *Digital Linear Filter* method was introduced to geophysics by
-    [Ghosh_1970]_, and made popular and wide-spread by [Anderson_1975]_,
-    [Anderson_1979]_, [Anderson_1982]_. The DLF is sometimes referred to as
-    the *Fast Hankel Transform* FHT, from which this routine has its name.
+    [Ghos70]_, and made popular and wide-spread by [Ande75]_, [Ande79]_,
+    [Ande82]_. The DLF is sometimes referred to as the *Fast Hankel Transform*
+    FHT, from which this routine has its name.
 
-    This implementation of the DLF follows [Key_2012]_, equation 6.  Without
-    going into the mathematical details (which can be found in any of the above
-    papers) and following [Key_2012]_, the DLF method rewrites the Hankel
+    This implementation of the DLF follows [Key12]_, equation 6.  Without going
+    into the mathematical details (which can be found in any of the above
+    papers) and following [Key12]_, the DLF method rewrites the Hankel
     transform of the form
 
     .. math:: F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)\
@@ -72,7 +72,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     with :math:`l=(n-1)/2`, and :math:`a` is the spacing coefficient.
 
     This function is loosely based on ``get_CSEM1D_FD_FHT.m`` from the source
-    code distributed with [Key_2012]_.
+    code distributed with [Key12]_.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -112,12 +112,12 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     r"""Hankel Transform using Quadrature-With-Extrapolation.
 
     *Quadrature-With-Extrapolation* was introduced to geophysics by
-    [Key_2012]_. It is one of many so-called *ISE* methods to solve Hankel
+    [Key12]_. It is one of many so-called *ISE* methods to solve Hankel
     Transforms, where *ISE* stands for Integration, Summation, and
     Extrapolation.
 
-    Following [Key_2012]_, but without going into the mathematical details
-    here, the QWE method rewrites the Hankel transform of the form
+    Following [Key12]_, but without going into the mathematical details here,
+    the QWE method rewrites the Hankel transform of the form
 
     .. math:: F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)\
             \mathrm{d}\lambda
@@ -129,11 +129,11 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
     but with various bells and whistles applied (using the so-called Shanks
     transformation in the form of a routine called :math:`\epsilon`-algorithm
-    ([Shanks_1955]_, [Wynn_1956]_; implemented with algorithms from
-    [Trefethen_2000]_ and [Weniger_1989]_).
+    ([Shan55]_, [Wynn56]_; implemented with algorithms from [Tref00]_ and
+    [Weni89]_).
 
     This function is based on ``get_CSEM1D_FD_QWE.m``, ``qwe.m``, and
-    ``getBesselWeights.m`` from the source code distributed with [Key_2012]_.
+    ``getBesselWeights.m`` from the source code distributed with [Key12]_.
 
     In the spline-version, ``hqwe`` checks how steep the decay of the
     wavenumber-domain result is, and calls QUAD for the very steep interval,
@@ -488,7 +488,7 @@ def ffht(fEM, time, freq, ftarg):
     r"""Fourier Transform using the Digital Linear Filter method.
 
 
-    It follows the Filter methodology [Anderson_1975]_, using Cosine- and
+    It follows the Filter methodology [Ande75]_, using Cosine- and
     Sine-filters; see ``fht`` for more information.
 
     The function is called from one of the modelling routines in :mod:`model`.
@@ -496,7 +496,7 @@ def ffht(fEM, time, freq, ftarg):
     parameters.
 
     This function is based on ``get_CSEM1D_TD_FHT.m`` from the source code
-    distributed with [Key_2012]_.
+    distributed with [Key12]_.
 
     Returns
     -------
@@ -527,7 +527,7 @@ def ffht(fEM, time, freq, ftarg):
 def fqwe(fEM, time, freq, qweargs):
     r"""Fourier Transform using Quadrature-With-Extrapolation.
 
-    It follows the QWE methodology [Key_2012]_ for the Hankel transform, see
+    It follows the QWE methodology [Key12]_ for the Hankel transform, see
     ``hqwe`` for more information.
 
     The function is called from one of the modelling routines in :mod:`model`.
@@ -535,7 +535,7 @@ def fqwe(fEM, time, freq, qweargs):
     parameters.
 
     This function is based on ``get_CSEM1D_TD_QWE.m`` from the source code
-    distributed with [Key_2012]_.
+    distributed with [Key12]_.
 
     ``fqwe`` checks how steep the decay of the frequency-domain result is, and
     calls QUAD for the very steep interval, for which QWE is not suited.
@@ -631,7 +631,7 @@ def fftlog(fEM, time, freq, ftarg):
     r"""Fourier Transform using FFTLog.
 
     FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT.
-    FFTLog was presented in Appendix B of [Hamilton_2000]_ and published at
+    FFTLog was presented in Appendix B of [Hami00]_ and published at
     <http://casa.colorado.edu/~ajsh/FFTLog>.
 
     This function uses a simplified version of ``pyfftlog``, which is a
@@ -1017,7 +1017,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
     description.
 
     This function is based on ``qwe.m`` from the source code distributed with
-    [Key_2012]_.
+    [Key12]_.
 
     """
     def getweights(i, inpint):
@@ -1050,7 +1050,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         EMi *= getweights(i, intervals[om, :])
 
         # 3.b Compute Shanks transformation
-        # Using the epsilon algorithm: structured after [Weniger_1989]_, p26.
+        # Using the epsilon algorithm: structured after [Weni89]_, p26.
         S[:, i][om] = S[:, i-1][om] + EMi  # working array for transformation
 
         # Recursive loop

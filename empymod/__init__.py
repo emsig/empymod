@@ -5,14 +5,14 @@ Theory
 
 The code is principally based on
 
-- [Hunziker_et_al_2015]_ for the wavenumber-domain calculation (``kernel``),
-- [Key_2012]_ for the DLF and QWE transforms,
-- [Slob_et_al_2010]_ for the analytical half-space solutions, and
-- [Hamilton_2000]_ for the FFTLog.
+- [HuTS15]_ for the wavenumber-domain calculation (``kernel``),
+- [Key12]_ for the DLF and QWE transforms,
+- [SlHM10]_ for the analytical half-space solutions, and
+- [Hami00]_ for the FFTLog.
 
-See these publications and all the others given in the references_, if you are
-interested in the theory on which empymod is based. Another good reference is
-[Ziolkowski_and_Slob_2019]_. The book derives in great detail the equations for
+See these publications and all the others given in the :doc:`references`, if
+you are interested in the theory on which empymod is based. Another good
+reference is [ZiSl19]_. The book derives in great detail the equations for
 layered-Earth CSEM modelling.
 
 
@@ -74,14 +74,13 @@ The structure of empymod is:
 Usage/Examples
 --------------
 
-A good starting point is [Werthmuller_2017b]_, and more information can be
-found in [Werthmuller_2017]_. There are a lot of examples of its usage
-available, in the form of Jupyter notebooks. Have a look at the following
-repositories:
+A good starting point is [Wert17b]_, and more information can be found in
+[Wert17]_. There are a lot of examples of its usage available, in the form of
+Jupyter notebooks. Have a look at the following repositories:
 
 - Example notebooks: https://github.com/empymod/empymod-examples,
 - Geophysical Tutoriol TLE: https://github.com/empymod/article-tle2017, and
-- Numerical examples of [Ziolkowski_and_Slob_2019]_:
+- Numerical examples of [ZiSl19]_:
   https://github.com/empymod/csem-ziolkowski-and-slob.
 
 The main modelling routines is ``bipole``, which can calculate the
@@ -322,10 +321,9 @@ FFTLog
 ''''''
 
 FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT originally
-proposed by [Talman_1978]_. The code used by ``empymod`` was published in
-Appendix B of [Hamilton_2000]_ and is publicly available at
-`casa.colorado.edu/~ajsh/FFTLog <http://casa.colorado.edu/~ajsh/FFTLog>`_.
-From the ``FFTLog``-website:
+proposed by [Talm78]_. The code used by ``empymod`` was published in Appendix B
+of [Hami00]_ and is publicly available at `casa.colorado.edu/~ajsh/FFTLog
+<http://casa.colorado.edu/~ajsh/FFTLog>`_. From the ``FFTLog``-website:
 
 *FFTLog is a set of fortran subroutines that compute the fast Fourier or Hankel
 (= Fourier-Bessel) transform of a periodic sequence of logarithmically spaced
@@ -336,22 +334,21 @@ currently ``empymod`` uses it only for the Fourier transform. It uses a
 simplified version of the python implementation of FFTLog, ``pyfftlog``
 (`github.com/prisae/pyfftlog <https://github.com/prisae/pyfftlog>`_).
 
-[Haines_and_Jones_1988]_ proposed a logarithmic Fourier transform
-(abbreviated by the authors as LFT) for electromagnetic geophysics, also based
-on [Talman_1978]_. I do not know if Hamilton was aware of the work by Haines
-and Jones. The two publications share as reference only the original paper by
-Talman, and both cite a publication of Anderson; Hamilton cites
-[Anderson_1982]_, and Haines and Jones cite [Anderson_1979]_. Hamilton probably
-never heard of Haines and Jones, as he works in astronomy, and Haines and Jones
-was published in the *Geophysical Journal*.
+[HaJo88]_ proposed a logarithmic Fourier transform (abbreviated by the authors
+as LFT) for electromagnetic geophysics, also based on [Talm78]_. I do not know
+if Hamilton was aware of the work by Haines and Jones. The two publications
+share as reference only the original paper by Talman, and both cite a
+publication of Anderson; Hamilton cites [Ande82]_, and Haines and Jones cite
+[Ande79]_. Hamilton probably never heard of Haines and Jones, as he works in
+astronomy, and Haines and Jones was published in the *Geophysical Journal*.
 
 Logarithmic FFTs are not widely used in electromagnetics, as far as I know,
 probably because of the ease, speed, and generally sufficient precision of the
-digital filter methods with sine and cosine transforms ([Anderson_1975]_).
-However, comparisons show that FFTLog can be faster and more precise than
-digital filters, specifically for responses with source and receiver at the
-interface between air and subsurface. Credit to use FFTLog in electromagnetics
-goes to David Taylor who, in the mid-2000s, implemented FFTLog into the forward
+digital filter methods with sine and cosine transforms ([Ande75]_). However,
+comparisons show that FFTLog can be faster and more precise than digital
+filters, specifically for responses with source and receiver at the interface
+between air and subsurface. Credit to use FFTLog in electromagnetics goes to
+David Taylor who, in the mid-2000s, implemented FFTLog into the forward
 modellers of the company Multi-Transient ElectroMagnetic (MTEM Ltd, later
 Petroleum Geo-Services PGS). The implementation was driven by land responses,
 where FFTLog can be much more precise than the filter method for very early
@@ -373,8 +370,8 @@ part,
             &= -\frac{2}{\pi}\int^\infty_0 \Im[E(r, \omega)]\
                 \sin(\omega t)\ \text{d}\omega \ ,
 
-see, e.g., [Anderson_1975]_ or [Key_2012]_. Quadrature-with-extrapolation,
-FFTLog, and obviously the sine/cosine-transform all make use of this split.
+see, e.g., [Ande75]_ or [Key12]_. Quadrature-with-extrapolation, FFTLog, and
+obviously the sine/cosine-transform all make use of this split.
 
 To obtain the step-on response the frequency-domain result is first divided
 by :math:`i\omega`, in the case of the step-off response it is additionally
@@ -534,17 +531,16 @@ offsets/frequencies. Best practice is to check first which one is faster. (You
 can use the benchmark-notebook in the `empymod/empymod-examples
 <https://github.com/empymod/empymod-examples>`_-repository.)
 
-(*) These statements are (following the notation of [Hunziker_et_al_2015]_):
-:math:`\Gamma` (below eq. 19); :math:`W^{u, d}_n` (eq. 74), :math:`r^\pm_n`
-(eq. 65); :math:`R^\pm_n` (eq. 64); :math:`P^{u, d; \pm}_s` (eq. 81);
-:math:`M_s` (eq. 82), and their corresponding bar-ed versions provided in the
-appendix (e.g. :math:`\bar{\Gamma}`). In big models, more than 95 % of the
-calculation is spent in the calculation of these six equations, and most of the
-time therefore in ``np.sqrt`` and ``np.exp``, or generally in
-``numpy``-``ufuncs`` which are implemented and executed in compiled C-code. For
-smaller models or if transforms with interpolations are used then all the other
-parts also start to play a role. However, those models generally execute
-comparably fast.
+(*) These statements are (following the notation of [HuTS15]_): :math:`\Gamma`
+(below eq. 19); :math:`W^{u, d}_n` (eq. 74), :math:`r^\pm_n` (eq. 65);
+:math:`R^\pm_n` (eq. 64); :math:`P^{u, d; \pm}_s` (eq. 81); :math:`M_s` (eq.
+82), and their corresponding bar-ed versions provided in the appendix (e.g.
+:math:`\bar{\Gamma}`). In big models, more than 95 % of the calculation is
+spent in the calculation of these six equations, and most of the time therefore
+in ``np.sqrt`` and ``np.exp``, or generally in ``numpy``-``ufuncs`` which are
+implemented and executed in compiled C-code. For smaller models or if
+transforms with interpolations are used then all the other parts also start to
+play a role. However, those models generally execute comparably fast.
 
 
 Lagged Convolution and Splined Transforms
@@ -686,106 +682,6 @@ See the ``LICENSE``- and ``NOTICE``-files on GitHub for more information.
     Ciencia y Tecnología*, http://www.conacyt.gob.mx), carried out at *The
     Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
     http://www.gob.mx/imp).
-
-
-.. |_| unicode:: 0xA0
-   :trim:
-
-.. _references:
-
-References |_|
---------------
-
-.. [Anderson_1975] Anderson, W. L., 1975, Improved digital filters for
-   evaluating Fourier and Hankel transform integrals: USGS, PB242800;
-   `pubs.er.usgs.gov/publication/70045426
-   <https://pubs.er.usgs.gov/publication/70045426>`_.
-.. [Anderson_1979] Anderson, W. L., 1979, Numerical integration of related
-   Hankel transforms of orders 0 and 1 by adaptive digital filtering:
-   Geophysics, 44, 1287--1305; DOI: |_| `10.1190/1.1441007
-   <http://doi.org/10.1190/1.1441007>`_.
-.. [Anderson_1982] Anderson, W. L., 1982, Fast Hankel transforms using
-   related and lagged convolutions: ACM Trans. on Math. Softw. (TOMS), 8,
-   344--368; DOI: |_| `10.1145/356012.356014
-   <http://doi.org/10.1145/356012.356014>`_.
-.. [Chave_and_Cox_1982] Chave, A. D., and C. S. Cox, 1982, Controlled
-   electromagnetic sources for measuring electrical conductivity beneath the
-   oceans: 1. forward problem and model study: Journal of Geophysical Research,
-   87, 5327--5338; DOI: |_| `10.1029/JB087iB07p05327
-   <http://doi.org/10.1029/JB087iB07p05327>`_.
-.. [Ghosh_1970] Ghosh, D. P.,  1970, The application of linear filter theory to
-   the direct interpretation of geoelectrical resistivity measurements: Ph.D.
-   Thesis, TU Delft; UUID: |_| `88a568bb-ebee-4d7b-92df-6639b42da2b2
-   <http://resolver.tudelft.nl/uuid:88a568bb-ebee-4d7b-92df-6639b42da2b2>`_.
-.. [Guptasarma_and_Singh_1997] Guptasarma, D., and B. Singh, 1997, New digital
-   linear filters for Hankel J0 and J1 transforms: Geophysical Prospecting, 45,
-   745--762; DOI: |_| `10.1046/j.1365-2478.1997.500292.x
-   <http://dx.doi.org/10.1046/j.1365-2478.1997.500292.x>`_.
-.. [Haines_and_Jones_1988] Haines, G. V., and A. G. Jones, 1988, Logarithmic
-   Fourier transformation: Geophysical Journal, 92, 171--178;
-   DOI: |_| `10.1111/j.1365-246X.1988.tb01131.x
-   <http://doi.org/10.1111/j.1365-246X.1988.tb01131.x>`_.
-.. [Hamilton_2000] Hamilton, A. J. S., 2000, Uncorrelated modes of the
-   non-linear power spectrum: Monthly Notices of the Royal Astronomical
-   Society, 312, pages 257--284; DOI: |_| `10.1046/j.1365-8711.2000.03071.x
-   <http://doi.org/10.1046/j.1365-8711.2000.03071.x>`_; Website of FFTLog:
-   `casa.colorado.edu/~ajsh/FFTLog <http://casa.colorado.edu/~ajsh/FFTLog>`_.
-.. [Hunziker_et_al_2015] Hunziker, J., J. Thorbecke, and E. Slob, 2015, The
-   electromagnetic response in a layered vertical transverse isotropic medium:
-   A new look at an old problem: Geophysics, 80(1), F1--F18;
-   DOI: |_| `10.1190/geo2013-0411.1
-   <http://doi.org/10.1190/geo2013-0411.1>`_;
-   Software: `software.seg.org/2015/0001 <http://software.seg.org/2015/0001>`_.
-.. [Key_2009] Key, K., 2009, 1D inversion of multicomponent, multifrequency
-   marine CSEM data: Methodology and synthetic studies for resolving thin
-   resistive layers: Geophysics, 74(2), F9--F20; DOI: |_| `10.1190/1.3058434
-   <http://doi.org/10.1190/1.3058434>`_.
-   Software: `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-   <http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
-.. [Key_2012] Key, K., 2012, Is the fast Hankel transform faster than
-   quadrature?: Geophysics, 77(3), F21--F30; DOI: |_| `10.1190/geo2011-0237.1
-   <http://doi.org/10.1190/geo2011-0237.1>`_;
-   Software: `software.seg.org/2012/0003 <http://software.seg.org/2012/0003>`_.
-.. [Kong_2007] Kong, F. N., 2007, Hankel transform filters for dipole antenna
-   radiation in a conductive medium: Geophysical Prospecting, 55, 83--89;
-   DOI: |_| `10.1111/j.1365-2478.2006.00585.x
-   <http://doi.org/10.1111/j.1365-2478.2006.00585.x>`_.
-.. [Shanks_1955] Shanks, D., 1955, Non-linear transformations of divergent and
-   slowly convergent sequences: Journal of Mathematics and Physics, 34, 1--42;
-   DOI: |_| `10.1002/sapm19553411
-   <http://doi.org/10.1002/sapm19553411>`_.
-.. [Slob_et_al_2010] Slob, E., J. Hunziker, and W. A. Mulder, 2010, Green's
-   tensors for the diffusive electric field in a VTI half-space: PIER, 107,
-   1--20: DOI: |_| `10.2528/PIER10052807
-   <http://doi.org/10.2528/PIER10052807>`_.
-.. [Talman_1978] Talman, J. D., 1978, Numerical Fourier and Bessel transforms
-    in logarithmic variables: Journal of Computational Physics, 29, pages
-    35--48; DOI: |_| `10.1016/0021-9991(78)90107-9
-    <http://doi.org/10.1016/0021-9991(78)90107-9>`_.
-.. [Trefethen_2000] Trefethen, L. N., 2000, Spectral methods in MATLAB: Society
-   for Industrial and Applied Mathematics (SIAM), volume 10 of Software,
-   Environments, and Tools, chapter 12, page 129;
-   DOI: |_| `10.1137/1.9780898719598.ch12
-   <http://doi.org/10.1137/1.9780898719598.ch12>`_.
-.. [Weniger_1989] Weniger, E. J., 1989, Nonlinear sequence transformations for
-   the acceleration of convergence and the summation of divergent series:
-   Computer Physics Reports, 10, 189--371;
-   arXiv: |_| `abs/math/0306302 <https://arxiv.org/abs/math/0306302>`_.
-.. [Werthmuller_2017] Werthmüller, D., 2017, An open-source full 3D
-   electromagnetic modeler for 1D VTI media in Python: empymod: Geophysics,
-   82(6), WB9--WB19; DOI: |_| `10.1190/geo2016-0626.1
-   <http://doi.org/10.1190/geo2016-0626.1>`_.
-.. [Werthmuller_2017b] Werthmüller, D., 2017, Getting started with
-   controlled-source electromagnetic 1D modeling: The Leading Edge, 36,
-   352--355;
-   DOI: |_| `10.1190/tle36040352.1 <http://doi.org/10.1190/tle36040352.1>`_.
-.. [Wynn_1956] Wynn, P., 1956, On a device for computing the
-   :math:`e_m(S_n)` tranformation: Math. Comput., 10, 91--96;
-   DOI: |_| `10.1090/S0025-5718-1956-0084056-6
-   <http://doi.org/10.1090/S0025-5718-1956-0084056-6>`_.
-.. [Ziolkowski_and_Slob_2019] Ziolkowski, A., and E. Slob, 2019, Introduction
-   to Controlled-Source Electromagnetic Methods: Cambridge University Press;
-   ISBN: |_| `9781107058620 <https://www.cambridge.org/9781107058620>`_.
 """
 # Copyright 2016-2019 Dieter Werthmüller
 #
