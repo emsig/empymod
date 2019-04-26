@@ -13,7 +13,7 @@ Making a release
    - ``CHANGELOG``
    - ``setup.py``: Version number, download url; DO NOT CHANGE THAT
    - ``empymod/__init__.py``: Check version number, remove '.dev?'.
-   - ``README.md``: Remove all batches
+   - ``README.md``: Remove all badges
 
 2. Check syntax of README::
 
@@ -55,41 +55,41 @@ Making a release
     (https://conda.io/docs/build_tutorials/pkgs.html).
 
 
-   1. Install miniconda in /opt::
+    1. Install miniconda in /opt::
 
-          wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-          bash miniconda.sh -b -p /opt/miniconda/miniconda
-          export PATH="/opt/miniconda/miniconda/bin:$PATH"
-          conda update conda
-          conda install -y conda-build anaconda-client
-          conda config --set anaconda_upload yes
-          anaconda login
+           wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+           bash miniconda.sh -b -p /opt/miniconda/miniconda
+           export PATH="/opt/miniconda/miniconda/bin:$PATH"
+           conda update conda
+           conda install -y conda-build anaconda-client
+           conda config --set anaconda_upload yes
+           anaconda login
 
-   2. Now to the conda-build part::
+    2. Now to the conda-build part::
 
-          conda skeleton pypi empymod
-          conda build --python 3.5 empymod
-          conda build --python 3.6 empymod
-          conda build --python 3.7 empymod
+           conda skeleton pypi empymod
+           conda build --python 3.5 empymod
+           conda build --python 3.6 empymod
+           conda build --python 3.7 empymod
 
-   3. Convert for all platforms::
+    3. Convert for all platforms::
 
-          conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py35_0.tar.bz2
-          conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py36_0.tar.bz2
-          conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py37_0.tar.bz2
+           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py35_0.tar.bz2
+           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py36_0.tar.bz2
+           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py37_0.tar.bz2
 
-   4. Upload them::
+    4. Upload them::
 
-          anaconda upload osx-64/*
-          anaconda upload win-*/*
-          anaconda upload linux-32/*
+           anaconda upload osx-64/*
+           anaconda upload win-*/*
+           anaconda upload linux-32/*
 
-   5. Logout::
+    5. Logout::
 
-          anaconda logout
+           anaconda logout
 
 10. Post-commit changes
 
     - ``setup.py``: Bump number, add '.dev0' to version number
     - ``empymod/__init__.py``: Bump number, add '.dev0' to version number
-    - ``README.md``: Add the current batches (|docs| |tests| |coverage|)
+    - ``README.md``: Add the current badges (|docs| |tests| |coverage|)
