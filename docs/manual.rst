@@ -256,10 +256,10 @@ test-suite included. To run the test-suite you must download ``empymod`` from
 GitHub.
 
 There is also a benchmark suite using *airspeed velocity*, located in the
-`empymod/asv <https://github.com/empymod/asv>`_-repository. The results of my
-machine can be found in the `empymod/bench
-<https://github.com/empymod/bench>`_, its rendered version at
-`empymod.github.io/asv <https://empymod.github.io/asv>`_.
+`empymod/empymod-asv <https://github.com/empymod/empymod-asv>`_-repository. The
+results of my machine can be found in the `empymod/empymod-bench
+<https://github.com/empymod/empymod-bench>`_, its rendered version at
+`empymod.github.io/empymod-asv <https://empymod.github.io/empymod-asv>`_.
 
 
 Transforms
