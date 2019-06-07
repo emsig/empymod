@@ -335,7 +335,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     EM : ndarray, (nfreq, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
-            - If rec is magnetic, returns B [T] (not H [A/m]!).
+            - If rec is magnetic, returns H [A/m].
 
         However, source and receiver are normalised (unless strength != 0). So
         for instance in the electric case the source strength is 1 A and its
@@ -853,7 +853,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     EM : ndarray, (nfreq, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
-            - If rec is magnetic, returns B [T] (not H [A/m]!).
+            - If rec is magnetic, returns H [A/m].
 
         However, source and receiver are normalised. So for instance in the
         electric case the source strength is 1 A and its length is 1 m. So the
@@ -1074,7 +1074,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     EM : ndarray, (nfreq, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
-            - If rec is magnetic, returns B [T] (not H [A/m]!).
+            - If rec is magnetic, returns H [A/m].
 
         However, source and receiver are normalised. So for instance in the
         electric case the source strength is 1 A and its length is 1 m. So the
