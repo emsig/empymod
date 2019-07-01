@@ -1034,11 +1034,11 @@ def test_spline_backwards_hankel():
     assert out2 is None
 
 
-def test_versions(capsys):
+def test_report(capsys):
 
     # Reporting is now done by the external package scooby.
     # We just ensure the shown packages do not change (core and optional).
-    out1 = utils.Versions()
+    out1 = utils.Report()
     out2 = scooby.Report(
             core=['numpy', 'scipy', 'empymod'],
             optional=['numexpr', 'IPython', 'matplotlib'],

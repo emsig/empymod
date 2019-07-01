@@ -4,7 +4,7 @@ Changelog
 *latest*
 --------
 
-- Use ``scooby`` for ``Versions`` (printinfo).
+- Use ``scooby`` for ``Versions`` (printinfo), change name to ``Report``.
 
 v1.8.2 - *2019-04-26*
 ---------------------
