@@ -8,6 +8,3 @@ Add-ons
 
 .. automodule:: empymod.scripts.tmtemod
     :members:
-
-.. automodule:: empymod.scripts.printinfo
-    :members:

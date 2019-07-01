@@ -30,6 +30,7 @@ This module consists of four groups of functions:
 
 
 # Mandatory imports
+import scooby
 import warnings
 import numpy as np
 from scipy import special
@@ -59,7 +60,7 @@ __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
            'check_bipole', 'check_ab', 'check_solution', 'get_abs',
            'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
            'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum',
-           'spline_backwards_hankel']
+           'spline_backwards_hankel', 'Versions']
 
 # 0. General settings
 
@@ -1973,3 +1974,60 @@ def spline_backwards_hankel(ht, htarg, opt):
                     htarg['pts_per_dec'] = 80  # Splined QWE; old default value
 
     return htarg, opt
+
+
+# 6. Versions
+class Versions(scooby.Report):
+    r"""Print date, time, and version information.
+
+    Use scooby to print date, time, and package version information in any
+    environment (Jupyter notebook, IPython console, Python console, QT
+    console), either as html-table (notebook) or as plain text (anywhere).
+
+    Always shown are the OS, number of CPU(s), ``numpy``, ``scipy``,
+    ``empymod``, ``sys.version``, and time/date.
+
+    Additionally shown are, if they can be imported, ``numexpr``, ``IPython``,
+    and ``matplotlib``. It also shows MKL information, if available.
+
+    All modules provided in ``add_pckg`` are also shown.
+
+
+    Parameters
+    ----------
+    add_pckg : packages, optional
+        Package or list of packages to add to output information (must be
+        imported beforehand).
+
+    ncol : int, optional
+        Number of package-columns in html table (no effect in text-version);
+        Defaults to 3.
+
+    text_width : int, optional
+        The text width for non-HTML display modes
+
+    sort : bool, optional
+        Sort the packages when the report is shown
+
+
+    Examples
+    --------
+    >>> import pytest
+    >>> import dateutil
+    >>> from emg3d import Versions
+    >>> Versions()                            # Default values
+    >>> Versions(pytest)                      # Provide additional package
+    >>> Versions([pytest, dateutil], ncol=5)  # Set nr of columns
+
+    """
+
+    def __init__(self, add_pckg=None, ncol=3, text_width=80, sort=False):
+        """Initiate a scooby.Report instance."""
+
+        # Mandatory packages.
+        core = ['numpy', 'scipy', 'empymod']
+
+        # Optional packages.
+        optional = ['numexpr', 'IPython', 'matplotlib']
+
+        super().__init__(add_pckg, core, optional, ncol, text_width, sort)

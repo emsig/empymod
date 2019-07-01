@@ -4,14 +4,14 @@ language: python
 matrix:
   include:
     - python: 3.5
-      env: PYTHON=3.5 PCKGS="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" TEST="--mpl" INST="pytest-mpl"
+      env: PYTHON=3.5 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl"
     - python: 3.6
-      env: PYTHON=3.6 PCKGS="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" TEST="--mpl" INST="pytest-mpl"
+      env: PYTHON=3.6 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl"
     - python: 3.6  # => 3.7
-      env: PYTHON=3.7 PCKGS="mkl mkl-service numexpr matplotlib IPython" CHAN="defaults" TEST="--mpl" INST="pytest-mpl"
+      env: PYTHON=3.7 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl"
     - python: 3.6  # => 3.6 with conda-forge
-      env: PYTHON=3.6 PCKGS="numexpr matplotlib IPython" CHAN="conda-forge" TEST="--mpl" INST="pytest-mpl"
-    - python: 3.6  # => 3.6 with without matplotlib, numexpr, IPython
+      env: PYTHON=3.6 PCKGS="numexpr matplotlib" CHAN="conda-forge" TEST="--mpl" INST="pytest-mpl"
+    - python: 3.6  # => 3.6 with without matplotlib, numexpr
       env: PYTHON=3.6 PCKGS="" CHAN="defaults" TEST="" INST=""
 
 install:
@@ -30,7 +30,7 @@ install:
   # Install and activate environment, install packages
   - conda create -q -n test-environment -c $CHAN python=$PYTHON numpy scipy pytest pytest-cov $PCKGS
   - source activate test-environment
-  - pip install coveralls pytest-flake8 $INST
+  - pip install coveralls pytest-flake8 scooby $INST
   - python setup.py install
   - cp tests/matplotlibrc .
 

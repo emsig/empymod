@@ -1,3 +1,4 @@
+import scooby
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose
@@ -1031,3 +1032,17 @@ def test_spline_backwards_hankel():
     out1, out2 = utils.spline_backwards_hankel('QWE', None, None)
     assert out1 == {}
     assert out2 is None
+
+
+def test_versions(capsys):
+
+    # Reporting is now done by the external package scooby.
+    # We just ensure the shown packages do not change (core and optional).
+    out1 = utils.Versions()
+    out2 = scooby.Report(
+            core=['numpy', 'scipy', 'empymod'],
+            optional=['numexpr', 'IPython', 'matplotlib'],
+            ncol=3)
+
+    # Ensure they're the same; exclude time to avoid errors.
+    assert out1.__repr__()[115:] == out2.__repr__()[115:]

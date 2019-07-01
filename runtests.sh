@@ -94,7 +94,7 @@ for i in ${PYTHON3VERSION[@]}; do
 
   # Install flake8
   if [ ! -d "$HOME/anaconda3/envs"+$NAME ]; then
-    pip install $INST &> $PRINT
+    pip install scooby $INST &> $PRINT
   fi
 
   # Run tests

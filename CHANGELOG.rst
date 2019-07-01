@@ -1,6 +1,11 @@
 Changelog
 #########
 
+*latest*
+--------
+
+- Use ``scooby`` for ``Versions`` (printinfo).
+
 v1.8.2 - *2019-04-26*
 ---------------------
 
