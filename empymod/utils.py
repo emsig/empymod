@@ -2030,4 +2030,5 @@ class Report(scooby.Report):
         # Optional packages.
         optional = ['numexpr', 'IPython', 'matplotlib']
 
-        super().__init__(add_pckg, core, optional, ncol, text_width, sort)
+        super().__init__(additional=add_pckg, core=core, optional=optional,
+                         ncol=ncol, text_width=text_width, sort=sort)
