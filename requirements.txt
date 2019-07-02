@@ -6,3 +6,5 @@ numpydoc >= 0.9
 # scipy 0.19.0 has a memory leak in quad
 # github.com/scipy/scipy/pull/7216
 scipy != 0.19.0
+
+scooby >= 0.3.0

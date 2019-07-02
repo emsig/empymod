@@ -25,6 +25,7 @@ setup(
     ],
     install_requires=[
         'numpy',
-        'scipy!=0.19.0'
+        'scipy!=0.19.0',
+        'scooby>=0.3.0'
     ],
 )
