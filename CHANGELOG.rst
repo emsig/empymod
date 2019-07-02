@@ -1,6 +1,13 @@
 Changelog
 #########
 
+*latest*
+--------
+
+- Use ``scooby`` for ``Versions`` (printinfo), change name to ``Report``.
+- DOC: Correct return statement if ``mrec=True``.
+- Typos and correct links for new asv/bench.
+
 v1.8.2 - *2019-04-26*
 ---------------------
 

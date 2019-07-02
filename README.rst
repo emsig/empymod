@@ -102,8 +102,6 @@ Features
     layer.
   - ``fdesign``: Design digital linear filters for the Hankel and Fourier
     transforms.
-  - ``printinfo``: Can be used to show date, time, and package version
-    information at the end of a notebook or a script.
 
 
 Installation
