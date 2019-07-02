@@ -60,7 +60,7 @@ __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
            'check_bipole', 'check_ab', 'check_solution', 'get_abs',
            'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
            'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum',
-           'spline_backwards_hankel', 'Report']
+           'spline_backwards_hankel', 'Report', 'Versions', 'versions']
 
 # 0. General settings
 
@@ -2032,3 +2032,21 @@ class Report(scooby.Report):
 
         super().__init__(additional=add_pckg, core=core, optional=optional,
                          ncol=ncol, text_width=text_width, sort=sort)
+
+
+class Versions(Report):
+    r"""New name is `Report`, here for backwards compatibility."""
+    mesg = ("\n    Class `Versions` is deprecated and will " +
+            "be removed; use class `Report` instead.")
+    warnings.warn(mesg, DeprecationWarning)
+
+    def __init__(self, add_pckg=None, ncol=3):
+        super().__init__(add_pckg, ncol)
+
+
+def versions(mode=None, add_pckg=None, ncol=4):
+    r"""Old func-way of class `Report`, here for backwards compatibility."""
+    mesg = ("\n    Func `versions` is deprecated and will " +
+            "be removed; use class `Report` instead.")
+    warnings.warn(mesg, DeprecationWarning)
+    return Report(add_pckg, ncol)

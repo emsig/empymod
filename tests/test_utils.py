@@ -1046,3 +1046,12 @@ def test_report(capsys):
 
     # Ensure they're the same; exclude time to avoid errors.
     assert out1.__repr__()[115:] == out2.__repr__()[115:]
+
+
+def test_versions_backwards():
+    out1 = utils.Report()
+    out2 = utils.Versions()
+    out3 = utils.versions()
+
+    assert out1.__repr__() == out2.__repr__()
+    assert out1.__repr__() == out3.__repr__()
