@@ -30,13 +30,20 @@ This module consists of four groups of functions:
 
 
 # Mandatory imports
-import scooby
 import warnings
 import numpy as np
 from scipy import special
 from datetime import timedelta
 from timeit import default_timer
 
+# scooby is a soft dependency for empymod
+try:
+    from scooby import Report as ScoobyReport
+except ImportError:
+    class ScoobyReport:
+        def __init__(self, additional, core, optional, ncol, text_width, sort):
+            print("\n* WARNING :: `empymod.Report` requires `scooby`."
+                  "\n             Install it via `pip install scooby`.\n")
 
 # Optional imports
 try:
@@ -1977,10 +1984,10 @@ def spline_backwards_hankel(ht, htarg, opt):
 
 
 # 6. Report
-class Report(scooby.Report):
+class Report(ScoobyReport):
     r"""Print date, time, and version information.
 
-    Use scooby to print date, time, and package version information in any
+    Use ``scooby`` to print date, time, and package version information in any
     environment (Jupyter notebook, IPython console, Python console, QT
     console), either as html-table (notebook) or as plain text (anywhere).
 
@@ -2008,6 +2015,13 @@ class Report(scooby.Report):
 
     sort : bool, optional
         Sort the packages when the report is shown
+
+
+    NOTE
+    ----
+
+    The package ``scooby`` has to be installed in order to use ``Report``:
+    ``pip install scooby``.
 
 
     Examples
