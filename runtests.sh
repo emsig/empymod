@@ -26,7 +26,7 @@ PCKGS="numpy scipy pytest pytest-cov"
 NMXPR="numexpr matplotlib IPython"
 STR2="**  WITH numexpr/matplotlib/IPython  "
 PROPS="--mpl --flake8"
-INST="pytest-flake8 pytest-mpl"
+INST="pytest-flake8 pytest-mpl scooby"
 SD="_soft-dep"
 WARN=""
 
@@ -94,7 +94,7 @@ for i in ${PYTHON3VERSION[@]}; do
 
   # Install flake8
   if [ ! -d "$HOME/anaconda3/envs"+$NAME ]; then
-    pip install scooby $INST &> $PRINT
+    pip install $INST &> $PRINT
   fi
 
   # Run tests

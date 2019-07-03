@@ -1,4 +1,3 @@
-import scooby
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose
@@ -9,6 +8,12 @@ try:
 except ImportError:
     use_vml = False
     use_ne_eval = False
+
+# Optional import
+try:
+    import scooby
+except ImportError:
+    scooby = False
 
 from empymod import utils, filters
 
@@ -1035,23 +1040,31 @@ def test_spline_backwards_hankel():
 
 
 def test_report(capsys):
+    out, _ = capsys.readouterr()  # Empty capsys
 
     # Reporting is now done by the external package scooby.
     # We just ensure the shown packages do not change (core and optional).
-    out1 = utils.Report()
-    out2 = scooby.Report(
-            core=['numpy', 'scipy', 'empymod'],
-            optional=['numexpr', 'IPython', 'matplotlib'],
-            ncol=3)
+    if scooby:
+        out1 = utils.Report()
+        out2 = scooby.Report(
+                core=['numpy', 'scipy', 'empymod'],
+                optional=['numexpr', 'IPython', 'matplotlib'],
+                ncol=3)
 
-    # Ensure they're the same; exclude time to avoid errors.
-    assert out1.__repr__()[115:] == out2.__repr__()[115:]
+        # Ensure they're the same; exclude time to avoid errors.
+        assert out1.__repr__()[115:] == out2.__repr__()[115:]
+
+    else:  # soft dependency
+        _ = utils.Report()
+        out, _ = capsys.readouterr()  # Empty capsys
+        assert 'WARNING :: `empymod.Report` requires `scooby`' in out
 
 
 def test_versions_backwards():
-    out1 = utils.Report()
-    out2 = utils.Versions()
-    out3 = utils.versions()
+    if scooby:
+        out1 = utils.Report()
+        out2 = utils.Versions()
+        out3 = utils.versions()
 
-    assert out1.__repr__() == out2.__repr__()
-    assert out1.__repr__() == out3.__repr__()
+        assert out1.__repr__() == out2.__repr__()
+        assert out1.__repr__() == out3.__repr__()
