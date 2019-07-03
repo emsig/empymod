@@ -1059,6 +1059,7 @@ def test_report(capsys):
         out, _ = capsys.readouterr()  # Empty capsys
         assert 'WARNING :: `empymod.Report` requires `scooby`' in out
 
+
 def test_versions_backwards():
     if scooby:
         out1 = utils.Report()
