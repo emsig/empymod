@@ -48,14 +48,6 @@ of ``NumPy`` and ``SciPy``; I recommend using `Anaconda
 start the *Anaconda Navigator*, add the channel ``prisae`` and ``empymod`` will
 appear in the package list and can be installed with a click.
 
-.. warning::
-
-    Do not use ``scipy == 0.19.0``. It has a memory leak in ``quad``, see
-    `github.com/scipy/scipy/pull/7216
-    <https://github.com/scipy/scipy/pull/7216>`_. So if you use QUAD (or
-    potentially QWE) in any of your transforms you might see your memory usage
-    going through the roof.
-
 
 The structure of empymod is:
 

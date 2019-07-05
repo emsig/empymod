@@ -1,12 +1,16 @@
 Changelog
 #########
 
-*latest*
---------
+
+v1.8.3 - *2019-07-05*
+---------------------
 
 - Use ``scooby`` for ``Versions`` (printinfo), change name to ``Report``.
 - DOC: Correct return statement if ``mrec=True``.
 - Typos and correct links for new asv/bench.
+- Bump requirement to SciPy>=1.0.0, remove warning regarding memory leak in
+  SciPy 0.19.0.
+
 
 v1.8.2 - *2019-04-26*
 ---------------------
@@ -30,6 +34,7 @@ v1.8.2 - *2019-04-26*
   references to its own file. Change reference style.
 - Move credits for initial funding from the license-section of the manual to
   CREDITS.rst, where it belongs.
+
 
 v1.8.1 - *2018-11-20*
 ---------------------

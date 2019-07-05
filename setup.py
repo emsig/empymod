@@ -7,13 +7,13 @@ description = 'Open-source full 3D electromagnetic modeller for 1D VTI media'
 
 setup(
     name='empymod',
-    version='1.8.3.dev0',
+    version='1.8.3',
     description=description,
     long_description=readme,
     author='Dieter Werthmüller',
     author_email='dieter@werthmuller.org',
     url='https://empymod.github.io',
-    download_url='https://github.com/empymod/empymod/tarball/v1.8.2',
+    download_url='https://github.com/empymod/empymod/tarball/v1.8.3',
     license='Apache License V2.0',
     packages=['empymod', 'empymod.scripts'],
     classifiers=[
@@ -25,6 +25,6 @@ setup(
     ],
     install_requires=[
         'numpy',
-        'scipy!=0.19.0',
+        'scipy>=1.0.0',
     ],
 )
