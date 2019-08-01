@@ -717,7 +717,7 @@ def fftlog(fEM, time, freq, ftarg):
     a = fftpack.rfft(a)
 
     # 4.b
-    m = np.arange(1, n/2, dtype=int)  # index variable
+    m = np.arange(1, n//2, dtype=int)  # index variable
     if q == 0:  # unbiased (q = 0) transform
         # multiply by (kr)^[- i 2 m pi/(n dlnr)] U_mu[i 2 m pi/(n dlnr)]
         ar = a[2*m-1]
