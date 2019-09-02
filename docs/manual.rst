@@ -366,19 +366,19 @@ see, e.g., [Ande75]_ or [Key12]_. Quadrature-with-extrapolation, FFTLog, and
 obviously the sine/cosine-transform all make use of this split.
 
 To obtain the step-on response the frequency-domain result is first divided
-by :math:`i\omega`, in the case of the step-off response it is additionally
-multiplied by -1. The impulse-response is the time-derivative of the
-step-response,
+by :math:`\mathrm{i}\omega`, in the case of the step-off response it is
+additionally multiplied by -1. The impulse-response is the time-derivative of
+the step-response,
 
 .. math::
 
     E(r, t)^\text{Impulse} =
                         \frac{\partial\ E(r, t)^\text{step}}{\partial t}\ .
 
-Using :math:`\frac{\partial}{\partial t} \Leftrightarrow i\omega` and going
-the other way, from impulse to step, leads to the divison by :math:`i\omega`.
-(This only holds because we define in accordance with the causality principle
-that :math:`E(r, t \le 0) = 0`).
+Using :math:`\frac{\partial}{\partial t} \Leftrightarrow \mathrm{i}\omega` and
+going the other way, from impulse to step, leads to the divison by
+:math:`\mathrm{i}\omega`. (This only holds because we define in accordance with
+the causality principle that :math:`E(r, t \le 0) = 0`).
 
 With the sine/cosine transform (``ft='ffht'/'sin'/'cos'``) you can choose which
 one you want for the impulse responses. For the switch-on response, however,
@@ -395,7 +395,8 @@ For completeness sake, the step-on response is given by
 .. math::
 
     E(r, t)^\text{Step-on} = - \frac{2}{\pi}\int^\infty_0
-                            \Im\left[\frac{E(r,\omega)}{i \omega}\right]\
+                            \Im\left[\frac{E(r,\omega)}{\mathrm{i}
+                            \omega}\right]\
                             \sin(\omega t)\ \text{d}\omega \ ,
 
 and the step-off by
@@ -403,8 +404,23 @@ and the step-off by
 .. math::
 
     E(r, t)^\text{Step-off} = - \frac{2}{\pi}\int^\infty_0
-                             \Re\left[\frac{E(r,\omega)}{i\omega}\right]\
+                             \Re\left[\frac{E(r,\omega)}{\mathrm{i}
+                             \omega}\right]\
                              \cos(\omega t)\ \text{d}\omega \ .
+
+
+Laplace domain
+''''''''''''''
+
+It is also possible to calculate the response in the **Laplace domain**, by
+using a real value for :math:`s` instead of the complex value
+:math:`\mathrm{i}\omega``. This simplifies the problem from complex numbers to
+real numbers. However, the transform from Laplace-to-time domain is not as
+robust as the transform from frequency-to-time domain, and is currently not
+implemented in ``empymod``. To calculate Laplace-domain responses instead
+of frequency-domain responses simply provide negative frequency values. If all
+provided frequencies :math:`f` are negative then :math:`s` is set to :math:`-f`
+instead of the frequency-domain :math:`s=2\mathrm{i}\pi f`.
 
 
 Note on speed, memory, and accuracy

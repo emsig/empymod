@@ -885,7 +885,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     def spline(values, points, int_pts):
         r"""Return `values` at `points` interpolated in log at `int_pts`."""
         out = iuSpline(np.log(points), values.real)(np.log(int_pts))
-        if hankel:
+        if values.dtype == complex:
             out = out+1j*iuSpline(np.log(points), values.imag)(np.log(int_pts))
         return out
 
@@ -922,7 +922,8 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
         # If Kernel is all zeroes we just put zeroes instead of carrying out
         # the DLF
-        alt_pre = np.zeros(signal[inp_index].shape[:-1], dtype=complex)
+        alt_pre = np.zeros(signal[inp_index].shape[:-1],
+                           dtype=signal[inp_index].dtype)
 
         if pts_per_dec != 0 and not one_angle:
             # Varying angle with either lagged or splined DLF.

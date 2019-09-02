@@ -204,7 +204,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 else:
                     Wu = np.exp(-lrecGam*ddepth)
             else:
-                Wu = np.zeros(lrecGam.shape, dtype=complex)
+                Wu = np.zeros_like(lrecGam)
             if lrec != 0:     # No downgoing field propagator if rec in first
                 ddepth = zrec - depth[lrec]
                 if use_ne_eval:
@@ -212,7 +212,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 else:
                     Wd = np.exp(-lrecGam*ddepth)
             else:
-                Wd = np.zeros(lrecGam.shape, dtype=complex)
+                Wd = np.zeros_like(lrecGam)
 
             # Field at rec level (coming from below (Pu) and above (Pd) rec)
             Pu, Pd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM,
@@ -223,7 +223,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
             # Green's function depending on <ab>
             if depth.size == 1:  # If only one layer, no reflections/fields
-                green = np.zeros(lrecGam.shape, dtype=complex)
+                green = np.zeros_like(lrecGam)
             elif ab in [13, 23, 31, 32, 14, 24, 15, 25]:
                 green = Pu*Wu - Pd*Wd
             else:
@@ -350,7 +350,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
 
         # Pre-allocate Ref
         Ref = np.zeros((Gam.shape[0], Gam.shape[1], abs(lsrc-lrec)+1,
-                        Gam.shape[3]), dtype=complex)
+                        Gam.shape[3]), dtype=Gam.dtype)
 
         # Calculate the reflection
         for iz in layer_count:
@@ -461,11 +461,11 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
 
         # No upgoing field if rec is in last layer or below src
         if up and (lrec == depth.size-1 or lrec > lsrc):
-            Pu = np.zeros(iGam.shape, dtype=complex)
+            Pu = np.zeros_like(iGam)
             continue
         # No downgoing field if rec is in first layer or above src
         if not up and (lrec == 0 or lrec < lsrc):
-            Pd = np.zeros(iGam.shape, dtype=complex)
+            Pd = np.zeros_like(iGam)
             continue
 
         # Swaps if up=True
@@ -816,10 +816,10 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     res = np.real(1/etaH[0, 0])
     aniso = 1/np.sqrt(np.real(etaV[0, 0])*res)
 
-    # Define freq/time and dtype depending on signal.
+    # Define sval/time and dtype depending on signal.
     if signal is None:
-        freq = freqtime
-        dtype = complex
+        sval = 2j*np.pi*freqtime
+        dtype = etaH.dtype
     else:
         time = freqtime
         if signal == -1:  # Calculate DC
@@ -843,9 +843,6 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     tm = mu_0*rm**2/(res*4)
     tsp = mu_0*rsp**2/(res*aniso**2*4)  # Scaled diffusion time
     tsm = mu_0*rsm**2/(res*aniso**2*4)
-    #
-    if signal is None:
-        s = 2j*np.pi*freq  # Laplace parameter
 
     # delta-fct delta_\alpha\beta
     if ab in [11, 22, 33]:
@@ -872,20 +869,20 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     # Exponential diffusion functions for m=0,1,2
 
     if signal is None:  # Frequency-domain
-        f0p = np.exp(-2*np.sqrt(s*tp))
-        f0m = np.exp(-2*np.sqrt(s*tm))
-        fs0p = np.exp(-2*np.sqrt(s*tsp))
-        fs0m = np.exp(-2*np.sqrt(s*tsm))
+        f0p = np.exp(-2*np.sqrt(sval*tp))
+        f0m = np.exp(-2*np.sqrt(sval*tm))
+        fs0p = np.exp(-2*np.sqrt(sval*tsp))
+        fs0m = np.exp(-2*np.sqrt(sval*tsm))
 
-        f1p = np.sqrt(s)*f0p
-        f1m = np.sqrt(s)*f0m
-        fs1p = np.sqrt(s)*fs0p
-        fs1m = np.sqrt(s)*fs0m
+        f1p = np.sqrt(sval)*f0p
+        f1m = np.sqrt(sval)*f0m
+        fs1p = np.sqrt(sval)*fs0p
+        fs1m = np.sqrt(sval)*fs0m
 
-        f2p = s*f0p
-        f2m = s*f0m
-        fs2p = s*fs0p
-        fs2m = s*fs0m
+        f2p = sval*f0p
+        f2m = sval*f0m
+        fs2p = sval*fs0p
+        fs2m = sval*fs0m
 
     elif abs(signal) == 1:  # Time-domain step response
         # Replace F(m) with F(m-2)
@@ -987,13 +984,17 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
         def BK(xip, nr):
             r"""Return BK_nr."""
-            return np.exp(-1j*np.imag(xip))*special.kve(nr, xip)
+            if np.isrealobj(xip):
+                # To keep it real in Laplace-domain [exp(-1j*0) = 1-0j].
+                return special.kve(nr, xip)
+            else:
+                return np.exp(-1j*np.imag(xip))*special.kve(nr, xip)
 
         # Airwave calculation
-        def airwave(s, hp, rp, res, fab, delta):
+        def airwave(sval, hp, rp, res, fab, delta):
             r"""Return airwave."""
             # Parameters
-            zeta = s*mu_0
+            zeta = sval*mu_0
             gamH = np.sqrt(zeta/res)
             xip = gamH*(rp + hp)/2
             xim = gamH*(rp - hp)/2
@@ -1006,19 +1007,19 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
             BK1 = BK(xip, 1)
 
             # Calculation
-            P1 = (s*mu_0)**(3/2)*fab*hp/(4*np.sqrt(res))
-            P2 = 4*BI1*BK0 - (3*BI0 - 4*np.sqrt(res)*BI1/(np.sqrt(s*mu_0) *
+            P1 = (sval*mu_0)**(3/2)*fab*hp/(4*np.sqrt(res))
+            P2 = 4*BI1*BK0 - (3*BI0 - 4*np.sqrt(res)*BI1/(np.sqrt(sval*mu_0) *
                               (rp + hp)) + BI2)*BK1
             P3 = 3*fab/rp**2 - delta
-            P4 = (s*mu_0*hp*rp*(BI0*BK0 - BI1*BK1) +
-                  np.sqrt(res*s*mu_0)*BI0*BK1 *
-                  (rp + hp) + np.sqrt(res*s*mu_0)*BI1*BK0*(rp - hp))
+            P4 = (sval*mu_0*hp*rp*(BI0*BK0 - BI1*BK1) +
+                  np.sqrt(res*sval*mu_0)*BI0*BK1 *
+                  (rp + hp) + np.sqrt(res*sval*mu_0)*BI1*BK0*(rp - hp))
 
             return (P1*P2 - P3*P4)/(4*np.pi*rp**3)
 
         # Airwave depending on signal
         if signal is None:  # Frequency-domain
-            air = airwave(s, hp, rp, res, fab, delta)
+            air = airwave(sval, hp, rp, res, fab, delta)
 
         elif abs(signal) == 1:  # Time-domain step response
             # Solution for step-response air-wave is not analytical, but uses
@@ -1036,8 +1037,8 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
                 return Dk.sum()*(-1)**(k+K/2)
 
             for k in range(1, K+1):
-                s = k*np.log(2)/time
-                cair = airwave(s, hp, rp, res, fab, delta)
+                sval = k*np.log(2)/time
+                cair = airwave(sval, hp, rp, res, fab, delta)
                 air += coeff_dk(k, K)*cair.real/k
 
         else:  # Time-domain impulse response

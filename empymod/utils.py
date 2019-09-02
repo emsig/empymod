@@ -425,21 +425,39 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     # Check frequency
     freq = _check_var(freq, float, 1, 'freq')
 
+    # As soon as at least one freq >0, we assume frequencies. Only if ALL are
+    # below 0 we assume Laplace and take the negative of it.
+    if np.any(freq > 0):
+        laplace = False
+        text_min = "Frequencies"
+        text_verb = "   frequency"
+    else:
+        laplace = True
+        freq = -freq
+        text_min = "Laplace val"
+        text_verb = "   s-value  "
+
     # Minimum frequency to avoid division by zero at freq = 0 Hz.
     # => min_freq can be set with utils.set_min
-    freq = _check_min(freq, _min_freq, 'Frequencies', 'Hz', verb)
+    freq = _check_min(freq, _min_freq, text_min, "Hz", verb)
     if verb > 2:
-        _prnt_min_max_val(freq, "   frequency  [Hz] : ", verb)
+        _prnt_min_max_val(freq, text_verb+"  [Hz] : ", verb)
+
+    # Define Laplace parameter sval.
+    if laplace:
+        sval = freq
+    else:
+        sval = 2j*np.pi*freq
 
     # Calculate eta and zeta (horizontal and vertical)
     c = 299792458              # Speed of light m/s
     mu_0 = 4e-7*np.pi          # Magn. permeability of free space [H/m]
     epsilon_0 = 1./(mu_0*c*c)  # Elec. permittivity of free space [F/m]
 
-    etaH = 1/res + np.outer(2j*np.pi*freq, epermH*epsilon_0)
-    etaV = 1/(res*aniso*aniso) + np.outer(2j*np.pi*freq, epermV*epsilon_0)
-    zetaH = np.outer(2j*np.pi*freq, mpermH*mu_0)
-    zetaV = np.outer(2j*np.pi*freq, mpermV*mu_0)
+    etaH = 1/res + np.outer(sval, epermH*epsilon_0)
+    etaV = 1/(res*aniso*aniso) + np.outer(sval, epermV*epsilon_0)
+    zetaH = np.outer(sval, mpermH*mu_0)
+    zetaV = np.outer(sval, mpermV*mu_0)
 
     return freq, etaH, etaV, zetaH, zetaV
 
@@ -1008,9 +1026,8 @@ def check_time(time, signal, ft, ftarg, verb):
                 print(pstr + "Standard")
 
         # Get required frequencies
-        # (multiply time by 2Pi, as calculation is done in angular frequencies)
-        freq, _ = transform.get_spline_values(ftarg[0], 2*np.pi*time, ftarg[1])
-        freq = np.squeeze(freq)
+        omega, _ = transform.get_spline_values(ftarg[0], time, ftarg[1])
+        freq = np.squeeze(omega/2/np.pi)
 
         # Rename ft
         ft = 'ffht'

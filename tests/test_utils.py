@@ -220,6 +220,17 @@ def test_check_frequency(capsys):
     assert_allclose(zetaH, rzetaH)
     assert_allclose(zetaV, rzetaV)
 
+    output = utils.check_frequency(-np.array([1e-40, 1, 1e6]),
+                                   np.array([20, .02]),
+                                   np.array([1, 3]), np.array([10, 5]),
+                                   np.array([20, 50]), np.array([1, 1]),
+                                   np.array([10, 5]), 3)
+    out, _ = capsys.readouterr()
+    assert "   s-value    [Hz] :  " in out
+    assert "* WARNING :: Laplace val < " in out
+    freq, etaH, etaV, zetaH, zetaV = output
+    assert_allclose(freq, rfreq)
+
 
 def test_check_hankel(capsys):
     # # FHT # #
@@ -1045,11 +1056,11 @@ def test_report(capsys):
     # Reporting is now done by the external package scooby.
     # We just ensure the shown packages do not change (core and optional).
     if scooby:
-        out1 = utils.Report()
-        out2 = scooby.Report(
+        out1 = scooby.Report(
                 core=['numpy', 'scipy', 'empymod'],
                 optional=['numexpr', 'IPython', 'matplotlib'],
                 ncol=3)
+        out2 = utils.Report()
 
         # Ensure they're the same; exclude time to avoid errors.
         assert out1.__repr__()[115:] == out2.__repr__()[115:]

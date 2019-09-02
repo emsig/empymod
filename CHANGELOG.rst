@@ -2,6 +2,13 @@ Changelog
 #########
 
 
+*latest*
+--------
+- Laplace-domain calculation: By providing a negative ``freq``-value, the
+  calculation is carried out in the real Laplace domain ``s = freq`` instead of
+  the complex frequency domain ``s = 2i*pi*freq``.
+
+
 v1.8.3 - *2019-07-05*
 ---------------------
 

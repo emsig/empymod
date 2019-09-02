@@ -457,7 +457,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # === 3. EM-FIELD CALCULATION ============
 
     # Pre-allocate output EM array
-    EM = np.zeros((freq.size, nrec*nsrc), dtype=complex)
+    EM = np.zeros((freq.size, nrec*nsrc), dtype=etaH.dtype)
 
     # Initialize kernel count, conv (only for QWE)
     # (how many times the wavenumber-domain kernel was calld)
@@ -490,7 +490,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             ab_calc = get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb)
 
             # Pre-allocate temporary source-EM array for integration loop
-            sEM = np.zeros((freq.size, isrz), dtype=complex)
+            sEM = np.zeros((freq.size, isrz), dtype=etaH.dtype)
 
             for isg in range(srcpts):  # Loop over src integration points
 
@@ -502,7 +502,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 lsrc, zsrc = get_layer_nr(tisrc, depth)
 
                 # Pre-allocate temporary receiver EM arrays for integr. loop
-                rEM = np.zeros((freq.size, isrz), dtype=complex)
+                rEM = np.zeros((freq.size, isrz), dtype=etaH.dtype)
 
                 for irg in range(recpts):  # Loop over rec integration pts
                     # Note, if source or receiver is a bipole, but horizontal
@@ -526,7 +526,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                             loop_off, conv)
 
                     # Pre-allocate temporary EM array for ab-loop
-                    abEM = np.zeros((freq.size, isrz), dtype=complex)
+                    abEM = np.zeros((freq.size, isrz), dtype=etaH.dtype)
 
                     for iab in ab_calc:  # Loop over required ab's
 
@@ -1162,7 +1162,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
             # If <ab> = 36 (or 63), field is zero
             # In `bipole` and in `dipole`, this is taken care of in `fem`. Here
             # we have to take care of it separately
-            EM = np.zeros((freqtime.size*nrec*nsrc), dtype=complex)
+            EM = np.zeros((freqtime.size*nrec*nsrc), dtype=etaH.dtype)
 
     # Squeeze
     if solution[1:] == 'split':
@@ -1422,12 +1422,14 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     # Pre-allocate
     if off.size == 1 and np.ndim(wavenumber) == 2:
         PJ0 = np.zeros((freq.size, wavenumber.shape[0], wavenumber.shape[1]),
-                       dtype=complex)
+                       dtype=etaH.dtype)
         PJ1 = np.zeros((freq.size, wavenumber.shape[0], wavenumber.shape[1]),
-                       dtype=complex)
+                       dtype=etaH.dtype)
     else:
-        PJ0 = np.zeros((freq.size, off.size, wavenumber.size), dtype=complex)
-        PJ1 = np.zeros((freq.size, off.size, wavenumber.size), dtype=complex)
+        PJ0 = np.zeros((freq.size, off.size, wavenumber.size),
+                       dtype=etaH.dtype)
+        PJ1 = np.zeros((freq.size, off.size, wavenumber.size),
+                       dtype=etaH.dtype)
 
     # If <ab> = 36 (or 63), field is zero
     # In `bipole` and in `dipole`, this is taken care of in `fem`. Here we
@@ -1487,7 +1489,7 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
 
     """
     # Preallocate array
-    fEM = np.zeros((freq.size, off.size), dtype=complex)
+    fEM = np.zeros((freq.size, off.size), dtype=etaH.dtype)
 
     # Initialize kernel count
     # (how many times the wavenumber-domain kernel was calld)
