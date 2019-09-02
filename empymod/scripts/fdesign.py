@@ -47,11 +47,12 @@ in the following way:
 
        return fdesign.Ghosh(name, lhs, rhs)
 
-Here, ``name`` must be one of ``j0``, ``j1``, ``sin``, or ``cos``, depending
-what type of transform pair it is. Additional variables are provided with
-``var``. The evaluation points of the ``lhs`` are denoted by ``l``, and the
-evaluation points of the ``rhs`` are denoted as ``r``. As an example here the
-implemented transform pair ``j0_1``
+Here, ``name`` must be one of ``j0``, ``j1``, ``sin``, ``cos``, ``lap``,
+``s2fr``, ``s2fi``, ``sin_i``, or ``cos_i``, depending what type of transform
+pair it is. Additional variables are provided with ``var``. The evaluation
+points of the ``lhs`` are denoted by ``l``, and the evaluation points of the
+``rhs`` are denoted as ``r``. As an example here the implemented transform pair
+``j0_1``
 
 .. code-block:: python
 
@@ -633,7 +634,10 @@ def plot_result(filt, full, prntres=True):
     if spacing.size > 1 or shift.size > 1:
         plt.subplot(122)
     plt.title('Filter values of best filter')
-    for attr in ['j0', 'j1', 'sin', 'cos']:
+    fnames = ['j0', 'j1', 'sin', 'cos',
+              'lap', 's2fr', 's2fi', 'sin_i', 'cos_i']
+
+    for attr in fnames:
         if hasattr(filt, attr):
             plt.plot(np.log10(filt.base),
                      np.log10(np.abs(getattr(filt, attr))), '.-', lw=.5,
@@ -755,12 +759,14 @@ def _plot_transform_pairs(fCI, r, k, axes, tit):
         else:
             plt.loglog(r, np.abs(f.rhs(r)), lw=2, label=f.name)
 
-    # Transform with Key
+    # Transform with Key :: TODO Adjust for additional transforms
     for f in fCI:
-        if f.name[1] in ['0', '1', '2']:
+        if f.name[1] in ['0', '1', '2'] and f.name[0] != 's':
             filt = j0j1filt()
-        else:
+        elif f.name in ['cos', 'sin']:
             filt = sincosfilt()
+        else:  # TODO Adjust for additional transforms
+            break
         kk = filt.base/r[:, None]
         if f.name == 'j2':
             lhs = f.lhs(kk)
@@ -1030,7 +1036,7 @@ def j1_5(f=1, rho=0.3, z=50):
 
 # # 3.c Fourier sine transform pairs
 
-def sin_1(a=1):
+def sin_1(a=1, inverse=False):
     r"""Fourier sine transform pair sin_1 ([Ande75]_)."""
 
     def lhs(x):
@@ -1039,10 +1045,13 @@ def sin_1(a=1):
     def rhs(b):
         return np.sqrt(np.pi)*b*np.exp(-b**2/(4*a**2))/(4*a**3)
 
-    return Ghosh('sin', lhs, rhs)
+    if inverse:
+        return Ghosh('sin_i', rhs, lhs)
+    else:
+        return Ghosh('sin', lhs, rhs)
 
 
-def sin_2(a=1):
+def sin_2(a=1, inverse=False):
     r"""Fourier sine transform pair sin_2 ([Ande75]_)."""
 
     def lhs(x):
@@ -1051,10 +1060,13 @@ def sin_2(a=1):
     def rhs(b):
         return b/(b**2 + a**2)
 
-    return Ghosh('sin', lhs, rhs)
+    if inverse:
+        return Ghosh('sin_i', rhs, lhs)
+    else:
+        return Ghosh('sin', lhs, rhs)
 
 
-def sin_3(a=1):
+def sin_3(a=1, inverse=False):
     r"""Fourier sine transform pair sin_3 ([Ande75]_)."""
 
     def lhs(x):
@@ -1063,12 +1075,15 @@ def sin_3(a=1):
     def rhs(b):
         return np.pi*np.exp(-a*b)/2
 
-    return Ghosh('sin', lhs, rhs)
+    if inverse:
+        return Ghosh('sin_i', rhs, lhs)
+    else:
+        return Ghosh('sin', lhs, rhs)
 
 
 # # 3.d Fourier cosine transform pairs
 
-def cos_1(a=1):
+def cos_1(a=1, inverse=False):
     r"""Fourier cosine transform pair cos_1 ([Ande75]_)."""
 
     def lhs(x):
@@ -1077,10 +1092,13 @@ def cos_1(a=1):
     def rhs(b):
         return np.sqrt(np.pi)*np.exp(-b**2/(4*a**2))/(2*a)
 
-    return Ghosh('cos', lhs, rhs)
+    if inverse:
+        return Ghosh('cos_i', rhs, lhs)
+    else:
+        return Ghosh('cos', lhs, rhs)
 
 
-def cos_2(a=1):
+def cos_2(a=1, inverse=False):
     r"""Fourier cosine transform pair cos_2 ([Ande75]_)."""
 
     def lhs(x):
@@ -1089,10 +1107,13 @@ def cos_2(a=1):
     def rhs(b):
         return a/(b**2 + a**2)
 
-    return Ghosh('cos', lhs, rhs)
+    if inverse:
+        return Ghosh('cos_i', rhs, lhs)
+    else:
+        return Ghosh('cos', lhs, rhs)
 
 
-def cos_3(a=1):
+def cos_3(a=1, inverse=False):
     r"""Fourier cosine transform pair cos_3 ([Ande75]_)."""
 
     def lhs(x):
@@ -1101,7 +1122,10 @@ def cos_3(a=1):
     def rhs(b):
         return np.pi*np.exp(-a*b)/(2*a)
 
-    return Ghosh('cos', lhs, rhs)
+    if inverse:
+        return Ghosh('cos_i', rhs, lhs)
+    else:
+        return Ghosh('cos', lhs, rhs)
 
 
 # # 3.e Modeller

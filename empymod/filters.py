@@ -66,6 +66,16 @@ __all__ = ['DigitalFilter', 'kong_61_2007', 'kong_241_2007', 'key_101_2009',
 
 class DigitalFilter:
     r"""Simple Class for Digital Linear Filters."""
+
+    # Possible filter names; including on top of the normal ones:
+    # - 'lap'   : Laplace to time           : x-s => x-t
+    # - 's2fr'  : Laplace to frequency      : x-s => x-f.real
+    # - 's2fi'  : Laplace to frequency      : x-s => x-f.imag
+    # - 'cos_i' : Inverse time to frequency : x-t => x-f.real
+    # - 'sin_i' : Inverse time to frequency : x-t => x-f.imag
+    fnames = ['j0', 'j1', 'sin', 'cos',
+              'lap', 's2fr', 's2fi', 'sin_i', 'cos_i']
+
     def __init__(self, name, savename=None):
         r"""Add filter name."""
         self.name = name
@@ -107,7 +117,7 @@ class DigitalFilter:
             self.base.tofile(f, sep="\n")
 
         # Save filter coefficients
-        for val in ['j0', 'j1', 'sin', 'cos']:
+        for val in self.fnames:
             if hasattr(self, val):
                 attrfile = os.path.join(path, name + '_' + val + '.txt')
                 with open(attrfile, 'w') as f:
@@ -147,7 +157,7 @@ class DigitalFilter:
             self.base = np.fromfile(f, sep="\n")
 
         # Get filter coefficients
-        for val in ['j0', 'j1', 'sin', 'cos']:
+        for val in self.fnames:
             attrfile = os.path.join(path, name + '_' + val + '.txt')
             if os.path.isfile(attrfile):
                 with open(attrfile, 'r') as f:
