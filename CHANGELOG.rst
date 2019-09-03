@@ -4,9 +4,14 @@ Changelog
 
 *latest*
 --------
+
 - Laplace-domain calculation: By providing a negative ``freq``-value, the
   calculation is carried out in the real Laplace domain ``s = freq`` instead of
   the complex frequency domain ``s = 2i*pi*freq``.
+- ``DigitalFilter`` now takes an argument to have other coefficients than
+  ``j0``, ``j1``, ``sin``, and ``cos``.
+- The provided sine and cosine transform pairs in ``fdesign`` can now be
+  asked to return the inverse pair (time to frequency).
 
 
 v1.8.3 - *2019-07-05*
