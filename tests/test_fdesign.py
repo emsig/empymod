@@ -345,6 +345,29 @@ def test_sincos():
 
         assert_allclose(rhs2a, rhs2c, rtol=1e-3)
 
+    # Check inverse
+    for sc in ['1', '2', '3']:
+        if sc == '1':
+            r = np.logspace(0, 0.7, 100)
+        else:
+            r = np.logspace(0, 1, 100)
+
+        k = filt.base/r[:, None]
+        tps = getattr(fdesign, 'sin_'+sc)()
+        tpc = getattr(fdesign, 'cos_'+sc)()
+        tps_i = getattr(fdesign, 'sin_'+sc)(inverse=True)
+        tpc_i = getattr(fdesign, 'cos_'+sc)(inverse=True)
+
+        rhs1a = tps.rhs(r)
+        rhs1c = tps_i.lhs(r)
+
+        assert_allclose(rhs1a, rhs1c)
+
+        rhs2a = tpc.rhs(r)
+        rhs2c = tpc_i.lhs(r)
+
+        assert_allclose(rhs2a, rhs2c)
+
 
 def test_empy_hankel():
 
