@@ -65,24 +65,41 @@ __all__ = ['DigitalFilter', 'kong_61_2007', 'kong_241_2007', 'key_101_2009',
 # 0. Filter Class and saving/loading routines
 
 class DigitalFilter:
-    r"""Simple Class for Digital Linear Filters."""
+    r"""Simple Class for Digital Linear Filters.
 
-    # Possible filter names; including on top of the normal ones:
-    # - 'lap'   : Laplace to time           : x-s => x-t
-    # - 's2fr'  : Laplace to frequency      : x-s => x-f.real
-    # - 's2fi'  : Laplace to frequency      : x-s => x-f.imag
-    # - 'cos_i' : Inverse time to frequency : x-t => x-f.real
-    # - 'sin_i' : Inverse time to frequency : x-t => x-f.imag
-    fnames = ['j0', 'j1', 'sin', 'cos',
-              'lap', 's2fr', 's2fi', 'sin_i', 'cos_i']
 
-    def __init__(self, name, savename=None):
+    Parameters
+    ----------
+    name : str
+        Name of the DFL.
+
+    savename = str
+        Name with which the filter is saved. If None (default) it is set to the
+        same value as ``name``.
+
+    filter_coeff = list of str
+        By default, the following filter coefficients are checked:
+
+            ``filter_coeff = ['j0', 'j1', 'sin', 'cos']``
+
+        This accounts for the standard Hankel and Fourier DLF in CSEM
+        modelling. However, other coefficient names can be provided via this
+        parameter (in list format).
+
+    """
+
+    def __init__(self, name, savename=None, filter_coeff=None):
         r"""Add filter name."""
         self.name = name
         if savename is None:
             self.savename = name
         else:
             self.savename = savename
+
+        if filter_coeff is None:
+            self.filter_coeff = ['j0', 'j1', 'sin', 'cos']
+        else:
+            self.filter_coeff = filter_coeff
 
     def tofile(self, path='filters'):
         r"""Save filter values to ascii-files.
@@ -117,7 +134,7 @@ class DigitalFilter:
             self.base.tofile(f, sep="\n")
 
         # Save filter coefficients
-        for val in self.fnames:
+        for val in self.filter_coeff:
             if hasattr(self, val):
                 attrfile = os.path.join(path, name + '_' + val + '.txt')
                 with open(attrfile, 'w') as f:
@@ -157,7 +174,7 @@ class DigitalFilter:
             self.base = np.fromfile(f, sep="\n")
 
         # Get filter coefficients
-        for val in self.fnames:
+        for val in self.filter_coeff:
             attrfile = os.path.join(path, name + '_' + val + '.txt')
             if os.path.isfile(attrfile):
                 with open(attrfile, 'r') as f:

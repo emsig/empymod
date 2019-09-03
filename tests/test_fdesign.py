@@ -94,9 +94,11 @@ def test_save_load_filter(tmpdir):
     dat1 = DATA['case1'][()]
     dat1[1].name = 'one'
     dat1[1].savename = 'one'
+    dat1[1].filter_coeff = ['j0', 'j1', 'sin', 'cos']
     dat2 = DATA['case2'][()]
     dat2[1].name = 'two'
     dat2[1].savename = 'two'
+    dat2[1].filter_coeff = ['j0', 'j1', 'sin', 'cos']
     fdesign.save_filter('one', dat1[1], dat1[2], path=tmpdir)
     fdesign.save_filter('one.gz', dat1[1], dat1[2], path=tmpdir)  # Check gz
     fdesign.save_filter('two', dat2[1], path=tmpdir)

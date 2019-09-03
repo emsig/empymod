@@ -47,12 +47,11 @@ in the following way:
 
        return fdesign.Ghosh(name, lhs, rhs)
 
-Here, ``name`` must be one of ``j0``, ``j1``, ``sin``, ``cos``, ``lap``,
-``s2fr``, ``s2fi``, ``sin_i``, or ``cos_i``, depending what type of transform
-pair it is. Additional variables are provided with ``var``. The evaluation
-points of the ``lhs`` are denoted by ``l``, and the evaluation points of the
-``rhs`` are denoted as ``r``. As an example here the implemented transform pair
-``j0_1``
+Here, ``name`` must be one of ``j0``, ``j1``, ``sin``, or ``cos``, depending
+what type of transform pair it is. Additional variables are provided with
+``var``. The evaluation points of the ``lhs`` are denoted by ``l``, and the
+evaluation points of the ``rhs`` are denoted as ``r``. As an example here the
+implemented transform pair ``j0_1``
 
 .. code-block:: python
 
@@ -634,10 +633,7 @@ def plot_result(filt, full, prntres=True):
     if spacing.size > 1 or shift.size > 1:
         plt.subplot(122)
     plt.title('Filter values of best filter')
-    fnames = ['j0', 'j1', 'sin', 'cos',
-              'lap', 's2fr', 's2fi', 'sin_i', 'cos_i']
-
-    for attr in fnames:
+    for attr in ['j0', 'j1', 'sin', 'cos']:
         if hasattr(filt, attr):
             plt.plot(np.log10(filt.base),
                      np.log10(np.abs(getattr(filt, attr))), '.-', lw=.5,
@@ -759,14 +755,12 @@ def _plot_transform_pairs(fCI, r, k, axes, tit):
         else:
             plt.loglog(r, np.abs(f.rhs(r)), lw=2, label=f.name)
 
-    # Transform with Key :: TODO Adjust for additional transforms
+    # Transform with Key
     for f in fCI:
-        if f.name[1] in ['0', '1', '2'] and f.name[0] != 's':
+        if f.name[1] in ['0', '1', '2']:
             filt = j0j1filt()
-        elif f.name in ['cos', 'sin']:
+        else:
             filt = sincosfilt()
-        else:  # TODO Adjust for additional transforms
-            break
         kk = filt.base/r[:, None]
         if f.name == 'j2':
             lhs = f.lhs(kk)
@@ -1046,7 +1040,7 @@ def sin_1(a=1, inverse=False):
         return np.sqrt(np.pi)*b*np.exp(-b**2/(4*a**2))/(4*a**3)
 
     if inverse:
-        return Ghosh('sin_i', rhs, lhs)
+        return Ghosh('sin', rhs, lhs)
     else:
         return Ghosh('sin', lhs, rhs)
 
@@ -1061,7 +1055,7 @@ def sin_2(a=1, inverse=False):
         return b/(b**2 + a**2)
 
     if inverse:
-        return Ghosh('sin_i', rhs, lhs)
+        return Ghosh('sin', rhs, lhs)
     else:
         return Ghosh('sin', lhs, rhs)
 
@@ -1076,7 +1070,7 @@ def sin_3(a=1, inverse=False):
         return np.pi*np.exp(-a*b)/2
 
     if inverse:
-        return Ghosh('sin_i', rhs, lhs)
+        return Ghosh('sin', rhs, lhs)
     else:
         return Ghosh('sin', lhs, rhs)
 
@@ -1093,7 +1087,7 @@ def cos_1(a=1, inverse=False):
         return np.sqrt(np.pi)*np.exp(-b**2/(4*a**2))/(2*a)
 
     if inverse:
-        return Ghosh('cos_i', rhs, lhs)
+        return Ghosh('cos', rhs, lhs)
     else:
         return Ghosh('cos', lhs, rhs)
 
@@ -1108,7 +1102,7 @@ def cos_2(a=1, inverse=False):
         return a/(b**2 + a**2)
 
     if inverse:
-        return Ghosh('cos_i', rhs, lhs)
+        return Ghosh('cos', rhs, lhs)
     else:
         return Ghosh('cos', lhs, rhs)
 
@@ -1123,7 +1117,7 @@ def cos_3(a=1, inverse=False):
         return np.pi*np.exp(-a*b)/(2*a)
 
     if inverse:
-        return Ghosh('cos_i', rhs, lhs)
+        return Ghosh('cos', rhs, lhs)
     else:
         return Ghosh('cos', lhs, rhs)
 
