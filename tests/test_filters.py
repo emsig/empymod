@@ -11,10 +11,13 @@ def test_digitalfilter():                                   # 1.a DigitalFilter
     # Assure a DigitalFilter has attribute 'name'.
     out1 = filters.DigitalFilter('test')
     out2 = filters.DigitalFilter('test', 'savenametest')
+    out3 = filters.DigitalFilter('test', filter_coeff=['abc', ])
     assert out1.name == 'test'
     assert out1.savename == out1.name
     assert out1.name == out2.name
+    assert out1.filter_coeff == ['j0', 'j1', 'sin', 'cos']
     assert out2.savename == 'savenametest'
+    assert out3.filter_coeff == ['abc', ]
 
 
 @pytest.mark.skipif(sys.version_info < (3, 6),

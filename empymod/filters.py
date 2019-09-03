@@ -65,14 +65,41 @@ __all__ = ['DigitalFilter', 'kong_61_2007', 'kong_241_2007', 'key_101_2009',
 # 0. Filter Class and saving/loading routines
 
 class DigitalFilter:
-    r"""Simple Class for Digital Linear Filters."""
-    def __init__(self, name, savename=None):
+    r"""Simple Class for Digital Linear Filters.
+
+
+    Parameters
+    ----------
+    name : str
+        Name of the DFL.
+
+    savename = str
+        Name with which the filter is saved. If None (default) it is set to the
+        same value as ``name``.
+
+    filter_coeff = list of str
+        By default, the following filter coefficients are checked:
+
+            ``filter_coeff = ['j0', 'j1', 'sin', 'cos']``
+
+        This accounts for the standard Hankel and Fourier DLF in CSEM
+        modelling. However, other coefficient names can be provided via this
+        parameter (in list format).
+
+    """
+
+    def __init__(self, name, savename=None, filter_coeff=None):
         r"""Add filter name."""
         self.name = name
         if savename is None:
             self.savename = name
         else:
             self.savename = savename
+
+        if filter_coeff is None:
+            self.filter_coeff = ['j0', 'j1', 'sin', 'cos']
+        else:
+            self.filter_coeff = filter_coeff
 
     def tofile(self, path='filters'):
         r"""Save filter values to ascii-files.
@@ -107,7 +134,7 @@ class DigitalFilter:
             self.base.tofile(f, sep="\n")
 
         # Save filter coefficients
-        for val in ['j0', 'j1', 'sin', 'cos']:
+        for val in self.filter_coeff:
             if hasattr(self, val):
                 attrfile = os.path.join(path, name + '_' + val + '.txt')
                 with open(attrfile, 'w') as f:
@@ -147,7 +174,7 @@ class DigitalFilter:
             self.base = np.fromfile(f, sep="\n")
 
         # Get filter coefficients
-        for val in ['j0', 'j1', 'sin', 'cos']:
+        for val in self.filter_coeff:
             attrfile = os.path.join(path, name + '_' + val + '.txt')
             if os.path.isfile(attrfile):
                 with open(attrfile, 'r') as f:

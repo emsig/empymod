@@ -94,9 +94,11 @@ def test_save_load_filter(tmpdir):
     dat1 = DATA['case1'][()]
     dat1[1].name = 'one'
     dat1[1].savename = 'one'
+    dat1[1].filter_coeff = ['j0', 'j1', 'sin', 'cos']
     dat2 = DATA['case2'][()]
     dat2[1].name = 'two'
     dat2[1].savename = 'two'
+    dat2[1].filter_coeff = ['j0', 'j1', 'sin', 'cos']
     fdesign.save_filter('one', dat1[1], dat1[2], path=tmpdir)
     fdesign.save_filter('one.gz', dat1[1], dat1[2], path=tmpdir)  # Check gz
     fdesign.save_filter('two', dat2[1], path=tmpdir)
@@ -342,6 +344,29 @@ def test_sincos():
         rhs2c = np.dot(tpc.lhs(k), filt.cos)/r
 
         assert_allclose(rhs2a, rhs2c, rtol=1e-3)
+
+    # Check inverse
+    for sc in ['1', '2', '3']:
+        if sc == '1':
+            r = np.logspace(0, 0.7, 100)
+        else:
+            r = np.logspace(0, 1, 100)
+
+        k = filt.base/r[:, None]
+        tps = getattr(fdesign, 'sin_'+sc)()
+        tpc = getattr(fdesign, 'cos_'+sc)()
+        tps_i = getattr(fdesign, 'sin_'+sc)(inverse=True)
+        tpc_i = getattr(fdesign, 'cos_'+sc)(inverse=True)
+
+        rhs1a = tps.rhs(r)
+        rhs1c = tps_i.lhs(r)
+
+        assert_allclose(rhs1a, rhs1c)
+
+        rhs2a = tpc.rhs(r)
+        rhs2c = tpc_i.lhs(r)
+
+        assert_allclose(rhs2a, rhs2c)
 
 
 def test_empy_hankel():
