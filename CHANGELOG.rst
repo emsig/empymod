@@ -12,6 +12,7 @@ Changelog
   ``j0``, ``j1``, ``sin``, and ``cos``.
 - The provided sine and cosine transform pairs in ``fdesign`` can now be
   asked to return the inverse pair (time to frequency).
+- Other tiny improvements and bug fixes.
 
 
 v1.8.3 - *2019-07-05*

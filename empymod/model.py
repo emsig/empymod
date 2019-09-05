@@ -1517,20 +1517,22 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
     else:
         xdir = xdirect
 
-    # Get angle dependent factors
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
-
-    # Compute required lambdas for given hankel-filter-base
-    # This should be in utils, but this is a backwards-incompatible change.
-    # Move this to utils for version 2.0.
-    if ht == 'fht':
-        # htarg[0] = filter; htarg[1] = pts_per_dec
-        lambd, int_pts = transform.get_spline_values(htarg[0], off, htarg[1])
-        if not loop_off:
-            htarg = (htarg[0], htarg[1], lambd, int_pts)
-
     # If not full-space with xdirect calculate fEM-field
     if not isfullspace*xdir:
+
+        # Get angle dependent factors
+        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+
+        # Compute required lambdas for given hankel-filter-base
+        # This should be in utils, but this is a backwards-incompatible change.
+        # Move this to utils for version 2.0.
+        if ht == 'fht':
+            # htarg[0] = filter; htarg[1] = pts_per_dec
+            lambd, int_pts = transform.get_spline_values(
+                    htarg[0], off, htarg[1])
+            if not loop_off:
+                htarg = (htarg[0], htarg[1], lambd, int_pts)
+
         calc = getattr(transform, ht)
         if loop_freq:
 
