@@ -755,12 +755,14 @@ def _plot_transform_pairs(fCI, r, k, axes, tit):
         else:
             plt.loglog(r, np.abs(f.rhs(r)), lw=2, label=f.name)
 
-    # Transform with Key
+    # Transform with Key in the case of Hankel or Fourier transform.
     for f in fCI:
-        if f.name[1] in ['0', '1', '2']:
+        if f.name[1] in ['0', '1', '2'] and f.name[0] == 'j':
             filt = j0j1filt()
-        else:
+        elif f.name in ['sin', 'cos']:
             filt = sincosfilt()
+        else:
+            break
         kk = filt.base/r[:, None]
         if f.name == 'j2':
             lhs = f.lhs(kk)
