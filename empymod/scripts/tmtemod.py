@@ -410,7 +410,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
     # Check frequency => get etaH, etaV, zetaH, and zetaV
     frequency = check_frequency(freqtime, res, aniso, epermH, epermV, mpermH,
                                 mpermV, verb)
-    freq, etaH, etaV, zetaH, zetaV = frequency
+    freq, etaH, etaV, zetaH, zetaV, _ = frequency
 
     # Check src and rec
     src, nsrc = check_dipole(src, 'src', verb)

@@ -435,7 +435,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # Check frequency => get etaH, etaV, zetaH, and zetaV
     frequency = check_frequency(freq, res, aniso, epermH, epermV, mpermH,
                                 mpermV, verb)
-    freq, etaH, etaV, zetaH, zetaV = frequency
+    freq, etaH, etaV, zetaH, zetaV, _ = frequency
 
     # Update etaH/etaV and zetaH/zetaV according to user-provided model
     if isinstance(res, dict) and 'func_eta' in res:
@@ -904,7 +904,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     # Check frequency => get etaH, etaV, zetaH, and zetaV
     frequency = check_frequency(freq, res, aniso, epermH, epermV, mpermH,
                                 mpermV, verb)
-    freq, etaH, etaV, zetaH, zetaV = frequency
+    freq, etaH, etaV, zetaH, zetaV, _ = frequency
 
     # Update etaH/etaV and zetaH/zetaV according to user-provided model
     if isinstance(res, dict) and 'func_eta' in res:
@@ -1123,7 +1123,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     # Check frequency => get etaH, etaV, zetaH, and zetaV
     frequency = check_frequency(freqtime, res, aniso, epermH, epermV, mpermH,
                                 mpermV, verb)
-    freqtime, etaH, etaV, zetaH, zetaV = frequency
+    time, etaH, etaV, zetaH, zetaV, sval = frequency
 
     # Update etaH/etaV and zetaH/zetaV according to user-provided model
     if isinstance(res, dict) and 'func_eta' in res:
@@ -1152,6 +1152,10 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     # === 3. EM-FIELD CALCULATION ============
 
     if solution[0] == 'd':
+        if signal is not None:
+            freqtime = time
+        else:
+            freqtime = sval
         EM = kernel.halfspace(off, angle, zsrc, zrec, etaH, etaV,
                               freqtime[:, None], ab_calc, signal, solution)
     else:
@@ -1162,7 +1166,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
             # If <ab> = 36 (or 63), field is zero
             # In `bipole` and in `dipole`, this is taken care of in `fem`. Here
             # we have to take care of it separately
-            EM = np.zeros((freqtime.size*nrec*nsrc), dtype=etaH.dtype)
+            EM = np.zeros((sval.size*nrec*nsrc), dtype=etaH.dtype)
 
     # Squeeze
     if solution[1:] == 'split':
@@ -1399,7 +1403,7 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     # Check frequency => get etaH, etaV, zetaH, and zetaV
     f = check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb)
-    freq, etaH, etaV, zetaH, zetaV = f
+    freq, etaH, etaV, zetaH, zetaV, _ = f
 
     # Check src-rec configuration
     # => Get flags if src or rec or both are magnetic (msrc, mrec)

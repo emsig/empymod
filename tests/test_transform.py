@@ -25,7 +25,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
     depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = model
     frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
                                       mpermV, 0)
-    _, etaH, etaV, zetaH, zetaV = frequency
+    _, etaH, etaV, zetaH, zetaV, _ = frequency
     src = [0, 0, 0]
     src, nsrc = utils.check_dipole(src, 'src', 0)
     for ab_inp in [11, 12, 13, 33]:
@@ -368,7 +368,7 @@ def test_dlf():                                                       # 10. dlf
         depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = model
         frequency = utils.check_frequency(1, res, aniso, epermH, epermV,
                                           mpermH, mpermV, 0)
-        _, etaH, etaV, zetaH, zetaV = frequency
+        _, etaH, etaV, zetaH, zetaV, _ = frequency
         src = [0, 0, 0]
         src, nsrc = utils.check_dipole(src, 'src', 0)
         ab, msrc, mrec = utils.check_ab(ab, 0)

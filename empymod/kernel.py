@@ -818,7 +818,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
     # Define sval/time and dtype depending on signal.
     if signal is None:
-        sval = 2j*np.pi*freqtime
+        sval = freqtime
         dtype = etaH.dtype
     else:
         time = freqtime

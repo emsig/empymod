@@ -628,7 +628,7 @@ def test_analytical():
     assert np.count_nonzero(ana_res2) == 0
 
     # 2. halfspace
-    for signal in [0, 1]:  # Frequency, Time
+    for signal in [None, 0, 1]:  # Frequency, Time
         model = {'src': [500, -100, 5],
                  'rec': [0, 1000, 20],
                  'res': 6.71,
@@ -651,6 +651,30 @@ def test_analytical():
         assert_allclose(res1, dTE+dTM)
         assert_allclose(res2, rTE+rTM)
         assert_allclose(res3, air)
+
+    # As above, but Laplace domain.
+    model = {'src': [500, -100, 5],
+             'rec': [0, 1000, 20],
+             'res': 6.71,
+             'aniso': 1.2,
+             'freqtime': -1,
+             'signal': None,
+             'ab': 12,
+             'verb': 0}
+    # Check dhs, dsplit, and dtetm
+    ana_res = analytical(solution='dhs', **model)
+    res1, res2, res3 = analytical(solution='dsplit', **model)
+    dTE, dTM, rTE, rTM, air = analytical(solution='dtetm', **model)
+    model['res'] = [2e14, model['res']]
+    model['aniso'] = [1, model['aniso']]
+    dip_res = dipole(depth=0, **model)
+    # Check dhs, dsplit
+    assert_allclose(dip_res, ana_res, rtol=1e-3)
+    assert_allclose(ana_res, res1+res2+res3)
+    # Check dsplit and dtetm
+    assert_allclose(res1, dTE+dTM)
+    assert_allclose(res2, rTE+rTM)
+    assert_allclose(res3, air)
 
     # 3. Check user-hook for eta/zeta
     def func_eta(inp, pdict):
