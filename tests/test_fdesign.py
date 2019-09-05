@@ -117,7 +117,7 @@ def test_save_load_filter(tmpdir):
 
     filt = fdesign.load_filter('two', True, path=tmpdir)
     assert_allclose(filt.base, dat2[1].base)
-    filt = fdesign.load_filter('two', path=tmpdir)
+    filt = fdesign.load_filter('two', path=tmpdir, filter_coeff=['bla'])
     assert_allclose(filt.base, dat2[1].base)
 
 

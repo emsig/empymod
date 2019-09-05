@@ -523,11 +523,14 @@ def save_filter(name, filt, full=None, path='filters'):
         np.savetxt(fullfile, fullsave, header=header)
 
 
-def load_filter(name, full=False, path='filters'):
+def load_filter(name, full=False, path='filters', filter_coeff=None):
     r"""Load saved DLF-filter and inversion output from text files."""
 
     # First we'll get the filter using its internal routine.
-    filt = DigitalFilter(name.split('.')[0])
+    if filter_coeff is None:
+        filt = DigitalFilter(name.split('.')[0])
+    else:
+        filt = DigitalFilter(name.split('.')[0], filter_coeff=filter_coeff)
     filt.fromfile(path)
 
     # If full, we get the inversion output
@@ -633,13 +636,22 @@ def plot_result(filt, full, prntres=True):
     if spacing.size > 1 or shift.size > 1:
         plt.subplot(122)
     plt.title('Filter values of best filter')
-    for attr in ['j0', 'j1', 'sin', 'cos']:
+
+    # Backwards compatibility, for old filters without `filt.filter_coeff`.
+    if hasattr(filt, 'filter_coeff'):
+        filter_coeff = filt.filter_coeff
+    else:
+        filter_coeff = ['j0', 'j1', 'sin', 'cos']
+
+    # Loop over filters.
+    for attr in filter_coeff:
         if hasattr(filt, attr):
             plt.plot(np.log10(filt.base),
                      np.log10(np.abs(getattr(filt, attr))), '.-', lw=.5,
                      label='abs('+attr+')')
             plt.plot(np.log10(filt.base), np.log10(-getattr(filt, attr)), '.',
                      color='k', ms=4)
+
     plt.plot(np.inf, 0, '.', color='k', ms=4, label='Neg. values')
     plt.xlabel('Base (log10)')
     plt.ylabel('Abs(Amplitude) (log10)')
@@ -757,22 +769,21 @@ def _plot_transform_pairs(fCI, r, k, axes, tit):
 
     # Transform with Key in the case of Hankel or Fourier transform.
     for f in fCI:
-        if f.name[1] in ['0', '1', '2'] and f.name[0] == 'j':
-            filt = j0j1filt()
-        elif f.name in ['sin', 'cos']:
-            filt = sincosfilt()
-        else:
-            break
-        kk = filt.base/r[:, None]
-        if f.name == 'j2':
-            lhs = f.lhs(kk)
-            kr0 = np.dot(lhs[0], getattr(filt, 'j0'))/r
-            kr1 = np.dot(lhs[1], getattr(filt, 'j1'))/r**2
-            kr = kr0+kr1
-        else:
-            kr = np.dot(f.lhs(kk), getattr(filt, f.name))/r
+        if f.name in ['j0', 'j1', 'j2', 'cos', 'sin']:
+            if f.name[1] in ['0', '1', '2'] and f.name[0] == 'j':
+                filt = j0j1filt()
+            else:
+                filt = sincosfilt()
+            kk = filt.base/r[:, None]
+            if f.name == 'j2':
+                lhs = f.lhs(kk)
+                kr0 = np.dot(lhs[0], getattr(filt, 'j0'))/r
+                kr1 = np.dot(lhs[1], getattr(filt, 'j1'))/r**2
+                kr = kr0+kr1
+            else:
+                kr = np.dot(f.lhs(kk), getattr(filt, f.name))/r
 
-        plt.loglog(r, np.abs(kr), '-.', lw=2, label=filt.name)
+            plt.loglog(r, np.abs(kr), '-.', lw=2, label=filt.name)
 
     if tit != 'fC':
         plt.xlabel('r')
@@ -1314,9 +1325,13 @@ def _calculate_filter(n, spacing, shift, fI, r_def, reim, name):
     dlf = DigitalFilter(name.split('.')[0])
     dlf.base = base
     dlf.factor = np.around(np.average(base[1:]/base[:-1]), 15)
+    dlf.filter_coeff = []
 
     # Loop over transforms
     for f in fI:
+        # Add current filter name.
+        dlf.filter_coeff.append(f.name)
+
         # Calculate lhs and rhs for inversion
         lhs = reim(f.lhs(k))
         rhs = reim(f.rhs(r)*r)
