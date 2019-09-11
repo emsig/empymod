@@ -213,7 +213,7 @@ def test_check_frequency(capsys):
     out, _ = capsys.readouterr()
     assert "   frequency  [Hz] :  " in out
     assert "* WARNING :: Frequencies < " in out
-    freq, etaH, etaV, zetaH, zetaV, _ = output
+    freq, etaH, etaV, zetaH, zetaV = output
     assert_allclose(freq, rfreq)
     assert_allclose(etaH, retaH)
     assert_allclose(etaV, retaV)
@@ -228,7 +228,7 @@ def test_check_frequency(capsys):
     out, _ = capsys.readouterr()
     assert "   s-value    [Hz] :  " in out
     assert "* WARNING :: Laplace val < " in out
-    freq, etaH, etaV, zetaH, zetaV, _ = output
+    freq, etaH, etaV, zetaH, zetaV = output
     assert_allclose(freq, rfreq)
 
 

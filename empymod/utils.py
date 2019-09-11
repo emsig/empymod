@@ -415,9 +415,6 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     zetaH, zetaV : array
         Parameters zetaH/zetaV, same size as provided resistivity.
 
-    sval : float
-        Laplace parameter.
-
     """
     global _min_freq
 
@@ -462,7 +459,7 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     zetaH = np.outer(sval, mpermH*mu_0)
     zetaV = np.outer(sval, mpermV*mu_0)
 
-    return freq, etaH, etaV, zetaH, zetaV, sval
+    return freq, etaH, etaV, zetaH, zetaV
 
 
 def check_hankel(ht, htarg, verb):
