@@ -576,6 +576,15 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Do f->t transform if required
     if signal is not None:
+        if msrc:
+            # In case of a magnetic source, the frequency-domain response is
+            # frequency-dependent. More precisely, the response has been
+            # normalized by :math:`i\omega\mu_0`.
+            # The must be taken care of when the transform
+            # back into time-domain has to be carried out.
+            for kk in range(len(freq)):
+                EM[kk, :] *= 2j * np.pi * freq[kk] * np.pi * 4e-7
+
         EM, conv = tem(EM, EM[0, :], freq, time, signal, ft, ftarg)
 
         # In case of QWE/QUAD, print Warning if not converged
@@ -946,6 +955,15 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # Do f->t transform if required
     if signal is not None:
+        if msrc:
+            # In case of a magnetic source, the frequency-domain response is
+            # frequency-dependent. More precisely, the response has been
+            # normalized by :math:`i\omega\mu_0`.
+            # The must be taken care of when the transform
+            # back into time-domain has to be carried out.
+            for kk in range(len(freq)):
+                EM[kk, :] *= 2j * np.pi * freq[kk] * np.pi * 4e-7
+
         EM, conv = tem(EM, off, freq, time, signal, ft, ftarg)
 
         # In case of QWE/QUAD, print Warning if not converged
