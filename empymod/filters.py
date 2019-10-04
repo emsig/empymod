@@ -83,8 +83,8 @@ class DigitalFilter:
             ``filter_coeff = ['j0', 'j1', 'sin', 'cos']``
 
         This accounts for the standard Hankel and Fourier DLF in CSEM
-        modelling. However, other coefficient names can be provided via this
-        parameter (in list format).
+        modelling. However, additional coefficient names can be provided via
+        this parameter (in list format).
 
     """
 
@@ -96,10 +96,10 @@ class DigitalFilter:
         else:
             self.savename = savename
 
-        if filter_coeff is None:
-            self.filter_coeff = ['j0', 'j1', 'sin', 'cos']
-        else:
-            self.filter_coeff = filter_coeff
+        # Define coefficient names.
+        self.filter_coeff = ['j0', 'j1', 'sin', 'cos']
+        if filter_coeff is not None:  # Additional, user provided.
+            self.filter_coeff.extend(filter_coeff)
 
     def tofile(self, path='filters'):
         r"""Save filter values to ascii-files.

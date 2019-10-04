@@ -5,25 +5,6 @@
    
 ----
 
-.. image:: https://readthedocs.org/projects/empymod/badge/?version=latest
-   :target: http://empymod.readthedocs.io/en/latest
-   :alt: Documentation Status
-.. image:: https://travis-ci.org/empymod/empymod.svg?branch=master
-   :target: https://travis-ci.org/empymod/empymod
-   :alt: Travis-CI
-.. image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
-   :target: https://coveralls.io/github/empymod/empymod?branch=master
-   :alt: Coveralls
-.. image:: https://img.shields.io/codacy/grade/b28ed3989ed248fe95e34288e43667b9/master.svg
-   :target: https://www.codacy.com/app/prisae/empymod
-   :alt: Codacy
-.. image:: https://img.shields.io/badge/benchmark-asv-blue.svg?style=flat
-   :target: https://empymod.github.io/empymod-asv
-   :alt: Airspeed Velocity
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.593094.svg
-   :target: https://doi.org/10.5281/zenodo.593094
-   :alt: Zenodo DOI
-
 .. sphinx-inclusion-marker
 
 The electromagnetic modeller **empymod** can model electric or magnetic
@@ -92,7 +73,7 @@ Features
     - Reflected wave
     - Airwave (semi-analytical in the case of step responses)
 
-- Add-ons (``empymod.scripts``):
+- Add-ons (``empymod.scripts``) and hidden features:
 
   The add-ons for empymod provide some very specific, additional
   functionalities:
@@ -102,6 +83,12 @@ Features
     layer.
   - ``fdesign``: Design digital linear filters for the Hankel and Fourier
     transforms.
+
+  Incomplete list of hidden features (see manual):
+
+  - Models with frequency-dependent resistivity (e.g., Cole-Cole IP).
+  - Space-Laplace domain calculation for the numerical and analytical
+    solutions.
 
 
 Installation

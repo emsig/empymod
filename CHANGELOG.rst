@@ -2,16 +2,18 @@ Changelog
 #########
 
 
-*latest* : Laplace
-------------------
+v1.9.0 : Laplace
+----------------
+
+**2019-10-04**
 
 - Laplace-domain calculation: By providing a negative ``freq``-value, the
   calculation is carried out in the real Laplace domain ``s = freq`` instead of
   the complex frequency domain ``s = 2i*pi*freq``.
-- More flexible filters and filter design:
+- Improvements to filter design and handling:
 
-  - ``DigitalFilter`` now takes an argument (list of strings) to have other
-    coefficients than ``j0``, ``j1``, ``sin``, and ``cos``.
+  - ``DigitalFilter`` now takes an argument (list of strings) for additional
+    coefficients to the default ``j0``, ``j1``, ``sin``, and ``cos``.
   - ``fdesign`` can now be used with any name as attribute you want to describe
     the transform pair (until now it had to be either ``j0``, ``j1``, ``j2``,
     ``sin``, or ``cos``).
