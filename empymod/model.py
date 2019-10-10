@@ -69,7 +69,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
            srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
-           verb=2):
+           verb=2, new=False):
     r"""Return the electromagnetic field due to an electromagnetic source.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -531,7 +531,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     for iab in ab_calc:  # Loop over required ab's
 
                         # Carry-out the frequency-domain calculation
-                        out = fem(iab, *finp)
+                        out = fem(iab, *finp, new=new)
 
                         # Get geometrical scaling factor
                         tfact = get_geo_fact(iab, srcazm, srcdip, recazm,
@@ -576,15 +576,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Do f->t transform if required
     if signal is not None:
-        if msrc:
-            # In case of a magnetic source, the frequency-domain response is
-            # frequency-dependent. More precisely, the response has been
-            # normalized by :math:`i\omega\mu_0`.
-            # The must be taken care of when the transform
-            # back into time-domain has to be carried out.
-            for kk in range(len(freq)):
-                EM[kk, :] *= 2j * np.pi * freq[kk] * np.pi * 4e-7
-
         EM, conv = tem(EM, EM[0, :], freq, time, signal, ft, ftarg)
 
         # In case of QWE/QUAD, print Warning if not converged
@@ -602,7 +593,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
-           verb=2):
+           verb=2, new=False):
     r"""Return the electromagnetic field due to a dipole source.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -948,180 +939,14 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     inp = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
            etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_ne_eval,
            msrc, mrec, loop_freq, loop_off)
-    EM, kcount, conv = fem(*inp)
+    EM, kcount, conv = fem(*inp, new=new)
 
     # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
 
     # Do f->t transform if required
     if signal is not None:
-        if msrc:
-            # In case of a magnetic source, the frequency-domain response is
-            # frequency-dependent. More precisely, the response has been
-            # normalized by :math:`i\omega\mu_0`.
-            # The must be taken care of when the transform
-            # back into time-domain has to be carried out.
-            for kk in range(len(freq)):
-                EM[kk, :] *= 2j * np.pi * freq[kk] * np.pi * 4e-7
-
         EM, conv = tem(EM, off, freq, time, signal, ft, ftarg)
-
-        # In case of QWE/QUAD, print Warning if not converged
-        conv_warning(conv, ftarg, 'Fourier', verb)
-
-    # Reshape for number of sources
-    EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
-
-    # === 4.  FINISHED ============
-    printstartfinish(verb, t0, kcount)
-
-    return EM
-
-
-def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
-         epermV=None, mpermH=None, mpermV=None, strength=0, xdirect=False,
-         ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
-         verb=2):
-    r"""loop-dev."""
-
-    # === 1.  LET'S START ============
-    t0 = printstartfinish(verb)
-
-    # === 2.  CHECK INPUT ============
-
-    # Check times and Fourier Transform arguments and get required frequencies
-    if signal is None:
-        freq = freqtime
-    else:
-        time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
-
-    # Check layer parameters
-    model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
-                        xdirect, verb)
-    depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
-
-    # Check frequency => get etaH, etaV, zetaH, and zetaV
-    frequency = check_frequency(freq, res, aniso, epermH, epermV, mpermH,
-                                mpermV, verb)
-    freq, etaH, etaV, zetaH, zetaV = frequency
-
-    # Update etaH/etaV and zetaH/zetaV according to user-provided model
-    if isinstance(res, dict) and 'func_eta' in res:
-        etaH, etaV = res['func_eta'](res, locals())
-    if isinstance(res, dict) and 'func_zeta' in res:
-        zetaH, zetaV = res['func_zeta'](res, locals())
-
-    # Check Hankel transform parameters
-    ht, htarg = check_hankel(ht, htarg, verb)
-
-    # Check optimization
-    use_ne_eval, loop_freq, loop_off = check_opt(opt, loop, ht, htarg, verb)
-
-    # Check src and rec, get flags if dipole or not
-    # nsrcz/nrecz are number of unique src/rec-pole depths
-    src, nsrc, nsrcz, srcdipole = check_bipole(src, 'src')
-    rec, nrec, nrecz, recdipole = check_bipole(rec, 'rec')
-
-    # === 3. EM-FIELD CALCULATION ============
-
-    # Pre-allocate output EM array
-    EM = np.zeros((freq.size, nrec*nsrc), dtype=etaH.dtype)
-
-    # Initialize kernel count, conv (only for QWE)
-    # (how many times the wavenumber-domain kernel was calld)
-    kcount = 0
-    conv = True
-
-    # Define some indices
-    isrc = int(nsrc/nsrcz)  # this is either 1 or nsrc
-    irec = int(nrec/nrecz)  # this is either 1 or nrec
-    isrz = int(isrc*irec)   # this is either 1, nsrc, nrec, or nsrc*nrec
-
-    # The kernel handles only 1 ab with one srcz-recz combination at once.
-    # Hence we have to loop over every different depth of src or rec, and
-    # over all required ab's.
-    for isz in range(nsrcz):  # Loop over source depths
-
-        # Get this source
-        srcazmdip = get_azm_dip(src, isz, nsrcz, 1, srcdipole, strength, 'src',
-                                verb)
-        tsrc, srcazm, srcdip, _, _, _ = srcazmdip
-
-        for irz in range(nrecz):  # Loop over receiver depths
-
-            # Get this receiver
-            recazmdip = get_azm_dip(rec, irz, nrecz, 1, recdipole, strength,
-                                    'rec', verb)
-            trec, recazm, recdip, _, _, _ = recazmdip
-
-            # Get required ab's
-            ab_calc = get_abs(True, True, srcazm, srcdip, recazm, recdip, verb)
-
-            # Get layer number in which src resides
-            lsrc, zsrc = get_layer_nr(tsrc, depth)
-
-            # Get src-rec offsets and angles
-            off, angle = get_off_ang(tsrc, trec, isrc, irec, verb)
-
-            # Get layer number in which rec resides
-            lrec, zrec = get_layer_nr(trec, depth)
-
-            # Gather variables
-            finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
-                    etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg,
-                    use_ne_eval, True, True, loop_freq, loop_off, conv)
-
-            # Pre-allocate temporary EM array for ab-loop
-            sEM = np.zeros((freq.size, isrz), dtype=etaH.dtype)
-
-            for iab in ab_calc:  # Loop over required ab's
-
-                # Carry-out the frequency-domain calculation
-                out = fem(iab, *finp)
-
-                # Get geometrical scaling factor
-                tfact = get_geo_fact(iab, srcazm, srcdip, recazm, recdip, True,
-                                     True)
-
-                # Add field to EM with geometrical factor
-                sEM += out[0]*np.squeeze(tfact)
-
-                # Update kernel count
-                kcount += out[1]
-
-                # Update conv (QWE convergence)
-                conv *= out[2]
-
-            # Scale signal for src-strength
-            if strength > 0:
-                sEM *= strength
-
-            # Add this src-rec signal
-            if nrec == nrecz:
-                if nsrc == nsrcz:  # Case 1: Looped over each src and each rec
-                    EM[:, isz*nrec+irz:isz*nrec+irz+1] = sEM
-                else:              # Case 2: Looped over each rec
-                    EM[:, irz:nsrc*nrec:nrec] = sEM
-            else:
-                if nsrc == nsrcz:  # Case 3: Looped over each src
-                    EM[:, isz*nrec:nrec*(isz+1)] = sEM
-                else:              # Case 4: All in one go
-                    EM = sEM
-
-    # In case of QWE/QUAD, print Warning if not converged
-    conv_warning(conv, htarg, 'Hankel', verb)
-
-    # Do f->t transform if required
-    if signal is not None:
-        # In case of a magnetic source, the frequency-domain response is
-        # frequency-dependent. More precisely, the response has been
-        # normalized by :math:`i\omega\mu_0`.
-        # The must be taken care of when the transform
-        # back into time-domain has to be carried out.
-        for kk in range(len(freq)):
-            EM[kk, :] *= 2j * np.pi * freq[kk] * np.pi * 4e-7
-
-        EM, conv = tem(EM, EM[0, :], freq, time, signal, ft, ftarg)
 
         # In case of QWE/QUAD, print Warning if not converged
         conv_warning(conv, ftarg, 'Fourier', verb)
@@ -1657,7 +1482,7 @@ def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
 def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         zetaV, xdirect, isfullspace, ht, htarg, use_ne_eval, msrc, mrec,
-        loop_freq, loop_off, conv=True):
+        loop_freq, loop_off, conv=True, new=False):
     r"""Return the electromagnetic frequency-domain response.
 
     This function is called from one of the above modelling routines. No
@@ -1743,6 +1568,14 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
             fEM += out[0]
             kcount += out[1]
             conv *= out[2]
+
+    if new and msrc:
+        # In case of a magnetic source, the frequency-domain response is
+        # frequency-dependent. More precisely, the response has been
+        # normalized by :math:`i\omega\mu_0`.
+        # The must be taken care of when the transform
+        # back into time-domain has to be carried out.
+        fEM *= 2j*np.pi*freq[:, None]*np.pi*4e-7
 
     return fEM, kcount, conv
 
