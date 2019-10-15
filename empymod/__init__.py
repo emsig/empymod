@@ -48,4 +48,4 @@ __all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts',
            'DigitalFilter']
 
 # Version
-__version__ = '1.10.0'
+__version__ = '1.10.1dev0'
