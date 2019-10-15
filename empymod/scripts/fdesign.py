@@ -201,7 +201,7 @@ Implemented Fourier transforms
 
 
 """
-# Copyright 2017-2019 Dieter Werthmüller
+# Copyright 2017-2019 The empymod Developers.
 #
 # This file is part of empymod.
 #

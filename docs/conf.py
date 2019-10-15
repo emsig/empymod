@@ -28,8 +28,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'empymod'
-copyright = u'2016-{}, Dieter Werthmüller'.format(time.strftime("%Y"))
-author = 'Dieter Werthmüller'
+copyright = u'2016-{}, The empymod Developers'.format(time.strftime("%Y"))
+author = 'The empymod Developers'
 
 # |version| and |release|.
 #
@@ -103,7 +103,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'empymod.tex', 'empymod Documentation',
-     'Dieter Werthmüller', 'manual'),
+     'The empymod Developers', 'manual'),
 ]
 
 # -- Options for manual page output ---------------------------------------

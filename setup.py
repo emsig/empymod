@@ -10,7 +10,7 @@ setup(
     version='1.9.1.dev0',
     description=description,
     long_description=readme,
-    author='Dieter Werthmüller',
+    author='The empymod Developers',
     author_email='dieter@werthmuller.org',
     url='https://empymod.github.io',
     download_url='https://github.com/empymod/empymod/tarball/v1.9.0',

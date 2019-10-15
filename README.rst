@@ -152,7 +152,7 @@ empymod would not exist.
 License information
 ===================
 
-Copyright 2016-2019 Dieter Werthmüller
+Copyright 2016-2019 The empymod Developers.
 
 Licensed under the Apache License, Version 2.0. See the ``LICENSE``- and
 ``NOTICE``-files or the documentation for more information.

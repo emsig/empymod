@@ -16,7 +16,7 @@ NOTICE-file in the root directory for more information regarding the involved
 licenses.
 
 """
-# Copyright 2016-2019 Dieter Werthmüller
+# Copyright 2016-2019 The empymod Developers.
 #
 # This file is part of empymod.
 #
