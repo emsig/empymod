@@ -2,8 +2,10 @@ Changelog
 #########
 
 
-*Latest*: Loop source and receiver
-----------------------------------
+v1.10.0: Loop source and receiver
+---------------------------------
+
+**2019-10-15**
 
 - New modelling routine ``model.loop`` to model the electromagnetic frequency-
   or time-domain field due to an arbitrary rotated, magnetic source consisting

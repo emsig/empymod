@@ -5,25 +5,6 @@
    
 ----
 
-.. image:: https://readthedocs.org/projects/empymod/badge/?version=latest
-   :target: http://empymod.readthedocs.io/en/latest
-   :alt: Documentation Status
-.. image:: https://travis-ci.org/empymod/empymod.svg?branch=master
-   :target: https://travis-ci.org/empymod/empymod
-   :alt: Travis-CI
-.. image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
-   :target: https://coveralls.io/github/empymod/empymod?branch=master
-   :alt: Coveralls
-.. image:: https://img.shields.io/codacy/grade/b28ed3989ed248fe95e34288e43667b9/master.svg
-   :target: https://www.codacy.com/app/prisae/empymod
-   :alt: Codacy
-.. image:: https://img.shields.io/badge/benchmark-asv-blue.svg?style=flat
-   :target: https://empymod.github.io/empymod-asv
-   :alt: Airspeed Velocity
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.593094.svg
-   :target: https://doi.org/10.5281/zenodo.593094
-   :alt: Zenodo DOI
-
 .. sphinx-inclusion-marker
 
 The electromagnetic modeller **empymod** can model electric or magnetic
@@ -62,7 +43,10 @@ Features
     strength; space-frequency and space-time domains.
   - ``dipole``: infinitesimal small dipoles oriented along the principal axes,
     normalized field; space-frequency and space-time domains.
-  - ``wavenumber``: as ``dipole``, but returns the wavenumber-frequency domain
+  - ``loop``: arbitrary oriented loop source measured by arbitrary oriented,
+    finite length electric or magnetic dipole or loop receivers;
+    space-frequency and space-time domains.
+  - ``dipole_k``: as ``dipole``, but returns the wavenumber-frequency domain
     response.
   - ``gpr``: calculates the ground-penetrating radar response for given central
     frequency, using a Ricker wavelet (experimental).
@@ -76,6 +60,7 @@ Features
   - Adaptive quadrature QUAD
 
 - Fourier transforms (space-frequency to space-time transform):
+
   - Digital Linear Filters DLF (using included filters or providing own ones)
   - Quadrature with extrapolation QWE
   - Logarithmic Fast Fourier Transform FFTLog
@@ -103,7 +88,7 @@ Features
   - ``fdesign``: Design digital linear filters for the Hankel and Fourier
     transforms.
 
-  Incomplete list of hidden features (see manual):
+- Incomplete list of hidden features (see manual):
 
   - Models with frequency-dependent resistivity (e.g., Cole-Cole IP).
   - Space-Laplace domain calculation for the numerical and analytical
