@@ -1,6 +1,13 @@
 Credits
 #######
 
+This project was initiated and is still mainly maintained by **Dieter
+Werthmüller**. However, it is a community effort as many people helped to
+improve it over time. The copyright is therefore attributed to «The empymod
+Developers», which includes everyone involved in the project. In the following
+some particular credits.
+
+
 Special thanks to
 
 - **Jürg Hunziker**, **Kerry Key**, and **Evert Slob** for answering all my

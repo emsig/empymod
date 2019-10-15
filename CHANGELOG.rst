@@ -10,6 +10,8 @@ Changelog
   of an electric loop, measured by arbitrary rotated, finite electric or
   magnetic bipole receivers or arbitrary rotated magnetic receivers consisting
   of electric loops.
+- Move copyright from «Dieter Werthmüller» to «The empymod Developers», to be
+  more inclusive and open the project for new contributors.
 
 
 v1.9.0 : Laplace
