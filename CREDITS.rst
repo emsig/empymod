@@ -1,7 +1,14 @@
 Credits
 #######
 
-Thanks to
+This project was initiated and is still mainly maintained by **Dieter
+Werthmüller**. However, it is a community effort as many people helped to
+improve it over time. The copyright is therefore attributed to «The empymod
+Developers», which includes everyone involved in the project. In the following
+some particular credits.
+
+
+Special thanks to
 
 - **Jürg Hunziker**, **Kerry Key**, and **Evert Slob** for answering all my
   questions regarding their codes and publications
@@ -19,6 +26,15 @@ Thanks to
   development of the add-on ``fdesign`` (see
   `github.com/empymod/article-fdesign
   <https://github.com/empymod/article-fdesign>`_).
+
+
+Many more helped through their feedback, feature request, bug reports etc. A
+certainly incomplete list (get in touch if you think you should appear here):
+
+- Seogi Kang
+- Svein-Erik Hamran
+- Peter van der Sman
+- Ralph-Uwe Börner
 
 
 .. note::

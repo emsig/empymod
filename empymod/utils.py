@@ -12,7 +12,7 @@ This module consists of four groups of functions:
    3. Internal utilities
 
 """
-# Copyright 2016-2019 Dieter Werthmüller
+# Copyright 2016-2019 The empymod Developers.
 #
 # This file is part of empymod.
 #
@@ -1675,7 +1675,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         # If dipole, g_w are ones
         g_w = np.ones(tinp[0].size)
 
-        # If dipole, inp_w are once, unless strength > 0
+        # If dipole, inp_w are ones, unless strength > 0
         inp_w = np.ones(tinp[0].size)
         if name == 'src' and strength > 0:
             inp_w *= strength

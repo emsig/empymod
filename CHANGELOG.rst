@@ -2,6 +2,18 @@ Changelog
 #########
 
 
+*Latest*: Loop source and receiver
+----------------------------------
+
+- New modelling routine ``model.loop`` to model the electromagnetic frequency-
+  or time-domain field due to an arbitrary rotated, magnetic source consisting
+  of an electric loop, measured by arbitrary rotated, finite electric or
+  magnetic bipole receivers or arbitrary rotated magnetic receivers consisting
+  of electric loops.
+- Move copyright from «Dieter Werthmüller» to «The empymod Developers», to be
+  more inclusive and open the project for new contributors.
+
+
 v1.9.0 : Laplace
 ----------------
 

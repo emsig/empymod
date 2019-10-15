@@ -4,16 +4,14 @@ Roadmap
 A collection of ideas of what could be added or improved in empymod. Please get
 in touch if you would like to tackle one of these problems!
 
-- **Additional modelling routines**
+- **Additional modelling routines and utilities**
 
-  - ``tdem`` (**TEM**)
+  - **TEM**
     [`empymod#8 <https://github.com/empymod/empymod/issues/8>`_]:
-    Issues that have to be addressed: ramp waveform, windowing, loop
-    integration, zero-offset (coincident loop).
+    Windowing functionality and more possibilities for loop measurements:
 
-    - in-loop
-    - coincident loop
-    - loop-loop
+    - concentric loops
+    - coincident loops
     - arbitrary shaped loops
 
   - **Ramp waveform**
@@ -63,23 +61,11 @@ in touch if you would like to tackle one of these problems!
     - Add the ``fht``-module from FFTLog for the Hankel transform.
 
 
-  - Hankel and Fourier
-
-    - Include the method outlined by Mulder et al., 2008, Geophysics
-      (piecewise-cubic Hermite interpolation with a FFT) to try to further
-      speed-up the splined versions.
-
-
 - Extend examples (example-notebooks)
 
   - Add different methods (e.g. DC)
   - Reproduce published results
 
-
-- Abstraction of the code
-  [`empymod#14 <https://github.com/empymod/empymod/issues/14>`_].
-
-- Replace (and extend) the use of ``numexpr`` with ``numba``.
 
 - GUI.
 
