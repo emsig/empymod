@@ -33,7 +33,7 @@ from . import scripts
 
 # Import all functions, except the filters
 from .model import *      # noqa  maint. in model.__all__
-from .model import bipole, dipole
+from .model import bipole, dipole, loop
 from .utils import *      # noqa  maint. in utils.__all__
 from .utils import EMArray, set_minimum, get_minimum
 from .filters import DigitalFilter
@@ -44,7 +44,7 @@ from .scripts import *    # noqa  maint. in scripts.__init__.__all__
 # Make only a selection available to __all__ to not clutter the namespace
 # Maybe also to discourage the use of `from empymod import *`.
 __all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts',
-           'bipole', 'dipole', 'EMArray', 'set_minimum', 'get_minimum',
+           'bipole', 'dipole', 'loop', 'EMArray', 'set_minimum', 'get_minimum',
            'DigitalFilter']
 
 # Version
