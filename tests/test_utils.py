@@ -1078,7 +1078,5 @@ def test_versions_backwards():
         out3 = utils.versions()
 
         # Exclude minutes and seconds, to avoid stupid failures.
-        assert out1.__repr__()[:336] == out2.__repr__()[:336]
-        assert out1.__repr__()[341:] == out2.__repr__()[341:]
-        assert out1.__repr__()[:336] == out3.__repr__()[:336]
-        assert out1.__repr__()[341:] == out3.__repr__()[341:]
+        assert out1.__repr__()[150:] == out2.__repr__()[150:]
+        assert out1.__repr__()[150:] == out3.__repr__()[150:]
