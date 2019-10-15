@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+from scipy.special import erf
 from os.path import join, dirname
 from numpy.testing import assert_allclose
 
@@ -12,7 +13,7 @@ except ImportError:
 
 # Import main modelling routines from empymod directly to ensure they are in
 # the __init__.py-file.
-from empymod import bipole, dipole, analytical
+from empymod import bipole, dipole, analytical, loop
 # Import rest from model
 from empymod.model import gpr, dipole_k, wavenumber, fem, tem
 from empymod.kernel import fullspace, halfspace
@@ -607,6 +608,149 @@ def test_dipole():
     assert_allclose(standard, outeta)
     outzeta = dipole(res=zeta, signal=0, mpermH=fact, mpermV=fact, **model)
     assert_allclose(standard, outzeta)
+
+
+class TestLoop:
+    # Loop is a subset of bipole, with a frequency-dependent factor at the
+    # frequency level.
+
+    def test_bipole(self, capsys):
+        # 1. Compare to bipole in the frequency domain, to ensure it is the
+        # same.
+
+        # Survey parameters.
+        depth = [0, 200]
+        res = [2e14, 100, 200]
+        freq = np.logspace(-4, 4, 101)
+
+        # 1.a: msrc-mrec; nrec==nrecz, nsrc!=nsrcz.
+        rec = [100, 0, 0, 23, -50]
+        src = [[0, 0, 0], [0, 0, 0], 0, 45, 33]
+        loo = loop(src, rec, depth, res, freq)
+        bip = bipole(src, rec, depth, res, freq, msrc=True, mrec=True)
+        bip *= 2j*np.pi*freq[:, None]*4e-7*np.pi
+        assert_allclose(bip, loo, rtol=1e-4, atol=1e-18)
+
+        # 1.b: msrc-erec; nrec!=nrecz, nsrc!=nsrcz.
+        rec = [[100, 200, 300], [-10, 0, 10], 0, 23, -50]
+        src = [[0, 0, 0], [0, 0, 0], 0, 45, 33]
+        loo = loop(src, rec, depth, res, freq, mrec=False, strength=np.pi)
+        bip = bipole(src, rec, depth, res, freq, msrc=True, mrec=False,
+                     strength=np.pi)*2j*np.pi*freq[:, None, None]*4e-7*np.pi
+        assert_allclose(bip, loo, rtol=1e-4, atol=1e-18)
+
+        # 1.c: msrc-looprec; nrec==nrecz, nsrc!=nsrcz.
+        rec = [[100, 100, 100], [0, 0, 0], [-10, 0, 10], 23, -50]
+        src = [[0, 0, 0], [0, 0, 0], 0, 45, 33]
+        loo = loop(src, rec, depth, res, freq, mrec='loop')
+        bip = bipole(src, rec, depth, res, freq, msrc=True, mrec=True)
+        bip *= (2j*np.pi*freq[:, None, None]*4e-7*np.pi)**2
+        assert_allclose(bip, loo, rtol=1e-4, atol=1e-18)
+
+        # 1.d: msrc-loopre; nrec!=nrecz, nsrc==nsrcz.
+        _, _ = capsys.readouterr()  # Empty it
+        rec = [[100, 100, 100], [0, 0, 0], 0, 23, -50]
+        src = [[0, 0, 0], [0, 0, 0], [-10, 0, 10], 45, 33]
+        mpermH = [1, 1, 1]
+        mpermV = [1.5, 2, 1]
+        loo = loop(src, rec, depth, res, freq, mrec='loop', mpermH=mpermH,
+                   mpermV=mpermV)
+        out, _ = capsys.readouterr()
+        bip = bipole(src, rec, depth, res, freq, msrc=True, mrec=True,
+                     mpermH=mpermH, mpermV=mpermV)
+        bip *= (2j*np.pi*freq[:, None, None]*4e-7*np.pi)**2
+        assert_allclose(bip, loo, rtol=1e-4, atol=1e-18)
+        assert '* WARNING :: `mpermH != mpermV` at source level, ' in out
+        assert '* WARNING :: `mpermH != mpermV` at receiver level, ' in out
+
+    def test_iso_fs(self):
+        # 2. Test with isotropic full-space solution, Ward and Hohmann, 1988.
+        # => em with ab=24; Eq. 2.58, Ward and Hohmann, 1988.
+
+        # Survey parameters.
+        src = [0, 0, 0, 0, 0]
+        rec = [100, 0, 100, -90, 0]
+        res = 100
+        time = np.logspace(-4, 0, 301)
+
+        # Calculation.
+        fhz_num2 = loop(src, rec, [], res, time, mrec=False, xdirect=True,
+                        verb=1, signal=1)
+
+        # Analytical solution.
+        mu_0 = 4e-7*np.pi
+        r = np.sqrt(rec[0]**2+rec[1]**2+rec[2]**2)
+        theta = np.sqrt(mu_0/(4*res*time))
+        theta_r = theta*r
+        ana_sol2 = - mu_0*theta**3*rec[2]*np.exp(-theta_r**2)
+        ana_sol2 /= 2*np.pi**1.5*time
+
+        # Check.
+        assert_allclose(fhz_num2, ana_sol2, rtol=1e-4, atol=1e-18)
+
+    def test_iso_hs(self):
+        # 3. Test with isotropic half-space solution, Ward and Hohmann, 1988.
+        # => mm with ab=66; Eq. 4.70, Ward and Hohmann, 1988.
+
+        # Survey parameters.
+        # time: cut out zero crossing.
+        mu_0 = 4e-7*np.pi
+        time = np.r_[np.logspace(-7.3, -5.7, 101), np.logspace(-4.3, 0, 101)]
+        src = [0, 0, 0, 0, 90]
+        rec = [100, 0, 0, 0, 90]
+        res = 100.
+
+        # Calculation.
+        fhz_num1 = loop(src, rec, 0, [2e14, res], time, xdirect=True, verb=1,
+                        epermH=[0, 1], epermV=[0, 1], signal=0)
+
+        # Analytical solution.
+        theta = np.sqrt(mu_0/(4*res*time))
+        theta_r = theta*rec[0]
+        ana_sol1 = (9 + 6 * theta_r**2 + 4 * theta_r**4) * np.exp(-theta_r**2)
+        ana_sol1 *= -2 * theta_r / np.sqrt(np.pi)
+        ana_sol1 += 9 * erf(theta_r)
+        ana_sol1 *= -res/(2*np.pi*mu_0*rec[0]**5)
+
+        # Check.
+        assert_allclose(fhz_num1, ana_sol1, rtol=1e-4)
+
+    def test_cole_cole(self):
+        # Just compare to bipole.
+
+        def func_eta(inp, pdict):
+            # Dummy function to check if it works.
+            etaH = pdict['etaH'].real*inp['fact'] + 1j*pdict['etaH'].imag
+            etaV = pdict['etaV'].real*inp['fact'] + 1j*pdict['etaV'].imag
+
+            return etaH, etaV
+
+        def func_zeta(inp, pdict):
+            # Dummy function to check if it works.
+            etaH = pdict['zetaH']/inp['fact']
+            etaV = pdict['zetaV']/inp['fact']
+
+            return etaH, etaV
+
+        freq = 1.
+        model = {'src': [0, 0, 500, 0, 0], 'rec': [500, 0, 600, 0, 0],
+                 'depth': [0, 550], 'freqtime': freq}
+        res = np.array([2, 10, 5])
+        fact = np.array([2, 2, 2])
+        eta = {'res': fact*res, 'fact': fact, 'func_eta': func_eta}
+        zeta = {'res': res, 'fact': fact, 'func_zeta': func_zeta}
+
+        # Frequency domain
+        etabip = bipole(res=eta, msrc=True, mrec=True, **model)
+        etabip *= 2j*np.pi*freq*4e-7*np.pi
+        etaloo = loop(res=eta, **model)
+        assert_allclose(etabip, etaloo)
+
+        zetabip = bipole(res=zeta, mpermH=fact, mpermV=fact, msrc=True,
+                         mrec=True, **model)
+        zetabip *= 2j*np.pi*freq*4e-7*np.pi
+        zetaloo = loop(res=zeta, mpermH=fact, mpermV=fact, **model)
+        assert_allclose(zetabip, zetaloo)
 
 
 def test_analytical():
