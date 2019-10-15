@@ -350,7 +350,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     >>> from empymod import bipole
     >>> # x-directed bipole source: x0, x1, y0, y1, z0, z1
     >>> src = [-50, 50, 0, 0, 100, 100]
-    >>> # x-directed dipole source-array: x, y, z, azimuth, dip
+    >>> # x-directed dipole receiver-array: x, y, z, azimuth, dip
     >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 0]
     >>> # layer boundaries
     >>> depth = [0, 300, 1000, 1050]
@@ -1246,42 +1246,41 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
     --------
     >>> import numpy as np
     >>> from empymod import loop
-    >>> # x-directed bipole source: x0, x1, y0, y1, z0, z1
-    >>> src = [-50, 50, 0, 0, 100, 100]
-    >>> # x-directed dipole source-array: x, y, z, azimuth, dip
-    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 0]
+    >>> # z-directed loop source: x, y, z, azimuth, dip
+    >>> src = [0, 0, 0, 0, 90]
+    >>> # z-directed magnetic dipole receiver-array: x, y, z, azimuth, dip
+    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 90]
     >>> # layer boundaries
-    >>> depth = [0, 300, 1000, 1050]
+    >>> depth = [0, 300, 500]
     >>> # layer resistivities
-    >>> res = [1e20, .3, 1, 50, 1]
+    >>> res = [2e14, 10, 500, 10]
     >>> # Frequency
     >>> freq = 1
-    >>> # Calculate electric field due to an electric source at 1 Hz.
+    >>> # Calculate magnetic field due to a loop source at 1 Hz.
     >>> # [mrec = True (default)]
-    >>> EMfield = bipole(src, rec, depth, res, freq, verb=4)
+    >>> EMfield = loop(src, rec, depth, res, freq, verb=4)
     :: empymod START  ::
     ~
-       depth       [m] :  0 300 1000 1050
-       res     [Ohm.m] :  1E+20 0.3 1 50 1
-       aniso       [-] :  1 1 1 1 1
-       epermH      [-] :  1 1 1 1 1
-       epermV      [-] :  1 1 1 1 1
-       mpermH      [-] :  1 1 1 1 1
-       mpermV      [-] :  1 1 1 1 1
+       depth       [m] :  0 300 500
+       res     [Ohm.m] :  2E+14 10 500 10
+       aniso       [-] :  1 1 1 1
+       epermH      [-] :  1 1 1 1
+       epermV      [-] :  1 1 1 1
+       mpermH      [-] :  1 1 1 1
+       mpermV      [-] :  1 1 1 1
+       direct field    :  Calc. in wavenumber domain
        frequency  [Hz] :  1
        Hankel          :  DLF (Fast Hankel Transform)
          > Filter      :  Key 201 (2009)
          > DLF type    :  Standard
        Kernel Opt.     :  None
        Loop over       :  None (all vectorized)
-       Source(s)       :  1 bipole(s)
-         > intpts      :  1 (as dipole)
-         > length  [m] :  100
-         > x_c     [m] :  0
-         > y_c     [m] :  0
-         > z_c     [m] :  100
+       Source(s)       :  1 dipole(s)
+         > x       [m] :  0
+         > y       [m] :  0
+         > z       [m] :  0
          > azimuth [°] :  0
-         > dip     [°] :  0
+         > dip     [°] :  90
        Receiver(s)     :  10 dipole(s)
          > x       [m] :  500 - 5000 : 10  [min-max; #]
                        :  500 1000 1500 2000 2500 3000 3500 4000 4500 5000
@@ -1289,17 +1288,17 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
                        :  0 0 0 0 0 0 0 0 0 0
          > z       [m] :  200
          > azimuth [°] :  0
-         > dip     [°] :  0
-       Required ab's   :  11
+         > dip     [°] :  90
+       Required ab's   :  33
     ~
-    :: empymod END; runtime = 0:00:00.005536 :: 1 kernel call(s)
-    ~
+    :: empymod END; runtime = 0:00:00.005025 :: 1 kernel call(s)
+
     >>> print(EMfield)
-    [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
-      -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
-       1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j
-       1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j
-       6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
+    [ -3.05449848e-10 -2.00374185e-11j  -7.12528991e-11 -5.37083268e-12j
+      -2.52076501e-11 -1.62732412e-12j  -1.18412295e-11 -8.99570998e-14j
+      -6.44054097e-12 +5.61150066e-13j  -3.77109625e-12 +7.89022722e-13j
+      -2.28484774e-12 +8.08897623e-13j  -1.40021365e-12 +7.32151174e-13j
+      -8.55487532e-13 +6.18402706e-13j  -5.15642408e-13 +4.99091919e-13j]
 
     """
 
@@ -1372,7 +1371,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
         # Get this source
         srcazmdip = get_azm_dip(src, isz, nsrcz, 1, srcdipole, strength,
                                 'src', verb)
-        tsrc, srcazm, srcdip, srcg_w, _, src_w = srcazmdip
+        tsrc, srcazm, srcdip, _, _, src_w = srcazmdip
 
         for irz in range(nrecz):  # Loop over receiver depths
 
