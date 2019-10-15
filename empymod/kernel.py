@@ -799,8 +799,9 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
     Calculates the frequency- or time-space domain electromagnetic response for
     a half-space below air using the diffusive approximation, as given in
-    [SlHM10]_, where the electric source is located at [0, 0, zsrc], and the
-    electric receiver at [xco, yco, zrec].
+    [SlHM10]_, where the electric source is located at [x=0, y=0, z=zsrc>=0],
+    and the electric receiver at [x=cos(angle)*off, y=sin(angle)*off,
+    z=zrec>=0].
 
     It can also be used to calculate the fullspace solution or the separate
     fields: direct field, reflected field, and airwave; always using the

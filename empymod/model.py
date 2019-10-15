@@ -70,7 +70,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
            verb=2):
-    r"""Return the electromagnetic field due to an electromagnetic source.
+    r"""Return the EM fields due to arbitrary rotated, finite length EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
     arbitrary finite electric or magnetic bipole sources, measured by arbitrary
@@ -81,8 +81,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     See Also
     --------
-    fem : Electromagnetic frequency-domain response.
-    tem : Electromagnetic time-domain response.
+    dipole : EM fields due to infinitesimal small EM dipoles.
 
 
     Parameters
@@ -332,7 +331,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     Returns
     -------
-    EM : ndarray, (nfreq, nrec, nsrc)
+    EM : ndarray, (nfreqtime, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns H [A/m].
@@ -348,7 +347,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         source :math:`A=1m^2` and :math:`I^e=1 Ampere`. A magnetic source is
         therefore frequency dependent.
 
-        The shape of EM is (nfreq, nrec, nsrc). However, single dimensions
+        The shape of EM is (nfreqtime, nrec, nsrc). However, single dimensions
         are removed.
 
 
@@ -594,7 +593,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
            ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
            verb=2):
-    r"""Return the electromagnetic field due to a dipole source.
+    r"""Return the EM fields due to infinitesimal small EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
     infinitesimal small electric or magnetic dipole source(s), measured by
@@ -614,9 +613,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     See Also
     --------
-    bipole : Electromagnetic field due to an electromagnetic source.
-    fem : Electromagnetic frequency-domain response.
-    tem : Electromagnetic time-domain response.
+    bipole : EM fields due to arbitrary rotated, finite length EM dipoles.
 
 
     Parameters
@@ -850,7 +847,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     Returns
     -------
-    EM : ndarray, (nfreq, nrec, nsrc)
+    EM : ndarray, (nfreqtime, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns H [A/m].
@@ -859,7 +856,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         electric case the source strength is 1 A and its length is 1 m. So the
         electric field could also be written as [V/(A.m2)].
 
-        The shape of EM is (nfreq, nrec, nsrc). However, single dimensions
+        The shape of EM is (nfreqtime, nrec, nsrc). However, single dimensions
         are removed.
 
 
@@ -1071,7 +1068,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     Returns
     -------
-    EM : ndarray, (nfreq, nrec, nsrc)
+    EM : ndarray, (nfreqtime, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns H [A/m].
@@ -1080,7 +1077,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         electric case the source strength is 1 A and its length is 1 m. So the
         electric field could also be written as [V/(A.m2)].
 
-        The shape of EM is (nfreq, nrec, nsrc). However, single dimensions
+        The shape of EM is (nfreqtime, nrec, nsrc). However, single dimensions
         are removed.
 
         If ``solution='dsplit'``, three ndarrays are returned: direct, reflect,
@@ -1285,10 +1282,8 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     See Also
     --------
-    dipole : Electromagnetic field due to an electromagnetic source (dipoles).
-    bipole : Electromagnetic field due to an electromagnetic source (bipoles).
-    fem : Electromagnetic frequency-domain response.
-    tem : Electromagnetic time-domain response.
+    dipole : EM fields due to infinitesimal small EM dipoles.
+    bipole : EM fields due to arbitrary rotated, finite length EM dipoles.
 
 
     Parameters
