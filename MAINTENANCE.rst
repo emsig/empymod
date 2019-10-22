@@ -31,43 +31,43 @@ Making a release
 
 7. conda build
 
-    Has to be done outside of ~/, because conda skeleton cannot handle, at the
-    moment, the encrypted home
-    (https://conda.io/docs/build_tutorials/pkgs.html).
+   Has to be done outside of ~/, because conda skeleton cannot handle, at the
+   moment, the encrypted home
+   (https://conda.io/docs/build_tutorials/pkgs.html).
 
 
-    1. Install miniconda in /opt::
+   1. Install miniconda in /opt::
 
-           wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-           bash miniconda.sh -b -p /opt/miniconda/miniconda
-           export PATH="/opt/miniconda/miniconda/bin:$PATH"
-           conda update conda
-           conda install -y conda-build anaconda-client
-           conda config --set anaconda_upload yes
-           anaconda login
+          wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+          bash miniconda.sh -b -p /opt/miniconda/miniconda
+          export PATH="/opt/miniconda/miniconda/bin:$PATH"
+          conda update conda
+          conda install -y conda-build anaconda-client
+          conda config --set anaconda_upload yes
+          anaconda login
 
-    2. Now to the conda-build part::
+   2. Now to the conda-build part::
 
-           conda skeleton pypi empymod
-           conda build --python 3.5 empymod
-           conda build --python 3.6 empymod
-           conda build --python 3.7 empymod
+          conda skeleton pypi empymod
+          conda build --python 3.5 empymod
+          conda build --python 3.6 empymod
+          conda build --python 3.7 empymod
 
-    3. Convert for all platforms::
+   3. Convert for all platforms::
 
-           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py35_0.tar.bz2
-           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py36_0.tar.bz2
-           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py37_0.tar.bz2
+          conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py35_0.tar.bz2
+          conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py36_0.tar.bz2
+          conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py37_0.tar.bz2
 
-    4. Upload them::
+   4. Upload them::
 
-           anaconda upload osx-64/*
-           anaconda upload win-*/*
-           anaconda upload linux-32/*
+          anaconda upload osx-64/*
+          anaconda upload win-*/*
+          anaconda upload linux-32/*
 
-    5. Logout::
+   5. Logout::
 
-           anaconda logout
+          anaconda logout
 
 
 Useful things
