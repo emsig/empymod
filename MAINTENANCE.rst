@@ -17,8 +17,10 @@ Making a release
        rm -rf build/ dist/ empymod.egg-info/
 
 3. Push it to GitHub, create a release tagging it
+   (ensure correct tag is in local home with ``python setup.py --version``).
 
-4. Get the Zenodo-DOI and add it to release notes
+4. Get the Zenodo-DOI and add it to release notes; also RTFD, which might have
+   to be triggered first.
 
 5. Create tar and wheel::
 
@@ -29,11 +31,12 @@ Making a release
 
        ~/anaconda3/bin/twine upload dist/*
 
-7. conda build
+7. ``conda`` build:
 
    Has to be done outside of ~/, because conda skeleton cannot handle, at the
    moment, the encrypted home
-   (https://conda.io/docs/build_tutorials/pkgs.html).
+   (https://conda.io/docs/build_tutorials/pkgs.html). Also, ensure you leave
+   any current conda environment with ``conda deactivate``.
 
 
    1. Install miniconda in /opt::
@@ -46,26 +49,34 @@ Making a release
           conda config --set anaconda_upload yes
           anaconda login
 
-   2. Now to the conda-build part::
+   2. Create the skeleton for conda from PyPi::
 
           conda skeleton pypi empymod
+
+      Edit the ``empymod/meta.yml`` in the following way:
+
+      - under ``build:``, add ``preserve_egg_dir: True``
+      - under ``requirement: host:``, add ``- setuptools_scm``
+
+   3. Now to the conda-build part::
+
           conda build --python 3.5 empymod
           conda build --python 3.6 empymod
           conda build --python 3.7 empymod
 
-   3. Convert for all platforms::
+   4. Convert for all platforms::
 
           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py35_0.tar.bz2
           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py36_0.tar.bz2
           conda convert --platform all /opt/miniconda/miniconda/conda-bld/linux-64/empymod-[version]-py37_0.tar.bz2
 
-   4. Upload them::
+   5. Upload them::
 
           anaconda upload osx-64/*
           anaconda upload win-*/*
           anaconda upload linux-32/*
 
-   5. Logout::
+   6. Logout::
 
           anaconda logout
 
