@@ -2,6 +2,16 @@ Changelog
 #########
 
 
+v1.10.1: setuptools_scm
+-----------------------
+
+**2019-10-22**
+
+- Typos from v1.10.0; update example in ``model.loop``.
+- Implement ``setuptools_scm`` for versioning (adds git hashes for
+  dev-versions).
+
+
 v1.10.0: Loop source and receiver
 ---------------------------------
 

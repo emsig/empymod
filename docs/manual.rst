@@ -211,8 +211,7 @@ If you prefer to contact me outside of GitHub use the contact form on my
 personal website, https://werthmuller.org.
 
 To install empymod from source, you can download the latest version from GitHub
-and either add the path to ``empymod`` to your python-path variable, or install
-it in your python distribution via:
+and install it in your python distribution via:
 
 .. code-block:: console
 

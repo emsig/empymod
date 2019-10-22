@@ -2,10 +2,19 @@
 __pycache__/
 
 # Sphinx
-_build/
+docs/_build/
 
 # Pytest and coverage related
 htmlcov
 .coverage
 .coverage.*
 .pytest_cache/
+
+# setuptools_scm
+empymod/version.py
+
+# Build related
+.eggs/
+build/
+dist/
+empymod.egg-info/
