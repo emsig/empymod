@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+import re
 from setuptools import setup
 
+# Get README and remove badges.
 readme = open('README.rst').read()
+readme = re.sub('----.*marker', '----', readme, flags=re.DOTALL)
 
 description = 'Open-source full 3D electromagnetic modeller for 1D VTI media'
 
@@ -13,7 +16,6 @@ setup(
     author='The empymod Developers',
     author_email='dieter@werthmuller.org',
     url='https://empymod.github.io',
-    download_url='https://github.com/empymod/empymod/tarball/v1.10.0',
     license='Apache License V2.0',
     packages=['empymod', 'empymod.scripts'],
     classifiers=[

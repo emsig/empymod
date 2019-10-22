@@ -11,9 +11,8 @@ Making a release
 1. Update:
 
    - ``CHANGELOG``
-   - ``setup.py``: Version number, download url; DO NOT CHANGE THAT
+   - ``setup.py``: Version number, remove '.dev?'.
    - ``empymod/__init__.py``: Check version number, remove '.dev?'.
-   - ``README.md``: Remove all badges
 
 2. Check syntax of README::
 
@@ -92,4 +91,3 @@ Making a release
 
     - ``setup.py``: Bump number, add '.dev0' to version number
     - ``empymod/__init__.py``: Bump number, add '.dev0' to version number
-    - ``README.md``: Add the current badges (|docs| |tests| |coverage|)
