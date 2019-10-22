@@ -60,4 +60,4 @@ except ImportError:
     # hard-coded.
     # So v1.10.0-hc is most likely v1.10.0, but it can be anything between
     # v1.10.0 and v1.10.1.
-    __version__ = '1.10.0-hc'
+    __version__ = '1.10.1-hc'
