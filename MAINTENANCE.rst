@@ -1,8 +1,7 @@
 Maintainers Guide
 =================
 
-A release is currently done completely manually, no automatic deployment is
-set up.
+Releases of ``empymod`` are currently done manually. This is the 'recipe'.
 
 
 Making a release
@@ -11,43 +10,26 @@ Making a release
 1. Update:
 
    - ``CHANGELOG``
-   - ``setup.py``: Version number, remove '.dev?'.
-   - ``empymod/__init__.py``: Check version number, remove '.dev?'.
+   - ``empymod/__init__.py``: Update version number.
 
-2. Check syntax of README::
-
-       python setup.py --long-description | rst2html.py --no-raw > index.html
-
-3. Remove any old stuff (just in case)::
+2. Remove any old stuff (just in case)::
 
        rm -rf build/ dist/ empymod.egg-info/
 
-4. Push it to GitHub, create a release tagging it
+3. Push it to GitHub, create a release tagging it
 
-5. Get the Zenodo-DOI and add it to release notes
+4. Get the Zenodo-DOI and add it to release notes
 
-6. Ensure ``python3-setuptools`` is installed::
-
-       sudo apt install python3-setuptools
-
-7. Create tar and wheel::
+5. Create tar and wheel::
 
        python setup.py sdist
        python setup.py bdist_wheel
 
-8. Test it on testpypi (requires ~/.pypirc)::
-
-       ~/anaconda3/bin/twine upload dist/* -r testpypi
-
-   Optionally test it already in conda if skeleton builds::
-
-       conda skeleton pypi --pypi-url https://test.pypi.io/pypi/ empymod
-
-9. Push it to PyPi (requires ~/.pypircs)::
+6. Push it to PyPi (requires ~/.pypircs)::
 
        ~/anaconda3/bin/twine upload dist/*
 
-10. conda build
+7. conda build
 
     Has to be done outside of ~/, because conda skeleton cannot handle, at the
     moment, the encrypted home
@@ -87,7 +69,22 @@ Making a release
 
            anaconda logout
 
-10. Post-commit changes
 
-    - ``setup.py``: Bump number, add '.dev0' to version number
-    - ``empymod/__init__.py``: Bump number, add '.dev0' to version number
+Useful things
+-------------
+
+- If unsure, test it first on testpypi (requires ~/.pypirc)::
+
+       ~/anaconda3/bin/twine upload dist/* -r testpypi
+
+- If unsure, test the test-pypi for conda if the skeleton builds::
+
+       conda skeleton pypi --pypi-url https://test.pypi.io/pypi/ empymod
+
+- If there were changes to README, check it with::
+
+       python setup.py --long-description | rst2html.py --no-raw > index.html
+
+- If it fails, you might have to install ``python3-setuptools``::
+
+       sudo apt install python3-setuptools

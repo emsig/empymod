@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import re
 from setuptools import setup
 
@@ -10,7 +11,6 @@ description = 'Open-source full 3D electromagnetic modeller for 1D VTI media'
 
 setup(
     name='empymod',
-    version='1.10.1.dev0',
     description=description,
     long_description=readme,
     author='The empymod Developers',
@@ -29,4 +29,10 @@ setup(
         'numpy',
         'scipy>=1.0.0',
     ],
+    use_scm_version={
+        'root': '.',
+        'relative_to': __file__,
+        'write_to': os.path.join('empymod', 'version.py'),
+    },
+    setup_requires=['setuptools_scm'],
 )
