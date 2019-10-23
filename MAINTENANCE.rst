@@ -7,10 +7,7 @@ Releases of ``empymod`` are currently done manually. This is the 'recipe'.
 Making a release
 ----------------
 
-1. Update:
-
-   - ``CHANGELOG``
-   - ``empymod/__init__.py``: Update version number.
+1. Update ``CHANGELOG.rst``.
 
 2. Remove any old stuff (just in case)::
 
