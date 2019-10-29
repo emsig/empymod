@@ -1,8 +1,5 @@
-Code
-####
-
-.. automodule:: empymod.model
-    :members:
+Other functions
+###############
 
 .. automodule:: empymod.kernel
     :members:

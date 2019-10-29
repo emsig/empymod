@@ -1,0 +1,27 @@
+/* Customized styles */
+
+/* Sidebar header background */
+.wy-side-nav-search, .wy-nav-top {
+  background: #996666;
+}
+
+/* Sidebar header text */
+.wy-side-nav-search > div.version {
+  color: #ffffff;
+}
+
+/* Navigation headings */
+.wy-menu .caption-text {
+  color: #cc3333;
+  font-weight: bold;
+
+}
+
+/* To fix equation numbering in rtd theme. */
+span.eqno {
+  margin-left: 5px;
+  float: right;
+}
+span.eqno a {
+  display: none;
+}

@@ -1,5 +1,5 @@
-Add-ons
-#######
+Add-on functions
+################
 
 .. automodule:: empymod.scripts
 
