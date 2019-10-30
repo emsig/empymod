@@ -38,8 +38,7 @@ References
    response in a layered vertical transverse isotropic medium: A new look at an
    old problem: Geophysics, 80(1), F1--F18; DOI: `10.1190/geo2013-0411.1
    <https://doi.org/10.1190/geo2013-0411.1>`_; Software:
-   `software.seg.org/2015/0001
-   <https://software.seg.org/2015/0001/index.html>`_.
+   `software.seg.org/2015/0001 <https://software.seg.org/2015/0001>`_.
 .. [Key09] Key, K., 2009, 1D inversion of multicomponent, multifrequency marine
    CSEM data: Methodology and synthetic studies for resolving thin resistive
    layers: Geophysics, 74(2), F9--F20; DOI: `10.1190/1.3058434
@@ -49,8 +48,7 @@ References
 .. [Key12] Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
    Geophysics, 77(3), F21--F30; DOI: `10.1190/geo2011-0237.1
    <https://doi.org/10.1190/geo2011-0237.1>`_; Software:
-   `software.seg.org/2012/0003
-   <https://software.seg.org/2012/0003/index.html>`_.
+   `software.seg.org/2012/0003 <https://software.seg.org/2012/0003>`_.
 .. [Kong07] Kong, F. N., 2007, Hankel transform filters for dipole antenna
    radiation in a conductive medium: Geophysical Prospecting, 55, 83--89; DOI:
    `10.1111/j.1365-2478.2006.00585.x

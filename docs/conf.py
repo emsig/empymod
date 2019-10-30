@@ -115,3 +115,11 @@ texinfo_documents = [
      author, 'empymod', description,
      'Electromagnetic geophysical modelling'),
 ]
+
+
+# ==== 5. linkcheck ====
+
+# software.seg.org results in "403 Client Error: Forbidden for url" on Travis.
+linkcheck_ignore = [
+    'https://software.seg.org',
+]
