@@ -18,7 +18,7 @@ matrix:
 
 jobs:
   allow_failures:
-    - CHCKLNKS = true
+    - env: CHCKLNKS=true
 
 install:
   - sudo apt-get update
