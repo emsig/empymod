@@ -44,9 +44,9 @@ have additional, optional dependencies for other modules such as
 If you are new to Python I recommend using a Python distribution, which will
 ensure that all dependencies are met, specifically properly compiled versions
 of ``NumPy`` and ``SciPy``; I recommend using `Anaconda
-<https://www.anaconda.com/download>`_. If you install Anaconda you can simply
-start the *Anaconda Navigator*, add the channel ``prisae`` and ``empymod`` will
-appear in the package list and can be installed with a click.
+<https://www.anaconda.com/distribution>`_. If you install Anaconda you can
+simply start the *Anaconda Navigator*, add the channel ``prisae`` and
+``empymod`` will appear in the package list and can be installed with a click.
 
 
 The structure of empymod is:
