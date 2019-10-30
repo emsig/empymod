@@ -1,6 +1,7 @@
 numpy
 scipy >= 1.0.0
 sphinx
-sphinxcontrib-napoleon
 numpydoc >= 0.9
+sphinx_numfig
+sphinx_rtd_theme
 setuptools_scm

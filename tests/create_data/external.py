@@ -1,10 +1,10 @@
 r"""Routines to create data from external modellers, for comparison purposes.
 
 - DIPOLE1D: You must have Dipole1D installed and it must be in your system
-  path; http://software.seg.org/2012/0003.
+  path; https://software.seg.org/2012/0003.
 
 - EMmod: You must have Dipole1D installed and it must be in your system
-  path; http://software.seg.org/2015/0001.
+  path; https://software.seg.org/2015/0001.
 
 - Green3D: You must have Green3D installed (for which you need to be a member
   of the CEMI consortium). The following files must be in the folder
@@ -124,7 +124,7 @@ def dipole1d(src, rec, depth, res, freq, srcpts=5):
 
     You must have Dipole1D installed and it must be in your system path.
 
-    http://software.seg.org/2012/0003
+    https://software.seg.org/2012/0003
 
     """
 
@@ -210,7 +210,7 @@ def emmod(dx, nx, dy, ny, src, rec, depth, res, freq, aniso, epermV, epermH,
 
     You must have EMmod installed and it must be in your system path.
 
-    http://software.seg.org/2015/0001
+    https://software.seg.org/2015/0001
 
     nd        : number of integration domains
     startlogx : first integration point in space

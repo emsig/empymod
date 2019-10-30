@@ -103,7 +103,7 @@ for i in ${PYTHON3VERSION[@]}; do
   rm matplotlibrc
 
   # De-activate venv
-  conda deactivate $NAME
+  conda deactivate
 
   # Remove venv
   if [ "$DELETE" = true ] ; then

@@ -7,8 +7,8 @@ matrix:
       env: PYTHON=3.5 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby"
     - python: 3.6
       env: PYTHON=3.6 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby"
-    - python: 3.6  # => 3.7
-      env: PYTHON=3.7 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby"
+    - python: 3.6  # => 3.7 and linkcheck
+      env: PYTHON=3.7 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby sphinx numpydoc sphinx_rtd_theme sphinx_numfig"
     - python: 3.6  # => 3.6 with conda-forge
       env: PYTHON=3.6 PCKGS="numexpr matplotlib" CHAN="conda-forge" TEST="--mpl" INST="pytest-mpl"
     - python: 3.6  # => 3.6 with without matplotlib, numexpr
@@ -35,6 +35,9 @@ install:
   - cp tests/matplotlibrc .
 
 
-script: pytest --cov=empymod --flake8 $TEST
+script:
+  - pytest --cov=empymod --flake8 $TEST
+  allow_failures:
+  - if [[ "$PYTHON" == 3.7 ]]; then cd docs; make html -b linkcheck; fi
 
 after_success: coveralls

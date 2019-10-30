@@ -17,7 +17,7 @@ The filters ``kong_61_2007`` and ``kong_241_2007`` from [Kong07]_, and
 ``key_101_2009``, ``key_201_2009``, ``key_401_2009``, ``key_81_CosSin_2009``,
 ``key_241_CosSin_2009``, and ``key_601_CosSin_2009`` from [Key09]_ are taken
 from *DIPOLE1D*, [Key09]_, which can be downloaded at
-http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM (1DCSEM_). *DIPOLE1D* is
+https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM (1DCSEM_). *DIPOLE1D* is
 distributed under the license GNU GPL version 3 or later. Kerry Key gave his
 written permission to re-distribute the filters under the Apache License,
 Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November 2016).
@@ -25,14 +25,14 @@ Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November 2016).
 The filters ``anderson_801_1982`` from [Ande82]_ and ``key_51_2012``,
 ``key_101_2012``, ``key_201_2012``, ``key_101_CosSin_2012``, and
 ``key_201_CosSin_2012``, all from [Key12]_, are taken from the software
-distributed with [Key12]_ and available at http://software.seg.org/2012/0003
+distributed with [Key12]_ and available at https://software.seg.org/2012/0003
 (SEG-2012-003_). These filters are distributed under the SEG license.
 
 The filter ``wer_201_2018`` was designed with the add-on ``fdesign``, see
 https://github.com/empymod/article-fdesign.
 
-.. _1DCSEM: http://marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-.. _SEG-2012-003: http://software.seg.org/2012/0003
+.. _1DCSEM: https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM
+.. _SEG-2012-003: https://software.seg.org/2012/0003
 
 """
 # Copyright 2016-2019 The empymod Developers.
@@ -43,7 +43,7 @@ https://github.com/empymod/article-fdesign.
 # use this file except in compliance with the License.  You may obtain a copy
 # of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -192,7 +192,7 @@ def kong_61_2007():
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
-    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+    <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -308,7 +308,7 @@ def kong_241_2007():
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
-    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+    <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -694,7 +694,7 @@ def key_101_2009():
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
-    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+    <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -819,7 +819,7 @@ def key_201_2009():
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
-    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+    <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -1043,7 +1043,7 @@ def key_401_2009():
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
-    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+    <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -1466,7 +1466,7 @@ def anderson_801_1982():
 
     Taken from file ``wa801Hankel.txt`` provided with SEG-2012-003_.
 
-    License: http://software.seg.org/disclaimer.txt.
+    License: https://software.seg.org/disclaimer.txt.
 
     """
 
@@ -2558,7 +2558,7 @@ def key_51_2012():
 
     Taken from file ``kk51Hankel.txt`` provided with SEG-2012-003_.
 
-    License: http://software.seg.org/disclaimer.txt.
+    License: https://software.seg.org/disclaimer.txt.
 
     """
 
@@ -2650,7 +2650,7 @@ def key_101_2012():
 
     Taken from file ``kk101Hankel.txt`` provided with SEG-2012-003_.
 
-    License: http://software.seg.org/disclaimer.txt.
+    License: https://software.seg.org/disclaimer.txt.
 
     """
 
@@ -2808,7 +2808,7 @@ def key_201_2012():
 
     Taken from file ``kk201Hankel.txt`` provided with SEG-2012-003_.
 
-    License: http://software.seg.org/disclaimer.txt.
+    License: https://software.seg.org/disclaimer.txt.
 
     """
 
@@ -3102,7 +3102,7 @@ def wer_201_2018():
     https://github.com/empymod/article-fdesign.
 
     License: `Apache License, Version 2.0,
-    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+    <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -3431,7 +3431,7 @@ def key_81_CosSin_2009():
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
-    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+    <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -3537,7 +3537,7 @@ def key_241_CosSin_2009():
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
-    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+    <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -3803,7 +3803,7 @@ def key_601_CosSin_2009():
     Taken from file ``FilterModules.f90`` provided with 1DCSEM_.
 
     License: `Apache License, Version 2.0,
-    <http://www.apache.org/licenses/LICENSE-2.0>`_.
+    <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
     """
 
@@ -4428,7 +4428,7 @@ def key_101_CosSin_2012():
 
     Taken from file ``kk101CosSin.txt`` provided with SEG-2012-003_.
 
-    License: http://software.seg.org/disclaimer.txt.
+    License: https://software.seg.org/disclaimer.txt.
 
     """
 
@@ -4589,7 +4589,7 @@ def key_201_CosSin_2012():
 
     Taken from file ``kk201CosSin.txt`` provided with SEG-2012-003_.
 
-    License: http://software.seg.org/disclaimer.txt.
+    License: https://software.seg.org/disclaimer.txt.
 
     """
 

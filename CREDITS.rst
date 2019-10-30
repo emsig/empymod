@@ -41,6 +41,6 @@ certainly incomplete list (get in touch if you think you should appear here):
 
     This software was initially (till 01/2017) developed with funding from *The
     Mexican National Council of Science and Technology* (*Consejo Nacional de
-    Ciencia y Tecnología*, http://www.conacyt.gob.mx), carried out at *The
+    Ciencia y Tecnología*, https://www.conacyt.gob.mx), carried out at *The
     Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
-    http://www.gob.mx/imp).
+    https://www.gob.mx/imp).
