@@ -39,13 +39,10 @@ install:
 
 
 script:
-  - if |
-    [ "$CHCKLNKS" = true ]
-    then
-        cd docs
-        make html -b linkcheck
+  - if [ "$CHCKLNKS" = true ]; then
+        cd docs; make html -b linkcheck;
     else
-        pytest --cov=empymod --flake8 $TEST
+        pytest --cov=empymod --flake8 $TEST;
     fi
 
 after_success:
