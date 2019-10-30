@@ -9,10 +9,10 @@ frequency domain and Fourier transform from frequency to time domain.
 The functions for the QWE and DLF Hankel and Fourier transforms are based on
 source files (specified in each function) from the source code distributed with
 [Key12]_, which can be found at `software.seg.org/2012/0003
-<http://software.seg.org/2012/0003>`_. These functions are (c) 2012 by Kerry
+<https://software.seg.org/2012/0003>`_. These functions are (c) 2012 by Kerry
 Key and the Society of Exploration Geophysicists,
-http://software.seg.org/disclaimer.txt. Please read the NOTICE-file in the root
-directory for more information regarding the involved licenses.
+https://software.seg.org/disclaimer.txt. Please read the NOTICE-file in the
+root directory for more information regarding the involved licenses.
 
 """
 # Copyright 2016-2019 The empymod Developers.
@@ -23,7 +23,7 @@ directory for more information regarding the involved licenses.
 # use this file except in compliance with the License.  You may obtain a copy
 # of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
