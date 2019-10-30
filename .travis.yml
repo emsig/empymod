@@ -5,12 +5,12 @@ matrix:
   include:
     - python: 3.5
       env: PYTHON=3.5 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby" CHCKLNKS=false
-    - python: 3.6
-      env: PYTHON=3.6 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby" CHCKLNKS=false
-    - python: 3.6  # => 3.7 and linkcheck
-      env: PYTHON=3.7 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby sphinx numpydoc sphinx_rtd_theme sphinx_numfig" CHCKLNKS=false
-    - python: 3.6  # => 3.6 with conda-forge
-      env: PYTHON=3.6 PCKGS="numexpr matplotlib" CHAN="conda-forge" TEST="--mpl" INST="pytest-mpl" CHCKLNKS=false
+#    - python: 3.6
+#       env: PYTHON=3.6 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby" CHCKLNKS=false
+#     - python: 3.6  # => 3.7 and linkcheck
+#       env: PYTHON=3.7 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby sphinx numpydoc sphinx_rtd_theme sphinx_numfig" CHCKLNKS=false
+#     - python: 3.6  # => 3.6 with conda-forge
+#       env: PYTHON=3.6 PCKGS="numexpr matplotlib" CHAN="conda-forge" TEST="--mpl" INST="pytest-mpl" CHCKLNKS=false
     - python: 3.6  # => 3.6 with without matplotlib, numexpr
       env: PYTHON=3.6 PCKGS="" CHAN="defaults" TEST="" INST="" CHCKLNKS=false
     - python: 3.6  # just linkcheck
@@ -18,7 +18,7 @@ matrix:
 
 jobs:
   allow_failures:
-    - env: CHCKLNKS=true
+    - env: PYTHON=3.5 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby" CHCKLNKS=false
 
 install:
   - sudo apt-get update
