@@ -18,7 +18,7 @@ matrix:
 
 jobs:
   allow_failures:
-    - env: PYTHON=3.5 PCKGS="numexpr matplotlib" CHAN="defaults" TEST="--mpl" INST="pytest-mpl scooby" CHCKLNKS=false
+    - env: PYTHON=3.7 PCKGS="" CHAN="defaults" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig" CHCKLNKS=true
 
 install:
   - sudo apt-get update
