@@ -25,13 +25,13 @@ def test_emarray():
     assert out.real == 3
     assert out.imag == 0
 
-    out = utils.EMArray(1, 1)
+    out = utils.EMArray(1+1j)
     assert out.amp == np.sqrt(2)
     assert out.pha == 45.
     assert out.real == 1
     assert out.imag == 1
 
-    out = utils.EMArray([1, 0], [1, 1])
+    out = utils.EMArray([1+1j, 0+1j])
     assert_allclose(out.amp, [np.sqrt(2), 1])
     assert_allclose(out.pha, [45., 90.])
     assert_allclose(out.real, [1, 0])
@@ -1080,3 +1080,23 @@ def test_versions_backwards():
         # Exclude minutes and seconds, to avoid stupid failures.
         assert out1.__repr__()[150:] == out2.__repr__()[150:]
         assert out1.__repr__()[150:] == out3.__repr__()[150:]
+
+
+def test_emarray_backwards():
+    out = utils.EMArray(3)
+    assert out.amp == 3
+    assert out.pha == 0
+    assert out.real == 3
+    assert out.imag == 0
+
+    out = utils.EMArray(1, 1)
+    assert out.amp == np.sqrt(2)
+    assert out.pha == 45.
+    assert out.real == 1
+    assert out.imag == 1
+
+    out = utils.EMArray([1, 0], [1, 1])
+    assert_allclose(out.amp, [np.sqrt(2), 1])
+    assert_allclose(out.pha, [45., 90.])
+    assert_allclose(out.real, [1, 0])
+    assert_allclose(out.imag, [1, 1])

@@ -90,15 +90,8 @@ class EMArray(np.ndarray):
 
     Parameters
     ----------
-    realpart : array
-        1. Real part of input, if input is real or complex.
-        2. Imaginary part of input, if input is pure imaginary.
-        3. Complex input.
-
-        In cases 2 and 3, ``imagpart`` must be None.
-
-    imagpart: array, optional
-        Imaginary part of input. Defaults to None.
+    data : array
+        Data to which to add ``.amp`` and ``.pha`` attributes.
 
     Attributes
     ----------
@@ -107,14 +100,14 @@ class EMArray(np.ndarray):
 
     pha : ndarray
         Phase of the input data, in degrees, lag-defined (increasing with
-        increasing offset.) To get lead-defined phases, multiply ``imagpart``
-        by -1 before passing through this function.
+        increasing offset). To get lead-defined phases, provide
+        ``data.conjugate()``.
 
     Examples
     --------
     >>> import numpy as np
     >>> from empymod.utils import EMArray
-    >>> emvalues = EMArray(np.array([1,2,3]), np.array([1, 0, -1]))
+    >>> emvalues = EMArray(np.array([1,2,3])+1j*np.array([1, 0, -1]))
     >>> print('Amplitude : ', emvalues.amp)
     Amplitude :  [ 1.41421356  2.          3.16227766]
     >>> print('Phase     : ', emvalues.pha)
@@ -122,25 +115,24 @@ class EMArray(np.ndarray):
 
     """
 
-    def __new__(cls, realpart, imagpart=None):
+    def __new__(cls, data, backwards_comp=None):
         r"""Create a new EMArray."""
+        if np.any(backwards_comp):  # Delete for v2.0.0
+            data = np.asarray(data) + 1j*np.asarray(backwards_comp)
+        return np.asarray(data).view(cls)
 
-        # Create complex obj
-        if np.any(imagpart):
-            obj = np.real(realpart) + 1j*np.real(imagpart)
-        else:
-            obj = np.asarray(realpart, dtype=complex)
+    @property
+    def amp(self):
+        """Make amplitude an attribute."""
+        return np.abs(self.view())
 
-        # Ensure its at least a 1D-Array, view cls
-        obj = np.atleast_1d(obj).view(cls)
-
-        # Store amplitude
-        obj.amp = np.abs(obj)
-
-        # Calculate phase, unwrap it, transform to degrees
-        obj.pha = np.rad2deg(np.unwrap(np.angle(obj.real + 1j*obj.imag)))
-
-        return obj
+    @property
+    def pha(self):
+        """Make phase an attribute (unwrapped and in degrees."""
+        ang = np.angle(self.view())
+        if ang.size > 1:
+            ang = np.unwrap(ang)
+        return 180*ang/np.pi
 
 
 # 2. Input parameter checks for modelling
