@@ -117,7 +117,7 @@ class EMArray(np.ndarray):
 
     def __new__(cls, data, backwards_comp=None):
         r"""Create a new EMArray."""
-        if backwards_comp is not None:  # Delete for v2.0.0
+        if np.any(backwards_comp):  # Delete for v2.0.0
             data = np.asarray(data) + 1j*np.asarray(backwards_comp)
         return np.asarray(data).view(cls)
 
