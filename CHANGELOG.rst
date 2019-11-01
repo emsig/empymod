@@ -2,6 +2,19 @@ Changelog
 #########
 
 
+latest
+------
+
+- Simplified and improved ``empymod.utils.EMArray``. Now every returned array
+  from the main modelling routines ``bipole``, ``dipole``, ``loop``, and
+  ``analytical`` is an EMArray with ``.amp``- and ``.pha``-attributes.
+- Theme and documentation reworked, to be more streamlined with ``emg3d`` (for
+  easier long-term maintenance).
+- Travis now checks all the url's in the documentation, so there should be no
+  broken links down the road. (Check is allowed to fail, it is visual QC.)
+- Fixes to the ``setuptools_scm``-implementation (``MANIFEST.in``).
+
+
 v1.10.1: setuptools_scm
 -----------------------
 

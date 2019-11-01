@@ -62,7 +62,7 @@ from .utils import (check_time, check_time_only, check_model, check_frequency,
                     check_hankel, check_opt, check_dipole, check_bipole,
                     check_ab, check_solution, get_abs, get_geo_fact,
                     get_azm_dip, get_off_ang, get_layer_nr, printstartfinish,
-                    conv_warning, spline_backwards_hankel)
+                    conv_warning, spline_backwards_hankel, EMArray)
 
 __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
            'tem', 'wavenumber']
@@ -335,10 +335,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     Returns
     -------
-    EM : ndarray, (nfreqtime, nrec, nsrc)
+    EM : EMAarray, (nfreqtime, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns H [A/m].
+
+        EMArray is a subclassed ndarray with ``.pha`` and ``.amp`` attributes
+        (only relevant for frequency-domain data).
 
         The shape of EM is (nfreqtime, nrec, nsrc). However, single dimensions
         are removed.
@@ -579,7 +582,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
 
-    return EM
+    return EMArray(EM)
 
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
@@ -841,10 +844,13 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     Returns
     -------
-    EM : ndarray, (nfreqtime, nrec, nsrc)
+    EM : EMArray, (nfreqtime, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns H [A/m].
+
+        EMArray is a subclassed ndarray with ``.pha`` and ``.amp`` attributes
+        (only relevant for frequency-domain data).
 
         The shape of EM is (nfreqtime, nrec, nsrc). However, single dimensions
         are removed.
@@ -944,7 +950,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
 
-    return EM
+    return EMArray(EM)
 
 
 def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
@@ -1236,10 +1242,13 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     Returns
     -------
-    EM : ndarray, (nfreqtime, nrec, nsrc)
+    EM : EMArray, (nfreqtime, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns H [A/m].
+
+        EMArray is a subclassed ndarray with ``.pha`` and ``.amp`` attributes
+        (only relevant for frequency-domain data).
 
 
     Examples
@@ -1484,7 +1493,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
 
-    return EM
+    return EMArray(EM)
 
 
 def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
@@ -1598,10 +1607,13 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     Returns
     -------
-    EM : ndarray, (nfreqtime, nrec, nsrc)
+    EM : EMArray, (nfreqtime, nrec, nsrc)
         Frequency- or time-domain EM field (depending on ``signal``):
             - If rec is electric, returns E [V/m].
             - If rec is magnetic, returns H [A/m].
+
+        EMArray is a subclassed ndarray with ``.pha`` and ``.amp`` attributes
+        (only relevant for frequency-domain data).
 
         The shape of EM is (nfreqtime, nrec, nsrc). However, single dimensions
         are removed.
@@ -1710,7 +1722,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     # === 4.  FINISHED ============
     printstartfinish(verb, t0)
 
-    return EM
+    return EMArray(EM)
 
 
 def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
