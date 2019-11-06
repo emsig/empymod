@@ -95,3 +95,32 @@ Useful things
 - If it fails, you might have to install ``python3-setuptools``::
 
        sudo apt install python3-setuptools
+
+
+CI
+--
+
+- Testing on `Travis <https://travis-ci.org/empymod/empymod>`_, includes:
+
+  - Tests using ``pytest``
+  - Linting / code style with ``pytest-flake8``
+  - Figures with ``pytest-mpl``
+  - Ensure all http(s)-links work (``sphinx linkcheck``)
+
+- Line-coverage with ``pytest-cov`` on `Coveralls
+  <https://coveralls.io/github/empymod/empymod>`_
+- Code-quality on `Codacy
+  <https://app.codacy.com/manual/prisae/empymod/dashboard>`_
+- Manual on `ReadTheDocs <https://empymod.readthedocs.io/en/latest>`_
+- DOI minting on `Zenodo <https://doi.org/10.5281/zenodo.593094>`_
+- Benchmarks with `Airspeed Velocity <https://empymod.github.io/empymod-asv>`_
+  (``asv``) [currently manually]
+- Examples in `empymod-examples
+  <https://github.com/empymod/empymod-examples>`_; should move to a
+  sphinx-gallery instance (`#33
+  <https://github.com/empymod/empymod/issues/33>`_) [currently manually]
+- deploy (`#49 <https://github.com/empymod/empymod/issues/49>`_)
+
+  - `PyPi <https://pypi.org/project/empymod>`_ [currently manually]
+  - `conda -c prisae <https://anaconda.org/prisae/empymod>`_; should move to
+    conda-forge [currently manually]
