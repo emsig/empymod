@@ -31,9 +31,8 @@ Making a release
 7. ``conda`` build:
 
    Has to be done outside of ~/, because conda skeleton cannot handle, at the
-   moment, the encrypted home
-   (https://conda.io/docs/build_tutorials/pkgs.html). Also, ensure you leave
-   any current conda environment with ``conda deactivate``.
+   moment, the encrypted home. Also, ensure you leave any current conda
+   environment with ``conda deactivate``.
 
 
    1. Install miniconda in /opt::

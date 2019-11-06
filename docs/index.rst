@@ -17,10 +17,10 @@ Version: |version| ~ Date: |today|
    manual
    transforms
    speedmemoryaccuracy
-   roadmap
    references
-   changelog
    credits
+   changelog
+   maintenance
 
 .. toctree::
    :maxdepth: 2

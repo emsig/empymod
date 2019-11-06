@@ -205,10 +205,11 @@ Contributing
 ------------
 
 New contributions, bug reports, or any kind of feedback is always welcomed!
-Have a look at the Roadmap-section to get an idea of things that could be
-implemented. The best way for interaction is at https://github.com/empymod.
-If you prefer to contact me outside of GitHub use the contact form on my
-personal website, https://werthmuller.org.
+Have a look at the `Projects <https://github.com/empymod/empymod/projects>`_ on
+GitHub to get an idea of things that could be implemented. The best way for
+interaction is at https://github.com/empymod. If you prefer to contact me
+outside of GitHub use the contact form on my personal website,
+https://werthmuller.org.
 
 To install empymod from source, you can download the latest version from GitHub
 and install it in your python distribution via:

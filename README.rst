@@ -39,8 +39,8 @@ domains.
 More information
 ================
 
-For more information regarding installation, usage, contributing, roadmap, bug
-reports, and much more, see
+For more information regarding installation, usage, contributing, bug reports,
+and much more, see
 
 - **Website**: https://empymod.github.io,
 - **Documentation**: https://empymod.readthedocs.io,
