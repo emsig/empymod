@@ -58,7 +58,7 @@ deploy:
     secure: qjFH/07DbwrH2sqGhWAO7y+JV4rgSiRomWmFEyTndt6nmNGuYhpjXIvVRh7/3aozCBLm4qpzflRJF6a+7SlCOkKAjWGM6w4X30nbcmvxBLLvWgL9cbf4gubDYgC1/19+rbLL0u1H8RYbXhXIMDiuNwFZWRqIOpEHt1hwcZBW9FOAt/Xhg8g0peo+I1iUSGAJIO+OC5WdN5L5ms46i5/ELr+UBylaUCFhGyCgnoL1lJFGGDV60eD4HM/4E6Oq0RhaoBh53QSv+eTffs0i+rnKP3tKBKxCnc7Xe+KAJMppAqpQKf3ljwCv+muaCcYKaBRKQXbNx8HjxsFqwgrefVoJ8tLchXAfmIWkVsAeAzvUqZDv44YJT2gdT/A3renLI0YQqalAHy7O+4Pftp5tYzFE3NJZhDUQcy7zEV6esFClKGuPPWedXSBEPcYkLmz2mkJYZK5X6eYGRgA7+j9XNCB8PC52kQIKhwmYX5dSnkwBFBObj+9CnTljNxO8PY2xQ9F7cbWZaGJdMzihUd1EQyUP6oXCkuY84Sn7Q6w24wzuLY7qg4NFtVkEpHI5DzNwys0uKrZAwDgV3pk/HqZIFMvNkzBLjjatborajrVBG0oxi0i4dSdi8nhQEjcp+ObUL04r9MJugFacF6rvSW0vUYytwwnRGXXmMi6oCc4gNL/MLQU=
   on:
     # branch: master  # TODO ACTIVATE
-    branch: empymod/test-pypi  # TODO REMOVE
+    branch: test-pypi  # TODO REMOVE
     # tags: true  # TODO ACTIVATE
     condition: '$DEPLOY_PYPI = "true"'
   distributions: "sdist bdist_wheel"
