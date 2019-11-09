@@ -24,7 +24,7 @@ You can install empymod either via ``conda``:
 
 .. code-block:: console
 
-   conda install -c prisae empymod
+   conda install -c conda-forge empymod
 
 or via ``pip``:
 
@@ -45,8 +45,20 @@ If you are new to Python I recommend using a Python distribution, which will
 ensure that all dependencies are met, specifically properly compiled versions
 of ``NumPy`` and ``SciPy``; I recommend using `Anaconda
 <https://www.anaconda.com/distribution>`_. If you install Anaconda you can
-simply start the *Anaconda Navigator*, add the channel ``prisae`` and
+simply start the *Anaconda Navigator*, add the channel ``conda-forge`` and
 ``empymod`` will appear in the package list and can be installed with a click.
+
+You should ensure that you have ``NumPy`` and ``SciPy`` installed with the
+Intel Math Kernel Library ``mkl``, as this makes quite a difference in terms of
+speed. You can check that by running
+
+.. code-block:: python
+
+    >>> import numpy as np
+    >>> np.show_config()
+
+The output should contain a lot of references to ``mkl``, and it should NOT
+contain references to ``blas``, ``lapack``, ``openblas``, or similar.
 
 
 The structure of empymod is:

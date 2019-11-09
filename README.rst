@@ -121,7 +121,7 @@ You can install empymod either via ``conda``:
 
 .. code-block:: console
 
-   conda install -c prisae empymod
+   conda install -c conda-forge empymod
 
 or via ``pip``:
 

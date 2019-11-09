@@ -8,7 +8,7 @@ standard quadrature in the form of *QUAD* is also provided. *QUAD* is generally
 orders of magnitudes slower, and more fragile depending on the input arguments.
 However, it can provide accurate results where *DLF* and *QWE* fail.
 
-Parts of the kernel can run in parallel using `numexpr`. This option is
+Parts of the kernel can run in parallel using ``numexpr``. This option is
 activated by setting ``opt='parallel'`` (see subsection :ref:`Parallelisation
 <parallelisation>`). It is switched off by default.
 
