@@ -79,13 +79,7 @@ Usage/Examples
 --------------
 
 A good starting point is [Wert17b]_, and more information can be found in
-[Wert17]_. There are a lot of examples of its usage available, in the form of
-Jupyter notebooks. Have a look at the following repositories:
-
-- Example notebooks: https://github.com/empymod/empymod-examples,
-- Geophysical Tutoriol TLE: https://github.com/empymod/article-tle2017, and
-- Numerical examples of [ZiSl19]_:
-  https://github.com/empymod/csem-ziolkowski-and-slob.
+[Wert17]_. You can find a lot o examples in the examples-section.
 
 The main modelling routines is ``bipole``, which can calculate the
 electromagnetic frequency- or time-domain field due to arbitrary finite
@@ -206,8 +200,7 @@ characteristics:
 And then you call ``empymod`` with ``res={'res': res-array, 'tau': tau,
 'func_eta': my_new_eta}``.
 
-Have a look at the example ``2d_Cole-Cole-IP`` in the `empymod-examples
-<https://github.com/empymod/empymod-examples>`_ repository, where this hook is
+Have a look at the corresponding example in the Gallery, where this hook is
 exploited in the low-frequency range to use the Cole-Cole model for IP
 calculation. It could also be used in the high-frequency range to model
 dielectricity.

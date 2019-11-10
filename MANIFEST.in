@@ -1,5 +1,6 @@
 prune docs
 prune tests
+prune examples
 exclude MAINTENANCE.rst
 exclude requirements.txt
 exclude requirements-dev.txt
