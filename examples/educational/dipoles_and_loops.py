@@ -368,7 +368,7 @@ square_pts -= empymod.dipole(src=[-0.5, +0.0, 0], rec=rec_dip, ab=42,
 square_pts -= empymod.dipole(src=[+0.0, -0.5, 0], rec=rec_dip, ab=41,
                              **model).reshape(np.shape(rx))
 
-plot_result(epm_loop, square_pts, x, f'Loop made of four points',
+plot_result(epm_loop, square_pts, x, 'Loop made of four points',
             vmin=-13, vmax=-5, rx=x)
 
 ###############################################################################
@@ -398,7 +398,7 @@ square_dip += empymod.bipole(src=[-0.5, +0.5, -0.5, -0.5, 0, 0],
                              **inp_dip, **model)
 square_dip = square_dip.reshape(np.shape(rx))
 
-plot_result(epm_loop, square_dip, x, f'Loop made of four dipoles',
+plot_result(epm_loop, square_dip, x, 'Loop made of four dipoles',
             vmin=-13, vmax=-5, rx=x)
 
 ###############################################################################

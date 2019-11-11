@@ -14,11 +14,11 @@ matrix:
     - python: 3.6  # => 3.6 with without matplotlib, numexpr
       env: PYTHON=3.6 PCKGS="" CHAN="defaults" TEST="" INST=""
     - python: 3.6  # just linkcheck
-      env: PYTHON=3.7 PCKGS="" CHAN="defaults" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig" CHCKLNKS=true
+      env: PYTHON=3.7 PCKGS="" CHAN="defaults" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig sphinx_gallery" CHCKLNKS=true
 
 jobs:
   allow_failures:  # env must be EXACTLY as env allowed to fail.
-    - env: PYTHON=3.7 PCKGS="" CHAN="defaults" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig" CHCKLNKS=true
+    - env: PYTHON=3.7 PCKGS="" CHAN="defaults" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig sphinx_gallery" CHCKLNKS=true
 
 install:
   - sudo apt-get update
