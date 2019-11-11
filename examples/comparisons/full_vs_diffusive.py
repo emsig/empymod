@@ -55,7 +55,7 @@ fs = fs.reshape(np.shape(rx))
 
 # Relative error (%)
 amperr = np.abs((fs.amp - hs.amp)/fs.amp)*100
-phaerr = np.abs((fs.pha - hs.pha)/fs.pha)*100
+phaerr = np.abs((np.angle(fs) - np.angle(hs))/np.angle(fs))*100
 
 ###############################################################################
 # Plot
