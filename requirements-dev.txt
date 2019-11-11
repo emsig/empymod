@@ -7,9 +7,10 @@ matplotlib
 sphinx_numfig
 sphinx_rtd_theme
 setuptools_scm
+sphinx_gallery
 pytest
-pytest-cov
-pytest-mpl
-pytest-flake8
+pytest_cov
+pytest_mpl
+pytest_flake8
 scooby
 coveralls

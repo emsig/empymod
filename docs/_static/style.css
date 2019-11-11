@@ -25,3 +25,8 @@ span.eqno {
 span.eqno a {
   display: none;
 }
+
+/* Don't let captions be italic in Sphinx-Gallery */
+.rst-content div.figure p.caption {
+  font-style: normal;
+}

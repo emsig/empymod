@@ -45,8 +45,7 @@ and much more, see
 - **Website**: https://empymod.github.io,
 - **Documentation**: https://empymod.readthedocs.io,
 - **Source Code**: https://github.com/empymod,
-- **Examples**: https://github.com/empymod/empymod-examples.
-
+- **Examples**: https://empymod.readthedocs.io#examples/.
 
 Features
 ========

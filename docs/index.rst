@@ -17,6 +17,7 @@ Version: |version| ~ Date: |today|
    manual
    transforms
    speedmemoryaccuracy
+   examples/index
    references
    credits
    changelog

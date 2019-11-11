@@ -2,6 +2,14 @@ Changelog
 #########
 
 
+latest
+------
+
+- Move from ``prisae`` to ``conda-forge`` on conda.
+- Automatic deploy for PyPi and conda-forge.
+- Move examples to an integrated Sphinx-Gallery, generated each time.
+
+
 v1.10.2: Always EMArray
 -----------------------
 

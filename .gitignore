@@ -3,12 +3,16 @@ __pycache__/
 
 # Sphinx
 docs/_build/
+docs/examples/
 
 # Pytest and coverage related
 htmlcov
 .coverage
 .coverage.*
 .pytest_cache/
+
+# Examples related
+examples/educational/filters/
 
 # setuptools_scm
 empymod/version.py

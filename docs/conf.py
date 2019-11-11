@@ -1,5 +1,7 @@
 import time
+import warnings
 from empymod import __version__
+from sphinx_gallery.sorting import ExplicitOrder, FileNameSortKey
 
 # ==== 1. Extensions  ====
 
@@ -11,15 +13,42 @@ extensions = [
     'sphinx.ext.todo',
     # 'sphinx.ext.intersphinx',
     'numpydoc',
+    'sphinx_gallery.gen_gallery',
 ]
 
 # Numpydoc settings
 numpydoc_show_class_members = False
-numfig = True
-numfig_format = {'figure': 'Figure %s:'}
+# numfig = True
+# numfig_format = {'figure': 'Figure %s:'}
 
 # Todo settings
 todo_include_todos = True
+
+# Sphinx gallery configuration
+sphinx_gallery_conf = {
+    'examples_dirs': '../examples',
+    'gallery_dirs': 'examples',
+    'subsection_order': ExplicitOrder([
+        '../examples/frequency_domain',
+        '../examples/time_domain',
+        '../examples/comparisons',
+        '../examples/add_ons',
+        '../examples/reproducing',
+        '../examples/educational',
+        '../examples/published',
+        ]),
+    'capture_repr': ('_repr_html_', '__repr__'),
+    # Patter to search for example files
+    "filename_pattern": r"\.py",
+    # Sort gallery example by file name instead of number of lines (default)
+    "within_subsection_order": FileNameSortKey,
+}
+
+# https://github.com/sphinx-gallery/sphinx-gallery/pull/521/files
+# Remove matplotlib agg warnings from generated doc when using plt.show
+warnings.filterwarnings("ignore", category=UserWarning,
+                        message='Matplotlib is currently using agg, which is a'
+                                ' non-GUI backend, so cannot show the figure.')
 
 # Intersphinx configuration
 # intersphinx_mapping = {
@@ -29,6 +58,9 @@ todo_include_todos = True
 
 # ==== 2. General Settings ====
 description = 'A multigrid solver for 3D electromagnetic diffusion.'
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = 'friendly'
 
 # The templates path.
 templates_path = ['_templates']
@@ -52,9 +84,6 @@ today_fmt = '%d %B %Y'
 # List of patterns to ignore, relative to source directory.
 exclude_patterns = ['_build', 'PermissionToRelicenseFilters.txt',
                     'LaTeX', '../tests']
-
-# The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
 
 # ==== 3. HTML settings ====
 html_theme = 'sphinx_rtd_theme'

@@ -52,14 +52,11 @@ CI
   <https://coveralls.io/github/empymod/empymod>`_
 - Code-quality on `Codacy
   <https://app.codacy.com/manual/prisae/empymod/dashboard>`_
-- Manual on `ReadTheDocs <https://empymod.readthedocs.io/en/latest>`_
+- Manual on `ReadTheDocs <https://empymod.readthedocs.io/en/latest>`_,
+  including the Gallery (examples run each time).
 - DOI minting on `Zenodo <https://doi.org/10.5281/zenodo.593094>`_
 - Benchmarks with `Airspeed Velocity <https://empymod.github.io/empymod-asv>`_
   (``asv``) [currently manually]
-- Examples in `empymod-examples
-  <https://github.com/empymod/empymod-examples>`_ [currently manually]
-  => should move to a sphinx-gallery instance (`#33
-  <https://github.com/empymod/empymod/issues/33>`_)
 - Automatically deploys if tagged:
 
   - `PyPi <https://pypi.org/project/empymod>`_
