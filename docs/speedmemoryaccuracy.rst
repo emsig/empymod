@@ -174,8 +174,8 @@ of *QWE*. The threshold is stored in ``diff_quad``, which can be changed within
 the parameter ``htarg`` and ``ftarg``.
 
 For a graphical explanation of the differences between standard DLF, lagged
-convolution DLF, and splined DLF for the Hankel and the Fourier transforms
-see the example ``7a_DLF-Standard-Lagged-Splined`` in the Gallery.
+convolution DLF, and splined DLF for the Hankel and the Fourier transforms see
+the example in the Gallery.
 
 Looping
 -------

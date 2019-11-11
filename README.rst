@@ -42,10 +42,10 @@ More information
 For more information regarding installation, usage, contributing, bug reports,
 and much more, see
 
-- **Website**: https://empymod.github.io,
-- **Documentation**: https://empymod.readthedocs.io,
-- **Source Code**: https://github.com/empymod,
-- **Examples**: https://empymod.readthedocs.io#examples/.
+- **Website**: https://empymod.github.io
+- **Documentation**: https://empymod.readthedocs.io
+- **Source Code**: https://github.com/empymod
+- **Examples**: https://empymod.readthedocs.io/en/stable/examples
 
 Features
 ========
