@@ -1,6 +1,9 @@
 Published results
 =================
 
+A lot of examples can be found in the notebooks which belong to published
+results. Here an overview where you can find those.
+
 Introduction to Controlled-Source Electromagnetic Methods
 ---------------------------------------------------------
 
@@ -39,7 +42,7 @@ A tool for designing digital filters for the Hankel and Fourier transforms in po
 See the notebooks in the repo `empymod/article-fdesign
 <https://github.com/empymod/article-fdesign>`_ for:
 
-    Werthmüller, D., K. Key, and E. Slob, 2018, **A tool for designing digital
+    Werthmüller, D., K. Key, and E. Slob, 2019, **A tool for designing digital
     filters for the Hankel and Fourier transforms in potential, diffusive, and
     wavefield modeling**:  Geophysics, 84(2), F47-F56; DOI:
     `10.1190/geo2018-0069.1 <http://doi.org/10.1190/geo2018-0069.1>`_.

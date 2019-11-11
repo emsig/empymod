@@ -9,6 +9,7 @@ import empymod
 import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
+# sphinx_gallery_thumbnail_number = 2
 
 ###############################################################################
 # Define models
@@ -87,8 +88,6 @@ fEMBGbp = empymod.bipole(**inpdat, res=resBG)
 ###############################################################################
 # Plot
 # ~~~~
-
-# sphinx_gallery_thumbnail_number = 2
 
 fig = plt.figure(figsize=(8, 6), facecolor='w')
 fig.subplots_adjust(wspace=.25, hspace=.4)

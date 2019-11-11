@@ -8,6 +8,7 @@ import empymod
 import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
+# sphinx_gallery_thumbnail_number = 3
 
 ###############################################################################
 # Define models
@@ -123,8 +124,6 @@ xfEMBG = empymod.dipole(**inpdat, res=resBG)
 ###############################################################################
 # Plot
 # ~~~~
-
-# sphinx_gallery_thumbnail_number = 3
 
 lfreq = np.log10(freq)
 

@@ -11,6 +11,9 @@ htmlcov
 .coverage.*
 .pytest_cache/
 
+# Examples related
+examples/educational/filters/
+
 # setuptools_scm
 empymod/version.py
 
