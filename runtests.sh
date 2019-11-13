@@ -101,6 +101,7 @@ for i in ${PYTHON3VERSION[@]}; do
   cp tests/matplotlibrc .
   pytest --cov=empymod $PROPS $WARN
   rm matplotlibrc
+  coverage html
 
   # De-activate venv
   conda deactivate

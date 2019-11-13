@@ -59,7 +59,7 @@ except ImportError:
     numexpr_msg += "`opt=='parallel'` has no effect."
 
 # Relative imports
-from . import filters, transform
+from empymod import filters, transform
 
 
 __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',

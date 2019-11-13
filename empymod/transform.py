@@ -36,7 +36,7 @@ import numpy as np
 from scipy import special, fftpack, integrate
 from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
-from . import kernel
+from empymod import kernel
 
 __all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
            'qwe', 'get_spline_values', 'fhti']

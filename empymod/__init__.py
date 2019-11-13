@@ -24,22 +24,22 @@ transform the responses into the space-frequency and space-time domains.
 # the License.
 
 # Import all modules
-from . import model
-from . import utils
-from . import filters
-from . import transform
-from . import kernel
-from . import scripts
+from empymod import model
+from empymod import utils
+from empymod import filters
+from empymod import transform
+from empymod import kernel
+from empymod import scripts
 
 # Import all functions, except the filters
-from .model import *      # noqa  maint. in model.__all__
-from .model import bipole, dipole, loop
-from .utils import *      # noqa  maint. in utils.__all__
-from .utils import EMArray, set_minimum, get_minimum
-from .filters import DigitalFilter
-from .transform import *  # noqa  maint. in transform.__all__
-from .kernel import *     # noqa  maint. in kernel.__all__
-from .scripts import *    # noqa  maint. in scripts.__init__.__all__
+from empymod.model import *      # noqa  maint. in model.__all__
+from empymod.model import bipole, dipole, loop
+from empymod.utils import *      # noqa  maint. in utils.__all__
+from empymod.utils import EMArray, set_minimum, get_minimum
+from empymod.filters import DigitalFilter
+from empymod.transform import *  # noqa  maint. in transform.__all__
+from empymod.kernel import *     # noqa  maint. in kernel.__all__
+from empymod.scripts import *    # noqa  maint. in scripts.__init__.__all__
 
 # Make only a selection available to __all__ to not clutter the namespace
 # Maybe also to discourage the use of `from empymod import *`.
@@ -52,7 +52,7 @@ try:
     # - Released versions just tags:       1.10.0
     # - GitHub commits add .dev#+hash:     1.10.1.dev3+g973038c
     # - Uncommitted changes add timestamp: 1.10.1.dev3+g973038c.d20191022
-    from .version import version as __version__
+    from empymod.version import version as __version__
 except ImportError:
     # If it was not installed, then we don't know the version. We could throw a
     # warning here, but this case *should* be rare. empymod should be installed
