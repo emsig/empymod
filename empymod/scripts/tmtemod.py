@@ -321,10 +321,10 @@ can use
 
 import numpy as np
 
-from ..filters import key_201_2012
-from ..kernel import reflections, angle_factor
-from ..utils import (check_model, check_frequency, check_dipole, _strvar,
-                     get_off_ang, get_layer_nr, printstartfinish)
+from empymod.filters import key_201_2012
+from empymod.kernel import reflections, angle_factor
+from empymod.utils import (check_model, check_frequency, check_dipole, _strvar,
+                           get_off_ang, get_layer_nr, printstartfinish)
 
 __all__ = ['dipole']
 

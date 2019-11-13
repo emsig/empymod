@@ -230,11 +230,11 @@ except ImportError:
     plt = False
     plt_msg = "* WARNING :: `matplotlib` is not installed, no figures shown."
 
-from ..filters import DigitalFilter
-from ..model import dipole, dipole_k
-from ..filters import key_201_2009 as j0j1filt
-from ..filters import key_201_CosSin_2012 as sincosfilt
-from ..utils import printstartfinish, timedelta, default_timer
+from empymod.filters import DigitalFilter
+from empymod.model import dipole, dipole_k
+from empymod.filters import key_201_2009 as j0j1filt
+from empymod.filters import key_201_CosSin_2012 as sincosfilt
+from empymod.utils import printstartfinish, timedelta, default_timer
 
 __all__ = ['design', 'save_filter', 'load_filter', 'plot_result',
            'print_result', 'Ghosh', 'j0_1', 'j0_2', 'j0_3', 'j0_4', 'j0_5',

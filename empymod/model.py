@@ -57,12 +57,13 @@ The modelling routines make use of the following two core routines:
 import warnings
 import numpy as np
 
-from . import kernel, transform
-from .utils import (check_time, check_time_only, check_model, check_frequency,
-                    check_hankel, check_opt, check_dipole, check_bipole,
-                    check_ab, check_solution, get_abs, get_geo_fact,
-                    get_azm_dip, get_off_ang, get_layer_nr, printstartfinish,
-                    conv_warning, spline_backwards_hankel, EMArray)
+from empymod import kernel, transform
+from empymod.utils import (
+        check_time, check_time_only, check_model, check_frequency,
+        check_hankel, check_opt, check_dipole, check_bipole, check_ab,
+        check_solution, get_abs, get_geo_fact, get_azm_dip, get_off_ang,
+        get_layer_nr, printstartfinish, conv_warning, spline_backwards_hankel,
+        EMArray)
 
 __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
            'tem', 'wavenumber']
