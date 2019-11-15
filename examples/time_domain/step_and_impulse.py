@@ -36,7 +36,7 @@ colors = [color['color'] for color in list(plt.rcParams['axes.prop_cycle'])]
 # Time Domain: Step Response :math:`\mathbf{\mathcal{H}(t)}`
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# .. math:
+# .. math::
 #
 #     E_x(\rho_h,\lambda,r,t) = \frac{\rho_h}{2 \pi r^3} \left[ 2\lambda +
 #     \rm{erf}\left(\frac{\tau_h}{2}\right) - 2\lambda
