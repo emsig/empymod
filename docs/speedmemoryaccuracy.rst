@@ -234,3 +234,6 @@ source is put deeper than the receiver. In either case, the best is to first
 test the survey layout against the analytical result (using
 ``empymod.analytical`` with ``solution='dhs'``) for a half-space, and
 subsequently model more complex cases.
+
+An common alternative to this trick is to use a lowpass filter in the frequency
+domain, which filters the unstable high frequencies out.
