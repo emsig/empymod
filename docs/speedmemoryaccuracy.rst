@@ -235,5 +235,5 @@ test the survey layout against the analytical result (using
 ``empymod.analytical`` with ``solution='dhs'``) for a half-space, and
 subsequently model more complex cases.
 
-An common alternative to this trick is to use a lowpass filter in the frequency
-domain, which filters the unstable high frequencies out.
+A common alternative to this trick is to apply a lowpass filter to filter out
+the unstable high frequencies.
