@@ -301,8 +301,7 @@ def walktem(moment, depth, res):
         waveform_times = hm_waveform_times
         waveform_current = hm_waveform_current
     else:
-        raise ValueError(f"Moment must be either 'lm' or 'hm'! Provided:"
-                         f"{moment}")
+        raise ValueError("Moment must be either 'lm' or 'hm'!")
 
     # === GET REQUIRED TIMES ===
     time = get_time(off_time, waveform_times)
