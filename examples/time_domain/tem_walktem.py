@@ -309,8 +309,8 @@ def walktem(moment, depth, res):
     # === GET REQUIRED FREQUENCIES ===
     time, freq, ft, ftarg = empymod.utils.check_time(
         time=time,          # Required times
-        signal=-1,          # Switch-off response
-        ft='cos',           # Use DLF (switch-off requires cosine, not sine)
+        signal=1,           # Switch-on response
+        ft='sin',           # Use DLF
         ftarg={'fftfilt': 'key_81_CosSin_2009'},  # Short, fast filter; if you
         verb=2,                 # need higher accuracy choose a longer filter.
     )
@@ -319,7 +319,7 @@ def walktem(moment, depth, res):
     # We only define a few parameters here. You could extend this for any
     # parameter possible to provide to empymod.model.bipole.
     EM = empymod.model.bipole(
-        src=[20, 20, 20, -20, 0, 0],  # El. bipole source; one side of square.
+        src=[20, 20, -20, 20, 0, 0],  # El. bipole source; one side of square.
         rec=[0, 0, 0, 0, 90],         # Receiver at the origin, vertical.
         depth=np.r_[0, depth],        # Depth-model, adding air-interface.
         res=np.r_[2e14, res],         # Provided resistivity model, adding air.
@@ -349,7 +349,7 @@ def walktem(moment, depth, res):
     # === CONVERT TO TIME DOMAIN ===
     delay_rst = 1.8e-7               # As stated in the WalkTEM manual
     EM, _ = np.squeeze(empymod.model.tem(EM[:, None], np.array([1]),
-                       freq, time+delay_rst, -1, ft, ftarg))
+                       freq, time+delay_rst, 1, ft, ftarg))
 
     # === APPLY WAVEFORM ===
     return waveform(time, EM, off_time, waveform_times, waveform_current)
