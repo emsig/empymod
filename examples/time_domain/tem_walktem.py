@@ -29,6 +29,7 @@ the help of Seogi Kang (`@sgkang <https://github.com/sgkang>`_) from
 import empymod
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LogLocator, NullFormatter
 from scipy.integrate.quadrature import _cached_roots_legendre
 from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 plt.style.use('ggplot')
@@ -128,26 +129,26 @@ plt.show()
 ###############################################################################
 # 2. ``empymod`` implementation
 # -----------------------------
-def waveform(times, resp, times_wanted, ramp_time, ramp_amplitude, nquad=3):
+def waveform(times, resp, times_wanted, wave_time, wave_amp, nquad=3):
     """Apply a source waveform to the signal.
 
     Parameters
     ----------
     times : ndarray
         Times of calculated input response; should start before and
-        end after ``times_wanted``.
+        end after `times_wanted`.
 
     resp : ndarray
-        EM-response corresponding to ``times``.
+        EM-response corresponding to `times`.
 
     times_wanted : ndarray
         Wanted times.
 
-    ramp_time : ndarray
-        Time steps of the ramp.
+    wave_time : ndarray
+        Time steps of the wave.
 
-    ramp_amplitude : ndarray
-        Amplitudes of the ramp corresponding to ``ramp_time``, usually
+    wave_amp : ndarray
+        Amplitudes of the wave corresponding to `wave_time`, usually
         in the range of [0, 1].
 
     nquad : int
@@ -156,20 +157,16 @@ def waveform(times, resp, times_wanted, ramp_time, ramp_amplitude, nquad=3):
     Returns
     -------
     resp_wanted : ndarray
-        EM field for ``times_wanted``.
+        EM field for `times_wanted`.
 
     """
-
-    # Check times_wanted vs ramp_time.
-    if times_wanted.min() < ramp_time.max():
-        raise NotImplementedError('Off-time overlaps waveform.')
 
     # Interpolate on log.
     PP = iuSpline(np.log10(times), resp)
 
-    # Ramp time steps.
-    dt = np.diff(ramp_time)
-    dI = np.diff(ramp_amplitude)
+    # Wave time steps.
+    dt = np.diff(wave_time)
+    dI = np.diff(wave_amp)
     dIdt = dI/dt
 
     # Gauss-Legendre Quadrature; 3 is generally good enough.
@@ -178,19 +175,32 @@ def waveform(times, resp, times_wanted, ramp_time, ramp_amplitude, nquad=3):
     # Pre-allocate output.
     resp_wanted = np.zeros_like(times_wanted)
 
-    # Loop over ramp segments.
-    for i in range(ramp_time.size-1):
+    # Loop over wave segments.
+    for i, cdIdt in enumerate(dIdt):
 
-        # Start and end for this ramp-segment for all times.
-        ta = times_wanted-ramp_time[i]
-        tb = times_wanted-ramp_time[i+1]
+        # We only have to consider segments with a change of current.
+        if cdIdt == 0.0:
+            continue
 
-        # Gauss-Legendre for this ramp segment. See
+        # If wanted time is before a wave element, ignore it.
+        ind_a = wave_time[i] < times_wanted
+        if ind_a.sum() == 0:
+            continue
+
+        # If wanted time is within a wave element, we cut the element.
+        ind_b = wave_time[i+1] > times_wanted[ind_a]
+
+        # Start and end for this wave-segment for all times.
+        ta = times_wanted[ind_a]-wave_time[i]
+        tb = times_wanted[ind_a]-wave_time[i+1]
+        tb[ind_b] = 0.0  # Cut elements
+
+        # Gauss-Legendre for this wave segment. See
         # https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
         # for the change of interval, which makes this a bit more complex.
-        t = np.outer((tb-ta)/2, g_x)+(ta+tb)[:, None]/2
-        fact = (tb-ta)/2*dIdt[i]
-        resp_wanted += fact*np.sum(np.array(PP(np.log10(t))*g_w), axis=1)
+        logt = np.log10(np.outer((tb-ta)/2, g_x)+(ta+tb)[:, None]/2)
+        fact = (tb-ta)/2*cdIdt
+        resp_wanted[ind_a] += fact*np.sum(np.array(PP(logt)*g_w), axis=1)
 
     return resp_wanted
 
@@ -415,19 +425,13 @@ plt.xscale('log')
 plt.yscale('log')
 plt.xlabel("Time(s)")
 plt.ylabel(r"$\mathrm{d}\mathrm{B}_\mathrm{z}\,/\,\mathrm{d}t$")
-plt.grid(which='both')
 plt.legend(title='Difference', loc=3)
 
 # Force minor ticks on logscale
-major = plt.matplotlib.ticker.LogLocator(base=10, numticks=20)
-ax1.yaxis.set_major_locator(major)
-ax2.yaxis.set_major_locator(major)
-minor = plt.matplotlib.ticker.LogLocator(
-            base=10.0, subs=np.arange(1., 10)/10, numticks=20)
-ax1.yaxis.set_minor_locator(minor)
-ax2.yaxis.set_minor_locator(minor)
-ax1.yaxis.set_minor_formatter(plt.matplotlib.ticker.NullFormatter())
-ax2.yaxis.set_minor_formatter(plt.matplotlib.ticker.NullFormatter())
+ax1.yaxis.set_minor_locator(LogLocator(subs='all', numticks=20))
+ax2.yaxis.set_minor_locator(LogLocator(subs='all', numticks=20))
+ax1.yaxis.set_minor_formatter(NullFormatter())
+ax2.yaxis.set_minor_formatter(NullFormatter())
 plt.grid(which='both')
 
 # Finish off
