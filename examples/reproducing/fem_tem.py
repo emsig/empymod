@@ -5,10 +5,10 @@ Magnetic loop sources and magnetic receivers
 Frequency and time-domain modelling of magnetic loop sources and magnetic
 receivers
 
-Reproducing Figures 2.2-2.5 and 4.2-4.5 of Ward and Hohmann (1988): Frequency-
-and time-domain isotropic solutions for a full-space (2.2-2.5) and a
-half-space, where source and receiver are at the interface (4.2-4.5). Source is
-a loop, receiver is a magnetic dipole.
+Reproducing Figures 2.2-2.5, 4.2-4.5, and 4.7-4.8 of Ward and Hohmann (1988):
+Frequency- and time-domain isotropic solutions for a full-space (2.2-2.5) and a
+half-space, where source and receiver are at the interface (4.2-4.5, 4.7-4.8).
+Source is a loop, receiver is a magnetic dipole.
 
 **Reference**
 
@@ -24,7 +24,6 @@ import numpy as np
 from scipy.special import erf
 import matplotlib.pyplot as plt
 from scipy.constants import mu_0
-plt.style.use('ggplot')
 
 ###############################################################################
 # Ward and Hohmann, 1988, Fig 4.4
@@ -330,6 +329,103 @@ plt.show()
 # ~~~~~~~~~~~~~~~
 #
 # .. image:: ../../_static/figures/WardHohmannFig4-5.png
+#
+# Ward and Hohmann, 1988, Fig 4.7
+# -------------------------------
+
+# Survey parameters
+radius = 50
+area = radius**2*np.pi
+freq = np.logspace(-1, np.log10(250000), 301)
+src = [radius, 0, 0, 90, 0]
+rec = [0, 0, 0, 0, 90]
+depth = 0
+res = [2e14, 100]
+strength = area/(radius/2)
+mrec = True
+
+# Calculation
+inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
+       'freqtime': freq, 'strength': strength, 'mrec': mrec,
+       'verb': 1}
+fhz_num = empymod.bipole(**inp)
+
+# Figure
+plt.figure(figsize=(5, 5))
+
+plt.plot(freq, fhz_num.real, 'C0-', label='Real')
+plt.plot(freq, -fhz_num.real, 'C0--')
+
+plt.plot(freq, fhz_num.imag, 'C1-', label='Imaginary')
+plt.plot(freq, -fhz_num.imag, 'C1--')
+
+plt.xscale('log')
+plt.yscale('log')
+plt.xlim([1e-1, 1e6])
+plt.ylim([1e-8, 1e-1])
+plt.xlabel('frequency (Hz)')
+plt.ylabel('$H_z$ (A/m)')
+plt.legend()
+
+plt.tight_layout()
+
+plt.show()
+
+###############################################################################
+# Original Figure
+# ~~~~~~~~~~~~~~~
+#
+# .. image:: ../../_static/figures/WardHohmannFig4-7.png
+#
+# Ward and Hohmann, 1988, Fig 4.8
+# -------------------------------
+
+# Survey parameters
+radius = 50
+area = radius**2*np.pi
+time = np.logspace(-7, -1, 301)
+src = [radius, 0, 0, 90, 0]
+rec = [0, 0, 0, 0, 90]
+depth = 0
+res = [2e14, 100]
+strength = area/(radius/2)
+mrec = True
+
+# Calculation
+inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
+       'freqtime': time, 'strength': strength, 'mrec': mrec,
+       'epermH': eperm, 'epermV': eperm, 'verb': 1}
+
+fhz_num = empymod.bipole(signal=-1, **inp)
+fdhz_num = empymod.bipole(signal=0, **inp)
+
+# Figure
+plt.figure(figsize=(4, 6))
+
+ax1 = plt.subplot(111)
+plt.plot(time*1e3, fdhz_num, 'C0-', label=r'dhz/dt (A/m-s)')
+plt.plot(time*1e3, -fdhz_num, 'C0--')
+
+plt.plot(time*1e3, fhz_num, 'C1-', label='hz (A/m)')
+plt.plot(time*1e3, -fhz_num, 'C1--')
+
+plt.xscale('log')
+plt.yscale('log')
+plt.xlim([1e-4, 1e2])
+plt.yticks(10**np.arange(-7., 4))
+plt.ylim([1e-7, 5e3])
+
+plt.xlabel('time (ms)')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+###############################################################################
+# Original Figure
+# ~~~~~~~~~~~~~~~
+#
+# .. image:: ../../_static/figures/WardHohmannFig4-8.png
 #
 # Ward and Hohmann, 1988, Fig 2.2
 # -------------------------------
