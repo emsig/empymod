@@ -8,7 +8,7 @@ model any EM method from DC to GPR. However, how to actually implement a
 particular EM method and survey layout can be tricky, as there are many more
 things involved than just calculating the EM Greens function.
 
-**In this example we are going to calculate a TEM respose, in particular from
+**In this example we are going to calculate a TEM response, in particular from
 the system** `WalkTEM <https://www.guidelinegeo.com/product/abem-walktem>`_,
 and compare it with data obtained from `AarhusInv
 <https://hgg.au.dk/software/aarhusinv>`_. However, you can use and adapt this
@@ -17,7 +17,7 @@ other system.
 
 What is not included in ``empymod`` at this moment (but hopefully in the
 future), but is required to model TEM data, is to **account for arbitrary
-source waveform**, and to apply a **lowpass filter**. So we gerate these two
+source waveform**, and to apply a **lowpass filter**. So we generate these two
 things here, and create our own wrapper to model TEM data.
 
 The incentive for this example came from Leon Foks (`@leonfoks
@@ -31,6 +31,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate.quadrature import _cached_roots_legendre
 from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
+plt.style.use('ggplot')
+# sphinx_gallery_thumbnail_number = 2
 
 ###############################################################################
 # 1. AarhusInv data
@@ -111,9 +113,16 @@ lm_waveform_current = np.r_[0.0, 1.0, 1.0, 0.0]
 hm_waveform_times = np.r_[-8.333E-03, -8.033E-03, 0.000E+00, 5.600E-06]
 hm_waveform_current = np.r_[0.0, 1.0, 1.0, 0.0]
 
-# Other characteristics
-cutofffreq = 4.5e5
-delay_rst = 1.8e-7
+plt.figure()
+plt.title('Waveforms')
+plt.plot(np.r_[-9, lm_waveform_times*1e3, 2], np.r_[0, lm_waveform_current, 0],
+         label='Low moment')
+plt.plot(np.r_[-9, hm_waveform_times*1e3, 2], np.r_[0, hm_waveform_current, 0],
+         '-.', label='High moment')
+plt.xlabel('Time (ms)')
+plt.xlim([-9, 0.5])
+plt.legend()
+plt.show()
 
 
 ###############################################################################
@@ -193,12 +202,21 @@ def get_time(time, r_time):
     Because of the arbitrary waveform, we need to calculate some times before
     and after the actually wanted times for interpolation of the waveform.
 
-    Note: We could first call ``waveform``, and get the actually required times
+    Some implementation details: The actual times here don't really matter. We
+    create a vector of time.size+2, so it is similar to the input times and
+    accounts that it will require a bit earlier and a bit later times. Really
+    important are only the minimum and maximum times. The Fourier DLF, with
+    `pts_per_dec=-1`, calculates times from minimum to at least the maximum,
+    where the actual spacing is defined by the filter spacing. It subsequently
+    interpolates to the wanted times. Afterwards, we interpolate those again to
+    calculate the actual waveform response.
+
+    Note: We could first call `waveform`, and get the actually required times
           from there. This would make this function obsolete. It would also
-          avoid the double interpolation, first in ``empymod.model.time`` for
-          the Fourier DLF with ``pts_per_dec=-1``, and second in ``waveform``.
-          Doable. Probably not or marginally faster. And the code would become
-          much less readible.
+          avoid the double interpolation, first in `empymod.model.time` for the
+          Fourier DLF with `pts_per_dec=-1`, and second in `waveform`. Doable.
+          Probably not or marginally faster. And the code would become much
+          less readable.
 
     Parameters
     ----------
@@ -236,7 +254,7 @@ def walktem(moment, depth, res):
     loop, centered around the origin.
 
     Note: This approximation of only using one of the four sides obviously only
-          works for horizontal square loops. If your loop is arbitary rotated,
+          works for horizontal square loops. If your loop is arbitrary rotated,
           then you have to model all four sides of the loop and sum it up.
 
 
@@ -277,7 +295,7 @@ def walktem(moment, depth, res):
                          f"{moment}")
 
     # === GET REQUIRED TIMES ===
-    time = get_time(off_time, waveform_times-delay_rst)
+    time = get_time(off_time, waveform_times)
 
     # === GET REQUIRED FREQUENCIES ===
     time, freq, ft, ftarg = empymod.utils.check_time(
@@ -296,7 +314,8 @@ def walktem(moment, depth, res):
         rec=[0, 0, 0, 0, 90],         # Receiver at the origin, vertical.
         depth=np.r_[0, depth],        # Depth-model, adding air-interface.
         res=np.r_[2e14, res],         # Provided resistivity model, adding air.
-        # aniso=aniso,                # Here you could implement anisotropy.
+        # aniso=aniso,                # Here you could implement anisotropy...
+        #                             # ...or any parameter accepted by bipole.
         freqtime=freq,                # Required frequencies.
         mrec=True,                    # It is an el. source, but a magn. rec.
         strength=4,                   # To account for 4 sides of square loop.
@@ -319,12 +338,12 @@ def walktem(moment, depth, res):
     EM *= h
 
     # === CONVERT TO TIME DOMAIN ===
+    delay_rst = 1.8e-7               # As stated in the WalkTEM manual
     EM, _ = np.squeeze(empymod.model.tem(EM[:, None], np.array([1]),
-                       freq, time, -1, ft, ftarg))
+                       freq, time+delay_rst, -1, ft, ftarg))
 
     # === APPLY WAVEFORM ===
-    return waveform(time, EM, off_time, waveform_times-delay_rst,
-                    waveform_current)
+    return waveform(time, EM, off_time, waveform_times, waveform_current)
 
 
 ###############################################################################
@@ -346,7 +365,7 @@ hm_empymod_con = walktem('hm', depth=[30], res=[10, 1])
 plt.figure(figsize=(9, 5))
 
 # Plot result resistive model
-plt.subplot(121)
+ax1 = plt.subplot(121)
 plt.title('Resistive Model')
 
 # AarhusInv
@@ -398,6 +417,18 @@ plt.xlabel("Time(s)")
 plt.ylabel(r"$\mathrm{d}\mathrm{B}_\mathrm{z}\,/\,\mathrm{d}t$")
 plt.grid(which='both')
 plt.legend(title='Difference', loc=3)
+
+# Force minor ticks on logscale
+major = plt.matplotlib.ticker.LogLocator(base=10, numticks=20)
+ax1.yaxis.set_major_locator(major)
+ax2.yaxis.set_major_locator(major)
+minor = plt.matplotlib.ticker.LogLocator(
+            base=10.0, subs=np.arange(1., 10)/10, numticks=20)
+ax1.yaxis.set_minor_locator(minor)
+ax2.yaxis.set_minor_locator(minor)
+ax1.yaxis.set_minor_formatter(plt.matplotlib.ticker.NullFormatter())
+ax2.yaxis.set_minor_formatter(plt.matplotlib.ticker.NullFormatter())
+plt.grid(which='both')
 
 # Finish off
 plt.tight_layout()
