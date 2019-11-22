@@ -396,7 +396,7 @@ plt.xscale('log')
 plt.yscale('log')
 plt.xlabel("Time(s)")
 plt.ylabel(r"$\mathrm{d}\mathrm{B}_\mathrm{z}\,/\,\mathrm{d}t$")
-plt.grid(which='both')
+plt.grid(which='both', c='w')
 plt.legend(title='Data', loc=1)
 
 # Plot result conductive model
@@ -431,7 +431,7 @@ ax1.yaxis.set_minor_locator(LogLocator(subs='all', numticks=20))
 ax2.yaxis.set_minor_locator(LogLocator(subs='all', numticks=20))
 ax1.yaxis.set_minor_formatter(NullFormatter())
 ax2.yaxis.set_minor_formatter(NullFormatter())
-plt.grid(which='both')
+plt.grid(which='both', c='w')
 
 # Finish off
 plt.tight_layout()
