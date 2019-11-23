@@ -254,18 +254,19 @@ def walktem(moment, depth, res):
     as an example. We could achieve the same using ``empymod.model.dipole`` or
     ``empymod.model.loop``.
 
-    We model the big source square loop by calculating only one side of the
-    electric square loop, approximating the finite length dipole with 5 point
-    dipole sources. The result is then multiplied by 4, to account for all four
-    sides of the square loop.
+    We model the big source square loop by calculating only half of one side of
+    the electric square loop and approximating the finite length dipole with 3
+    point dipole sources. The result is then multiplied by 8, to account for
+    all eight half-sides of the square loop.
 
     The implementation here assumes a central loop configuration, where the
     receiver (1 m2 area) is at the origin, and the source is a 40x40 m electric
     loop, centered around the origin.
 
-    Note: This approximation of only using one of the four sides obviously only
-          works for horizontal square loops. If your loop is arbitrary rotated,
-          then you have to model all four sides of the loop and sum it up.
+    Note: This approximation of only using half of one of the four sides
+          obviously only works for central, horizontal square loops. If your
+          loop is arbitrary rotated, then you have to model all four sides of
+          the loop and sum it up.
 
 
     Parameters
@@ -319,7 +320,7 @@ def walktem(moment, depth, res):
     # We only define a few parameters here. You could extend this for any
     # parameter possible to provide to empymod.model.bipole.
     EM = empymod.model.bipole(
-        src=[20, 20, -20, 20, 0, 0],  # El. bipole source; one side of square.
+        src=[20, 20,   0, 20, 0, 0],  # El. bipole source; half of one side.
         rec=[0, 0, 0, 0, 90],         # Receiver at the origin, vertical.
         depth=np.r_[0, depth],        # Depth-model, adding air-interface.
         res=np.r_[2e14, res],         # Provided resistivity model, adding air.
@@ -327,8 +328,8 @@ def walktem(moment, depth, res):
         #                             # ...or any parameter accepted by bipole.
         freqtime=freq,                # Required frequencies.
         mrec=True,                    # It is an el. source, but a magn. rec.
-        strength=4,                   # To account for 4 sides of square loop.
-        srcpts=5,                     # Approx. the finite dip. with 5 points.
+        strength=8,                   # To account for 4 sides of square loop.
+        srcpts=3,                     # Approx. the finite dip. with 3 points.
         htarg={'fhtfilt': 'key_101_2009'},  # Short filter, so fast.
     )
 
