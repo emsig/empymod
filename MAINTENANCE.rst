@@ -13,9 +13,12 @@ Making a release
    will create a PR for the conda-forge `feedstock
    <https://github.com/conda-forge/empymod-feedstock>`_. Merge that PR.
 
-4. Release notes edits: (1) get and add the `Zenodo-DOI
-   <https://doi.org/10.5281/zenodo.593094>`_; (b) add the readthedocs badge,
-   you might have to trigger a build first.
+4. Check that:
+
+  - `PyPi <https://pypi.org/project/empymod>`_ deployed;
+  - `conda-forge <https://anaconda.org/conda-forge/empymod>`_ deployed;
+  - `Zenodo <https://doi.org/10.5281/zenodo.593094>`_ minted a DOI;
+  - `empymod.rtfd.io <https://empymod.rtfd.io>`_ created a tagged version.
 
 
 Useful things
