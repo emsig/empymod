@@ -24,7 +24,9 @@ The incentive for this example came from Leon Foks (`@leonfoks
 <https://github.com/leonfoks>`_) for `GeoBIPy
 <https://github.com/usgs/geobipy>`_, and it was created with his help and also
 the help of Seogi Kang (`@sgkang <https://github.com/sgkang>`_) from
-`simpegEM1D <https://github.com/simpeg/simpegem1d>`_.
+`simpegEM1D <https://github.com/simpeg/simpegem1d>`_; the waveform function is
+based on work from Kerry Key (`@kerrykey <https://github.com/kerrykey>`_) from
+`emlab <https://emlab.ldeo.columbia.edu>`_.
 """
 import empymod
 import numpy as np
