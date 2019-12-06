@@ -579,8 +579,7 @@ def check_hankel(ht, htarg, verb):
 
         # limit : None
         try:
-            limit = _check_var(htarg['limit'], float, 0, 'qwe: limit (quad)',
-                               ())
+            limit = _check_var(htarg['limit'], int, 0, 'qwe: limit (quad)', ())
         except VariableCatch:
             limit = None
 
@@ -1087,8 +1086,7 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # limit : None
         try:
-            limit = _check_var(ftarg['limit'], float, 0, 'qwe: limit (quad)',
-                               ())
+            limit = _check_var(ftarg['limit'], int, 0, 'qwe: limit (quad)', ())
         except VariableCatch:
             limit = None
 
