@@ -261,7 +261,7 @@ results of my machine can be found in the `empymod/empymod-bench
 License
 -------
 
-Copyright 2016-2019 The empymod Developers.
+Copyright 2016-2020 The empymod Developers.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -303,7 +303,7 @@ can use
 
 
 """
-# Copyright 2017-2019 The empymod Developers.
+# Copyright 2017-2020 The empymod Developers.
 #
 # This file is part of empymod.
 #

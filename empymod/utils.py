@@ -12,7 +12,7 @@ This module consists of four groups of functions:
    3. Internal utilities
 
 """
-# Copyright 2016-2019 The empymod Developers.
+# Copyright 2016-2020 The empymod Developers.
 #
 # This file is part of empymod.
 #
