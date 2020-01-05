@@ -51,7 +51,7 @@ script:  # No pytest for linkcheck-run.
     fi
 
 after_success:  # No coveralls for linkcheck-run.
-  - if [ "$CHCKLNKS" = false ]; then coveralls; fi
+  - if [ "$CHCKLNKS" = "" ]; then coveralls; fi
 
 deploy:
   provider: pypi
