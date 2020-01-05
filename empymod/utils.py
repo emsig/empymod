@@ -1114,7 +1114,7 @@ def check_time(time, signal, ft, ftarg, verb):
         g_x, _ = special.p_roots(nquad)
         minf = np.floor(10*np.log10((g_x.min() + 1)*np.pi/2/time.max()))/10
         maxf = np.ceil(10*np.log10(maxint*np.pi/time.min()))/10
-        freq = np.logspace(minf, maxf, (maxf-minf)*pts_per_dec + 1)
+        freq = np.logspace(minf, maxf, int((maxf-minf)*pts_per_dec + 1))
 
     elif ft == 'fftlog':              # FFTLog (using sine and imag-part)
 
@@ -1207,7 +1207,7 @@ def check_time(time, signal, ft, ftarg, verb):
         if pts_per_dec:  # Space actually calculated freqs logarithmically.
             start = np.log10(dfreq)
             stop = np.log10(nfreq*dfreq)
-            freq = np.logspace(start, stop, (stop-start)*pts_per_dec + 1)
+            freq = np.logspace(start, stop, int((stop-start)*pts_per_dec + 1))
         else:
             freq = np.arange(1, nfreq+1)*dfreq
 
@@ -1938,10 +1938,18 @@ def _check_min(par, minval, name, unit, verb):
 
 def _check_targ(targ, keys):
     r"""Check format of htarg/ftarg and return dict."""
-    if not targ:  # If None
+    if targ is None:   # If None
         targ = {}
-    elif not isinstance(targ, (list, tuple, dict)):  # If only one value
+    elif isinstance(targ, (list, tuple, dict)):  # All good, except if empty
+        if len(targ) == 0:
+            targ = {}
+    elif targ == '':   # Empty string
+        targ = {}
+    elif isinstance(targ, np.ndarray) and targ.size == 0:  # Empty array
+        targ = {}
+    else:              # If only one value
         targ = [targ, ]
+
     if isinstance(targ, (list, tuple)):  # Put list into dict
         targ = {keys[i]: targ[i] for i in range(min(len(targ), len(keys)))}
     return targ

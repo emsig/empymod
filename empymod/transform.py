@@ -226,7 +226,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     if pts_per_dec == 0:
         ilambd = np.logspace(start, stop, 3)
     else:
-        ilambd = np.logspace(start, stop, (stop-start)*pts_per_dec + 1)
+        ilambd = np.logspace(start, stop, int((stop-start)*pts_per_dec + 1))
 
     # Call the kernel
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
