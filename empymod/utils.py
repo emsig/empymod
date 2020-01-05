@@ -1938,10 +1938,18 @@ def _check_min(par, minval, name, unit, verb):
 
 def _check_targ(targ, keys):
     r"""Check format of htarg/ftarg and return dict."""
-    if not targ:  # If None
+    if targ is None:   # If None
         targ = {}
-    elif not isinstance(targ, (list, tuple, dict)):  # If only one value
+    elif isinstance(targ, (list, tuple, dict)):  # All good, except if empty
+        if len(targ) == 0:
+            targ = {}
+    elif targ == '':   # Empty string
+        targ = {}
+    elif isinstance(targ, np.ndarray) and targ.size == 0:  # Empty array
+        targ = {}
+    else:              # If only one value
         targ = [targ, ]
+
     if isinstance(targ, (list, tuple)):  # Put list into dict
         targ = {keys[i]: targ[i] for i in range(min(len(targ), len(keys)))}
     return targ
