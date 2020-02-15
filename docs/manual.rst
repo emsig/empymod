@@ -206,6 +206,20 @@ calculation. It could also be used in the high-frequency range to model
 dielectricity.
 
 
+Coordinate system
+'''''''''''''''''
+
+The used coordinate system is either a
+
+- Left-Handed System (LHS), where Easting is the :math:`x`-direction, Northing
+  the :math:`y`-direction, and positive :math:`z` is pointing downwards;
+- Right-Handed System (RHS), where Easting is the :math:`x`-direction, Northing
+  the :math:`y`-direction, and positive :math:`z` is pointing upwards.
+
+Have a look at the example :ref:`sphx_glr_examples_coordinate_system.py` for
+further explanations.
+
+
 Contributing
 ------------
 
