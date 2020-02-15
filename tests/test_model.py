@@ -566,6 +566,14 @@ def test_dipole():
                      verb=0, **model)
     assert_allclose(dip_res, bip_res)
 
+    # 1b. Check RHS and LHS
+    imodel = {'depth': [-1000, -100], 'res': [100, 0.3, 2],
+              'aniso': [2, .5, 2]}
+    ibip_res = bipole([src[0], src[1], -src[2], 0, -90],
+                      [rec[0], rec[1], -rec[2], 90, 0], msrc=True, freqtime=f,
+                      verb=0, **imodel)
+    assert_allclose(ibip_res, bip_res)
+
     # 2. Time
     t = 1
     dip_res = dipole(src, rec, freqtime=t, signal=1, ab=62, verb=0, **model)
