@@ -53,6 +53,7 @@ two possibilities.
 import empymod
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 plt.style.use('ggplot')
 
 ###############################################################################
@@ -63,103 +64,71 @@ plt.style.use('ggplot')
 # the left-handed system with positive :math:`z` upwards. Easting is always
 # :math:`x`, and Northing is :math:`y`.
 
-x = np.arange(11)
-ang = np.deg2rad(45)
-azimuth = np.deg2rad(70)
-azarc = np.linspace(np.deg2rad(90), azimuth, 11)
-dparc = np.linspace(np.deg2rad(90), np.deg2rad(125), 11)
-dip = np.deg2rad(35)
 
-xscale = 1.3
-yscale = 3
-zscale = 2
+def repeated(ax, pm):
+    """These are all repeated for the two subplots."""
 
-x0 = x
-x1 = np.zeros(x.size)
+    # Coordinate system
+    ax.plot(np.array([-2, 12]), np.array([0, 0]), np.array([0, 0]), c='.4')
+    ax.plot(np.array([0, 0]), np.array([-2, 12]), np.array([0, 0]), c='.4')
+    ax.plot(np.array([0, 0]), np.array([0, 0]), np.array([-pm*2, pm*12]),
+            c='.4')
 
-y0 = np.sin(ang)*x
-y1 = np.cos(ang)*x/yscale
+    # Annotate it
+    ax.text(12, 1, 0, 'x')
+    ax.text(0, 12, 1, 'y')
+    ax.text(-1, 0, pm*12, 'z')
 
-z0 = np.zeros(x.size)
-z1 = x/zscale
+    # Helper lines
+    ax.plot(np.array([0, 10]), np.array([0, 10]), np.array([0, 0]),
+            '--', c='.6')
+    ax.plot(np.array([0, 10]), np.array([0, 0]), np.array([0, -10]),
+            '--', c='.6')
+    ax.plot(np.array([10, 10]), np.array([0, 10]), np.array([0, 0]),
+            ':', c='.6')
+    ax.plot(np.array([10, 10]), np.array([10, 10]), np.array([0, -10]),
+            ':', c='.6')
+    ax.plot(np.array([10, 10]), np.array([0, 0]), np.array([0, -10]),
+            ':', c='.6')
+    ax.plot(np.array([10, 10]), np.array([0, 10]), np.array([-10, -10]),
+            ':', c='.6')
 
-az0 = np.sin(azimuth)*x/xscale
-az1 = np.cos(azimuth)*x/yscale/xscale
+    # Resulting trajectory
+    ax.plot(np.array([0, 10]), np.array([0, 10]), np.array([0, -10]), 'C0')
 
-dp0 = np.cos(dip)*x/xscale
-dp1 = np.sin(-dip)*x/xscale
+    # Theta
+    azimuth = np.linspace(np.pi/4, np.pi/2, 31)
+    ax.plot(np.sin(azimuth)*5, np.cos(azimuth)*5, 0, c='C5')
+    ax.text(3, 5, 0, r"$\theta$", color='C5', fontsize=14)
 
-fontdic = {
-    'fontsize': 14,
-    'horizontalalignment': 'center',
-    'verticalalignment': 'center',
-}
-fontdic2 = fontdic.copy()
-fontdic2['fontsize'] = 20
+    # Phi
+    ax.plot(np.sin(azimuth)*7, azimuth*0, -np.cos(azimuth)*7, c='C1')
 
-# FIGURE
-plt.figure(figsize=(10, 5))
+    ax.view_init(azim=-60, elev=20)
 
-# # # Left-Handed System LHS # # #
-ax1 = plt.subplot(121)
-plt.title('Left-handed system (LHS)\nfor positive $z$ downwards', fontsize=14)
 
-# x
-plt.plot(x0, x1, 'k')
-plt.text(x0[-1], x1[-1]-0.5, 'x', **fontdic)
+###############################################################################
 
-# y
-plt.plot(y0, y1, 'k')
-plt.text(y0[-1]-0.5, y1[-1]/yscale+1.8, 'y', **fontdic)
+# Create figure
+fig = plt.figure(figsize=(8, 3.5))
 
-# z
-plt.plot(z0, -z1, 'k')
-plt.text(-0.5, -z1[-1], 'z', **fontdic)
-
-# azimuth
-plt.plot(az0, az1, 'C1')
-plt.plot(np.sin(azarc)*6, np.cos(azarc)*6/yscale, 'C1--')
-plt.text(7.5, 0.5, r'$\theta$', color='C1', **fontdic2)
-
-# dip
-plt.plot(dp0, dp1, 'C0')
-plt.plot(np.sin(dparc)*5, np.cos(dparc)*5, 'C0--')
-plt.text(5.5, -1.5, r'$\varphi$', color='C0', **fontdic2)
-plt.plot()
-
-plt.axis('equal')
+# Left-handed system
+ax1 = fig.add_subplot(121, projection=Axes3D.name, facecolor='w')
 ax1.axis('off')
+plt.title('Left-handed system (LHS)\nfor positive $z$ downwards', fontsize=12)
+ax1.text(7, 0, -5, r"$\varphi$", color='C1', fontsize=14)
 
-# # # right-Handed System RHS # # #
-ax2 = plt.subplot(122, sharey=ax1, frameon=False)
-plt.title('Right-handed system (RHS)\nfor positive $z$ upwards', fontsize=14)
+repeated(ax1, -1)
 
-# x
-plt.plot(x0, x1, 'k')
-plt.text(x0[-1], x1[-1]-0.5, 'x', **fontdic)
-
-# y
-plt.plot(y0, y1, 'k')
-plt.text(y0[-1]-0.5, y1[-1]/yscale+1.8, 'y', **fontdic)
-
-# z
-plt.plot(z0, z1, 'k')
-plt.text(-0.5, z1[-1], 'z', **fontdic)
-
-# azimuth
-plt.plot(az0, az1, 'C1')
-plt.plot(np.sin(azarc)*6, np.cos(azarc)*6/yscale, 'C1--')
-plt.text(7.5, 0.5, r'$\theta$', color='C1', **fontdic2)
-
-# dip
-plt.plot(dp0, dp1, 'C0')
-plt.plot(np.sin(dparc)*5, np.cos(dparc)*5, 'C0--')
-plt.text(5.5, -1.5, r'$-\varphi$', color='C0', **fontdic2)
-plt.plot()
-
-plt.axis('equal')
+# Right-handed  system
+ax2 = fig.add_subplot(122, projection='3d', facecolor='w', sharez=ax1)
 ax2.axis('off')
+plt.title('Right-handed system (RHS)\nfor positive $z$ upwards', fontsize=12)
+ax2.text(7, 0, -5, r"$-\varphi$", color='C1', fontsize=14)
 
+repeated(ax2, 1)
+
+plt.tight_layout()
 plt.show()
 
 
