@@ -14,3 +14,4 @@ pytest_mpl
 pytest_flake8
 scooby
 coveralls
+memory_profiler

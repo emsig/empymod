@@ -42,6 +42,12 @@ sphinx_gallery_conf = {
     "filename_pattern": r"\.py",
     # Sort gallery example by file name instead of number of lines (default)
     "within_subsection_order": FileNameSortKey,
+    # Remove the settings (e.g., sphinx_gallery_thumbnail_number)
+    'remove_config_comments': True,
+    # Show memory
+    'show_memory': True,
+    # Custom first notebook cell
+    'first_notebook_cell': '%matplotlib notebook',
 }
 
 # https://github.com/sphinx-gallery/sphinx-gallery/pull/521/files
@@ -52,7 +58,7 @@ warnings.filterwarnings("ignore", category=UserWarning,
 
 # Intersphinx configuration
 # intersphinx_mapping = {
-#     "numpy": ("https://docs.scipy.org/doc/numpy/", None),
+#     "numpy": ("https://numpy.org", None),
 #     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
 # }
 

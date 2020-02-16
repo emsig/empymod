@@ -108,11 +108,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
               different angles, you have to use the bipole-method (with
               srcpts/recpts = 1, so it is calculated as dipoles).
 
-        Angles (coordinate system is left-handed, positive z down
-        (East-North-Depth):
+        Angles (coordinate system is either left-handed with positive z down or
+        right-handed with positive z up; East-North-Depth):
 
             - azimuth (°): horizontal deviation from x-axis, anti-clockwise.
-            - dip (°): vertical deviation from xy-plane downwards.
+            - +/-dip (°): vertical deviation from xy-plane down/up-wards.
 
         Sources or receivers placed on a layer interface are considered in the
         upper layer.
@@ -1010,11 +1010,11 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
               recpts = 1, so it is calculated as dipoles). Note that srcpts is
               fixed to 1, as the source is a loop.
 
-        Angles (coordinate system is left-handed, positive z down
-        (East-North-Depth):
+        Angles (coordinate system is either left-handed with positive z down or
+        right-handed with positive z up; East-North-Depth):
 
             - azimuth (°): horizontal deviation from x-axis, anti-clockwise.
-            - dip (°): vertical deviation from xy-plane downwards.
+            - +/-dip (°): vertical deviation from xy-plane down/up-wards.
 
         Sources or receivers placed on a layer interface are considered in the
         upper layer.

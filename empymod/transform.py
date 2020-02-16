@@ -432,7 +432,7 @@ def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     # Get required lambdas
     la = np.log10(a)
     lb = np.log10(b)
-    ilambd = np.logspace(la, lb, (lb-la)*pts_per_dec + 1)
+    ilambd = np.logspace(la, lb, int((lb-la)*pts_per_dec + 1))
 
     # Call the kernel
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
