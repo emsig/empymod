@@ -2,6 +2,27 @@ Changelog
 #########
 
 
+v1.10.4: Positive z down- or upwards
+------------------------------------
+
+**2020-02-16**
+
+- New examples:
+
+  - ``empymod`` can handle positive z down- or upwards (left-handed or
+    right-handed coordinate systems; it was always possible, but not known nor
+    documented). Adjusted documentation, docstrings, and added an example.
+  - Example how to calculate the responses for the WalkTEM system.
+
+- Minor things and bug fixes:
+
+  - Change from relative to absolute imports.
+  - Simplified releasing (no badges).
+  - Python 3.8 is tested.
+  - Fix: numpy now throws an error if the third argument of ``logspace`` is not
+    an ``int``, some casting was therefore necessary within the code.
+
+
 v1.10.3: Sphinx Gallery
 -----------------------
 
