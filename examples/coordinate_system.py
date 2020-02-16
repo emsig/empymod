@@ -54,6 +54,8 @@ import empymod
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import proj3d
+from matplotlib.patches import FancyArrowPatch
 plt.style.use('ggplot')
 
 ###############################################################################
@@ -65,36 +67,53 @@ plt.style.use('ggplot')
 # :math:`x`, and Northing is :math:`y`.
 
 
+###############################################################################
+
+class Arrow3D(FancyArrowPatch):
+    """https://stackoverflow.com/a/29188796"""
+
+    def __init__(self, xs, ys, zs):
+        FancyArrowPatch.__init__(
+                self, (0, 0), (0, 0), mutation_scale=20, lw=1.5,
+                arrowstyle='-|>', color='.2', zorder=100)
+        self._verts3d = xs, ys, zs
+
+    def draw(self, renderer):
+        xs3d, ys3d, zs3d = self._verts3d
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+        FancyArrowPatch.draw(self, renderer)
+
+
+###############################################################################
+
 def repeated(ax, pm):
     """These are all repeated for the two subplots."""
 
     # Coordinate system
-    ax.plot(np.array([-2, 12]), np.array([0, 0]), np.array([0, 0]), c='.4')
-    ax.plot(np.array([0, 0]), np.array([-2, 12]), np.array([0, 0]), c='.4')
-    ax.plot(np.array([0, 0]), np.array([0, 0]), np.array([-pm*2, pm*12]),
-            c='.4')
+    # The first three are not visible, but for the aspect ratio of the plot.
+    ax.plot([-2, 12], [0, 0], [0, 0], c='w')
+    ax.plot([0, 0], [-2, 12], [0, 0], c='w')
+    ax.plot([0, 0], [0, 0], [-pm*2, pm*12], c='w')
+    ax.add_artist(Arrow3D([-2, 14], [0, 0], [0, 0]))
+    ax.add_artist(Arrow3D([0, 0], [-2, 14], [0, 0]))
+    ax.add_artist(Arrow3D([0, 0], [0, 0], [-pm*2, pm*14]))
 
     # Annotate it
-    ax.text(12, 1, 0, 'x')
-    ax.text(0, 12, 1, 'y')
-    ax.text(-1, 0, pm*12, 'z')
+    ax.text(12, 2, 0, r'$x$')
+    ax.text(0, 12, 2, r'$y$')
+    ax.text(-2, 0, pm*12, r'$z$')
 
     # Helper lines
-    ax.plot(np.array([0, 10]), np.array([0, 10]), np.array([0, 0]),
-            '--', c='.6')
-    ax.plot(np.array([0, 10]), np.array([0, 0]), np.array([0, -10]),
-            '--', c='.6')
-    ax.plot(np.array([10, 10]), np.array([0, 10]), np.array([0, 0]),
-            ':', c='.6')
-    ax.plot(np.array([10, 10]), np.array([10, 10]), np.array([0, -10]),
-            ':', c='.6')
-    ax.plot(np.array([10, 10]), np.array([0, 0]), np.array([0, -10]),
-            ':', c='.6')
-    ax.plot(np.array([10, 10]), np.array([0, 10]), np.array([-10, -10]),
-            ':', c='.6')
+    ax.plot([0, 10], [0, 10], [0, 0], '--', c='.6')
+    ax.plot([0, 10], [0, 0], [0, -10], '--', c='.6')
+    ax.plot([10, 10], [0, 10], [0, 0], ':', c='.6')
+    ax.plot([10, 10], [10, 10], [0, -10], ':', c='.6')
+    ax.plot([10, 10], [0, 0], [0, -10], ':', c='.6')
+    ax.plot([10, 10], [0, 10], [-10, -10], ':', c='.6')
 
     # Resulting trajectory
-    ax.plot(np.array([0, 10]), np.array([0, 10]), np.array([0, -10]), 'C0')
+    ax.plot([0, 10], [0, 10], [0, -10], 'C0')
 
     # Theta
     azimuth = np.linspace(np.pi/4, np.pi/2, 31)
