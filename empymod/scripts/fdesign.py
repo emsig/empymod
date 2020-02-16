@@ -1315,7 +1315,7 @@ def _calculate_filter(n, spacing, shift, fI, r_def, reim, name):
     # r :: Start/end is defined by base AND r_def[0]/r_def[1]
     #      Overdetermined system if r_def[2] > 1
     r = np.logspace(np.log10(1/np.max(base)) - r_def[0],
-                    np.log10(1/np.min(base)) + r_def[1], r_def[2]*n)
+                    np.log10(1/np.min(base)) + r_def[1], int(r_def[2]*n))
 
     # k :: Get required k-values (matrix of shape (r.size, base.size))
     k = base/r[:, None]
