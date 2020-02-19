@@ -2,6 +2,18 @@ Changelog
 #########
 
 
+*latest*
+
+- Depths can now be defined in increasing or decreasing order, as long as they
+  are consistent. Model parameters have to be defined in the same order.
+  Hence all these are possible:
+
+  - ``[-330, 0, 1000, 1050]`` -> left-handed system
+  - ``[1050, 1000, 0, -330]`` -> left-handed system
+  - ``[-1050, -1000, 0, 330]`` -> right-handed system
+  - ``[330, 0, -1000, -1050]`` -> right-handed system
+
+
 v1.10.4: Positive z down- or upwards
 ------------------------------------
 

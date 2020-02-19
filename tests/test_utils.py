@@ -379,6 +379,21 @@ def test_check_model(capsys):
         out, _ = capsys.readouterr()
         assert out[:25] == "* ERROR   :: <depth> must"
 
+    # Swapped depth
+    var1 = [1, 2, 3, 4]
+    var2 = [4, 3, 2, 1]
+    out1 = utils.check_model([0, 50, 100], var1, var1, var1, var1, var1, var1,
+                             True, 1)
+    out2 = utils.check_model([0, -50, -100], var2, var2, var2, var2, var2,
+                             var2, True, 1)
+    assert_allclose(out1[1], out2[1])
+    assert_allclose(out1[2], out2[2])
+    assert_allclose(out1[3], out2[3])
+    assert_allclose(out1[4], out2[4])
+    assert_allclose(out1[5], out2[5])
+    assert_allclose(out1[6], out2[6])
+    assert out1[7] == out2[7]
+
     # A ValueError check
     with pytest.raises(ValueError):
         utils.check_model(0, 1, [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], True,

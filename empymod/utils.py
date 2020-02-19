@@ -737,6 +737,13 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
         depth = []
     depth = _check_var(depth, float, 1, 'depth')
 
+    # If all depths are decreasing, swap depth and parameters.
+    if depth.size > 1 and np.all(depth[1:] - depth[:-1] < 0):
+        depth = depth[::-1]
+        swap = True
+    else:
+        swap = False
+
     # Add -infinity at the beginning
     # => The top-layer (-infinity to first interface) is layer 0.
     if depth.size == 0:
@@ -782,6 +789,15 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     epermV = check_inp(epermV, 'epermV', 0.0)
     mpermH = check_inp(mpermH, 'mpermH', 0.0)
     mpermV = check_inp(mpermV, 'mpermV', 0.0)
+
+    # Swap parameters if depths were given in reverse.
+    if swap:
+        res = res[::-1]
+        aniso = aniso[::-1]
+        epermH = epermH[::-1]
+        epermV = epermV[::-1]
+        mpermH = mpermH[::-1]
+        mpermV = mpermV[::-1]
 
     # Print model parameters
     if verb > 2:
