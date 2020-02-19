@@ -27,14 +27,27 @@ the same.
 There are a few other important points to keep in mind when switching between
 coordinate systems:
 
-- The interfaces (``depth``) have always to be defined from lowest to highest.
-  E.g., a simple three-layer model with the sea-surface at 0 m and 100 m water
-  column is either defined as ``depth=[0, 100]`` for the LHS, or as
-  ``depth=[-100, 0]`` for the RHS.
-- The above statement affects also all model parameters (``resistivity``,
-  ``anisotropy``, etc.). E.g., for the above three-layer example,
-  ``res=[1e12, 0.3, 1]`` (air, water, subsurface) for the LHS, or ``res=[1,
-  0.3, 1e12]`` (subsurface, water, air) for the RHS.
+- The interfaces (``depth``) have to be defined continuously increasing or
+  decreasing, either from lowest to highest or the other way around. E.g., a
+  simple five-layer model with the sea-surface at 0 m, a 100 m water column,
+  and a target of 50 m 900 m below the seafloor can be defined in four ways:
+
+  - ``[0, 100, 1000, 1050]`` -> LHS low to high
+  - ``[0, -100, -1000, -1050]`` -> RHS high to low
+  - ``[1050, 1000, 100, 0]`` -> LHS high to low
+  - ``[-1050, -1000, -100, 0]`` -> RHS low to high
+
+- The above point affects also all model parameters (``res``, ``aniso``,
+  ``{e;m}perm{H;V}``). E.g., for the above five-layer example this would be
+
+  - ``res = [1e12, 0.3, 1, 50, 1]`` -> LHS low to high
+  - ``res = [1e12, 0.3, 1, 50, 1]`` -> RHS high to low
+  - ``res = [1, 50, 1, 0.3, 1e12]`` -> LHS high to low
+  - ``res = [1, 50, 1, 0.3, 1e12]`` -> RHS low to high
+
+  Note that in a two-layer scenario the values are always taken as low-to-high
+  (as it is not possible to detect the direction from only one interface).
+
 - A source or a receiver *exactly on* a boundary is taken as being in the lower
   layer. Hence, if :math:`z_\rm{rec} = z_0`, where :math:`z_0` is the surface,
   then the receiver is taken as in the air in the LHS, but as in the subsurface
@@ -42,8 +55,10 @@ coordinate systems:
   receiver is taken as in the sea in the LHS, but as in the subsurface in the
   RHS. This can be avoided by never placing it exactly on a boundary, but
   slightly (e.g., 1 mm) in the layer where you want to have it.
-- With ``dipole``, the ``ab``'s containing vertical directions (``3``) switch
-  the sign for each vertical component.
+- In ``bipole``, the ``dip`` switches sign. Correspondingly in ``dipole``, the
+  ``ab``'s containing vertical directions switch the sign for each vertical
+  component.
+- Sign switches also occur for magnetic sources or receivers.
 
 
 In this example we first create a sketch of the LHS and RHS for visualization,
@@ -175,6 +190,8 @@ lhs = empymod.dipole(
         rec=[off, np.zeros(off.size), 200],
         depth=[0, 300, 1000, 1050],
         res=[1e20, 0.3, 1, 50, 1],
+        # depth=[1050, 1000, 300, 0],  # Alternative way, LHS high to low.
+        # res=[1, 50, 1, 0.3, 1e20],   # " " "
         freqtime=1,
         verb=0
 )
@@ -192,8 +209,10 @@ lhs = empymod.dipole(
 rhs = empymod.dipole(
         src=[0, 0, -100],
         rec=[off, np.zeros(off.size), -200],
-        depth=[-1050, -1000, -300, 0],
-        res=[1, 50, 1, 0.3, 1e20],
+        depth=[0, -300, -1000, -1050],
+        res=[1e20, 0.3, 1, 50, 1],
+        # depth=[-1050, -1000, -300, 0],  # Alternative way, RHS low to high.
+        # res=[1, 50, 1, 0.3, 1e20],      # " " "
         freqtime=1,
         verb=0
 )
@@ -257,8 +276,8 @@ lhs = empymod.bipole(
 rhs = empymod.bipole(
         src=[-50, 50, -10, 10, -100, -110],
         rec=[6000, 6100, 20, -20, -220, -200],
-        depth=[-1050, -1000, -300, 0],
-        res=[1, 50, 1, 0.3, 1e20],
+        depth=[0, -300, -1000, -1050],
+        res=[1e20, 0.3, 1, 50, 1],
         **inp
 )
 
@@ -292,8 +311,8 @@ lhs = empymod.bipole(
 rhs = empymod.bipole(
         src=[0, 0, -100, 10, -20],
         rec=[6000, 0, -200, -5, -15],
-        depth=[-1050, -1000, -300, 0],
-        res=[1, 50, 1, 0.3, 1e20],
+        depth=[0, -300, -1000, -1050],
+        res=[1e20, 0.3, 1, 50, 1],
         **inp
 )
 
