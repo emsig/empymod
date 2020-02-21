@@ -739,10 +739,17 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
     # If all depths are decreasing, swap depth and parameters.
     if depth.size > 1 and np.all(depth[1:] - depth[:-1] < 0):
-        depth = depth[::-1]
-        swap = True
+        swap = -1
     else:
-        swap = False
+        swap = 1
+    depth = depth[::swap]
+
+    # Ensure depth is increasing
+    if np.any(depth[1:] - depth[:-1] < 0):
+        print('* ERROR   :: Depth must be continuously increasing or ' +
+              'decreasing.\n             <depth> provided: ' +
+              _strvar(depth[::swap]))
+        raise ValueError('depth')
 
     # Add -infinity at the beginning
     # => The top-layer (-infinity to first interface) is layer 0.
@@ -750,12 +757,6 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
         depth = np.array([-np.infty, ])
     elif depth[0] != -np.infty:
         depth = np.insert(depth, 0, -np.infty)
-
-    # Ensure depth is increasing
-    if np.any(depth[1:] - depth[:-1] < 0):
-        print('* ERROR   :: <depth> must be increasing;' +
-              ' <depth> provided: ' + _strvar(depth))
-        raise ValueError('depth')
 
     # Check if the user provided a model for etaH/etaV/zetaH/zetaV
     if isinstance(res, dict):
@@ -791,13 +792,12 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     mpermV = check_inp(mpermV, 'mpermV', 0.0)
 
     # Swap parameters if depths were given in reverse.
-    if swap:
-        res = res[::-1]
-        aniso = aniso[::-1]
-        epermH = epermH[::-1]
-        epermV = epermV[::-1]
-        mpermH = mpermH[::-1]
-        mpermV = mpermV[::-1]
+    res = res[::swap]
+    aniso = aniso[::swap]
+    epermH = epermH[::swap]
+    epermV = epermV[::swap]
+    mpermH = mpermH[::swap]
+    mpermV = mpermV[::swap]
 
     # Print model parameters
     if verb > 2:

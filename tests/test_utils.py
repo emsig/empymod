@@ -372,32 +372,63 @@ def test_check_model(capsys):
     out, _ = capsys.readouterr()
     assert "MODEL IS A FULLSPACE\n" in out
 
-    # Increasing depth
+    # Non-continuously in/de-creasing depth
+    _, _ = capsys.readouterr()
     with pytest.raises(ValueError):
         var = [1, 1, 1, 1]
         utils.check_model([0, 100, 90], var, var, var, var, var, var, True, 1)
-        out, _ = capsys.readouterr()
-        assert out[:25] == "* ERROR   :: <depth> must"
-
-    # Swapped depth
-    var1 = [1, 2, 3, 4]
-    var2 = [4, 3, 2, 1]
-    out1 = utils.check_model([0, 50, 100], var1, var1, var1, var1, var1, var1,
-                             True, 1)
-    out2 = utils.check_model([0, -50, -100], var2, var2, var2, var2, var2,
-                             var2, True, 1)
-    assert_allclose(out1[1], out2[1])
-    assert_allclose(out1[2], out2[2])
-    assert_allclose(out1[3], out2[3])
-    assert_allclose(out1[4], out2[4])
-    assert_allclose(out1[5], out2[5])
-    assert_allclose(out1[6], out2[6])
-    assert out1[7] == out2[7]
+    out, _ = capsys.readouterr()
+    assert out[:23] == "* ERROR   :: Depth must"
 
     # A ValueError check
     with pytest.raises(ValueError):
-        utils.check_model(0, 1, [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], True,
-                          1)
+        utils.check_model(
+                0, 1, [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], True, 1)
+
+
+def test_check_all_depths():
+    depth = np.array([-50, 0, 100, 2000])
+    res = [6, 1, 2, 3, 4]
+    aniso = [6, 7, 8, 9, 10]
+    epermH = [1.0, 1.1, 1.2, 1.3, 1.4]
+    epermV = [1.5, 1.6, 1.7, 1.8, 1.9]
+    mpermH = [2.0, 2.1, 2.2, 2.3, 2.4]
+    mpermV = [2.5, 2.6, 2.7, 2.8, 2.9]
+
+    # 1. Ordering as internally used:
+
+    # LHS low-to-high (+1, ::+1)
+    lhs_l2h = utils.check_model(
+            depth, res, aniso, epermH, epermV, mpermH, mpermV, True, 0)
+
+    # RHS high-to-low (-1, ::+1)
+    rhs_h2l = utils.check_model(
+            -depth, res, aniso, epermH, epermV, mpermH, mpermV, True, 0)
+
+    # 2. Reversed ordering:
+
+    # LHS high-to-low (+1, ::-1)
+    lhs_h2l = utils.check_model(
+            depth[::-1], res[::-1], aniso[::-1], epermH[::-1], epermV[::-1],
+            mpermH[::-1], mpermV[::-1], True, 0)
+
+    # RHS low-to-high (-1, ::-1)
+    rhs_l2h = utils.check_model(
+            -depth[::-1], res[::-1], aniso[::-1], epermH[::-1], epermV[::-1],
+            mpermH[::-1], mpermV[::-1], True, 0)
+
+    for i, var in enumerate([lhs_h2l, rhs_h2l, rhs_l2h]):
+        if i == 0:
+            swap = 1   # LHS
+        else:
+            swap = -1  # RHS
+        assert_allclose(lhs_l2h[0][1:], swap*var[0][1:][::swap])
+        assert_allclose(lhs_l2h[1], var[1][::swap])
+        assert_allclose(lhs_l2h[2], var[2][::swap])
+        assert_allclose(lhs_l2h[3], var[3][::swap])
+        assert_allclose(lhs_l2h[4], var[4][::swap])
+        assert_allclose(lhs_l2h[5], var[5][::swap])
+        assert_allclose(lhs_l2h[6], var[6][::swap])
 
 
 def test_check_opt(capsys):

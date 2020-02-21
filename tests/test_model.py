@@ -621,6 +621,49 @@ def test_dipole():
     assert_allclose(standard, outzeta)
 
 
+def test_all_depths():
+    # Test RHS/LHS low-to-high/high-to-low
+    src = [0, 0, 10]
+    rec = [500, 100, 50]
+    freq = 1
+    depth = np.array([-50, 0, 100, 2000])
+    res = [6, 1, 2, 3, 4]
+    aniso = [6, 7, 8, 9, 10]
+    epermH = [1.0, 1.1, 1.2, 1.3, 1.4]
+    epermV = [1.5, 1.6, 1.7, 1.8, 1.9]
+    mpermH = [2.0, 2.1, 2.2, 2.3, 2.4]
+    mpermV = [2.5, 2.6, 2.7, 2.8, 2.9]
+
+    # 1. Ordering as internally used:
+
+    # LHS low-to-high (+1, ::+1)
+    lhs_l2h = dipole(
+            src, rec, depth, res, freq, None, 11, aniso, epermH, epermV,
+            mpermH, mpermV)
+
+    # RHS high-to-low (-1, ::+1)
+    rhs_h2l = dipole(
+            [src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]], -depth, res,
+            freq, None, 11, aniso, epermH, epermV, mpermH, mpermV)
+
+    # 2. Reversed ordering:
+
+    # LHS high-to-low (+1, ::-1)
+    lhs_h2l = dipole(
+            src, rec, depth[::-1], res[::-1], freq, None, 11, aniso[::-1],
+            epermH[::-1], epermV[::-1], mpermH[::-1], mpermV[::-1])
+
+    # RHS low-to-high (-1, ::-1)
+    rhs_l2h = dipole(
+            [src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]], -depth[::-1],
+            res[::-1], freq, None, 11, aniso[::-1], epermH[::-1], epermV[::-1],
+            mpermH[::-1], mpermV[::-1])
+
+    assert_allclose(lhs_l2h, lhs_h2l)
+    assert_allclose(lhs_l2h, rhs_l2h)
+    assert_allclose(lhs_l2h, rhs_h2l)
+
+
 class TestLoop:
     # Loop is a subset of bipole, with a frequency-dependent factor at the
     # frequency level.
