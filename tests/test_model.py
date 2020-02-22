@@ -15,7 +15,7 @@ except ImportError:
 # the __init__.py-file.
 from empymod import bipole, dipole, analytical, loop
 # Import rest from model
-from empymod.model import gpr, dipole_k, wavenumber, fem, tem
+from empymod.model import gpr, dipole_k, fem, tem
 from empymod.kernel import fullspace, halfspace
 
 # These are kind of macro-tests, as they check the final results.
@@ -276,7 +276,7 @@ class TestBipole:
             assert "Kernel Opt.     :  None" in out
         assert_allclose(non, par, equal_nan=True)
 
-        spl = bipole(opt='spline', verb=3, **inp)
+        spl = bipole(htarg={'pts_per_dec': -1}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "> DLF type    :  Lagged Convolution" in out
         assert_allclose(non, spl, 1e-3, 1e-22, True)
@@ -935,11 +935,6 @@ def test_dipole_k():
     w_res0, w_res1 = dipole_k(**res['inp'])
     assert_allclose(w_res0, res['PJ0'])
     assert_allclose(w_res1, res['PJ1'])
-
-    # Test depreciated model.wavenumber
-    w_res0b, w_res1b = wavenumber(**res['inp'])
-    assert_allclose(w_res0, w_res0b)
-    assert_allclose(w_res1, w_res1b)
 
     # Check that ab=36 returns zeros
     res['inp']['ab'] = 36
