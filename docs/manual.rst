@@ -32,7 +32,7 @@ or via ``pip``:
 
    pip install empymod
 
-Required are Python version 3.5 or higher and the modules ``NumPy`` and
+Required are Python version 3.6 or higher and the modules ``NumPy`` and
 ``SciPy``. The module ``numexpr`` is required additionally (built with Intel's
 VML) if you want to run parts of the kernel in parallel.
 

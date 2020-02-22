@@ -1378,8 +1378,8 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
             # Check mu at source level.
             if verb > 0 and mpermH[lsrc] != mpermV[lsrc]:
-                print('* WARNING :: `mpermH != mpermV` at source level, '
-                      'only `mpermH` considered for loop factor.')
+                print("* WARNING :: `mpermH != mpermV` at source level, "
+                      "only `mpermH` considered for loop factor.")
 
             # Pre-allocate temporary receiver EM arrays for integr. loop
             rEM = np.zeros((freq.size, isrz), dtype=etaH.dtype)
@@ -1401,8 +1401,8 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
                 # Check mu at receiver level.
                 if rec_loop and verb > 0 and mpermH[lrec] != mpermV[lrec]:
-                    print('* WARNING :: `mpermH != mpermV` at receiver level, '
-                          'only `mpermH` considered for loop factor.')
+                    print("* WARNING :: `mpermH != mpermV` at receiver level, "
+                          "only `mpermH` considered for loop factor.")
 
                 # Gather variables
                 finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq,
@@ -1744,8 +1744,8 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
     """
     if verb > 2:
         print("   GPR             :  EXPERIMENTAL, USE WITH CAUTION")
-        print("     > centre freq :  " + str(cf))
-        print("     > gain        :  " + str(gain))
+        print(f"     > centre freq :  {cf}")
+        print(f"     > gain        :  {gain}")
 
     # === 1.  CHECK TIME ============
 

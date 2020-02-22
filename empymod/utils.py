@@ -107,9 +107,9 @@ class EMArray(np.ndarray):
     >>> import numpy as np
     >>> from empymod.utils import EMArray
     >>> emvalues = EMArray(np.array([1,2,3])+1j*np.array([1, 0, -1]))
-    >>> print('Amplitude : ', emvalues.amp)
+    >>> print(f"Amplitude : {emvalues.amp}")
     Amplitude :  [ 1.41421356  2.          3.16227766]
-    >>> print('Phase     : ', emvalues.pha)
+    >>> print(f"Phase     : {emvalues.pha}")
     Phase     :  [ 45.           0.         -18.43494882]
 
     """
@@ -166,7 +166,7 @@ def check_ab(ab, verb):
     try:
         ab = int(ab)
     except VariableCatch:
-        print('* ERROR   :: <ab> must be an integer')
+        print("* ERROR   :: <ab> must be an integer")
         raise
 
     # Check src and rec orientation (<ab> for alpha-beta)
@@ -175,13 +175,12 @@ def check_ab(ab, verb):
            31, 32, 33, 34, 35, 36, 41, 42, 43, 44, 45, 46,
            51, 52, 53, 54, 55, 56, 61, 62, 63, 64, 65, 66]
     if ab not in pab:
-        print('* ERROR   :: <ab> must be one of: ' + str(pab) + ';' +
-              ' <ab> provided: ' + str(ab))
+        print("* ERROR   :: <ab> must be one of: {pab}; <ab> provided: {ab}")
         raise ValueError('ab')
 
     # Print input <ab>
     if verb > 2:
-        print("   Input ab        : ", ab)
+        print(f"   Input ab        :  {ab}")
 
     # Check if src and rec are magnetic or electric
     msrc = ab % 10 > 3   # If True: magnetic src
@@ -201,9 +200,9 @@ def check_ab(ab, verb):
     # Print actual calculated <ab>
     if verb > 2:
         if ab in [36, 63]:
-            print("\n>  <ab> IS "+str(ab)+" WHICH IS ZERO; returning")
+            print(f"\n>  <ab> IS {ab} WHICH IS ZERO; returning")
         else:
-            print("   Calculated ab   : ", ab_calc)
+            print(f"   Calculated ab   :  {ab_calc}")
 
     return ab_calc, msrc, mrec
 
@@ -261,8 +260,8 @@ def check_bipole(inp, name):
     # Check length of inp.
     narr = len(inp)
     if narr not in [5, 6]:
-        print('* ERROR   :: Parameter ' + name + ' has wrong length! : ' +
-              str(narr) + ' instead of 5 (dipole) or 6 (bipole).')
+        print(f"* ERROR   :: Parameter {name} has wrong length! : "
+              f"{narr} instead of 5 (dipole) or 6 (bipole).")
         raise ValueError(name)
 
     # Flag if it is a dipole or not
@@ -297,8 +296,8 @@ def check_bipole(inp, name):
         # (This is a problem, as we would could not define the angles then.)
         if not np.all((inp0[0] != inp1[0]) + (inp0[1] != inp1[1]) +
                       (inp0[2] != inp1[2])):
-            print("* ERROR   :: At least one of <" + name + "> is a point " +
-                  "dipole, use the format [x, y, z, azimuth, dip] instead " +
+            print(f"* ERROR   :: At least one of <{name}> is a point "
+                  "dipole, use the format [x, y, z, azimuth, dip] instead "
                   "of [x0, x1, y0, y1, z0, z1].")
             raise ValueError('Bipole: bipole-' + name)
 
@@ -353,7 +352,7 @@ def check_dipole(inp, name, verb):
         else:
             longname = '   Receiver(s)     : '
 
-        print(longname, str(inp[0].size), 'dipole(s)')
+        print(f"{longname} {inp[0].size} dipole(s)")
         tname = ['x  ', 'y  ', 'z  ']
         for i in range(3):
             text = "     > " + tname[i] + "     [m] : "
@@ -506,14 +505,14 @@ def check_hankel(ht, htarg, verb):
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  DLF (Fast Hankel Transform)")
-            print("     > Filter      :  " + fhtfilt.name)
+            print(f"     > Filter      :  {fhtfilt.name}")
             pstr = "     > DLF type    :  "
             if pts_per_dec < 0:
-                print(pstr + "Lagged Convolution")
+                print(f"{pstr}Lagged Convolution")
             elif pts_per_dec > 0:
-                print(pstr + "Splined, " + str(pts_per_dec) + " pts/dec")
+                print(f"{pstr}Splined, {pts_per_dec} pts/dec")
             else:
-                print(pstr + "Standard")
+                print(f"{pstr}Standard")
 
     elif ht in ['qwe', 'hqwe']:
         # Rename ht
@@ -587,18 +586,18 @@ def check_hankel(ht, htarg, verb):
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  Quadrature-with-Extrapolation")
-            print("     > rtol        :  " + str(rtol))
-            print("     > atol        :  " + str(atol))
-            print("     > nquad       :  " + str(nquad))
-            print("     > maxint      :  " + str(maxint))
-            print("     > pts_per_dec :  " + str(pts_per_dec))
-            print("     > diff_quad   :  " + str(diff_quad))
+            print(f"     > rtol        :  {rtol}")
+            print(f"     > atol        :  {atol}")
+            print(f"     > nquad       :  {nquad}")
+            print(f"     > maxint      :  {maxint}")
+            print(f"     > pts_per_dec :  {pts_per_dec}")
+            print(f"     > diff_quad   :  {diff_quad}")
             if a:
-                print("     > a     (quad):  " + str(a))
+                print(f"     > a     (quad):  {a}")
             if b:
-                print("     > b     (quad):  " + str(b))
+                print(f"     > b     (quad):  {b}")
             if limit:
-                print("     > limit (quad):  " + str(limit))
+                print(f"     > limit (quad):  {limit}")
 
     elif ht in ['quad', 'hquad']:
         # Rename ht
@@ -652,16 +651,16 @@ def check_hankel(ht, htarg, verb):
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  Quadrature")
-            print("     > rtol        :  " + str(rtol))
-            print("     > atol        :  " + str(atol))
-            print("     > limit       :  " + str(limit))
-            print("     > a           :  " + str(a))
-            print("     > b           :  " + str(b))
-            print("     > pts_per_dec :  " + str(pts_per_dec))
+            print(f"     > rtol        :  {rtol}")
+            print(f"     > atol        :  {atol}")
+            print(f"     > limit       :  {limit}")
+            print(f"     > a           :  {a}")
+            print(f"     > b           :  {b}")
+            print(f"     > pts_per_dec :  {pts_per_dec}")
 
     else:
-        print("* ERROR   :: <ht> must be one of: ['fht', 'qwe', 'quad'];" +
-              " <ht> provided: " + str(ht))
+        print("* ERROR   :: <ht> must be one of: ['fht', 'qwe', 'quad'];"
+              f" <ht> provided: {ht}")
         raise ValueError('ht')
 
     return ht, htarg
@@ -743,9 +742,9 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
     # Ensure depth is increasing
     if np.any(depth[1:] - depth[:-1] < 0):
-        print('* ERROR   :: Depth must be continuously increasing or ' +
-              'decreasing.\n             <depth> provided: ' +
-              _strvar(depth[::swap]))
+        print(f"* ERROR   :: Depth must be continuously increasing or "
+              f"decreasing.\n             <depth> provided: "
+              f"{_strvar(depth[::swap])}")
         raise ValueError('depth')
 
     # Add -infinity at the beginning
@@ -798,13 +797,13 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
     # Print model parameters
     if verb > 2:
-        print("   depth       [m] : ", _strvar(depth[1:]))
-        print("   res     [Ohm.m] : ", _strvar(res))
-        print("   aniso       [-] : ", _strvar(aniso))
-        print("   epermH      [-] : ", _strvar(epermH))
-        print("   epermV      [-] : ", _strvar(epermV))
-        print("   mpermH      [-] : ", _strvar(mpermH))
-        print("   mpermV      [-] : ", _strvar(mpermV))
+        print(f"   depth       [m] :  {_strvar(depth[1:])}")
+        print(f"   res     [Ohm.m] :  {_strvar(res)}")
+        print(f"   aniso       [-] :  {_strvar(aniso)}")
+        print(f"   epermH      [-] :  {_strvar(epermH)}")
+        print(f"   epermV      [-] :  {_strvar(epermV)}")
+        print(f"   mpermH      [-] :  {_strvar(mpermH)}")
+        print(f"   mpermV      [-] :  {_strvar(mpermV)}")
 
     # Check if medium is a homogeneous full-space. If that is the case, the
     # EM-field is computed analytically directly in the frequency-domain.
@@ -834,7 +833,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     # Print fullspace info
     if verb > 2 and isfullspace:
         if xdirect:
-            print("\n>  MODEL IS A FULLSPACE; returning analytical " +
+            print("\n>  MODEL IS A FULLSPACE; returning analytical "
                   "frequency-domain solution")
         else:
             print("\n>  MODEL IS A FULLSPACE")
@@ -895,7 +894,7 @@ def check_opt(opt, loop, ht, htarg, verb):
         if numexpr:
             use_ne_eval = numexpr.evaluate
         elif verb > 0:
-            print(numexpr_msg)
+            print(f"{numexpr_msg}")
 
     # Define if to loop over frequencies or over offsets
     lagged_splined_fht = False
@@ -1020,14 +1019,14 @@ def check_time(time, signal, ft, ftarg, verb):
                 print("   Fourier         :  DLF (Sine-Filter)")
             else:
                 print("   Fourier         :  DLF (Cosine-Filter)")
-            print("     > Filter      :  " + fftfilt.name)
+            print(f"     > Filter      :  {fftfilt.name}")
             pstr = "     > DLF type    :  "
             if pts_per_dec < 0:
-                print(pstr + "Lagged Convolution")
+                print(f"{pstr}Lagged Convolution")
             elif pts_per_dec > 0:
-                print(pstr + "Splined, " + str(pts_per_dec) + " pts/dec")
+                print(f"{pstr}Splined, {pts_per_dec} pts/dec")
             else:
-                print(pstr + "Standard")
+                print(f"{pstr}Standard")
 
         # Get required frequencies
         omega, _ = transform.get_spline_values(ftarg[0], time, ftarg[1])
@@ -1110,18 +1109,18 @@ def check_time(time, signal, ft, ftarg, verb):
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  Quadrature-with-Extrapolation")
-            print("     > rtol        :  " + str(rtol))
-            print("     > atol        :  " + str(atol))
-            print("     > nquad       :  " + str(nquad))
-            print("     > maxint      :  " + str(maxint))
-            print("     > pts_per_dec :  " + str(pts_per_dec))
-            print("     > diff_quad   :  " + str(diff_quad))
+            print(f"     > rtol        :  {rtol}")
+            print(f"     > atol        :  {atol}")
+            print(f"     > nquad       :  {nquad}")
+            print(f"     > maxint      :  {maxint}")
+            print(f"     > pts_per_dec :  {pts_per_dec}")
+            print(f"     > diff_quad   :  {diff_quad}")
             if a:
-                print("     > a     (quad):  " + str(a))
+                print(f"     > a     (quad):  {a}")
             if b:
-                print("     > b     (quad):  " + str(b))
+                print(f"     > b     (quad):  {b}")
             if limit:
-                print("     > limit (quad):  " + str(limit))
+                print(f"     > limit (quad):  {limit}")
 
         # Get required frequencies
         g_x, _ = special.p_roots(nquad)
@@ -1165,9 +1164,9 @@ def check_time(time, signal, ft, ftarg, verb):
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  FFTLog")
-            print("     > pts_per_dec :  " + str(pts_per_dec))
-            print("     > add_dec     :  " + str(add_dec))
-            print("     > q           :  " + str(q))
+            print(f"     > pts_per_dec :  {pts_per_dec}")
+            print(f"     > add_dec     :  {add_dec}")
+            print(f"     > q           :  {q}")
 
         # Calculate minimum and maximum required frequency
         minf = np.log10(1/time.max()) + add_dec[0]
@@ -1230,17 +1229,17 @@ def check_time(time, signal, ft, ftarg, verb):
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  Fast Fourier Transform FFT")
-            print("     > dfreq       :  " + str(ftarg[0]))
-            print("     > nfreq       :  " + str(ftarg[1]))
-            print("     > ntot        :  " + str(ftarg[2]))
+            print(f"     > dfreq       :  {ftarg[0]}")
+            print(f"     > nfreq       :  {ftarg[1]}")
+            print(f"     > ntot        :  {ftarg[2]}")
             if pts_per_dec:
-                print("     > pts_per_dec :  " + str(ftarg[3]))
+                print(f"     > pts_per_dec :  {ftarg[3]}")
             else:
                 print("     > pts_per_dec :  (linear)")
 
     else:
-        print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +
-              "'fftlog', 'fft']; <ft> provided: "+str(ft))
+        print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', "
+              f"'fftlog', 'fft']; <ft> provided: {ft}")
         raise ValueError('ft')
 
     return time, freq, ft, ftarg
@@ -1279,7 +1278,7 @@ def check_time_only(time, signal, verb):
 
     # Check input signal
     if int(signal) not in [-1, 0, 1]:
-        print("* ERROR   :: <signal> must be one of: [None, -1, 0, 1]; " +
+        print("* ERROR   :: <signal> must be one of: [None, -1, 0, 1]; "
               "<signal> provided: "+str(signal))
         raise ValueError('signal')
 
@@ -1321,21 +1320,20 @@ def check_solution(solution, signal, ab, msrc, mrec):
 
     # Ensure valid solution.
     if solution not in ['fs', 'dfs', 'dhs', 'dsplit', 'dtetm']:
-        print("* ERROR   :: Solution must be one of ['fs', 'dfs', 'dhs', " +
-              "'dsplit', 'dtetm']; <solution> provided: " + solution)
+        print("* ERROR   :: Solution must be one of ['fs', 'dfs', 'dhs', "
+              f"'dsplit', 'dtetm']; <solution> provided: {solution}")
         raise ValueError('solution')
 
     # If diffusive solution is required, ensure EE-field.
     if solution[0] == 'd' and (msrc or mrec):
-        print('* ERROR   :: Diffusive solution is only implemented for ' +
-              'electric sources and electric receivers, <ab> provided: ' +
-              str(ab))
+        print("* ERROR   :: Diffusive solution is only implemented for "
+              f"electric sources and electric receivers, <ab> provided: {ab}")
         raise ValueError('ab')
 
     # If full solution is required, ensure frequency-domain.
     if solution == 'fs' and signal is not None:
-        print('* ERROR   :: Full fullspace solution is only implemented for ' +
-              'the frequency domain, <signal> provided: ' + str(signal))
+        print("* ERROR   :: Full fullspace solution is only implemented for "
+              f"the frequency domain, <signal> provided: {signal}")
         raise ValueError('signal')
 
 
@@ -1425,7 +1423,7 @@ def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
 
     # Print actual calculated <ab>
     if verb > 2:
-        print("   Required ab's   : ", _strvar(ab_calc))
+        print(f"   Required ab's   :  {_strvar(ab_calc)}")
 
     return ab_calc
 
@@ -1757,24 +1755,24 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
         # Print dipole/bipole information
         if isdipole:
-            print(longname, str(tout[0].size), 'dipole(s)')
+            print(f"{longname} {tout[0].size} dipole(s)")
             tname = ['x  ', 'y  ', 'z  ']
             prntinp = tout
         else:
-            print(longname, str(int(tout[0].size/intpts)), 'bipole(s)')
+            print(f"{longname} {int(tout[0].size/intpts)} bipole(s)")
             tname = ['x_c', 'y_c', 'z_c']
             if intpts == 1:
                 print("     > intpts      :  1 (as dipole)")
                 prntinp = tout
             else:
-                print("     > intpts      : ", intpts)
+                print(f"     > intpts      :  {intpts}")
                 prntinp = [np.atleast_1d(tinp[0])[0] + dx/2,
                            np.atleast_1d(tinp[2])[0] + dy/2,
                            np.atleast_1d(tinp[4])[0] + dz/2]
 
             # Print bipole length and strength
             _prnt_min_max_val(dl, "     > length  [m] : ", verb)
-            print("     > strength[A] : ", _strvar(strength))
+            print(f"     > strength[A] :  {_strvar(strength)}")
 
         # Print coordinates
         for i in range(3):
@@ -1796,7 +1794,7 @@ def printstartfinish(verb, inp=None, kcount=None):
             ktxt = ' '
             if kcount:
                 ktxt += str(kcount) + ' kernel call(s)'
-            print('\n:: empymod END; runtime = ' + ttxt + ' ::' + ktxt + '\n')
+            print(f"\n:: empymod END; runtime = {ttxt} ::{ktxt}\n")
     else:
         t0 = default_timer()
         if verb > 2:
@@ -1807,9 +1805,9 @@ def printstartfinish(verb, inp=None, kcount=None):
 def conv_warning(conv, targ, name, verb):
     r"""Print error if QWE/QUAD did not converge at least once."""
     if verb > 0 and not conv:
-        print('* WARNING :: ' + name +
-              '-quadrature did not converge at least once;\n             ' +
-              '=> desired `atol` and `rtol` might not be achieved.')
+        print(f"* WARNING :: {name}"
+              "-quadrature did not converge at least once;\n             "
+              "=> desired `atol` and `rtol` might not be achieved.")
 
 
 # 3. Set/get min values
@@ -1895,13 +1893,12 @@ def _check_shape(var, name, shape, shape2=None):
     if shape != varshape:
         if shape2:
             if shape2 != varshape:
-                print('* ERROR   :: Parameter ' + name + ' has wrong shape!' +
-                      ' : ' + str(varshape) + ' instead of ' + str(shape) +
-                      'or' + str(shape2) + '.')
+                print(f"* ERROR   :: Parameter {name} has wrong shape!"
+                      f" : {varshape} instead of {shape} or {shape2}.")
                 raise ValueError(name)
         else:
-            print('* ERROR   :: Parameter ' + name + ' has wrong shape! : ' +
-                  str(varshape) + ' instead of ' + str(shape) + '.')
+            print(f"* ERROR   :: Parameter {name} has wrong shape! : "
+                  f"{varshape} instead of {shape}.")
             raise ValueError(name)
 
 
@@ -1923,12 +1920,12 @@ def _strvar(a, prec='{:G}'):
 def _prnt_min_max_val(var, text, verb):
     r"""Print variable; if more than three, just min/max, unless verb > 3."""
     if var.size > 3:
-        print(text, _strvar(var.min()), "-", _strvar(var.max()),
-              ":", _strvar(var.size), " [min-max; #]")
+        print(f"{text} {_strvar(var.min())} - {_strvar(var.max())} "
+              f": {_strvar(var.size)}  [min-max; #]")
         if verb > 3:
-            print("                   : ", _strvar(var))
+            print(f"                   :  {_strvar(var)}")
     else:
-        print(text, _strvar(np.atleast_1d(var)))
+        print(f"{text} {_strvar(np.atleast_1d(var))}")
 
 
 def _check_min(par, minval, name, unit, verb):
@@ -1941,8 +1938,8 @@ def _check_min(par, minval, name, unit, verb):
         ipar = np.where(par < minval)
         par[ipar] = minval
         if verb > 0 and np.size(ipar) != 0:
-            print('* WARNING :: ' + name + ' < ' + str(minval) + ' ' + unit +
-                  ' are set to ' + str(minval) + ' ' + unit + '!')
+            print(f"* WARNING :: {name} < {str(minval)} {unit}"
+                  f" are set to {minval} {unit}!")
     if scalar:
         return np.squeeze(par)
     else:
