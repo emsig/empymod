@@ -193,15 +193,6 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         if depth.size > 1:  # Only if more than 1 layer
             Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
 
-            # Temporary measure because of jitted reflections().
-            # Remove once fields() is adjusted.
-            # fields() should take Rp/Rm of nd=4, ALWAYS.
-            if lsrc == lrec:
-                if np.arange(depth.size-2, min(lrec, lsrc)-1, -1).size > 0:
-                    Rp = Rp[:, :, 0, :]
-                if np.arange(1, max(lrec, lsrc)+1, 1).size > 0:
-                    Rm = Rm[:, :, 0, :]
-
             # Field propagators
             # (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74
             if lrec != depth.size-1:  # No upgoing field prop. if rec in last
@@ -492,10 +483,11 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
         # Calculate Pu+, Pu-, Pd+, Pd-
         if lsrc == lrec:  # rec in src layer; Eqs  81/82, A-8/A-9
             if last_layer:  # If src/rec are in top (up) or bottom (down) layer
-                P = Rmp*np.exp(-iGam*dm)
+                P = Rmp[:, :, 0, :]*np.exp(-iGam*dm)
             else:           # If src and rec are in any layer in between
-                P = np.exp(-iGam*dm) + pm*Rpm*np.exp(-iGam*(ds+dp))
-                P *= Rmp/(1 - Rmp*Rpm*np.exp(-2*iGam*ds))
+                P = np.exp(-iGam*dm) + pm*Rpm[:, :, 0, :]*np.exp(-iGam*(ds+dp))
+                P *= Rmp[:, :, 0, :]
+                P /= 1 - Rmp[:, :, 0, :]*Rpm[:, :, 0, :]*np.exp(-2*iGam*ds)
 
         else:           # rec above (up) / below (down) src layer
             #           # Eqs  95/96,  A-24/A-25 for rec above src layer

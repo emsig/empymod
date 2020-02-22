@@ -490,14 +490,6 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
         # Get Rp/Rm for lambd=0
         Rp, Rm = reflections(depth, z_eta, Gam, lrec, lsrc)
 
-        # Temporary measure because of jitted reflections().
-        # Remove once fields() is adjusted.
-        if lsrc == lrec:
-            if np.arange(depth.size-2, min(lrec, lsrc)-1, -1).size > 0:
-                Rp = Rp[:, :, 0, :]
-            if np.arange(1, max(lrec, lsrc)+1, 1).size > 0:
-                Rm = Rm[:, :, 0, :]
-
         # Depending on model Rp/Rm have 3 or 4 dimensions. Last two are
         # wavenumbers and layers btw src and rec, which both are 1.
         if Rp.ndim == 4:
@@ -571,14 +563,6 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd):
 
         # Reflection (coming from below (Rp) and above (Rm) rec)
         Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
-
-        # Temporary measure because of jitted reflections().
-        # Remove once fields() is adjusted.
-        if lsrc == lrec:
-            if np.arange(depth.size-2, min(lrec, lsrc)-1, -1).size > 0:
-                Rp = Rp[:, :, 0, :]
-            if np.arange(1, max(lrec, lsrc)+1, 1).size > 0:
-                Rm = Rm[:, :, 0, :]
 
         # Field propagators
         # (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74
@@ -664,12 +648,12 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, TM):
         # Calculate Pu+, Pu-, Pd+, Pd-; rec in src layer; Eqs  81/82, A-8/A-9
         iGam = Gam[:, :, lsrc, :]
         if last_layer:  # If src/rec are in top (up) or bottom (down) layer
-            Pd = Rmp*np.exp(-iGam*dm)
+            Pd = Rmp[:, :, 0, :]*np.exp(-iGam*dm)
             Pu = np.full_like(Gam[:, :, lsrc, :], 0+0j)
         else:           # If src and rec are in any layer in between
-            Ms = 1 - Rmp*Rpm*np.exp(-2*iGam*ds)
-            Pd = Rmp/Ms*np.exp(-iGam*dm)
-            Pu = Rmp/Ms*pm*Rpm*np.exp(-iGam*(ds+dp))
+            Ms = 1 - Rmp[:, :, 0, :]*Rpm[:, :, 0, :]*np.exp(-2*iGam*ds)
+            Pd = Rmp[:, :, 0, :]/Ms*np.exp(-iGam*dm)
+            Pu = Rmp[:, :, 0, :]/Ms*pm*Rpm[:, :, 0, :]*np.exp(-iGam*(ds+dp))
 
         # Store P's
         if up:

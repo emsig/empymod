@@ -94,16 +94,6 @@ def test_fields():
                 'lrec': np.array(lay), 'lsrc': np.array(lay)}
         Rp1, Rm1 = kernel.reflections(**inp1)
 
-        # Temporary measure because of jitted reflections().
-        # Remove once fields() is adjusted.
-        # fields() should take Rp/Rm of nd=4, ALWAYS.
-        ls, lr, dd = inp1['lsrc'], inp1['lrec'], inp1['depth']
-        if ls == lr:
-            if np.arange(dd.size-2, min(lr, ls)-1, -1).size > 0:
-                Rp1 = Rp1[:, :, 0, :]
-            if np.arange(1, max(lr, ls)+1, 1).size > 0:
-                Rm1 = Rm1[:, :, 0, :]
-
         inp2 = {'depth': depth[:-1], 'Gam': Gam, 'Rp': Rp1, 'Rm': Rm1,
                 'lrec': np.array(lay), 'lsrc': np.array(lay),
                 'zsrc': depth[lay+1]-50}
