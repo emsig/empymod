@@ -60,8 +60,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
             assert_allclose(np.squeeze(wvnr0), np.squeeze(freq0))
 
         # # # 1. Spline; One angle # # #
-        htarg, _ = utils.spline_backwards_hankel(htype, None, 'spline')
-        _, htarg = utils.check_hankel(htype, htarg, 0)
+        _, htarg = utils.check_hankel(htype, {'pts_per_dec': 80}, 0)
         if htype == 'hquad':  # Lower atol to ensure convergence
             _, htarg = utils.check_hankel('quad', [1e-8], 0)
         elif htype == 'fht':  # Adjust htarg for fht

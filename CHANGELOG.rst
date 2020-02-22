@@ -2,6 +2,17 @@ Changelog
 #########
 
 
+*latest* v2.0.0 development
+---------------------------
+
+This version will be backwards incompatible, and only support Python 3.6+.
+
+- Removed all deprecated functions.
+- Dropped support for Python 3.5.
+- Dropped testing for channel conda-forge. The problems encountered at the
+  early development cycle of empymod with conda-forge do not exist any longer.
+
+
 v1.10.5: Continuously in- or decreasing
 ---------------------------------------
 

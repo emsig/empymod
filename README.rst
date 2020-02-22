@@ -128,7 +128,7 @@ or via ``pip``:
 
    pip install empymod
 
-Required are Python version 3.5 or higher and the modules `NumPy` and `SciPy`.
+Required are Python version 3.6 or higher and the modules `NumPy` and `SciPy`.
 Consult the installation notes in the `manual
 <https://empymod.readthedocs.io/en/stable/manual.html#installation>`_ for more
 information regarding installation and requirements.

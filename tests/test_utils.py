@@ -1073,29 +1073,6 @@ def test_minimum():
     assert d['min_angle'] == 1e-5
 
 
-def test_spline_backwards_hankel():
-    out1, out2 = utils.spline_backwards_hankel('fht', None, None)
-    assert out1 == {}
-    assert out2 is None
-
-    out1, out2 = utils.spline_backwards_hankel('fht', {'pts_per_dec': 45},
-                                               'parallel')
-    assert out1 == {'pts_per_dec': 45}
-    assert out2 == 'parallel'
-
-    out1, out2 = utils.spline_backwards_hankel('FHT', None, 'spline')
-    assert out1 == {'pts_per_dec': -1}
-    assert out2 is None
-
-    out1, out2 = utils.spline_backwards_hankel('qwe', None, 'spline')
-    assert out1 == {'pts_per_dec': 80}
-    assert out2 is None
-
-    out1, out2 = utils.spline_backwards_hankel('QWE', None, None)
-    assert out1 == {}
-    assert out2 is None
-
-
 def test_report(capsys):
     out, _ = capsys.readouterr()  # Empty capsys
 
@@ -1115,34 +1092,3 @@ def test_report(capsys):
         _ = utils.Report()
         out, _ = capsys.readouterr()  # Empty capsys
         assert 'WARNING :: `empymod.Report` requires `scooby`' in out
-
-
-def test_versions_backwards():
-    if scooby:
-        out1 = utils.Report()
-        out2 = utils.Versions()
-        out3 = utils.versions()
-
-        # Exclude minutes and seconds, to avoid stupid failures.
-        assert out1.__repr__()[150:] == out2.__repr__()[150:]
-        assert out1.__repr__()[150:] == out3.__repr__()[150:]
-
-
-def test_emarray_backwards():
-    out = utils.EMArray(3)
-    assert out.amp == 3
-    assert out.pha == 0
-    assert out.real == 3
-    assert out.imag == 0
-
-    out = utils.EMArray(1, 1)
-    assert out.amp == np.sqrt(2)
-    assert out.pha == 45.
-    assert out.real == 1
-    assert out.imag == 1
-
-    out = utils.EMArray([1, 0], [1, 1])
-    assert_allclose(out.amp, [np.sqrt(2), 1])
-    assert_allclose(out.pha, [45., 90.])
-    assert_allclose(out.real, [1, 0])
-    assert_allclose(out.imag, [1, 1])

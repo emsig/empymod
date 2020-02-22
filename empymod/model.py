@@ -54,7 +54,6 @@ The modelling routines make use of the following two core routines:
 # the License.
 
 
-import warnings
 import numpy as np
 
 from empymod import kernel, transform
@@ -62,11 +61,10 @@ from empymod.utils import (
         check_time, check_time_only, check_model, check_frequency,
         check_hankel, check_opt, check_dipole, check_bipole, check_ab,
         check_solution, get_abs, get_geo_fact, get_azm_dip, get_off_ang,
-        get_layer_nr, printstartfinish, conv_warning, spline_backwards_hankel,
-        EMArray)
+        get_layer_nr, printstartfinish, conv_warning, EMArray)
 
 __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
-           'tem', 'wavenumber']
+           'tem']
 
 
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
@@ -308,12 +306,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
               default all available cores up to a maximum of 8. You can change
               this behaviour to your desired number of threads ``nthreads``
               with ``numexpr.set_num_threads(nthreads)``.
-            - The value 'spline' is deprecated and will be removed. See
-              ``htarg`` instead for the interpolated versions.
-
-        The option 'parallel' only affects speed and memory usage, whereas
-        'spline' also affects precision!  Please read the note in the *README*
-        documentation for more information.
 
     loop : {None, 'freq', 'off'}, optional
         Define if to calculate everything vectorized or if to loop over
@@ -413,9 +405,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     t0 = printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
-
-    # Backwards compatibility
-    htarg, opt = spline_backwards_hankel(ht, htarg, opt)
 
     # Check times and Fourier Transform arguments and get required frequencies
     if signal is None:
@@ -817,12 +806,6 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
               default all available cores up to a maximum of 8. You can change
               this behaviour to your desired number of threads ``nthreads``
               with ``numexpr.set_num_threads(nthreads)``.
-            - The value 'spline' is deprecated and will be removed. See
-              ``htarg`` instead for the interpolated versions.
-
-        The option 'parallel' only affects speed and memory usage, whereas
-        'spline' also affects precision!  Please read the note in the *README*
-        documentation for more information.
 
     loop : {None, 'freq', 'off'}, optional
         Define if to calculate everything vectorized or if to loop over
@@ -879,9 +862,6 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     t0 = printstartfinish(verb)
 
     # === 2.  CHECK INPUT ============
-
-    # Backwards compatibility
-    htarg, opt = spline_backwards_hankel(ht, htarg, opt)
 
     # Check times and Fourier Transform arguments, get required frequencies
     # (freq = freqtime if ``signal=None``)
@@ -1998,19 +1978,6 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     printstartfinish(verb, t0, 1)
 
     return np.squeeze(PJ0), np.squeeze(PJ1)
-
-
-def wavenumber(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
-               epermH=None, epermV=None, mpermH=None, mpermV=None, verb=2):
-    r"""Depreciated. Use `dipole_k` instead."""
-
-    # Issue warning
-    mesg = ("\n    The use of `model.wavenumber` is deprecated and will " +
-            "be removed;\n    use `model.dipole_k` instead.")
-    warnings.warn(mesg, DeprecationWarning)
-
-    return dipole_k(src, rec, depth, res, freq, wavenumber, ab, aniso, epermH,
-                    epermV, mpermH, mpermV, verb)
 
 
 # Core modelling routines

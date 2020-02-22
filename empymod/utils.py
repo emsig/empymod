@@ -30,7 +30,6 @@ This module consists of four groups of functions:
 
 
 # Mandatory imports
-import warnings
 import numpy as np
 from scipy import special
 from datetime import timedelta
@@ -67,7 +66,7 @@ __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
            'check_bipole', 'check_ab', 'check_solution', 'get_abs',
            'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
            'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum',
-           'spline_backwards_hankel', 'Report', 'Versions', 'versions']
+           'Report']
 
 # 0. General settings
 
@@ -115,10 +114,8 @@ class EMArray(np.ndarray):
 
     """
 
-    def __new__(cls, data, backwards_comp=None):
+    def __new__(cls, data):
         r"""Create a new EMArray."""
-        if np.any(backwards_comp):  # Delete for v2.0.0
-            data = np.asarray(data) + 1j*np.asarray(backwards_comp)
         return np.asarray(data).view(cls)
 
     @property
@@ -1971,50 +1968,7 @@ def _check_targ(targ, keys):
     return targ
 
 
-# 5. Backwards compatibility
-
-def spline_backwards_hankel(ht, htarg, opt):
-    r"""Check opt if deprecated 'spline' is used.
-
-    Returns corrected htarg, opt.
-    r"""
-    # Ensure ht is all lowercase
-    ht = ht.lower()
-
-    # Only relevant for 'fht' and 'hqwe', not for 'quad'
-    if ht in ['fht', 'qwe', 'hqwe']:
-
-        # Get corresponding htarg
-        if ht == 'fht':
-            htarg = _check_targ(htarg, ['fhtfilt', 'pts_per_dec'])
-        elif ht in ['qwe', 'hqwe']:
-            htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
-                                'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
-
-        # If spline (qwe, fht) or lagged (fht)
-        if opt == 'spline':
-
-            # Issue warning
-            mesg = ("\n    The use of `opt='spline'` is deprecated and will " +
-                    "be removed\n    in v2.0.0; use the corresponding " +
-                    "setting in `htarg`.")
-            warnings.warn(mesg, DeprecationWarning)
-
-            # Reset opt
-            opt = None
-
-            # Check pts_per_dec; set to old default values if not given
-            if 'pts_per_dec' not in htarg:
-                if ht == 'fht':
-                    htarg['pts_per_dec'] = -1  # Lagged Convolution DLF
-
-                elif ht in ['qwe', 'hqwe']:
-                    htarg['pts_per_dec'] = 80  # Splined QWE; old default value
-
-    return htarg, opt
-
-
-# 6. Report
+# 5. Report
 class Report(ScoobyReport):
     r"""Print date, time, and version information.
 
@@ -2077,21 +2031,3 @@ class Report(ScoobyReport):
 
         super().__init__(additional=add_pckg, core=core, optional=optional,
                          ncol=ncol, text_width=text_width, sort=sort)
-
-
-class Versions(Report):
-    r"""New name is `Report`, here for backwards compatibility."""
-    mesg = ("\n    Class `Versions` is deprecated and will " +
-            "be removed; use class `Report` instead.")
-    warnings.warn(mesg, DeprecationWarning)
-
-    def __init__(self, add_pckg=None, ncol=3):
-        super().__init__(add_pckg, ncol)
-
-
-def versions(mode=None, add_pckg=None, ncol=4):
-    r"""Old func-way of class `Report`, here for backwards compatibility."""
-    mesg = ("\n    Func `versions` is deprecated and will " +
-            "be removed; use class `Report` instead.")
-    warnings.warn(mesg, DeprecationWarning)
-    return Report(add_pckg, ncol)
