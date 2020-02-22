@@ -59,7 +59,7 @@ import numpy as np
 from empymod import kernel, transform
 from empymod.utils import (
         check_time, check_time_only, check_model, check_frequency,
-        check_hankel, check_opt, check_dipole, check_bipole, check_ab,
+        check_hankel, check_loop, check_dipole, check_bipole, check_ab,
         check_solution, get_abs, get_geo_fact, get_azm_dip, get_off_ang,
         get_layer_nr, printstartfinish, conv_warning, EMArray)
 
@@ -70,8 +70,7 @@ __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
            srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
-           ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
-           verb=2):
+           ht='fht', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
     r"""Return EM fields due to arbitrary rotated, finite length EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -209,7 +208,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     - If > 0, interpolation is used.
 
                 - diff_quad: criteria when to swap to QUAD (only relevant if
-                  opt='spline') (default: 100)
+                  pts_per_dec=-1) (default: 100)
                 - a: lower limit for QUAD (default: first interval from QWE)
                 - b: upper limit for QUAD (default: last interval from QWE)
                 - limit: limit for quad (default: maxint)
@@ -292,26 +291,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         However, if provided as list, you have to follow the order given above.
         See ``htarg`` for a few examples.
 
-    opt : {None, 'parallel'}, optional
-        Optimization flag. Defaults to None:
-            - None: Normal case, no parallelization nor interpolation is used.
-            - If 'parallel', the package ``numexpr`` is used to evaluate the
-              most expensive statements. Always check if it actually improves
-              performance for a specific problem. It can speed up the
-              calculation for big arrays, but will most likely be slower for
-              small arrays. It will use all available cores for these specific
-              statements, which all contain ``Gamma`` in one way or another,
-              which has dimensions (#frequencies, #offsets, #layers, #lambdas),
-              therefore can grow pretty big. The module ``numexpr`` uses by
-              default all available cores up to a maximum of 8. You can change
-              this behaviour to your desired number of threads ``nthreads``
-              with ``numexpr.set_num_threads(nthreads)``.
-
     loop : {None, 'freq', 'off'}, optional
         Define if to calculate everything vectorized or if to loop over
         frequencies ('freq') or over offsets ('off'), default is None. It
-        always loops over frequencies if ``ht = 'qwe'`` or if ``opt =
-        'spline'``. Calculating everything vectorized is fast for few offsets
+        always loops over frequencies if ``ht = 'qwe'`` or if ``pts_per_dec =
+        -1``. Calculating everything vectorized is fast for few offsets
         OR for few frequencies. However, if you calculate many frequencies for
         many offsets, it might be faster to loop over frequencies. Only
         comparing the different versions will yield the answer for your
@@ -370,7 +354,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        Hankel          :  DLF (Fast Hankel Transform)
          > Filter      :  Key 201 (2009)
          > DLF type    :  Standard
-       Kernel Opt.     :  None
        Loop over       :  None (all vectorized)
        Source(s)       :  1 bipole(s)
          > intpts      :  1 (as dipole)
@@ -431,8 +414,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, verb)
 
-    # Check optimization
-    use_ne_eval, loop_freq, loop_off = check_opt(opt, loop, ht, htarg, verb)
+    # Check loop
+    loop_freq, loop_off = check_loop(loop, ht, htarg, verb)
 
     # Check src and rec, get flags if dipole or not
     # nsrcz/nrecz are number of unique src/rec-pole depths
@@ -507,8 +490,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     # Gather variables
                     finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq,
                             etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht,
-                            htarg, use_ne_eval, msrc, mrec, loop_freq,
-                            loop_off, conv)
+                            htarg, msrc, mrec, loop_freq, loop_off, conv)
 
                     # Pre-allocate temporary EM array for ab-loop
                     abEM = np.zeros((freq.size, isrz), dtype=etaH.dtype)
@@ -577,8 +559,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
-           ht='fht', htarg=None, ft='sin', ftarg=None, opt=None, loop=None,
-           verb=2):
+           ht='fht', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
     r"""Return EM fields due to infinitesimal small EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -710,7 +691,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
                     - If > 0, interpolation is used.
 
                 - diff_quad: criteria when to swap to QUAD (only relevant if
-                  opt='spline') (default: 100)
+                  pts_per_dec=-1) (default: 100)
                 - a: lower limit for QUAD (default: first interval from QWE)
                 - b: upper limit for QUAD (default: last interval from QWE)
                 - limit: limit for quad (default: maxint)
@@ -792,26 +773,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         However, if provided as list, you have to follow the order given above.
         See ``htarg`` for a few examples.
 
-    opt : {None, 'parallel'}, optional
-        Optimization flag. Defaults to None:
-            - None: Normal case, no parallelization nor interpolation is used.
-            - If 'parallel', the package ``numexpr`` is used to evaluate the
-              most expensive statements. Always check if it actually improves
-              performance for a specific problem. It can speed up the
-              calculation for big arrays, but will most likely be slower for
-              small arrays. It will use all available cores for these specific
-              statements, which all contain ``Gamma`` in one way or another,
-              which has dimensions (#frequencies, #offsets, #layers, #lambdas),
-              therefore can grow pretty big. The module ``numexpr`` uses by
-              default all available cores up to a maximum of 8. You can change
-              this behaviour to your desired number of threads ``nthreads``
-              with ``numexpr.set_num_threads(nthreads)``.
-
     loop : {None, 'freq', 'off'}, optional
         Define if to calculate everything vectorized or if to loop over
         frequencies ('freq') or over offsets ('off'), default is None. It
-        always loops over frequencies if ``ht = 'qwe'`` or if ``opt =
-        'spline'``. Calculating everything vectorized is fast for few offsets
+        always loops over frequencies if ``ht = 'qwe'`` or if ``pts_per_dec =
+        -1``. Calculating everything vectorized is fast for few offsets
         OR for few frequencies. However, if you calculate many frequencies for
         many offsets, it might be faster to loop over frequencies. Only
         comparing the different versions will yield the answer for your
@@ -889,8 +855,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, verb)
 
-    # Check optimization
-    use_ne_eval, loop_freq, loop_off = check_opt(opt, loop, ht, htarg, verb)
+    # Check loop
+    loop_freq, loop_off = check_loop(loop, ht, htarg, verb)
 
     # Check src-rec configuration
     # => Get flags if src or rec or both are magnetic (msrc, mrec)
@@ -911,8 +877,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # Collect variables for fem
     inp = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
-           etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, use_ne_eval,
-           msrc, mrec, loop_freq, loop_off)
+           etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, msrc, mrec,
+           loop_freq, loop_off)
     EM, kcount, conv = fem(*inp)
 
     # In case of QWE/QUAD, print Warning if not converged
@@ -937,7 +903,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
          epermV=None, mpermH=None, mpermV=None, mrec=True, recpts=1,
          strength=0, xdirect=False, ht='fht', htarg=None, ft='sin', ftarg=None,
-         opt=None, loop=None, verb=2):
+         loop=None, verb=2):
     r"""Return EM fields due to a magnetic source loop.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -1104,7 +1070,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
                     - If > 0, interpolation is used.
 
                 - diff_quad: criteria when to swap to QUAD (only relevant if
-                  opt='spline') (default: 100)
+                  pts_per_dec=-1) (default: 100)
                 - a: lower limit for QUAD (default: first interval from QWE)
                 - b: upper limit for QUAD (default: last interval from QWE)
                 - limit: limit for quad (default: maxint)
@@ -1187,26 +1153,11 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
         However, if provided as list, you have to follow the order given above.
         See ``htarg`` for a few examples.
 
-    opt : {None, 'parallel'}, optional
-        Optimization flag. Defaults to None:
-            - None: Normal case, no parallelization nor interpolation is used.
-            - If 'parallel', the package ``numexpr`` is used to evaluate the
-              most expensive statements. Always check if it actually improves
-              performance for a specific problem. It can speed up the
-              calculation for big arrays, but will most likely be slower for
-              small arrays. It will use all available cores for these specific
-              statements, which all contain ``Gamma`` in one way or another,
-              which has dimensions (#frequencies, #offsets, #layers, #lambdas),
-              therefore can grow pretty big. The module ``numexpr`` uses by
-              default all available cores up to a maximum of 8. You can change
-              this behaviour to your desired number of threads ``nthreads``
-              with ``numexpr.set_num_threads(nthreads)``.
-
     loop : {None, 'freq', 'off'}, optional
         Define if to calculate everything vectorized or if to loop over
         frequencies ('freq') or over offsets ('off'), default is None. It
-        always loops over frequencies if ``ht = 'qwe'`` or if ``opt =
-        'spline'``. Calculating everything vectorized is fast for few offsets
+        always loops over frequencies if ``ht = 'qwe'`` or if ``pts_per_dec =
+        -1``. Calculating everything vectorized is fast for few offsets
         OR for few frequencies. However, if you calculate many frequencies for
         many offsets, it might be faster to loop over frequencies. Only
         comparing the different versions will yield the answer for your
@@ -1263,7 +1214,6 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
        Hankel          :  DLF (Fast Hankel Transform)
          > Filter      :  Key 201 (2009)
          > DLF type    :  Standard
-       Kernel Opt.     :  None
        Loop over       :  None (all vectorized)
        Source(s)       :  1 dipole(s)
          > x       [m] :  0
@@ -1322,8 +1272,8 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
     # Check Hankel transform parameters
     ht, htarg = check_hankel(ht, htarg, verb)
 
-    # Check optimization
-    use_ne_eval, loop_freq, loop_off = check_opt(opt, loop, ht, htarg, verb)
+    # Check loop
+    loop_freq, loop_off = check_loop(loop, ht, htarg, verb)
 
     # Check src and rec, get flags if dipole or not
     # nsrcz/nrecz are number of unique src/rec-pole depths
@@ -1407,8 +1357,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
                 # Gather variables
                 finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq,
                         etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht,
-                        htarg, use_ne_eval, True, mrec, loop_freq,
-                        loop_off, conv)
+                        htarg, True, mrec, loop_freq, loop_off, conv)
 
                 # Pre-allocate temporary EM array for ab-loop
                 abEM = np.zeros((freq.size, isrz), dtype=etaH.dtype)
@@ -1708,8 +1657,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
 def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
         epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
-        ht='quad', htarg=None, ft='fft', ftarg=None, opt=None, loop=None,
-        verb=2):
+        ht='quad', htarg=None, ft='fft', ftarg=None, loop=None, verb=2):
     r"""Return Ground-Penetrating Radar signal.
 
     THIS FUNCTION IS EXPERIMENTAL, USE WITH CAUTION.
@@ -1755,7 +1703,7 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
     # === 2. CALL DIPOLE ============
 
     EM = dipole(src, rec, depth, res, freq, None, ab, aniso, epermH, epermV,
-                mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, opt, loop, verb)
+                mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, loop, verb)
 
     # === 3. GPR STUFF
 
@@ -1961,7 +1909,7 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
         J0, J1, J0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
                                         etaV, zetaH, zetaV,
                                         np.atleast_2d(wavenumber), ab_calc,
-                                        False, msrc, mrec, False)
+                                        False, msrc, mrec)
 
         # Collect output
         if J1 is not None:
@@ -1983,8 +1931,8 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 # Core modelling routines
 
 def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
-        zetaV, xdirect, isfullspace, ht, htarg, use_ne_eval, msrc, mrec,
-        loop_freq, loop_off, conv=True):
+        zetaV, xdirect, isfullspace, ht, htarg, msrc, mrec, loop_freq,
+        loop_off, conv=True):
     r"""Return electromagnetic frequency-domain response.
 
     This function is called from one of the above modelling routines. No
@@ -2044,7 +1992,7 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
                 out = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
                            etaH[None, i, :], etaV[None, i, :],
                            zetaH[None, i, :], zetaV[None, i, :], xdir,
-                           htarg, use_ne_eval, msrc, mrec)
+                           htarg, msrc, mrec)
                 fEM[None, i, :] += out[0]
                 kcount += out[1]
                 conv *= out[2]
@@ -2059,14 +2007,13 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
 
                 out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
                            factAng[None, i], depth, ab, etaH, etaV, zetaH,
-                           zetaV, xdir, htarg, use_ne_eval, msrc, mrec)
+                           zetaV, xdir, htarg, msrc, mrec)
                 fEM[:, None, i] += out[0]
                 kcount += out[1]
                 conv *= out[2]
         else:
             out = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH,
-                       etaV, zetaH, zetaV, xdir, htarg, use_ne_eval, msrc,
-                       mrec)
+                       etaV, zetaH, zetaV, xdir, htarg, msrc, mrec)
             fEM += out[0]
             kcount += out[1]
             conv *= out[2]

@@ -171,7 +171,7 @@ PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
                                    etaH[None, :], etaV[None, :],
                                    zetaH[None, :], zetaV[None, :],
                                    np.atleast_2d(ilambd), ab, False,
-                                   msrc, mrec, False)
+                                   msrc, mrec)
 si_PJ0r = iuSpline(np.log(ilambd), PJ0.real)
 si_PJ0i = iuSpline(np.log(ilambd), PJ0.imag)
 si_PJ1r = iuSpline(np.log(ilambd), PJ1.real)
@@ -193,7 +193,7 @@ sEM += np.sum(np.reshape(sPJ0*BJ0, (off.size, nquad, -1), order='F'), 1)
 nsinp = {'zsrc': zsrc, 'zrec': zrec, 'lsrc': lsrc, 'lrec': lrec, 'depth':
          depth, 'etaH': etaH[None, :], 'etaV': etaV[None, :], 'zetaH':
          zetaH[None, :], 'zetaV': zetaV[None, :], 'ab': ab, 'xdirect': False,
-         'msrc': msrc, 'mrec': mrec, 'use_ne_eval': False}
+         'msrc': msrc, 'mrec': mrec}
 
 hqwe = {'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
         'intervals': intervals, 'lambd': lambd, 'off': off, 'factAng': factAng,
@@ -227,7 +227,7 @@ PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
                                    etaH[None, :], etaV[None, :],
                                    zetaH[None, :], zetaV[None, :],
                                    np.atleast_2d(ilambd), ab, False, msrc,
-                                   mrec, False)
+                                   mrec)
 sPJ0r = iuSpline(np.log(ilambd), PJ0.real)
 sPJ0i = iuSpline(np.log(ilambd), PJ0.imag)
 sPJ1r = iuSpline(np.log(ilambd), PJ1.real)

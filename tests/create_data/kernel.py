@@ -54,8 +54,7 @@ inp1 = {'zsrc': np.array([100]),
         'zetaH': zetaH,
         'zetaV': zetaV,
         'lambd': lambd,
-        'xdirect': False,
-        'use_ne_eval': False}
+        'xdirect': False}
 wave = {}
 for key, val in iab.items():
     res = kernel.wavenumber(ab=key, msrc=val[0], mrec=val[1], **inp1)
@@ -111,8 +110,7 @@ inp7 = {'depth': depth,
         'Gam': Gam,
         'lrec': inp5['lrec'],
         'lsrc': inp5['lsrc'],
-        'zsrc': inp1['zsrc'],
-        'use_ne_eval': False}
+        'zsrc': inp1['zsrc']}
 # Source and receiver in same layer, but not last
 inp8 = {'depth': depth,
         'Rp': Rp2,
@@ -120,44 +118,37 @@ inp8 = {'depth': depth,
         'Gam': Gam,
         'lrec': inp6['lrec'],
         'lsrc': inp6['lsrc'],
-        'zsrc': np.array([350]),
-        'use_ne_eval': False}
+        'zsrc': np.array([350])}
 
 # Source and receiver in same layer, but not last
-Rp4, Rm4 = kernel.reflections(depth, etaH, Gam, np.array(5),
-                              np.array(5), False)
+Rp4, Rm4 = kernel.reflections(depth, etaH, Gam, np.array(5), np.array(5))
 inp10 = {'depth': depth,
          'Rp': Rp4,
          'Rm': Rm4,
          'Gam': Gam,
          'lrec': np.array(5),
          'lsrc': np.array(5),
-         'zsrc': np.array([700]),
-         'use_ne_eval': False}
+         'zsrc': np.array([700])}
 
 # Receiver in first layer, source in last
-Rp3, Rm3 = kernel.reflections(depth, etaH, Gam, np.array(0),
-                              np.array(5), False)
+Rp3, Rm3 = kernel.reflections(depth, etaH, Gam, np.array(0), np.array(5))
 inp9 = {'depth': depth,
         'Rp': Rp3,
         'Rm': Rm3,
         'Gam': Gam,
         'lrec': np.array(0),
         'lsrc': np.array(5),
-        'zsrc': np.array([700]),
-        'use_ne_eval': False}
+        'zsrc': np.array([700])}
 
 # Source in first layer, receiver in last
-Rp5, Rm5 = kernel.reflections(depth, etaH, Gam, np.array(5),
-                              np.array(0), False)
+Rp5, Rm5 = kernel.reflections(depth, etaH, Gam, np.array(5), np.array(0))
 inp11 = {'depth': depth,
          'Rp': Rp5,
          'Rm': Rm5,
          'Gam': Gam,
          'lrec': np.array(5),
          'lsrc': np.array(0),
-         'zsrc': np.array([-30]),
-         'use_ne_eval': False}
+         'zsrc': np.array([-30])}
 
 
 fields = {}

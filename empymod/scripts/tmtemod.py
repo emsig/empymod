@@ -488,7 +488,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
         r"""Return Rp, Rm."""
 
         # Get Rp/Rm for lambd=0
-        Rp, Rm = reflections(depth, z_eta, Gam, lrec, lsrc, False)
+        Rp, Rm = reflections(depth, z_eta, Gam, lrec, lsrc)
 
         # Depending on model Rp/Rm have 3 or 4 dimensions. Last two are
         # wavenumbers and layers btw src and rec, which both are 1.
@@ -562,7 +562,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd):
         lrecGam = Gam[:, :, lrec, :]
 
         # Reflection (coming from below (Rp) and above (Rm) rec)
-        Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc, False)
+        Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
 
         # Field propagators
         # (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74

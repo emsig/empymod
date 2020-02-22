@@ -31,10 +31,9 @@ inp1 = {'src': [[-200, 200], [300, -300], [-100, -200], [-200, -100],
         'strength': 100,
         'xdirect': True,
         'ht': 'fht',
-        'htarg': 'key_51_2012',
+        'htarg': {'fhtfilt': 'key_51_2012', 'pts_per_dec': -1},
         'ft': 'sin',
         'ftarg': None,
-        'opt': 'spline',
         'loop': None,
         'verb': 0}
 EM1 = bipole(**inp1)
@@ -62,7 +61,6 @@ inp2 = {'src': [[-30, 10], [40, -20], [-15, -10], [-30, -20], [3, 5], [3, 5]],
         'htarg': 'key_201_2009',
         'ft': 'sin',
         'ftarg': None,
-        'opt': 'parallel',
         'loop': None,
         'verb': 0}
 EM2 = bipole(**inp2)
@@ -89,7 +87,6 @@ inp3 = {'src': [[0, 1000], [100, 1200], [0, 0], [0, 100], 10, 10],
         'htarg': [1e-10, 1e-20, 21, 40, 40],
         'ft': 'sin',
         'ftarg': None,
-        'opt': 'spline',
         'loop': 'freq',
         'verb': 0}
 EM3 = bipole(**inp3)
@@ -116,7 +113,6 @@ inp4 = {'src': [0, 100, 0, 0, 10, 10],
         'htarg': None,
         'ft': 'fftlog',
         'ftarg': None,
-        'opt': None,
         'loop': None,
         'verb': 0}
 EM4 = bipole(**inp4)
@@ -239,7 +235,6 @@ for i in range(34):
                          'htarg': None,
                          'ft': None,
                          'ftarg': None,
-                         'opt': None,
                          'loop': None,
                          'verb': 0}
 
@@ -328,7 +323,6 @@ for i in range(9):
                          'htarg': None,
                          'ft': 'sin',
                          'ftarg': None,
-                         'opt': None,
                          'loop': None,
                          'verb': 0}
 
@@ -352,7 +346,6 @@ igpr = {'src': [[0, 0], [0, 1], 0.0000001],
         'xdirect': True,
         'ht': 'fht',
         'htarg': ['key_201_2009', ''],
-        'opt': None,
         'loop': None,
         'verb': 3}
 igpr2a = dc(igpr)

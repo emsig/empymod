@@ -44,25 +44,12 @@ except ImportError:
             print("\n* WARNING :: `empymod.Report` requires `scooby`."
                   "\n             Install it via `pip install scooby`.\n")
 
-# Optional imports
-try:
-    import numexpr
-    # Ensure Intel's Vector Math Library
-    if not numexpr.use_vml:
-        numexpr = False
-        numexpr_msg = "* WARNING :: `numexpr` is not installed with VML, "
-        numexpr_msg += "`opt=='parallel'` has no effect."
-except ImportError:
-    numexpr = False
-    numexpr_msg = "* WARNING :: `numexpr` is not installed, "
-    numexpr_msg += "`opt=='parallel'` has no effect."
-
 # Relative imports
 from empymod import filters, transform
 
 
 __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
-           'check_frequency', 'check_hankel', 'check_opt', 'check_dipole',
+           'check_frequency', 'check_hankel', 'check_loop', 'check_dipole',
            'check_bipole', 'check_ab', 'check_solution', 'get_abs',
            'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
            'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum',
@@ -850,8 +837,8 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
 
 
-def check_opt(opt, loop, ht, htarg, verb):
-    r"""Check optimization parameters.
+def check_loop(loop, ht, htarg, verb):
+    r"""Check loop parameter.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -859,9 +846,6 @@ def check_opt(opt, loop, ht, htarg, verb):
 
     Parameters
     ----------
-    opt : {None, 'parallel'}
-        Optimization flag; use ``numexpr`` or not.
-
     loop : {None, 'freq', 'off'}
         Loop flag.
 
@@ -877,9 +861,6 @@ def check_opt(opt, loop, ht, htarg, verb):
 
     Returns
     -------
-    use_ne_eval : bool
-        Boolean if to use ``numexpr``.
-
     loop_freq : bool
         Boolean if to loop over frequencies.
 
@@ -887,14 +868,6 @@ def check_opt(opt, loop, ht, htarg, verb):
         Boolean if to loop over offsets.
 
     """
-
-    # Check optimization flag
-    use_ne_eval = False
-    if opt == 'parallel':
-        if numexpr:
-            use_ne_eval = numexpr.evaluate
-        elif verb > 0:
-            print(f"{numexpr_msg}")
 
     # Define if to loop over frequencies or over offsets
     lagged_splined_fht = False
@@ -909,12 +882,8 @@ def check_opt(opt, loop, ht, htarg, verb):
         loop_off = loop == 'off'
         loop_freq = loop == 'freq'
 
-    # If verbose, print optimization information
+    # If verbose, print loop information
     if verb > 2:
-        if use_ne_eval:
-            print("   Kernel Opt.     :  Use parallel")
-        else:
-            print("   Kernel Opt.     :  None")
 
         if loop_off:
             print("   Loop over       :  Offsets")
@@ -923,7 +892,7 @@ def check_opt(opt, loop, ht, htarg, verb):
         else:
             print("   Loop over       :  None (all vectorized)")
 
-    return use_ne_eval, loop_freq, loop_off
+    return loop_freq, loop_off
 
 
 def check_time(time, signal, ft, ftarg, verb):
@@ -1973,11 +1942,11 @@ class Report(ScoobyReport):
     environment (Jupyter notebook, IPython console, Python console, QT
     console), either as html-table (notebook) or as plain text (anywhere).
 
-    Always shown are the OS, number of CPU(s), ``numpy``, ``scipy``,
+    Always shown are the OS, number of CPU(s), ``numpy``, ``scipy``, ``numba``,
     ``empymod``, ``sys.version``, and time/date.
 
-    Additionally shown are, if they can be imported, ``numexpr``, ``IPython``,
-    and ``matplotlib``. It also shows MKL information, if available.
+    Additionally shown are, if they can be imported, ``IPython``, and
+    ``matplotlib``. It also shows MKL information, if available.
 
     All modules provided in ``add_pckg`` are also shown.
 
@@ -2021,10 +1990,10 @@ class Report(ScoobyReport):
         """Initiate a scooby.Report instance."""
 
         # Mandatory packages.
-        core = ['numpy', 'scipy', 'empymod']
+        core = ['numpy', 'scipy', 'numba', 'empymod']
 
         # Optional packages.
-        optional = ['numexpr', 'IPython', 'matplotlib']
+        optional = ['IPython', 'matplotlib']
 
         super().__init__(additional=add_pckg, core=core, optional=optional,
                          ncol=ncol, text_width=text_width, sort=sort)

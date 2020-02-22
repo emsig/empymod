@@ -2,7 +2,6 @@ numpy
 scipy >= 1.0.0
 sphinx
 numpydoc >= 0.9
-numexpr
 matplotlib
 sphinx_numfig
 sphinx_rtd_theme

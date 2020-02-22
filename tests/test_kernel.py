@@ -2,14 +2,6 @@ import numpy as np
 from os.path import join, dirname
 from numpy.testing import assert_allclose
 
-# See if numexpr is installed, and if it is, if it uses VML
-try:
-    from numexpr import use_vml, evaluate as use_ne_eval
-except ImportError:
-    use_vml = False
-    use_ne_eval = False
-
-
 from empymod import kernel
 from empymod import bipole
 
@@ -59,11 +51,6 @@ def test_greenfct():                                              # 2. greenfct
             out = kernel.greenfct(ab=ab, msrc=msrc, mrec=mrec, **val[i])
             assert_allclose(out[0], val[i+1][0])
             assert_allclose(out[1], val[i+1][1])
-            if use_vml:  # Check if numexpr yields same result
-                val[i]['use_ne_eval'] = use_ne_eval
-                out = kernel.greenfct(ab=ab, msrc=msrc, mrec=mrec, **val[i])
-                assert_allclose(out[0], val[i+1][0])
-                assert_allclose(out[1], val[i+1][1])
 
 
 def test_reflections():                                        # 3. reflections
@@ -80,10 +67,6 @@ def test_fields():                                                  # 4. fields
         for i in [2, 4, 6, 8, 10]:
             ab = val[0]
             TM = val[1]
-            Pu, Pd = kernel.fields(ab=ab, TM=TM, **val[i])
-            assert_allclose(Pu, val[i+1][0])
-            assert_allclose(Pd, val[i+1][1])
-            val[i]['use_ne_eval'] = use_ne_eval
             Pu, Pd = kernel.fields(ab=ab, TM=TM, **val[i])
             assert_allclose(Pu, val[i+1][0])
             assert_allclose(Pd, val[i+1][1])

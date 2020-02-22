@@ -72,7 +72,7 @@ def test_greenfct():
 
         # empymod-version
         out1, out2 = kernel.greenfct(ab=11, xdirect=False, msrc=False,
-                                     mrec=False, use_ne_eval=False, **inp)
+                                     mrec=False, **inp)
 
         # empymod.scripts-version
         TM, TE = tmtemod.greenfct(**inp)
@@ -91,8 +91,7 @@ def test_fields():
     for lay in [0, 1, 5]:  # Src/rec in first, second, and last layer
 
         inp1 = {'depth': depth[:-1], 'e_zH': etaH, 'Gam': Gam,
-                'lrec': np.array(lay), 'lsrc': np.array(lay),
-                'use_ne_eval': False}
+                'lrec': np.array(lay), 'lsrc': np.array(lay)}
         Rp1, Rm1 = kernel.reflections(**inp1)
 
         inp2 = {'depth': depth[:-1], 'Gam': Gam, 'Rp': Rp1, 'Rm': Rm1,
@@ -103,7 +102,7 @@ def test_fields():
             inp2['TM'] = TM
 
             # empymod-version
-            out = kernel.fields(ab=11, use_ne_eval=False, **inp2)
+            out = kernel.fields(ab=11, **inp2)
 
             # empymod.scripts-version
             TMTE = tmtemod.fields(**inp2)

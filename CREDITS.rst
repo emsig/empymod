@@ -4,9 +4,16 @@ Credits
 This project was initiated and is still mainly maintained by **Dieter
 Werthmüller**. However, it is a community effort as many people helped to
 improve it over time. The copyright is therefore attributed to «The empymod
-Developers», which includes everyone involved in the project. In the following
-some particular credits.
+Developers», which includes everyone involved in the project.
 
+Code contributors:
+
+- `Dieter Werthmüller <https://github.com/prisae>`_
+- `Leon Foks <https://github.com/leonfoks>`_
+
+
+There are various other ways how people have contributed. In the following some
+particular credits.
 
 Special thanks to
 
@@ -26,6 +33,9 @@ Special thanks to
   development of the add-on ``fdesign`` (see
   `github.com/empymod/article-fdesign
   <https://github.com/empymod/article-fdesign>`_).
+
+- **The electromagnetic group** of Aleksander Mousatov at the Mexican Petroleum
+  Institute, Mexico City (see note below).
 
 
 Many more helped through their feedback, feature request, bug reports etc. A
