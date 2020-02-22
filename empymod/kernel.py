@@ -195,11 +195,12 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
             # Temporary measure because of jitted reflections().
             # Remove once fields() is adjusted.
+            # fields() should take Rp/Rm of nd=4, ALWAYS.
             if lsrc == lrec:
                 if np.arange(depth.size-2, min(lrec, lsrc)-1, -1).size > 0:
-                    Rm = Rm[:, :, 0, :]
-                if np.arange(1, max(lrec, lsrc)+1, 1).size > 0:
                     Rp = Rp[:, :, 0, :]
+                if np.arange(1, max(lrec, lsrc)+1, 1).size > 0:
+                    Rm = Rm[:, :, 0, :]
 
             # Field propagators
             # (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74

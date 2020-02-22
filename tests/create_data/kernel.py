@@ -4,6 +4,21 @@ from copy import deepcopy
 from scipy.constants import mu_0, epsilon_0
 from empymod import kernel, filters
 
+
+def fix_rm_rp(inp, Rp, Rm):
+    """Temporary measure because of jitted reflections().
+    Remove once fields() is adjusted.
+    """
+    lsrc, lrec, depth = inp['lsrc'], inp['lrec'], inp['depth']
+    if lsrc == lrec:
+        if np.arange(depth.size-2, min(lrec, lsrc)-1, -1).size > 0:
+            Rp = Rp[:, :, 0, :]
+        if np.arange(1, max(lrec, lsrc)+1, 1).size > 0:
+            Rm = Rm[:, :, 0, :]
+
+    return Rp, Rm
+
+
 # All possible (ab, msrc, mrec) combinations
 pab = (np.arange(1, 7)[None, :] + np.array([10, 20, 30])[:, None]).ravel()
 iab = {}
@@ -92,7 +107,9 @@ inp5 = {'depth': depth,
         'lrec': inp1['lrec'],
         'lsrc': inp1['lsrc']}
 Rp1, Rm1 = kernel.reflections(**inp5)
+
 refl[0] = (inp5, Rp1, Rm1)
+Rp1, Rm1 = fix_rm_rp(inp5, Rp1, Rm1)
 # Source and receiver in same layer, but not last
 inp6 = {'depth': inp2['depth'],
         'e_zH': etaH,
@@ -100,7 +117,9 @@ inp6 = {'depth': inp2['depth'],
         'lrec': np.array(3),
         'lsrc': np.array(3)}
 Rp2, Rm2 = kernel.reflections(**inp6)
+
 refl[1] = (inp6, Rp2, Rm2)
+Rp2, Rm2 = fix_rm_rp(inp6, Rp2, Rm2)
 
 # # E -- FIELDS # #
 # Standard example
@@ -122,6 +141,8 @@ inp8 = {'depth': depth,
 
 # Source and receiver in same layer, but not last
 Rp4, Rm4 = kernel.reflections(depth, etaH, Gam, np.array(5), np.array(5))
+Rp4, Rm4 = fix_rm_rp({'lsrc': np.array(5), 'lrec': np.array(5), 'depth':
+                     depth}, Rp4, Rm4)
 inp10 = {'depth': depth,
          'Rp': Rp4,
          'Rm': Rm4,
@@ -132,6 +153,8 @@ inp10 = {'depth': depth,
 
 # Receiver in first layer, source in last
 Rp3, Rm3 = kernel.reflections(depth, etaH, Gam, np.array(0), np.array(5))
+Rp3, Rm3 = fix_rm_rp({'lsrc': np.array(5), 'lrec': np.array(0), 'depth':
+                     depth}, Rp3, Rm3)
 inp9 = {'depth': depth,
         'Rp': Rp3,
         'Rm': Rm3,
@@ -142,6 +165,8 @@ inp9 = {'depth': depth,
 
 # Source in first layer, receiver in last
 Rp5, Rm5 = kernel.reflections(depth, etaH, Gam, np.array(5), np.array(0))
+Rp5, Rm5 = fix_rm_rp({'lsrc': np.array(5), 'lrec': np.array(0), 'depth':
+                     depth}, Rp5, Rm5)
 inp11 = {'depth': depth,
          'Rp': Rp5,
          'Rm': Rm5,

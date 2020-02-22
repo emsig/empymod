@@ -166,7 +166,7 @@ factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 # 1 Spline version
 start = np.log(lambd.min())
 stop = np.log(lambd.max())
-ilambd = np.logspace(start, stop, (stop-start)*pts_per_dec + 1, 10)
+ilambd = np.logspace(start, stop, int((stop-start)*pts_per_dec + 1), base=10.0)
 PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
                                    etaH[None, :], etaV[None, :],
                                    zetaH[None, :], zetaV[None, :],
@@ -222,7 +222,7 @@ freqres = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
 rtol, atol, limit, a, b, pts_per_dec = htarg
 la = np.log(a)
 lb = np.log(b)
-ilambd = np.logspace(la, lb, (lb-la)*pts_per_dec + 1, base=np.e)
+ilambd = np.logspace(la, lb, int((lb-la)*pts_per_dec + 1), base=np.e)
 PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
                                    etaH[None, :], etaV[None, :],
                                    zetaH[None, :], zetaV[None, :],
