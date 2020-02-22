@@ -91,8 +91,7 @@ inp5 = {'depth': depth,
         'e_zH': etaH,
         'Gam': Gam,
         'lrec': inp1['lrec'],
-        'lsrc': inp1['lsrc'],
-        'use_ne_eval': False}
+        'lsrc': inp1['lsrc']}
 Rp1, Rm1 = kernel.reflections(**inp5)
 refl[0] = (inp5, Rp1, Rm1)
 # Source and receiver in same layer, but not last
@@ -100,8 +99,7 @@ inp6 = {'depth': inp2['depth'],
         'e_zH': etaH,
         'Gam': Gam,
         'lrec': np.array(3),
-        'lsrc': np.array(3),
-        'use_ne_eval': False}
+        'lsrc': np.array(3)}
 Rp2, Rm2 = kernel.reflections(**inp6)
 refl[1] = (inp6, Rp2, Rm2)
 

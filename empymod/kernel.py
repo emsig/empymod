@@ -34,12 +34,16 @@ licenses.
 
 
 import numpy as np
+import numba as nb
 from scipy import special  # Only used for halfspace solution
 
 np.seterr(all='ignore')
 
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']
+
+# Numba-settings
+_numba_setting = {'nogil': True, 'fastmath': True, 'cache': True}
 
 
 # Wavenumber-frequency domain kernel
@@ -193,7 +197,15 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
         # Reflection (coming from below (Rp) and above (Rm) rec)
         if depth.size > 1:  # Only if more than 1 layer
-            Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval)
+            Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
+
+            # Temporary measure because of jitted reflections().
+            # Remove once fields() is adjusted.
+            if lsrc == lrec:
+                if np.arange(depth.size-2, min(lrec, lsrc)-1, -1).size > 0:
+                    Rm = Rm[:, :, 0, :]
+                if np.arange(1, max(lrec, lsrc)+1, 1).size > 0:
+                    Rp = Rp[:, :, 0, :]
 
             # Field propagators
             # (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74
@@ -313,7 +325,8 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     return PTM, PTE
 
 
-def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
+@nb.njit(**_numba_setting)
+def reflections(depth, e_zH, Gam, lrec, lsrc):
     r"""Calculate Rp, Rm.
 
     .. math:: R^\pm_n, \bar{R}^\pm_n
@@ -326,20 +339,23 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
 
     """
 
+    nfreq, noff, nlambda = Gam[:, :, 0, :].shape
+
     # Loop over Rp, Rm
     for plus in [True, False]:
 
         # Switches depending if plus or minus
         if plus:
             pm = 1
-            layer_count = np.arange(depth.size-2, min(lrec, lsrc)-1, -1)
+            layer_count = np.arange(
+                    depth.size-2, min(lrec[()], lsrc[()])-1, -1)
             izout = abs(lsrc-lrec)
-            minmax = max(lrec, lsrc)
+            minmax = max(lrec[()], lsrc[()])
         else:
             pm = -1
-            layer_count = np.arange(1, max(lrec, lsrc)+1, 1)
+            layer_count = np.arange(1, max(lrec[()], lsrc[()])+1, 1)
             izout = 0
-            minmax = -min(lrec, lsrc)
+            minmax = -min(lrec[()], lsrc[()])
 
         # If rec in last  and rec below src (plus) or
         # if rec in first and rec above src (minus), shift izout
@@ -353,20 +369,20 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
                         Gam.shape[3]), dtype=Gam.dtype)
 
         # Calculate the reflection
+        rloc = np.zeros(Gam[:, :, 0, :].shape, dtype=Gam.dtype)
+
+        # Calculate the reflection
         for iz in layer_count:
 
             # Eqs 65, A-12
-            e_zHa = e_zH[:, None, iz+pm, None]
-            Gama = Gam[:, :, iz, :]
-            e_zHb = e_zH[:, None, iz, None]
-            Gamb = Gam[:, :, iz+pm, :]
-            if use_ne_eval:
-                rlocstr = "(e_zHa*Gama - e_zHb*Gamb)/(e_zHa*Gama + e_zHb*Gamb)"
-                rloc = use_ne_eval(rlocstr)
-            else:
-                rloca = e_zHa*Gama
-                rlocb = e_zHb*Gamb
-                rloc = (rloca - rlocb)/(rloca + rlocb)
+            for i in range(nfreq):
+                ra = e_zH[i, iz+pm]
+                rb = e_zH[i, iz]
+                for ii in range(noff):
+                    for iii in range(nlambda):
+                        rloca = ra*Gam[i, ii, iz, iii]
+                        rlocb = rb*Gam[i, ii, iz+pm, iii]
+                        rloc[i, ii, iii] = (rloca - rlocb)/(rloca + rlocb)
 
             # In first layer tRef = rloc
             if iz == layer_count[0]:
@@ -375,12 +391,13 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
                 ddepth = depth[iz+1+pm]-depth[iz+pm]
 
                 # Eqs 64, A-11
-                if use_ne_eval:
-                    term = use_ne_eval("tRef*exp(-2*Gamb*ddepth)")
-                    tRef = use_ne_eval("(rloc + term)/(1 + rloc*term)")
-                else:
-                    term = tRef*np.exp(-2*Gamb*ddepth)  # NOQA
-                    tRef = (rloc + term)/(1 + rloc*term)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iii in range(nlambda):
+                            term = tRef[i, ii, iii]*np.exp(
+                                    -2*Gam[i, ii, iz+pm, iii]*ddepth)
+                            tRef[i, ii, iii] = (rloc[i, ii, iii] + term)/(
+                                    1 + rloc[i, ii, iii]*term)
 
             # The global reflection coefficient is given back for all layers
             # between and including src- and rec-layer
@@ -390,13 +407,16 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
 
         # If lsrc = lrec, we just store the last values
         if lsrc == lrec and layer_count.size > 0:
-            Ref = tRef
+            out = np.zeros_like(Ref[:, :, :1, :])
+            out[:, :, 0, :] = tRef
+        else:
+            out = Ref
 
         # Store Ref in Rm/Rp
         if plus:
-            Rm = Ref
+            Rm = out
         else:
-            Rp = Ref
+            Rp = out
 
     # Return reflections (minus and plus)
     return Rm, Rp

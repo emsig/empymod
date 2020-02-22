@@ -72,10 +72,6 @@ def test_reflections():                                        # 3. reflections
         Rp, Rm = kernel.reflections(**val[0])
         assert_allclose(Rp, val[1])
         assert_allclose(Rm, val[2])
-        val[0]['use_ne_eval'] = use_ne_eval
-        Rp, Rm = kernel.reflections(**val[0])
-        assert_allclose(Rp, val[1])
-        assert_allclose(Rm, val[2])
 
 
 def test_fields():                                                  # 4. fields
