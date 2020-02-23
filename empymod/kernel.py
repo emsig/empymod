@@ -43,7 +43,9 @@ __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']
 
 # Numba-settings
-_numba_setting = {'nogil': True, 'fastmath': True, 'cache': True}
+_numba_setting = {'nogil': True, 'cache': True}
+_numba_plus_fm = _numba_setting.copy()
+_numba_plus_fm['fastmath'] = True
 
 
 # Wavenumber-frequency domain kernel
@@ -301,7 +303,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     return PTM, PTE
 
 
-@nb.njit(**_numba_setting)
+@nb.njit(**_numba_plus_fm)
 def reflections(depth, e_zH, Gam, lrec, lsrc):
     r"""Calculate Rp, Rm.
 
@@ -540,10 +542,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
                         for iii in range(nlambda):
                             tiRpm = Rpm[i, ii, rsrcl-1*pup, iii]
                             tiGam = Gam[i, ii, lsrc-1*pup, iii]
-                            # p1 can be zero. np.divide is ignoring that.
-                            p1 = 1 + tiRpm*np.exp(-2*tiGam*ddepth)
-                            p2 = np.divide(1, p1)
-                            P[i, ii, iii] *= p2
+                            P[i, ii, iii] /= 1 + tiRpm*np.exp(-2*tiGam*ddepth)
 
             # Second compute P for all other layers
             if nlsr > 2:
