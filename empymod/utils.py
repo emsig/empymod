@@ -1482,7 +1482,7 @@ def get_layer_nr(inp, depth):
         inp[2] (depths).
 
     """
-    zinp = inp[2]
+    zinp = np.array(inp[2], dtype=float)
 
     #  depth = [-infty : last interface]; create additional depth-array
     # pdepth = [fist interface : +infty]
@@ -1495,7 +1495,7 @@ def get_layer_nr(inp, depth):
     linp = np.where((depth[None, :] < b_zinp)*(pdepth[None, :] >= b_zinp))[1]
 
     # Return; squeeze in case of only one inp-depth
-    return np.squeeze(linp), zinp
+    return np.squeeze(linp), np.squeeze(zinp)
 
 
 def get_off_ang(src, rec, nsrc, nrec, verb):

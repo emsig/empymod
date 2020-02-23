@@ -2,7 +2,7 @@
 
 # Help text
 usage="
-$(basename "$0") [-hcpndw] [-v VERSION(S)]
+$(basename "$0") [-hcpnmdw] [-v VERSION(S)]
 
 Run pytest for empymod locally in an isolated venv before submitting to
 GitHub/Travis-CI; by default for all supported python versions of empymod.
@@ -12,7 +12,8 @@ where:
     -v : Python 3.x version, e.g. '-v 7' for Python 3.7. Default: '6 7 8'.
     -c : Use channel 'conda-forge' instead of channel 'defaults'.
     -p : Print output of conda.
-    -n : Run tests without matplotlib/IPython.
+    -n : Disable numba.
+    -m : Run tests without matplotlib/IPython.
     -d : Delete environments after tests
     -w : Disable warnings
 
@@ -29,9 +30,10 @@ PROPS="--mpl --flake8"
 INST="pytest-flake8 pytest-mpl scooby"
 SD="_soft-dep"
 WARN=""
+DISABLENUMBA=false
 
 # Get Optional Input
-while getopts "hv:cpndw" opt; do
+while getopts "hv:cpnmdw" opt; do
 
   case $opt in
     h) echo "$usage"
@@ -43,7 +45,9 @@ while getopts "hv:cpndw" opt; do
        ;;
     p) PRINT="/dev/tty"
        ;;
-    n) NMXPR=""
+    n) DISABLENUMBA=true
+       ;;
+    m) NMXPR=""
        STR2="**  NO matplotlib/IPython  "
        PROPS="--flake8"
        INST="pytest-flake8"
@@ -91,6 +95,9 @@ for i in ${PYTHON3VERSION[@]}; do
 
   # Activate venv
   source activate $NAME
+  if [ "$DISABLENUMBA" = true ] ; then
+    export NUMBA_DISABLE_JIT=1
+  fi
 
   # Install flake8
   if [ ! -d "$HOME/anaconda3/envs"+$NAME ]; then

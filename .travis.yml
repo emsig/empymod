@@ -5,11 +5,11 @@ language: python
 matrix:
   include:
     - python: 3.6
-      env: PYTHON=3.6 PCKGS="matplotlib" TEST="--mpl" INST="pytest-mpl scooby"
+      env: PYTHON=3.6 NUMBA_DISABLE_JIT=1 PCKGS="matplotlib" TEST="--mpl" INST="pytest-mpl scooby"
     - python: 3.7
-      env: PYTHON=3.7 DEPLOY_PYPI=true PCKGS="matplotlib" TEST="--mpl" INST="pytest-mpl scooby"
+      env: PYTHON=3.7 NUMBA_DISABLE_JIT=1  DEPLOY_PYPI=true PCKGS="matplotlib" TEST="--mpl" INST="pytest-mpl scooby"
     - python: 3.8  # => without matplotlib
-      env: PYTHON=3.8 PCKGS="" TEST="" INST=""
+      env: PYTHON=3.8 NUMBA_DISABLE_JIT=1  PCKGS="" TEST="" INST=""
     - python: 3.7  # => without matplotlib
       env: PYTHON=3.7 PCKGS="" TEST="" INST=""
     - python: 3.7  # => just linkcheck
@@ -46,8 +46,8 @@ script:  # No pytest for linkcheck-run.
         pytest --cov=empymod --flake8 $TEST;
     fi
 
-after_success:  # No coveralls for linkcheck-run.
-  - if [ "$CHCKLNKS" = "" ]; then coveralls; fi
+after_success:  # Only coveralls when JIT disabled.
+  - if [ "$NUMBA_DISABLE_JIT" == "1" ]; then coveralls; fi
 
 deploy:
   provider: pypi

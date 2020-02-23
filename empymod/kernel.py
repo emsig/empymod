@@ -398,6 +398,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc):
     return Rm, Rp
 
 
+@nb.njit(**_numba_setting)
 def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
     r"""Calculate Pu+, Pu-, Pd+, Pd-.
 
@@ -413,6 +414,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
     This function is called from the function :mod:`kernel.greenfct`.
 
     """
+
+    nfreq, noff, nlambda = Gam[:, :, 0, :].shape
 
     # Variables
     nlsr = abs(lsrc-lrec)+1  # nr of layers btw and incl. src and rec layer
@@ -480,14 +483,29 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
             if not plus:
                 mupm = -1
 
+        P = np.zeros_like(iGam)
+
         # Calculate Pu+, Pu-, Pd+, Pd-
         if lsrc == lrec:  # rec in src layer; Eqs  81/82, A-8/A-9
             if last_layer:  # If src/rec are in top (up) or bottom (down) layer
-                P = Rmp[:, :, 0, :]*np.exp(-iGam*dm)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iii in range(nlambda):
+                            tRmp = Rmp[i, ii, 0, iii]
+                            tiGam = iGam[i, ii, iii]
+                            P[i, ii, iii] = tRmp*np.exp(-tiGam*dm)
+
             else:           # If src and rec are in any layer in between
-                P = np.exp(-iGam*dm) + pm*Rpm[:, :, 0, :]*np.exp(-iGam*(ds+dp))
-                P *= Rmp[:, :, 0, :]
-                P /= 1 - Rmp[:, :, 0, :]*Rpm[:, :, 0, :]*np.exp(-2*iGam*ds)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iii in range(nlambda):
+                            tiGam = iGam[i, ii, iii]
+                            tRpm = Rpm[i, ii, 0, iii]
+                            tRmp = Rmp[i, ii, 0, iii]
+                            p1 = np.exp(-tiGam*dm)
+                            p2 = pm*tRpm*np.exp(-tiGam*(ds+dp))
+                            p3 = 1 - tRmp * tRpm * np.exp(-2*tiGam*ds)
+                            P[i, ii, iii] = (p1 + p2) * tRmp/p3
 
         else:           # rec above (up) / below (down) src layer
             #           # Eqs  95/96,  A-24/A-25 for rec above src layer
@@ -496,34 +514,59 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
             # First compute P_{s-1} (up) / P_{s+1} (down)
             iRpm = Rpm[:, :, rsrcl, :]
             if first_layer:  # If src is in bottom (up) / top (down) layer
-                P = (1 + iRpm)*mupm*np.exp(-iGam*dp)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iii in range(nlambda):
+                            tiRpm = iRpm[i, ii, iii]
+                            tiGam = iGam[i, ii, iii]
+                            P[i, ii, iii] = (1 + tiRpm)*mupm*np.exp(-tiGam*dp)
             else:
-                iRmp = Rmp[:, :, rsrcl, :]
-                P = mupm*np.exp(-iGam*dp)
-                P += pm*mupm*iRmp*np.exp(-iGam * (ds+dm))
-                P *= (1 + iRpm)/(1 - iRmp*iRpm * np.exp(-2*iGam*ds))
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iii in range(nlambda):
+                            iRmp = Rmp[i, ii, rsrcl, iii]
+                            tiGam = iGam[i, ii, iii]
+                            tRpm = iRpm[i, ii, iii]
+                            p1 = mupm*np.exp(-tiGam*dp)
+                            p2 = pm*mupm*iRmp*np.exp(-tiGam * (ds+dm))
+                            p3 = (1 + tRpm)/(1 - iRmp*tRpm*np.exp(-2*tiGam*ds))
+                            P[i, ii, iii] = (p1 + p2) * p3
 
             # If up or down and src is in last but one layer
             if up or (not up and lsrc+1 < depth.size-1):
                 ddepth = depth[lsrc+1-1*pup]-depth[lsrc-1*pup]
-                iRpm = Rpm[:, :, rsrcl-1*pup, :]
-                miGam = Gam[:, :, lsrc-1*pup, :]
-                P /= (1 + iRpm*np.exp(-2*miGam * ddepth))
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iii in range(nlambda):
+                            tiRpm = Rpm[i, ii, rsrcl-1*pup, iii]
+                            tiGam = Gam[i, ii, lsrc-1*pup, iii]
+                            # p1 can be zero. np.divide is ignoring that.
+                            p1 = 1 + tiRpm*np.exp(-2*tiGam*ddepth)
+                            p2 = np.divide(1, p1)
+                            P[i, ii, iii] *= p2
 
             # Second compute P for all other layers
             if nlsr > 2:
                 for iz in izrange:
                     ddepth = depth[isr+iz+pup+1]-depth[isr+iz+pup]
-                    iRpm = Rpm[:, :, iz+pup, :]
-                    piGam = Gam[:, :, isr+iz+pup, :]
-                    P *= (1 + iRpm)*np.exp(-piGam * ddepth)
+                    for i in range(nfreq):
+                        for ii in range(noff):
+                            for iii in range(nlambda):
+                                tiRpm = Rpm[i, ii, iz+pup, iii]
+                                piGam = Gam[i, ii, isr+iz+pup, iii]
+                                p1 = (1+tiRpm)*np.exp(-piGam*ddepth)
+                                P[i, ii, iii] *= p1
 
                     # If rec/src NOT in first/last layer (up/down)
                     if isr+iz != last:
                         ddepth = depth[isr+iz+1] - depth[isr+iz]
-                        iRpm = Rpm[:, :, iz, :]
-                        piGam2 = Gam[:, :, isr+iz, :]
-                        P /= 1 + iRpm*np.exp(-2*piGam2 * ddepth)
+                        for i in range(nfreq):
+                            for ii in range(noff):
+                                for iii in range(nlambda):
+                                    tiRpm = Rpm[i, ii, iz, iii]
+                                    piGam2 = Gam[i, ii, isr+iz, iii]
+                                    p1 = 1 + tiRpm*np.exp(-2*piGam2 * ddepth)
+                                    P[i, ii, iii] /= p1
 
         # Store P in Pu/Pd
         if up:
