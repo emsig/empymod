@@ -1399,35 +1399,43 @@ def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
     bab = np.asarray(ab_calc*0+1, dtype=bool)
 
     # Remove if source is x- or y-directed
-    check = np.atleast_1d(srcazm)[0]
+    check = np.atleast_1d(srcazm)
     if np.allclose(srcazm % (np.pi/2), 0):  # if all angles are multiples of 90
-        if np.isclose(check // (np.pi/2) % 2, 0):  # Multiples of pi (180)
+        if np.all(np.isclose(check // (np.pi/2) % 2, 0)):
+            # Multiples of pi (180)
             bab[:, 1] *= False        # x-directed source, remove y
-        else:                                      # Multiples of pi/2 (90)
+        elif np.all(np.isclose(check // (np.pi/2) % 2, 1)):
+            # Multiples of pi/2 (90)
             bab[:, 0] *= False        # y-directed source, remove x
 
     # Remove if source is vertical
-    check = np.atleast_1d(srcdip)[0]
+    check = np.atleast_1d(srcdip)
     if np.allclose(srcdip % (np.pi/2), 0):  # if all angles are multiples of 90
-        if np.isclose(check // (np.pi/2) % 2, 0):  # Multiples of pi (180)
+        if np.all(np.isclose(check // (np.pi/2) % 2, 0)):
+            # Multiples of pi (180)
             bab[:, 2] *= False        # Horizontal, remove z
-        else:                                      # Multiples of pi/2 (90)
+        elif np.all(np.isclose(check // (np.pi/2) % 2, 1)):
+            # Multiples of pi/2 (90)
             bab[:, :2] *= False       # Vertical, remove x/y
 
     # Remove if receiver is x- or y-directed
-    check = np.atleast_1d(recazm)[0]
+    check = np.atleast_1d(recazm)
     if np.allclose(recazm % (np.pi/2), 0):  # if all angles are multiples of 90
-        if np.isclose(check // (np.pi/2) % 2, 0):  # Multiples of pi (180)
+        if np.all(np.isclose(check // (np.pi/2) % 2, 0)):
+            # Multiples of pi (180)
             bab[1, :] *= False        # x-directed receiver, remove y
-        else:                                      # Multiples of pi/2 (90)
+        elif np.all(np.isclose(check // (np.pi/2) % 2, 1)):
+            # Multiples of pi/2 (90)
             bab[0, :] *= False        # y-directed receiver, remove x
 
     # Remove if receiver is vertical
-    check = np.atleast_1d(recdip)[0]
+    check = np.atleast_1d(recdip)
     if np.allclose(recdip % (np.pi/2), 0):  # if all angles are multiples of 90
-        if np.isclose(check // (np.pi/2) % 2, 0):  # Multiples of pi (180)
+        if np.all(np.isclose(check // (np.pi/2) % 2, 0)):
+            # Multiples of pi (180)
             bab[2, :] *= False        # Horizontal, remove z
-        else:                                      # Multiples of pi/2 (90)
+        elif np.all(np.isclose(check // (np.pi/2) % 2, 1)):
+            # Multiples of pi/2 (90)
             bab[:2, :] *= False       # Vertical, remove x/y
 
     # Reduce

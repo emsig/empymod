@@ -782,6 +782,24 @@ def test_get_abs(capsys):
     out, _ = capsys.readouterr()
     assert out == "   Required ab's   :  11 12 31 32\n"
 
+    # Assure that for different, but aligned angles, they are not deleted.
+    ab_calc = utils.get_abs(
+            False, False, np.array([0., np.pi/2]), np.array([0., 0.]),
+            np.array([0.]), np.array([0.]), 0)
+    assert_allclose(ab_calc, [11, 12])
+    ab_calc = utils.get_abs(
+            False, False, np.array([0., 0.]), np.array([3*np.pi/2, np.pi]),
+            np.array([0.]), np.array([0.]), 0)
+    assert_allclose(ab_calc, [11, 13])
+    ab_calc = utils.get_abs(
+            False, False, np.array([0.]), np.array([0.]),
+            np.array([0., np.pi/2]), np.array([0., 0.]), 0)
+    assert_allclose(ab_calc, [11, 21])
+    ab_calc = utils.get_abs(
+            False, False, np.array([0.]), np.array([0.]),
+            np.array([0., 0.]), np.array([3*np.pi/2, np.pi]), 0)
+    assert_allclose(ab_calc, [11, 31])
+
 
 def test_get_geo_fact():
     res = np.array([0.017051023225738, 0.020779123804907, -0.11077204227395,

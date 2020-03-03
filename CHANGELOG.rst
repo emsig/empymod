@@ -6,8 +6,13 @@ Changelog
 --------
 
 - `empymod.bipole`:
-  In the source and receiver format `[x, y, z, azimuth, dip]`, azimuth and dip
-  can now be either single values, or the same number as the other coordinates.
+
+  - In the source and receiver format `[x, y, z, azimuth, dip]`, azimuth and
+    dip can now be either single values, or the same number as the other
+    coordinates.
+  - Bugfix (in `utils.get_abs`): When different orientations were used exactly
+    along the principal axes, at the same depth, only the first source was
+    calculated [`empymod#74 <https://github.com/empymod/empymod/issues/74>`_].
 
 
 v1.10.5: Continuously in- or decreasing
