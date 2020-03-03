@@ -2,6 +2,14 @@ Changelog
 #########
 
 
+*latest*
+--------
+
+- `empymod.bipole`:
+  In the source and receiver format `[x, y, z, azimuth, dip]`, azimuth and dip
+  can now be either single values, or the same number as the other coordinates.
+
+
 v1.10.5: Continuously in- or decreasing
 ---------------------------------------
 

@@ -275,12 +275,19 @@ def check_bipole(inp, name):
         # Check x, y, and z
         inp = chck_dipole(inp, name)
 
-        # Check azimuth and dip (must be floats, otherwise use ``bipole``)
-        inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,))
-        inp[4] = _check_var(inp[4], float, 1, 'dip', (1,))
+        # Check azimuth and dip
+        inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,), inp[0].shape)
+        inp[4] = _check_var(inp[4], float, 1, 'dip', (1,), inp[0].shape)
 
         # How many different depths
         inpz = inp[2].size
+
+        # Expand azimuth and dip to match number of depths
+        if inpz > 1:
+            if inp[3].size == 1:
+                inp[3] = np.ones(inpz)*inp[3]
+            if inp[4].size == 1:
+                inp[4] = np.ones(inpz)*inp[4]
 
     else:         # bipole checks
         # Check each pole for x, y, and z
@@ -1657,8 +1664,8 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     else:  # If there are several depths, we take the current one
         if isdipole:
             tinp = [np.atleast_1d(inp[0][iz]), np.atleast_1d(inp[1][iz]),
-                    np.atleast_1d(inp[2][iz]), np.atleast_1d(inp[3]),
-                    np.atleast_1d(inp[4])]
+                    np.atleast_1d(inp[2][iz]), np.atleast_1d(inp[3][iz]),
+                    np.atleast_1d(inp[4][iz])]
         else:
             tinp = [inp[0][iz], inp[1][iz], inp[2][iz],
                     inp[3][iz], inp[4][iz], inp[5][iz]]
