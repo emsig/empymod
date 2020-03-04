@@ -13,7 +13,7 @@ matrix:
     - python: 3.8  # => without matplotlib, numexpr
       env: PYTHON=3.8 CHAN="defaults" PCKGS="" TEST="" INST=""
     - python: 3.7  # => with conda-forge
-      env: PYTHON=3.7 CHAN="conda-forge" PCKGS="numexpr matplotlib" TEST="--mpl" INST="pytest-mpl"
+      env: PYTHON=3.7 CHAN="conda-forge" PCKGS="" TEST="" INST=""
     - python: 3.7  # => without matplotlib, numexpr
       env: PYTHON=3.7 CHAN="defaults" PCKGS="" TEST="" INST=""
     - python: 3.7  # => just linkcheck
