@@ -86,14 +86,22 @@ def test_check_bipole():
     assert outz == 3
     assert_allclose(isdipole, True)
 
-    # Wrong azimuth
+    # Multiple azimuth
     pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], [0, 1, 2], 1]
-    with pytest.raises(ValueError):
-        utils.check_bipole(pole, 'tvar')
-    # Wrong dip
+    assert_allclose(pole[0], np.array([0, 0, 0]))
+    assert_allclose(pole[1], np.array([10, 20, 30]))
+    assert_allclose(pole[2], np.array([100, 0, 100]))
+    assert_allclose(pole[3], np.array([0, 1, 2]))
+    assert_allclose(pole[4], np.array([1, 1, 1]))
+
+    # Multiple dip
     pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 1, [0, 1, 2]]
-    with pytest.raises(ValueError):
-        utils.check_bipole(pole, 'tvar')
+    assert_allclose(pole[0], np.array([0, 0, 0]))
+    assert_allclose(pole[1], np.array([10, 20, 30]))
+    assert_allclose(pole[2], np.array([100, 0, 100]))
+    assert_allclose(pole[3], np.array([1, 1, 1]))
+    assert_allclose(pole[4], np.array([0, 1, 2]))
+
     # x.size != y.size
     pole = [[0, 0], [10, 20, 30], [100, 0, 100], 0, 0]
     with pytest.raises(ValueError):
@@ -720,6 +728,24 @@ def test_get_abs(capsys):
     _ = utils.get_abs(True, True, 90, 0, 0, 90, 3)
     out, _ = capsys.readouterr()
     assert out == "   Required ab's   :  11 12 31 32\n"
+
+    # Assure that for different, but aligned angles, they are not deleted.
+    ab_calc = utils.get_abs(
+            False, False, np.array([0., np.pi/2]), np.array([0., 0.]),
+            np.array([0.]), np.array([0.]), 0)
+    assert_allclose(ab_calc, [11, 12])
+    ab_calc = utils.get_abs(
+            False, False, np.array([0., 0.]), np.array([3*np.pi/2, np.pi]),
+            np.array([0.]), np.array([0.]), 0)
+    assert_allclose(ab_calc, [11, 13])
+    ab_calc = utils.get_abs(
+            False, False, np.array([0.]), np.array([0.]),
+            np.array([0., np.pi/2]), np.array([0., 0.]), 0)
+    assert_allclose(ab_calc, [11, 21])
+    ab_calc = utils.get_abs(
+            False, False, np.array([0.]), np.array([0.]),
+            np.array([0., 0.]), np.array([3*np.pi/2, np.pi]), 0)
+    assert_allclose(ab_calc, [11, 31])
 
 
 def test_get_geo_fact():
