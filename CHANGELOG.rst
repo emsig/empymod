@@ -2,6 +2,23 @@ Changelog
 #########
 
 
+Minor v1.10.x
+"""""""""""""
+
+v1.10.6: Various azimuths and dips at same depth
+------------------------------------------------
+
+- ``empymod.bipole``
+
+  - In the source and receiver format ``[x, y, z, azimuth, dip]``, azimuth and
+    dip can now be either single values, or the same number as the other
+    coordinates.
+  - Bugfix (in ``utils.get_abs``): When different orientations were used
+    exactly along the principal axes, at the same depth, only the first source
+    was calculated [`empymod#74
+    <https://github.com/empymod/empymod/issues/74>`_].
+
+
 v1.10.5: Continuously in- or decreasing
 ---------------------------------------
 
@@ -87,6 +104,9 @@ v1.10.0: Loop source and receiver
   more inclusive and open the project for new contributors.
 
 
+Minor v1.9.x
+"""""""""""""
+
 v1.9.0 : Laplace
 ----------------
 
@@ -106,6 +126,10 @@ v1.9.0 : Laplace
     asked to return the inverse pair (time to frequency).
 
 - Other tiny improvements and bug fixes.
+
+
+Minor v1.8.x
+""""""""""""
 
 
 v1.8.3 : Scooby
@@ -191,6 +215,10 @@ for the user-facing routines in ``model``:
   ``empymod.fht``. Gives a speed-up if looped over offsets or frequencies.
   Should be in ``utils``, but that would be heavily backwards incompatible.
   Move there in version 2.0.
+
+
+Minor v1.7.x
+""""""""""""
 
 
 v1.7.3 : Speed improvements following benchmarks
@@ -290,6 +318,10 @@ Merge ``empyscripts`` into ``empymod`` under ``empymod.scripts``.
 - Broaden namespace of ``empymod``. All public functions from the various
   modules and the modules from ``empymod.scripts`` are now available under
   ``empymod`` directly.
+
+
+Minor v1.6.x
+""""""""""""
 
 
 v1.6.2 : Speed improvements for QUAD/QWE
@@ -399,6 +431,10 @@ are affected.
 - Bugfix in ``model.wavenumber`` for ``ab=[36, 63]`` (zeroes).
 
 
+Minor v1.5.x
+""""""""""""
+
+
 v1.5.2 : Improved DLF
 ---------------------
 
@@ -460,6 +496,10 @@ v1.5.0 : Hankel filter wer_201_2018
 - Bug fixes
 
 - Version of manuscript submission to geophysics for the DLF article.
+
+
+Minor v1.4.x
+""""""""""""
 
 
 v1.4.4 : TE/TM split
@@ -530,6 +570,10 @@ push it to 1.4.1; so there isn't really a version 1.4.0.]
     only fullspace solution (all for the diffusive approximation).
 
 
+Minor v1.3.x
+"""""""""""""
+
+
 v1.3.0 : New transforms QUAD (Hankel) and FFT (Fourier)
 -------------------------------------------------------
 
@@ -561,6 +605,10 @@ v1.3.0 : New transforms QUAD (Hankel) and FFT (Fourier)
   - Move ``publications/TheLeadingEdge2017`` to /prisae/empymod-tle2017
 
 - Bug fixes and documentation improvements
+
+
+Minor v1.2.x
+""""""""""""
 
 
 v1.2.1 : Installable via pip and conda
@@ -613,6 +661,10 @@ v1.2.0 : Bipole
 - Bug fixes
 
 
+Minor v1.1.x
+""""""""""""
+
+
 v1.1.0 : Include source bipole
 ------------------------------
 
@@ -638,6 +690,10 @@ v1.1.0 : Include source bipole
     ``key_241_CosSin_2009``, and ``key_601_CosSin_2009``.
 
 - Bug fixes
+
+
+Minor v1.0.x
+""""""""""""
 
 
 v1.0.0 : Initial release
