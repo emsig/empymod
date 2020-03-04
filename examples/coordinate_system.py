@@ -2,13 +2,29 @@ r"""
 Coordinate system
 =================
 
-The derivation on which ``empymod`` is based ([HuTS15]_) and the actual
-implementation consider a coordinate system where positive :math:`z` points
-into the ground. This defines a left-handed system assuming that Easting is the
-:math:`x`-direction and Northing is the :math:`y`-direction. However,
-``empymod`` can equally be used for a coordinate system where positive
-:math:`z` is pointing up by just flipping :math:`z`, keep Easting and Northing
-the same.
+Short version
+-------------
+
+The used coordinate system is either a
+
+- Left-Handed System (LHS), where Easting is the :math:`x`-direction, Northing
+  the :math:`y`-direction, and positive :math:`z` is pointing downwards;
+- Right-Handed System (RHS), where Easting is the :math:`x`-direction, Northing
+  the :math:`y`-direction, and positive :math:`z` is pointing upwards.
+
+
+In more detail
+--------------
+
+The derivation on which ``empymod`` is based ([HuTS15]_) uses a right-handed
+system with :math:`x` to the East, :math:`y` to the South, and :math:`z`
+downwards (ESD). In the actual original implementation of ``empymod`` this was
+changed to a left-handed system with :math:`x` to the East, :math:`y` to the
+North, and :math:`z` downwards (END). However, ``empymod`` can equally well be
+used for a coordinate system where positive :math:`z` is pointing up by just
+flipping :math:`z`, resulting in :math:`x` to the East, :math:`y` to the North,
+and :math:`z` upwards (ENU).
+
 
 +----------------+--------------------+---------------------+
 |                | Left-handed system | Right-handed system |
