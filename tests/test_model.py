@@ -548,6 +548,22 @@ class TestBipole:
         outzeta = bipole(res=zeta, signal=0, mpermH=fact, mpermV=fact, **model)
         assert_allclose(standard, outzeta)
 
+    def test_src_rec_definitions(self):
+        inp = {'depth': [0, -250], 'res': [1e20, 0.3, 5], 'freqtime': 1.23456}
+
+        src1 = [[0, 0], [20, 0], [0, 0], [0, 20], -200, -200]
+        src2 = [[10, 0], [0, 10], -200, [0, 90], [0, 0]]
+
+        rec1 = [[1000, 0, 1000], [1200, 0, 1200],
+                [0, 1000, 1000], [0, 1200, 1200],
+                -250, -250]
+        rec2 = [[1100, 0, 1100], [0, 1100, 1100], -250, [0, 90, 45], [0, 0, 0]]
+
+        bip1 = bipole(src1, rec1, **inp)  # [x1, x2, y1, y2, z1, z2]
+        bip2 = bipole(src2, rec2, **inp)  # [x, y, z, azimuth, dip]
+
+        assert_allclose(bip1[:, :], bip2[:, :])
+
 
 def test_dipole():
     # As this is a subset of bipole, just run two tests to ensure

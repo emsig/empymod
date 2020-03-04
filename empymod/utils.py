@@ -271,12 +271,19 @@ def check_bipole(inp, name):
         # Check x, y, and z
         inp = chck_dipole(inp, name)
 
-        # Check azimuth and dip (must be floats, otherwise use ``bipole``)
-        inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,))
-        inp[4] = _check_var(inp[4], float, 1, 'dip', (1,))
+        # Check azimuth and dip
+        inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,), inp[0].shape)
+        inp[4] = _check_var(inp[4], float, 1, 'dip', (1,), inp[0].shape)
 
         # How many different depths
         inpz = inp[2].size
+
+        # Expand azimuth and dip to match number of depths
+        if inpz > 1:
+            if inp[3].size == 1:
+                inp[3] = np.ones(inpz)*inp[3]
+            if inp[4].size == 1:
+                inp[4] = np.ones(inpz)*inp[4]
 
     else:         # bipole checks
         # Check each pole for x, y, and z
@@ -1387,35 +1394,43 @@ def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
     bab = np.asarray(ab_calc*0+1, dtype=bool)
 
     # Remove if source is x- or y-directed
-    check = np.atleast_1d(srcazm)[0]
+    check = np.atleast_1d(srcazm)
     if np.allclose(srcazm % (np.pi/2), 0):  # if all angles are multiples of 90
-        if np.isclose(check // (np.pi/2) % 2, 0):  # Multiples of pi (180)
+        if np.all(np.isclose(check // (np.pi/2) % 2, 0)):
+            # Multiples of pi (180)
             bab[:, 1] *= False        # x-directed source, remove y
-        else:                                      # Multiples of pi/2 (90)
+        elif np.all(np.isclose(check // (np.pi/2) % 2, 1)):
+            # Multiples of pi/2 (90)
             bab[:, 0] *= False        # y-directed source, remove x
 
     # Remove if source is vertical
-    check = np.atleast_1d(srcdip)[0]
+    check = np.atleast_1d(srcdip)
     if np.allclose(srcdip % (np.pi/2), 0):  # if all angles are multiples of 90
-        if np.isclose(check // (np.pi/2) % 2, 0):  # Multiples of pi (180)
+        if np.all(np.isclose(check // (np.pi/2) % 2, 0)):
+            # Multiples of pi (180)
             bab[:, 2] *= False        # Horizontal, remove z
-        else:                                      # Multiples of pi/2 (90)
+        elif np.all(np.isclose(check // (np.pi/2) % 2, 1)):
+            # Multiples of pi/2 (90)
             bab[:, :2] *= False       # Vertical, remove x/y
 
     # Remove if receiver is x- or y-directed
-    check = np.atleast_1d(recazm)[0]
+    check = np.atleast_1d(recazm)
     if np.allclose(recazm % (np.pi/2), 0):  # if all angles are multiples of 90
-        if np.isclose(check // (np.pi/2) % 2, 0):  # Multiples of pi (180)
+        if np.all(np.isclose(check // (np.pi/2) % 2, 0)):
+            # Multiples of pi (180)
             bab[1, :] *= False        # x-directed receiver, remove y
-        else:                                      # Multiples of pi/2 (90)
+        elif np.all(np.isclose(check // (np.pi/2) % 2, 1)):
+            # Multiples of pi/2 (90)
             bab[0, :] *= False        # y-directed receiver, remove x
 
     # Remove if receiver is vertical
-    check = np.atleast_1d(recdip)[0]
+    check = np.atleast_1d(recdip)
     if np.allclose(recdip % (np.pi/2), 0):  # if all angles are multiples of 90
-        if np.isclose(check // (np.pi/2) % 2, 0):  # Multiples of pi (180)
+        if np.all(np.isclose(check // (np.pi/2) % 2, 0)):
+            # Multiples of pi (180)
             bab[2, :] *= False        # Horizontal, remove z
-        else:                                      # Multiples of pi/2 (90)
+        elif np.all(np.isclose(check // (np.pi/2) % 2, 1)):
+            # Multiples of pi/2 (90)
             bab[:2, :] *= False       # Vertical, remove x/y
 
     # Reduce
@@ -1652,8 +1667,8 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     else:  # If there are several depths, we take the current one
         if isdipole:
             tinp = [np.atleast_1d(inp[0][iz]), np.atleast_1d(inp[1][iz]),
-                    np.atleast_1d(inp[2][iz]), np.atleast_1d(inp[3]),
-                    np.atleast_1d(inp[4])]
+                    np.atleast_1d(inp[2][iz]), np.atleast_1d(inp[3][iz]),
+                    np.atleast_1d(inp[4][iz])]
         else:
             tinp = [inp[0][iz], inp[1][iz], inp[2][iz],
                     inp[3][iz], inp[4][iz], inp[5][iz]]

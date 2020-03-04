@@ -99,12 +99,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
               z1 (bipole) can be single values or arrays.
             - The variables x and y (dipole) or x0, x1, y0, and y1 (bipole)
               must have the same dimensions.
-            - The variable z (dipole) or z0 and z1 (bipole) must either be
-              single values or having the same dimension as the other
-              coordinates.
-            - The variables azimuth and dip must be single values. If they have
-              different angles, you have to use the bipole-method (with
-              srcpts/recpts = 1, so it is calculated as dipoles).
+            - The variables z, azimuth, and dip (dipole) or z0 and z1 (bipole)
+              must either be single values or having the same dimension as the
+              other coordinates.
 
         Angles (coordinate system is either left-handed with positive z down or
         right-handed with positive z up; East-North-Depth):
@@ -982,13 +979,9 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
               z1 (bipole) can be single values or arrays.
             - The variables x and y (dipole) or x0, x1, y0, and y1 (bipole)
               must have the same dimensions.
-            - The variable z (dipole) or z0 and z1 (bipole) must either be
-              single values or having the same dimension as the other
-              coordinates.
-            - The variables azimuth and dip must be single values. If they have
-              different angles, you have to use the bipole-method (with
-              recpts = 1, so it is calculated as dipoles). Note that srcpts is
-              fixed to 1, as the source is a loop.
+            - The variables z, azimuth, and dip (dipole) or z0 and z1 (bipole)
+              must either be single values or having the same dimension as the
+              other coordinates.
 
         Angles (coordinate system is either left-handed with positive z down or
         right-handed with positive z up; East-North-Depth):
