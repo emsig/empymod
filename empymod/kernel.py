@@ -44,8 +44,7 @@ __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
 
 # Numba-settings
 _numba_setting = {'nogil': True, 'cache': True}
-_numba_plus_fm = _numba_setting.copy()
-_numba_plus_fm['fastmath'] = True
+_numba_with_fm = {'fastmath': True, **_numba_setting}
 
 
 # Wavenumber-frequency domain kernel
@@ -124,9 +123,9 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
             PJ0 = sign*(PTM - PTE)/(8*np.pi)*lambd
 
     elif ab in [13, 23, 31, 32, 34, 35, 16, 26]:  # Eqs 107, 113, 114, 115,
-        PJ1 = sign*Ptot*lambd*lambd               # .   121, 125, 126, 127
         if ab in [34, 26]:
-            PJ1 *= -1
+            sign *= -1
+        PJ1 = sign*Ptot*lambd*lambd               # .   121, 125, 126, 127
 
     elif ab in [33, ]:                            # Eq 116
         PJ0 = sign*Ptot*lambd*lambd*lambd
@@ -135,6 +134,7 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     return PJ0, PJ1, PJ0b
 
 
+@nb.njit(**_numba_setting)
 def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
              ab, xdirect, msrc, mrec):
     r"""Calculate Green's function for TM and TE.
@@ -155,6 +155,9 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     This function is called from the function :mod:`kernel.wavenumber`.
 
     """
+    nfreq, nlayer = etaH.shape
+    noff, nlambda = lambd.shape
+
     # GTM/GTE have shape (frequency, offset, lambda).
     # gamTM/gamTE have shape (frequency, offset, layer, lambda):
 
@@ -184,9 +187,15 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
             e_zH, e_zV, z_eH = zetaH, zetaV, etaH  # TE: etaV not used
 
         # Uppercase gamma
-        Gam = np.sqrt((e_zH/e_zV)[:, None, :, None] *
-                      (lambd*lambd)[None, :, None, :] +
-                      (z_eH*e_zH)[:, None, :, None])
+        Gam = np.zeros((nfreq, noff, nlayer, nlambda), etaH.dtype)
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iii in range(nlayer):
+                    h_div_v = e_zH[i, iii]/e_zV[i, iii]
+                    h_times_h = z_eH[i, iii]*e_zH[i, iii]
+                    for iv in range(nlambda):
+                        l2 = lambd[ii, iv]*lambd[ii, iv]
+                        Gam[i, ii, iii, iv] = np.sqrt(h_div_v*l2 + h_times_h)
 
         # Gamma in receiver layer
         lrecGam = Gam[:, :, lrec, :]
@@ -271,39 +280,66 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     # These are the factors inside the integrals
     # Eqs 105-107, 111-116, 119-121, 123-128
 
-    # PTM, PTE
     if ab in [11, 12, 21, 22]:
-        PTM = GTM*gamTM[:, :, lrec, :]/etaH[:, None, lrec, None]
-        PTE = zetaH[:, None, lsrc, None]*GTE/gamTE[:, :, lsrc, :]
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= gamTM[i, ii, lrec, iv]/etaH[i, lrec]
+                    GTE[i, ii, iv] *= zetaH[i, lsrc]/gamTE[i, ii, lsrc, iv]
+
     elif ab in [14, 15, 24, 25]:
-        PTM = ((etaH[:, lsrc]/etaH[:, lrec])[:, None, None] *
-               GTM*gamTM[:, :, lrec, :]/gamTM[:, :, lsrc, :])
-        PTE = GTE
+        for i in range(nfreq):
+            fact = etaH[i, lsrc]/etaH[i, lrec]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= fact*gamTM[i, ii, lrec, iv]
+                    GTM[i, ii, iv] /= gamTM[i, ii, lsrc, iv]
+
     elif ab in [13, 23]:
-        PTM = -((etaH[:, lsrc]/etaH[:, lrec]/etaV[:, lsrc])[:, None, None] *
-                GTM*gamTM[:, :, lrec, :]/gamTM[:, :, lsrc, :])
-        PTE = 0
+        GTE = np.zeros_like(GTM)
+        for i in range(nfreq):
+            fact = etaH[i, lsrc]/etaH[i, lrec]/etaV[i, lsrc]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= -fact*gamTM[i, ii, lrec, iv]
+                    GTM[i, ii, iv] /= gamTM[i, ii, lsrc, iv]
+
     elif ab in [31, 32]:
-        PTM = GTM/etaV[:, None, lrec, None]
-        PTE = 0
+        GTE = np.zeros_like(GTM)
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] /= etaV[i, lrec]
+
     elif ab in [34, 35]:
-        PTM = ((etaH[:, lsrc]/etaV[:, lrec])[:, None, None] *
-               GTM/gamTM[:, :, lsrc, :])
-        PTE = 0
+        GTE = np.zeros_like(GTM)
+        for i in range(nfreq):
+            fact = etaH[i, lsrc]/etaV[i, lrec]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= fact/gamTM[i, ii, lsrc, iv]
+
     elif ab in [16, 26]:
-        PTM = 0
-        PTE = ((zetaH[:, lsrc]/zetaV[:, lsrc])[:, None, None] *
-               GTE/gamTE[:, :, lsrc, :])
+        GTM = np.zeros_like(GTE)
+        for i in range(nfreq):
+            fact = zetaH[i, lsrc]/zetaV[i, lsrc]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTE[i, ii, iv] *= fact/gamTE[i, ii, lsrc, iv]
+
     elif ab in [33, ]:
-        PTM = ((etaH[:, lsrc]/etaV[:, lsrc]/etaV[:, lrec])[:, None, None] *
-               GTM/gamTM[:, :, lsrc, :])
-        PTE = 0
+        GTE = np.zeros_like(GTM)
+        for i in range(nfreq):
+            fact = etaH[i, lsrc]/etaV[i, lsrc]/etaV[i, lrec]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= fact/gamTM[i, ii, lsrc, iv]
 
     # Return Green's functions
-    return PTM, PTE
+    return GTM, GTE
 
 
-@nb.njit(**_numba_plus_fm)
+@nb.njit(**_numba_with_fm)
 def reflections(depth, e_zH, Gam, lrec, lsrc):
     r"""Calculate Rp, Rm.
 
