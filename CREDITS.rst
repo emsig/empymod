@@ -9,7 +9,6 @@ Developers», which includes everyone involved in the project.
 Code contributors:
 
 - `Dieter Werthmüller <https://github.com/prisae>`_
-- `Leon Foks <https://github.com/leonfoks>`_
 
 
 There are various other ways how people have contributed. In the following some
@@ -41,10 +40,11 @@ Special thanks to
 Many more helped through their feedback, feature request, bug reports etc. A
 certainly incomplete list (get in touch if you think you should appear here):
 
-- Seogi Kang
+- `Seogi Kang <https://github.com/sgkang>`_
 - Svein-Erik Hamran
 - Peter van der Sman
-- Ralph-Uwe Börner
+- `Ralph-Uwe Börner <https://github.com/ruboerner>`_
+- `Leon Foks <https://github.com/leonfoks>`_
 
 
 .. note::

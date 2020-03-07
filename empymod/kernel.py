@@ -425,7 +425,10 @@ def reflections(depth, e_zH, Gam, lrec, lsrc):
 
     """
 
+    # Get numbers and max/min layer.
     nfreq, noff, nlambda = Gam[:, :, 0, :].shape
+    maxl = max([lrec, lsrc])
+    minl = min([lrec, lsrc])
 
     # Loop over Rp, Rm
     for plus in [True, False]:
@@ -433,15 +436,14 @@ def reflections(depth, e_zH, Gam, lrec, lsrc):
         # Switches depending if plus or minus
         if plus:
             pm = 1
-            layer_count = np.arange(
-                    depth.size-2, min(lrec[()], lsrc[()])-1, -1)
+            layer_count = np.arange(depth.size-2, minl-1, -1)
             izout = abs(lsrc-lrec)
-            minmax = max(lrec[()], lsrc[()])
+            minmax = pm*maxl
         else:
             pm = -1
-            layer_count = np.arange(1, max(lrec[()], lsrc[()])+1, 1)
+            layer_count = np.arange(1, maxl+1, 1)
             izout = 0
-            minmax = -min(lrec[()], lsrc[()])
+            minmax = pm*minl
 
         # If rec in last  and rec below src (plus) or
         # if rec in first and rec above src (minus), shift izout
@@ -450,12 +452,9 @@ def reflections(depth, e_zH, Gam, lrec, lsrc):
         if shiftplus or shiftminus:
             izout -= pm
 
-        # Pre-allocate Ref
-        Ref = np.zeros((Gam.shape[0], Gam.shape[1], abs(lsrc-lrec)+1,
-                        Gam.shape[3]), dtype=Gam.dtype)
-
-        # Calculate the reflection
-        rloc = np.zeros(Gam[:, :, 0, :].shape, dtype=Gam.dtype)
+        # Pre-allocate Ref and rloc
+        Ref = np.zeros_like(Gam[:, :, :maxl-minl+1, :])
+        rloc = np.zeros_like(Gam[:, :, 0, :])
 
         # Calculate the reflection
         for iz in layer_count:
