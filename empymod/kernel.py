@@ -49,6 +49,7 @@ _numba_with_fm = {'fastmath': True, **_numba_setting}
 
 # Wavenumber-frequency domain kernel
 
+@nb.njit(**_numba_with_fm)
 def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                ab, xdirect, msrc, mrec):
     r"""Calculate wavenumber domain solution.
@@ -88,6 +89,8 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     are correct, as no checks are carried out here.
 
     """
+    nfreq, _ = etaH.shape
+    noff, nlambda = lambd.shape
 
     # ** CALCULATE GREEN'S FUNCTIONS
     # Shape of PTM, PTE: (nfreq, noffs, nfilt)
@@ -96,13 +99,13 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
     # ** AB-SPECIFIC COLLECTION OF PJ0, PJ1, AND PJ0b
 
-    # Pre-allocate output
-    PJ0 = None
-    PJ1 = None
-    PJ0b = None
-
     # Calculate Ptot which is used in all cases
-    Ptot = (PTM + PTE)/(4*np.pi)
+    Ptot = np.zeros_like(PTM)
+    fourpi = 4*np.pi
+    for i in range(nfreq):
+        for ii in range(noff):
+            for iv in range(nlambda):
+                Ptot[i, ii, iv] = (PTM[i, ii, iv] + PTE[i, ii, iv])/fourpi
 
     # If rec is magnetic switch sign (reciprocity MM/ME => EE/EM).
     if mrec:
@@ -115,20 +118,50 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         # J2(kr) = 2/(kr)*J1(kr) - J0(kr)         #     119, 120, 123, 124
         if ab in [14, 22]:
             sign *= -1
-        PJ0b = sign/2*Ptot*lambd
-        PJ1 = -sign*Ptot
+
+        PJ0b = np.zeros_like(PTM)
+        PJ1 = np.zeros_like(PTM)
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    PJ0b[i, ii, iv] = sign/2*Ptot[i, ii, iv]*lambd[ii, iv]
+                    PJ1[i, ii, iv] = -sign*Ptot[i, ii, iv]
+
         if ab in [11, 22, 24, 15]:
             if ab in [22, 24]:
                 sign *= -1
-            PJ0 = sign*(PTM - PTE)/(8*np.pi)*lambd
+
+            PJ0 = np.zeros_like(PTM)
+            eightpi = sign*8*np.pi
+            for i in range(nfreq):
+                for ii in range(noff):
+                    for iv in range(nlambda):
+                        PJ0[i, ii, iv] = PTM[i, ii, iv] - PTE[i, ii, iv]
+                        PJ0[i, ii, iv] *= lambd[ii, iv]/eightpi
+        else:
+            PJ0 = None
 
     elif ab in [13, 23, 31, 32, 34, 35, 16, 26]:  # Eqs 107, 113, 114, 115,
         if ab in [34, 26]:
             sign *= -1
-        PJ1 = sign*Ptot*lambd*lambd               # .   121, 125, 126, 127
+        PJ1 = np.zeros_like(PTM)
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):         # 121, 125, 126, 127
+                    dlambd = lambd[ii, iv]*lambd[ii, iv]
+                    PJ1[i, ii, iv] = sign*Ptot[i, ii, iv]*dlambd
+        PJ0 = None
+        PJ0b = None
 
     elif ab in [33, ]:                            # Eq 116
-        PJ0 = sign*Ptot*lambd*lambd*lambd
+        PJ0 = np.zeros_like(PTM)
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    tlambd = lambd[ii, iv]*lambd[ii, iv]*lambd[ii, iv]
+                    PJ0[i, ii, iv] = sign*Ptot[i, ii, iv]*tlambd
+        PJ1 = None
+        PJ0b = None
 
     # Return PJ0, PJ1, PJ0b
     return PJ0, PJ1, PJ0b
