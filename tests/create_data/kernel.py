@@ -8,6 +8,7 @@ from empymod import kernel, filters
 # All possible (ab, msrc, mrec) combinations
 pab = (np.arange(1, 7)[None, :] + np.array([10, 20, 30])[:, None]).ravel()
 iab = {}
+i = 0
 for mrec in [False, True]:
     for ab in pab:
         if ab == 36:
@@ -18,15 +19,16 @@ for mrec in [False, True]:
             msrc = False
         if mrec:
             msrc = not msrc
-        iab[ab] = (msrc, mrec)
+        iab[i] = (msrc, mrec, ab)
+        i += 1
 
 # # A -- ANGLE # #
 
 angres = []
 angle = np.array([1., 2., 4., 5.])
 for key, val in iab.items():
-    inp = {'angle': angle, 'ab': key, 'msrc': val[0], 'mrec': val[1]}
-    res = kernel.angle_factor(angle, key, val[0], val[1])
+    inp = {'angle': angle, 'ab': val[2], 'msrc': val[0], 'mrec': val[1]}
+    res = kernel.angle_factor(angle, val[2], val[0], val[1])
     angres.append({'inp': inp, 'res': res})
 
 # # B -- WAVENUMBER # #
@@ -58,8 +60,8 @@ inp1 = {'zsrc': 100.,
         'xdirect': False}
 wave = {}
 for key, val in iab.items():
-    res = kernel.wavenumber(ab=key, msrc=val[0], mrec=val[1], **inp1)
-    wave[key] = (key, val[0], val[1], inp1, res)
+    res = kernel.wavenumber(ab=val[2], msrc=val[0], mrec=val[1], **inp1)
+    wave[key] = (val[2], val[0], val[1], inp1, res)
 
 # # C -- GREENFCT # #
 
@@ -75,11 +77,11 @@ inp4['zrec'] = -30.
 inp4['lrec'] = np.array(0)
 green = {}
 for key, val in iab.items():
-    res1 = kernel.greenfct(ab=key, msrc=val[0], mrec=val[1], **inp2)
-    res2 = kernel.greenfct(ab=key, msrc=val[0], mrec=val[1], **inp3)
-    res3 = kernel.greenfct(ab=key, msrc=val[0], mrec=val[1], **inp4)
+    res1 = kernel.greenfct(ab=val[2], msrc=val[0], mrec=val[1], **inp2)
+    res2 = kernel.greenfct(ab=val[2], msrc=val[0], mrec=val[1], **inp3)
+    res3 = kernel.greenfct(ab=val[2], msrc=val[0], mrec=val[1], **inp4)
 
-    green[key] = (key, val[0], val[1], inp2, res1, inp3, res2, inp4, res3)
+    green[key] = (val[2], val[0], val[1], inp2, res1, inp3, res2, inp4, res3)
 
 
 # # D -- REFLECTIONS # #

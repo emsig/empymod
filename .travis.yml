@@ -46,9 +46,8 @@ script:  # No pytest for linkcheck-run.
         pytest --cov=empymod --flake8 $TEST;
     fi
 
-after_success:  # Eventually only coveralls when JIT disabled.
+after_success:
   - if [ "$CHCKLNKS" == "" ]; then coveralls; fi
-  # - if [ "$NUMBA_DISABLE_JIT" == "1" ]; then coveralls; fi
 
 deploy:
   provider: pypi
