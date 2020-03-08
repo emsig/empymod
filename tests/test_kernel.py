@@ -24,13 +24,13 @@ DATAKERNEL = np.load(join(dirname(__file__), 'data/kernel.npz'),
 @pytest.mark.parametrize("njit", [True, False])
 def test_wavenumber(njit):                                      # 1. wavenumber
     if njit:
-        fct = kernel.wavenumber
+        wavenumber = kernel.wavenumber
     else:
-        fct = kernel.wavenumber.py_func
+        wavenumber = kernel.wavenumber.py_func
 
     dat = DATAKERNEL['wave'][()]
     for _, val in dat.items():
-        out = fct(ab=val[0], msrc=val[1], mrec=val[2], **val[3])
+        out = wavenumber(ab=val[0], msrc=val[1], mrec=val[2], **val[3])
 
         if val[0] in [11, 22, 24, 15, 33]:
             assert_allclose(out[0], val[4][0], atol=1e-100)
@@ -51,9 +51,9 @@ def test_wavenumber(njit):                                      # 1. wavenumber
 @pytest.mark.parametrize("njit", [True, False])
 def test_greenfct(njit):                                          # 2. greenfct
     if njit:
-        fct = kernel.greenfct
+        greenfct = kernel.greenfct
     else:
-        fct = kernel.greenfct.py_func
+        greenfct = kernel.greenfct.py_func
 
     dat = DATAKERNEL['green'][()]
     for _, val in dat.items():
@@ -61,7 +61,7 @@ def test_greenfct(njit):                                          # 2. greenfct
             ab = val[0]
             msrc = val[1]
             mrec = val[2]
-            out = fct(ab=ab, msrc=msrc, mrec=mrec, **val[i])
+            out = greenfct(ab=ab, msrc=msrc, mrec=mrec, **val[i])
             assert_allclose(out[0], val[i+1][0])
             assert_allclose(out[1], val[i+1][1])
 
@@ -69,13 +69,13 @@ def test_greenfct(njit):                                          # 2. greenfct
 @pytest.mark.parametrize("njit", [True, False])
 def test_reflections(njit):                                    # 3. reflections
     if njit:
-        fct = kernel.reflections
+        reflections = kernel.reflections
     else:
-        fct = kernel.reflections.py_func
+        reflections = kernel.reflections.py_func
 
     dat = DATAKERNEL['refl'][()]
     for _, val in dat.items():
-        Rp, Rm = fct(**val[0])
+        Rp, Rm = reflections(**val[0])
         assert_allclose(Rp, val[1])
         assert_allclose(Rm, val[2])
 
@@ -83,16 +83,16 @@ def test_reflections(njit):                                    # 3. reflections
 @pytest.mark.parametrize("njit", [True, False])
 def test_fields(njit):                                              # 4. fields
     if njit:
-        fct = kernel.fields
+        fields = kernel.fields
     else:
-        fct = kernel.fields.py_func
+        fields = kernel.fields.py_func
 
     dat = DATAKERNEL['fields'][()]
     for _, val in dat.items():
         for i in [2, 4, 6, 8, 10]:
             ab = val[0]
             TM = val[1]
-            Pu, Pd = fct(ab=ab, TM=TM, **val[i])
+            Pu, Pd = fields(ab=ab, TM=TM, **val[i])
             assert_allclose(Pu, val[i+1][0])
             assert_allclose(Pd, val[i+1][1])
 
