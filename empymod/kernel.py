@@ -99,8 +99,22 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
     # ** AB-SPECIFIC COLLECTION OF PJ0, PJ1, AND PJ0b
 
-    # Calculate Ptot which is used in all cases
+    # Pre-allocate output
+    if ab in [11, 22, 24, 15, 33]:
+        PJ0 = np.zeros_like(PTM)
+    else:
+        PJ0 = None
+    if ab in [11, 12, 21, 22, 14, 24, 15, 25]:
+        PJ0b = np.zeros_like(PTM)
+    else:
+        PJ0b = None
+    if ab not in [33, ]:
+        PJ1 = np.zeros_like(PTM)
+    else:
+        PJ1 = None
     Ptot = np.zeros_like(PTM)
+
+    # Calculate Ptot which is used in all cases
     fourpi = 4*np.pi
     for i in range(nfreq):
         for ii in range(noff):
@@ -119,8 +133,6 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         if ab in [14, 22]:
             sign *= -1
 
-        PJ0b = np.zeros_like(PTM)
-        PJ1 = np.zeros_like(PTM)
         for i in range(nfreq):
             for ii in range(noff):
                 for iv in range(nlambda):
@@ -131,37 +143,28 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
             if ab in [22, 24]:
                 sign *= -1
 
-            PJ0 = np.zeros_like(PTM)
             eightpi = sign*8*np.pi
             for i in range(nfreq):
                 for ii in range(noff):
                     for iv in range(nlambda):
                         PJ0[i, ii, iv] = PTM[i, ii, iv] - PTE[i, ii, iv]
                         PJ0[i, ii, iv] *= lambd[ii, iv]/eightpi
-        else:
-            PJ0 = None
 
     elif ab in [13, 23, 31, 32, 34, 35, 16, 26]:  # Eqs 107, 113, 114, 115,
         if ab in [34, 26]:
             sign *= -1
-        PJ1 = np.zeros_like(PTM)
         for i in range(nfreq):
             for ii in range(noff):
                 for iv in range(nlambda):         # 121, 125, 126, 127
                     dlambd = lambd[ii, iv]*lambd[ii, iv]
                     PJ1[i, ii, iv] = sign*Ptot[i, ii, iv]*dlambd
-        PJ0 = None
-        PJ0b = None
 
     elif ab in [33, ]:                            # Eq 116
-        PJ0 = np.zeros_like(PTM)
         for i in range(nfreq):
             for ii in range(noff):
                 for iv in range(nlambda):
                     tlambd = lambd[ii, iv]*lambd[ii, iv]*lambd[ii, iv]
                     PJ0[i, ii, iv] = sign*Ptot[i, ii, iv]*tlambd
-        PJ1 = None
-        PJ0b = None
 
     # Return PJ0, PJ1, PJ0b
     return PJ0, PJ1, PJ0b

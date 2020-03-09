@@ -7,6 +7,9 @@ Changelog
 
 This version will be backwards incompatible, and only support Python 3.6+.
 
+- Using ``numexpr`` is no longer a possibility. Instead, ``numba`` is a new
+  dependency. All four kernel routines (``wavenumber``, ``greenfct``,
+  ``reflections``, and ``fields``) are now numba-jitted functions.
 - Removed all deprecated functions.
 - Dropped support for Python 3.5.
 - Dropped testing for channel conda-forge. The problems encountered at the
