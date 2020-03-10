@@ -17,7 +17,7 @@ plt.style.use('ggplot')
 # Define model
 # ------------
 
-x = (np.arange(1051))*10-500
+x = (np.arange(526))*20-500
 rx = np.repeat([x, ], np.size(x), axis=0)
 ry = rx.transpose()
 zsrc = 150
