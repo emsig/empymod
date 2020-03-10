@@ -4,9 +4,11 @@ from copy import deepcopy
 from scipy.constants import mu_0, epsilon_0
 from empymod import kernel, filters
 
+
 # All possible (ab, msrc, mrec) combinations
 pab = (np.arange(1, 7)[None, :] + np.array([10, 20, 30])[:, None]).ravel()
 iab = {}
+i = 0
 for mrec in [False, True]:
     for ab in pab:
         if ab == 36:
@@ -17,15 +19,16 @@ for mrec in [False, True]:
             msrc = False
         if mrec:
             msrc = not msrc
-        iab[ab] = (msrc, mrec)
+        iab[i] = (msrc, mrec, ab)
+        i += 1
 
 # # A -- ANGLE # #
 
 angres = []
 angle = np.array([1., 2., 4., 5.])
 for key, val in iab.items():
-    inp = {'angle': angle, 'ab': key, 'msrc': val[0], 'mrec': val[1]}
-    res = kernel.angle_factor(angle, key, val[0], val[1])
+    inp = {'angle': angle, 'ab': val[2], 'msrc': val[0], 'mrec': val[1]}
+    res = kernel.angle_factor(angle, val[2], val[0], val[1])
     angres.append({'inp': inp, 'res': res})
 
 # # B -- WAVENUMBER # #
@@ -44,8 +47,8 @@ zetaH = np.outer(2j*np.pi*freq, mpermH*mu_0)
 zetaV = np.outer(2j*np.pi*freq, mpermV*mu_0)
 lambd = filters.key_51_2012().base/np.array([0.001, 1, 100, 10000])[:, None]
 depth = np.array([-np.infty, 0, 150, 300, 500, 600])
-inp1 = {'zsrc': np.array([100]),
-        'zrec': np.array([650]),
+inp1 = {'zsrc': 100.,
+        'zrec': 650.,
         'lsrc': np.array(1),
         'lrec': np.array(5),
         'depth': depth,
@@ -54,12 +57,11 @@ inp1 = {'zsrc': np.array([100]),
         'zetaH': zetaH,
         'zetaV': zetaV,
         'lambd': lambd,
-        'xdirect': False,
-        'use_ne_eval': False}
+        'xdirect': False}
 wave = {}
 for key, val in iab.items():
-    res = kernel.wavenumber(ab=key, msrc=val[0], mrec=val[1], **inp1)
-    wave[key] = (key, val[0], val[1], inp1, res)
+    res = kernel.wavenumber(ab=val[2], msrc=val[0], mrec=val[1], **inp1)
+    wave[key] = (val[2], val[0], val[1], inp1, res)
 
 # # C -- GREENFCT # #
 
@@ -67,19 +69,19 @@ for key, val in iab.items():
 inp2 = deepcopy(inp1)
 # Source and receiver in same layer (last)
 inp3 = deepcopy(inp1)
-inp3['zsrc'] = np.array([610])
+inp3['zsrc'] = 610.
 inp3['lsrc'] = np.array(5)
 # Receiver in first layer
 inp4 = deepcopy(inp1)
-inp4['zrec'] = np.array([-30])
+inp4['zrec'] = -30.
 inp4['lrec'] = np.array(0)
 green = {}
 for key, val in iab.items():
-    res1 = kernel.greenfct(ab=key, msrc=val[0], mrec=val[1], **inp2)
-    res2 = kernel.greenfct(ab=key, msrc=val[0], mrec=val[1], **inp3)
-    res3 = kernel.greenfct(ab=key, msrc=val[0], mrec=val[1], **inp4)
+    res1 = kernel.greenfct(ab=val[2], msrc=val[0], mrec=val[1], **inp2)
+    res2 = kernel.greenfct(ab=val[2], msrc=val[0], mrec=val[1], **inp3)
+    res3 = kernel.greenfct(ab=val[2], msrc=val[0], mrec=val[1], **inp4)
 
-    green[key] = (key, val[0], val[1], inp2, res1, inp3, res2, inp4, res3)
+    green[key] = (val[2], val[0], val[1], inp2, res1, inp3, res2, inp4, res3)
 
 
 # # D -- REFLECTIONS # #
@@ -91,18 +93,18 @@ inp5 = {'depth': depth,
         'e_zH': etaH,
         'Gam': Gam,
         'lrec': inp1['lrec'],
-        'lsrc': inp1['lsrc'],
-        'use_ne_eval': False}
+        'lsrc': inp1['lsrc']}
 Rp1, Rm1 = kernel.reflections(**inp5)
+
 refl[0] = (inp5, Rp1, Rm1)
 # Source and receiver in same layer, but not last
 inp6 = {'depth': inp2['depth'],
         'e_zH': etaH,
         'Gam': Gam,
         'lrec': np.array(3),
-        'lsrc': np.array(3),
-        'use_ne_eval': False}
+        'lsrc': np.array(3)}
 Rp2, Rm2 = kernel.reflections(**inp6)
+
 refl[1] = (inp6, Rp2, Rm2)
 
 # # E -- FIELDS # #
@@ -113,8 +115,7 @@ inp7 = {'depth': depth,
         'Gam': Gam,
         'lrec': inp5['lrec'],
         'lsrc': inp5['lsrc'],
-        'zsrc': inp1['zsrc'],
-        'use_ne_eval': False}
+        'zsrc': inp1['zsrc']}
 # Source and receiver in same layer, but not last
 inp8 = {'depth': depth,
         'Rp': Rp2,
@@ -122,44 +123,37 @@ inp8 = {'depth': depth,
         'Gam': Gam,
         'lrec': inp6['lrec'],
         'lsrc': inp6['lsrc'],
-        'zsrc': np.array([350]),
-        'use_ne_eval': False}
+        'zsrc': 350.}
 
 # Source and receiver in same layer, but not last
-Rp4, Rm4 = kernel.reflections(depth, etaH, Gam, np.array(5),
-                              np.array(5), False)
+Rp4, Rm4 = kernel.reflections(depth, etaH, Gam, np.array(5), np.array(5))
 inp10 = {'depth': depth,
          'Rp': Rp4,
          'Rm': Rm4,
          'Gam': Gam,
          'lrec': np.array(5),
          'lsrc': np.array(5),
-         'zsrc': np.array([700]),
-         'use_ne_eval': False}
+         'zsrc': 700.}
 
 # Receiver in first layer, source in last
-Rp3, Rm3 = kernel.reflections(depth, etaH, Gam, np.array(0),
-                              np.array(5), False)
+Rp3, Rm3 = kernel.reflections(depth, etaH, Gam, np.array(0), np.array(5))
 inp9 = {'depth': depth,
         'Rp': Rp3,
         'Rm': Rm3,
         'Gam': Gam,
         'lrec': np.array(0),
         'lsrc': np.array(5),
-        'zsrc': np.array([700]),
-        'use_ne_eval': False}
+        'zsrc': 700.}
 
 # Source in first layer, receiver in last
-Rp5, Rm5 = kernel.reflections(depth, etaH, Gam, np.array(5),
-                              np.array(0), False)
+Rp5, Rm5 = kernel.reflections(depth, etaH, Gam, np.array(5), np.array(0))
 inp11 = {'depth': depth,
          'Rp': Rp5,
          'Rm': Rm5,
          'Gam': Gam,
          'lrec': np.array(5),
          'lsrc': np.array(0),
-         'zsrc': np.array([-30]),
-         'use_ne_eval': False}
+         'zsrc': -30.}
 
 
 fields = {}

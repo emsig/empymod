@@ -4,13 +4,6 @@ from scipy.special import erf
 from os.path import join, dirname
 from numpy.testing import assert_allclose
 
-# See if numexpr is installed, and if it is, if it uses VML
-try:
-    from numexpr import use_vml, evaluate as use_ne_eval
-except ImportError:
-    use_vml = False
-    use_ne_eval = False
-
 # Import main modelling routines from empymod directly to ensure they are in
 # the __init__.py-file.
 from empymod import bipole, dipole, analytical, loop
@@ -257,29 +250,6 @@ class TestBipole:
         # r = 100; sI = 33 => 3300
         assert_allclose(bip1, dip*3300, 1e-5)  # bipole as dipole
         assert_allclose(bip2, dip*3300, 1e-2)  # bipole, src/rec switched.
-
-    def test_optimization(self, capsys):
-        # Compare optimization options: None, parallel, spline
-        inp = {'depth': [0, 500], 'res': [10, 3, 50], 'freqtime': [1, 2, 3],
-               'rec': [[6000, 7000, 8000], [200, 200, 200], 300, 0, 0],
-               'src': [0, 0, 0, 0, 0]}
-
-        non = bipole(opt=None, verb=3, **inp)
-        out, _ = capsys.readouterr()
-        assert "Kernel Opt.     :  None" in out
-
-        par = bipole(opt='parallel', verb=3, **inp)
-        out, _ = capsys.readouterr()
-        if use_ne_eval and use_vml:
-            assert "Kernel Opt.     :  Use parallel" in out
-        else:
-            assert "Kernel Opt.     :  None" in out
-        assert_allclose(non, par, equal_nan=True)
-
-        spl = bipole(htarg={'pts_per_dec': -1}, verb=3, **inp)
-        out, _ = capsys.readouterr()
-        assert "> DLF type    :  Lagged Convolution" in out
-        assert_allclose(non, spl, 1e-3, 1e-22, True)
 
     def test_loop(self, capsys):
         # Compare loop options: None, 'off', 'freq'

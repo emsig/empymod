@@ -2,13 +2,6 @@ import pytest
 import numpy as np
 from numpy.testing import assert_allclose
 
-# See if numexpr is installed, and if it is, if it uses VML
-try:
-    from numexpr import use_vml, evaluate as use_ne_eval
-except ImportError:
-    use_vml = False
-    use_ne_eval = False
-
 # Optional import
 try:
     import scooby
@@ -437,52 +430,6 @@ def test_check_all_depths():
         assert_allclose(lhs_l2h[4], var[4][::swap])
         assert_allclose(lhs_l2h[5], var[5][::swap])
         assert_allclose(lhs_l2h[6], var[6][::swap])
-
-
-def test_check_opt(capsys):
-    fhtarg = [filters.kong_61_2007(), 43]
-    qwehtarg = [np.array(1e-12), np.array(1e-30), np.array(51), np.array(100),
-                np.array(33)]
-
-    res = utils.check_opt(None, None, 'fht', fhtarg, 4)
-    assert_allclose(res, (False, True, False))
-    out, _ = capsys.readouterr()
-    outstr = "   Kernel Opt.     :  None\n   Loop over       :  Freq"
-    assert out[:53] == outstr
-
-    res = utils.check_opt(None, 'off', 'hqwe', qwehtarg, 4)
-    assert_allclose(res, (False, True, False))
-    out, _ = capsys.readouterr()
-    outstr = "   Kernel Opt.     :  None\n   Loop over       :  Freq"
-    assert out[:53] == outstr
-
-    res = utils.check_opt('parallel', 'off', 'fht', [fhtarg[0], 0], 4)
-    if use_vml:
-        assert_allclose(callable(res[0]), True)
-        outstr = "   Kernel Opt.     :  Use parallel\n   Loop over       :  Of"
-    elif not use_ne_eval:
-        assert_allclose(callable(res[0]), False)
-        outstr = "* WARNING :: `numexpr` is not installed, `opt=='parallel'` "
-    else:
-        assert_allclose(callable(res[0]), False)
-        outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"
-    assert_allclose(res[1:], (False, True))
-    out, _ = capsys.readouterr()
-    assert out[:59] == outstr
-
-    res = utils.check_opt('parallel', 'freq', 'hqwe', qwehtarg, 4)
-    if use_vml:
-        assert_allclose(callable(res[0]), True)
-        outstr = "   Kernel Opt.     :  Use parallel\n   Loop over       :  Fr"
-    elif not use_ne_eval:
-        assert_allclose(callable(res[0]), False)
-        outstr = "* WARNING :: `numexpr` is not installed, `opt=='parallel'` "
-    else:
-        assert_allclose(callable(res[0]), False)
-        outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"
-    assert_allclose(res[1:], (True, False))
-    out, _ = capsys.readouterr()
-    assert out[:59] == outstr
 
 
 def test_check_time(capsys):
@@ -1106,8 +1053,8 @@ def test_report(capsys):
     # We just ensure the shown packages do not change (core and optional).
     if scooby:
         out1 = scooby.Report(
-                core=['numpy', 'scipy', 'empymod'],
-                optional=['numexpr', 'IPython', 'matplotlib'],
+                core=['numpy', 'scipy', 'numba', 'empymod'],
+                optional=['IPython', 'matplotlib'],
                 ncol=3)
         out2 = utils.Report()
 

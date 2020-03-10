@@ -8,10 +8,6 @@ standard quadrature in the form of *QUAD* is also provided. *QUAD* is generally
 orders of magnitudes slower, and more fragile depending on the input arguments.
 However, it can provide accurate results where *DLF* and *QWE* fail.
 
-Parts of the kernel can run in parallel using ``numexpr``. This option is
-activated by setting ``opt='parallel'`` (see subsection :ref:`Parallelisation
-<parallelisation>`). It is switched off by default.
-
 
 Memory
 ------
@@ -79,51 +75,6 @@ source and receiver bipoles.
     +----------------+--------+-------+------+-------+-------+------+---------+
 
 
-.. _parallelisation:
-
-Parallelisation
----------------
-If ``opt = 'parallel'``, six (*) of the most time-consuming statements are
-calculated by using the ``numexpr`` package
-(https://github.com/pydata/numexpr/wiki/Numexpr-Users-Guide).  These statements
-are all in the ``kernel``-functions ``greenfct``, ``reflections``, and
-``fields``, and all involve :math:`\Gamma` in one way or another, often
-calculating square roots or exponentials. As :math:`\Gamma` has dimensions
-(#frequencies, #offsets, #layers, #lambdas), it can become fairly big.
-
-The package ``numexpr`` has to be built with Intel's VML, otherwise it won't be
-used. You can check if it uses VML with
-
-.. code-block:: python
-
-    >>> import numexpr
-    >>> numexpr.use_vml
-
-The module ``numexpr`` uses by default all available cores up to a maximum of
-8. You can change this behaviour to a lower or a higher value with the
-following command (in the example it is changed to 4):
-
-.. code-block:: python
-
-    >>> import numexpr
-    >>> numexpr.set_num_threads(4)
-
-This parallelisation will make ``empymod`` faster (by using more threads) if
-you calculate a lot of offsets/frequencies at once, but slower for few
-offsets/frequencies.
-
-(*) These statements are (following the notation of [HuTS15]_): :math:`\Gamma`
-(below eq. 19); :math:`W^{u, d}_n` (eq. 74), :math:`r^\pm_n` (eq. 65);
-:math:`R^\pm_n` (eq. 64); :math:`P^{u, d; \pm}_s` (eq. 81); :math:`M_s` (eq.
-82), and their corresponding bar-ed versions provided in the appendix (e.g.
-:math:`\bar{\Gamma}`). In big models, more than 95 % of the calculation is
-spent in the calculation of these six equations, and most of the time therefore
-in ``np.sqrt`` and ``np.exp``, or generally in ``numpy``-``ufuncs`` which are
-implemented and executed in compiled C-code. For smaller models or if
-transforms with interpolations are used then all the other parts also start to
-play a role. However, those models generally execute comparably fast.
-
-
 Lagged Convolution and Splined Transforms
 -----------------------------------------
 Both Hankel and Fourier DLF have three options, which can be controlled via
@@ -145,8 +96,7 @@ Additionally, the interpolated versions minimizes memory requirements a lot.
 Speed-up is greater if all source-receiver angles are identical. Note that
 setting ``pts_per_dec`` to something else than 0 to calculate only one offset
 (Hankel) or only one time (Fourier) will be slower than using the standard
-version. Similarly, the standard version is usually the fastest when using the
-``parallel`` option (``numexpr``).
+version.
 
 *QWE*: Good speed-up is also achieved for *QWE* by setting ``maxint`` as low as
 possible. Also, the higher ``nquad`` is, the higher the speed-up will be.
@@ -179,17 +129,16 @@ the example in the Gallery.
 
 Looping
 -------
-By default, you can calculate many offsets and many frequencies
-all in one go, vectorized (for the *DLF*), which is the default. The ``loop``
-parameter gives you the possibility to force looping over frequencies or
-offsets. This parameter can have severe effects on both runtime and memory
-usage. Play around with this factor to find the fastest version for your
-problem at hand. It ALWAYS loops over frequencies if ``ht = 'QWE'/'QUAD'`` or
-if ``ht = 'FHT'`` and ``pts_per_dec!=0`` (Lagged Convolution or Splined Hankel
-DLF). All vectorized is very fast if there are few offsets or few frequencies.
-If there are many offsets and many frequencies, looping over the smaller of the
-two will be faster. Choosing the right looping together with ``opt =
-'parallel'`` can have a huge influence.
+By default, you can calculate many offsets and many frequencies all in one go,
+vectorized (for the *DLF*), which is the default. The ``loop`` parameter gives
+you the possibility to force looping over frequencies or offsets. This
+parameter can have severe effects on both runtime and memory usage. Play around
+with this factor to find the fastest version for your problem at hand. It
+ALWAYS loops over frequencies if ``ht = 'QWE'/'QUAD'`` or if ``ht = 'FHT'`` and
+``pts_per_dec!=0`` (Lagged Convolution or Splined Hankel DLF). All vectorized
+is very fast if there are few offsets or few frequencies. If there are many
+offsets and many frequencies, looping over the smaller of the two will be
+faster. Choosing the right looping can have a significant influence.
 
 
 Vertical components and ``xdirect``

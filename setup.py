@@ -28,6 +28,7 @@ setup(
     install_requires=[
         'numpy',
         'scipy>=1.0.0',
+        'numba',
     ],
     use_scm_version={
         'root': '.',

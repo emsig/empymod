@@ -5,12 +5,12 @@ language: python
 matrix:
   include:
     - python: 3.6
-      env: PYTHON=3.6 PCKGS="numexpr matplotlib" TEST="--mpl" INST="pytest-mpl scooby"
+      env: PYTHON=3.6 PCKGS="matplotlib" TEST="--mpl" INST="pytest-mpl scooby"
     - python: 3.7
-      env: PYTHON=3.7 DEPLOY_PYPI=true PCKGS="numexpr matplotlib" TEST="--mpl" INST="pytest-mpl scooby"
-    - python: 3.8  # => without matplotlib, numexpr
+      env: PYTHON=3.7 DEPLOY_PYPI=true PCKGS="matplotlib" TEST="--mpl" INST="pytest-mpl scooby"
+    - python: 3.8  # => without matplotlib
       env: PYTHON=3.8 PCKGS="" TEST="" INST=""
-    - python: 3.7  # => without matplotlib, numexpr
+    - python: 3.7  # => without matplotlib
       env: PYTHON=3.7 PCKGS="" TEST="" INST=""
     - python: 3.7  # => just linkcheck
       env: PYTHON=3.7 CHCKLNKS=true PCKGS="" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig sphinx_gallery memory_profiler"
@@ -33,7 +33,7 @@ install:
   - conda info -a
 
   # Install and activate environment, install packages
-  - conda create -q -n test-environment python=$PYTHON numpy scipy pytest pytest-cov $PCKGS
+  - conda create -q -n test-environment python=$PYTHON numpy scipy numba pytest pytest-cov $PCKGS
   - source activate test-environment
   - pip install setuptools_scm coveralls pytest-flake8 $INST
   - python setup.py install
@@ -46,8 +46,8 @@ script:  # No pytest for linkcheck-run.
         pytest --cov=empymod --flake8 $TEST;
     fi
 
-after_success:  # No coveralls for linkcheck-run.
-  - if [ "$CHCKLNKS" = "" ]; then coveralls; fi
+after_success:
+  - if [ "$CHCKLNKS" == "" ]; then coveralls; fi
 
 deploy:
   provider: pypi

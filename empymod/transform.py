@@ -45,7 +45,7 @@ __all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
 # 1. Hankel transforms (wavenumber -> frequency)
 
 def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
-        zetaV, xdirect, fhtarg, use_ne_eval, msrc, mrec):
+        zetaV, xdirect, fhtarg, msrc, mrec):
     r"""Hankel Transform using the Digital Linear Filter method.
 
     The *Digital Linear Filter* method was introduced to geophysics by
@@ -98,7 +98,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
     # 2. Call the kernel
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                           zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
+                           zetaV, lambd, ab, xdirect, msrc, mrec)
 
     # 3. Carry out the dlf
     fEM = dlf(PJ, lambd, off, fhtfilt, pts_per_dec, factAng=factAng, ab=ab,
@@ -108,7 +108,7 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
 
 def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
-         zetaV, xdirect, qweargs, use_ne_eval, msrc, mrec):
+         zetaV, xdirect, qweargs, msrc, mrec):
     r"""Hankel Transform using Quadrature-With-Extrapolation.
 
     *Quadrature-With-Extrapolation* was introduced to geophysics by
@@ -233,7 +233,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
                                        etaH[None, :], etaV[None, :],
                                        zetaH[None, :], zetaV[None, :],
                                        np.atleast_2d(ilambd), ab, xdirect,
-                                       msrc, mrec, use_ne_eval)
+                                       msrc, mrec)
 
     # Check which kernels have information
     k_used = [True, True, True]
@@ -372,8 +372,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
                                                etaH[None, :], etaV[None, :],
                                                zetaH[None, :], zetaV[None, :],
                                                np.atleast_2d(inplambd)[:, iB],
-                                               ab, xdirect, msrc, mrec,
-                                               use_ne_eval)
+                                               ab, xdirect, msrc, mrec)
 
             # Carry out and return the Hankel transform for this interval
             gEM = np.zeros_like(inpoff, dtype=complex)
@@ -397,7 +396,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
 
 def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
-          zetaV, xdirect, quadargs, use_ne_eval, msrc, mrec):
+          zetaV, xdirect, quadargs, msrc, mrec):
     r"""Hankel Transform using the ``QUADPACK`` library.
 
     This routine uses the ``scipy.integrate.quad`` module, which in turn makes
@@ -438,7 +437,7 @@ def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
                                        etaV, zetaH, zetaV,
                                        np.atleast_2d(ilambd), ab, xdirect,
-                                       msrc, mrec, use_ne_eval)
+                                       msrc, mrec)
 
     # Interpolation in wavenumber domain: Has to be done separately on each PJ,
     # in order to work with multiple offsets which have different angles.

@@ -325,7 +325,7 @@ def plot_result(data1, data2, x, title, vmin=-15., vmax=-7., rx=0):
 # - Offsets: -250 m - 250 m
 
 # Survey parameters
-x = ((np.arange(1002))*0.5-250.25)
+x = ((np.arange(502))-250.5)
 rx = np.repeat([x, ], np.size(x), axis=0)
 ry = rx.transpose()
 rxx = rx.ravel()
