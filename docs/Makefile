@@ -1,6 +1,3 @@
-# Disable numba, so jitted functions are nicely documented.
-export NUMBA_DISABLE_JIT=1
-
 # Command line options.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
