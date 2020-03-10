@@ -210,8 +210,6 @@ base = np.array([1e-2, 1e-1, 1e0, 1e1, 1e2])
 # |   ht = 'fht'                  # Default
 # |   htarg = {'pts_per_dec': 0}  # Default
 #
-# The standard DLF works also with the parallel option, ``opt = 'parallel'``.
-#
 # For the **Fourier transform**, use these parameters in ``empymod.dipole`` or
 # ``empymod.bipole`` (from version ``v1.6.0`` onwards):
 #

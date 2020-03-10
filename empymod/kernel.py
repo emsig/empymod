@@ -151,11 +151,11 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                         PJ0[i, ii, iv] *= lambd[ii, iv]/eightpi
 
     elif ab in [13, 23, 31, 32, 34, 35, 16, 26]:  # Eqs 107, 113, 114, 115,
-        if ab in [34, 26]:
+        if ab in [34, 26]:                        # .   121, 125, 126, 127
             sign *= -1
         for i in range(nfreq):
             for ii in range(noff):
-                for iv in range(nlambda):         # 121, 125, 126, 127
+                for iv in range(nlambda):
                     dlambd = lambd[ii, iv]*lambd[ii, iv]
                     PJ1[i, ii, iv] = sign*Ptot[i, ii, iv]*dlambd
 
