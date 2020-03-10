@@ -75,7 +75,8 @@ plt.show()
 
 # Dipole
 inpdat = {'src': [0, 0, zsrc, 0, 0], 'rec': [fx, fy, zrec, 0, 0],
-          'depth': depth, 'freqtime': 1, 'aniso': aniso, 'verb': verb}
+          'depth': depth, 'freqtime': 1, 'aniso': aniso,
+          'htarg': {'pts_per_dec': -1}, 'verb': verb}
 fEM = empymod.bipole(**inpdat, res=res)
 fEMBG = empymod.bipole(**inpdat, res=resBG)
 

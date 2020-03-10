@@ -87,7 +87,8 @@ def calc_appres(depth, res, a, n, srcpts=1, recpts=1, verb=1):
         'freqtime': 1e-20,  # Smaller f would be set to 1e-20 be empymod.
         'verb': verb,       # Setting it to 1e-20 avoids warning-message.
         'res': np.r_[2e14, np.array(res, ndmin=1)],
-        'strength': 1       # So it is NOT normalized to 1 m src/rec.
+        'strength': 1,      # So it is NOT normalized to 1 m src/rec.
+        'htarg': {'pts_per_dec': -1},
     }
 
     return np.real(empymod.bipole(**model))*np.pi*a*n*(n+1)*(n+2), AB/2

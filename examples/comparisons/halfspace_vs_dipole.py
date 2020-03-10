@@ -26,6 +26,8 @@ t = np.logspace(-2, 3, 301)
 
 # Collect parameters
 inpEM = {'src': src, 'rec': rec, 'freqtime': t, 'verb': 0}
+inpEMdip = inpEM.copy()
+inpEMdip['htarg'] = {'pts_per_dec': -1}
 modHS = {'res': res, 'aniso': aniso}
 modFS = {'res': res[1], 'aniso': aniso[1]}
 
@@ -50,7 +52,7 @@ plt.figure('Impulse HS')
 i = 330
 for ab in all_abs:
     i += 1
-    EM = empymod.dipole(**inpEM, **modHS, ab=ab, signal=0, depth=0)
+    EM = empymod.dipole(**inpEMdip, **modHS, ab=ab, signal=0, depth=0)
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab, signal=0)
     plot_t(EM, HS, 'Impulse HS', i)
 plt.suptitle('Impulse HS')
@@ -63,7 +65,7 @@ plt.figure('Switch-on HS')
 i = 330
 for ab in all_abs:
     i += 1
-    EM = empymod.dipole(**inpEM, **modHS, ab=ab, signal=1, depth=0)
+    EM = empymod.dipole(**inpEMdip, **modHS, ab=ab, signal=1, depth=0)
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab, signal=1)
     plot_t(EM, HS, 'Switch-on HS', i)
 plt.suptitle('Switch-on HS')
@@ -76,7 +78,7 @@ plt.figure('Switch-off HS')
 i = 330
 for ab in all_abs:
     i += 1
-    EM = empymod.dipole(**inpEM, **modHS, ab=ab, signal=-1, depth=0)
+    EM = empymod.dipole(**inpEMdip, **modHS, ab=ab, signal=-1, depth=0)
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab, signal=-1)
     plot_t(EM, HS, 'Switch-off HS', i)
 plt.suptitle('Switch-off HS')
@@ -89,7 +91,7 @@ plt.figure('Impulse FS')
 i = 330
 for ab in all_abs:
     i += 1
-    EM = empymod.dipole(**inpEM, **modFS, ab=ab, signal=0, depth=[])
+    EM = empymod.dipole(**inpEMdip, **modFS, ab=ab, signal=0, depth=[])
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab, signal=0)
     plot_t(EM, HS, 'Impulse FS', i)
 plt.suptitle('Impulse FS')
@@ -102,7 +104,7 @@ plt.figure('Switch-on FS')
 i = 330
 for ab in all_abs:
     i += 1
-    EM = empymod.dipole(**inpEM, **modFS, ab=ab, signal=1, depth=[])
+    EM = empymod.dipole(**inpEMdip, **modFS, ab=ab, signal=1, depth=[])
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab, signal=1)
     plot_t(EM, HS, 'Switch-on FS', i)
 plt.suptitle('Switch-on FS')
@@ -117,7 +119,7 @@ for ab in all_abs:
     i += 1
 
     # Switch-off
-    EM = empymod.dipole(**inpEM, **modFS, ab=ab, signal=-1, depth=[])
+    EM = empymod.dipole(**inpEMdip, **modFS, ab=ab, signal=-1, depth=[])
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab, signal=-1)
     plot_t(EM, HS, 'Switch-off FS', i)
 plt.suptitle('Switch-off FS')
@@ -145,7 +147,7 @@ def plot_f(EM, HS, title, i):
 i = 330
 for ab in all_abs:
     i += 1
-    EM = empymod.dipole(**inpEM, **modHS, ab=ab, depth=0)
+    EM = empymod.dipole(**inpEMdip, **modHS, ab=ab, depth=0)
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab)
     plot_f(EM, HS, 'Frequency HS', i)
 plt.figure('Frequency HS')
@@ -159,7 +161,7 @@ plt.figure('Frequency FS')
 i = 330
 for ab in all_abs:
     i += 1
-    EM = empymod.dipole(**inpEM, **modFS, ab=ab, depth=[])
+    EM = empymod.dipole(**inpEMdip, **modFS, ab=ab, depth=[])
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab)
     plot_f(EM, HS, 'Frequency FS', i)
 plt.suptitle('Frequency FS')

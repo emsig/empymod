@@ -74,7 +74,8 @@ plt.show()
 # ~~~~~~~~~
 
 inpdat = {'src': [0, 0, zsrc], 'rec': [fx, fy, zrec], 'depth': depth,
-          'freqtime': 1, 'aniso': aniso, 'ab': ab, 'verb': verb}
+          'freqtime': 1, 'aniso': aniso, 'ab': ab,
+          'htarg': {'pts_per_dec': -1}, 'verb': verb}
 
 fEM = empymod.dipole(**inpdat, res=res)
 fEMBG = empymod.dipole(**inpdat, res=resBG)
@@ -115,7 +116,8 @@ plt.show()
 # Calculate responses
 freq = np.logspace(-1.5, .5, 33)  # 33 frequencies from -1.5 to 0.5 (logspace)
 inpdat = {'src': [0, 0, zsrc], 'rec': [fx, fy, zrec], 'depth': depth,
-          'freqtime': freq, 'aniso': aniso, 'ab': ab, 'verb': verb}
+          'freqtime': freq, 'aniso': aniso, 'ab': ab,
+          'htarg': {'pts_per_dec': -1}, 'verb': verb}
 
 xfEM = empymod.dipole(**inpdat, res=res)
 xfEMBG = empymod.dipole(**inpdat, res=resBG)
