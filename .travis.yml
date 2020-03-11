@@ -41,7 +41,7 @@ install:
 
 script:  # No pytest for linkcheck-run.
   - if [ "$CHCKLNKS" = true ]; then
-        cd docs; make html -b linkcheck;
+        NUMBA_CACHE_DIR=/tmp; cd docs; make html -b linkcheck;
     else
         pytest --cov=empymod --flake8 $TEST;
     fi
