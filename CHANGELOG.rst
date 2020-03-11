@@ -10,6 +10,9 @@ This version will be backwards incompatible, and only support Python 3.6+.
 - Using ``numexpr`` is no longer a possibility. Instead, ``numba`` is a new
   dependency. All four kernel routines (``wavenumber``, ``greenfct``,
   ``reflections``, and ``fields``) are now numba-jitted functions.
+- ``EMArray``: Phase is now in radians and not unwrapped. To unwrap it, have it
+  in degrees, or lead-defined, set the class arguments ``.unwrap``, ``.deg``,
+  and ``.lead`` to ``True``, respectively.
 - Removed all deprecated functions.
 - Dropped support for Python 3.5.
 - Dropped testing for channel conda-forge. The problems encountered at the

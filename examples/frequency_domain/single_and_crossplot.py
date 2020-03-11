@@ -80,6 +80,10 @@ inpdat = {'src': [0, 0, zsrc], 'rec': [fx, fy, zrec], 'depth': depth,
 fEM = empymod.dipole(**inpdat, res=res)
 fEMBG = empymod.dipole(**inpdat, res=resBG)
 
+# Change the phases to unwrapped degrees.
+empymod.EMArray.deg = True
+empymod.EMArray.unwrap = True
+
 ###############################################################################
 # Plot
 # ~~~~

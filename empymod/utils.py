@@ -85,38 +85,63 @@ class EMArray(np.ndarray):
         Amplitude of the input data.
 
     pha : ndarray
-        Phase of the input data, in degrees, lag-defined (increasing with
-        increasing offset). To get lead-defined phases, provide
-        ``data.conjugate()``.
+        Phase of the input data, in radians, lag-defined (increasing with
+        increasing offset), not unwrapped. You can set class-wise flags to
+        change this (<default>):
+        - data.deg = True/<False>
+        - data.unwrap = True/<False>
+        - data.lead = True/<False>
+
 
     Examples
     --------
     >>> import numpy as np
     >>> from empymod.utils import EMArray
     >>> emvalues = EMArray(np.array([1,2,3])+1j*np.array([1, 0, -1]))
-    >>> print(f"Amplitude : {emvalues.amp}")
-    Amplitude :  [ 1.41421356  2.          3.16227766]
-    >>> print(f"Phase     : {emvalues.pha}")
-    Phase     :  [ 45.           0.         -18.43494882]
+    >>> print(f"Amplitude           : {emvalues.amp}")
+    Amplitude           : [ 1.41421356    2.          3.16227766]
+    >>> print(f"Phase               : {emvalues.pha}")
+    Phase               : [ 0.78539816    0.         -0.32175055]
+    >>> emvalues.deg = True
+    >>> emvalues.unwrap = True
+    >>> print(f"Phase (unwrap(deg)) : {emvalues.pha}")
+    Phase (unwrap(deg)) : [ 45.           0.         -18.43494882]
+    >>> emvalues.lead = True
+    >>> print(f"Phase lead of prev. : {emvalues.pha}")
+    Phase (unwrap(deg)) : [-45.           0.          18.43494882]
 
     """
 
-    def __new__(cls, data):
+    def __new__(cls, data, deg=False, unwrap=False, lead=False):
         r"""Create a new EMArray."""
+        cls.unwrap = unwrap
+        cls.deg = deg
+        cls.lead = lead
         return np.asarray(data).view(cls)
 
     @property
     def amp(self):
-        """Make amplitude an attribute."""
+        """Make the absolute value (amplitude [amp]) an attribute."""
         return np.abs(self.view())
 
     @property
     def pha(self):
-        """Make phase an attribute (unwrapped and in degrees."""
-        ang = np.angle(self.view())
-        if ang.size > 1:
+        """Make angle (phase [pha]) an attribute."""
+        # Get angle, lead or lag defined.
+        if self.lead:
+            ang = np.angle(np.conj(self.view()))
+        else:
+            ang = np.angle(self.view())
+
+        # Unwrap if desired.
+        if self.unwrap:
             ang = np.unwrap(ang)
-        return 180*ang/np.pi
+
+        # Convert to degrees if desired.
+        if self.deg:
+            ang *= 180/np.pi
+
+        return ang
 
 
 # 2. Input parameter checks for modelling

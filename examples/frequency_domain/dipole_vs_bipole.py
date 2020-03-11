@@ -86,6 +86,10 @@ inpdat['srcpts'] = 10
 fEMbp = empymod.bipole(**inpdat, res=res)
 fEMBGbp = empymod.bipole(**inpdat, res=resBG)
 
+# Change the phases to unwrapped degrees.
+empymod.EMArray.deg = True
+empymod.EMArray.unwrap = True
+
 ###############################################################################
 # Plot
 # ~~~~
