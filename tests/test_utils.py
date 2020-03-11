@@ -20,15 +20,21 @@ def test_emarray():
 
     out = utils.EMArray(1+1j)
     assert out.amp == np.sqrt(2)
-    assert out.pha == 45.
+    assert_allclose(out.pha, np.pi/4)
     assert out.real == 1
     assert out.imag == 1
 
-    out = utils.EMArray([1+1j, 0+1j])
-    assert_allclose(out.amp, [np.sqrt(2), 1])
-    assert_allclose(out.pha, [45., 90.])
-    assert_allclose(out.real, [1, 0])
-    assert_allclose(out.imag, [1, 1])
+    out = utils.EMArray([1+1j, 0+1j, -1-1j])
+    assert_allclose(out.amp, [np.sqrt(2), 1, np.sqrt(2)])
+    assert_allclose(out.pha, [np.pi/4, np.pi/2, -3*np.pi/4])
+    out.deg = True
+    assert_allclose(out.pha, [45., 90., -135.])
+    out.lead = True
+    assert_allclose(out.pha, [-45., -90., 135.])
+    out.unwrap = True
+    assert_allclose(out.pha, [-45., -90., -225.])
+    assert_allclose(out.real, [1, 0, -1])
+    assert_allclose(out.imag, [1, 1, -1])
 
 
 def test_check_ab(capsys):

@@ -146,6 +146,10 @@ ahs = empymod.utils.EMArray(np.nan_to_num(ahs))
 atg = empymod.dipole(**inp3, ab=22)  # " "   Target
 atg = empymod.utils.EMArray(np.nan_to_num(atg))
 
+# Change the phases to unwrapped degrees.
+empymod.EMArray.deg = True
+empymod.EMArray.unwrap = True
+
 ###############################################################################
 # Plot
 # ~~~~
