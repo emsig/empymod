@@ -36,7 +36,11 @@ install:
   - conda create -q -n test-environment python=$PYTHON numpy scipy numba pytest pytest-cov $PCKGS
   - source activate test-environment
   - pip install setuptools_scm coveralls pytest-flake8 $INST
-  - python setup.py install
+  - if [ "$CHCKLNKS" = true ]; then
+        pip install .;
+    else
+        python setup.py install;
+    fi
   - cp tests/matplotlibrc .
 
 script:  # No pytest for linkcheck-run.
