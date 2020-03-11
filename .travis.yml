@@ -37,9 +37,9 @@ install:
   - source activate test-environment
   - pip install setuptools_scm coveralls pytest-flake8 $INST
   - if [ "$CHCKLNKS" = true ]; then
-        pip install .
+        pip install .;
     else
-        python setup.py install
+        python setup.py install;
     fi
   - cp tests/matplotlibrc .
 
