@@ -7,20 +7,34 @@ Changelog
 
 This version will be backwards incompatible, and only support Python 3.6+.
 
-- Using ``numexpr`` is no longer a possibility. Instead, ``numba`` is a new
-  dependency. All four kernel routines (``wavenumber``, ``greenfct``,
-  ``reflections``, and ``fields``) are now numba-jitted functions.
-- ``EMArray``: Phase is now in radians and not unwrapped. To unwrap it, have it
-  in degrees, or lead-defined, set the class arguments ``.unwrap``, ``.deg``,
-  and ``.lead`` to ``True``, respectively.
-- Removed all deprecated functions.
-- Dropped support for Python 3.5; moved to f-strings.
-- Dropped testing for channel conda-forge. The problems encountered at the
-  early development cycle of empymod with conda-forge do not exist any longer.
+- Numba:
+
+  - Using ``numexpr`` is no longer a possibility. Instead, ``numba`` is a new
+    dependency. All four kernel routines (``wavenumber``, ``greenfct``,
+    ``reflections``, and ``fields``) are now numba-jitted functions.
+
+- Removed:
+
+  - Removed all deprecated functions.
+  - Dropped support for Python 3.5; moved to f-strings.
+  - Dropped testing for channel conda-forge. The problems encountered at the
+    early development cycle of empymod with conda-forge do not exist any
+    longer.
+
+- New defaults:
+
+  - ``EMArray``: Phase is now in radians and not unwrapped. To unwrap it, have
+    it in degrees, or lead-defined, set the class arguments ``.unwrap``,
+    ``.deg``, and ``.lead`` to ``True``, respectively.
+  - The parameters ``epermV`` and ``mpermV`` are set to the values of
+    ``epermH`` and ``mpermH``, respectively, if not provided (hence assuming
+    isotropic behaviour). Before they were set to ones if not provided.
+
 - Renaming:
-  - ``fftfilt``-> ``dlf`` (filter name for Hankel-DLF)
-  - ``fhtfilt``-> ``dlf`` (filter name for Fourier-DLF)
-  - ``ft``-> ``kind`` (method in Fourier-DLF [sine/cosine])
+
+  - In ``htarg``-dict: ``fftfilt``-> ``dlf`` (filter name for Hankel-DLF)
+  - In ``ftarg``-dict: ``fhtfilt``-> ``dlf`` (filter name for Fourier-DLF)
+  - In ``ftarg``-dict: ``ft``-> ``kind`` (method in Fourier-DLF [sine/cosine])
 
 
 Minor v1.10.x

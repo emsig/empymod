@@ -799,9 +799,17 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     # => min_res can be set with utils.set_min
     aniso = check_inp(aniso, 'aniso', _min_res)
     epermH = check_inp(epermH, 'epermH', 0.0)
-    epermV = check_inp(epermV, 'epermV', 0.0)
+    # We assume isotropic behaviour if epermH was provided but not epermV
+    if epermV is None:
+        epermV = epermH
+    else:
+        epermV = check_inp(epermV, 'epermV', 0.0)
     mpermH = check_inp(mpermH, 'mpermH', 0.0)
-    mpermV = check_inp(mpermV, 'mpermV', 0.0)
+    # We assume isotropic behaviour if mpermH was provided but not mpermV
+    if mpermV is None:
+        mpermV = mpermH
+    else:
+        mpermV = check_inp(mpermV, 'mpermV', 0.0)
 
     # Swap parameters if depths were given in reverse.
     res = res[::swap]

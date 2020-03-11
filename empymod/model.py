@@ -139,12 +139,15 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     epermH, epermV : array_like, optional
         Relative horizontal/vertical electric permittivities
-        epsilon_h/epsilon_v (-);
-        #epermH = #epermV = #res. Default is ones.
+        epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
+        provided but not epermV, isotropic behaviour is assumed.
+        Default is ones.
 
     mpermH, mpermV : array_like, optional
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
-        #mpermH = #mpermV = #res. Default is ones.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is ones.
 
     msrc, mrec : boolean, optional
         If True, source/receiver (msrc/mrec) is magnetic, else electric.
@@ -640,12 +643,15 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     epermH, epermV : array_like, optional
         Relative horizontal/vertical electric permittivities
-        epsilon_h/epsilon_v (-);
-        #epermH = #epermV = #res. Default is ones.
+        epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
+        provided but not epermV, isotropic behaviour is assumed.
+        Default is ones.
 
     mpermH, mpermV : array_like, optional
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
-        #mpermH = #mpermV = #res. Default is ones.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is ones.
 
     xdirect : bool or None, optional
         Direct field calculation (only if src and rec are in the same layer):
@@ -986,12 +992,15 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     epermH, epermV : array_like, optional
         Relative horizontal/vertical electric permittivities
-        epsilon_h/epsilon_v (-);
-        #epermH = #epermV = #res. Default is ones.
+        epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
+        provided but not epermV, isotropic behaviour is assumed.
+        Default is ones.
 
     mpermH, mpermV : array_like, optional
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
-        #mpermH = #mpermV = #res. Default is ones.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is ones.
 
         Note that the relative horizontal and vertical magnetic permeabilities
         in layers with loop sources or receivers will be set to 1.
@@ -1513,12 +1522,16 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         Anisotropy lambda = sqrt(rho_v/rho_h) (-); defaults to one.
 
     epermH, epermV : float, optional
-        Relative horizontal/vertical electric permittivity epsilon_h/epsilon_v
-        (-); default is one. Ignored for the diffusive solution.
+        Relative horizontal/vertical electric permittivity
+        epsilon_h/epsilon_v (-). If epermH is provided but not epermV,
+        isotropic behaviour is assumed.
+        Default is one; ignored for the diffusive solution.
 
     mpermH, mpermV : float, optional
         Relative horizontal/vertical magnetic permeability mu_h/mu_v (-);
-        default is one. Ignored for the diffusive solution.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is one; ignored for the diffusive solution.
 
     verb : {0, 1, 2, 3, 4}, optional
         Level of verbosity, default is 2:
@@ -1798,12 +1811,15 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     epermH, epermV : array_like, optional
         Relative horizontal/vertical electric permittivities
-        epsilon_h/epsilon_v (-);
-        #epermH = #epermV = #res. Default is ones.
+        epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
+        provided but not epermV, isotropic behaviour is assumed.
+        Default is ones.
 
     mpermH, mpermV : array_like, optional
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
-        #mpermH = #mpermV = #res. Default is ones.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is ones.
 
     verb : {0, 1, 2, 3, 4}, optional
         Level of verbosity, default is 2:
