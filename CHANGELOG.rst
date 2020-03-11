@@ -17,6 +17,10 @@ This version will be backwards incompatible, and only support Python 3.6+.
 - Dropped support for Python 3.5; moved to f-strings.
 - Dropped testing for channel conda-forge. The problems encountered at the
   early development cycle of empymod with conda-forge do not exist any longer.
+- Renaming:
+  - ``fftfilt``-> ``dlf`` (filter name for Hankel-DLF)
+  - ``fhtfilt``-> ``dlf`` (filter name for Fourier-DLF)
+  - ``ft``-> ``kind`` (method in Fourier-DLF [sine/cosine])
 
 
 Minor v1.10.x

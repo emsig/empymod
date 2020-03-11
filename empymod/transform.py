@@ -90,19 +90,13 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
         Only relevant for QWE/QUAD.
 
     """
-    # 1. Get fhtargs
-    fhtfilt = fhtarg[0]
-    pts_per_dec = fhtarg[1]
-    lambd = fhtarg[2]
-    int_pts = fhtarg[3]
-
-    # 2. Call the kernel
+    # Call the kernel
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                           zetaV, lambd, ab, xdirect, msrc, mrec)
+                           zetaV, fhtarg['lambd'], ab, xdirect, msrc, mrec)
 
-    # 3. Carry out the dlf
-    fEM = dlf(PJ, lambd, off, fhtfilt, pts_per_dec, factAng=factAng, ab=ab,
-              int_pts=int_pts)
+    # Carry out the dlf
+    fEM = dlf(PJ, fhtarg['lambd'], off, fhtarg['dlf'], fhtarg['pts_per_dec'],
+              factAng=factAng, ab=ab, int_pts=fhtarg['int_pts'])
 
     return fEM, 1, True
 
@@ -506,17 +500,13 @@ def ffht(fEM, time, freq, ftarg):
         Only relevant for QWE/QUAD.
 
     """
-    # Get ffhtargs
-    ffhtfilt = ftarg[0]
-    pts_per_dec = ftarg[1]
-    kind = ftarg[2]  # Sine (`sin`) or cosine (`cos`)
-
     # Cast into Standard DLF format
-    if pts_per_dec == 0:
+    if ftarg['pts_per_dec'] == 0:
         fEM = fEM.reshape(time.size, -1)
 
     # Carry out DLF
-    tEM = dlf(fEM, 2*np.pi*freq, time, ffhtfilt, pts_per_dec, kind=kind)
+    tEM = dlf(fEM, 2*np.pi*freq, time, ftarg['dlf'], ftarg['pts_per_dec'],
+              kind=ftarg['kind'])
 
     # Return the electromagnetic time domain field
     # (Second argument is only for QWE)

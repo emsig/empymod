@@ -247,33 +247,33 @@ def test_check_hankel(capsys):
     assert "   Hankel          :  DLF (Fast Hankel Transform)\n     > F" in out
     assert "     > DLF type    :  Standard" in out
     assert ht == 'fht'
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == 0
+    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['pts_per_dec'] == 0
 
     # [filter str]
     _, htarg = utils.check_hankel('fht', 'key_201_2009', 0)
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == 0
+    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['pts_per_dec'] == 0
     # [filter inst]
     _, htarg = utils.check_hankel('fht', filters.kong_61_2007(), 0)
-    assert htarg[0].name == filters.kong_61_2007().name
-    assert htarg[1] == 0
+    assert htarg['dlf'].name == filters.kong_61_2007().name
+    assert htarg['pts_per_dec'] == 0
     # ['', pts_per_dec]  :: list
     _, htarg = utils.check_hankel('fht', ['', 20], 0)
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == 20
+    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['pts_per_dec'] == 20
     # ['', pts_per_dec]  :: dict
     _, htarg = utils.check_hankel('fht', {'pts_per_dec': -1}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Lagged Convolution" in out
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == -1
+    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['pts_per_dec'] == -1
     # [filter str, pts_per_dec]
     _, htarg = utils.check_hankel('fht', ['key_201_2009', 20], 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Splined, 20.0 pts/dec" in out
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == 20
+    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['pts_per_dec'] == 20
 
     # # QWE # #
     # verbose
@@ -449,8 +449,8 @@ def test_check_time(capsys):
     assert "   Fourier         :  DLF (Sine-Filter)" in out
     assert "> DLF type    :  Lagged Convolution" in out
     assert ft == 'ffht'
-    assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] == -1
+    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['pts_per_dec'] == -1
     f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
                    7.39786458e-08, 8.50106448e-08, 9.76877807e-08,
                    1.12255383e-07, 1.28995366e-07, 1.48231684e-07])
@@ -460,7 +460,7 @@ def test_check_time(capsys):
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 201+3)
-    assert ftarg[2] == 'sin'
+    assert ftarg['kind'] == 'sin'
 
     # [filter str]
     _, f, _, ftarg = utils.check_time(time, -1, 'cos', 'key_201_CosSin_2012',
@@ -470,26 +470,26 @@ def test_check_time(capsys):
     outstr += "   Fourier         :  DLF (Cosine-Filter)\n     > Filter"
     assert out[:79] == outstr
     assert ft == 'ffht'
-    assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] == -1
+    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 201+3)
-    assert ftarg[2] == 'cos'
+    assert ftarg['kind'] == 'cos'
 
     # [filter inst]
     _, _, _, ftarg = utils.check_time(time, 1, 'sin',
                                       filters.key_201_CosSin_2012(), 0)
-    assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] == -1
-    assert ftarg[2] == 'sin'
+    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['pts_per_dec'] == -1
+    assert ftarg['kind'] == 'sin'
 
     # ['', pts_per_dec]
     out, _ = capsys.readouterr()  # clear buffer
     _, _, _, ftarg = utils.check_time(time, 0, 'ffht', ['', 30], 4)
-    assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] == 30
-    assert ftarg[2] == 'sin'
+    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['pts_per_dec'] == 30
+    assert ftarg['kind'] == 'sin'
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Splined, 30.0 pts/dec" in out
 
@@ -498,29 +498,29 @@ def test_check_time(capsys):
                                       ['key_81_CosSin_2009', -1], 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Lagged Convolution" in out
-    assert ftarg[0].name == filters.key_81_CosSin_2009().name
-    assert ftarg[1] == -1
-    assert ftarg[2] == 'cos'
+    assert ftarg['dlf'].name == filters.key_81_CosSin_2009().name
+    assert ftarg['pts_per_dec'] == -1
+    assert ftarg['kind'] == 'cos'
 
     # ['', 0]
     _, freq, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': 0}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Standard" in out
-    assert ftarg[1] == 0
+    assert ftarg['pts_per_dec'] == 0
     f_base = filters.key_201_CosSin_2012().base
     assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
 
     # [filter str, pts_per_dec] :: dict, deprecated
     _, _, _, ftarg = utils.check_time(time, 0, 'cos',
-                                      {'fftfilt': 'key_81_CosSin_2009',
+                                      {'dlf': 'key_81_CosSin_2009',
                                        'pts_per_dec': 50}, 0)
-    assert ftarg[0].name == filters.key_81_CosSin_2009().name
-    assert ftarg[1] == 50
-    assert ftarg[2] == 'cos'
+    assert ftarg['dlf'].name == filters.key_81_CosSin_2009().name
+    assert ftarg['pts_per_dec'] == 50
+    assert ftarg['kind'] == 'cos'
 
     # ['', 0]  :: dict, deprecated
     _, f, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': None}, 0)
-    assert ftarg[1] == -1
+    assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 204)

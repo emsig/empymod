@@ -41,7 +41,7 @@ def test_storeandsave(tmpdir):                                  # 1.b Save/Load
     assert_allclose(outfilt.factor, inpfilt.factor)
 
 
-def test_fhtfilters():                                         # 2. FHT filters
+def test_hankel_dlf():                                         # 2. FHT filters
     # Check that all FHT filters
     #   (a) exist,
     #   (b) base, j0, and j1 have right number of values
@@ -51,16 +51,16 @@ def test_fhtfilters():                                         # 2. FHT filters
                'key_401_2009', 'anderson_801_1982', 'key_51_2012',
                'key_101_2012', 'key_201_2012', 'wer_201_2018']
     for filt in allfilt:
-        fhtfilt = getattr(filters, filt)()
+        dlf = getattr(filters, filt)()
         nr = int(filt.split('_')[1])
-        fact = np.around(np.average(fhtfilt.base[1:]/fhtfilt.base[:-1]), 15)
-        assert len(fhtfilt.base) == nr
-        assert len(fhtfilt.j0) == nr
-        assert len(fhtfilt.j1) == nr
-        assert_allclose(fhtfilt.factor, fact)
+        fact = np.around(np.average(dlf.base[1:]/dlf.base[:-1]), 15)
+        assert len(dlf.base) == nr
+        assert len(dlf.j0) == nr
+        assert len(dlf.j1) == nr
+        assert_allclose(dlf.factor, fact)
 
 
-def test_co_sinefilters():                                 # 3. Co/Sine filters
+def test_fourier_dlf():                                    # 3. Co/Sine filters
     # Check that all Co/Sine filters
     #   (a) exist,
     #   (b) base, j0, and j1 have right number of values
@@ -70,10 +70,10 @@ def test_co_sinefilters():                                 # 3. Co/Sine filters
                'key_601_CosSin_2009', 'key_101_CosSin_2012',
                'key_201_CosSin_2012']
     for filt in allfilt:
-        fhtfilt = getattr(filters, filt)()
+        dlf = getattr(filters, filt)()
         nr = int(filt.split('_')[1])
-        fact = np.around(np.average(fhtfilt.base[1:]/fhtfilt.base[:-1]), 15)
-        assert len(fhtfilt.base) == nr
-        assert len(fhtfilt.cos) == nr
-        assert len(fhtfilt.sin) == nr
-        assert_allclose(fhtfilt.factor, fact)
+        fact = np.around(np.average(dlf.base[1:]/dlf.base[:-1]), 15)
+        assert len(dlf.base) == nr
+        assert len(dlf.cos) == nr
+        assert len(dlf.sin) == nr
+        assert_allclose(dlf.factor, fact)

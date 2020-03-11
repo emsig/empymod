@@ -501,35 +501,32 @@ def check_hankel(ht, htarg, verb):
     if ht == 'fht':    # If FHT, check filter settings
 
         # Get and check input or set defaults
-        htarg = _check_targ(htarg, ['fhtfilt', 'pts_per_dec'])
+        htarg = _check_targ(htarg, ['dlf', 'pts_per_dec'])
 
         # Check filter; defaults to key_201_2009
         try:
-            fhtfilt = htarg['fhtfilt']
-            if not hasattr(fhtfilt, 'base'):
-                fhtfilt = getattr(filters, fhtfilt)()
+            dlf = htarg['dlf']
+            if not hasattr(dlf, 'base'):
+                htarg['dlf'] = getattr(filters, dlf)()
         except VariableCatch:
-            fhtfilt = filters.key_201_2009()
+            htarg['dlf'] = filters.key_201_2009()
 
         # Check pts_per_dec; defaults to 0
         try:
-            pts_per_dec = _check_var(htarg['pts_per_dec'], float, 0,
-                                     'fht: pts_per_dec', ())
+            htarg['pts_per_dec'] = _check_var(htarg['pts_per_dec'], float, 0,
+                                              'fht: pts_per_dec', ())
         except VariableCatch:
-            pts_per_dec = 0.0
-
-        # Assemble htarg
-        htarg = (fhtfilt, pts_per_dec)
+            htarg['pts_per_dec'] = 0.0
 
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  DLF (Fast Hankel Transform)")
-            print(f"     > Filter      :  {fhtfilt.name}")
+            print(f"     > Filter      :  {htarg['dlf'].name}")
             pstr = "     > DLF type    :  "
-            if pts_per_dec < 0:
+            if htarg['pts_per_dec'] < 0:
                 print(f"{pstr}Lagged Convolution")
-            elif pts_per_dec > 0:
-                print(f"{pstr}Splined, {pts_per_dec} pts/dec")
+            elif htarg['pts_per_dec'] > 0:
+                print(f"{pstr}Splined, {htarg['pts_per_dec']} pts/dec")
             else:
                 print(f"{pstr}Standard")
 
@@ -904,7 +901,7 @@ def check_loop(loop, ht, htarg, verb):
     # Define if to loop over frequencies or over offsets
     lagged_splined_fht = False
     if ht == 'fht':
-        if htarg[1] != 0:
+        if htarg['pts_per_dec'] != 0:
             lagged_splined_fht = True
 
     if ht in ['hqwe', 'hquad'] or lagged_splined_fht:
@@ -978,59 +975,50 @@ def check_time(time, signal, ft, ftarg, verb):
 
     if ft in ['cos', 'sin', 'ffht']:  # Fourier-FHT (Sine/Cosine-filters)
 
-        # If `ft='ffht'`, we assume that it run the check before, and get
-        # sin/cos from ftarg. If not, defaults to 'sin'. To ensure that this
-        # check can be re-run without failing.
-        if ft == 'ffht':
-            try:
-                ft = ftarg[2]
-            except VariableCatch:
-                ft = 'sin'
-
-        # If switch-off/on is required, ensure ft is cosine/sine
-        if signal > 0:
-            ft = 'sin'
-        elif signal < 0:
-            ft = 'cos'
-
         # Check Input
-        ftarg = _check_targ(ftarg, ['fftfilt', 'pts_per_dec', 'ft'])
+        ftarg = _check_targ(ftarg, ['dlf', 'pts_per_dec', 'kind'])
 
         # Check filter; defaults to key_201_CosSin_2012
         try:
-            fftfilt = ftarg['fftfilt']
-            if not hasattr(fftfilt, 'base'):
-                fftfilt = getattr(filters, fftfilt)()
+            dlf = ftarg['dlf']
+            if not hasattr(dlf, 'base'):
+                ftarg['dlf'] = getattr(filters, dlf)()
         except VariableCatch:
-            fftfilt = filters.key_201_CosSin_2012()
+            ftarg['dlf'] = filters.key_201_CosSin_2012()
 
         # Check pts_per_dec; defaults to -1
         try:
-            pts_per_dec = _check_var(ftarg['pts_per_dec'], float, 0,
-                                     ft + 'pts_per_dec', ())
+            ftarg['pts_per_dec'] = _check_var(ftarg['pts_per_dec'], float, 0,
+                                              ft + 'pts_per_dec', ())
         except VariableCatch:
-            pts_per_dec = -1.0
+            ftarg['pts_per_dec'] = -1.0
 
-        # Assemble ftarg
-        ftarg = (fftfilt, pts_per_dec, ft)
+        # Check kind; if switch-off/on is required, ensure kind is cosine/sine
+        kind = ftarg.get('kind', ft)  # 'sin' is default.
+        if signal > 0 or kind == 'ffht':
+            kind = 'sin'
+        elif signal < 0:
+            kind = 'cos'
+        ftarg['kind'] = kind
 
         # If verbose, print Fourier transform information
         if verb > 2:
-            if ft == 'sin':
+            if ftarg['kind'] == 'sin':
                 print("   Fourier         :  DLF (Sine-Filter)")
             else:
                 print("   Fourier         :  DLF (Cosine-Filter)")
-            print(f"     > Filter      :  {fftfilt.name}")
+            print(f"     > Filter      :  {ftarg['dlf'].name}")
             pstr = "     > DLF type    :  "
-            if pts_per_dec < 0:
+            if ftarg['pts_per_dec'] < 0:
                 print(f"{pstr}Lagged Convolution")
-            elif pts_per_dec > 0:
-                print(f"{pstr}Splined, {pts_per_dec} pts/dec")
+            elif ftarg['pts_per_dec'] > 0:
+                print(f"{pstr}Splined, {ftarg['pts_per_dec']} pts/dec")
             else:
                 print(f"{pstr}Standard")
 
         # Get required frequencies
-        omega, _ = transform.get_spline_values(ftarg[0], time, ftarg[1])
+        omega, _ = transform.get_spline_values(
+                ftarg['dlf'], time, ftarg['pts_per_dec'])
         freq = np.squeeze(omega/2/np.pi)
 
         # Rename ft
@@ -1962,7 +1950,7 @@ def _check_targ(targ, keys):
     elif isinstance(targ, (list, tuple, dict)):  # All good, except if empty
         if len(targ) == 0:
             targ = {}
-    elif targ == '':   # Empty string
+    elif isinstance(targ, str) and targ == '':   # Empty string
         targ = {}
     elif isinstance(targ, np.ndarray) and targ.size == 0:  # Empty array
         targ = {}

@@ -224,8 +224,7 @@ la = np.log(a)
 lb = np.log(b)
 ilambd = np.logspace(la, lb, int((lb-la)*pts_per_dec + 1), base=np.e)
 PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
-                                   etaH[None, :], etaV[None, :],
-                                   zetaH[None, :], zetaV[None, :],
+                                   etaH, etaV, zetaH, zetaV,
                                    np.atleast_2d(ilambd), ab, False, msrc,
                                    mrec)
 sPJ0r = iuSpline(np.log(ilambd), PJ0.real)

@@ -182,11 +182,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [fhtfilt, pts_per_dec]:
+            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
 
-                - fhtfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (default: ``empymod.filters.key_201_2009()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -239,11 +239,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [fftfilt, pts_per_dec]:
+            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
 
-                - fftfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade; (default: -1)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -665,11 +665,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [fhtfilt, pts_per_dec]:
+            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
 
-                - fhtfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (default: ``empymod.filters.key_201_2009()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -722,11 +722,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [fftfilt, pts_per_dec]:
+            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
 
-                - fftfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade; (default: -1)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -1040,11 +1040,11 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [fhtfilt, pts_per_dec]:
+            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
 
-                - fhtfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (default: ``empymod.filters.key_201_2009()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -1097,11 +1097,11 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [fftfilt, pts_per_dec]:
+            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
 
-                - fftfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade; (default: -1)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -1972,11 +1972,11 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         # This should be in utils, but this is a backwards-incompatible change.
         # Move this to utils for version 2.0.
         if ht == 'fht':
-            # htarg[0] = filter; htarg[1] = pts_per_dec
             lambd, int_pts = transform.get_spline_values(
-                    htarg[0], off, htarg[1])
+                    htarg['dlf'], off, htarg['pts_per_dec'])
             if not loop_off:
-                htarg = (htarg[0], htarg[1], lambd, int_pts)
+                htarg['lambd'] = lambd
+                htarg['int_pts'] = int_pts
 
         calc = getattr(transform, ht)
         if loop_freq:
@@ -1996,7 +1996,8 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
                 # See comments above where it says "ht == 'fht'".
                 # Get pre-calculated lambd, int_pts for this offset
                 if ht == 'fht':
-                    htarg = (htarg[0], htarg[1], lambd[None, i, :], int_pts[i])
+                    htarg['lambd'] = lambd[None, i, :]
+                    htarg['int_pts'] = int_pts[i]
 
                 out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
                            factAng[None, i], depth, ab, etaH, etaV, zetaH,
