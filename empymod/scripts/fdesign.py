@@ -378,7 +378,7 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
         fC = dc(fI)
     fI = check_f(fI)
     if fI[0].name == 'j2':
-        print("* ERROR   :: j2 (jointly j0 and j1) is only implemented for " +
+        print("* ERROR   :: j2 (jointly j0 and j1) is only implemented for "
               "fC, not for fI!")
         raise ValueError('j2')
     fC = check_f(fC)
@@ -428,9 +428,9 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
 
     # Finish output from brute/fmin; depending if finish or not
     if verb > 1:
-        print('')
+        print("")
         if callable(finish):
-            print('')
+            print("")
 
     # Get best filter (full[0] contains spacing/shift of the best result).
     dlf = _calculate_filter(n, full[0][0], full[0][1], fI, r_def, reim, name)
@@ -444,10 +444,10 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
 
     # If plot, show result
     if plot > 0:
-        print('* QC: Overview of brute-force inversion:')
+        print("* QC: Overview of brute-force inversion:")
         plot_result(dlf, full, False)
         if plot > 1:
-            print('* QC: Inversion result of best filter (minimum amplitude):')
+            print("* QC: Inversion result of best filter (minimum amplitude):")
             _get_min_val(full[0], n, fI, fC, r, r_def, error, reim, cvar, 0,
                          plot+1, log)
 
@@ -667,15 +667,15 @@ def print_result(filt, full=None):
     - filt, full as returned from fdesign.design with full_output=True
 
     """
-    print('   Filter length   : %d' % filt.base.size)
-    print('   Best filter')
+    print(f"   Filter length   : {filt.base.size}")
+    print("   Best filter")
 
     if full:  # If full provided, we have more information
         if full[4] == 0:  # Min amp
-            print('   > Min field     : %g' % full[1])
+            print(f"   > Min field     : {full[1]:g}")
         else:  # Max amp
             r = 1/full[1]
-            print('   > Max r         : %g' % r)
+            print(f"   > Max r         : {r:g}")
         spacing = full[0][0]
         shift = full[0][1]
     else:  # Print what we can without full
@@ -684,20 +684,20 @@ def print_result(filt, full=None):
         b = filt.base[-2]
         spacing = np.log(a)-np.log(b)
         shift = np.log(a)-spacing*(n//2)
-    print('   > Spacing       : %1.10g' % spacing)
-    print('   > Shift         : %1.10g' % shift)
-    print('   > Base min/max  : %e / %e' % (filt.base.min(), filt.base.max()))
+    print(f"   > Spacing       : {spacing:1.10g}")
+    print(f"   > Shift         : {shift:1.10g}")
+    print(f"   > Base min/max  : {filt.base.min():e} / {filt.base.max():e}")
 
 
 # # 2.b Private plotting routines for QC
 
 def _call_qc_transform_pairs(n, ispacing, ishift, fI, fC, r, r_def, reim):
     r"""QC the input transform pairs."""
-    print('* QC: Input transform-pairs:')
-    print('  fC: x-range defined through ``n``, ``spacing``, ``shift``, and ' +
-          '``r``-parameters; b-range defined through ``r``-parameter.')
-    print('  fI: x- and b-range defined through ``n``, ``spacing``' +
-          ', ``shift``, and ``r_def``-parameters.')
+    print("* QC: Input transform-pairs:")
+    print("  fC: x-range defined through ``n``, ``spacing``, ``shift``, and "
+          "``r``-parameters; b-range defined through ``r``-parameter.")
+    print("  fI: x- and b-range defined through ``n``, ``spacing``, "
+          "``shift``, and ``r_def``-parameters.")
 
     # Calculate min/max k, from minimum and maximum spacing/shift
     minspace = np.arange(*ispacing).min()
@@ -1263,8 +1263,8 @@ def _get_min_val(spaceshift, *params):
             # if imin0.size == 0:  # empty array, all rel_error < error.
             imin0 = rhs.size-1  # set to last r
             if verb > 0 and log['warn-r'] == 0:
-                print('* WARNING :: all data have error < ' + str(error) +
-                      '; choose larger r or set error-level higher.')
+                print(f"* WARNING :: all data have error < {error}; "
+                      "choose larger r or set error-level higher.")
                 log['warn-r'] = 1  # Only do this once
 
         else:
@@ -1363,8 +1363,8 @@ def _ls2ar(inp, strinp):
         stop = inp[1]
         num = inp[2]
     else:
-        print("* ERROR   :: <"+strinp+"> must be a float or a tuple of 3 " +
-              "elements (start, stop, num); <"+strinp+" provided: " + str(inp))
+        print(f"* ERROR   :: <{strinp}> must be a float or a tuple of 3 "
+              f"elements (start, stop, num); <{strinp} provided: {inp}")
         raise ValueError(strinp)
 
     # Re-arrange it to be compatible with np.arange/slice for brute
@@ -1385,7 +1385,7 @@ def _print_count(log):
         pass              # function with the first arguments twice...
 
     elif log['cnt2'] > log['totnr']:  # fmin-status
-        print("   fmin  fct calls : %d" % (log['cnt2']-log['totnr']), end='\r')
+        print(f"   fmin  fct calls : {log['cnt2']-log['totnr']}", end='\r')
 
     elif int(cp) > log['cnt1'] or cp < 1 or log['cnt2'] == log['totnr']:
         # Get seconds since start
@@ -1395,10 +1395,9 @@ def _print_count(log):
         tleft = str(timedelta(seconds=int(100*sec/cp - sec)))
 
         # Print progress
-        pstr = ("   brute fct calls : %d/%d"
-                % (log['cnt2'], log['totnr']))
+        pstr = f"   brute fct calls : {log['cnt2']}/{log['totnr']}"
         if log['totnr'] > 100:
-            pstr += (" (%d %%); est: %s        " % (cp, tleft))
+            pstr += f" ({int(cp)} %); est: {tleft}        "
         print(pstr, end='\r')
 
         if log['cnt2'] == log['totnr']:
@@ -1406,7 +1405,7 @@ def _print_count(log):
             print(" "*len(pstr), end='\r')
 
             # Print final brute-message
-            print("   brute fct calls : %d" % log['totnr'])
+            print(f"   brute fct calls : {log['totnr']}")
 
         # Update percentage cnt1
         log['cnt1'] = cp
