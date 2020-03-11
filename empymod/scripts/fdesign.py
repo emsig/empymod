@@ -672,10 +672,10 @@ def print_result(filt, full=None):
 
     if full:  # If full provided, we have more information
         if full[4] == 0:  # Min amp
-            print(f"   > Min field     : {full[1]:e}")
+            print(f"   > Min field     : {full[1]:g}")
         else:  # Max amp
             r = 1/full[1]
-            print(f"   > Max r         : {r}")
+            print(f"   > Max r         : {r:g}")
         spacing = full[0][0]
         shift = full[0][1]
     else:  # Print what we can without full
