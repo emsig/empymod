@@ -36,12 +36,16 @@ install:
   - conda create -q -n test-environment python=$PYTHON numpy scipy numba pytest pytest-cov $PCKGS
   - source activate test-environment
   - pip install setuptools_scm coveralls pytest-flake8 $INST
-  - python setup.py install
+  - if [ "$CHCKLNKS" = true ]; then
+        pip install .
+    else
+        python setup.py install
+    fi
   - cp tests/matplotlibrc .
 
 script:  # No pytest for linkcheck-run.
   - if [ "$CHCKLNKS" = true ]; then
-        NUMBA_CACHE_DIR=/tmp; cd docs; make html -b linkcheck;
+        cd docs; make html -b linkcheck;
     else
         pytest --cov=empymod --flake8 $TEST;
     fi
