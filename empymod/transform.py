@@ -90,13 +90,17 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
         Only relevant for QWE/QUAD.
 
     """
+
+    # Compute required lambdas for given Hankel-filter-base
+    lambd, int_pts = get_dlf_points(fhtarg['dlf'], off, fhtarg['pts_per_dec'])
+
     # Call the kernel
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                           zetaV, fhtarg['lambd'], ab, xdirect, msrc, mrec)
+                           zetaV, lambd, ab, xdirect, msrc, mrec)
 
     # Carry out the dlf
-    fEM = dlf(PJ, fhtarg['lambd'], off, fhtarg['dlf'], fhtarg['pts_per_dec'],
-              factAng=factAng, ab=ab, int_pts=fhtarg['int_pts'])
+    fEM = dlf(PJ, lambd, off, fhtarg['dlf'], fhtarg['pts_per_dec'],
+              factAng=factAng, ab=ab, int_pts=int_pts)
 
     return fEM, 1, True
 

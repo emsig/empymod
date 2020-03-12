@@ -40,6 +40,9 @@ This version will be backwards incompatible, and only support Python 3.6+.
 - Other changes:
 
   - ``htarg`` and ``ftarg`` internally are now dictionaries, not lists.
+  - Undo a change introduced in v1.8.0: ``get_dlf_points`` is calculated
+    directly within ``transform.fht`` [`empymod#26
+    <https://github.com/empymod/empymod/issues/26>`_].
 
 
 Minor v1.10.x

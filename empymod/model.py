@@ -1984,16 +1984,6 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         # Get angle dependent factors
         factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
-        # Compute required lambdas for given Hankel-filter-base
-        # This should be in utils, but this is a backwards-incompatible change.
-        # Move this to utils for version 2.0.
-        if ht == 'fht':
-            lambd, int_pts = transform.get_dlf_points(
-                    htarg['dlf'], off, htarg['pts_per_dec'])
-            if not loop_off:
-                htarg['lambd'] = lambd
-                htarg['int_pts'] = int_pts
-
         calc = getattr(transform, ht)
         if loop_freq:
 
@@ -2008,12 +1998,6 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
 
         elif loop_off:
             for i in range(off.size):
-
-                # See comments above where it says "ht == 'fht'".
-                # Get pre-calculated lambd, int_pts for this offset
-                if ht == 'fht':
-                    htarg['lambd'] = lambd[None, i, :]
-                    htarg['int_pts'] = int_pts[i]
 
                 out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
                            factAng[None, i], depth, ab, etaH, etaV, zetaH,
