@@ -908,7 +908,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     if pts_per_dec < 0:  # Lagged Convolution DLF: interp. in output domain
         # Lagged Convolution DLF: re-arrange signal
 
-        # Get interpolation points, if not provided # (backwards compatibility)
+        # Get interpolation points, if not provided (just in case).
         if int_pts is None:
             _, int_pts = get_dlf_points(filt, out_pts, pts_per_dec)
 
@@ -923,7 +923,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     elif pts_per_dec > 0:  # Splined DLF: interpolate in input domain
         # Splined DLF; interpolate in input domain
 
-        # Get interpolation points, if not provided (backwards compatibility)
+        # Get interpolation points, if not provided (just in case).
         if int_pts is None:
             int_pts = filt.base/out_pts[:, None]
 
