@@ -987,7 +987,7 @@ def check_time(time, signal, ft, ftarg, verb):
     # Ensure ft is all lowercase
     ft = ft.lower()
 
-    if ft in ['cos', 'sin', 'ffht']:  # Fourier-FHT (Sine/Cosine-filters)
+    if ft in ['dlf', 'cos', 'sin', 'ffht']:  # Fourier-DLF (sin/cos-filters)
 
         # Check Input
         ftarg = _check_targ(ftarg, ['dlf', 'pts_per_dec', 'kind'])
@@ -1008,8 +1008,10 @@ def check_time(time, signal, ft, ftarg, verb):
             ftarg['pts_per_dec'] = -1.0
 
         # Check kind; if switch-off/on is required, ensure kind is cosine/sine
-        kind = ftarg.get('kind', ft)  # 'sin' is default.
-        if signal > 0 or kind == 'ffht':
+        kind = ftarg.get('kind', ft)
+        if kind in ['dlf', 'ffht']:  # 'sin' is default.
+            kind = 'sin'
+        if signal > 0:
             kind = 'sin'
         elif signal < 0:
             kind = 'cos'
@@ -1036,11 +1038,11 @@ def check_time(time, signal, ft, ftarg, verb):
         freq = np.squeeze(omega/2/np.pi)
 
         # Rename ft
-        ft = 'ffht'
+        ft = 'dlf'
 
     elif ft in ['qwe', 'fqwe']:       # QWE (using sine and imag-part)
         # Rename ft
-        ft = 'fqwe'
+        ft = 'qwe'
 
         # Get and check input or set defaults
         ftarg = _check_targ(ftarg, ['rtol', 'atol', 'nquad', 'maxint',

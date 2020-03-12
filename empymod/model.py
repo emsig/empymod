@@ -70,7 +70,7 @@ __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
            srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
-           ht='dlf', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
+           ht='dlf', htarg=None, ft='dlf', ftarg=None, loop=None, verb=2):
     r"""Return EM fields due to arbitrary rotated, finite length EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -234,15 +234,16 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             - Only changing diff_quad:
                 {'diffquad': 10} or ['', '', '', '', '', 10]
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
+    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if ``signal`` != None. Flag to choose either the Digital
         Linear Filter method (Sine- or Cosine-Filter), the
         Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
-        Fourier transform.  Defaults to 'sin'.
+        Fourier transform.
+        Defaults to 'dlf' (which is 'sin' if signal >=0, else 'cos').
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
+            - If ``ft`` = 'dlf', 'sin', or 'cos': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -720,15 +721,16 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
             - Only changing diff_quad:
                 {'diffquad': 10} or ['', '', '', '', '', 10]
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
+    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if ``signal`` != None. Flag to choose either the Digital
         Linear Filter method (Sine- or Cosine-Filter), the
         Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
-        Fourier transform.  Defaults to 'sin'.
+        Fourier transform.
+        Defaults to 'dlf' (which is 'sin' if signal >=0, else 'cos').
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
+            - If ``ft`` = 'dlf', 'sin', or 'cos': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -1098,15 +1100,16 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
             - Only changing diff_quad:
                 {'diffquad': 10} or ['', '', '', '', '', 10]
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
+    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if ``signal`` != None. Flag to choose either the Digital
         Linear Filter method (Sine- or Cosine-Filter), the
         Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
-        Fourier transform.  Defaults to 'sin'.
+        Fourier transform.
+        Defaults to 'dlf' (which is 'sin' if signal >=0, else 'cos').
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
+            - If ``ft`` = 'dlf', 'sin', or 'cos': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -2037,9 +2040,10 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
         fact = 1
 
     # 2. f->t transform
+    calc = getattr(transform, 'fourier_'+ft)
     tEM = np.zeros((time.size, off.size))
     for i in range(off.size):
-        out = getattr(transform, ft)(fEM[:, i]*fact, time, freq, ftarg)
+        out = calc(fEM[:, i]*fact, time, freq, ftarg)
         tEM[:, i] += out[0]
         conv *= out[1]
 

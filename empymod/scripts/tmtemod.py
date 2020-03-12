@@ -32,7 +32,7 @@ important limitations:
 - ``ab`` == 11                   [=> x-directed el. source & el. receivers]
 - ``signal`` == None             [=> only frequency domain]
 - ``xdirect`` == False           [=> direct field calc. in wavenr-domain]
-- ``ht`` == 'fht'
+- ``ht`` == 'dlf'
 - ``htarg`` == 'key_201_2012'
 - Options ``ft``, ``ftarg``, ``opt``, and ``loop`` are not available.
 - ``lsrc`` == ``lrec``           [=> src & rec are assumed in same layer!]

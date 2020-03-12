@@ -18,7 +18,7 @@ DATA = np.load(join(dirname(__file__), 'data/transform.npz'),
 
 @pytest.mark.parametrize("htype", ['dlf', 'qwe', 'quad'])
 def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
-    # Compare wavenumber-domain calculation / FHT with analytical
+    # Compare wavenumber-domain calculation / DLF with analytical
     # frequency-domain fullspace solution
     calc = getattr(transform, 'hankel_'+htype)
     model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
@@ -43,8 +43,8 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
         if htype != 'quad':  # quad is always using spline
             # Wavenumber solution plus transform
 
-            # Adjust htarg for fht
-            if htype == 'fht':
+            # Adjust htarg for dlf
+            if htype == 'dlf':
                 lambd, int_pts = transform.get_dlf_points(
                         htarg['dlf'], off, htarg['pts_per_dec'])
                 htarg['lambd'] = lambd
@@ -64,7 +64,7 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
         _, htarg = utils.check_hankel(htype, {'pts_per_dec': 80}, 0)
         if htype == 'quad':  # Lower atol to ensure convergence
             _, htarg = utils.check_hankel('quad', [1e-8], 0)
-        elif htype == 'fht':  # Adjust htarg for fht
+        elif htype == 'dlf':  # Adjust htarg for dlf
             lambd, int_pts = transform.get_dlf_points(
                     htarg['dlf'], off, htarg['pts_per_dec'])
             htarg['lambd'] = lambd
@@ -92,7 +92,7 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
         if htype == 'qwe':  # Put a very low diff_quad, to test it.; lower err
             _, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, 80, .1,
                                                   1e-6, .1, 1000], 0)
-        elif htype == 'fht':  # Adjust htarg for fht
+        elif htype == 'dlf':  # Adjust htarg for dlf
             lambd, int_pts = transform.get_dlf_points(
                     htarg['dlf'], off, htarg['pts_per_dec'])
             htarg['lambd'] = lambd
@@ -110,8 +110,8 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
         assert_allclose(np.squeeze(wvnr2), np.squeeze(freq2), rtol=1e-4)
 
         # # # 3. Spline; pts_per_dec # # #
-        if htype == 'fht':
-            _, htarg = utils.check_hankel('fht', ['key_201_2012', 20], 0)
+        if htype == 'dlf':
+            _, htarg = utils.check_hankel('dlf', ['key_201_2012', 20], 0)
             lambd, int_pts = transform.get_dlf_points(
                     htarg['dlf'], off, htarg['pts_per_dec'])
             htarg['lambd'] = lambd
@@ -139,7 +139,7 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
             _, htarg = utils.check_hankel('qwe', ['', '', '', 200, 80], 0)
         elif htype == 'quad':
             _, htarg = utils.check_hankel('quad', None, 0)
-        elif htype == 'fht':
+        elif htype == 'dlf':
             lambd, int_pts = transform.get_dlf_points(
                     htarg['dlf'], off, htarg['pts_per_dec'])
             htarg['lambd'] = lambd
@@ -156,34 +156,35 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
         assert_allclose(np.squeeze(wvnr4), np.squeeze(freq4), rtol=1e-4)
 
 
-@pytest.mark.parametrize("ftype", ['ffht', 'fqwe', 'fftlog', 'fft'])
-def test_fourier(ftype):               # 4. ffht / 5. fqwe / 6. fftlog / 7. fft
+@pytest.mark.parametrize("ftype", ['dlf', 'qwe', 'fftlog', 'fft'])
+def test_fourier(ftype):               # 4. DLF / 5. QWE / 6. FFTLog / 7. FFT
     # Check FFT-method with the analytical functions for a halfspace.
     t = DATA['t'][()]
     for i in [0, 1, 2]:
-        fl = DATA[ftype+str(i)][()]
+        fl = DATA['fourier_'+ftype+str(i)][()]
         res = DATA['tEM'+str(i)][()]
         finp = fl['fEM']
         if i > 0:
             finp /= 2j*np.pi*fl['f']
         if i > 1:
             finp *= -1
+        calc = getattr(transform, 'fourier_'+ftype)
         if ftype != 'fft':
-            tEM, _ = getattr(transform, ftype)(finp, t, fl['f'], fl['ftarg'])
+            tEM, _ = calc(finp, t, fl['f'], fl['ftarg'])
             assert_allclose(tEM*2/np.pi, res, rtol=1e-3)
         elif i == 0:  # FFT is difficult, specifically for step responses
-            tEM, _ = getattr(transform, ftype)(finp, t, fl['f'], fl['ftarg'])
+            tEM, _ = calc(finp, t, fl['f'], fl['ftarg'])
             assert_allclose(tEM[:-7]*2/np.pi, res[:-7], rtol=1e-2)
 
 
 def test_qwe():                                                        # 8. qwe
-    # QWE is integral of hankel_qwe and fqwe, and therefore tested a lot
+    # QWE is integral of hankel_qwe and fourier_qwe, and therefore tested a lot
     # through those. Here we just ensure status quo. And if a problem arises in
-    # hankel_qwe or fqwe, it would make it obvious if the problem arises from
-    # qwe or not.
+    # hankel_qwe or fourier_qwe, it would make it obvious if the problem arises
+    # from qwe or not.
 
     # Fourier
-    dat = DATA['fqwe0'][()]
+    dat = DATA['fourier_qwe0'][()]
     tres = DATA['tEM0'][()]
     ftarg = dat['ftarg']
     tEM, _, _ = transform.qwe(ftarg['rtol'], ftarg['atol'], ftarg['maxint'],
@@ -345,14 +346,15 @@ def test_quad():                                                      # 9. quad
 
 
 def test_dlf():                                                       # 10. dlf
-    # DLF is integral of fht and ffht, and therefore tested a lot through
-    # those. Here we just ensure status quo. And if a problem arises in fht or
-    # ffht, it would make it obvious if the problem arises from dlf or not.
+    # DLF is integral of hankel_dlf and fourier_dlf, and therefore tested a lot
+    # through those. Here we just ensure status quo. And if a problem arises in
+    # hankel_dlf or fourier_dlf, it would make it obvious if the problem arises
+    # from dlf or not.
 
     # Check DLF for Fourier
     t = DATA['t'][()]
     for i in [0, 1, 2]:
-        dat = DATA['ffht'+str(i)][()]
+        dat = DATA['fourier_dlf'+str(i)][()]
         tres = DATA['tEM'+str(i)][()]
         finp = dat['fEM']
         ftarg = dat['ftarg']
@@ -378,7 +380,7 @@ def test_dlf():                                                       # 10. dlf
         src = [0, 0, 0]
         src, nsrc = utils.check_dipole(src, 'src', 0)
         ab, msrc, mrec = utils.check_ab(ab, 0)
-        ht, htarg = utils.check_hankel('fht', None, 0)
+        ht, htarg = utils.check_hankel('dlf', None, 0)
         xdirect = False  # Important, as we want to comp. wavenumber-frequency!
         rec = [np.arange(1, 11)*500, np.zeros(10), 300]
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
@@ -390,7 +392,7 @@ def test_dlf():                                                       # 10. dlf
 
         # # # 0. No Spline # # #
 
-        # fht calculation
+        # dlf calculation
         lambd = dlf.base/off[:, None]
         PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
@@ -412,7 +414,7 @@ def test_dlf():                                                       # 10. dlf
 
         # # # 1. Spline; One angle # # #
 
-        # fht calculation
+        # dlf calculation
         lambd, _ = transform.get_dlf_points(dlf, off, pts_per_dec)
         PJ1 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                 zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
@@ -429,7 +431,7 @@ def test_dlf():                                                       # 10. dlf
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
 
-        # fht calculation
+        # dlf calculation
         lambd, _ = transform.get_dlf_points(dlf, off, -1)
         PJ2 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                 zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
@@ -450,7 +452,7 @@ def test_dlf():                                                       # 10. dlf
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
 
-        # fht calculation
+        # dlf calculation
         lambd, _ = transform.get_dlf_points(dlf, off, -1)
         PJ2 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                 zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
@@ -469,7 +471,7 @@ def test_dlf():                                                       # 10. dlf
         # # # 3. Spline; Multi angle # # #
 
         lambd, _ = transform.get_dlf_points(dlf, off, 30)
-        # fht calculation
+        # dlf calculation
         PJ3 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                 zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
 

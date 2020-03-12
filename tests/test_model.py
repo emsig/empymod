@@ -307,10 +307,10 @@ class TestBipole:
         assert "Fourier         :  Quadrature-with-Extrapolation" in out
         assert_allclose(qwe, ftl, 1e-2, equal_nan=True)
 
-        ffht = bipole(ft='ffht', verb=3, **inp)
+        dlf = bipole(ft='dlf', verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Fourier         :  DLF (Sine-Filter)" in out
-        assert_allclose(ffht, ftl, 1e-2, equal_nan=True)
+        assert_allclose(dlf, ftl, 1e-2, equal_nan=True)
 
         # FFT: We keep the error-check very low, otherwise we would have to
         #      calculate too many frequencies.

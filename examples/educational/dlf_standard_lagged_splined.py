@@ -207,7 +207,7 @@ base = np.array([1e-2, 1e-1, 1e0, 1e1, 1e2])
 # For the **Hankel transform**, use these parameters in ``empymod.dipole`` or
 # ``empymod.bipole`` (from version ``v1.6.0`` onwards):
 #
-# |   ht = 'fht'                  # Default
+# |   ht = 'dlf'                  # Default
 # |   htarg = {'pts_per_dec': 0}  # Default
 #
 # For the **Fourier transform**, use these parameters in ``empymod.dipole`` or
@@ -275,7 +275,7 @@ plt.show()
 # For the **Hankel transform**, use these parameters in ``empymod.dipole`` or
 # ``empymod.bipole`` (from version ``v1.6.0`` onwards):
 #
-# |   ht = 'fht'                      # Default
+# |   ht = 'dlf'                      # Default
 # |   htarg = {'pts_per_dec': int<0}
 #
 # For the **Fourier transform**, use these parameters in ``empymod.dipole`` or
@@ -354,7 +354,7 @@ plt.show()
 # For the **Hankel transform**, use these parameters in ``empymod.dipole`` or
 # ``empymod.bipole`` (from version ``v1.6.0`` onwards):
 #
-# |   ht = 'fht'                     # Default
+# |   ht = 'dlf'                     # Default
 # |   htarg = {'pts_per_dec': int>0}
 #
 # For the **Fourier transform**, use these parameters in ``empymod.dipole`` or

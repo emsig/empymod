@@ -125,7 +125,7 @@ going the other way, from impulse to step, leads to the divison by
 :math:`\mathrm{i}\omega`. (This only holds because we define in accordance with
 the causality principle that :math:`E(r, t \le 0) = 0`).
 
-With the sine/cosine transform (``ft='ffht'/'sin'/'cos'``) you can choose which
+With the sine/cosine transform (``ft='dlf'/'sin'/'cos'``) you can choose which
 one you want for the impulse responses. For the switch-on response, however,
 the sine-transform is enforced, and equally the cosine transform for the
 switch-off response. This is because these two do not need to now the field at

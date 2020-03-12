@@ -134,7 +134,7 @@ vectorized (for the *DLF*), which is the default. The ``loop`` parameter gives
 you the possibility to force looping over frequencies or offsets. This
 parameter can have severe effects on both runtime and memory usage. Play around
 with this factor to find the fastest version for your problem at hand. It
-ALWAYS loops over frequencies if ``ht = 'QWE'/'QUAD'`` or if ``ht = 'FHT'`` and
+ALWAYS loops over frequencies if ``ht = 'QWE'/'QUAD'`` or if ``ht = 'DLF'`` and
 ``pts_per_dec!=0`` (Lagged Convolution or Splined Hankel DLF). All vectorized
 is very fast if there are few offsets or few frequencies. If there are many
 offsets and many frequencies, looping over the smaller of the two will be

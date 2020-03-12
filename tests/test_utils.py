@@ -250,7 +250,7 @@ def test_check_frequency(capsys):
 
 
 def test_check_hankel(capsys):
-    # # FHT # #
+    # # DLF # #
     # verbose
     ht, htarg = utils.check_hankel('fht', None, 4)  # OLD 'fht' instead 'dlf'
     out, _ = capsys.readouterr()
@@ -484,14 +484,14 @@ def test_check_all_depths():
 def test_check_time(capsys):
     time = np.array([3])
 
-    # # FFHT # #
+    # # DLF # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'ffht', None, 4)
+    _, f, ft, ftarg = utils.check_time(time, 0, 'dlf', None, 4)
     out, _ = capsys.readouterr()
     assert "   time        [s] :  3" in out
     assert "   Fourier         :  DLF (Sine-Filter)" in out
     assert "> DLF type    :  Lagged Convolution" in out
-    assert ft == 'ffht'
+    assert ft == 'dlf'
     assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
     assert ftarg['pts_per_dec'] == -1
     f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
@@ -512,7 +512,7 @@ def test_check_time(capsys):
     outstr = "   time        [s] :  3\n"
     outstr += "   Fourier         :  DLF (Cosine-Filter)\n     > Filter"
     assert out[:79] == outstr
-    assert ft == 'ffht'
+    assert ft == 'dlf'
     assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
     assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
@@ -529,7 +529,7 @@ def test_check_time(capsys):
 
     # ['', pts_per_dec]
     out, _ = capsys.readouterr()  # clear buffer
-    _, _, _, ftarg = utils.check_time(time, 0, 'ffht', ['', 30], 4)
+    _, _, _, ftarg = utils.check_time(time, 0, 'dlf', ['', 30], 4)
     assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
     assert ftarg['pts_per_dec'] == 30
     assert ftarg['kind'] == 'sin'
@@ -574,7 +574,7 @@ def test_check_time(capsys):
     out, _ = capsys.readouterr()
     outstr = "   Fourier         :  Quadrature-with-Extrapolation\n     > rtol"
     assert out[24:87] == outstr
-    assert ft == 'fqwe'
+    assert ft == 'qwe'
     assert ftarg['rtol'] == 1e-8
     assert ftarg['atol'] == 1e-20
     assert ftarg['nquad'] == 21
@@ -596,7 +596,7 @@ def test_check_time(capsys):
     assert ftarg['sincos'] is np.sin
 
     # only last argument
-    _, _, _, ftarg = utils.check_time(time, 1, 'fqwe',
+    _, _, _, ftarg = utils.check_time(time, 1, 'qwe',
                                       ['', '', '', '', '', '', '', '', 30], 0)
     assert ftarg['rtol'] == 1e-8
     assert ftarg['atol'] == 1e-20
@@ -719,11 +719,11 @@ def test_check_time(capsys):
 
     # Signal != -1, 0, 1
     with pytest.raises(ValueError):
-        utils.check_time(time, -2, 'ffht', None, 0)
+        utils.check_time(time, -2, 'dlf', None, 0)
 
-    # ft != cos, sin, ffht, qwe, fftlog,
+    # ft != cos, sin, dlf, qwe, fftlog,
     with pytest.raises(ValueError):
-        utils.check_time(time, 0, 'fht', None, 0)
+        utils.check_time(time, 0, 'bla', None, 0)
 
 
 def test_check_solution(capsys):

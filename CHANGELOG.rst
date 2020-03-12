@@ -35,12 +35,18 @@ This version will be backwards incompatible, and only support Python 3.6+.
   - ``transform.fht`` -> ``transform.hankel_dlf``
   - ``transform.hqwe`` -> ``transform.hankel_qwe``
   - ``transform.hquad`` -> ``transform.hankel_quad``
+  - ``transform.ffht`` -> ``transform.fourier_dlf``
+  - ``transform.fqwe`` -> ``transform.fourier_qwe``
+  - ``transform.fftlog`` -> ``transform.fourier_fftlog``
+  - ``transform.fft`` -> ``transform.fourier_fft``
   - ``transform.fhti`` -> ``transform.get_fftlog_input``
   - ``transform.get_spline_values`` -> ``transform.get_dlf_points``.
   - ``factAng`` -> ``ang_fact``
   - In ``htarg``-dict: ``fftfilt``-> ``dlf`` (filter name for Hankel-DLF)
   - In ``ftarg``-dict: ``fhtfilt``-> ``dlf`` (filter name for Fourier-DLF)
   - In ``ftarg``-dict: ``ft``-> ``kind`` (method in Fourier-DLF [sine/cosine])
+  - Within ``transform``, change ``fhtarg``, ``qweargs``, and ``quadargs`` to
+    ``htarg``; ``qweargs`` to ``ftarg``.
 
 - Other changes:
 
