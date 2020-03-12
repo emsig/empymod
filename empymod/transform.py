@@ -38,14 +38,15 @@ from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
 from empymod import kernel
 
-__all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
-           'qwe', 'get_dlf_points', 'fhti']
+__all__ = ['hankel_dlf', 'hankel_qwe', 'hankel_quad', 'fourier_dlf',
+           'fourier_qwe', 'fourier_fftlog', 'fourier_fft', 'dlf', 'qwe',
+           'get_dlf_points', 'get_fftlog_input']
 
 
 # 1. Hankel transforms (wavenumber -> frequency)
 
-def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
-        zetaV, xdirect, fhtarg, msrc, mrec):
+def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+               zetaH, zetaV, xdirect, htarg, msrc, mrec):
     r"""Hankel Transform using the Digital Linear Filter method.
 
     The *Digital Linear Filter* method was introduced to geophysics by
@@ -92,21 +93,21 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     """
 
     # Compute required lambdas for given Hankel-filter-base
-    lambd, int_pts = get_dlf_points(fhtarg['dlf'], off, fhtarg['pts_per_dec'])
+    lambd, int_pts = get_dlf_points(htarg['dlf'], off, htarg['pts_per_dec'])
 
     # Call the kernel
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
                            zetaV, lambd, ab, xdirect, msrc, mrec)
 
     # Carry out the dlf
-    fEM = dlf(PJ, lambd, off, fhtarg['dlf'], fhtarg['pts_per_dec'],
-              factAng=factAng, ab=ab, int_pts=int_pts)
+    fEM = dlf(PJ, lambd, off, htarg['dlf'], htarg['pts_per_dec'],
+              ang_fact=ang_fact, ab=ab, int_pts=int_pts)
 
     return fEM, 1, True
 
 
-def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
-         zetaV, xdirect, qweargs, msrc, mrec):
+def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+               zetaH, zetaV, xdirect, htarg, msrc, mrec):
     r"""Hankel Transform using Quadrature-With-Extrapolation.
 
     *Quadrature-With-Extrapolation* was introduced to geophysics by
@@ -133,7 +134,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     This function is based on ``get_CSEM1D_FD_QWE.m``, ``qwe.m``, and
     ``getBesselWeights.m`` from the source code distributed with [Key12]_.
 
-    In the spline-version, ``hqwe`` checks how steep the decay of the
+    In the spline-version, ``hankel_qwe`` checks how steep the decay of the
     wavenumber-domain result is, and calls QUAD for the very steep interval,
     for which QWE is not suited.
 
@@ -160,11 +161,11 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     zetaV = zetaV[0, :]
 
     # Get rtol, atol, nquad, maxint, and pts_per_dec
-    rtol = qweargs['rtol']
-    atol = qweargs['atol']
-    nquad = qweargs['nquad']
-    maxint = qweargs['maxint']
-    pts_per_dec = qweargs['pts_per_dec']
+    rtol = htarg['rtol']
+    atol = htarg['atol']
+    nquad = htarg['nquad']
+    maxint = htarg['maxint']
+    pts_per_dec = htarg['pts_per_dec']
 
     # 1. PRE-COMPUTE THE BESSEL FUNCTIONS
     # at fixed quadrature points for each interval and multiply by the
@@ -269,13 +270,13 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
             sPJ0br = None
             sPJ0bi = None
 
-        # Get quadargs: diff_quad, a, b, limit
-        diff_quad = qweargs['diff_quad']
-        a = qweargs['a']
-        b = qweargs['b']
-        limit = qweargs['limit']
+        # Get htarg: diff_quad, a, b, limit
+        diff_quad = htarg['diff_quad']
+        a = htarg['a']
+        b = htarg['b']
+        limit = htarg['limit']
 
-        # Set quadargs if not given:
+        # Set htarg if not given:
         if not limit:
             limit = maxint
         if not a:
@@ -324,7 +325,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
                         'limit': limit}
 
                 fEM[i], tc = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi,
-                                  ab, off[i], factAng[i], iinp)
+                                  ab, off[i], ang_fact[i], iinp)
 
                 # Update conv
                 conv *= tc
@@ -353,7 +354,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
                 sEM += np.sum(np.reshape(sPJ0b*BJ0, (off.size, nquad, -1),
                                          order='F'), 1)
             if k_used[1] or k_used[2]:
-                sEM *= factAng[:, np.newaxis]
+                sEM *= ang_fact[:, np.newaxis]
             if k_used[0]:
                 sEM += np.sum(np.reshape(sPJ0*BJ0, (off.size, nquad, -1),
                                          order='F'), 1)
@@ -395,23 +396,23 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
         # Get QWE
         fEM, kcount, conv = qwe(rtol, atol, maxint, getkernel, intervals,
-                                lambd, off, factAng)
+                                lambd, off, ang_fact)
 
     return fEM, kcount, conv
 
 
-def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
-          zetaV, xdirect, quadargs, msrc, mrec):
+def hankel_quad(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+                zetaH, zetaV, xdirect, htarg, msrc, mrec):
     r"""Hankel Transform using the ``QUADPACK`` library.
 
     This routine uses the ``scipy.integrate.quad`` module, which in turn makes
     use of the Fortran library ``QUADPACK`` (``qagse``).
 
-    It is massively (orders of magnitudes) slower than either ``fht`` or
-    ``hqwe``, and is mainly here for completeness and comparison purposes. It
-    always uses interpolation in the wavenumber domain, hence it generally will
-    not be as precise as the other methods. However, it might work in some
-    areas where the others fail.
+    It is massively (orders of magnitudes) slower than either ``hankel_dlf`` or
+    ``hankel_qwe``, and is mainly here for completeness and comparison
+    purposes. It always uses interpolation in the wavenumber domain, hence it
+    generally will not be as precise as the other methods. However, it might
+    work in some areas where the others fail.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -431,9 +432,9 @@ def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     """
 
     # Get required lambdas
-    la = np.log10(quadargs['a'])
-    lb = np.log10(quadargs['b'])
-    ilambd = np.logspace(la, lb, int((lb-la)*quadargs['pts_per_dec'] + 1))
+    la = np.log10(htarg['a'])
+    lb = np.log10(htarg['b'])
+    ilambd = np.logspace(la, lb, int((lb-la)*htarg['pts_per_dec'] + 1))
 
     # Call the kernel
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
@@ -470,13 +471,13 @@ def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     conv = True
 
     # Input-dictionary for quad
-    iinp = {'a': quadargs['a'], 'b': quadargs['b'], 'epsabs': quadargs['atol'],
-            'epsrel': quadargs['rtol'], 'limit': quadargs['limit']}
+    iinp = {'a': htarg['a'], 'b': htarg['b'], 'epsabs': htarg['atol'],
+            'epsrel': htarg['rtol'], 'limit': htarg['limit']}
 
     # Loop over offsets
     for i in range(off.size):
         fEM[i], tc = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab,
-                          off[i], factAng[i], iinp)
+                          off[i], ang_fact[i], iinp)
         conv *= tc
 
     # Return the electromagnetic field
@@ -486,12 +487,12 @@ def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
 # 2. Fourier transforms (frequency -> time)
 
-def ffht(fEM, time, freq, ftarg):
+def fourier_dlf(fEM, time, freq, ftarg):
     r"""Fourier Transform using the Digital Linear Filter method.
 
 
     It follows the Filter methodology [Ande75]_, using Cosine- and
-    Sine-filters; see ``fht`` for more information.
+    Sine-filters; see ``hankel_dlf`` for more information.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -522,11 +523,11 @@ def ffht(fEM, time, freq, ftarg):
     return tEM, True
 
 
-def fqwe(fEM, time, freq, qweargs):
+def fourier_qwe(fEM, time, freq, ftarg):
     r"""Fourier Transform using Quadrature-With-Extrapolation.
 
     It follows the QWE methodology [Key12]_ for the Hankel transform, see
-    ``hqwe`` for more information.
+    ``hankel_qwe`` for more information.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -535,8 +536,9 @@ def fqwe(fEM, time, freq, qweargs):
     This function is based on ``get_CSEM1D_TD_QWE.m`` from the source code
     distributed with [Key12]_.
 
-    ``fqwe`` checks how steep the decay of the frequency-domain result is, and
-    calls QUAD for the very steep interval, for which QWE is not suited.
+    ``fourier_qwe`` checks how steep the decay of the frequency-domain result
+    is, and calls QUAD for the very steep interval, for which QWE is not
+    suited.
 
     Returns
     -------
@@ -548,15 +550,15 @@ def fqwe(fEM, time, freq, qweargs):
 
     """
     # Get rtol, atol, nquad, maxint, diff_quad, a, b, and limit
-    rtol = qweargs['rtol']
-    atol = qweargs['atol']
-    nquad = qweargs['nquad']
-    maxint = qweargs['maxint']
-    diff_quad = qweargs['diff_quad']
-    a = qweargs['a']
-    b = qweargs['b']
-    limit = qweargs['limit']
-    sincos = qweargs['sincos']
+    rtol = ftarg['rtol']
+    atol = ftarg['atol']
+    nquad = ftarg['nquad']
+    maxint = ftarg['maxint']
+    diff_quad = ftarg['diff_quad']
+    a = ftarg['a']
+    b = ftarg['b']
+    limit = ftarg['limit']
+    sincos = ftarg['sincos']
 
     # Calculate quadrature intervals for all offset
     xint = np.concatenate((np.array([1e-20]), np.arange(1, maxint+1)*np.pi))
@@ -592,7 +594,7 @@ def fqwe(fEM, time, freq, qweargs):
     else:
         tEM_int = tEM_rint
 
-    # Set quadargs if not given:
+    # Set ftarg if not given:
     if not limit:
         limit = maxint
     if not a:
@@ -633,7 +635,7 @@ def fqwe(fEM, time, freq, qweargs):
     return tEM, conv
 
 
-def fftlog(fEM, time, freq, ftarg):
+def fourier_fftlog(fEM, time, freq, ftarg):
     r"""Fourier Transform using FFTLog.
 
     FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT.
@@ -645,8 +647,9 @@ def fftlog(fEM, time, freq, ftarg):
     <https://github.com/prisae/pyfftlog>.
 
     Not the full flexibility of ``FFTLog`` is available here: Only the
-    logarithmic FFT (``fftl`` in ``FFTLog``), not the Hankel transform (``fht``
-    in ``FFTLog``). Furthermore, the following parameters are fixed:
+    logarithmic FFT (``fftl`` in ``FFTLog``), not the Hankel transform
+    (``hankel_dlf`` in ``FFTLog``). Furthermore, the following parameters are
+    fixed:
 
        - ``kr`` = 1 (initial value)
        - ``kropt`` = 1 (silently adjusts ``kr``)
@@ -775,7 +778,7 @@ def fftlog(fEM, time, freq, ftarg):
     return tEM, True
 
 
-def fft(fEM, time, freq, ftarg):
+def fourier_fft(fEM, time, freq, ftarg):
     r"""Fourier Transform using the Fast Fourier Transform.
 
     The function is called from one of the modelling routines in :mod:`model`.
@@ -823,16 +826,17 @@ def fft(fEM, time, freq, ftarg):
 
 # 3. Utilities
 
-def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
+def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, ang_fact=None,
         ab=None, int_pts=None):
     r"""Digital Linear Filter method.
 
-    This is the kernel of the DLF method, used for the Hankel (``fht``) and the
-    Fourier (``ffht``) Transforms. See ``fht`` for an extensive description.
+    This is the kernel of the DLF method, used for the Hankel (``hankel_dlf``)
+    and the Fourier (``fourier_dlf``) Transforms. See ``hankel_dlf`` for an
+    extensive description.
 
     For the Hankel transform, `signal` contains 3 complex wavenumber-domain
     signals: (PJ0, PJ1, PJ0b), as returned from `kernel.wavenumber`. The Hankel
-    DLF has two additional, optional parameters: `factAng`, as returned from
+    DLF has two additional, optional parameters: `ang_fact`, as returned from
     `kernel.angle_factor`, and `ab`. The PJ0-kernel is the part of the
     wavenumber-domain calculation which contains a zeroth-order Bessel function
     and does NOT depend on the angle between source and receiver, only on
@@ -848,17 +852,17 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     """
     # 0. HANKEL/FOURIER-DEPENDING SETTINGS
     if isinstance(signal, tuple):
-        # Hankel transform: 3 complex signals; respects `factAng` and `ab`
+        # Hankel transform: 3 complex signals; respects `ang_fact` and `ab`
         hankel = True
 
         # Check if all angles are the same
-        if factAng is None:
+        if ang_fact is None:
             has_angle_factors = False
         else:
-            one_angle = factAng.min() == factAng.max()
+            one_angle = ang_fact.min() == ang_fact.max()
             if one_angle:
-                has_angle_factors = factAng[0] != 1.0
-                factAng = factAng[0]
+                has_angle_factors = ang_fact[0] != 1.0
+                ang_fact = ang_fact[0]
             else:
                 has_angle_factors = True
 
@@ -970,7 +974,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
                 # Angle dependency
                 if has_angle_factors:
-                    out_angle *= factAng
+                    out_angle *= ang_fact
                 out_signal = out_angle + out_noang
 
         else:
@@ -993,7 +997,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
             # Angle dependency
             if has_angle_factors:
-                out_signal *= factAng
+                out_signal *= ang_fact
 
             if k_used[0]:  # J0
                 out_signal += np.dot(inp_PJ0, filt.j0)
@@ -1012,7 +1016,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
             # Angle dependency
             if has_angle_factors:
-                out_signal *= factAng
+                out_signal *= ang_fact
 
             if k_used[0]:  # Only if kernel contains info
                 out_signal += spline(out_noang[::-1], int_pts[::-1], out_pts)
@@ -1025,12 +1029,12 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
 
 def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
-        factAng=None):
+        ang_fact=None):
     r"""Quadrature-With-Extrapolation.
 
-    This is the kernel of the QWE method, used for the Hankel (``hqwe``) and
-    the Fourier (``fqwe``) Transforms. See ``hqwe`` for an extensive
-    description.
+    This is the kernel of the QWE method, used for the Hankel (``hankel_qwe``)
+    and the Fourier (``fourier_qwe``) Transforms. See ``hankel_qwe`` for an
+    extensive description.
 
     This function is based on ``qwe.m`` from the source code distributed with
     [Key12]_.
@@ -1042,7 +1046,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
 
     # 1. Calculate the first interval for all offsets
     if hasattr(inp, '__call__'):  # Hankel and not spline
-        EM0 = inp(0, lambd, off, factAng)
+        EM0 = inp(0, lambd, off, ang_fact)
     else:                         # Fourier or Hankel with spline
         EM0 = inp[:, 0]
     EM0 *= getweights(0, intervals)
@@ -1059,7 +1063,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
     for i in range(1, maxint):
         # 3.a Calculate the field for this interval
         if hasattr(inp, '__call__'):  # Hankel and not spline
-            EMi = inp(i, lambd[om, :], off[om], factAng[om])
+            EMi = inp(i, lambd[om, :], off[om], ang_fact[om])
             kcount += 1  # Update count
         else:                         # Fourier or Hankel with spline
             EMi = inp[om, i]
@@ -1110,11 +1114,12 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
     return EM, kcount, conv
 
 
-def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
+def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
     r"""Quadrature for Hankel transform.
 
     This is the kernel of the QUAD method, used for the Hankel transforms
-    ``hquad`` and ``hqwe`` (where the integral is not suited for QWE).
+    ``hankel_quad`` and ``hankel_qwe`` (where the integral is not suited for
+    QWE).
 
     """
 
@@ -1153,16 +1158,16 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
             conv = False
 
     if sPJ1r is not None:
-        re = integrate.quad(quad_PJ1, args=(sPJ1r, ab, off, factAng), **iinp)
-        im = integrate.quad(quad_PJ1, args=(sPJ1i, ab, off, factAng), **iinp)
+        re = integrate.quad(quad_PJ1, args=(sPJ1r, ab, off, ang_fact), **iinp)
+        im = integrate.quad(quad_PJ1, args=(sPJ1i, ab, off, ang_fact), **iinp)
         out += re[0] + 1j*im[0]
         # If there is a fourth output from QUAD, it means it did not converge
         if (len(re) or len(im)) > 3:
             conv = False
 
     if sPJ0br is not None:
-        re = integrate.quad(quad_PJ0b, args=(sPJ0br, off, factAng), **iinp)
-        im = integrate.quad(quad_PJ0b, args=(sPJ0bi, off, factAng), **iinp)
+        re = integrate.quad(quad_PJ0b, args=(sPJ0br, off, ang_fact), **iinp)
+        im = integrate.quad(quad_PJ0b, args=(sPJ0bi, off, ang_fact), **iinp)
         out += re[0] + 1j*im[0]
         # If there is a fourth output from QUAD, it means it did not converge
         if (len(re) or len(im)) > 3:
@@ -1232,7 +1237,7 @@ def get_dlf_points(filt, inp, nr_per_dec=None):
     return np.atleast_2d(out), new_inp
 
 
-def fhti(rmin, rmax, n, q, mu):
+def get_fftlog_input(rmin, rmax, n, q, mu):
     r"""Return parameters required for FFTLog."""
 
     # Central point log10(r_c) of periodic interval

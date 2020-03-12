@@ -70,7 +70,7 @@ __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
            srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
-           ht='fht', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
+           ht='dlf', htarg=None, ft='dlf', ftarg=None, loop=None, verb=2):
     r"""Return EM fields due to arbitrary rotated, finite length EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -177,15 +177,15 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         Defaults to False.
 
-    ht : {'fht', 'qwe', 'quad'}, optional
-        Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
-        Hankel Transform*), the *Quadrature-With-Extrapolation* (QWE), or a
-        simple *Quadrature* (QUAD) for the Hankel transform.  Defaults to
-        'fht'.
+    ht : {'dlf', 'qwe', 'quad'}, optional
+        Flag to choose either the *Digital Linear Filter* (DLF) method, the
+        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
+        for the Hankel transform.
+        Defaults to 'dlf'.
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
+            - If ``ht`` = 'dlf': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -234,15 +234,16 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             - Only changing diff_quad:
                 {'diffquad': 10} or ['', '', '', '', '', 10]
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
+    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if ``signal`` != None. Flag to choose either the Digital
         Linear Filter method (Sine- or Cosine-Filter), the
         Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
-        Fourier transform.  Defaults to 'sin'.
+        Fourier transform.
+        Defaults to 'dlf' (which is 'sin' if signal >=0, else 'cos').
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
+            - If ``ft`` = 'dlf', 'sin', or 'cos': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -559,7 +560,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
-           ht='fht', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
+           ht='dlf', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
     r"""Return EM fields due to infinitesimal small EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -663,15 +664,15 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
         Defaults to False.
 
-    ht : {'fht', 'qwe', 'quad'}, optional
-        Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
-        Hankel Transform*), the *Quadrature-With-Extrapolation* (QWE), or a
-        simple *Quadrature* (QUAD) for the Hankel transform.  Defaults to
-        'fht'.
+    ht : {'dlf', 'qwe', 'quad'}, optional
+        Flag to choose either the *Digital Linear Filter* (DLF) method, the
+        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
+        for the Hankel transform.
+        Defaults to 'dlf'.
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
+            - If ``ht`` = 'dlf': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -720,15 +721,16 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
             - Only changing diff_quad:
                 {'diffquad': 10} or ['', '', '', '', '', 10]
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
+    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if ``signal`` != None. Flag to choose either the Digital
         Linear Filter method (Sine- or Cosine-Filter), the
         Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
-        Fourier transform.  Defaults to 'sin'.
+        Fourier transform.
+        Defaults to 'dlf' (which is 'sin' if signal >=0, else 'cos').
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
+            - If ``ft`` = 'dlf', 'sin', or 'cos': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -905,7 +907,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
 def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
          epermV=None, mpermH=None, mpermV=None, mrec=True, recpts=1,
-         strength=0, xdirect=False, ht='fht', htarg=None, ft='sin', ftarg=None,
+         strength=0, xdirect=False, ht='dlf', htarg=None, ft='sin', ftarg=None,
          loop=None, verb=2):
     r"""Return EM fields due to a magnetic source loop.
 
@@ -1041,15 +1043,15 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
         Defaults to False.
 
-    ht : {'fht', 'qwe', 'quad'}, optional
-        Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
-        Hankel Transform*), the *Quadrature-With-Extrapolation* (QWE), or a
-        simple *Quadrature* (QUAD) for the Hankel transform.  Defaults to
-        'fht'.
+    ht : {'dlf', 'qwe', 'quad'}, optional
+        Flag to choose either the *Digital Linear Filter* (DLF) method, the
+        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
+        for the Hankel transform.
+        Defaults to 'dlf'.
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
+            - If ``ht`` = 'dlf': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -1098,15 +1100,16 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
             - Only changing diff_quad:
                 {'diffquad': 10} or ['', '', '', '', '', 10]
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
+    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
         Only used if ``signal`` != None. Flag to choose either the Digital
         Linear Filter method (Sine- or Cosine-Filter), the
         Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
-        Fourier transform.  Defaults to 'sin'.
+        Fourier transform.
+        Defaults to 'dlf' (which is 'sin' if signal >=0, else 'cos').
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
+            - If ``ft`` = 'dlf', 'sin', or 'cos': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -1889,7 +1892,7 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     # Get angle-dependent factor
     off, angle = get_off_ang(src, rec, nsrc, nrec, verb)
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+    ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # Get layer number in which src and rec reside (lsrc/lrec)
     lsrc, zsrc = get_layer_nr(src, depth)
@@ -1922,14 +1925,14 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
         # Collect output
         if J1 is not None:
-            PJ1 += factAng[:, np.newaxis]*J1
+            PJ1 += ang_fact[:, np.newaxis]*J1
             if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
                 # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
                 PJ1 /= off[:, None]
         if J0 is not None:
             PJ0 += J0
         if J0b is not None:
-            PJ0 += factAng[:, np.newaxis]*J0b
+            PJ0 += ang_fact[:, np.newaxis]*J0b
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, 1)
@@ -1982,13 +1985,13 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
     if not isfullspace*xdir:
 
         # Get angle dependent factors
-        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+        ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
 
-        calc = getattr(transform, ht)
+        calc = getattr(transform, 'hankel_'+ht)
         if loop_freq:
 
             for i in range(freq.size):
-                out = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
+                out = calc(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab,
                            etaH[None, i, :], etaV[None, i, :],
                            zetaH[None, i, :], zetaV[None, i, :], xdir,
                            htarg, msrc, mrec)
@@ -2000,13 +2003,13 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
             for i in range(off.size):
 
                 out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
-                           factAng[None, i], depth, ab, etaH, etaV, zetaH,
+                           ang_fact[None, i], depth, ab, etaH, etaV, zetaH,
                            zetaV, xdir, htarg, msrc, mrec)
                 fEM[:, None, i] += out[0]
                 kcount += out[1]
                 conv *= out[2]
         else:
-            out = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH,
+            out = calc(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH,
                        etaV, zetaH, zetaV, xdir, htarg, msrc, mrec)
             fEM += out[0]
             kcount += out[1]
@@ -2037,9 +2040,10 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
         fact = 1
 
     # 2. f->t transform
+    calc = getattr(transform, 'fourier_'+ft)
     tEM = np.zeros((time.size, off.size))
     for i in range(off.size):
-        out = getattr(transform, ft)(fEM[:, i]*fact, time, freq, ftarg)
+        out = calc(fEM[:, i]*fact, time, freq, ftarg)
         tEM[:, i] += out[0]
         conv *= out[1]
 

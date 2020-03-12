@@ -32,7 +32,7 @@ important limitations:
 - ``ab`` == 11                   [=> x-directed el. source & el. receivers]
 - ``signal`` == None             [=> only frequency domain]
 - ``xdirect`` == False           [=> direct field calc. in wavenr-domain]
-- ``ht`` == 'fht'
+- ``ht`` == 'dlf'
 - ``htarg`` == 'key_201_2012'
 - Options ``ft``, ``ftarg``, ``opt``, and ``loop`` are not available.
 - ``lsrc`` == ``lrec``           [=> src & rec are assumed in same layer!]
@@ -456,20 +456,20 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
                         zetaV, lambd)
 
     # 3.3. CARRY OUT THE HANKEL TRANSFORM WITH DLF
-    factAng = angle_factor(ang, 11, False, False)
-    zmfactAng = (factAng[:, np.newaxis]-1)/2
-    zpfactAng = (factAng[:, np.newaxis]+1)/2
+    ang_fact = angle_factor(ang, 11, False, False)
+    zm_ang_fact = (ang_fact[:, np.newaxis]-1)/2
+    zp_ang_fact = (ang_fact[:, np.newaxis]+1)/2
     fact = 4*np.pi*off
 
     # TE [uu, ud, du, dd, df]
     for i, val in enumerate(PTE):
-        PTE[i] = (factAng*np.dot(-val, filt.j1)/off +
-                  np.dot(zmfactAng*val*lambd, filt.j0))/fact
+        PTE[i] = (ang_fact*np.dot(-val, filt.j1)/off +
+                  np.dot(zm_ang_fact*val*lambd, filt.j0))/fact
 
     # TM [uu, ud, du, dd, df]
     for i, val in enumerate(PTM):
-        PTM[i] = (factAng*np.dot(-val, filt.j1)/off +
-                  np.dot(zpfactAng*val*lambd, filt.j0))/fact
+        PTM[i] = (ang_fact*np.dot(-val, filt.j1)/off +
+                  np.dot(zp_ang_fact*val*lambd, filt.j0))/fact
 
     # 3.4. Remove non-physical contributions
 
@@ -501,7 +501,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
 
         # Calculate reverberation M and general factor npfct
         Ms = 1 - Rp*Rm*np.exp(-2*iGam*ds)
-        npfct = factAng*zetaH[:, lsrc]/(fact*off*lgam*Ms)
+        npfct = ang_fact*zetaH[:, lsrc]/(fact*off*lgam*Ms)
 
         return Rp, Rm, npfct
 

@@ -55,62 +55,63 @@ tEM1 = test_time(res, off, t, 1)
 tEM2 = test_time(res, off, t, -1)
 
 
-# # B -- FFTLog # #
+# # B -- Fourier FFTLog # #
 # Signal = 0
 _, f, _, ftarg = utils.check_time(t, 0, 'fftlog', ['', [-3, 2]], 0)
 fEM = test_freq(res, off, f)
-fftlog0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_fftlog0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1
 _, f, _, ftarg = utils.check_time(t, 1, 'fftlog', [30, [-3, 2], -.5], 0)
 fEM = test_freq(res, off, f)
-fftlog1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_fftlog1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = -1
 _, f, _, ftarg = utils.check_time(t, -1, 'fftlog', [30, [-5, 2], .1], 0)
 fEM = test_freq(res, off, f)
-fftlog2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_fftlog2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
-# # C -- FFHT # #
+# # C -- Fourier DLF # #
 # Signal = 0
 _, f, _, ftarg = utils.check_time(t, 0, 'cos', {'pts_per_dec': 0}, 0)
 fEM = test_freq(res, off, f)
-ffht0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_dlf0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1
 _, f, _, ftarg = utils.check_time(t, 1, 'sin', ['key_201_CosSin_2012', -1], 0)
 fEM = test_freq(res, off, f)
-ffht1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_dlf1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = -1
 _, f, _, ftarg = utils.check_time(t, -1, 'sin', ['key_201_CosSin_2012', 20], 0)
 fEM = test_freq(res, off, f)
-ffht2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_dlf2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
-# # D -- FQWE # #
+# # D -- Fourier QWE # #
 # Signal = 0
 _, f, _, ftarg = utils.check_time(t, 0, 'qwe', None, 0)
 fEM = test_freq(res, off, f)
-fqwe0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_qwe0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1
 _, f, _, ftarg = utils.check_time(t, 1, 'qwe', [1e-6, '', 41, 300, '', '',
                                                 1e-4, 1e4, 1000], 0)
 fEM = test_freq(res, off, f)
-fqwe1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_qwe1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = -1
 _, f, _, ftarg = utils.check_time(t, -1, 'qwe', [1e-6, '', 41, 300, '', '',
                                                  1e-5, 1e5, 1000], 0)
 fEM = test_freq(res, off, f)
-fqwe2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_qwe2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
-# # E -- FFT # #
+# # E -- Fourier FFT # #
 # Signal = 0
 _, f, _, ftarg = utils.check_time(t, 0, 'fft', [0.0005, 2**20, '', 10], 0)
 fEM = test_freq(res, off, f)
-fft0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
+fourier_fft0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
-# # F -- QWE - FQWE # #
-nquad = fqwe0['ftarg']['nquad']
-maxint = fqwe0['ftarg']['maxint']
-fEM = fqwe0['fEM']
-freq = fqwe0['f']
-# The following is a condensed version of transform.fqwe, without doqwe-part
+# # F -- QWE - Fourier QWE # #
+nquad = fourier_qwe0['ftarg']['nquad']
+maxint = fourier_qwe0['ftarg']['maxint']
+fEM = fourier_qwe0['fEM']
+freq = fourier_qwe0['f']
+# The following is a condensed version of transform.fourier_qwe, without
+# doqwe-part
 xint = np.concatenate((np.array([1e-20]), np.arange(1, maxint+1)*np.pi))
 intervals = xint/t[:, None]
 g_x, g_w = special.p_roots(nquad)
@@ -119,10 +120,10 @@ Bx = dx*(np.tile(g_x, maxint) + 1) + np.repeat(xint[:-1], nquad)
 SS = np.sin(Bx)*np.tile(g_w, maxint)
 tEM_iint = iuSpline(np.log(2*np.pi*freq), fEM.imag)
 sEM = tEM_iint(np.log(Bx/t[:, None]))*SS
-fqwe0['sEM'] = sEM
-fqwe0['intervals'] = intervals
+fourier_qwe0['sEM'] = sEM
+fourier_qwe0['intervals'] = intervals
 
-# # G -- QWE - HQWE # #
+# # G -- QWE - HANKEL QWE # #
 # Model
 model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
 depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
@@ -140,7 +141,7 @@ lrec, zrec = utils.get_layer_nr(rec, depth)
 # Frequency-domain result
 freqres = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                            ab, msrc, mrec)
-# The following is a condensed version of transform.hqwe
+# The following is a condensed version of transform.hankel_qwe
 etaH = etaH[0, :]
 etaV = etaV[0, :]
 zetaH = zetaH[0, :]
@@ -170,7 +171,7 @@ BJ0 = special.j0(Bx)*np.tile(g_w, maxint)
 BJ1 = special.j1(Bx)*np.tile(g_w, maxint)
 intervals = xint/off[:, None]
 lambd = Bx/off[:, None]
-factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
 # 1 Spline version
 start = np.log(lambd.min())
 stop = np.log(lambd.max())
@@ -194,7 +195,7 @@ if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
     # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
     sEM /= np.atleast_1d(off[:, np.newaxis])
 sEM += np.sum(np.reshape(sPJ0b*BJ0, (off.size, nquad, -1), order='F'), 1)
-sEM *= factAng[:, np.newaxis]
+sEM *= ang_fact[:, np.newaxis]
 sEM += np.sum(np.reshape(sPJ0*BJ0, (off.size, nquad, -1), order='F'), 1)
 
 # Additinol stuff needed for non-spline version
@@ -203,12 +204,14 @@ nsinp = {'zsrc': zsrc, 'zrec': zrec, 'lsrc': lsrc, 'lrec': lrec, 'depth':
          zetaH[None, :], 'zetaV': zetaV[None, :], 'ab': ab, 'xdirect': False,
          'msrc': msrc, 'mrec': mrec}
 
-hqwe = {'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
-        'intervals': intervals, 'lambd': lambd, 'off': off, 'factAng': factAng,
-        'nsinp': nsinp, 'nquad': nquad, 'BJ0': BJ0, 'BJ1': BJ1, 'ab': ab,
-        'freqres': np.squeeze(freqres), 'diff_quad': diff_quad}
+hankel_qwe = {
+        'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
+        'intervals': intervals, 'lambd': lambd, 'off': off,
+        'ang_fact': ang_fact, 'nsinp': nsinp, 'nquad': nquad, 'BJ0': BJ0,
+        'BJ1': BJ1, 'ab': ab, 'freqres': np.squeeze(freqres),
+        'diff_quad': diff_quad}
 
-# # H -- QUAD # #
+# # H -- Hankel QUAD # #
 # Model
 model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
 depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
@@ -226,7 +229,7 @@ lrec, zrec = utils.get_layer_nr(rec, depth)
 # Frequency-domain result
 freqres = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                            ab, msrc, mrec)
-# The following is a condensed version of transform.hquad
+# The following is a condensed version of transform.hankel_quad
 rtol = htarg['rtol']
 atol = htarg['atol']
 limit = htarg['limit']
@@ -246,17 +249,23 @@ sPJ1r = iuSpline(np.log(ilambd), PJ1.real)
 sPJ1i = iuSpline(np.log(ilambd), PJ1.imag)
 sPJ0br = iuSpline(np.log(ilambd), PJ0b.real)
 sPJ0bi = iuSpline(np.log(ilambd), PJ0b.imag)
-factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
 iinp = {'a': a, 'b': b, 'epsabs': atol, 'epsrel': rtol, 'limit': limit}
 quad = {'inp': {'sPJ0r': sPJ0r, 'sPJ0i': sPJ0i, 'sPJ1r': sPJ1r, 'sPJ1i': sPJ1i,
                 'sPJ0br': sPJ0br, 'sPJ0bi': sPJ0bi, 'ab': ab, 'off': off,
-                'factAng': factAng, 'iinp': iinp}, 'res': np.squeeze(freqres)}
+                'ang_fact': ang_fact, 'iinp': iinp},
+        'res': np.squeeze(freqres)}
 
 # # I -- Store data # #
-np.savez_compressed('../data/transform.npz',
-                    t=t, tEM0=tEM0, tEM1=tEM1, tEM2=tEM2,
-                    fftlog0=fftlog0, fftlog1=fftlog1, fftlog2=fftlog2,
-                    ffht0=ffht0, ffht1=ffht1, ffht2=ffht2,
-                    fqwe0=fqwe0, fqwe1=fqwe1, fqwe2=fqwe2,
-                    fft0=fft0, fft1=fft0, fft2=fft0,  # fft1/2 are dummies
-                    hqwe=hqwe, quad=quad)
+np.savez_compressed(
+        '../data/transform.npz', t=t, tEM0=tEM0, tEM1=tEM1, tEM2=tEM2,
+        fourier_fftlog0=fourier_fftlog0, fourier_fftlog1=fourier_fftlog1,
+        fourier_fftlog2=fourier_fftlog2,
+        fourier_dlf0=fourier_dlf0, fourier_dlf1=fourier_dlf1,
+        fourier_dlf2=fourier_dlf2,
+        fourier_qwe0=fourier_qwe0, fourier_qwe1=fourier_qwe1,
+        fourier_qwe2=fourier_qwe2,
+        # fft1/2 are dummies
+        fourier_fft0=fourier_fft0, fourier_fft1=fourier_fft0,
+        fourier_fft2=fourier_fft0,
+        hankel_qwe=hankel_qwe, quad=quad)

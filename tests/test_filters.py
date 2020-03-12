@@ -41,8 +41,8 @@ def test_storeandsave(tmpdir):                                  # 1.b Save/Load
     assert_allclose(outfilt.factor, inpfilt.factor)
 
 
-def test_hankel_dlf():                                         # 2. FHT filters
-    # Check that all FHT filters
+def test_hankel_dlf():                                      # 2. Hankel filters
+    # Check that all Hankel filters
     #   (a) exist,
     #   (b) base, j0, and j1 have right number of values
     #       (nothing got accidently deleted), and
@@ -60,8 +60,8 @@ def test_hankel_dlf():                                         # 2. FHT filters
         assert_allclose(dlf.factor, fact)
 
 
-def test_fourier_dlf():                                    # 3. Co/Sine filters
-    # Check that all Co/Sine filters
+def test_fourier_dlf():                                    # 3. Fourier filters
+    # Check that all Fourier filters
     #   (a) exist,
     #   (b) base, j0, and j1 have right number of values
     #       (nothing got accidently deleted), and

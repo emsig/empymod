@@ -4,7 +4,7 @@ Step and impulse responses
 
 These examples compare the analytical solution with `empymod` for time-domain
 step and impulse responses for inline, x-directed source and receivers, for the
-four different frequency-to-time methods **QWE**, **FHT**, **FFTLog**, and
+four different frequency-to-time methods **QWE**, **DLF**, **FFTLog**, and
 **FFT**. Which method is faster and which is more precise depends on the model
 (land or marine, source/receiver at air-interface or not) and the response
 (step or impulse).
@@ -115,7 +115,7 @@ t = np.logspace(-2, 1, 301)  # Desired times (s)
 
 # Collect parameters
 inparg = {'src': src, 'rec': rec, 'depth': 0, 'freqtime': t, 'res': res,
-          'aniso': aniso, 'epermH': eperm, 'epermV': eperm, 'ht': 'fht',
+          'aniso': aniso, 'epermH': eperm, 'epermV': eperm, 'ht': 'dlf',
           'verb': 2}
 
 ###############################################################################
@@ -127,7 +127,7 @@ ex = ee_xx_impulse(res[1], aniso[1], rec[0], t)
 inparg['signal'] = 0  # signal 0 = impulse
 print('QWE')
 qwe = empymod.dipole(**inparg, ft='qwe')
-print('FHT (Sine)')
+print('DLF (Sine)')
 sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
 print('FFTLog')
 ftl = empymod.dipole(**inparg, ft='fftlog')
@@ -195,7 +195,7 @@ ex = ee_xx_step(res[1], aniso[1], rec[0], t)
 inparg['signal'] = 1  # signal 1 = switch-on
 print('QWE')
 qwe = empymod.dipole(**inparg, ft='qwe')
-print('FHT (Sine)')
+print('DLF (Sine)')
 sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
 print('FFTLog')
 ftl = empymod.dipole(**inparg, ft='fftlog', ftarg=['', '', -0.6])
@@ -244,7 +244,7 @@ ex = exDC - ee_xx_step(res[1], aniso[1], rec[0], t)
 inparg['signal'] = -1  # signal -1 = switch-off
 print('QWE')
 qwe = empymod.dipole(**inparg, ft='qwe')
-print('FHT (Cosine/Sine)')
+print('DLF (Cosine/Sine)')
 sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
 print('FFTLog')
 ftl = empymod.dipole(**inparg, ft='fftlog', ftarg=['', [-5, 3]])
@@ -290,7 +290,7 @@ t = np.logspace(-2, 1, 301)  # Desired times (s)
 
 # Collect parameters
 inparg = {'src': src, 'rec': rec, 'depth': [0, 1000], 'freqtime': t,
-          'res': res, 'aniso': aniso, 'ht': 'fht', 'verb': 2}
+          'res': res, 'aniso': aniso, 'ht': 'dlf', 'verb': 2}
 
 ###############################################################################
 # Impulse response
@@ -299,7 +299,7 @@ inparg = {'src': src, 'rec': rec, 'depth': [0, 1000], 'freqtime': t,
 inparg['signal'] = 0  # signal 0 = impulse
 print('QWE')
 qwe = empymod.dipole(**inparg, ft='qwe', ftarg=['', '', '', 500])
-print('FHT (Sine)')
+print('DLF (Sine)')
 sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
 print('FFTLog')
 ftl = empymod.dipole(**inparg, ft='fftlog')
@@ -333,7 +333,7 @@ plt.show()
 inparg['signal'] = 1  # signal 1 = step
 print('QWE')
 qwe = empymod.dipole(**inparg, ft='qwe', ftarg=['', '', 31, 500])
-print('FHT (Sine)')
+print('DLF (Sine)')
 sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
 print('FFTLog')
 ftl = empymod.dipole(**inparg, ft='fftlog', ftarg=['', [-2, 4]])

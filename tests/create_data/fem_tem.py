@@ -33,7 +33,7 @@ off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
 lsrc, zsrc = utils.get_layer_nr(src, depth)
 lrec, zrec = utils.get_layer_nr(rec, depth)
 
-ht, htarg = utils.check_hankel('fht', None, 0)
+ht, htarg = utils.check_hankel('dlf', None, 0)
 
 # 1. FULLSPACE
 inp1 = {'ab': 12,
