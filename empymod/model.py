@@ -67,10 +67,7 @@ __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
            'tem']
 
 
-def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
-           epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
-           srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
-           ht='dlf', htarg=None, ft='dlf', ftarg=None, loop=None, verb=2):
+def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None, **kwargs):
     r"""Return EM fields due to arbitrary rotated, finite length EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -385,6 +382,27 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     """
 
+    # Get kwargs.                           # => create a utils-fct for this
+    epermH = kwargs.pop('epermH', None)     #
+    epermV = kwargs.pop('epermV', None)     #
+    mpermH = kwargs.pop('mpermH', None)     #
+    mpermV = kwargs.pop('mpermV', None)     #
+    msrc = kwargs.pop('msrc', False)        #
+    mrec = kwargs.pop('mrec', False)        #
+    srcpts = kwargs.pop('srcpts', 1)        #
+    recpts = kwargs.pop('recpts', 1)        #
+    strength = kwargs.pop('strength', 0)    #
+    xdirect = kwargs.pop('xdirect', False)  #
+    ht = kwargs.pop('ht', 'dlf')            #
+    htarg = kwargs.pop('htarg', None)       #
+    ft = kwargs.pop('ft', 'dlf')            #
+    ftarg = kwargs.pop('ftarg', None)       #
+    loop = kwargs.pop('loop', None)         #
+    verb = kwargs.pop('verb', 2)            #
+    # Ensure no kwargs left.                #
+    if kwargs:                              #
+        print(f"WAAAAAAAAAAA LEFT **kwargs: {kwargs}")
+
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
 
@@ -558,9 +576,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     return EMArray(EM)
 
 
-def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
-           epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
-           ht='dlf', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
+def dipole(src, rec, depth, res, freqtime, signal=None, aniso=None, **kwargs):
     r"""Return EM fields due to infinitesimal small EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -617,6 +633,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
             - 0 : Impulse time-domain response
             - +1 : Switch-on time-domain response
 
+    aniso : array_like, optional
+        Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
+        Defaults to ones.
+
     ab : int, optional
         Source-receiver configuration, defaults to 11.
 
@@ -637,10 +657,6 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         + **receiver**  +-------+------+------+------+------+------+------+
         |               | **z** |  61  |  62  |  63  |  64  |  65  |  66  |
         +---------------+-------+------+------+------+------+------+------+
-
-    aniso : array_like, optional
-        Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
-        Defaults to ones.
 
     epermH, epermV : array_like, optional
         Relative horizontal/vertical electric permittivities
@@ -828,6 +844,23 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
     """
+
+    # Get kwargs.                           # => create a utils-fct for this
+    ab = kwargs.pop('ab', 11)               #
+    epermH = kwargs.pop('epermH', None)     #
+    epermV = kwargs.pop('epermV', None)     #
+    mpermH = kwargs.pop('mpermH', None)     #
+    mpermV = kwargs.pop('mpermV', None)     #
+    xdirect = kwargs.pop('xdirect', False)  #
+    ht = kwargs.pop('ht', 'dlf')            #
+    htarg = kwargs.pop('htarg', None)       #
+    ft = kwargs.pop('ft', 'dlf')            #
+    ftarg = kwargs.pop('ftarg', None)       #
+    loop = kwargs.pop('loop', None)         #
+    verb = kwargs.pop('verb', 2)            #
+    # Ensure no kwargs left.                #
+    if kwargs:                              #
+        print(f"WAAAAAAAAAAA LEFT **kwargs: {kwargs}")
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -1711,8 +1744,11 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
 
     # === 2. CALL DIPOLE ============
 
-    EM = dipole(src, rec, depth, res, freq, None, ab, aniso, epermH, epermV,
-                mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, loop, verb)
+    inp = {'ab': ab, 'aniso': aniso, 'epermH': epermH, 'epermV': epermV,
+           'mpermH': mpermH, 'mpermV': mpermV, 'xdirect': xdirect, 'ht': ht,
+           'htarg': htarg, 'ft': ft, 'ftarg': ftarg, 'loop': loop,
+           'verb': verb}
+    EM = dipole(src, rec, depth, res, freq, **inp)
 
     # === 3. GPR STUFF
 

@@ -621,29 +621,26 @@ def test_all_depths():
     mpermV = [2.5, 2.6, 2.7, 2.8, 2.9]
 
     # 1. Ordering as internally used:
+    inp = {'ab': 11, 'aniso': aniso, 'epermH': epermH, 'epermV': epermV,
+           'mpermH': mpermH, 'mpermV': mpermV}
 
     # LHS low-to-high (+1, ::+1)
-    lhs_l2h = dipole(
-            src, rec, depth, res, freq, None, 11, aniso, epermH, epermV,
-            mpermH, mpermV)
+    lhs_l2h = dipole(src, rec, depth, res, freq, None, **inp)
 
     # RHS high-to-low (-1, ::+1)
-    rhs_h2l = dipole(
-            [src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]], -depth, res,
-            freq, None, 11, aniso, epermH, epermV, mpermH, mpermV)
+    rhs_h2l = dipole([src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]],
+                     -depth, res, freq, **inp)
 
     # 2. Reversed ordering:
+    inp_r = {'ab': 11, 'aniso': aniso[::-1], 'epermH': epermH[::-1], 'epermV':
+             epermV[::-1], 'mpermH': mpermH[::-1], 'mpermV': mpermV[::-1]}
 
     # LHS high-to-low (+1, ::-1)
-    lhs_h2l = dipole(
-            src, rec, depth[::-1], res[::-1], freq, None, 11, aniso[::-1],
-            epermH[::-1], epermV[::-1], mpermH[::-1], mpermV[::-1])
+    lhs_h2l = dipole(src, rec, depth[::-1], res[::-1], freq, **inp_r)
 
     # RHS low-to-high (-1, ::-1)
-    rhs_l2h = dipole(
-            [src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]], -depth[::-1],
-            res[::-1], freq, None, 11, aniso[::-1], epermH[::-1], epermV[::-1],
-            mpermH[::-1], mpermV[::-1])
+    rhs_l2h = dipole([src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]],
+                     -depth[::-1], res[::-1], freq, **inp_r)
 
     assert_allclose(lhs_l2h, lhs_h2l)
     assert_allclose(lhs_l2h, rhs_l2h)
