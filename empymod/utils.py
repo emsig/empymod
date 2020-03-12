@@ -255,19 +255,19 @@ def check_bipole(inp, name):
     def chck_dipole(inp, name):
         r"""Check inp for shape and type."""
         # Check x
-        inp[0] = _check_var(inp[0], float, 1, name+'-x')
+        inp_x = _check_var(inp[0], float, 1, name+'-x')
 
         # Check y and ensure it has same dimension as x
-        inp[1] = _check_var(inp[1], float, 1, name+'-y', inp[0].shape)
+        inp_y = _check_var(inp[1], float, 1, name+'-y', inp_x.shape)
 
         # Check z
-        inp[2] = _check_var(inp[2], float, 1, name+'-z', (1,), inp[0].shape)
+        inp_z = _check_var(inp[2], float, 1, name+'-z', (1,), inp_x.shape)
 
         # Check if all depths are the same, if so replace by one value
-        if np.all(np.isclose(inp[2]-inp[2][0], 0)):
-            inp[2] = np.array([inp[2][0]])
+        if np.all(np.isclose(inp_z-inp_z[0], 0)):
+            inp_z = np.array([inp_z[0]])
 
-        return inp
+        return [inp_x, inp_y, inp_z]
 
     # Check length of inp.
     narr = len(inp)
@@ -281,52 +281,54 @@ def check_bipole(inp, name):
 
     if isdipole:  # dipole checks
         # Check x, y, and z
-        inp = chck_dipole(inp, name)
+        out = chck_dipole(inp, name)
 
         # Check azimuth and dip
-        inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,), inp[0].shape)
-        inp[4] = _check_var(inp[4], float, 1, 'dip', (1,), inp[0].shape)
+        inp_a = _check_var(inp[3], float, 1, 'azimuth', (1,), out[0].shape)
+        inp_d = _check_var(inp[4], float, 1, 'dip', (1,), out[0].shape)
 
         # How many different depths
-        inpz = inp[2].size
+        nz = out[2].size
 
         # Expand azimuth and dip to match number of depths
-        if inpz > 1:
-            if inp[3].size == 1:
-                inp[3] = np.ones(inpz)*inp[3]
-            if inp[4].size == 1:
-                inp[4] = np.ones(inpz)*inp[4]
+        if nz > 1:
+            if inp_a.size == 1:
+                inp_a = np.ones(nz)*inp_a
+            if inp_d.size == 1:
+                inp_d = np.ones(nz)*inp_d
+
+        out = [*out, inp_a, inp_d]
 
     else:         # bipole checks
         # Check each pole for x, y, and z
-        inp0 = chck_dipole(inp[::2], name+'-1')   # [x0, y0, z0]
-        inp1 = chck_dipole(inp[1::2], name+'-2')  # [x1, y1, z1]
+        out0 = chck_dipole(inp[::2], name+'-1')   # [x0, y0, z0]
+        out1 = chck_dipole(inp[1::2], name+'-2')  # [x1, y1, z1]
 
         # If one pole has a single depth, but the other has various
         # depths, we have to repeat the single depth, as we will have
         # to loop over them.
-        if inp0[2].size != inp1[2].size:
-            if inp0[2].size == 1:
-                inp0[2] = np.repeat(inp0[2], inp1[2].size)
+        if out0[2].size != out1[2].size:
+            if out0[2].size == 1:
+                out0[2] = np.repeat(out0[2], out1[2].size)
             else:
-                inp1[2] = np.repeat(inp1[2], inp0[2].size)
+                out1[2] = np.repeat(out1[2], out0[2].size)
 
         # Check if inp is a dipole instead of a bipole
         # (This is a problem, as we would could not define the angles then.)
-        if not np.all((inp0[0] != inp1[0]) + (inp0[1] != inp1[1]) +
-                      (inp0[2] != inp1[2])):
+        if not np.all((out0[0] != out1[0]) + (out0[1] != out1[1]) +
+                      (out0[2] != out1[2])):
             print(f"* ERROR   :: At least one of <{name}> is a point "
                   "dipole, use the format [x, y, z, azimuth, dip] instead "
                   "of [x0, x1, y0, y1, z0, z1].")
             raise ValueError('Bipole: bipole-' + name)
 
         # Collect elements
-        inp = [inp0[0], inp1[0], inp0[1], inp1[1], inp0[2], inp1[2]]
+        out = [out0[0], out1[0], out0[1], out1[1], out0[2], out1[2]]
 
         # How many different depths
-        inpz = inp[4].size
+        nz = out[4].size
 
-    return inp, inp[0].size, inpz, isdipole
+    return out, out[0].size, nz, isdipole
 
 
 def check_dipole(inp, name, verb):
@@ -359,9 +361,10 @@ def check_dipole(inp, name, verb):
 
     # Check inp for x, y, and z; x & y must have same length, z is a float
     _check_shape(np.squeeze(inp), name, (3,))
-    inp[0] = _check_var(inp[0], float, 1, name+'-x')
-    inp[1] = _check_var(inp[1], float, 1, name+'-y', inp[0].shape)
-    inp[2] = _check_var(inp[2], float, 1, name+'-z', (1,))
+    inp_x = _check_var(inp[0], float, 1, name+'-x')
+    inp_y = _check_var(inp[1], float, 1, name+'-y', inp_x.shape)
+    inp_z = _check_var(inp[2], float, 1, name+'-z', (1,))
+    out = [inp_x, inp_y, inp_z]
 
     # Print spatial parameters
     if verb > 2:
@@ -371,13 +374,13 @@ def check_dipole(inp, name, verb):
         else:
             longname = '   Receiver(s)     : '
 
-        print(f"{longname} {inp[0].size} dipole(s)")
+        print(f"{longname} {out[0].size} dipole(s)")
         tname = ['x  ', 'y  ', 'z  ']
         for i in range(3):
             text = "     > " + tname[i] + "     [m] : "
-            _prnt_min_max_val(inp[i], text, verb)
+            _prnt_min_max_val(out[i], text, verb)
 
-    return inp, inp[0].size
+    return out, out[0].size
 
 
 def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):

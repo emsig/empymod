@@ -83,8 +83,11 @@ def test_check_bipole():
     # # Dipole stuff
 
     # Normal case
-    pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 0, 32]
-    pole, nout, outz, isdipole = utils.check_bipole(pole, 'tvar')
+    ipole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 0, 32]
+    inp_type = type(ipole[0])
+    pole, nout, outz, isdipole = utils.check_bipole(ipole, 'tvar')
+    out_type = type(ipole[0])
+    assert inp_type == out_type  # Check input wasn't altered.
     assert_allclose(pole[0], np.array([0, 0, 0]))
     assert_allclose(pole[1], np.array([10, 20, 30]))
     assert_allclose(pole[2], np.array([100, 0, 100]))
@@ -121,8 +124,11 @@ def test_check_bipole():
         utils.check_bipole(pole, 'tvar')
 
     # Normal case
-    pole = [0, 0, 1000, 1000, 10, 20]
-    pole, nout, outz, isdipole = utils.check_bipole(pole, 'tvar')
+    ipole = [0, 0, 1000, 1000, 10, 20]
+    inp_type = type(ipole[0])
+    pole, nout, outz, isdipole = utils.check_bipole(ipole, 'tvar')
+    out_type = type(ipole[0])
+    assert inp_type == out_type  # Check input wasn't altered.
     assert_allclose(pole[0], 0)
     assert_allclose(pole[1], 0)
     assert_allclose(pole[2], 1000)
@@ -152,8 +158,12 @@ def test_check_bipole():
 
 def test_check_dipole(capsys):
     # correct input, verb > 2, src
-    src, nsrc = utils.check_dipole([[1000, 2000], [0, 0], 0], 'src', 3)
+    isrc = [[1000, 2000], [0, 0], 0]
+    inp_type = type(isrc[0])
+    src, nsrc = utils.check_dipole(isrc, 'src', 3)
     out, _ = capsys.readouterr()
+    out_type = type(isrc[0])
+    assert inp_type == out_type  # Check input wasn't altered.
     assert nsrc == 2
     assert_allclose(src[0], [1000, 2000])
     assert_allclose(src[1], [0, 0])
