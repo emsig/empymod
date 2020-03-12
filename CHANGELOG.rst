@@ -35,6 +35,11 @@ This version will be backwards incompatible, and only support Python 3.6+.
   - In ``htarg``-dict: ``fftfilt``-> ``dlf`` (filter name for Hankel-DLF)
   - In ``ftarg``-dict: ``fhtfilt``-> ``dlf`` (filter name for Fourier-DLF)
   - In ``ftarg``-dict: ``ft``-> ``kind`` (method in Fourier-DLF [sine/cosine])
+  - ``transform.get_spline_values`` -> ``transform.get_dlf_points``.
+
+- Other changes:
+
+  - ``htarg`` and ``ftarg`` internally are now dictionaries, not lists.
 
 
 Minor v1.10.x

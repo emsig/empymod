@@ -282,18 +282,28 @@ def test_check_hankel(capsys):
     outstr = "   Hankel          :  Quadrature-with-Extrapolation\n     > rtol"
     assert outstr in out
     assert ht == 'hqwe'
-    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 0, 100])
-    assert htarg[-3] is None
-    assert htarg[-2] is None
-    assert htarg[-1] is None
+    assert htarg['rtol'] == 1e-12
+    assert htarg['atol'] == 1e-30
+    assert htarg['nquad'] == 51
+    assert htarg['maxint'] == 100
+    assert htarg['pts_per_dec'] == 0
+    assert htarg['diff_quad'] == 100
+    assert htarg['a'] is None
+    assert htarg['b'] is None
+    assert htarg['limit'] is None
 
     # only last argument
     _, htarg = utils.check_hankel('qwe', ['', '', '', '', '', '', '', '', 30],
                                   0)
-    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 0, 100])
-    assert htarg[-3] is None
-    assert htarg[-2] is None
-    assert htarg[-1] == 30
+    assert htarg['rtol'] == 1e-12
+    assert htarg['atol'] == 1e-30
+    assert htarg['nquad'] == 51
+    assert htarg['maxint'] == 100
+    assert htarg['pts_per_dec'] == 0
+    assert htarg['diff_quad'] == 100
+    assert htarg['a'] is None
+    assert htarg['b'] is None
+    assert htarg['limit'] == 30
 
     # all arguments
     _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30, 200, 1e-6,
@@ -302,7 +312,15 @@ def test_check_hankel(capsys):
     assert "     > a     (quad):  1e-06" in out
     assert "     > b     (quad):  160" in out
     assert "     > limit (quad):  30" in out
-    assert_allclose(htarg, [1e-3, 1e-4, 31, 20, 30, 200, 1e-6, 160, 30])
+    assert htarg['rtol'] == 1e-3
+    assert htarg['atol'] == 1e-4
+    assert htarg['nquad'] == 31
+    assert htarg['maxint'] == 20
+    assert htarg['pts_per_dec'] == 30
+    assert htarg['diff_quad'] == 200
+    assert htarg['a'] == 1e-6
+    assert htarg['b'] == 160
+    assert htarg['limit'] == 30
 
     # # QUAD # #
     # verbose
@@ -311,14 +329,29 @@ def test_check_hankel(capsys):
     outstr = "   Hankel          :  Quadrature\n     > rtol"
     assert outstr in out
     assert ht == 'hquad'
-    assert_allclose(htarg, [1e-12, 1e-20, 500, 1e-6, 0.1, 40])
+    assert htarg['rtol'] == 1e-12
+    assert htarg['atol'] == 1e-20
+    assert htarg['limit'] == 500
+    assert htarg['a'] == 1e-6
+    assert htarg['b'] == 0.1
+    assert htarg['pts_per_dec'] == 40
 
     # only last argument
     _, htarg = utils.check_hankel('quad', ['', '', '', '', '', 100], 0)
-    assert_allclose(htarg, [1e-12, 1e-20, 500, 1e-6, 0.1, 100])
+    assert htarg['rtol'] == 1e-12
+    assert htarg['atol'] == 1e-20
+    assert htarg['limit'] == 500
+    assert htarg['a'] == 1e-6
+    assert htarg['b'] == 0.1
+    assert htarg['pts_per_dec'] == 100
     # all arguments
     _, htarg = utils.check_hankel('quad', [1e-3, 1e-4, 100, 1e-10, 200, 50], 0)
-    assert_allclose(htarg, [1e-3, 1e-4, 100, 1e-10, 200, 50])
+    assert htarg['rtol'] == 1e-3
+    assert htarg['atol'] == 1e-4
+    assert htarg['limit'] == 100
+    assert htarg['a'] == 1e-10
+    assert htarg['b'] == 200
+    assert htarg['pts_per_dec'] == 50
 
     # wrong ht
     with pytest.raises(ValueError):
@@ -532,7 +565,12 @@ def test_check_time(capsys):
     outstr = "   Fourier         :  Quadrature-with-Extrapolation\n     > rtol"
     assert out[24:87] == outstr
     assert ft == 'fqwe'
-    assert_allclose(ftarg[:-4], [1e-8, 1e-20, 21, 200, 20, 100])
+    assert ftarg['rtol'] == 1e-8
+    assert ftarg['atol'] == 1e-20
+    assert ftarg['nquad'] == 21
+    assert ftarg['maxint'] == 200
+    assert ftarg['pts_per_dec'] == 20
+    assert ftarg['diff_quad'] == 100
     f1 = np.array([3.16227766e-03, 3.54813389e-03, 3.98107171e-03,
                    4.46683592e-03, 5.01187234e-03, 5.62341325e-03,
                    6.30957344e-03, 7.07945784e-03, 7.94328235e-03])
@@ -542,19 +580,24 @@ def test_check_time(capsys):
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 99)
-    assert ftarg[-4] is None
-    assert ftarg[-3] is None
-    assert ftarg[-2] is None
-    assert ftarg[-1] is np.sin
+    assert ftarg['a'] is None
+    assert ftarg['b'] is None
+    assert ftarg['limit'] is None
+    assert ftarg['sincos'] is np.sin
 
     # only last argument
     _, _, _, ftarg = utils.check_time(time, 1, 'fqwe',
                                       ['', '', '', '', '', '', '', '', 30], 0)
-    assert_allclose(ftarg[:-4], [1e-8, 1e-20, 21, 200, 20, 100])
-    assert ftarg[-4] is None
-    assert ftarg[-3] is None
-    assert ftarg[-2] == 30
-    assert ftarg[-1] is np.sin
+    assert ftarg['rtol'] == 1e-8
+    assert ftarg['atol'] == 1e-20
+    assert ftarg['nquad'] == 21
+    assert ftarg['maxint'] == 200
+    assert ftarg['pts_per_dec'] == 20
+    assert ftarg['diff_quad'] == 100
+    assert ftarg['a'] is None
+    assert ftarg['b'] is None
+    assert ftarg['limit'] == 30
+    assert ftarg['sincos'] is np.sin
 
     # all arguments
     _, _, _, ftarg = utils.check_time(time, -1, 'qwe', [1e-3, 1e-4, 31, 20, 30,
@@ -563,8 +606,16 @@ def test_check_time(capsys):
     assert "     > a     (quad):  0.01" in out
     assert "     > b     (quad):  0.2" in out
     assert "     > limit (quad):  100" in out
-    assert_allclose(ftarg[:-1], [1e-3, 1e-4, 31, 20, 30, 200, 0.01, .2, 100])
-    assert ftarg[-1] is np.cos
+    assert ftarg['rtol'] == 1e-3
+    assert ftarg['atol'] == 1e-4
+    assert ftarg['nquad'] == 31
+    assert ftarg['maxint'] == 20
+    assert ftarg['pts_per_dec'] == 30
+    assert ftarg['diff_quad'] == 200
+    assert ftarg['a'] == 0.01
+    assert ftarg['b'] == 0.2
+    assert ftarg['limit'] == 100
+    assert ftarg['sincos'] is np.cos
 
     # # FFTLog # #
     # verbose
@@ -573,9 +624,9 @@ def test_check_time(capsys):
     outstr = "   Fourier         :  FFTLog\n     > pts_per_dec"
     assert outstr in out
     assert ft == 'fftlog'
-    assert ftarg[0] == 10
-    assert_allclose(ftarg[1], np.array([-2.,  1.]))
-    assert ftarg[2] == 0
+    assert ftarg['pts_per_dec'] == 10
+    assert_allclose(ftarg['add_dec'], np.array([-2.,  1.]))
+    assert ftarg['q'] == 0
     tres = np.array([0.3571562, 0.44963302, 0.56605443, 0.71262031, 0.89713582,
                      1.12942708, 1.42186445, 1.79002129, 2.25350329,
                      2.83699255, 3.57156202, 4.49633019, 5.66054433,
@@ -584,10 +635,11 @@ def test_check_time(capsys):
                      44.96330186, 56.60544331, 71.26203102, 89.71358175,
                      112.94270785, 142.18644499, 179.00212881, 225.35032873,
                      283.69925539])
-    assert ftarg[3] == 0.5
-    assert_allclose(ftarg[4], tres)
-    assert_allclose(ftarg[5:], [0.23025850929940461, 1.0610526667295022,
-                    0.016449035064149849])
+    assert ftarg['mu'] == 0.5
+    assert_allclose(ftarg['tcalc'], tres)
+    assert_allclose(ftarg['dlnr'], 0.23025850929940461)
+    assert_allclose(ftarg['kr'], 1.0610526667295022)
+    assert_allclose(ftarg['rk'], 0.016449035064149849)
 
     fres = np.array([0.00059525, 0.00074937, 0.00094341, 0.00118768, 0.0014952,
                      0.00188234, 0.00236973, 0.00298331, 0.00375577,
@@ -601,12 +653,13 @@ def test_check_time(capsys):
 
     # Several parameters
     _, _, _, ftarg = utils.check_time(time, -1, 'fftlog', [10, [-3, 4], 2], 0)
-    assert ftarg[0] == 10
-    assert_allclose(ftarg[1], np.array([-3.,  4.]))
-    assert ftarg[2] == 1  # q > 1 reset to 1...
-    assert ftarg[3] == -0.5
-    assert_allclose(ftarg[5:], [0.23025850929940461, 0.94312869748639161,
-                                1.8505737940600746])
+    assert ftarg['pts_per_dec'] == 10
+    assert_allclose(ftarg['add_dec'], np.array([-3.,  4.]))
+    assert ftarg['q'] == 1  # q > 1 reset to 1...
+    assert ftarg['mu'] == -0.5
+    assert_allclose(ftarg['dlnr'], 0.23025850929940461)
+    assert_allclose(ftarg['kr'], 0.94312869748639161)
+    assert_allclose(ftarg['rk'], 1.8505737940600746)
 
     # # FFT # #
     # verbose
@@ -615,10 +668,10 @@ def test_check_time(capsys):
     assert "Fourier         :  Fast Fourier Transform FFT\n     > dfreq" in out
     assert "     > pts_per_dec :  (linear)" in out
     assert ft == 'fft'
-    assert ftarg[0] == 0.002
-    assert ftarg[1] == 2048
-    assert ftarg[2] == 2048
-    assert ftarg[3] is None
+    assert ftarg['dfreq'] == 0.002
+    assert ftarg['nfreq'] == 2048
+    assert ftarg['ntot'] == 2048
+    assert ftarg['pts_per_dec'] is None
     fres = np.array([0.002, 0.004, 0.006, 0.008, 0.01, 4.088, 4.09, 4.092,
                      4.094, 4.096])
     assert_allclose(f[:5], fres[:5])
@@ -626,18 +679,18 @@ def test_check_time(capsys):
 
     # Several parameters
     _, _, _, ftarg = utils.check_time(time, 0, 'fft', [1e-3, 2**15+1, 3], 0)
-    assert ftarg[0] == 0.001
-    assert ftarg[1] == 2**15+1
-    assert ftarg[2] == 2**16
+    assert ftarg['dfreq'] == 0.001
+    assert ftarg['nfreq'] == 2**15+1
+    assert ftarg['ntot'] == 2**16
 
     # Several parameters; pts_per_dec
     _, f, _, ftarg = utils.check_time(time, 0, 'fft', ['', '', '', 5], 3)
     out, _ = capsys.readouterr()
     assert "     > pts_per_dec :  5" in out
-    assert ftarg[0] == 0.002
-    assert ftarg[1] == 2048
-    assert ftarg[2] == 2048
-    assert ftarg[3] == 5
+    assert ftarg['dfreq'] == 0.002
+    assert ftarg['nfreq'] == 2048
+    assert ftarg['ntot'] == 2048
+    assert ftarg['pts_per_dec'] == 5
     outf = np.array([2.00000000e-03, 3.22098066e-03, 5.18735822e-03,
                      8.35419026e-03, 1.34543426e-02, 2.16680888e-02,
                      3.48962474e-02, 5.62000691e-02, 9.05096680e-02,

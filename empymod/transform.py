@@ -39,7 +39,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 from empymod import kernel
 
 __all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
-           'qwe', 'get_spline_values', 'fhti']
+           'qwe', 'get_dlf_points', 'fhti']
 
 
 # 1. Hankel transforms (wavenumber -> frequency)
@@ -156,7 +156,11 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     zetaV = zetaV[0, :]
 
     # Get rtol, atol, nquad, maxint, and pts_per_dec
-    rtol, atol, nquad, maxint, pts_per_dec = qweargs[:5]
+    rtol = qweargs['rtol']
+    atol = qweargs['atol']
+    nquad = qweargs['nquad']
+    maxint = qweargs['maxint']
+    pts_per_dec = qweargs['pts_per_dec']
 
     # 1. PRE-COMPUTE THE BESSEL FUNCTIONS
     # at fixed quadrature points for each interval and multiply by the
@@ -262,7 +266,10 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
             sPJ0bi = None
 
         # Get quadargs: diff_quad, a, b, limit
-        diff_quad, a, b, limit = qweargs[5:]
+        diff_quad = qweargs['diff_quad']
+        a = qweargs['a']
+        b = qweargs['b']
+        limit = qweargs['limit']
 
         # Set quadargs if not given:
         if not limit:
@@ -419,13 +426,10 @@ def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
     """
 
-    # Get quadargs
-    rtol, atol, limit, a, b, pts_per_dec = quadargs
-
     # Get required lambdas
-    la = np.log10(a)
-    lb = np.log10(b)
-    ilambd = np.logspace(la, lb, int((lb-la)*pts_per_dec + 1))
+    la = np.log10(quadargs['a'])
+    lb = np.log10(quadargs['b'])
+    ilambd = np.logspace(la, lb, int((lb-la)*quadargs['pts_per_dec'] + 1))
 
     # Call the kernel
     PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH,
@@ -462,7 +466,8 @@ def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     conv = True
 
     # Input-dictionary for quad
-    iinp = {'a': a, 'b': b, 'epsabs': atol, 'epsrel': rtol, 'limit': limit}
+    iinp = {'a': quadargs['a'], 'b': quadargs['b'], 'epsabs': quadargs['atol'],
+            'epsrel': quadargs['rtol'], 'limit': quadargs['limit']}
 
     # Loop over offsets
     for i in range(off.size):
@@ -539,7 +544,15 @@ def fqwe(fEM, time, freq, qweargs):
 
     """
     # Get rtol, atol, nquad, maxint, diff_quad, a, b, and limit
-    rtol, atol, nquad, maxint, _, diff_quad, a, b, limit, sincos = qweargs
+    rtol = qweargs['rtol']
+    atol = qweargs['atol']
+    nquad = qweargs['nquad']
+    maxint = qweargs['maxint']
+    diff_quad = qweargs['diff_quad']
+    a = qweargs['a']
+    b = qweargs['b']
+    limit = qweargs['limit']
+    sincos = qweargs['sincos']
 
     # Calculate quadrature intervals for all offset
     xint = np.concatenate((np.array([1e-20]), np.arange(1, maxint+1)*np.pi))
@@ -651,7 +664,13 @@ def fftlog(fEM, time, freq, ftarg):
 
     """
     # Get tcalc, dlnr, kr, rk, q; a and n
-    _, _, q, mu, tcalc, dlnr, kr, rk = ftarg
+    q = ftarg['q']
+    mu = ftarg['mu']
+    tcalc = ftarg['tcalc']
+    dlnr = ftarg['dlnr']
+    kr = ftarg['kr']
+    rk = ftarg['rk']
+
     if mu > 0:  # Sine
         a = -fEM.imag
     else:       # Cosine
@@ -769,7 +788,10 @@ def fft(fEM, time, freq, ftarg):
 
     """
     # Get ftarg values
-    dfreq, nfreq, ntot, pts_per_dec = ftarg
+    dfreq = ftarg['dfreq']
+    nfreq = ftarg['nfreq']
+    ntot = ftarg['ntot']
+    pts_per_dec = ftarg['pts_per_dec']
 
     # If pts_per_dec, we have first to interpolate fEM to required freqs
     if pts_per_dec:
@@ -884,7 +906,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
         # Get interpolation points, if not provided # (backwards compatibility)
         if int_pts is None:
-            _, int_pts = get_spline_values(filt, out_pts, pts_per_dec)
+            _, int_pts = get_dlf_points(filt, out_pts, pts_per_dec)
 
         # Re-arrange signal
         for i, val in enumerate(signal):
@@ -1146,7 +1168,7 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
     return out, conv
 
 
-def get_spline_values(filt, inp, nr_per_dec=None):
+def get_dlf_points(filt, inp, nr_per_dec=None):
     r"""Return required calculation points."""
 
     # Standard DLF
