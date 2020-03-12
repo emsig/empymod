@@ -314,7 +314,7 @@ def walktem(moment, depth, res):
         time=time,          # Required times
         signal=1,           # Switch-on response
         ft='sin',           # Use DLF
-        ftarg={'fftfilt': 'key_81_CosSin_2009'},  # Short, fast filter; if you
+        ftarg={'dlf': 'key_81_CosSin_2009'},  # Short, fast filter; if you
         verb=2,                 # need higher accuracy choose a longer filter.
     )
 
@@ -332,7 +332,7 @@ def walktem(moment, depth, res):
         mrec=True,                    # It is an el. source, but a magn. rec.
         strength=8,                   # To account for 4 sides of square loop.
         srcpts=3,                     # Approx. the finite dip. with 3 points.
-        htarg={'fhtfilt': 'key_101_2009'},  # Short filter, so fast.
+        htarg={'dlf': 'key_101_2009'},  # Short filter, so fast.
     )
 
     # Multiply the frequecny-domain result with

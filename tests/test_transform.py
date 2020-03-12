@@ -45,9 +45,10 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
 
             # Adjust htarg for fht
             if htype == 'fht':
-                lambd, int_pts = transform.get_spline_values(htarg[0], off,
-                                                             htarg[1])
-                htarg = (htarg[0], htarg[1], lambd, int_pts)
+                lambd, int_pts = transform.get_dlf_points(
+                        htarg['dlf'], off, htarg['pts_per_dec'])
+                htarg['lambd'] = lambd
+                htarg['int_pts'] = int_pts
 
             wvnr0, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth,
                                   ab, etaH, etaV, zetaH, zetaV, xdirect, htarg,
@@ -64,9 +65,10 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         if htype == 'hquad':  # Lower atol to ensure convergence
             _, htarg = utils.check_hankel('quad', [1e-8], 0)
         elif htype == 'fht':  # Adjust htarg for fht
-            lambd, int_pts = transform.get_spline_values(htarg[0], off,
-                                                         htarg[1])
-            htarg = (htarg[0], htarg[1], lambd, int_pts)
+            lambd, int_pts = transform.get_dlf_points(
+                    htarg['dlf'], off, htarg['pts_per_dec'])
+            htarg['lambd'] = lambd
+            htarg['int_pts'] = int_pts
 
         # Wavenumber solution plus transform
         wvnr1, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
@@ -91,9 +93,10 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
             _, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, 80, .1,
                                                   1e-6, .1, 1000], 0)
         elif htype == 'fht':  # Adjust htarg for fht
-            lambd, int_pts = transform.get_spline_values(htarg[0], off,
-                                                         htarg[1])
-            htarg = (htarg[0], htarg[1], lambd, int_pts)
+            lambd, int_pts = transform.get_dlf_points(
+                    htarg['dlf'], off, htarg['pts_per_dec'])
+            htarg['lambd'] = lambd
+            htarg['int_pts'] = int_pts
 
         # Analytical frequency-domain solution
         wvnr2, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
@@ -109,9 +112,10 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         # # # 3. Spline; pts_per_dec # # #
         if htype == 'fht':
             _, htarg = utils.check_hankel('fht', ['key_201_2012', 20], 0)
-            lambd, int_pts = transform.get_spline_values(htarg[0], off,
-                                                         htarg[1])
-            htarg = (htarg[0], htarg[1], lambd, int_pts)
+            lambd, int_pts = transform.get_dlf_points(
+                    htarg['dlf'], off, htarg['pts_per_dec'])
+            htarg['lambd'] = lambd
+            htarg['int_pts'] = int_pts
         elif htype == 'hqwe':
             _, htarg = utils.check_hankel('qwe', ['', '', '', 80, 100], 0)
         if htype != 'hquad':  # hquad is always pts_per_dec
@@ -136,9 +140,10 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         elif htype == 'hquad':
             _, htarg = utils.check_hankel('quad', None, 0)
         elif htype == 'fht':
-            lambd, int_pts = transform.get_spline_values(htarg[0], off,
-                                                         htarg[1])
-            htarg = (htarg[0], htarg[1], lambd, int_pts)
+            lambd, int_pts = transform.get_dlf_points(
+                    htarg['dlf'], off, htarg['pts_per_dec'])
+            htarg['lambd'] = lambd
+            htarg['int_pts'] = int_pts
         # Analytical frequency-domain solution
         wvnr4, _, conv = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
                               etaH, etaV, zetaH, zetaV, xdirect, htarg, msrc,
@@ -180,8 +185,8 @@ def test_qwe():                                                        # 8. qwe
     dat = DATA['fqwe0'][()]
     tres = DATA['tEM0'][()]
     ftarg = dat['ftarg']
-    tEM, _, _ = transform.qwe(ftarg[0], ftarg[1], ftarg[3], dat['sEM'],
-                              dat['intervals'])
+    tEM, _, _ = transform.qwe(ftarg['rtol'], ftarg['atol'], ftarg['maxint'],
+                              dat['sEM'], dat['intervals'])
     assert_allclose(np.squeeze(-tEM*2/np.pi), tres, rtol=1e-3)
 
     # Hankel
@@ -211,10 +216,10 @@ def test_qwe():                                                        # 8. qwe
     assert_allclose(np.squeeze(fEM), dat['freqres'], rtol=1e-5)
 
 
-def test_get_spline_values():                            # 9. get_spline_values
+def test_get_dlf_points():                                  # 9. get_dlf_points
     # Check one example
     filt = filters.key_81_CosSin_2009()
-    out, new_inp = transform.get_spline_values(filt, np.arange(1, 6), -1)
+    out, new_inp = transform.get_dlf_points(filt, np.arange(1, 6), -1)
     # Expected values
     oout = np.array([[6.70925256e-05, 8.19469958e-05, 1.00090287e-04,
                       1.22250552e-04, 1.49317162e-04, 1.82376393e-04,
@@ -255,20 +260,20 @@ def test_get_spline_values():                            # 9. get_spline_values
 
     # Ensure output dimension
     hfilt = filters.anderson_801_1982()
-    out, _ = transform.get_spline_values(hfilt, np.array([1, 1.1]), -1)
+    out, _ = transform.get_dlf_points(hfilt, np.array([1, 1.1]), -1)
     assert_allclose(out.size, 804)
 
     # Check a hypothetical short filter, with small pts_per_dec, and ensure
     # at least four points are returned
     filt = filters.DigitalFilter('shortest')
     filt.base = np.array([1., 1.1])
-    out, new_inp = transform.get_spline_values(filt, np.array([1.]), 1)
+    out, new_inp = transform.get_dlf_points(filt, np.array([1.]), 1)
     assert_allclose(out.size, 4)
 
     # Check standard example
     ffilt = filters.key_81_CosSin_2009()
     inp = np.arange(1, 6)
-    out, new_inp = transform.get_spline_values(ffilt, inp, 0)
+    out, new_inp = transform.get_dlf_points(ffilt, inp, 0)
     assert_allclose(inp, new_inp)
     assert_allclose(out, ffilt.base/inp[:, None])
 
@@ -354,11 +359,11 @@ def test_dlf():                                                       # 10. dlf
         if i > 1:
             finp *= -1
 
-        if ftarg[1] == 0:
+        if ftarg['pts_per_dec'] == 0:
             finp = finp.reshape(t.size, -1)
 
-        tEM = transform.dlf(finp, 2*np.pi*dat['f'], t, ftarg[0], ftarg[1],
-                            kind=ftarg[2])
+        tEM = transform.dlf(finp, 2*np.pi*dat['f'], t, ftarg['dlf'],
+                            ftarg['pts_per_dec'], kind=ftarg['kind'])
         assert_allclose(tEM*2/np.pi, tres, rtol=1e-3)
 
     # Check DLF for Hankel
@@ -378,13 +383,13 @@ def test_dlf():                                                       # 10. dlf
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
         lsrc, zsrc = utils.get_layer_nr(src, depth)
         lrec, zrec = utils.get_layer_nr(rec, depth)
-        fhtfilt = htarg[0]
-        pts_per_dec = htarg[1]
+        dlf = htarg['dlf']
+        pts_per_dec = htarg['pts_per_dec']
 
         # # # 0. No Spline # # #
 
         # fht calculation
-        lambd = fhtfilt.base/off[:, None]
+        lambd = dlf.base/off[:, None]
         PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
 
@@ -395,8 +400,7 @@ def test_dlf():                                                       # 10. dlf
             factAng = None
 
         # dlf calculation
-        fEM0 = transform.dlf(PJ, lambd, off, fhtfilt, 0, factAng=factAng,
-                             ab=ab)
+        fEM0 = transform.dlf(PJ, lambd, off, dlf, 0, factAng=factAng, ab=ab)
 
         # Analytical frequency-domain solution
         freq1 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
@@ -407,12 +411,12 @@ def test_dlf():                                                       # 10. dlf
         # # # 1. Spline; One angle # # #
 
         # fht calculation
-        lambd, _ = transform.get_spline_values(fhtfilt, off, pts_per_dec)
+        lambd, _ = transform.get_dlf_points(dlf, off, pts_per_dec)
         PJ1 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                 zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
 
         # dlf calculation
-        fEM1 = transform.dlf(PJ1, lambd, off, fhtfilt, pts_per_dec,
+        fEM1 = transform.dlf(PJ1, lambd, off, dlf, pts_per_dec,
                              factAng=factAng, ab=ab)
 
         # Compare
@@ -424,14 +428,13 @@ def test_dlf():                                                       # 10. dlf
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
 
         # fht calculation
-        lambd, _ = transform.get_spline_values(fhtfilt, off, -1)
+        lambd, _ = transform.get_dlf_points(dlf, off, -1)
         PJ2 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                 zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
         factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
         # dlf calculation
-        fEM2 = transform.dlf(PJ2, lambd, off, fhtfilt, -1, factAng=factAng,
-                             ab=ab)
+        fEM2 = transform.dlf(PJ2, lambd, off, dlf, -1, factAng=factAng, ab=ab)
 
         # Analytical frequency-domain solution
         freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
@@ -445,14 +448,13 @@ def test_dlf():                                                       # 10. dlf
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
 
         # fht calculation
-        lambd, _ = transform.get_spline_values(fhtfilt, off, -1)
+        lambd, _ = transform.get_dlf_points(dlf, off, -1)
         PJ2 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                 zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
         factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
         # dlf calculation
-        fEM2 = transform.dlf(PJ2, lambd, off, fhtfilt, -1, factAng=factAng,
-                             ab=ab)
+        fEM2 = transform.dlf(PJ2, lambd, off, dlf, -1, factAng=factAng, ab=ab)
 
         # Analytical frequency-domain solution
         freq2 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
@@ -462,14 +464,13 @@ def test_dlf():                                                       # 10. dlf
 
         # # # 3. Spline; Multi angle # # #
 
-        lambd, _ = transform.get_spline_values(fhtfilt, off, 30)
+        lambd, _ = transform.get_dlf_points(dlf, off, 30)
         # fht calculation
         PJ3 = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV,
                                 zetaH, zetaV, lambd, ab, xdirect, msrc, mrec)
 
         # dlf calculation
-        fEM3 = transform.dlf(PJ3, lambd, off, fhtfilt, 30, factAng=factAng,
-                             ab=ab)
+        fEM3 = transform.dlf(PJ3, lambd, off, dlf, 30, factAng=factAng, ab=ab)
 
         # Compare
         assert_allclose(np.squeeze(fEM3), np.squeeze(freq2), rtol=1e-3)

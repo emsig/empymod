@@ -139,12 +139,15 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     epermH, epermV : array_like, optional
         Relative horizontal/vertical electric permittivities
-        epsilon_h/epsilon_v (-);
-        #epermH = #epermV = #res. Default is ones.
+        epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
+        provided but not epermV, isotropic behaviour is assumed.
+        Default is ones.
 
     mpermH, mpermV : array_like, optional
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
-        #mpermH = #mpermV = #res. Default is ones.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is ones.
 
     msrc, mrec : boolean, optional
         If True, source/receiver (msrc/mrec) is magnetic, else electric.
@@ -182,11 +185,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [fhtfilt, pts_per_dec]:
+            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
 
-                - fhtfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (default: ``empymod.filters.key_201_2009()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -239,11 +242,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [fftfilt, pts_per_dec]:
+            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
 
-                - fftfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade; (default: -1)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -640,12 +643,15 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     epermH, epermV : array_like, optional
         Relative horizontal/vertical electric permittivities
-        epsilon_h/epsilon_v (-);
-        #epermH = #epermV = #res. Default is ones.
+        epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
+        provided but not epermV, isotropic behaviour is assumed.
+        Default is ones.
 
     mpermH, mpermV : array_like, optional
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
-        #mpermH = #mpermV = #res. Default is ones.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is ones.
 
     xdirect : bool or None, optional
         Direct field calculation (only if src and rec are in the same layer):
@@ -665,11 +671,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [fhtfilt, pts_per_dec]:
+            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
 
-                - fhtfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (default: ``empymod.filters.key_201_2009()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -722,11 +728,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [fftfilt, pts_per_dec]:
+            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
 
-                - fftfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade; (default: -1)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -986,12 +992,15 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     epermH, epermV : array_like, optional
         Relative horizontal/vertical electric permittivities
-        epsilon_h/epsilon_v (-);
-        #epermH = #epermV = #res. Default is ones.
+        epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
+        provided but not epermV, isotropic behaviour is assumed.
+        Default is ones.
 
     mpermH, mpermV : array_like, optional
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
-        #mpermH = #mpermV = #res. Default is ones.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is ones.
 
         Note that the relative horizontal and vertical magnetic permeabilities
         in layers with loop sources or receivers will be set to 1.
@@ -1040,11 +1049,11 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [fhtfilt, pts_per_dec]:
+            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
 
-                - fhtfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (default: ``empymod.filters.key_201_2009()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (default: ``empymod.filters.key_201_2009()``)
                 - pts_per_dec: points per decade; (default: 0)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -1097,11 +1106,11 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     ftarg : dict or list, optional
         Only used if ``signal`` !=None. Depends on the value for ``ft``:
-            - If ``ft`` = 'sin' or 'cos': [fftfilt, pts_per_dec]:
+            - If ``ft`` = 'sin' or 'cos': [dlf, pts_per_dec]:
 
-                - fftfilt: string of filter name in ``empymod.filters`` or
-                           the filter method itself.
-                           (Default: ``empymod.filters.key_201_CosSin_2012()``)
+                - dlf: string of filter name in ``empymod.filters`` or
+                       the filter method itself.
+                       (Default: ``empymod.filters.key_201_CosSin_2012()``)
                 - pts_per_dec: points per decade; (default: -1)
                     - If 0: Standard DLF.
                     - If < 0: Lagged Convolution DLF.
@@ -1513,12 +1522,16 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         Anisotropy lambda = sqrt(rho_v/rho_h) (-); defaults to one.
 
     epermH, epermV : float, optional
-        Relative horizontal/vertical electric permittivity epsilon_h/epsilon_v
-        (-); default is one. Ignored for the diffusive solution.
+        Relative horizontal/vertical electric permittivity
+        epsilon_h/epsilon_v (-). If epermH is provided but not epermV,
+        isotropic behaviour is assumed.
+        Default is one; ignored for the diffusive solution.
 
     mpermH, mpermV : float, optional
         Relative horizontal/vertical magnetic permeability mu_h/mu_v (-);
-        default is one. Ignored for the diffusive solution.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is one; ignored for the diffusive solution.
 
     verb : {0, 1, 2, 3, 4}, optional
         Level of verbosity, default is 2:
@@ -1798,12 +1811,15 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     epermH, epermV : array_like, optional
         Relative horizontal/vertical electric permittivities
-        epsilon_h/epsilon_v (-);
-        #epermH = #epermV = #res. Default is ones.
+        epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
+        provided but not epermV, isotropic behaviour is assumed.
+        Default is ones.
 
     mpermH, mpermV : array_like, optional
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
-        #mpermH = #mpermV = #res. Default is ones.
+        #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
+        isotropic behaviour is assumed.
+        Default is ones.
 
     verb : {0, 1, 2, 3, 4}, optional
         Level of verbosity, default is 2:
@@ -1968,16 +1984,6 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         # Get angle dependent factors
         factAng = kernel.angle_factor(angle, ab, msrc, mrec)
 
-        # Compute required lambdas for given hankel-filter-base
-        # This should be in utils, but this is a backwards-incompatible change.
-        # Move this to utils for version 2.0.
-        if ht == 'fht':
-            # htarg[0] = filter; htarg[1] = pts_per_dec
-            lambd, int_pts = transform.get_spline_values(
-                    htarg[0], off, htarg[1])
-            if not loop_off:
-                htarg = (htarg[0], htarg[1], lambd, int_pts)
-
         calc = getattr(transform, ht)
         if loop_freq:
 
@@ -1992,11 +1998,6 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
 
         elif loop_off:
             for i in range(off.size):
-
-                # See comments above where it says "ht == 'fht'".
-                # Get pre-calculated lambd, int_pts for this offset
-                if ht == 'fht':
-                    htarg = (htarg[0], htarg[1], lambd[None, i, :], int_pts[i])
 
                 out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
                            factAng[None, i], depth, ab, etaH, etaV, zetaH,

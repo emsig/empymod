@@ -106,8 +106,8 @@ fEM = test_freq(res, off, f)
 fft0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
 # # F -- QWE - FQWE # #
-nquad = fqwe0['ftarg'][2]
-maxint = fqwe0['ftarg'][3]
+nquad = fqwe0['ftarg']['nquad']
+maxint = fqwe0['ftarg']['maxint']
 fEM = fqwe0['fEM']
 freq = fqwe0['f']
 # The following is a condensed version of transform.fqwe, without doqwe-part
@@ -145,7 +145,15 @@ etaH = etaH[0, :]
 etaV = etaV[0, :]
 zetaH = zetaH[0, :]
 zetaV = zetaV[0, :]
-rtol, atol, nquad, maxint, pts_per_dec, diff_quad, a, b, limit = htarg
+rtol = htarg['rtol']
+atol = htarg['atol']
+nquad = htarg['nquad']
+maxint = htarg['maxint']
+pts_per_dec = htarg['pts_per_dec']
+diff_quad = htarg['diff_quad']
+a = htarg['a']
+b = htarg['b']
+limit = htarg['limit']
 g_x, g_w = special.p_roots(nquad)
 b_zero = np.pi*np.arange(1.25, maxint+1)
 for i in range(10):
@@ -219,13 +227,17 @@ lrec, zrec = utils.get_layer_nr(rec, depth)
 freqres = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                            ab, msrc, mrec)
 # The following is a condensed version of transform.hquad
-rtol, atol, limit, a, b, pts_per_dec = htarg
+rtol = htarg['rtol']
+atol = htarg['atol']
+limit = htarg['limit']
+a = htarg['a']
+b = htarg['b']
+pts_per_dec = htarg['pts_per_dec']
 la = np.log(a)
 lb = np.log(b)
 ilambd = np.logspace(la, lb, int((lb-la)*pts_per_dec + 1), base=np.e)
 PJ0, PJ1, PJ0b = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth,
-                                   etaH[None, :], etaV[None, :],
-                                   zetaH[None, :], zetaV[None, :],
+                                   etaH, etaV, zetaH, zetaV,
                                    np.atleast_2d(ilambd), ab, False, msrc,
                                    mrec)
 sPJ0r = iuSpline(np.log(ilambd), PJ0.real)
