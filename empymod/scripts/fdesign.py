@@ -636,7 +636,7 @@ def plot_result(filt, full, prntres=True):
         plt.subplot(122)
     plt.title('Filter values of best filter')
 
-    # Backwards compatibility, for old filters without `filt.filter_coeff`.
+    # Check for old filters without `filt.filter_coeff`.
     if hasattr(filt, 'filter_coeff'):
         filter_coeff = filt.filter_coeff
     else:

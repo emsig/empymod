@@ -543,7 +543,7 @@ def test_check_time(capsys):
     f_base = filters.key_201_CosSin_2012().base
     assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
 
-    # [filter str, pts_per_dec] :: dict, deprecated
+    # [filter str, pts_per_dec] :: dict
     _, _, _, ftarg = utils.check_time(time, 0, 'cos',
                                       {'dlf': 'key_81_CosSin_2009',
                                        'pts_per_dec': 50}, 0)
@@ -551,7 +551,7 @@ def test_check_time(capsys):
     assert ftarg['pts_per_dec'] == 50
     assert ftarg['kind'] == 'cos'
 
-    # ['', 0]  :: dict, deprecated
+    # ['', 0]  :: dict
     _, f, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': None}, 0)
     assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
