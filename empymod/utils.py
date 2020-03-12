@@ -481,7 +481,7 @@ def check_hankel(ht, htarg, verb):
 
     Parameters
     ----------
-    ht : {'fht', 'qwe', 'quad'}
+    ht : {'dlf', 'qwe', 'quad'}
         Flag to choose the Hankel transform.
 
     htarg : str or filter from empymod.filters or array_like,
@@ -501,7 +501,7 @@ def check_hankel(ht, htarg, verb):
     # Ensure ht is all lowercase
     ht = ht.lower()
 
-    if ht == 'fht':    # If FHT, check filter settings
+    if ht in ['dlf', 'fht']:    # If DLF, check filter settings
 
         # Get and check input or set defaults
         htarg = _check_targ(htarg, ['dlf', 'pts_per_dec'])
@@ -517,7 +517,7 @@ def check_hankel(ht, htarg, verb):
         # Check pts_per_dec; defaults to 0
         try:
             htarg['pts_per_dec'] = _check_var(
-                    htarg['pts_per_dec'], float, 0, 'fht: pts_per_dec', ())
+                    htarg['pts_per_dec'], float, 0, 'dlf: pts_per_dec', ())
         except VariableCatch:
             htarg['pts_per_dec'] = 0.0
 
@@ -535,7 +535,7 @@ def check_hankel(ht, htarg, verb):
 
     elif ht in ['qwe', 'hqwe']:
         # Rename ht
-        ht = 'hqwe'
+        ht = 'qwe'
 
         # Get and check input or set defaults
         htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
@@ -622,7 +622,7 @@ def check_hankel(ht, htarg, verb):
 
     elif ht in ['quad', 'hquad']:
         # Rename ht
-        ht = 'hquad'
+        ht = 'quad'
 
         # Get and check input or set defaults
         htarg = _check_targ(htarg, ['rtol', 'atol', 'limit', 'a', 'b',
@@ -681,7 +681,7 @@ def check_hankel(ht, htarg, verb):
             print(f"     > pts_per_dec :  {htarg['pts_per_dec']}")
 
     else:
-        print("* ERROR   :: <ht> must be one of: ['fht', 'qwe', 'quad'];"
+        print("* ERROR   :: <ht> must be one of: ['dlf', 'qwe', 'quad'];"
               f" <ht> provided: {ht}")
         raise ValueError('ht')
 
@@ -913,12 +913,12 @@ def check_loop(loop, ht, htarg, verb):
     """
 
     # Define if to loop over frequencies or over offsets
-    lagged_splined_fht = False
-    if ht == 'fht':
+    lagged_splined_dlf = False
+    if ht == 'dlf':
         if htarg['pts_per_dec'] != 0:
-            lagged_splined_fht = True
+            lagged_splined_dlf = True
 
-    if ht in ['hqwe', 'hquad'] or lagged_splined_fht:
+    if ht in ['qwe', 'quad'] or lagged_splined_dlf:
         loop_freq = True
         loop_off = False
     else:
@@ -1180,7 +1180,7 @@ def check_time(time, signal, ft, ftarg, verb):
         n = np.int(maxf - minf)*ftarg['pts_per_dec']
 
         # Initialize FFTLog, get required parameters
-        freq, tcalc, dlnr, kr, rk = transform.fhti(
+        freq, tcalc, dlnr, kr, rk = transform.get_fftlog_input(
                 minf, maxf, n, ftarg['q'], ftarg['mu'])
         ftarg['tcalc'] = tcalc
         ftarg['dlnr'] = dlnr

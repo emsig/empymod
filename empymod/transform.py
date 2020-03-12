@@ -38,14 +38,14 @@ from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
 from empymod import kernel
 
-__all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
-           'qwe', 'get_dlf_points', 'fhti']
+__all__ = ['hankel_dlf', 'hankel_qwe', 'hankel_quad', 'ffht', 'fqwe', 'fftlog',
+           'fft', 'dlf', 'qwe', 'get_dlf_points', 'get_fftlog_input']
 
 
 # 1. Hankel transforms (wavenumber -> frequency)
 
-def fht(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV, zetaH,
-        zetaV, xdirect, fhtarg, msrc, mrec):
+def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+               zetaH, zetaV, xdirect, fhtarg, msrc, mrec):
     r"""Hankel Transform using the Digital Linear Filter method.
 
     The *Digital Linear Filter* method was introduced to geophysics by
@@ -105,8 +105,8 @@ def fht(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV, zetaH,
     return fEM, 1, True
 
 
-def hqwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV, zetaH,
-         zetaV, xdirect, qweargs, msrc, mrec):
+def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+               zetaH, zetaV, xdirect, qweargs, msrc, mrec):
     r"""Hankel Transform using Quadrature-With-Extrapolation.
 
     *Quadrature-With-Extrapolation* was introduced to geophysics by
@@ -133,7 +133,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV, zetaH,
     This function is based on ``get_CSEM1D_FD_QWE.m``, ``qwe.m``, and
     ``getBesselWeights.m`` from the source code distributed with [Key12]_.
 
-    In the spline-version, ``hqwe`` checks how steep the decay of the
+    In the spline-version, ``hankel_qwe`` checks how steep the decay of the
     wavenumber-domain result is, and calls QUAD for the very steep interval,
     for which QWE is not suited.
 
@@ -400,18 +400,18 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV, zetaH,
     return fEM, kcount, conv
 
 
-def hquad(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV, zetaH,
-          zetaV, xdirect, quadargs, msrc, mrec):
+def hankel_quad(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+                zetaH, zetaV, xdirect, quadargs, msrc, mrec):
     r"""Hankel Transform using the ``QUADPACK`` library.
 
     This routine uses the ``scipy.integrate.quad`` module, which in turn makes
     use of the Fortran library ``QUADPACK`` (``qagse``).
 
-    It is massively (orders of magnitudes) slower than either ``fht`` or
-    ``hqwe``, and is mainly here for completeness and comparison purposes. It
-    always uses interpolation in the wavenumber domain, hence it generally will
-    not be as precise as the other methods. However, it might work in some
-    areas where the others fail.
+    It is massively (orders of magnitudes) slower than either ``hankel_dlf`` or
+    ``hankel_qwe``, and is mainly here for completeness and comparison
+    purposes. It always uses interpolation in the wavenumber domain, hence it
+    generally will not be as precise as the other methods. However, it might
+    work in some areas where the others fail.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -491,7 +491,7 @@ def ffht(fEM, time, freq, ftarg):
 
 
     It follows the Filter methodology [Ande75]_, using Cosine- and
-    Sine-filters; see ``fht`` for more information.
+    Sine-filters; see ``hankel_dlf`` for more information.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -526,7 +526,7 @@ def fqwe(fEM, time, freq, qweargs):
     r"""Fourier Transform using Quadrature-With-Extrapolation.
 
     It follows the QWE methodology [Key12]_ for the Hankel transform, see
-    ``hqwe`` for more information.
+    ``hankel_qwe`` for more information.
 
     The function is called from one of the modelling routines in :mod:`model`.
     Consult these modelling routines for a description of the input and output
@@ -645,8 +645,9 @@ def fftlog(fEM, time, freq, ftarg):
     <https://github.com/prisae/pyfftlog>.
 
     Not the full flexibility of ``FFTLog`` is available here: Only the
-    logarithmic FFT (``fftl`` in ``FFTLog``), not the Hankel transform (``fht``
-    in ``FFTLog``). Furthermore, the following parameters are fixed:
+    logarithmic FFT (``fftl`` in ``FFTLog``), not the Hankel transform
+    (``hankel_dlf`` in ``FFTLog``). Furthermore, the following parameters are
+    fixed:
 
        - ``kr`` = 1 (initial value)
        - ``kropt`` = 1 (silently adjusts ``kr``)
@@ -827,8 +828,9 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, ang_fact=None,
         ab=None, int_pts=None):
     r"""Digital Linear Filter method.
 
-    This is the kernel of the DLF method, used for the Hankel (``fht``) and the
-    Fourier (``ffht``) Transforms. See ``fht`` for an extensive description.
+    This is the kernel of the DLF method, used for the Hankel (``hankel_dlf``)
+    and the Fourier (``ffht``) Transforms. See ``hankel_dlf`` for an extensive
+    description.
 
     For the Hankel transform, `signal` contains 3 complex wavenumber-domain
     signals: (PJ0, PJ1, PJ0b), as returned from `kernel.wavenumber`. The Hankel
@@ -1028,8 +1030,8 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         ang_fact=None):
     r"""Quadrature-With-Extrapolation.
 
-    This is the kernel of the QWE method, used for the Hankel (``hqwe``) and
-    the Fourier (``fqwe``) Transforms. See ``hqwe`` for an extensive
+    This is the kernel of the QWE method, used for the Hankel (``hankel_qwe``)
+    and the Fourier (``fqwe``) Transforms. See ``hankel_qwe`` for an extensive
     description.
 
     This function is based on ``qwe.m`` from the source code distributed with
@@ -1114,7 +1116,8 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
     r"""Quadrature for Hankel transform.
 
     This is the kernel of the QUAD method, used for the Hankel transforms
-    ``hquad`` and ``hqwe`` (where the integral is not suited for QWE).
+    ``hankel_quad`` and ``hankel_qwe`` (where the integral is not suited for
+    QWE).
 
     """
 
@@ -1232,7 +1235,7 @@ def get_dlf_points(filt, inp, nr_per_dec=None):
     return np.atleast_2d(out), new_inp
 
 
-def fhti(rmin, rmax, n, q, mu):
+def get_fftlog_input(rmin, rmax, n, q, mu):
     r"""Return parameters required for FFTLog."""
 
     # Central point log10(r_c) of periodic interval

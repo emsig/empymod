@@ -115,7 +115,7 @@ t = np.logspace(-2, 1, 301)  # Desired times (s)
 
 # Collect parameters
 inparg = {'src': src, 'rec': rec, 'depth': 0, 'freqtime': t, 'res': res,
-          'aniso': aniso, 'epermH': eperm, 'epermV': eperm, 'ht': 'fht',
+          'aniso': aniso, 'epermH': eperm, 'epermV': eperm, 'ht': 'dlf',
           'verb': 2}
 
 ###############################################################################
@@ -290,7 +290,7 @@ t = np.logspace(-2, 1, 301)  # Desired times (s)
 
 # Collect parameters
 inparg = {'src': src, 'rec': rec, 'depth': [0, 1000], 'freqtime': t,
-          'res': res, 'aniso': aniso, 'ht': 'fht', 'verb': 2}
+          'res': res, 'aniso': aniso, 'ht': 'dlf', 'verb': 2}
 
 ###############################################################################
 # Impulse response

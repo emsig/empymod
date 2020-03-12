@@ -277,20 +277,20 @@ class TestBipole:
                'freqtime': [1.34, 23, 31], 'src': [0, 0, 0, 0, 90],
                'rec': [[200, 300, 400], [3000, 4000, 5000], 120, 90, 0]}
 
-        fht = bipole(ht='fht', htarg={'pts_per_dec': 0}, verb=3, **inp)
+        dlf = bipole(ht='dlf', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  DLF (Fast Hankel Transform)" in out
 
         qwe = bipole(ht='qwe', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  Quadrature-with-Extrapolation" in out
-        assert_allclose(fht, qwe, equal_nan=True)
+        assert_allclose(dlf, qwe, equal_nan=True)
 
         quad = bipole(ht='quad', htarg=['', '', '', '', 1, 1000], verb=3,
                       **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  Quadrature" in out
-        assert_allclose(fht, quad, equal_nan=True)
+        assert_allclose(dlf, quad, equal_nan=True)
 
     def test_fourier(self, capsys):
         # Compare Fourier transforms

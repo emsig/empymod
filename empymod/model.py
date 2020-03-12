@@ -70,7 +70,7 @@ __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
            srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
-           ht='fht', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
+           ht='dlf', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
     r"""Return EM fields due to arbitrary rotated, finite length EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -177,15 +177,15 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         Defaults to False.
 
-    ht : {'fht', 'qwe', 'quad'}, optional
-        Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
-        Hankel Transform*), the *Quadrature-With-Extrapolation* (QWE), or a
-        simple *Quadrature* (QUAD) for the Hankel transform.  Defaults to
-        'fht'.
+    ht : {'dlf', 'qwe', 'quad'}, optional
+        Flag to choose either the *Digital Linear Filter* (DLF) method, the
+        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
+        for the Hankel transform.
+        Defaults to 'dlf'.
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
+            - If ``ht`` = 'dlf': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -559,7 +559,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
-           ht='fht', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
+           ht='dlf', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
     r"""Return EM fields due to infinitesimal small EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -663,15 +663,15 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
         Defaults to False.
 
-    ht : {'fht', 'qwe', 'quad'}, optional
-        Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
-        Hankel Transform*), the *Quadrature-With-Extrapolation* (QWE), or a
-        simple *Quadrature* (QUAD) for the Hankel transform.  Defaults to
-        'fht'.
+    ht : {'dlf', 'qwe', 'quad'}, optional
+        Flag to choose either the *Digital Linear Filter* (DLF) method, the
+        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
+        for the Hankel transform.
+        Defaults to 'dlf'.
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
+            - If ``ht`` = 'dlf': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -905,7 +905,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
 def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
          epermV=None, mpermH=None, mpermV=None, mrec=True, recpts=1,
-         strength=0, xdirect=False, ht='fht', htarg=None, ft='sin', ftarg=None,
+         strength=0, xdirect=False, ht='dlf', htarg=None, ft='sin', ftarg=None,
          loop=None, verb=2):
     r"""Return EM fields due to a magnetic source loop.
 
@@ -1041,15 +1041,15 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
         Defaults to False.
 
-    ht : {'fht', 'qwe', 'quad'}, optional
-        Flag to choose either the *Digital Linear Filter* method (FHT, *Fast
-        Hankel Transform*), the *Quadrature-With-Extrapolation* (QWE), or a
-        simple *Quadrature* (QUAD) for the Hankel transform.  Defaults to
-        'fht'.
+    ht : {'dlf', 'qwe', 'quad'}, optional
+        Flag to choose either the *Digital Linear Filter* (DLF) method, the
+        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
+        for the Hankel transform.
+        Defaults to 'dlf'.
 
     htarg : dict or list, optional
         Depends on the value for ``ht``:
-            - If ``ht`` = 'fht': [dlf, pts_per_dec]:
+            - If ``ht`` = 'dlf': [dlf, pts_per_dec]:
 
                 - dlf: string of filter name in ``empymod.filters`` or
                        the filter method itself.
@@ -1984,7 +1984,7 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         # Get angle dependent factors
         ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
 
-        calc = getattr(transform, ht)
+        calc = getattr(transform, 'hankel_'+ht)
         if loop_freq:
 
             for i in range(freq.size):

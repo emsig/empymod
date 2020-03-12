@@ -122,7 +122,7 @@ sEM = tEM_iint(np.log(Bx/t[:, None]))*SS
 fqwe0['sEM'] = sEM
 fqwe0['intervals'] = intervals
 
-# # G -- QWE - HQWE # #
+# # G -- QWE - HANKEL QWE # #
 # Model
 model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
 depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = model
@@ -140,7 +140,7 @@ lrec, zrec = utils.get_layer_nr(rec, depth)
 # Frequency-domain result
 freqres = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                            ab, msrc, mrec)
-# The following is a condensed version of transform.hqwe
+# The following is a condensed version of transform.hankel_qwe
 etaH = etaH[0, :]
 etaV = etaV[0, :]
 zetaH = zetaH[0, :]
@@ -203,7 +203,8 @@ nsinp = {'zsrc': zsrc, 'zrec': zrec, 'lsrc': lsrc, 'lrec': lrec, 'depth':
          zetaH[None, :], 'zetaV': zetaV[None, :], 'ab': ab, 'xdirect': False,
          'msrc': msrc, 'mrec': mrec}
 
-hqwe = {'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
+hankel_qwe = {
+        'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
         'intervals': intervals, 'lambd': lambd, 'off': off,
         'ang_fact': ang_fact, 'nsinp': nsinp, 'nquad': nquad, 'BJ0': BJ0,
         'BJ1': BJ1, 'ab': ab, 'freqres': np.squeeze(freqres),
@@ -227,7 +228,7 @@ lrec, zrec = utils.get_layer_nr(rec, depth)
 # Frequency-domain result
 freqres = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV,
                            ab, msrc, mrec)
-# The following is a condensed version of transform.hquad
+# The following is a condensed version of transform.hankel_quad
 rtol = htarg['rtol']
 atol = htarg['atol']
 limit = htarg['limit']
@@ -261,4 +262,4 @@ np.savez_compressed('../data/transform.npz',
                     ffht0=ffht0, ffht1=ffht1, ffht2=ffht2,
                     fqwe0=fqwe0, fqwe1=fqwe1, fqwe2=fqwe2,
                     fft0=fft0, fft1=fft0, fft2=fft0,  # fft1/2 are dummies
-                    hqwe=hqwe, quad=quad)
+                    hankel_qwe=hankel_qwe, quad=quad)

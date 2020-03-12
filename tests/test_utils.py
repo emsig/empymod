@@ -252,7 +252,7 @@ def test_check_frequency(capsys):
 def test_check_hankel(capsys):
     # # FHT # #
     # verbose
-    ht, htarg = utils.check_hankel('fht', None, 4)
+    ht, htarg = utils.check_hankel('fht', None, 4)  # OLD 'fht' instead 'dlf'
     out, _ = capsys.readouterr()
     assert "   Hankel          :  DLF (Fast Hankel Transform)\n     > F" in out
     assert "     > DLF type    :  Standard" in out
@@ -261,25 +261,25 @@ def test_check_hankel(capsys):
     assert htarg['pts_per_dec'] == 0
 
     # [filter str]
-    _, htarg = utils.check_hankel('fht', 'key_201_2009', 0)
+    _, htarg = utils.check_hankel('dlf', 'key_201_2009', 0)
     assert htarg['dlf'].name == filters.key_201_2009().name
     assert htarg['pts_per_dec'] == 0
     # [filter inst]
-    _, htarg = utils.check_hankel('fht', filters.kong_61_2007(), 0)
+    _, htarg = utils.check_hankel('dlf', filters.kong_61_2007(), 0)
     assert htarg['dlf'].name == filters.kong_61_2007().name
     assert htarg['pts_per_dec'] == 0
     # ['', pts_per_dec]  :: list
-    _, htarg = utils.check_hankel('fht', ['', 20], 0)
+    _, htarg = utils.check_hankel('dlf', ['', 20], 0)
     assert htarg['dlf'].name == filters.key_201_2009().name
     assert htarg['pts_per_dec'] == 20
     # ['', pts_per_dec]  :: dict
-    _, htarg = utils.check_hankel('fht', {'pts_per_dec': -1}, 4)
+    _, htarg = utils.check_hankel('dlf', {'pts_per_dec': -1}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Lagged Convolution" in out
     assert htarg['dlf'].name == filters.key_201_2009().name
     assert htarg['pts_per_dec'] == -1
     # [filter str, pts_per_dec]
-    _, htarg = utils.check_hankel('fht', ['key_201_2009', 20], 4)
+    _, htarg = utils.check_hankel('dlf', ['key_201_2009', 20], 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Splined, 20.0 pts/dec" in out
     assert htarg['dlf'].name == filters.key_201_2009().name
@@ -291,7 +291,7 @@ def test_check_hankel(capsys):
     out, _ = capsys.readouterr()
     outstr = "   Hankel          :  Quadrature-with-Extrapolation\n     > rtol"
     assert outstr in out
-    assert ht == 'hqwe'
+    assert ht == 'qwe'
     assert htarg['rtol'] == 1e-12
     assert htarg['atol'] == 1e-30
     assert htarg['nquad'] == 51
@@ -338,7 +338,7 @@ def test_check_hankel(capsys):
     out, _ = capsys.readouterr()
     outstr = "   Hankel          :  Quadrature\n     > rtol"
     assert outstr in out
-    assert ht == 'hquad'
+    assert ht == 'quad'
     assert htarg['rtol'] == 1e-12
     assert htarg['atol'] == 1e-20
     assert htarg['limit'] == 500
@@ -721,7 +721,7 @@ def test_check_time(capsys):
     with pytest.raises(ValueError):
         utils.check_time(time, -2, 'ffht', None, 0)
 
-    # ft != cos, sin, ffht, qwe, hqwe, fftlog,
+    # ft != cos, sin, ffht, qwe, fftlog,
     with pytest.raises(ValueError):
         utils.check_time(time, 0, 'fht', None, 0)
 

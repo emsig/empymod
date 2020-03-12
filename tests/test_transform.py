@@ -16,11 +16,11 @@ DATA = np.load(join(dirname(__file__), 'data/transform.npz'),
                allow_pickle=True)
 
 
-@pytest.mark.parametrize("htype", ['fht', 'hqwe', 'hquad'])
-def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
+@pytest.mark.parametrize("htype", ['dlf', 'qwe', 'quad'])
+def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
     # Compare wavenumber-domain calculation / FHT with analytical
     # frequency-domain fullspace solution
-    calc = getattr(transform, htype)
+    calc = getattr(transform, 'hankel_'+htype)
     model = utils.check_model([], 10, 2, 2, 5, 1, 10, True, 0)
     depth, res, aniso, epermH, epermV, mpermH, mpermV, _ = model
     frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
@@ -40,7 +40,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         lrec, zrec = utils.get_layer_nr(rec, depth)
 
         # # # 0. No Spline # # #
-        if htype != 'hquad':  # hquad is always using spline
+        if htype != 'quad':  # quad is always using spline
             # Wavenumber solution plus transform
 
             # Adjust htarg for fht
@@ -62,7 +62,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
 
         # # # 1. Spline; One angle # # #
         _, htarg = utils.check_hankel(htype, {'pts_per_dec': 80}, 0)
-        if htype == 'hquad':  # Lower atol to ensure convergence
+        if htype == 'quad':  # Lower atol to ensure convergence
             _, htarg = utils.check_hankel('quad', [1e-8], 0)
         elif htype == 'fht':  # Adjust htarg for fht
             lambd, int_pts = transform.get_dlf_points(
@@ -78,7 +78,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         freq1 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
                                  zetaV, ab, msrc, mrec)
         # Compare
-        if htype == 'hqwe' and ab in [13, 33]:
+        if htype == 'qwe' and ab in [13, 33]:
             assert_allclose(conv, False)
         else:
             assert_allclose(conv, True)
@@ -89,7 +89,7 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
         ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
-        if htype == 'hqwe':  # Put a very low diff_quad, to test it.; lower err
+        if htype == 'qwe':  # Put a very low diff_quad, to test it.; lower err
             _, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, 80, .1,
                                                   1e-6, .1, 1000], 0)
         elif htype == 'fht':  # Adjust htarg for fht
@@ -116,9 +116,9 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
                     htarg['dlf'], off, htarg['pts_per_dec'])
             htarg['lambd'] = lambd
             htarg['int_pts'] = int_pts
-        elif htype == 'hqwe':
+        elif htype == 'qwe':
             _, htarg = utils.check_hankel('qwe', ['', '', '', 80, 100], 0)
-        if htype != 'hquad':  # hquad is always pts_per_dec
+        if htype != 'quad':  # quad is always pts_per_dec
             # Analytical frequency-domain solution
             wvnr3, _, conv = calc(zsrc, zrec, lsrc, lrec, off, ang_fact, depth,
                                   ab, etaH, etaV, zetaH, zetaV, xdirect, htarg,
@@ -135,9 +135,9 @@ def test_hankel(htype):                           # 1. fht / 2. hqwe / 3. hquad
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
         ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
-        if htype == 'hqwe':
+        if htype == 'qwe':
             _, htarg = utils.check_hankel('qwe', ['', '', '', 200, 80], 0)
-        elif htype == 'hquad':
+        elif htype == 'quad':
             _, htarg = utils.check_hankel('quad', None, 0)
         elif htype == 'fht':
             lambd, int_pts = transform.get_dlf_points(
@@ -177,9 +177,10 @@ def test_fourier(ftype):               # 4. ffht / 5. fqwe / 6. fftlog / 7. fft
 
 
 def test_qwe():                                                        # 8. qwe
-    # QWE is integral of hqwe and fqwe, and therefore tested a lot through
-    # those. Here we just ensure status quo. And if a problem arises in hqwe or
-    # fqwe, it would make it obvious if the problem arises from qwe or not.
+    # QWE is integral of hankel_qwe and fqwe, and therefore tested a lot
+    # through those. Here we just ensure status quo. And if a problem arises in
+    # hankel_qwe or fqwe, it would make it obvious if the problem arises from
+    # qwe or not.
 
     # Fourier
     dat = DATA['fqwe0'][()]
@@ -190,7 +191,7 @@ def test_qwe():                                                        # 8. qwe
     assert_allclose(np.squeeze(-tEM*2/np.pi), tres, rtol=1e-3)
 
     # Hankel
-    dat = DATA['hqwe'][()]
+    dat = DATA['hankel_qwe'][()]
 
     # With spline
     fEM, _, _ = transform.qwe(dat['rtol'], dat['atol'], dat['maxint'],
@@ -278,9 +279,9 @@ def test_get_dlf_points():                                  # 9. get_dlf_points
     assert_allclose(out, ffilt.base/inp[:, None])
 
 
-def test_fhti():                                                     # 10. fhti
+def test_get_fftlog_input():                             # 10. get_fftlog_input
     # Check one example
-    freq, tcalc, dlnr, kr, rk = transform.fhti(-1, 2, 60, 0, 0.5)
+    freq, tcalc, dlnr, kr, rk = transform.get_fftlog_input(-1, 2, 60, 0, 0.5)
     # Expected values
     ofreq = np.array([0.01685855, 0.0189156, 0.02122365, 0.02381333, 0.026719,
                       0.02997921, 0.03363722, 0.03774158, 0.04234675,
@@ -324,9 +325,10 @@ def test_fhti():                                                     # 10. fhti
 
 
 def test_quad():                                                      # 9. quad
-    # QUAD is used from hquad and hqwe, and therefore tested a lot through
-    # those. Here we just ensure status quo. And if a problem arises in hquad
-    # or hqwe, it would make it obvious if the problem arises from quad or not.
+    # QUAD is used from hankel_quad and hankel_qwe, and therefore tested a lot
+    # through those. Here we just ensure status quo. And if a problem arises in
+    # hankel_quad or hankel_qwe, it would make it obvious if the problem arises
+    # from quad or not.
 
     # Hankel
     dat = DATA['quad'][()]
