@@ -44,7 +44,7 @@ __all__ = ['fht', 'hqwe', 'hquad', 'ffht', 'fqwe', 'fftlog', 'fft', 'dlf',
 
 # 1. Hankel transforms (wavenumber -> frequency)
 
-def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
+def fht(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV, zetaH,
         zetaV, xdirect, fhtarg, msrc, mrec):
     r"""Hankel Transform using the Digital Linear Filter method.
 
@@ -100,12 +100,12 @@ def fht(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
     # Carry out the dlf
     fEM = dlf(PJ, lambd, off, fhtarg['dlf'], fhtarg['pts_per_dec'],
-              factAng=factAng, ab=ab, int_pts=int_pts)
+              ang_fact=ang_fact, ab=ab, int_pts=int_pts)
 
     return fEM, 1, True
 
 
-def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
+def hqwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV, zetaH,
          zetaV, xdirect, qweargs, msrc, mrec):
     r"""Hankel Transform using Quadrature-With-Extrapolation.
 
@@ -324,7 +324,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
                         'limit': limit}
 
                 fEM[i], tc = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi,
-                                  ab, off[i], factAng[i], iinp)
+                                  ab, off[i], ang_fact[i], iinp)
 
                 # Update conv
                 conv *= tc
@@ -353,7 +353,7 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
                 sEM += np.sum(np.reshape(sPJ0b*BJ0, (off.size, nquad, -1),
                                          order='F'), 1)
             if k_used[1] or k_used[2]:
-                sEM *= factAng[:, np.newaxis]
+                sEM *= ang_fact[:, np.newaxis]
             if k_used[0]:
                 sEM += np.sum(np.reshape(sPJ0*BJ0, (off.size, nquad, -1),
                                          order='F'), 1)
@@ -395,12 +395,12 @@ def hqwe(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
 
         # Get QWE
         fEM, kcount, conv = qwe(rtol, atol, maxint, getkernel, intervals,
-                                lambd, off, factAng)
+                                lambd, off, ang_fact)
 
     return fEM, kcount, conv
 
 
-def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
+def hquad(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV, zetaH,
           zetaV, xdirect, quadargs, msrc, mrec):
     r"""Hankel Transform using the ``QUADPACK`` library.
 
@@ -476,7 +476,7 @@ def hquad(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH, etaV, zetaH,
     # Loop over offsets
     for i in range(off.size):
         fEM[i], tc = quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab,
-                          off[i], factAng[i], iinp)
+                          off[i], ang_fact[i], iinp)
         conv *= tc
 
     # Return the electromagnetic field
@@ -823,7 +823,7 @@ def fft(fEM, time, freq, ftarg):
 
 # 3. Utilities
 
-def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
+def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, ang_fact=None,
         ab=None, int_pts=None):
     r"""Digital Linear Filter method.
 
@@ -832,7 +832,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
     For the Hankel transform, `signal` contains 3 complex wavenumber-domain
     signals: (PJ0, PJ1, PJ0b), as returned from `kernel.wavenumber`. The Hankel
-    DLF has two additional, optional parameters: `factAng`, as returned from
+    DLF has two additional, optional parameters: `ang_fact`, as returned from
     `kernel.angle_factor`, and `ab`. The PJ0-kernel is the part of the
     wavenumber-domain calculation which contains a zeroth-order Bessel function
     and does NOT depend on the angle between source and receiver, only on
@@ -848,17 +848,17 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
     """
     # 0. HANKEL/FOURIER-DEPENDING SETTINGS
     if isinstance(signal, tuple):
-        # Hankel transform: 3 complex signals; respects `factAng` and `ab`
+        # Hankel transform: 3 complex signals; respects `ang_fact` and `ab`
         hankel = True
 
         # Check if all angles are the same
-        if factAng is None:
+        if ang_fact is None:
             has_angle_factors = False
         else:
-            one_angle = factAng.min() == factAng.max()
+            one_angle = ang_fact.min() == ang_fact.max()
             if one_angle:
-                has_angle_factors = factAng[0] != 1.0
-                factAng = factAng[0]
+                has_angle_factors = ang_fact[0] != 1.0
+                ang_fact = ang_fact[0]
             else:
                 has_angle_factors = True
 
@@ -970,7 +970,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
                 # Angle dependency
                 if has_angle_factors:
-                    out_angle *= factAng
+                    out_angle *= ang_fact
                 out_signal = out_angle + out_noang
 
         else:
@@ -993,7 +993,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
             # Angle dependency
             if has_angle_factors:
-                out_signal *= factAng
+                out_signal *= ang_fact
 
             if k_used[0]:  # J0
                 out_signal += np.dot(inp_PJ0, filt.j0)
@@ -1012,7 +1012,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
             # Angle dependency
             if has_angle_factors:
-                out_signal *= factAng
+                out_signal *= ang_fact
 
             if k_used[0]:  # Only if kernel contains info
                 out_signal += spline(out_noang[::-1], int_pts[::-1], out_pts)
@@ -1025,7 +1025,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, factAng=None,
 
 
 def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
-        factAng=None):
+        ang_fact=None):
     r"""Quadrature-With-Extrapolation.
 
     This is the kernel of the QWE method, used for the Hankel (``hqwe``) and
@@ -1042,7 +1042,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
 
     # 1. Calculate the first interval for all offsets
     if hasattr(inp, '__call__'):  # Hankel and not spline
-        EM0 = inp(0, lambd, off, factAng)
+        EM0 = inp(0, lambd, off, ang_fact)
     else:                         # Fourier or Hankel with spline
         EM0 = inp[:, 0]
     EM0 *= getweights(0, intervals)
@@ -1059,7 +1059,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
     for i in range(1, maxint):
         # 3.a Calculate the field for this interval
         if hasattr(inp, '__call__'):  # Hankel and not spline
-            EMi = inp(i, lambd[om, :], off[om], factAng[om])
+            EMi = inp(i, lambd[om, :], off[om], ang_fact[om])
             kcount += 1  # Update count
         else:                         # Fourier or Hankel with spline
             EMi = inp[om, i]
@@ -1110,7 +1110,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
     return EM, kcount, conv
 
 
-def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
+def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
     r"""Quadrature for Hankel transform.
 
     This is the kernel of the QUAD method, used for the Hankel transforms
@@ -1153,16 +1153,16 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, factAng, iinp):
             conv = False
 
     if sPJ1r is not None:
-        re = integrate.quad(quad_PJ1, args=(sPJ1r, ab, off, factAng), **iinp)
-        im = integrate.quad(quad_PJ1, args=(sPJ1i, ab, off, factAng), **iinp)
+        re = integrate.quad(quad_PJ1, args=(sPJ1r, ab, off, ang_fact), **iinp)
+        im = integrate.quad(quad_PJ1, args=(sPJ1i, ab, off, ang_fact), **iinp)
         out += re[0] + 1j*im[0]
         # If there is a fourth output from QUAD, it means it did not converge
         if (len(re) or len(im)) > 3:
             conv = False
 
     if sPJ0br is not None:
-        re = integrate.quad(quad_PJ0b, args=(sPJ0br, off, factAng), **iinp)
-        im = integrate.quad(quad_PJ0b, args=(sPJ0bi, off, factAng), **iinp)
+        re = integrate.quad(quad_PJ0b, args=(sPJ0br, off, ang_fact), **iinp)
+        im = integrate.quad(quad_PJ0b, args=(sPJ0bi, off, ang_fact), **iinp)
         out += re[0] + 1j*im[0]
         # If there is a fourth output from QUAD, it means it did not converge
         if (len(re) or len(im)) > 3:

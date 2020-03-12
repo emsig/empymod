@@ -76,7 +76,7 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
         ``PJ0`` and ``PJ0b`` could theoretically be added here into one, and
         then be transformed in one go.  However, ``PJ0b`` has to be multiplied
-        by ``factAng`` later. This has to be done after the Hankel transform
+        by ``ang_fact`` later. This has to be done after the Hankel transform
         for methods which make use of spline interpolation, in order to work
         for offsets that are not in line with each other.
 
@@ -733,13 +733,13 @@ def angle_factor(angle, ab, msrc, mrec):
         eval_angle *= 2
 
     # Get factor
-    factAng = fct(eval_angle)
+    ang_fact = fct(eval_angle)
 
     # Ensure cos([pi/2, 3pi/2]) and sin([pi, 2pi]) are zero (floating pt issue)
-    factAng[np.isclose(np.abs(eval_angle), test_ang_1, 1e-10, 1e-14)] = 0
-    factAng[np.isclose(np.abs(eval_angle), test_ang_2, 1e-10, 1e-14)] = 0
+    ang_fact[np.isclose(np.abs(eval_angle), test_ang_1, 1e-10, 1e-14)] = 0
+    ang_fact[np.isclose(np.abs(eval_angle), test_ang_2, 1e-10, 1e-14)] = 0
 
-    return factAng
+    return ang_fact
 
 
 # Analytical solutions

@@ -1889,7 +1889,7 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     # Get angle-dependent factor
     off, angle = get_off_ang(src, rec, nsrc, nrec, verb)
-    factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+    ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
 
     # Get layer number in which src and rec reside (lsrc/lrec)
     lsrc, zsrc = get_layer_nr(src, depth)
@@ -1922,14 +1922,14 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
         # Collect output
         if J1 is not None:
-            PJ1 += factAng[:, np.newaxis]*J1
+            PJ1 += ang_fact[:, np.newaxis]*J1
             if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
                 # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
                 PJ1 /= off[:, None]
         if J0 is not None:
             PJ0 += J0
         if J0b is not None:
-            PJ0 += factAng[:, np.newaxis]*J0b
+            PJ0 += ang_fact[:, np.newaxis]*J0b
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, 1)
@@ -1982,13 +1982,13 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
     if not isfullspace*xdir:
 
         # Get angle dependent factors
-        factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+        ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
 
         calc = getattr(transform, ht)
         if loop_freq:
 
             for i in range(freq.size):
-                out = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab,
+                out = calc(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab,
                            etaH[None, i, :], etaV[None, i, :],
                            zetaH[None, i, :], zetaV[None, i, :], xdir,
                            htarg, msrc, mrec)
@@ -2000,13 +2000,13 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
             for i in range(off.size):
 
                 out = calc(zsrc, zrec, lsrc, lrec, off[None, i],
-                           factAng[None, i], depth, ab, etaH, etaV, zetaH,
+                           ang_fact[None, i], depth, ab, etaH, etaV, zetaH,
                            zetaV, xdir, htarg, msrc, mrec)
                 fEM[:, None, i] += out[0]
                 kcount += out[1]
                 conv *= out[2]
         else:
-            out = calc(zsrc, zrec, lsrc, lrec, off, factAng, depth, ab, etaH,
+            out = calc(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH,
                        etaV, zetaH, zetaV, xdir, htarg, msrc, mrec)
             fEM += out[0]
             kcount += out[1]

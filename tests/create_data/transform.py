@@ -170,7 +170,7 @@ BJ0 = special.j0(Bx)*np.tile(g_w, maxint)
 BJ1 = special.j1(Bx)*np.tile(g_w, maxint)
 intervals = xint/off[:, None]
 lambd = Bx/off[:, None]
-factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
 # 1 Spline version
 start = np.log(lambd.min())
 stop = np.log(lambd.max())
@@ -194,7 +194,7 @@ if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
     # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
     sEM /= np.atleast_1d(off[:, np.newaxis])
 sEM += np.sum(np.reshape(sPJ0b*BJ0, (off.size, nquad, -1), order='F'), 1)
-sEM *= factAng[:, np.newaxis]
+sEM *= ang_fact[:, np.newaxis]
 sEM += np.sum(np.reshape(sPJ0*BJ0, (off.size, nquad, -1), order='F'), 1)
 
 # Additinol stuff needed for non-spline version
@@ -204,9 +204,10 @@ nsinp = {'zsrc': zsrc, 'zrec': zrec, 'lsrc': lsrc, 'lrec': lrec, 'depth':
          'msrc': msrc, 'mrec': mrec}
 
 hqwe = {'rtol': rtol, 'atol': atol, 'maxint': maxint, 'getkernel': sEM,
-        'intervals': intervals, 'lambd': lambd, 'off': off, 'factAng': factAng,
-        'nsinp': nsinp, 'nquad': nquad, 'BJ0': BJ0, 'BJ1': BJ1, 'ab': ab,
-        'freqres': np.squeeze(freqres), 'diff_quad': diff_quad}
+        'intervals': intervals, 'lambd': lambd, 'off': off,
+        'ang_fact': ang_fact, 'nsinp': nsinp, 'nquad': nquad, 'BJ0': BJ0,
+        'BJ1': BJ1, 'ab': ab, 'freqres': np.squeeze(freqres),
+        'diff_quad': diff_quad}
 
 # # H -- QUAD # #
 # Model
@@ -246,11 +247,12 @@ sPJ1r = iuSpline(np.log(ilambd), PJ1.real)
 sPJ1i = iuSpline(np.log(ilambd), PJ1.imag)
 sPJ0br = iuSpline(np.log(ilambd), PJ0b.real)
 sPJ0bi = iuSpline(np.log(ilambd), PJ0b.imag)
-factAng = kernel.angle_factor(angle, ab, msrc, mrec)
+ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
 iinp = {'a': a, 'b': b, 'epsabs': atol, 'epsrel': rtol, 'limit': limit}
 quad = {'inp': {'sPJ0r': sPJ0r, 'sPJ0i': sPJ0i, 'sPJ1r': sPJ1r, 'sPJ1i': sPJ1i,
                 'sPJ0br': sPJ0br, 'sPJ0bi': sPJ0bi, 'ab': ab, 'off': off,
-                'factAng': factAng, 'iinp': iinp}, 'res': np.squeeze(freqres)}
+                'ang_fact': ang_fact, 'iinp': iinp},
+        'res': np.squeeze(freqres)}
 
 # # I -- Store data # #
 np.savez_compressed('../data/transform.npz',
