@@ -83,7 +83,7 @@ plt.show()
 # Calculate corresponding time-domain signal.
 tresp, _ = empymod.model.tem(
     fEM=fresp[:, None],
-    off=model['rec'][0],
+    off=np.array(model['rec'][0]),
     freq=freq,
     time=time,
     signal=signal,

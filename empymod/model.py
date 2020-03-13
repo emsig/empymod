@@ -61,7 +61,7 @@ from empymod.utils import (
         check_time, check_time_only, check_model, check_frequency,
         check_hankel, check_loop, check_dipole, check_bipole, check_ab,
         check_solution, get_abs, get_geo_fact, get_azm_dip, get_off_ang,
-        get_layer_nr, printstartfinish, conv_warning, EMArray)
+        get_layer_nr, get_kwargs, printstartfinish, conv_warning, EMArray)
 
 __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
            'tem']
@@ -69,8 +69,7 @@ __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
 
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
-           srcpts=1, mrec=False, recpts=1, strength=0, xdirect=False,
-           ht='dlf', htarg=None, ft='dlf', ftarg=None, loop=None, verb=2):
+           srcpts=1, mrec=False, recpts=1, strength=0, **kwargs):
     r"""Return EM fields due to arbitrary rotated, finite length EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -384,6 +383,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
     """
+    # Get kwargs with defaults.
+    out = get_kwargs(['xdirect', 'ht', 'htarg', 'ft', 'ftarg', 'loop', 'verb'],
+                     [False, 'dlf', None, 'dlf', None, None, 2], kwargs)
+    xdirect, ht, htarg, ft, ftarg, loop, verb = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -559,8 +562,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
-           epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
-           ht='dlf', htarg=None, ft='sin', ftarg=None, loop=None, verb=2):
+           epermH=None, epermV=None, mpermH=None, mpermV=None, **kwargs):
     r"""Return EM fields due to infinitesimal small EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -828,6 +830,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
     """
+    # Get kwargs with defaults.
+    out = get_kwargs(['xdirect', 'ht', 'htarg', 'ft', 'ftarg', 'loop', 'verb'],
+                     [False, 'dlf', None, 'dlf', None, None, 2], kwargs)
+    xdirect, ht, htarg, ft, ftarg, loop, verb = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -907,8 +913,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
 def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
          epermV=None, mpermH=None, mpermV=None, mrec=True, recpts=1,
-         strength=0, xdirect=False, ht='dlf', htarg=None, ft='sin', ftarg=None,
-         loop=None, verb=2):
+         strength=0, **kwargs):
     r"""Return EM fields due to a magnetic source loop.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -1246,6 +1251,10 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
       -8.55487532e-13 +6.18402706e-13j  -5.15642408e-13 +4.99091919e-13j]
 
     """
+    # Get kwargs with defaults.
+    out = get_kwargs(['xdirect', 'ht', 'htarg', 'ft', 'ftarg', 'loop', 'verb'],
+                     [False, 'dlf', None, 'dlf', None, None, 2], kwargs)
+    xdirect, ht, htarg, ft, ftarg, loop, verb = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -1433,7 +1442,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
 def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
                aniso=None, epermH=None, epermV=None, mpermH=None, mpermV=None,
-               verb=2):
+               **kwargs):
     r"""Return analytical full- or half-space solution.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -1579,6 +1588,8 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
        1.31469130e-10 -7.62770461e-11j   7.72342470e-11 -5.74534125e-11j
        4.61480481e-11 -4.36275540e-11j   2.76174038e-11 -3.32860932e-11j]
     """
+    # Get kwargs with defaults.
+    verb = get_kwargs(['verb', ], [2, ], kwargs)[0]
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -1665,8 +1676,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
 
 def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
-        epermH=None, epermV=None, mpermH=None, mpermV=None, xdirect=False,
-        ht='quad', htarg=None, ft='fft', ftarg=None, loop=None, verb=2):
+        epermH=None, epermV=None, mpermH=None, mpermV=None, **kwargs):
     r"""Return Ground-Penetrating Radar signal.
 
     THIS FUNCTION IS EXPERIMENTAL, USE WITH CAUTION.
@@ -1699,6 +1709,11 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
         GPR response
 
     """
+    # Get kwargs with defaults.
+    out = get_kwargs(['xdirect', 'ht', 'htarg', 'ft', 'ftarg', 'loop', 'verb'],
+                     [False, 'quad', None, 'fft', None, None, 2], kwargs)
+    xdirect, ht, htarg, ft, ftarg, loop, verb = out
+
     if verb > 2:
         print("   GPR             :  EXPERIMENTAL, USE WITH CAUTION")
         print(f"     > centre freq :  {cf}")
@@ -1711,8 +1726,10 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
 
     # === 2. CALL DIPOLE ============
 
-    EM = dipole(src, rec, depth, res, freq, None, ab, aniso, epermH, epermV,
-                mpermH, mpermV, xdirect, ht, htarg, ft, ftarg, loop, verb)
+    EM = dipole(src=src, rec=rec, depth=depth, res=res, freqtime=freq, ab=ab,
+                aniso=aniso, epermH=epermH, epermV=epermV, mpermH=mpermH,
+                mpermV=mpermV, xdirect=xdirect, ht=ht, htarg=htarg, ft=ft,
+                ftarg=ftarg, loop=loop, verb=verb)
 
     # === 3. GPR STUFF
 
@@ -1746,7 +1763,7 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
 
 
 def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
-             epermH=None, epermV=None, mpermH=None, mpermV=None, verb=2):
+             epermH=None, epermV=None, mpermH=None, mpermV=None, **kwargs):
     r"""Return electromagnetic wavenumber-domain field.
 
     Calculate the electromagnetic wavenumber-domain field due to infinitesimal
@@ -1867,6 +1884,8 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
        2.42062030e-10 -8.95356636e-10j   2.54406501e-10 -9.42218177e-10j
        2.67371420e-10 -9.91530051e-10j   2.80987292e-10 -1.04342036e-09j]
     """
+    # Get kwargs with defaults.
+    verb = get_kwargs(['verb', ], [2, ], kwargs)[0]
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)

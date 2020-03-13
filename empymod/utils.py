@@ -1506,8 +1506,10 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
 def get_layer_nr(inp, depth):
     r"""Get number of layer in which inp resides.
 
-    Note:
-    If zinp is on a layer interface, the layer above the interface is chosen.
+    .. note::
+
+        If zinp is on a layer interface, the layer above the interface is
+        chosen.
 
     This check-function is called from one of the modelling routines in
     :mod:`model`.  Consult these modelling routines for a detailed description
@@ -1804,6 +1806,76 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     return tout, azm, dip, g_w, intpts, inp_w
 
 
+def get_kwargs(names, defaults, kwargs):
+    """Return wanted parameters, check remaining.
+
+    1. Extracts parameters ``names`` from ``kwargs``, filling them with the
+       ``defaults``-value if it is not in ``kwargs``.
+    2. Check remaining kwargs;
+       - Raise an error if it is an unknown keyword;
+       - Print warning if it is a keyword from another routine (verb>0).
+
+    List of possible kwargs:
+
+    - ALL functions: src, rec, res, aniso, epermH, epermV, mpermH, mpermV, verb
+    - ONLY gpr: cf, gain
+    - ONLY bipole: msrc, srcpts
+    - ONLY dipole_k: freq, wavenumber
+    - ONLY analytical: solution
+    - ONLY bipole, loop: mrec, recpts, strength
+    - ONLY bipole, dipole, loop, gpr: ht, htarg, ft, ftarg, xdirect, loop
+    - ONLY bipole, dipole, loop, analytical: signal
+    - ONLY dipole, analytical, gpr, dipole_k: ab
+    - ONLY bipole, dipole, loop, gpr, dipole_k: depth
+    - ONLY bipole, dipole, loop, analytical, gpr: freqtime
+
+    Parameters
+    ----------
+    names: list
+        Names of wanted parameters as strings.
+
+    defaults: list
+        Default values of wanted parameters, in same order.
+
+    kwargs : dict
+        Passed-through kwargs.
+
+    Returns
+    ------
+    values : list
+        Wanted parameters.
+
+    """
+    # Known keys (excludes keys present in ALL routines).
+    known_keys = set([
+            'depth', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'signal',
+            'ab', 'freqtime', 'freq', 'wavenumber', 'solution', 'cf', 'gain',
+            'msrc', 'srcpts', 'mrec', 'recpts', 'strength'
+    ])
+
+    # Loop over wanted parameters.
+    out = list()
+    verb = 2  # get_kwargs-internal default.
+    for i, name in enumerate(names):
+
+        # Catch verb for warnings later on.
+        if name == 'verb':
+            verb = kwargs.get(name, defaults[i])
+
+        # Add this parameter to the list.
+        out.append(kwargs.pop(name, defaults[i]))
+
+    # Check remaining parameters.
+    if kwargs:
+        if not set(kwargs.keys()).issubset(known_keys):
+            print(f"* ERROR   :: Unexpected **kwargs: {kwargs}")
+            raise ValueError('kwargs')
+        elif verb > 0:
+            print(f"* WARNING :: Unused **kwargs: {kwargs}")
+
+    return out
+
+
 def printstartfinish(verb, inp=None, kcount=None):
     r"""Print start and finish with time measure and kernel count."""
     if inp:
@@ -1837,6 +1909,11 @@ def set_minimum(min_freq=None, min_time=None, min_off=None, min_res=None,
 
     The given parameters are set to its minimum value if they are smaller.
 
+    .. note::
+
+        set_minimum and get_minimum are derived after set_printoptions and
+        get_printoptions from arrayprint.py in numpy.
+
     Parameters
     ----------
     min_freq : float, optional
@@ -1850,11 +1927,6 @@ def set_minimum(min_freq=None, min_time=None, min_off=None, min_res=None,
         Minimum horizontal and vertical resistivity [Ohm.m] (default 1e-20).
     min_angle : float, optional
         Minimum angle [-] (default 1e-10).
-
-    Note
-    ----
-    set_minimum and get_minimum are derived after set_printoptions and
-    get_printoptions from arrayprint.py in numpy.
 
     """
 
@@ -1876,6 +1948,11 @@ def get_minimum():
     r"""
     Return the current minimum values.
 
+    .. note::
+
+        set_minimum and get_minimum are derived after set_printoptions and
+        get_printoptions from arrayprint.py in numpy.
+
     Returns
     -------
     min_vals : dict
@@ -1888,11 +1965,6 @@ def get_minimum():
           - min_angle : float
 
         For a full description of these options, see `set_minimum`.
-
-    Note
-    ----
-    set_minimum and get_minimum are derived after set_printoptions and
-    get_printoptions from arrayprint.py in numpy.
 
     """
     d = dict(min_freq=_min_freq,
@@ -1999,6 +2071,11 @@ class Report(ScoobyReport):
 
     All modules provided in ``add_pckg`` are also shown.
 
+    .. note::
+
+        The package ``scooby`` has to be installed in order to use ``Report``:
+        ``pip install scooby``.
+
 
     Parameters
     ----------
@@ -2015,13 +2092,6 @@ class Report(ScoobyReport):
 
     sort : bool, optional
         Sort the packages when the report is shown
-
-
-    NOTE
-    ----
-
-    The package ``scooby`` has to be installed in order to use ``Report``:
-    ``pip install scooby``.
 
 
     Examples
