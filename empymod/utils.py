@@ -32,8 +32,11 @@ This module consists of four groups of functions:
 # Mandatory imports
 import numpy as np
 from scipy import special
-from datetime import timedelta
 from timeit import default_timer
+from datetime import timedelta, datetime
+
+# Relative imports
+from empymod import filters, transform
 
 # scooby is a soft dependency for empymod
 try:
@@ -44,8 +47,18 @@ except ImportError:
             print("\n* WARNING :: `empymod.Report` requires `scooby`."
                   "\n             Install it via `pip install scooby`.\n")
 
-# Relative imports
-from empymod import filters, transform
+# Version: We take care of it here instead of in __init__, so we can use it
+# within the package itself (logs).
+try:
+    # - Released versions just tags:       1.10.0
+    # - GitHub commits add .dev#+hash:     1.10.1.dev3+g973038c
+    # - Uncommitted changes add timestamp: 1.10.1.dev3+g973038c.d20191022
+    from empymod.version import version as __version__
+except ImportError:
+    # If it was not installed, then we don't know the version. We could throw a
+    # warning here, but this case *should* be rare. empymod should be installed
+    # properly!
+    __version__ = 'unknown-'+datetime.today().strftime('%Y%m%d')
 
 
 __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
@@ -873,9 +886,9 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
         if xdirect is None:
             print("   direct field    :  Not calculated (secondary field)")
         elif xdirect:
-            print("   direct field    :  Calc. in frequency domain")
+            print("   direct field    :  Comp. in frequency domain")
         else:
-            print("   direct field    :  Calc. in wavenumber domain")
+            print("   direct field    :  Comp. in wavenumber domain")
 
     return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
 
@@ -1888,7 +1901,7 @@ def printstartfinish(verb, inp=None, kcount=None):
     else:
         t0 = default_timer()
         if verb > 2:
-            print("\n:: empymod START  ::\n")
+            print(f"\n:: empymod START  ::  v{__version__.split('+')[0]}\n")
         return t0
 
 

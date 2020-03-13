@@ -70,8 +70,8 @@ plt.show()
 # 1. Frequency response for f = 1 Hz
 # ----------------------------------
 #
-# Calculate
-# ~~~~~~~~~
+# Compute
+# ~~~~~~~
 
 inpdat = {'src': [0, 0, zsrc], 'rec': [fx, fy, zrec], 'depth': depth,
           'freqtime': 1, 'aniso': aniso, 'ab': ab,
@@ -114,10 +114,10 @@ plt.show()
 # 2. Crossplot
 # ------------
 #
-# Calculate
-# ~~~~~~~~~
+# Compute
+# ~~~~~~~
 
-# Calculate responses
+# Compute responses
 freq = np.logspace(-1.5, .5, 33)  # 33 frequencies from -1.5 to 0.5 (logspace)
 inpdat = {'src': [0, 0, zsrc], 'rec': [fx, fy, zrec], 'depth': depth,
           'freqtime': freq, 'aniso': aniso, 'ab': ab,

@@ -3,16 +3,16 @@ Transforms
 
 Included **Hankel transforms**:
 
-- Digital Linear Filters *DLF*
-- Quadrature with Extrapolation *QWE*
-- Adaptive quadrature *QUAD*
+- DLF: Digital Linear Filters
+- QWE: Quadrature with Extrapolation
+- QUAD: Adaptive quadrature
 
 Included **Fourier transforms**:
 
-- Digital Linear Filters *DLF*
-- Quadrature with Extrapolation *QWE*
-- Logarithmic Fast Fourier Transform *FFTLog*
-- Fast Fourier Transform *FFT*
+- DLF: Digital Linear Filters
+- QWE: Quadrature with Extrapolation
+- FFTLog: Logarithmic Fast Fourier Transform
+- FFT: Fast Fourier Transform
 
 
 Digital Linear Filters
@@ -96,9 +96,8 @@ Notes on Fourier Transform
 --------------------------
 
 The Fourier transform to obtain the space-time domain impulse response from the
-complex-valued space-frequency response can be calculated by either a
-cosine transform with the real values, or a sine transform with the imaginary
-part,
+complex-valued space-frequency response can be computed by either a cosine
+transform with the real values, or a sine transform with the imaginary part,
 
 .. math::
 
@@ -122,8 +121,8 @@ the step-response,
 
 Using :math:`\frac{\partial}{\partial t} \Leftrightarrow \mathrm{i}\omega` and
 going the other way, from impulse to step, leads to the divison by
-:math:`\mathrm{i}\omega`. (This only holds because we define in accordance with
-the causality principle that :math:`E(r, t \le 0) = 0`).
+:math:`\mathrm{i}\omega`. This only holds because we define in accordance with
+the causality principle that :math:`E(r, t \le 0) = 0`.
 
 With the sine/cosine transform (``ft='dlf'/'sin'/'cos'``) you can choose which
 one you want for the impulse responses. For the switch-on response, however,
@@ -157,12 +156,12 @@ and the step-off by
 Laplace domain
 --------------
 
-It is also possible to calculate the response in the **Laplace domain**, by
-using a real value for :math:`s` instead of the complex value
+It is also possible to compute the response in the **Laplace domain**, by using
+a real value for :math:`s` instead of the complex value
 :math:`\mathrm{i}\omega``. This simplifies the problem from complex numbers to
 real numbers. However, the transform from Laplace-to-time domain is not as
 robust as the transform from frequency-to-time domain, and is currently not
-implemented in ``empymod``. To calculate Laplace-domain responses instead
-of frequency-domain responses simply provide negative frequency values. If all
+implemented in ``empymod``. To compute Laplace-domain responses instead of
+frequency-domain responses simply provide negative frequency values. If all
 provided frequencies :math:`f` are negative then :math:`s` is set to :math:`-f`
 instead of the frequency-domain :math:`s=2\mathrm{i}\pi f`.

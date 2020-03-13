@@ -50,14 +50,14 @@ signal = 1
 # => See the docstrings (e.g., empymod.model.dipole) for available transforms
 #    and their arguments.
 time, freq, ft, ftarg = empymod.utils.check_time(
-        time=time, signal=signal, ft='sin', ftarg={'pts_per_dec'}, verb=3)
+        time=time, signal=signal, ft='sin', ftarg=None, verb=3)
 
 ###############################################################################
-# Frequency-domain calculation
+# Frequency-domain computation
 # ----------------------------
 #
-# **=> Here we calculate the frequency-domain result with `empymod`, but you
-# could calculate it with any other modeller.**
+# **=> Here we compute the frequency-domain result with `empymod`, but you
+# could compute it with any other modeller.**
 
 fresp = empymod.dipole(freqtime=freq, **model)
 
@@ -80,7 +80,7 @@ plt.show()
 # Fourier transform
 # -----------------
 
-# Calculate corresponding time-domain signal.
+# Compute corresponding time-domain signal.
 tresp, _ = empymod.model.tem(
     fEM=fresp[:, None],
     off=np.array(model['rec'][0]),

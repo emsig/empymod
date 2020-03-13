@@ -70,8 +70,8 @@ plt.show()
 # Frequency response for f = 1 Hz
 # -------------------------------
 #
-# Calculate
-# ~~~~~~~~~
+# Compute
+# ~~~~~~~
 
 # Dipole
 inpdat = {'src': [0, 0, zsrc, 0, 0], 'rec': [fx, fy, zrec, 0, 0],

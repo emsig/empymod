@@ -85,7 +85,7 @@ rec = [100, 0, 0, 0, 0]  # x-dir. receiver 100m away from source, inline
 cond = 0.01              # Conductivity (S/m)
 
 ###############################################################################
-# Calculation using ``empymod``
+# Computation using ``empymod``
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Collect common parameters
@@ -341,8 +341,8 @@ model = {
 }
 
 ###############################################################################
-# Calculate ``empymod.loop`` result
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Compute ``empymod.loop`` result
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 epm_loop = empymod.loop(src=[0, 0, 0, 0, 90], rec=[rxx, ryy, 10, 0, 0],
                         **model).reshape(np.shape(rx))

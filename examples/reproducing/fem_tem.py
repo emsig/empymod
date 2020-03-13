@@ -202,7 +202,7 @@ rec = [100, 0, 0, 0, 90]
 depth = 0
 res = [2e14, 100]
 
-# Calculation
+# Computation
 inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
        'freqtime': freq, 'verb': 1}
 fhz_num = empymod.loop(**inp)
@@ -244,7 +244,7 @@ rec = [100, 0, 0, 0, 0]
 depth = 0
 res = [2e14, 100]
 
-# Calculation
+# Computation
 inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
        'freqtime': freq, 'verb': 1}
 fhz_num = empymod.loop(**inp)
@@ -285,7 +285,7 @@ rec = [100, 0, 0, 0, 0]
 depth = 0
 res = [2e14, 100]
 
-# Calculation
+# Computation
 inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
        'epermH': eperm, 'epermV': eperm,
        'freqtime': time, 'verb': 1}
@@ -344,7 +344,7 @@ res = [2e14, 100]
 strength = area/(radius/2)
 mrec = True
 
-# Calculation
+# Computation
 inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
        'freqtime': freq, 'strength': strength, 'mrec': mrec,
        'verb': 1}
@@ -391,7 +391,7 @@ res = [2e14, 100]
 strength = area/(radius/2)
 mrec = True
 
-# Calculation
+# Computation
 inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
        'freqtime': time, 'strength': strength, 'mrec': mrec,
        'epermH': eperm, 'epermV': eperm, 'verb': 1}
@@ -437,7 +437,7 @@ rec = [0, 100, 0, 0, 0]
 depth = []
 res = 100
 
-# Calculation
+# Computation
 inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
        'freqtime': freq, 'verb': 1}
 fhz_num = empymod.loop(**inp)
@@ -479,7 +479,7 @@ rec = [100, 0, 0, 0, 0]
 depth = []
 res = 100
 
-# Calculation
+# Computation
 inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
        'freqtime': freq, 'verb': 1}
 fhz_num = empymod.loop(**inp)
@@ -520,7 +520,7 @@ rec = [0, 100, 0, 0, 0]
 depth = []
 res = 100
 
-# Calculation
+# Computation
 inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
        'xdirect': True, 'freqtime': time, 'verb': 1}
 fhz_num = empymod.loop(signal=1, **inp)
@@ -575,7 +575,7 @@ rec = [100, 0, 0, 0, 0]
 depth = []
 res = 100
 
-# Calculation
+# Computation
 inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
        'xdirect': True, 'freqtime': time, 'verb': 1}
 fhz_num = empymod.loop(signal=1, **inp)

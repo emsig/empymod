@@ -1,5 +1,5 @@
 r"""
-Improve land CSEM calculation
+Improve land CSEM computation
 =============================
 
 The problem
@@ -15,7 +15,7 @@ case of a land CSEM survey.
 This singularity leads to noise at very high frequencies and therefore at very
 early times because the Hankel transform cannot handle the singularity
 correctly (or, if you would choose a sufficiently precise quadrature, it would
-take literally forever to calculate it).
+take literally forever to compute it).
 
 The "solution"
 --------------
@@ -55,17 +55,17 @@ model = {
 }
 
 ###############################################################################
-# Calculate
-# ---------
+# Compute
+# -------
 
-# Calculate with default eperm_air = 1
+# Compute with default eperm_air = 1
 res_1 = empymod.dipole(**model)
 
 # Set horizontal and vertical electric permittivity of air to 0
 model['epermH'][0] = 0
 model['epermV'][0] = 0
 
-# Calculate with eperm_air = 0
+# Compute with eperm_air = 0
 res_0 = empymod.dipole(**model)
 
 ###############################################################################

@@ -13,7 +13,7 @@ Dipole-dipole layout as shown in figure 8.32 in Kearey et al. (2002):
 .. image:: ../../_static/figures/Fig_from_8-32.jpg
 
 The apparent resistivity :math:`\rho_a` of the *plotting point* is then
-calculated with
+computed with
 
 .. math::
 
@@ -33,14 +33,14 @@ import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
 ###############################################################################
-# Calculate :math:`\boldsymbol{\rho_a}`
-# -------------------------------------
+# Compute :math:`\boldsymbol{\rho_a}`
+# -----------------------------------
 #
-# First we define a function to calculate apparent resistivity for a given
-# model and given source and receivers.
+# First we define a function to compute apparent resistivity for a given model
+# and given source and receivers.
 
 
-def calc_appres(depth, res, a, n, srcpts=1, recpts=1, verb=1):
+def comp_appres(depth, res, a, n, srcpts=1, recpts=1, verb=1):
     """Return apparent resistivity for dipole-dipole DC measurement
 
         rho_a = V/I pi a n (n+1) (n+2).
@@ -51,11 +51,11 @@ def calc_appres(depth, res, a, n, srcpts=1, recpts=1, verb=1):
     - Source and receiver are located at the air-interface.
     - Source is centered at x = 0 m.
 
-    Note: DC response can be obtained by either t->infinity s or f->0 Hz.
-          f = 0 Hz is much faster, as there is no Fourier transform involved
-          and only a single frequency has to be calculated. By default,
-          the minimum frequency in empymod is 1e-20 Hz. The difference between
-          the signals for 1e-20 Hz and 0 Hz is very small.
+    Note: DC response can be obtained by either t->infinity s or f->0 Hz. f = 0
+          Hz is much faster, as there is no Fourier transform involved and only
+          a single frequency has to be computed. By default, the minimum
+          frequency in empymod is 1e-20 Hz. The difference between the signals
+          for 1e-20 Hz and 0 Hz is very small.
 
     For more explanation regarding input parameters see `empymod.model`.
 
@@ -98,16 +98,16 @@ def calc_appres(depth, res, a, n, srcpts=1, recpts=1, verb=1):
 # Plot-function
 # -------------
 #
-# Second we create a plot-function, which includes the call to `calc_appres`,
+# Second we create a plot-function, which includes the call to `comp_appres`,
 # to use for a couple of different models.
 
 def plotit(depth, a, n, res1, res2, res3, title):
-    """Call `calc_appres` and plot result."""
+    """Call `comp_appres` and plot result."""
 
-    # Calculate the three different models
-    rho1, AB2 = calc_appres(depth, res1, a, n)
-    rho2, _ = calc_appres(depth, res2, a, n)
-    rho3, _ = calc_appres(depth, res3, a, n)
+    # Compute the three different models
+    rho1, AB2 = comp_appres(depth, res1, a, n)
+    rho2, _ = comp_appres(depth, res2, a, n)
+    rho3, _ = comp_appres(depth, res3, a, n)
 
     # Create figure
     plt.figure()

@@ -41,15 +41,15 @@ range of IP.
 - **Cole, K.S., and R.H. Cole, 1941**, Dispersion and adsorption in
   dielectrics. I. Alternating current characteristics; *Journal of Chemical
   Physics*, Volume 9, Pages 341-351, doi:
-  [10.1063/1.1750906](https://doi.org/10.1063/1.1750906).
+  `10.1063/1.1750906 <https://doi.org/10.1063/1.1750906>`_.
 - **Pelton, W.H., S.H. Ward, P.G. Hallof, W.R. Sill, and P.H. Nelson, 1978**,
   Mineral discrimination and removal of inductive coupling with multifrequency
   IP, *Geophysics*, Volume 43, Pages 588-609, doi:
-  [10.1190/1.1440839](https://doi.org/10.1190/1.1440839).
+  `10.1190/1.1440839 <https://doi.org/10.1190/1.1440839>`_.
 - **Tarasov, A., and K. Titov, 2013**, On the use of the Cole–Cole equations in
   spectral induced polarization; *Geophysical Journal International*, Volume
   195, Issue 1, Pages 352-356, doi:
-  [10.1093/gji/ggt251](https://doi.org/10.1093/gji/ggt251).
+  `10.1093/gji/ggt251 <https://doi.org/10.1093/gji/ggt251>`_.
 """
 import empymod
 import numpy as np
@@ -86,7 +86,7 @@ plt.style.use('ggplot')
 # - The signature is ``func(inp, p_dict)``, where
 #
 #   - ``inp`` is the dictionary you provide, and
-#   - ``p_dict`` is a dictionary that contains all parameters so far calculated
+#   - ``p_dict`` is a dictionary that contains all parameters so far computed
 #     in empymod [``locals()``].
 #
 # - It must return ``etaH, etaV`` if ``func_eta``, or ``zetaH, zetaV`` if
@@ -98,7 +98,7 @@ plt.style.use('ggplot')
 # ::
 #
 #     def my_new_eta(inp, p_dict):
-#         # Your calculations, using the parameters you provided
+#         # Your computations, using the parameters you provided
 #         # in ``inp`` and the parameters from empymod in ``p_dict``.
 #         # In the example below, we provide, e.g., inp['tau']
 #         return etaH, etaV
@@ -109,9 +109,9 @@ plt.style.use('ggplot')
 # Define the Cole-Cole model
 # --------------------------
 #
-# In this notebook we exploit this hook in empymod to calculate :math:`\eta_h`
+# In this notebook we exploit this hook in empymod to compute :math:`\eta_h`
 # and :math:`\eta_v` with the Cole-Cole model. By default, :math:`\eta_h` and
-# :math:`\eta_v` are calculated like this:
+# :math:`\eta_v` are computed like this:
 #
 # .. math::
 #
@@ -120,12 +120,11 @@ plt.style.use('ggplot')
 #     j\omega\varepsilon_{r;v}\varepsilon_0 \ . \qquad (5)
 #
 #
-# With this function we recalculate it. We replace the real part, the
-# resistivity :math:`\rho`, in equations (4) and (5) by the complex,
-# frequency-dependent Cole-Cole resistivity [:math:`\rho(\omega)`], as given,
-# for instance, in equations (1)-(3). Then we add back the imaginary part
-# coming from thet dielectric permittivity (basically zero for low
-# frequencies).
+# With this function we recompute it. We replace the real part, the resistivity
+# :math:`\rho`, in equations (4) and (5) by the complex, frequency-dependent
+# Cole-Cole resistivity [:math:`\rho(\omega)`], as given, for instance, in
+# equations (1)-(3). Then we add back the imaginary part coming from thet
+# dielectric permittivity (basically zero for low frequencies).
 #
 # Note that in this notebook we use this hook to model relaxation in the low
 # frequency spectrum for IP measurements, replacing :math:`\rho` by a
@@ -138,7 +137,7 @@ plt.style.use('ggplot')
 def cole_cole(inp, p_dict):
     """Cole and Cole (1941)."""
 
-    # Calculate complex conductivity from Cole-Cole
+    # Compute complex conductivity from Cole-Cole
     iotc = np.outer(2j*np.pi*p_dict['freq'], inp['tau'])**inp['c']
     condH = inp['cond_8'] + (inp['cond_0']-inp['cond_8'])/(1+iotc)
     condV = condH/p_dict['aniso']**2
@@ -153,7 +152,7 @@ def cole_cole(inp, p_dict):
 def pelton_et_al(inp, p_dict):
     """ Pelton et al. (1978)."""
 
-    # Calculate complex resistivity from Pelton et al.
+    # Compute complex resistivity from Pelton et al.
     iotc = np.outer(2j*np.pi*p_dict['freq'], inp['tau'])**inp['c']
     rhoH = inp['rho_0']*(1 - inp['m']*(1 - 1/(1 + iotc)))
     rhoV = rhoH*p_dict['aniso']**2
@@ -207,7 +206,7 @@ cole_model = {'res': res_0, 'cond_0': 1/res_0, 'cond_8': 1/res_8,
 pelton_model = {'res': res_0, 'rho_0': res_0, 'm': m,
                 'tau': tau, 'c': c, 'func_eta': pelton_et_al}
 
-# Calculate
+# Compute
 out_bipole = empymod.bipole(res=res_0, **model)
 out_cole = empymod.bipole(res=cole_model, **model)
 out_pelton = empymod.bipole(res=pelton_model, **model)

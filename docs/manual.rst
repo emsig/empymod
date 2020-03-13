@@ -6,7 +6,7 @@ Theory
 
 The code is principally based on
 
-- [HuTS15]_ for the wavenumber-domain calculation (``kernel``),
+- [HuTS15]_ for the wavenumber-domain computation (``kernel``),
 - [Key12]_ for the DLF and QWE transforms,
 - [SlHM10]_ for the analytical half-space solutions, and
 - [Hami00]_ for the FFTLog.
@@ -20,13 +20,13 @@ layered-Earth CSEM modelling.
 Installation
 ------------
 
-You can install empymod either via ``conda``:
+You can install empymod either via **conda**:
 
 .. code-block:: console
 
    conda install -c conda-forge empymod
 
-or via ``pip``:
+or via **pip**:
 
 .. code-block:: console
 
@@ -37,8 +37,8 @@ and ``Numba``.
 
 The modeller empymod comes with add-ons (``empymod.scripts``). These add-ons
 provide some very specific, additional functionalities. Some of these add-ons
-have additional, optional dependencies for other modules such as
-``matplotlib``. See the *Add-ons*-section for their documentation.
+have additional, optional dependencies such as ``matplotlib``. See the
+*Add-ons*-section for their documentation.
 
 If you are new to Python I recommend using a Python distribution, which will
 ensure that all dependencies are met, specifically properly compiled versions
@@ -62,9 +62,9 @@ contain references to ``blas``, ``lapack``, ``openblas``, or similar.
 
 The structure of empymod is:
 
-- **model.py**: EM modelling routines.
+- **model.py**: EM modelling; principal end-user facing routines.
 - **utils.py**: Utilities for ``model`` such as checking input parameters.
-- **kernel.py**: Kernel of ``empymod``, calculates the wavenumber-domain
+- **kernel.py**: Kernel of ``empymod``, computes the wavenumber-domain
   electromagnetic response. Plus analytical, frequency-domain full- and
   half-space solutions.
 - **transform.py**: Methods to carry out the required Hankel transform from
@@ -80,55 +80,57 @@ Usage/Examples
 A good starting point is [Wert17b]_, and more information can be found in
 [Wert17]_. You can find a lot o examples in the examples-section.
 
-The main modelling routines is ``bipole``, which can calculate the
-electromagnetic frequency- or time-domain field due to arbitrary finite
-electric or magnetic bipole sources, measured by arbitrary finite electric or
-magnetic bipole receivers. The model is defined by horizontal resistivity and
-anisotropy, horizontal and vertical electric permittivities and horizontal and
-vertical magnetic permeabilities. By default, the electromagnetic response is
-normalized to source and receiver of 1 m length, and source strength of 1 A.
+The main modelling routine is ``bipole``, which can compute the electromagnetic
+frequency- or time-domain field due to arbitrary finite electric or magnetic
+bipole sources, measured by arbitrary finite electric or magnetic bipole
+receivers. The model is defined by horizontal resistivity and anisotropy,
+horizontal and vertical electric permittivities and horizontal and vertical
+magnetic permeabilities. By default, the electromagnetic response is normalized
+to source and receiver of 1 m length, and source strength of 1 A.
 
 A simple frequency-domain example, with most of the parameters left at the
 default value:
 
 .. code-block:: python
 
+    >>> import empymod
     >>> import numpy as np
-    >>> from empymod import bipole
     >>> # x-directed bipole source: x0, x1, y0, y1, z0, z1
-    >>> src = [-50, 50, 0, 0, 100, 100]
+    >>> src = [-50, 50, 0, 0, -100, -100]
     >>> # x-directed dipole source-array: x, y, z, azimuth, dip
-    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 0]
+    >>> rec = [np.arange(1, 11)*500, np.zeros(10), -200, 0, 0]
     >>> # layer boundaries
-    >>> depth = [0, 300, 1000, 1050]
+    >>> depth = [0, -300, -1000, -1050]
     >>> # layer resistivities
     >>> res = [1e20, .3, 1, 50, 1]
     >>> # Frequency
     >>> freq = 1
-    >>> # Calculate electric field due to an electric source at 1 Hz.
+    >>> # Compute the electric field due to an electric source at 1 Hz.
     >>> # [msrc = mrec = True (default)]
-    >>> EMfield = bipole(src, rec, depth, res, freq, verb=4)
-    :: empymod START  ::
+    >>> EMfield = empymod.bipole(src, rec, depth, res, freq, verb=4)
     ~
-       depth       [m] :  0 300 1000 1050
-       res     [Ohm.m] :  1E+20 0.3 1 50 1
+    :: empymod START  ::  v2.0.0
+    ~
+       depth       [m] :  -1050, -1000, -300, 0
+       res     [Ohm.m] :  1 50 1 0.3 1E+20
        aniso       [-] :  1 1 1 1 1
        epermH      [-] :  1 1 1 1 1
        epermV      [-] :  1 1 1 1 1
        mpermH      [-] :  1 1 1 1 1
        mpermV      [-] :  1 1 1 1 1
+       direct field    :  Comp. in wavenumber domain
        frequency  [Hz] :  1
        Hankel          :  DLF (Fast Hankel Transform)
          > Filter      :  Key 201 (2009)
          > DLF type    :  Standard
-       Kernel Opt.     :  None
        Loop over       :  None (all vectorized)
        Source(s)       :  1 bipole(s)
          > intpts      :  1 (as dipole)
          > length  [m] :  100
+         > strength[A] :  0
          > x_c     [m] :  0
          > y_c     [m] :  0
-         > z_c     [m] :  100
+         > z_c     [m] :  -100
          > azimuth [°] :  0
          > dip     [°] :  0
        Receiver(s)     :  10 dipole(s)
@@ -136,7 +138,7 @@ default value:
                        :  500 1000 1500 2000 2500 3000 3500 4000 4500 5000
          > y       [m] :  0 - 0 : 10  [min-max; #]
                        :  0 0 0 0 0 0 0 0 0 0
-         > z       [m] :  200
+         > z       [m] :  -200
          > azimuth [°] :  0
          > dip     [°] :  0
        Required ab's   :  11
@@ -151,7 +153,7 @@ default value:
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
 
-Hook for user-defined calculation of :math:`\eta` and :math:`\zeta`
+Hook for user-defined computation of :math:`\eta` and :math:`\zeta`
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 In principal it is always best to write your own modelling routine if you want
@@ -180,7 +182,7 @@ characteristics:
 - The signature is ``func(inp, p_dict)``, where
 
     - ``inp`` is the dictionary you provide, and
-    - ``p_dict`` is a dictionary that contains all parameters so far calculated
+    - ``p_dict`` is a dictionary that contains all parameters so far computed
       in empymod [``locals()``].
 
 - It must return ``etaH, etaV`` if ``func_eta``, or ``zetaH, zetaV`` if
@@ -191,7 +193,7 @@ characteristics:
 .. code-block:: python
 
     def my_new_eta(inp, p_dict):
-        # Your calculations, using the parameters you provided
+        # Your computations, using the parameters you provided
         # in `inp` and the parameters from empymod in `p_dict`.
         # In the example line below, we provide, e.g.,  inp['tau']
         return etaH, etaV
@@ -201,7 +203,7 @@ And then you call ``empymod`` with ``res={'res': res-array, 'tau': tau,
 
 Have a look at the corresponding example in the Gallery, where this hook is
 exploited in the low-frequency range to use the Cole-Cole model for IP
-calculation. It could also be used in the high-frequency range to model
+computation. It could also be used in the high-frequency range to model
 dielectricity.
 
 
@@ -253,7 +255,7 @@ tests, just install ``pytest`` and run it within the ``empymod``-top-directory.
     > # and then
     > cd to/the/empymod/folder  # Ensure you are in the right directory,
     > ls -d */                  # your output should look the same.
-    docs/  empymod/  tests/
+    docs/  empymod/  examples/  tests/
     > # pytest will find the tests, which are located in the tests-folder.
     > # simply run
     > pytest --cov=empymod --flake8 --mpl
@@ -288,4 +290,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-See the ``LICENSE``- and ``NOTICE``-files on GitHub for more information.
+See the LICENSE- and NOTICE-files on GitHub for more information.
