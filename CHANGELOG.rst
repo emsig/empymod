@@ -50,10 +50,12 @@ This version will be backwards incompatible, and only support Python 3.6+.
 
 - Other changes:
 
-  - ``bipole`` and ``dipole`` now only have the following mandatory positional
-    arguments: ``src``, ``rec``, ``depth``, ``res``, and ``freqtime``, and the
-    optional positional keyword arguments ``signal`` and ``aniso``; all the
-    others are now within ``**kwargs``.
+  - All settings (``xdirect``, ``ht``, ``htarg``, ``ft``, ``ftarg``, ``loop``,
+    ``verb``) are now extracted from ``kwargs``. This makes it possible that
+    all ``model``-functions take the same keyword-arguments; warnings are
+    raised if a particular parameter is not used in this function, but it
+    doesn't fail (it fails, however, for unknown parameters). Pure positional
+    calls including those parameters will therefore not work any longer.
   - ``htarg`` and ``ftarg`` internally are now dictionaries, not lists.
   - Undo a change introduced in v1.8.0: ``get_dlf_points`` is calculated
     directly within ``transform.fht`` [`empymod#26

@@ -936,6 +936,19 @@ def test_get_azm_dip(capsys):
     assert outstr[:47] == "   Receiver(s)     :  1 bipole(s)\n     > intpts"
 
 
+def test_get_kwargs(capsys):
+    kwargs1 = {'ft': 'sin', 'depth': []}
+    ft, ht = utils.get_kwargs(['ft', 'ht'], ['dlf', 'dlf'], kwargs1)
+    out, _ = capsys.readouterr()
+    assert ft == 'sin'
+    assert ht == 'dlf'
+    assert "* WARNING :: Unused **kwargs: {'depth': []}" in out
+
+    kwargs2 = {'depth': [], 'unknown': 1}
+    with pytest.raises(ValueError):
+        utils.get_kwargs(['verb', ], [0, ], kwargs2)
+
+
 def test_printstartfinish(capsys):
     t0 = utils.printstartfinish(0)
     assert isinstance(t0, float)

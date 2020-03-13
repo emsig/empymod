@@ -625,7 +625,7 @@ def test_all_depths():
            'mpermH': mpermH, 'mpermV': mpermV}
 
     # LHS low-to-high (+1, ::+1)
-    lhs_l2h = dipole(src, rec, depth, res, freq, None, **inp)
+    lhs_l2h = dipole(src, rec, depth, res, freq, **inp)
 
     # RHS high-to-low (-1, ::+1)
     rhs_h2l = dipole([src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]],
