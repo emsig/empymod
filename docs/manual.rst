@@ -1,20 +1,5 @@
-Manual
-######
-
-Theory
-------
-
-The code is principally based on
-
-- [HuTS15]_ for the wavenumber-domain computation (``kernel``),
-- [Key12]_ for the DLF and QWE transforms,
-- [SlHM10]_ for the analytical half-space solutions, and
-- [Hami00]_ for the FFTLog.
-
-See these publications and all the others given in the :doc:`references`, if
-you are interested in the theory on which empymod is based. Another good
-reference is [ZiSl19]_. The book derives in great detail the equations for
-layered-Earth CSEM modelling.
+Getting started
+###############
 
 
 Installation
@@ -32,23 +17,23 @@ or via **pip**:
 
    pip install empymod
 
-Required are Python version 3.6 or higher and the modules ``NumPy``, ``SciPy``,
-and ``Numba``.
+Required are Python version 3.6 or higher and the modules NumPy, SciPy, and
+Numba.
 
 The modeller empymod comes with add-ons (``empymod.scripts``). These add-ons
 provide some very specific, additional functionalities. Some of these add-ons
-have additional, optional dependencies such as ``matplotlib``. See the
+have additional, optional dependencies such as matplotlib. See the
 *Add-ons*-section for their documentation.
 
 If you are new to Python I recommend using a Python distribution, which will
 ensure that all dependencies are met, specifically properly compiled versions
-of ``NumPy`` and ``SciPy``; I recommend using `Anaconda
+of NumPy and SciPy; I recommend using `Anaconda
 <https://www.anaconda.com/distribution>`_. If you install Anaconda you can
-simply start the *Anaconda Navigator*, add the channel ``conda-forge`` and
-``empymod`` will appear in the package list and can be installed with a click.
+simply start the *Anaconda Navigator*, add the channel **conda-forge** and
+**empymod** will appear in the package list and can be installed with a click.
 
-You should ensure that you have ``NumPy`` and ``SciPy`` installed with the
-Intel Math Kernel Library ``mkl``, as this makes quite a difference in terms of
+You should ensure that you have NumPy and SciPy installed with the Intel Math
+Kernel Library (*mkl*), as this makes quite a difference in terms of
 speed. You can check that by running
 
 .. code-block:: python
@@ -63,8 +48,8 @@ contain references to ``blas``, ``lapack``, ``openblas``, or similar.
 The structure of empymod is:
 
 - **model.py**: EM modelling; principal end-user facing routines.
-- **utils.py**: Utilities for ``model`` such as checking input parameters.
-- **kernel.py**: Kernel of ``empymod``, computes the wavenumber-domain
+- **utils.py**: Utilities such as checking input parameters.
+- **kernel.py**: Kernel of empymod, computes the wavenumber-domain
   electromagnetic response. Plus analytical, frequency-domain full- and
   half-space solutions.
 - **transform.py**: Methods to carry out the required Hankel transform from
@@ -73,20 +58,23 @@ The structure of empymod is:
 - **filters.py**: Filters for the *Digital Linear Filters* method DLF (Hankel
   and Fourier transforms).
 
+.. note::
 
-Usage/Examples
---------------
+    Until v2 empymod did not use Numba but instead optionally NumExpr. Use
+    **v1.10.x** if you cannot use Numba or want to use NumExpr. However, no
+    new features will land in v1, only bugfixes.
 
-A good starting point is [Wert17b]_, and more information can be found in
-[Wert17]_. You can find a lot o examples in the examples-section.
 
-The main modelling routine is ``bipole``, which can compute the electromagnetic
-frequency- or time-domain field due to arbitrary finite electric or magnetic
-bipole sources, measured by arbitrary finite electric or magnetic bipole
-receivers. The model is defined by horizontal resistivity and anisotropy,
-horizontal and vertical electric permittivities and horizontal and vertical
-magnetic permeabilities. By default, the electromagnetic response is normalized
-to source and receiver of 1 m length, and source strength of 1 A.
+Usage
+-----
+
+The main modelling routine is :func:`empymod.model.bipole`, which can compute
+the electromagnetic frequency- or time-domain field due to arbitrary finite
+electric or magnetic bipole sources, measured by arbitrary finite electric or
+magnetic bipole receivers. The model is defined by horizontal resistivity and
+anisotropy, horizontal and vertical electric permittivities and horizontal and
+vertical magnetic permeabilities. By default, the electromagnetic response is
+normalized to source and receiver of 1 m length, and source strength of 1 A.
 
 A simple frequency-domain example, with most of the parameters left at the
 default value:
@@ -153,62 +141,14 @@ default value:
        6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
 
 
-Hook for user-defined computation of :math:`\eta` and :math:`\zeta`
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-In principal it is always best to write your own modelling routine if you want
-to adjust something. Just copy ``empymod.dipole`` or ``empymod.bipole`` as a
-template, and modify it to your needs. Since ``empymod v1.7.4``, however, there
-is a hook which allows you to modify :math:`\eta_h, \eta_v, \zeta_h`, and
-:math:`\zeta_v` quite easily.
-
-The trick is to provide a dictionary (we name it ``inp`` here) instead of the
-resistivity vector in ``res``. This dictionary, ``inp``, has two mandatory plus
-optional entries:
-
-- ``res``: the resistivity vector you would have provided normally (mandatory).
-- A function name, which has to be either or both of (mandatory)
-
-    - ``func_eta``: To adjust ``etaH`` and ``etaV``, or
-    - ``func_zeta``: to adjust ``zetaH`` and ``zetaV``.
-
-- In addition, you have to provide all parameters you use in
-  ``func_eta``/``func_zeta`` and are not already provided to ``empymod``. All
-  additional parameters must have #layers elements.
-
-The functions ``func_eta`` and ``func_zeta`` must have the following
-characteristics:
-
-- The signature is ``func(inp, p_dict)``, where
-
-    - ``inp`` is the dictionary you provide, and
-    - ``p_dict`` is a dictionary that contains all parameters so far computed
-      in empymod [``locals()``].
-
-- It must return ``etaH, etaV`` if ``func_eta``, or ``zetaH, zetaV`` if
-  ``func_zeta``.
-
-**Dummy example**
-
-.. code-block:: python
-
-    def my_new_eta(inp, p_dict):
-        # Your computations, using the parameters you provided
-        # in `inp` and the parameters from empymod in `p_dict`.
-        # In the example line below, we provide, e.g.,  inp['tau']
-        return etaH, etaV
-
-And then you call ``empymod`` with ``res={'res': res-array, 'tau': tau,
-'func_eta': my_new_eta}``.
-
-Have a look at the corresponding example in the Gallery, where this hook is
-exploited in the low-frequency range to use the Cole-Cole model for IP
-computation. It could also be used in the high-frequency range to model
-dielectricity.
+A good starting point is the :ref:`sphx_glr_examples`-gallery or [Wert17b]_,
+and more detailed information can be found in [Wert17]_. The description of all
+parameters can be found in the API documentation for
+:func:`empymod.model.bipole`.
 
 
 Coordinate system
-'''''''''''''''''
+-----------------
 
 The used coordinate system is either a
 
@@ -219,6 +159,22 @@ The used coordinate system is either a
 
 Have a look at the example :ref:`sphx_glr_examples_coordinate_system.py` for
 further explanations.
+
+
+Theory
+------
+
+The code is principally based on
+
+- [HuTS15]_ for the wavenumber-domain computation (``kernel``),
+- [Key12]_ for the DLF and QWE transforms,
+- [SlHM10]_ for the analytical half-space solutions, and
+- [Hami00]_ for the FFTLog.
+
+See these publications and all the others given in the :doc:`references`, if
+you are interested in the theory on which empymod is based. Another good
+reference is [ZiSl19]_. The book derives in great detail the equations for
+layered-Earth CSEM modelling.
 
 
 Contributing

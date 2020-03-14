@@ -11,7 +11,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
-    # 'sphinx.ext.intersphinx',
+    'sphinx.ext.intersphinx',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
 ]
@@ -57,10 +57,10 @@ warnings.filterwarnings("ignore", category=UserWarning,
                                 ' non-GUI backend, so cannot show the figure.')
 
 # Intersphinx configuration
-# intersphinx_mapping = {
-#     "numpy": ("https://numpy.org", None),
-#     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
-# }
+intersphinx_mapping = {
+    "numpy": ("https://numpy.org", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+}
 
 # ==== 2. General Settings ====
 description = 'A multigrid solver for 3D electromagnetic diffusion.'

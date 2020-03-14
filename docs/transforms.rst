@@ -17,8 +17,8 @@ Included **Fourier transforms**:
 
 Digital Linear Filters
 ----------------------
-The module ``empymod.filters`` comes with many DLFs for the Hankel and the
-Fourier transform. If you want to export one of these filters to plain ascii
+The module :mod:`empymod.filters` comes with many DLFs for the Hankel and the
+Fourier transform. If you want to export one of these filters to plain ASCII
 files you can use the ``tofile``-routine of each filter:
 
 .. code-block:: python
@@ -26,7 +26,7 @@ files you can use the ``tofile``-routine of each filter:
     >>> import empymod
     >>> # Load a filter
     >>> filt = empymod.filters.wer_201_2018()
-    >>> # Save it to pure ascii-files
+    >>> # Save it to pure ASCII-files
     >>> filt.tofile()
     >>> # This will save the following three files:
     >>> #    ./filters/wer_201_2018_base.txt
@@ -42,7 +42,7 @@ base and the filter coefficient have to be stored in separate files:
     >>> # Create an empty filter;
     >>> # Name has to be the base of the text files
     >>> filt = empymod.filters.DigitalFilter('my-filter')
-    >>> # Load the ascii-files
+    >>> # Load the ASCII-files
     >>> filt.fromfile()
     >>> # This will load the following three files:
     >>> #    ./filters/my-filter_base.txt

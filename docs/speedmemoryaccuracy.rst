@@ -1,5 +1,5 @@
-Speed, memory, and accuracy
-###########################
+Tips and tricks
+###############
 
 There is the usual trade-off between speed, memory, and accuracy. Very
 generally speaking we can say that the *DLF* is faster than *QWE*, but *QWE* is
@@ -193,3 +193,57 @@ subsequently model more complex cases.
 
 A common alternative to this trick is to apply a lowpass filter to filter out
 the unstable high frequencies.
+
+
+Hook for user-defined computation of :math:`\eta` and :math:`\zeta`
+-------------------------------------------------------------------
+
+In principal it is always best to write your own modelling routine if you want
+to adjust something. Just copy ``empymod.dipole`` or ``empymod.bipole`` as a
+template, and modify it to your needs. Since ``empymod v1.7.4``, however, there
+is a hook which allows you to modify :math:`\eta_h, \eta_v, \zeta_h`, and
+:math:`\zeta_v` quite easily.
+
+The trick is to provide a dictionary (we name it ``inp`` here) instead of the
+resistivity vector in ``res``. This dictionary, ``inp``, has two mandatory plus
+optional entries:
+
+- ``res``: the resistivity vector you would have provided normally (mandatory).
+- A function name, which has to be either or both of (mandatory)
+
+    - ``func_eta``: To adjust ``etaH`` and ``etaV``, or
+    - ``func_zeta``: to adjust ``zetaH`` and ``zetaV``.
+
+- In addition, you have to provide all parameters you use in
+  ``func_eta``/``func_zeta`` and are not already provided to ``empymod``. All
+  additional parameters must have #layers elements.
+
+The functions ``func_eta`` and ``func_zeta`` must have the following
+characteristics:
+
+- The signature is ``func(inp, p_dict)``, where
+
+    - ``inp`` is the dictionary you provide, and
+    - ``p_dict`` is a dictionary that contains all parameters so far computed
+      in empymod [``locals()``].
+
+- It must return ``etaH, etaV`` if ``func_eta``, or ``zetaH, zetaV`` if
+  ``func_zeta``.
+
+**Dummy example**
+
+.. code-block:: python
+
+    def my_new_eta(inp, p_dict):
+        # Your computations, using the parameters you provided
+        # in `inp` and the parameters from empymod in `p_dict`.
+        # In the example line below, we provide, e.g.,  inp['tau']
+        return etaH, etaV
+
+And then you call ``empymod`` with ``res={'res': res-array, 'tau': tau,
+'func_eta': my_new_eta}``.
+
+Have a look at the corresponding example in the Gallery, where this hook is
+exploited in the low-frequency range to use the Cole-Cole model for IP
+computation. It could also be used in the high-frequency range to model
+dielectricity.
