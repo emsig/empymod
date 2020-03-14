@@ -1,7 +1,7 @@
 r"""
 
-:mod:`transform` -- Hankel and Fourier Transforms
-=================================================
+:mod:`empymod.transform` -- Hankel and Fourier Transforms
+=========================================================
 
 Methods to carry out the required Hankel transform from wavenumber to
 frequency domain and Fourier transform from frequency to time domain.
@@ -59,25 +59,34 @@ def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     papers) and following [Key12]_, the DLF method rewrites the Hankel
     transform of the form
 
-    .. math:: F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)\
+    .. math::
+        :label: dlf1
+
+        F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)\
             \mathrm{d}\lambda
 
     as
 
-    .. math::   F(r)   = \sum^n_{i=1} f(b_i/r)h_i/r \ ,
+    .. math::
+        :label: dlf2
+
+        F(r)   = \sum^n_{i=1} f(b_i/r)h_i/r \ ,
 
     where :math:`h` is the digital filter.The Filter abscissae b is given by
 
-    .. math:: b_i = \lambda_ir = e^{ai}, \qquad i = -l, -l+1, \cdots, l \ ,
+    .. math::
+        :label: dlf3
+
+        b_i = \lambda_ir = e^{ai}, \qquad i = -l, -l+1, \cdots, l \ ,
 
     with :math:`l=(n-1)/2`, and :math:`a` is the spacing coefficient.
 
-    This function is loosely based on ``get_CSEM1D_FD_FHT.m`` from the source
+    This function is loosely based on `get_CSEM1D_FD_FHT.m` from the source
     code distributed with [Key12]_.
 
-    The function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
+    The function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and output parameters.
 
     Returns
     -------
@@ -118,29 +127,34 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     Following [Key12]_, but without going into the mathematical details here,
     the QWE method rewrites the Hankel transform of the form
 
-    .. math:: F(r)   = \int^\infty_0 f(\lambda)J_v(\lambda r)\
-            \mathrm{d}\lambda
+    .. math::
+        :label: qwe1
+
+        F(r) = \int^\infty_0 f(\lambda)J_v(\lambda r)\ \mathrm{d}\lambda
 
     as a quadrature sum which form is similar to the DLF (equation 15),
 
-    .. math::   F_i   \approx \sum^m_{j=1} f(x_j/r)w_j g(x_j) =
-                \sum^m_{j=1} f(x_j/r)\hat{g}(x_j) \ ,
+    .. math::
+        :label: qwe2
+
+        F_i \approx \sum^m_{j=1} f(x_j/r)w_j g(x_j) =
+        \sum^m_{j=1} f(x_j/r)\hat{g}(x_j) \ ,
 
     but with various bells and whistles applied (using the so-called Shanks
     transformation in the form of a routine called :math:`\epsilon`-algorithm
     ([Shan55]_, [Wynn56]_; implemented with algorithms from [Tref00]_ and
     [Weni89]_).
 
-    This function is based on ``get_CSEM1D_FD_QWE.m``, ``qwe.m``, and
-    ``getBesselWeights.m`` from the source code distributed with [Key12]_.
+    This function is based on `get_CSEM1D_FD_QWE.m`, `qwe.m`, and
+    `getBesselWeights.m` from the source code distributed with [Key12]_.
 
-    In the spline-version, ``hankel_qwe`` checks how steep the decay of the
+    In the spline-version, :func:`hankel_qwe` checks how steep the decay of the
     wavenumber-domain result is, and calls QUAD for the very steep interval,
     for which QWE is not suited.
 
-    The function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
+    The function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and output parameters.
 
     Returns
     -------
@@ -151,7 +165,7 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
         Kernel count.
 
     conv : bool
-        If true, QWE/QUAD converged. If not, <htarg> might have to be adjusted.
+        If true, QWE/QUAD converged. If not, `htarg` might have to be adjusted.
 
     """
     # Input params have an additional dimension for frequency, reduce here
@@ -403,20 +417,20 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
 
 def hankel_quad(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
                 zetaH, zetaV, xdirect, htarg, msrc, mrec):
-    r"""Hankel Transform using the ``QUADPACK`` library.
+    r"""Hankel Transform using the `QUADPACK` library.
 
-    This routine uses the ``scipy.integrate.quad`` module, which in turn makes
-    use of the Fortran library ``QUADPACK`` (``qagse``).
+    This routine uses the :func:`scipy.integrate.quad` module, which in turn
+    makes use of the Fortran library `QUADPACK` (`qagse`).
 
-    It is massively (orders of magnitudes) slower than either ``hankel_dlf`` or
-    ``hankel_qwe``, and is mainly here for completeness and comparison
-    purposes. It always uses interpolation in the wavenumber domain, hence it
-    generally will not be as precise as the other methods. However, it might
-    work in some areas where the others fail.
+    It is massively (orders of magnitudes) slower than either
+    :func:`hankel_dlf` or :func:`hankel_qwe`, and is mainly here for
+    completeness and comparison purposes. It always uses interpolation in the
+    wavenumber domain, hence it generally will not be as precise as the other
+    methods. However, it might work in some areas where the others fail.
 
-    The function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
+    The function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and output parameters.
 
     Returns
     -------
@@ -427,7 +441,7 @@ def hankel_quad(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
         Kernel count. For HQUAD, this is 1.
 
     conv : bool
-        If true, QUAD converged. If not, <htarg> might have to be adjusted.
+        If true, QUAD converged. If not, `htarg` might have to be adjusted.
 
     """
 
@@ -492,19 +506,19 @@ def fourier_dlf(fEM, time, freq, ftarg):
 
 
     It follows the Filter methodology [Ande75]_, using Cosine- and
-    Sine-filters; see ``hankel_dlf`` for more information.
+    Sine-filters; see :func:`hankel_dlf` for more information.
 
-    The function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
+    The function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and output parameters.
 
-    This function is based on ``get_CSEM1D_TD_FHT.m`` from the source code
+    This function is based on `get_CSEM1D_TD_FHT.m` from the source code
     distributed with [Key12]_.
 
     Returns
     -------
     tEM : array
-        Returns time-domain EM response of ``fEM`` for given ``time``.
+        Returns time-domain EM response of `fEM` for given `time`.
 
     conv : bool
         Only relevant for QWE/QUAD.
@@ -527,26 +541,26 @@ def fourier_qwe(fEM, time, freq, ftarg):
     r"""Fourier Transform using Quadrature-With-Extrapolation.
 
     It follows the QWE methodology [Key12]_ for the Hankel transform, see
-    ``hankel_qwe`` for more information.
+    :func:`hankel_qwe` for more information.
 
-    The function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
+    The function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and output parameters.
 
-    This function is based on ``get_CSEM1D_TD_QWE.m`` from the source code
+    This function is based on `get_CSEM1D_TD_QWE.m` from the source code
     distributed with [Key12]_.
 
-    ``fourier_qwe`` checks how steep the decay of the frequency-domain result
-    is, and calls QUAD for the very steep interval, for which QWE is not
+    :func:`fourier_qwe` checks how steep the decay of the frequency-domain
+    result is, and calls QUAD for the very steep interval, for which QWE is not
     suited.
 
     Returns
     -------
     tEM : array
-        Returns time-domain EM response of ``fEM`` for given ``time``.
+        Returns time-domain EM response of `fEM` for given `time`.
 
     conv : bool
-        If true, QWE/QUAD converged. If not, <ftarg> might have to be adjusted.
+        If true, QWE/QUAD converged. If not, `ftarg` might have to be adjusted.
 
     """
     # Get rtol, atol, nquad, maxint, diff_quad, a, b, and limit
@@ -613,7 +627,7 @@ def fourier_qwe(fEM, time, freq, ftarg):
     # Carry out SciPy's Quad if required
     if np.any(~doqwe):
         def sEMquad(w, t):
-            r"""Return scaled, interpolated value of tEM_int for ``w``."""
+            r"""Return scaled, interpolated value of tEM_int for `w`."""
             return tEM_int(np.log(w))*sincos(w*t)
 
         # Loop over times that require QUAD
@@ -640,31 +654,31 @@ def fourier_fftlog(fEM, time, freq, ftarg):
 
     FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT.
     FFTLog was presented in Appendix B of [Hami00]_ and published at
-    <http://casa.colorado.edu/~ajsh/FFTLog>.
+    http://casa.colorado.edu/~ajsh/FFTLog.
 
-    This function uses a simplified version of ``pyfftlog``, which is a
-    python-version of ``FFTLog``. For more details regarding ``pyfftlog`` see
-    <https://github.com/prisae/pyfftlog>.
+    This function uses a simplified version of `pyfftlog`, which is a
+    python-version of `FFTLog`. For more details regarding `pyfftlog` see
+    https://github.com/prisae/pyfftlog.
 
-    Not the full flexibility of ``FFTLog`` is available here: Only the
-    logarithmic FFT (``fftl`` in ``FFTLog``), not the Hankel transform
-    (``hankel_dlf`` in ``FFTLog``). Furthermore, the following parameters are
+    Not the full flexibility of `FFTLog` is available here: Only the
+    logarithmic FFT (`fftl` in `FFTLog`), not the Hankel transform
+    (:func:`hankel_dlf` in `FFTLog`). Furthermore, the following parameters are
     fixed:
 
-       - ``kr`` = 1 (initial value)
-       - ``kropt`` = 1 (silently adjusts ``kr``)
-       - ``dir`` = 1 (forward)
+    - `kr` = 1 (initial value)
+    - `kropt` = 1 (silently adjusts `kr`)
+    - `dir` = 1 (forward)
 
-    Furthermore, ``q`` is restricted to -1 <= q <= 1.
+    Furthermore, `q` is restricted to -1 <= q <= 1.
 
-    The function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
+    The function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and output parameters.
 
     Returns
     -------
     tEM : array
-        Returns time-domain EM response of ``fEM`` for given ``time``.
+        Returns time-domain EM response of `fEM` for given `time`.
 
     conv : bool
         Only relevant for QWE/QUAD.
@@ -781,14 +795,14 @@ def fourier_fftlog(fEM, time, freq, ftarg):
 def fourier_fft(fEM, time, freq, ftarg):
     r"""Fourier Transform using the Fast Fourier Transform.
 
-    The function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
+    The function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and output parameters.
 
     Returns
     -------
     tEM : array
-        Returns time-domain EM response of ``fEM`` for given ``time``.
+        Returns time-domain EM response of `fEM` for given `time`.
 
     conv : bool
         Only relevant for QWE/QUAD.
@@ -830,9 +844,9 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, ang_fact=None,
         ab=None, int_pts=None):
     r"""Digital Linear Filter method.
 
-    This is the kernel of the DLF method, used for the Hankel (``hankel_dlf``)
-    and the Fourier (``fourier_dlf``) Transforms. See ``hankel_dlf`` for an
-    extensive description.
+    This is the kernel of the DLF method, used for the Hankel
+    (:func:`hankel_dlf`) and the Fourier (:func:`fourier_dlf`) Transforms. See
+    :func:`hankel_dlf` for an extensive description.
 
     For the Hankel transform, `signal` contains 3 complex wavenumber-domain
     signals: (PJ0, PJ1, PJ0b), as returned from `kernel.wavenumber`. The Hankel
@@ -1032,11 +1046,11 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         ang_fact=None):
     r"""Quadrature-With-Extrapolation.
 
-    This is the kernel of the QWE method, used for the Hankel (``hankel_qwe``)
-    and the Fourier (``fourier_qwe``) Transforms. See ``hankel_qwe`` for an
-    extensive description.
+    This is the kernel of the QWE method, used for the Hankel
+    (:func:`hankel_qwe`) and the Fourier (:func:`fourier_qwe`) Transforms. See
+    :func:`hankel_qwe` for an extensive description.
 
-    This function is based on ``qwe.m`` from the source code distributed with
+    This function is based on `qwe.m` from the source code distributed with
     [Key12]_.
 
     """
@@ -1118,8 +1132,8 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
     r"""Quadrature for Hankel transform.
 
     This is the kernel of the QUAD method, used for the Hankel transforms
-    ``hankel_quad`` and ``hankel_qwe`` (where the integral is not suited for
-    QWE).
+    :func:`hankel_quad` and :func:`hankel_qwe` (where the integral is not
+    suited for QWE).
 
     """
 
@@ -1178,7 +1192,7 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
 
 
 def get_dlf_points(filt, inp, nr_per_dec=None):
-    r"""Return required calculation points."""
+    r"""Return calculation points required for DLF."""
 
     # Standard DLF
     if nr_per_dec == 0:

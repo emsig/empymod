@@ -1,6 +1,6 @@
 r"""
-:mod:`fdesign` -- Digital Linear Filter (DLF) design
-====================================================
+:mod:`empymod.scripts.fdesign` -- Digital Linear Filter (DLF) design
+====================================================================
 
 The add-on fdesign can be used to design digital linear filters for the Hankel
 or Fourier transform, or for any linear transform ([Ghos70]_). For this
@@ -17,7 +17,7 @@ More information can be found in the following places:
 
 This filter designing tool uses the direct matrix inversion method as described
 in [Kong07]_ and is based on scripts by [Key12]_. The whole project of
-``fdesign`` started with the Matlab scripts from Kerry Key, which he used to
+`fdesign` started with the Matlab scripts from Kerry Key, which he used to
 design his filters for [Key09]_, [Key12]_. Fruitful discussions with Evert Slob
 and Kerry Key improved the add-on substantially.
 
@@ -47,11 +47,11 @@ in the following way:
 
        return fdesign.Ghosh(name, lhs, rhs)
 
-Here, ``name`` must be one of ``j0``, ``j1``, ``sin``, or ``cos``, depending
-what type of transform pair it is. Additional variables are provided with
-``var``. The evaluation points of the ``lhs`` are denoted by ``l``, and the
-evaluation points of the ``rhs`` are denoted as ``r``. As an example here the
-implemented transform pair ``j0_1``
+Here, `name` must be one of `j0`, `j1`, `sin`, or `cos`, depending what type of
+transform pair it is. Additional variables are provided with `var`. The
+evaluation points of the `lhs` are denoted by `l`, and the evaluation points of
+the `rhs` are denoted as `r`. As an example here the implemented transform pair
+`j0_1`
 
 .. code-block:: python
 
@@ -70,80 +70,90 @@ implemented transform pair ``j0_1``
 Implemented Hankel transforms
 -----------------------------
 
-- ``j0_1`` [Ande75]_
+- `j0_1` [Ande75]_
 
   .. math::
+      :label: j01
 
       \int^\infty_0 l \exp\left(-al^2\right) J_0(lr) dl =
       \frac{\exp\left(\frac{-r^2}{4a}\right)}{2a}
 
-- ``j0_2`` [Ande75]_
+- `j0_2` [Ande75]_
 
   .. math::
+      :label: j02
 
       \int^\infty_0 \exp\left(-al\right) J_0(lr) dl =
       \frac{1}{\sqrt{a^2+r^2}}
 
-- ``j0_3`` [GuSi97]_
+- `j0_3` [GuSi97]_
 
   .. math::
+      :label: j03
 
       \int^\infty_0 l\exp\left(-al\right) J_0(lr) dl =
       \frac{a}{(a^2 + r^2)^{3/2}}
 
-- ``j0_4`` [ChCo82]_
+- `j0_4` [ChCo82]_
 
   .. math::
+      :label: j04
 
       \int^\infty_0 \frac{l}{\beta} \exp\left(-\beta z_v \right)
       J_0(lr) dl =
       \frac{\exp\left(-\gamma R\right)}{R}
 
-- ``j0_5`` [ChCo82]_
+- `j0_5` [ChCo82]_
 
   .. math::
+      :label: j05
 
-    \int^\infty_0 l \exp\left(-\beta z_v \right)
-    J_0(lr) dl =
-    \frac{ z_v (\gamma R + 1)}{R^3}\exp\left(-\gamma R\right)
+      \int^\infty_0 l \exp\left(-\beta z_v \right)
+      J_0(lr) dl =
+      \frac{ z_v (\gamma R + 1)}{R^3}\exp\left(-\gamma R\right)
 
-- ``j1_1`` [Ande75]_
-
-  .. math::
-
-    \int^\infty_0 l^2 \exp\left(-al^2\right) J_1(lr) dl =
-    \frac{r}{4a^2} \exp\left(-\frac{r^2}{4a}\right)
-
-
-- ``j1_2`` [Ande75]_
+- `j1_1` [Ande75]_
 
   .. math::
+      :label: j11
 
-    \int^\infty_0 \exp\left(-al\right) J_1(lr) dl =
-    \frac{\sqrt{a^2+r^2}-a}{r\sqrt{a^2 + r^2}}
+      \int^\infty_0 l^2 \exp\left(-al^2\right) J_1(lr) dl =
+      \frac{r}{4a^2} \exp\left(-\frac{r^2}{4a}\right)
 
-- ``j1_3`` [Ande75]_
 
-  .. math::
-
-    \int^\infty_0 l \exp\left(-al\right) J_1(lr) dl =
-    \frac{r}{(a^2 + r^2)^{3/2}}
-
-- ``j1_4`` [ChCo82]_
+- `j1_2` [Ande75]_
 
   .. math::
+      :label: j12
 
-    \int^\infty_0 \frac{l^2}{\beta} \exp\left(-\beta z_v \right)
-    J_1(lr) dl =
-    \frac{r(\gamma R+1)}{R^3}\exp\left(-\gamma R\right)
+      \int^\infty_0 \exp\left(-al\right) J_1(lr) dl =
+      \frac{\sqrt{a^2+r^2}-a}{r\sqrt{a^2 + r^2}}
 
-- ``j1_5`` [ChCo82]_
+- `j1_3` [Ande75]_
 
   .. math::
+      :label: j13
 
-    \int^\infty_0 l^2 \exp\left(-\beta z_v \right)
-    J_1(lr) dl =
-    \frac{r z_v(\gamma^2R^2+3\gamma R+3)}{R^5}\exp\left(-\gamma R\right)
+      \int^\infty_0 l \exp\left(-al\right) J_1(lr) dl =
+      \frac{r}{(a^2 + r^2)^{3/2}}
+
+- `j1_4` [ChCo82]_
+
+  .. math::
+      :label: j14
+
+      \int^\infty_0 \frac{l^2}{\beta} \exp\left(-\beta z_v \right)
+      J_1(lr) dl =
+      \frac{r(\gamma R+1)}{R^3}\exp\left(-\gamma R\right)
+
+- `j1_5` [ChCo82]_
+
+  .. math::
+      :label: j15
+
+      \int^\infty_0 l^2 \exp\left(-\beta z_v \right)
+      J_1(lr) dl =
+      \frac{r z_v(\gamma^2R^2+3\gamma R+3)}{R^5}\exp\left(-\gamma R\right)
 
 Where
 
@@ -157,47 +167,53 @@ Where
 Implemented Fourier transforms
 ------------------------------
 
-- ``sin_1`` [Ande75]_
+- `sin_1` [Ande75]_
 
   .. math::
+      :label: sin1
 
-    \int^\infty_0 l\exp\left(-a^2l^2\right) \sin(lr) dl =
-    \frac{\sqrt{\pi}r}{4a^3} \exp\left(-\frac{r^2}{4a^2}\right)
+      \int^\infty_0 l\exp\left(-a^2l^2\right) \sin(lr) dl =
+      \frac{\sqrt{\pi}r}{4a^3} \exp\left(-\frac{r^2}{4a^2}\right)
 
-- ``sin_2`` [Ande75]_
-
-  .. math::
-
-    \int^\infty_0 \exp\left(-al\right) \sin(lr) dl =
-    \frac{r}{a^2 + r^2}
-
-- ``sin_3`` [Ande75]_
+- `sin_2` [Ande75]_
 
   .. math::
+      :label: sin2
 
-    \int^\infty_0 \frac{l}{a^2+l^2} \sin(lr) dl =
-    \frac{\pi}{2} \exp\left(-ar\right)
+      \int^\infty_0 \exp\left(-al\right) \sin(lr) dl =
+      \frac{r}{a^2 + r^2}
 
-- ``cos_1`` [Ande75]_
-
-  .. math::
-
-    \int^\infty_0 \exp\left(-a^2l^2\right) \cos(lr) dl =
-    \frac{\sqrt{\pi}}{2a} \exp\left(-\frac{r^2}{4a^2}\right)
-
-- ``cos_2`` [Ande75]_
+- `sin_3` [Ande75]_
 
   .. math::
+      :label: sin3
 
-    \int^\infty_0 \exp\left(-al\right) \cos(lr) dl =
-    \frac{a}{a^2 + r^2}
+      \int^\infty_0 \frac{l}{a^2+l^2} \sin(lr) dl =
+      \frac{\pi}{2} \exp\left(-ar\right)
 
-- ``cos_3`` [Ande75]_
+- `cos_1` [Ande75]_
 
   .. math::
+      :label: cos1
 
-    \int^\infty_0 \frac{1}{a^2+l^2} \cos(lr) dl =
-    \frac{\pi}{2a} \exp\left(-ar\right)
+      \int^\infty_0 \exp\left(-a^2l^2\right) \cos(lr) dl =
+      \frac{\sqrt{\pi}}{2a} \exp\left(-\frac{r^2}{4a^2}\right)
+
+- `cos_2` [Ande75]_
+
+  .. math::
+      :label: cos2
+
+      \int^\infty_0 \exp\left(-al\right) \cos(lr) dl =
+      \frac{a}{a^2 + r^2}
+
+- `cos_3` [Ande75]_
+
+  .. math::
+      :label: cos3
+
+      \int^\infty_0 \frac{1}{a^2+l^2} \cos(lr) dl =
+      \frac{\pi}{2a} \exp\left(-ar\right)
 
 
 """
@@ -333,19 +349,21 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
 
     verb : {0, 1, 2}, optional
         Level of verbosity, default is 2:
-            - 0: Print nothing.
-            - 1: Print warnings.
-            - 2: Print additional time, progress, and result
+
+        - 0: Print nothing.
+        - 1: Print warnings.
+        - 2: Print additional time, progress, and result
 
     plot : {0, 1, 2, 3}, optional
         Level of plot-verbosity, default is 1:
-            - 0: Plot nothing.
-            - 1: Plot brute-force result
-            - 2: Plot additional theoretical transform pairs, and best inv.
-            - 3: Plot additional inversion result
-                 (can result in lots of plots depending on spacing and shift)
-                 If you are using a notebook, use %matplotlib notebook to have
-                 all inversion results appear in the same plot.
+
+        - 0: Plot nothing.
+        - 1: Plot brute-force result
+        - 2: Plot additional theoretical transform pairs, and best inv.
+        - 3: Plot additional inversion result
+          (can result in lots of plots depending on spacing and shift)
+          If you are using a notebook, use %matplotlib notebook to have
+          all inversion results appear in the same plot.
 
     Returns
     -------
@@ -353,7 +371,7 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
         Best filter for the input parameters.
     full : tuple
         Output from scipy.optimize.brute with full_output=True. (Returned when
-        ``full_output`` is True.)
+        `full_output` is True.)
 
     """
 
@@ -580,7 +598,7 @@ def plot_result(filt, full, prntres=True):
     - filt, full as returned from fdesign.design with full_output=True
     - If prntres is True, it calls fdesign.print_result as well.
 
-    r"""
+    """
     # Check matplotlib (soft dependency)
     if not plt:
         print(plt_msg)
@@ -694,10 +712,10 @@ def print_result(filt, full=None):
 def _call_qc_transform_pairs(n, ispacing, ishift, fI, fC, r, r_def, reim):
     r"""QC the input transform pairs."""
     print("* QC: Input transform-pairs:")
-    print("  fC: x-range defined through ``n``, ``spacing``, ``shift``, and "
-          "``r``-parameters; b-range defined through ``r``-parameter.")
-    print("  fI: x- and b-range defined through ``n``, ``spacing``, "
-          "``shift``, and ``r_def``-parameters.")
+    print("  fC: x-range defined through `n`, `spacing`, `shift`, and "
+          "`r`-parameters; b-range defined through `r`-parameter.")
+    print("  fI: x- and b-range defined through `n`, `spacing`, "
+          "`shift`, and `r_def`-parameters.")
 
     # Calculate min/max k, from minimum and maximum spacing/shift
     minspace = np.arange(*ispacing).min()
@@ -1141,8 +1159,8 @@ def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=None, aniso=None,
                 htarg=None, verblhs=0, verbrhs=0):
     r"""Numerical transform pair with empymod.
 
-    All parameters except ``ftype``, ``verblhs``, and ``verbrhs`` correspond to
-    the input parameters to ``empymod.dipole``. See there for more information.
+    All parameters except `ftype`, `verblhs`, and `verbrhs` correspond to the
+    input parameters to `empymod.dipole`. See there for more information.
 
     Note that if depth=None or [], the analytical full-space solutions will be
     used (much faster).
@@ -1152,17 +1170,16 @@ def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=None, aniso=None,
     ftype : str or list of strings
         Either of: {'j0', 'j1', 'j2', ['j0', 'j1']}
 
-        - 'j0': Analyze J0-term with ab=11, angle=45°
-        - 'j1': Analyze J1-term with ab=31, angle=0°
-        - 'j2': Analyze J0- and J1-terms jointly with ab=12, angle=45°
-        - ['j0', 'j1']: Same as calling empy_hankel twice, once with 'j0' and
-                        one with 'j1'; can be provided like this to
-                        fdesign.design.
+        - `'j0'`: Analyze J0-term with ab=11, angle=45°
+        - `'j1'`: Analyze J1-term with ab=31, angle=0°
+        - `'j2'`: Analyze J0- and J1-terms jointly with ab=12, angle=45°
+        - `['j0', 'j1']` : Same as calling empy_hankel twice, once with 'j0'
+          and one with 'j1'; can be provided like this to fdesign.design.
+
+        Note that ftype='j2' only works for fC, not for fI.
 
     verblhs, verbrhs: int
         verb-values provided to empymod for lhs and rhs.
-
-    Note that ftype='j2' only works for fC, not for fI.
 
     """
 

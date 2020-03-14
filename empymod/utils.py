@@ -1,9 +1,9 @@
 r"""
 
-:mod:`utils` -- Utilites
-========================
+:mod:`empymod.utils` -- Utilites
+================================
 
-Utilities for ``model`` such as checking input parameters.
+Utilities for :mod:`empymod.model` such as checking input parameters.
 
 This module consists of four groups of functions:
    0. General settings
@@ -90,7 +90,7 @@ class EMArray(np.ndarray):
     Parameters
     ----------
     data : array
-        Data to which to add ``.amp`` and ``.pha`` attributes.
+        Data to which to add `.amp` and `.pha` attributes.
 
     Attributes
     ----------
@@ -101,6 +101,7 @@ class EMArray(np.ndarray):
         Phase of the input data, in radians, lag-defined (increasing with
         increasing offset), not unwrapped. You can set class-wise flags to
         change this (<default>):
+
         - data.deg = True/<False>
         - data.unwrap = True/<False>
         - data.lead = True/<False>
@@ -165,8 +166,8 @@ def check_ab(ab, verb):
     r"""Check source-receiver configuration.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`. Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -236,8 +237,8 @@ def check_bipole(inp, name):
     r"""Check di-/bipole parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -348,8 +349,8 @@ def check_dipole(inp, name, verb):
     r"""Check dipole parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -400,8 +401,8 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     r"""Calculate frequency-dependent parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -489,8 +490,8 @@ def check_hankel(ht, htarg, verb):
     r"""Check Hankel transform parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -498,7 +499,7 @@ def check_hankel(ht, htarg, verb):
         Flag to choose the Hankel transform.
 
     htarg : str or filter from empymod.filters or array_like,
-        Depends on the value for ``ht``.
+        Depends on the value for `ht`.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -706,8 +707,8 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     r"""Check the model: depth and corresponding layer parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -897,8 +898,8 @@ def check_loop(loop, ht, htarg, verb):
     r"""Check loop parameter.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -909,7 +910,7 @@ def check_loop(loop, ht, htarg, verb):
         Flag to choose the Hankel transform.
 
     htarg : array_like,
-        Depends on the value for ``ht``.
+        Depends on the value for `ht`.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -955,8 +956,8 @@ def check_time(time, signal, ft, ftarg, verb):
     r"""Check time domain specific input parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -965,16 +966,17 @@ def check_time(time, signal, ft, ftarg, verb):
 
     signal : {None, 0, 1, -1}
         Source signal:
-            - None: Frequency-domain response
-            - -1 : Switch-off time-domain response
-            - 0 : Impulse time-domain response
-            - +1 : Switch-on time-domain response
+
+        - None: Frequency-domain response
+        - -1 : Switch-off time-domain response
+        - 0 : Impulse time-domain response
+        - +1 : Switch-on time-domain response
 
     ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}
         Flag for Fourier transform.
 
     ftarg : str or filter from empymod.filters or array_like,
-        Only used if ``signal`` !=None. Depends on the value for ``ft``:
+        Only used if `signal!=None`. Depends on the value for `ft`:
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -1272,8 +1274,8 @@ def check_time_only(time, signal, verb):
     r"""Check time and signal parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1282,10 +1284,11 @@ def check_time_only(time, signal, verb):
 
     signal : {None, 0, 1, -1}
         Source signal:
-            - None: Frequency-domain response
-            - -1 : Switch-off time-domain response
-            - 0 : Impulse time-domain response
-            - +1 : Switch-on time-domain response
+
+        - None: Frequency-domain response
+        - -1 : Switch-off time-domain response
+        - 0 : Impulse time-domain response
+        - +1 : Switch-on time-domain response
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -1321,8 +1324,8 @@ def check_solution(solution, signal, ab, msrc, mrec):
     r"""Check required solution with parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`. Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1331,10 +1334,11 @@ def check_solution(solution, signal, ab, msrc, mrec):
 
     signal : {None, 0, 1, -1}
         Source signal:
-            - None: Frequency-domain response
-            - -1 : Switch-off time-domain response
-            - 0 : Impulse time-domain response
-            - +1 : Switch-on time-domain response
+
+        - None: Frequency-domain response
+        - -1 : Switch-off time-domain response
+        - 0 : Impulse time-domain response
+        - +1 : Switch-on time-domain response
 
     msrc, mrec : bool
         True if src/rec is magnetic, else False.
@@ -1366,8 +1370,8 @@ def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
     r"""Get required ab's for given angles.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1463,8 +1467,8 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
     r"""Get required geometrical scaling factor for given angles.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1525,8 +1529,8 @@ def get_layer_nr(inp, depth):
         chosen.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1566,8 +1570,8 @@ def get_off_ang(src, rec, nsrc, nrec, verb):
     r"""Get depths, offsets, angles, hence spatial input parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1620,15 +1624,16 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     r"""Get angles, interpolation weights and normalization weights.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
     inp : list of floats or arrays
         Input coordinates (m):
-            - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
-            - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
+
+        - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
+        - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
 
     iz : int
         Index of current di-/bipole depth (-).
@@ -1644,10 +1649,11 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
     strength : float, optional
         Source strength (A):
-          - If 0, output is normalized to source and receiver of 1 m length,
-            and source strength of 1 A.
-          - If != 0, output is returned for given source and receiver length,
-            and source strength.
+
+        - If 0, output is normalized to source and receiver of 1 m length, and
+          source strength of 1 A.
+        - If != 0, output is returned for given source and receiver length, and
+          source strength.
 
     name : str, {'src', 'rec'}
         Pole-type.
@@ -1822,9 +1828,10 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 def get_kwargs(names, defaults, kwargs):
     """Return wanted parameters, check remaining.
 
-    1. Extracts parameters ``names`` from ``kwargs``, filling them with the
-       ``defaults``-value if it is not in ``kwargs``.
+    1. Extracts parameters `names` from `kwargs`, filling them with the
+       `defaults`-value if it is not in `kwargs`.
     2. Check remaining kwargs;
+
        - Raise an error if it is an unknown keyword;
        - Print warning if it is a keyword from another routine (verb>0).
 
@@ -1971,11 +1978,11 @@ def get_minimum():
     min_vals : dict
         Dictionary of current minimum values with keys
 
-          - min_freq : float
-          - min_time : float
-          - min_off : float
-          - min_res : float
-          - min_angle : float
+        - min_freq : float
+        - min_time : float
+        - min_off : float
+        - min_res : float
+        - min_angle : float
 
         For a full description of these options, see `set_minimum`.
 
@@ -2072,21 +2079,21 @@ def _check_targ(targ, keys):
 class Report(ScoobyReport):
     r"""Print date, time, and version information.
 
-    Use ``scooby`` to print date, time, and package version information in any
+    Use `scooby` to print date, time, and package version information in any
     environment (Jupyter notebook, IPython console, Python console, QT
     console), either as html-table (notebook) or as plain text (anywhere).
 
-    Always shown are the OS, number of CPU(s), ``numpy``, ``scipy``, ``numba``,
-    ``empymod``, ``sys.version``, and time/date.
+    Always shown are the OS, number of CPU(s), `numpy`, `scipy`, `numba`,
+    `empymod`, `sys.version`, and time/date.
 
-    Additionally shown are, if they can be imported, ``IPython``, and
-    ``matplotlib``. It also shows MKL information, if available.
+    Additionally shown are, if they can be imported, `IPython`, and
+    `matplotlib`. It also shows MKL information, if available.
 
-    All modules provided in ``add_pckg`` are also shown.
+    All modules provided in `add_pckg` are also shown.
 
     .. note::
 
-        The package ``scooby`` has to be installed in order to use ``Report``:
+        The package `scooby` has to be installed in order to use `Report`:
         ``pip install scooby``.
 
 

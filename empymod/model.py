@@ -1,7 +1,7 @@
 r"""
 
-:mod:`model` -- Model EM-responses
-==================================
+:mod:`empymod.model` -- Model EM-responses
+==========================================
 
 EM-modelling routines. The implemented routines might not be the fastest
 solution to your specific problem. Use these routines as template to create

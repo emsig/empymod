@@ -100,6 +100,7 @@ complex-valued space-frequency response can be computed by either a cosine
 transform with the real values, or a sine transform with the imaginary part,
 
 .. math::
+    :label: fourier
 
     E(r, t)^\text{Impulse} &= \ \frac{2}{\pi}\int^\infty_0 \Re[E(r, \omega)]\
                         \cos(\omega t)\ \text{d}\omega \ , \\
@@ -115,6 +116,7 @@ additionally multiplied by -1. The impulse-response is the time-derivative of
 the step-response,
 
 .. math::
+    :label: impulse
 
     E(r, t)^\text{Impulse} =
                         \frac{\partial\ E(r, t)^\text{step}}{\partial t}\ .
@@ -137,6 +139,7 @@ step-on responses. The FFT uses the full complex-valued response at the moment.
 For completeness sake, the step-on response is given by
 
 .. math::
+    :label: step-on
 
     E(r, t)^\text{Step-on} = - \frac{2}{\pi}\int^\infty_0
                             \Im\left[\frac{E(r,\omega)}{\mathrm{i}
@@ -146,6 +149,7 @@ For completeness sake, the step-on response is given by
 and the step-off by
 
 .. math::
+    :label: step-off
 
     E(r, t)^\text{Step-off} = - \frac{2}{\pi}\int^\infty_0
                              \Re\left[\frac{E(r,\omega)}{\mathrm{i}
