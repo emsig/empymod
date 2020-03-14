@@ -26,20 +26,23 @@ transform the responses into the space-frequency and space-time domains.
 # Import all modules
 from empymod import model
 from empymod import utils
-from empymod import filters
-from empymod import transform
 from empymod import kernel
+from empymod import filters
 from empymod import scripts
+from empymod import transform
 
-# Import all functions, except the filters
-from empymod.model import *      # noqa  maint. in model.__all__
-from empymod.model import bipole, dipole, loop
-from empymod.utils import *      # noqa  maint. in utils.__all__
-from empymod.utils import EMArray, set_minimum, get_minimum
+# Import most important functions for __all__
 from empymod.filters import DigitalFilter
-from empymod.transform import *  # noqa  maint. in transform.__all__
-from empymod.kernel import *     # noqa  maint. in kernel.__all__
-from empymod.scripts import *    # noqa  maint. in scripts.__init__.__all__
+from empymod.model import bipole, dipole, loop
+from empymod.utils import EMArray, set_minimum, get_minimum
+
+# We import all (*) from the following modules.
+# What is imported is maintained in each module in `__all__`.
+from empymod.model import *      # noqa
+from empymod.utils import *      # noqa
+from empymod.kernel import *     # noqa
+from empymod.scripts import *    # noqa
+from empymod.transform import *  # noqa
 
 # Make only a selection available to __all__ to not clutter the namespace
 # Maybe also to discourage the use of `from empymod import *`.

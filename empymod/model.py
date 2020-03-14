@@ -102,9 +102,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           (bipole) can be single values or arrays.
         - The variables x and y (dipole) or x0, x1, y0, and y1 (bipole) must
           have the same dimensions.
-        - The variables z, azimuth, and dip (dipole) or z0 and z1 (bipole)
-          must either be single values or having the same dimension as the
-          other coordinates.
+        - The variables z, azimuth, and dip (dipole) or z0 and z1 (bipole) must
+          either be single values or having the same dimension as the other
+          coordinates.
 
         Angles (coordinate system is either left-handed with positive z down or
         right-handed with positive z up; East-North-Depth):
@@ -174,16 +174,14 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         Default is 0.
 
-    xdirect : bool or None, optional
-        Direct field calculation (only if src and rec are in the same layer):
+    verb : {0, 1, 2, 3, 4}, optional
+        Level of verbosity, default is 2:
 
-        - If True, direct field is calculated analytically in the frequency
-          domain.
-        - If False, direct field is calculated in the wavenumber domain.
-        - If None, direct field is excluded from the calculation, and only
-          reflected fields are returned (secondary field).
-
-        Defaults to False.
+        - 0: Print nothing.
+        - 1: Print warnings.
+        - 2: Print additional runtime and kernel calls
+        - 3: Print additional start/stop, condensed parameter information.
+        - 4: Print additional full parameter information
 
     ht : {'dlf', 'qwe', 'quad'}, optional
         Flag to choose either the *Digital Linear Filter* (DLF) method, the
@@ -290,6 +288,17 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           given number per decade, and then interpolated to yield the required
           frequencies for the FFT.
 
+    xdirect : bool or None, optional
+        Direct field calculation (only if src and rec are in the same layer):
+
+        - If True, direct field is calculated analytically in the frequency
+          domain.
+        - If False, direct field is calculated in the wavenumber domain.
+        - If None, direct field is excluded from the calculation, and only
+          reflected fields are returned (secondary field).
+
+        Defaults to False.
+
     loop : {None, 'freq', 'off'}, optional
         Define if to calculate everything vectorized or if to loop over
         frequencies ('freq') or over offsets ('off'), default is None. It
@@ -300,19 +309,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         the different versions will yield the answer for your specific problem
         at hand!
 
-    verb : {0, 1, 2, 3, 4}, optional
-        Level of verbosity, default is 2:
-
-        - 0: Print nothing.
-        - 1: Print warnings.
-        - 2: Print additional runtime and kernel calls
-        - 3: Print additional start/stop, condensed parameter information.
-        - 4: Print additional full parameter information
-
 
     Returns
     -------
-    EM : EMAarray, (nfreqtime, nrec, nsrc)
+    EM : EMArray, (nfreqtime, nrec, nsrc)
         Frequency- or time-domain EM field (depending on `signal`):
 
         - If rec is electric, returns E [V/m].
@@ -327,8 +327,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     Examples
     --------
+    >>> import empymod
     >>> import numpy as np
-    >>> from empymod import bipole
     >>> # x-directed bipole source: x0, x1, y0, y1, z0, z1
     >>> src = [-50, 50, 0, 0, 100, 100]
     >>> # x-directed dipole receiver-array: x, y, z, azimuth, dip
@@ -341,7 +341,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     >>> freq = 1
     >>> # Calculate electric field due to an electric source at 1 Hz.
     >>> # [msrc = mrec = False (default)]
-    >>> EMfield = bipole(src, rec, depth, res, freq, verb=4)
+    >>> EMfield = empymod.bipole(src, rec, depth, res, freq, verb=4)
     ~
     :: empymod START  ::  v2.0.0
     ~
@@ -388,9 +388,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     """
     # Get kwargs with defaults.
-    out = get_kwargs(['xdirect', 'ht', 'htarg', 'ft', 'ftarg', 'loop', 'verb'],
-                     [False, 'dlf', None, 'dlf', None, None, 2], kwargs)
-    xdirect, ht, htarg, ft, ftarg, loop, verb = out
+    out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
+                     [2, 'dlf', None, 'dlf', None, False, None], kwargs)
+    verb, ht, htarg, ft, ftarg, xdirect, loop = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -595,7 +595,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     Parameters
     ----------
     src, rec : list of floats or arrays
-        Source and receiver coordinates (m): [x, y, z]:
+        Source and receiver coordinates [x, y, z] (m):
 
         - The x- and y-coordinates can be arrays, z is a single value.
         - The x- and y-coordinates must have the same dimension.
@@ -663,132 +663,6 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         isotropic behaviour is assumed.
         Default is ones.
 
-    xdirect : bool or None, optional
-        Direct field calculation (only if src and rec are in the same layer):
-
-        - If True, direct field is calculated analytically in the frequency
-          domain.
-        - If False, direct field is calculated in the wavenumber domain.
-        - If None, direct field is excluded from the calculation, and only
-          reflected fields are returned (secondary field).
-
-        Defaults to False.
-
-    ht : {'dlf', 'qwe', 'quad'}, optional
-        Flag to choose either the *Digital Linear Filter* (DLF) method, the
-        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
-        for the Hankel transform.
-        Defaults to 'dlf'.
-
-    htarg : dict, optional
-        Possible parameters depends on the value for `ht`:
-
-        - If `ht='dlf'`:
-
-          - `dlf`: string of filter name in :mod:`empymod.filters` or the
-            filter method itself. (default:
-            :func:`empymod.filters.key_201_2009`)
-          - `pts_per_dec`: points per decade; (default: 0):
-
-            - If 0: Standard DLF.
-            - If < 0: Lagged Convolution DLF.
-            - If > 0: Splined DLF
-
-        - If `ht='qwe'`:
-
-          - `rtol`: relative tolerance (default: 1e-12)
-          - `atol`: absolute tolerance (default: 1e-30)
-          - `nquad`: order of Gaussian quadrature (default: 51)
-          - `maxint`: maximum number of partial integral intervals
-            (default: 40)
-          - `pts_per_dec`: points per decade; (default: 0)
-
-            - If 0, no interpolation is used.
-            - If > 0, interpolation is used.
-
-          - `diff_quad`: criteria when to swap to QUAD (only relevant if
-            pts_per_dec=-1) (default: 100)
-          - `a`: lower limit for QUAD (default: first interval from QWE)
-          - `b`: upper limit for QUAD (default: last interval from QWE)
-          - `limit`: limit for quad (default: maxint)
-
-        - If `ht='quad'`:
-
-          - `rtol`: relative tolerance (default: 1e-12)
-          - `atol`: absolute tolerance (default: 1e-20)
-          - `limit`: An upper bound on the number of subintervals used in the
-            adaptive algorithm (default: 500)
-          - `lmin`: Minimum wavenumber (default 1e-6)
-          - `lmax`: Maximum wavenumber (default 0.1)
-          - `pts_per_dec`: points per decade (default: 40)
-
-    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
-        Only used if signal!=None. Flag to choose either the Digital Linear
-        Filter method (Sine- or Cosine-Filter), the
-        Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
-        Fourier transform.
-        Defaults to 'dlf' (which is 'sin' if signal>=0, else 'cos').
-
-    ftarg : dict, optional
-        Only used if signal!=None. Possible parameters depends on the value for
-        `ft`:
-
-        - If `ft='dlf'`, 'sin', or 'cos':
-
-          - `dlf`: string of filter name in :mod:`empymod.filters` or the
-            filter method itself. (Default:
-            :func:`empymod.filters.key_201_CosSin_2012`)
-          - `pts_per_dec`: points per decade; (default: -1)
-
-            - If 0: Standard DLF.
-            - If < 0: Lagged Convolution DLF.
-            - If > 0: Splined DLF
-
-
-        - If `ft='qwe'`:
-
-          - `rtol`: relative tolerance (default: 1e-8)
-          - `atol`: absolute tolerance (default: 1e-20)
-          - `nquad`: order of Gaussian quadrature (default: 21)
-          - `maxint`: maximum number of partial integral intervals
-            (default: 200)
-          - `pts_per_dec`: points per decade (default: 20)
-          - `diff_quad`: criteria when to swap to QUAD (default: 100)
-          - `a`: lower limit for QUAD (default: first interval from QWE)
-          - `b`: upper limit for QUAD (default: last interval from QWE)
-          - `limit`: limit for quad (default: maxint)
-
-        - If `ft='fftlog'`:
-
-          - `pts_per_dec`: sampels per decade (default: 10)
-          - `add_dec`: additional decades [left, right] (default: [-2, 1])
-          - `q`: exponent of power law bias (default: 0); -1 <= q <= 1
-
-        - If `ft='fft'`:
-
-          - `dfreq`: Linear step-size of frequencies (default: 0.002)
-          - `nfreq`: Number of frequencies (default: 2048)
-          - `ntot`: Total number for FFT; difference between nfreq and ntot
-            is padded with zeroes. This number is ideally a power of 2, e.g.
-            2048 or 4096 (default: nfreq).
-          - `pts_per_dec`: points per decade (default: None)
-
-          Padding can sometimes improve the result, not always. The default
-          samples from 0.002 Hz - 4.096 Hz. If pts_per_dec is set to an
-          integer, calculated frequencies are logarithmically spaced with the
-          given number per decade, and then interpolated to yield the required
-          frequencies for the FFT.
-
-    loop : {None, 'freq', 'off'}, optional
-        Define if to calculate everything vectorized or if to loop over
-        frequencies ('freq') or over offsets ('off'), default is None. It
-        always loops over frequencies if `ht='qwe'` or if `pts_per_dec=-1`.
-        Calculating everything vectorized is fast for few offsets OR for few
-        frequencies. However, if you calculate many frequencies for many
-        offsets, it might be faster to loop over frequencies. Only comparing
-        the different versions will yield the answer for your specific problem
-        at hand!
-
     verb : {0, 1, 2, 3, 4}, optional
         Level of verbosity, default is 2:
 
@@ -797,6 +671,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         - 2: Print additional runtime and kernel calls
         - 3: Print additional start/stop, condensed parameter information.
         - 4: Print additional full parameter information
+
+    ht, htarg, ft, ftarg, xdirect, loop : settings, optinal
+        See docstring of :func:`bipole` for a description.
 
 
     Returns
@@ -816,13 +693,13 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     Examples
     --------
+    >>> import empymod
     >>> import numpy as np
-    >>> from empymod import dipole
     >>> src = [0, 0, 100]
     >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200]
     >>> depth = [0, 300, 1000, 1050]
     >>> res = [1e20, .3, 1, 50, 1]
-    >>> EMfield = dipole(src, rec, depth, res, freqtime=1, verb=0)
+    >>> EMfield = empymod.dipole(src, rec, depth, res, freqtime=1, verb=0)
     >>> print(EMfield)
     [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
       -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
@@ -832,9 +709,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     """
     # Get kwargs with defaults.
-    out = get_kwargs(['xdirect', 'ht', 'htarg', 'ft', 'ftarg', 'loop', 'verb'],
-                     [False, 'dlf', None, 'dlf', None, None, 2], kwargs)
-    xdirect, ht, htarg, ft, ftarg, loop, verb = out
+    out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
+                     [2, 'dlf', None, 'dlf', None, False, None], kwargs)
+    verb, ht, htarg, ft, ftarg, xdirect, loop = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -1046,132 +923,6 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
         Default is 0.
 
-    xdirect : bool or None, optional
-        Direct field calculation (only if src and rec are in the same layer):
-
-        - If True, direct field is calculated analytically in the frequency
-          domain.
-        - If False, direct field is calculated in the wavenumber domain.
-        - If None, direct field is excluded from the calculation, and only
-          reflected fields are returned (secondary field).
-
-        Defaults to False.
-
-    ht : {'dlf', 'qwe', 'quad'}, optional
-        Flag to choose either the *Digital Linear Filter* (DLF) method, the
-        *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
-        for the Hankel transform.
-        Defaults to 'dlf'.
-
-    htarg : dict, optional
-        Possible parameters depends on the value for `ht`:
-
-        - If `ht='dlf'`:
-
-          - `dlf`: string of filter name in :mod:`empymod.filters` or the
-            filter method itself. (default:
-            :func:`empymod.filters.key_201_2009`)
-          - `pts_per_dec`: points per decade; (default: 0):
-
-            - If 0: Standard DLF.
-            - If < 0: Lagged Convolution DLF.
-            - If > 0: Splined DLF
-
-        - If `ht='qwe'`:
-
-          - `rtol`: relative tolerance (default: 1e-12)
-          - `atol`: absolute tolerance (default: 1e-30)
-          - `nquad`: order of Gaussian quadrature (default: 51)
-          - `maxint`: maximum number of partial integral intervals
-            (default: 40)
-          - `pts_per_dec`: points per decade; (default: 0)
-
-            - If 0, no interpolation is used.
-            - If > 0, interpolation is used.
-
-          - `diff_quad`: criteria when to swap to QUAD (only relevant if
-            pts_per_dec=-1) (default: 100)
-          - `a`: lower limit for QUAD (default: first interval from QWE)
-          - `b`: upper limit for QUAD (default: last interval from QWE)
-          - `limit`: limit for quad (default: maxint)
-
-        - If `ht='quad'`:
-
-          - `rtol`: relative tolerance (default: 1e-12)
-          - `atol`: absolute tolerance (default: 1e-20)
-          - `limit`: An upper bound on the number of subintervals used in the
-            adaptive algorithm (default: 500)
-          - `lmin`: Minimum wavenumber (default 1e-6)
-          - `lmax`: Maximum wavenumber (default 0.1)
-          - `pts_per_dec`: points per decade (default: 40)
-
-    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
-        Only used if signal!=None. Flag to choose either the Digital Linear
-        Filter method (Sine- or Cosine-Filter), the
-        Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
-        Fourier transform.
-        Defaults to 'dlf' (which is 'sin' if signal>=0, else 'cos').
-
-    ftarg : dict, optional
-        Only used if signal!=None. Possible parameters depends on the value for
-        `ft`:
-
-        - If `ft='dlf'`, 'sin', or 'cos':
-
-          - `dlf`: string of filter name in :mod:`empymod.filters` or the
-            filter method itself. (Default:
-            :func:`empymod.filters.key_201_CosSin_2012`)
-          - `pts_per_dec`: points per decade; (default: -1)
-
-            - If 0: Standard DLF.
-            - If < 0: Lagged Convolution DLF.
-            - If > 0: Splined DLF
-
-
-        - If `ft='qwe'`:
-
-          - `rtol`: relative tolerance (default: 1e-8)
-          - `atol`: absolute tolerance (default: 1e-20)
-          - `nquad`: order of Gaussian quadrature (default: 21)
-          - `maxint`: maximum number of partial integral intervals
-            (default: 200)
-          - `pts_per_dec`: points per decade (default: 20)
-          - `diff_quad`: criteria when to swap to QUAD (default: 100)
-          - `a`: lower limit for QUAD (default: first interval from QWE)
-          - `b`: upper limit for QUAD (default: last interval from QWE)
-          - `limit`: limit for quad (default: maxint)
-
-        - If `ft='fftlog'`:
-
-          - `pts_per_dec`: sampels per decade (default: 10)
-          - `add_dec`: additional decades [left, right] (default: [-2, 1])
-          - `q`: exponent of power law bias (default: 0); -1 <= q <= 1
-
-        - If `ft='fft'`:
-
-          - `dfreq`: Linear step-size of frequencies (default: 0.002)
-          - `nfreq`: Number of frequencies (default: 2048)
-          - `ntot`: Total number for FFT; difference between nfreq and ntot
-            is padded with zeroes. This number is ideally a power of 2, e.g.
-            2048 or 4096 (default: nfreq).
-          - `pts_per_dec`: points per decade (default: None)
-
-          Padding can sometimes improve the result, not always. The default
-          samples from 0.002 Hz - 4.096 Hz. If pts_per_dec is set to an
-          integer, calculated frequencies are logarithmically spaced with the
-          given number per decade, and then interpolated to yield the required
-          frequencies for the FFT.
-
-    loop : {None, 'freq', 'off'}, optional
-        Define if to calculate everything vectorized or if to loop over
-        frequencies ('freq') or over offsets ('off'), default is None. It
-        always loops over frequencies if `ht='qwe'` or if `pts_per_dec=-1`.
-        Calculating everything vectorized is fast for few offsets OR for few
-        frequencies. However, if you calculate many frequencies for many
-        offsets, it might be faster to loop over frequencies. Only comparing
-        the different versions will yield the answer for your specific problem
-        at hand!
-
     verb : {0, 1, 2, 3, 4}, optional
         Level of verbosity, default is 2:
 
@@ -1180,6 +931,9 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
         - 2: Print additional runtime and kernel calls
         - 3: Print additional start/stop, condensed parameter information.
         - 4: Print additional full parameter information
+
+    ht, htarg, ft, ftarg, xdirect, loop : settings, optinal
+        See docstring of :func:`bipole` for a description.
 
 
     Returns
@@ -1196,8 +950,8 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     Examples
     --------
+    >>> import empymod
     >>> import numpy as np
-    >>> from empymod import loop
     >>> # z-directed loop source: x, y, z, azimuth, dip
     >>> src = [0, 0, 0, 0, 90]
     >>> # z-directed magnetic dipole receiver-array: x, y, z, azimuth, dip
@@ -1210,8 +964,9 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
     >>> freq = 1
     >>> # Calculate magnetic field due to a loop source at 1 Hz.
     >>> # [mrec = True (default)]
-    >>> EMfield = loop(src, rec, depth, res, freq, verb=4)
-    :: empymod START  ::
+    >>> EMfield = empymod.loop(src, rec, depth, res, freq, verb=4)
+    ~
+    :: empymod START  ::  w2.0.0
     ~
        depth       [m] :  0 300 500
        res     [Ohm.m] :  2E+14 10 500 10
@@ -1220,7 +975,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
        epermV      [-] :  1 1 1 1
        mpermH      [-] :  1 1 1 1
        mpermV      [-] :  1 1 1 1
-       direct field    :  Calc. in wavenumber domain
+       direct field    :  Comp. in wavenumber domain
        frequency  [Hz] :  1
        Hankel          :  DLF (Fast Hankel Transform)
          > Filter      :  Key 201 (2009)
@@ -1253,9 +1008,9 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     """
     # Get kwargs with defaults.
-    out = get_kwargs(['xdirect', 'ht', 'htarg', 'ft', 'ftarg', 'loop', 'verb'],
-                     [False, 'dlf', None, 'dlf', None, None, 2], kwargs)
-    xdirect, ht, htarg, ft, ftarg, loop, verb = out
+    out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
+                     [2, 'dlf', None, 'dlf', None, False, None], kwargs)
+    verb, ht, htarg, ft, ftarg, xdirect, loop = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -1477,9 +1232,10 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     Parameters
     ----------
     src, rec : list of floats or arrays
-        Source and receiver coordinates (m): [x, y, z].
-        The x- and y-coordinates can be arrays, z is a single value.
-        The x- and y-coordinates must have the same dimension.
+        Source and receiver coordinates [x, y, z] (m):
+
+        - The x- and y-coordinates can be arrays, z is a single value.
+        - The x- and y-coordinates must have the same dimension.
 
     res : float
         Horizontal resistivity rho_h (Ohm.m).
@@ -1579,12 +1335,12 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     Examples
     --------
+    >>> import empymod
     >>> import numpy as np
-    >>> from empymod import analytical
     >>> src = [0, 0, 0]
     >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200]
     >>> res = 50
-    >>> EMfield = analytical(src, rec, res, freqtime=1, verb=0)
+    >>> EMfield = empymod.analytical(src, rec, res, freqtime=1, verb=0)
     >>> print(EMfield)
     [  4.03091405e-08 -9.69163818e-10j   6.97630362e-09 -4.88342150e-10j
        2.15205979e-09 -2.97489809e-10j   8.90394459e-10 -1.99313433e-10j
@@ -1694,10 +1450,15 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
     frequency `cf`. If signal!=None, it carries out the Fourier transform and
     applies a gain to the response.
 
-    For input parameters see the function :func:`dipole`, except for:
 
     Parameters
     ----------
+    src, rec, freqtime : survey parameters
+        See docstring of :func:`dipole` for a description.
+
+    depth, res, aniso, epermH, epermV, mpermH, mpermV : model parameters
+        See docstring of :func:`dipole` for a description.
+
     cf : float
         Centre frequency of GPR-signal, in Hz. Sensible values are between
         10 MHz and 3000 MHz.
@@ -1705,6 +1466,9 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
     gain : float
         Power of gain function. If None, no gain is applied. Only used if
         signal!=None.
+
+    ht, htarg, ft, ftarg, xdirect, loop : settings, optinal
+        See docstring of :func:`bipole` for a description.
 
 
     Returns
@@ -1714,9 +1478,9 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
 
     """
     # Get kwargs with defaults.
-    out = get_kwargs(['xdirect', 'ht', 'htarg', 'ft', 'ftarg', 'loop', 'verb'],
-                     [False, 'quad', None, 'fft', None, None, 2], kwargs)
-    xdirect, ht, htarg, ft, ftarg, loop, verb = out
+    out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
+                     [2, 'quad', None, 'fft', None, False, None], kwargs)
+    verb, ht, htarg, ft, ftarg, xdirect, loop = out
 
     if verb > 2:
         print("   GPR             :  EXPERIMENTAL, USE WITH CAUTION")
@@ -1788,10 +1552,11 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     Parameters
     ----------
     src, rec : list of floats or arrays
-        Source and receiver coordinates (m): [x, y, z].
-        The x- and y-coordinates can be arrays, z is a single value.
-        The x- and y-coordinates must have the same dimension.
-        The x- and y-coordinates only matter for the angle-dependent factor.
+        Source and receiver coordinates [x, y, z] (m):
+
+        - The x- and y-coordinates can be arrays, z is a single value.
+        - The x- and y-coordinates must have the same dimension.
+        - The x- and y-coordinates only matter for the angle-dependent factor.
 
         Sources or receivers placed on a layer interface are considered in the
         upper layer.
@@ -1869,15 +1634,15 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     Examples
     --------
+    >>> import empymod
     >>> import numpy as np
-    >>> from empymod.model import dipole_k
     >>> src = [0, 0, 100]
     >>> rec = [5000, 0, 200]
     >>> depth = [0, 300, 1000, 1050]
     >>> res = [1e20, .3, 1, 50, 1]
     >>> freq = 1
-    >>> wavenrs = np.logspace(-3.7, -3.6, 10)
-    >>> PJ0, PJ1 = dipole_k(src, rec, depth, res, freq, wavenrs, verb=0)
+    >>> wavenr = np.logspace(-3.7, -3.6, 10)
+    >>> PJ0, PJ1 = empymod.dipole_k(src, rec, depth, res, freq, wavenr, verb=0)
     >>> print(PJ0)
     [ -1.02638329e-08 +4.91531529e-09j  -1.05289724e-08 +5.04222413e-09j
       -1.08009148e-08 +5.17238608e-09j  -1.10798310e-08 +5.30588284e-09j
@@ -1973,11 +1738,11 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         loop_off, conv=True):
     r"""Return electromagnetic frequency-domain response.
 
-    This function is called from one of the above modelling routines. No
-    input-check is carried out here. See the main description of :mod:`model`
-    for information regarding input and output parameters.
+    This function is called from one of the modelling routines
+    :mod:`empymod.model`. Consult those for more details regarding the input
+    and output parameters.
 
-    This function can be directly used if you are sure the provided input is in
+    This function can be used directly if you are sure the provided input is in
     the correct format. This is useful for inversion routines and similar, as
     it can speed-up the calculation by omitting input-checks.
 
@@ -2047,11 +1812,11 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
 def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
     r"""Return time-domain response of the frequency-domain response fEM.
 
-    This function is called from one of the above modelling routines. No
-    input-check is carried out here. See the main description of :mod:`model`
-    for information regarding input and output parameters.
+    This function is called from one of the modelling routines
+    :mod:`empymod.model`. Consult those for more details regarding the input
+    and output parameters.
 
-    This function can be directly used if you are sure the provided input is in
+    This function can be used directly if you are sure the provided input is in
     the correct format. This is useful for inversion routines and similar, as
     it can speed-up the calculation by omitting input-checks.
 
