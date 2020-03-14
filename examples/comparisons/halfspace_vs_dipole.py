@@ -22,10 +22,10 @@ src = [0, 0, 100]
 rec = [2000, 500, 200]
 res = [2e14, 2.5]
 aniso = [1, 2]
-t = np.logspace(-2, 3, 301)
+time = np.logspace(-2, 3, 301)
 
 # Collect parameters
-inpEM = {'src': src, 'rec': rec, 'freqtime': t, 'verb': 0}
+inpEM = {'src': src, 'rec': rec, 'freqtime': time, 'verb': 0}
 inpEMdip = inpEM.copy()
 inpEMdip['htarg'] = {'pts_per_dec': -1}
 modHS = {'res': res, 'aniso': aniso}
@@ -41,8 +41,8 @@ all_abs = [11, 12, 13, 21, 22, 23, 31, 32, 33]
 def plot_t(EM, HS, title, i):
     plt.figure(title, figsize=(10, 8))
     plt.subplot(i)
-    plt.semilogx(t, EM)
-    plt.semilogx(t, HS, '--')
+    plt.semilogx(time, EM)
+    plt.semilogx(time, HS, '--')
 
 
 ###############################################################################
@@ -129,16 +129,17 @@ plt.show()
 # Frequency domain
 # ----------------
 
-inpEM['freqtime'] = 1/t
+inpEM['freqtime'] = 1/time
+inpEMdip['freqtime'] = 1/time
 
 
 def plot_f(EM, HS, title, i):
     plt.figure(title, figsize=(10, 8))
     plt.subplot(i)
-    plt.semilogx(1/t, EM.real)
-    plt.semilogx(1/t, HS.real, '--')
-    plt.semilogx(1/t, EM.imag)
-    plt.semilogx(1/t, HS.imag, '--')
+    plt.semilogx(1/time, EM.real)
+    plt.semilogx(1/time, HS.real, '--')
+    plt.semilogx(1/time, EM.imag)
+    plt.semilogx(1/time, HS.imag, '--')
 
 
 ###############################################################################

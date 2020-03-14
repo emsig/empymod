@@ -44,7 +44,7 @@ import matplotlib.pyplot as plt
 #
 # .. image:: ../../_static/figures/Ziolkowski2007.jpg
 #
-# Calculation
+# Computation
 # ~~~~~~~~~~~
 
 # Time
@@ -63,7 +63,7 @@ inp1 = dc(inp2)
 inp1['depth'] = inp2['depth'][0]
 inp1['res'] = inp2['res'][:2]
 
-# Calculate responses
+# Compute responses
 sths = empymod.dipole(**inp1, signal=1)  # Step, HS
 sttg = empymod.dipole(**inp2, signal=1)  # " "   Target
 imhs = empymod.dipole(**inp1, signal=0, ft='fftlog')  # Impulse, HS
@@ -115,7 +115,7 @@ plt.show()
 #
 # .. image:: ../../_static/figures/Constable2006.jpg
 #
-# Calculation
+# Computation
 # ~~~~~~~~~~~
 
 # Offsets
@@ -134,13 +134,13 @@ inp4 = dc(inp3)
 inp4['depth'] = inp3['depth'][:2]
 inp4['res'] = inp3['res'][:3]
 
-# Calculate radial responses
+# Compute radial responses
 rhs = empymod.dipole(**inp4)  # Step, HS
 rhs = empymod.utils.EMArray(np.nan_to_num(rhs))
 rtg = empymod.dipole(**inp3)  # " "   Target
 rtg = empymod.utils.EMArray(np.nan_to_num(rtg))
 
-# Calculate azimuthal response
+# Compute azimuthal response
 ahs = empymod.dipole(**inp4, ab=22)  # Step, HS
 ahs = empymod.utils.EMArray(np.nan_to_num(ahs))
 atg = empymod.dipole(**inp3, ab=22)  # " "   Target

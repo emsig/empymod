@@ -375,7 +375,7 @@ def test_check_model(capsys):
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = res
     out, _ = capsys.readouterr()
     assert "* WARNING :: Parameter aniso < " in out
-    assert "   direct field    :  Calc. in frequency domain" in out
+    assert "   direct field    :  Comp. in frequency domain" in out
     assert_allclose(depth, [-np.infty, 0])
     assert_allclose(res, [1e20, 20])
     assert_allclose(aniso, [1, np.sqrt(1e-20/20)])
@@ -389,7 +389,7 @@ def test_check_model(capsys):
     res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
                             [1, 1], False, 3)
     out, _ = capsys.readouterr()
-    assert "   direct field    :  Calc. in wavenumber domain" in out
+    assert "   direct field    :  Comp. in wavenumber domain" in out
 
     # xdirect=None
     res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
@@ -958,7 +958,7 @@ def test_printstartfinish(capsys):
     t0 = utils.printstartfinish(3)
     assert isinstance(t0, float)
     out, _ = capsys.readouterr()
-    assert out == "\n:: empymod START  ::\n\n"
+    assert ":: empymod START  ::  v" in out
 
     utils.printstartfinish(0, t0)
     out, _ = capsys.readouterr()

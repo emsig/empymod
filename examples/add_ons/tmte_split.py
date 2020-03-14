@@ -40,7 +40,7 @@ model = {
 }
 
 ###############################################################################
-# Calculation
+# Computation
 # -----------
 
 target = empymod.dipole(res=rtg, **model)

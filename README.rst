@@ -30,7 +30,7 @@ The electromagnetic modeller **empymod** can model electric or magnetic
 responses due to a three-dimensional electric or magnetic source in a
 layered-earth model with vertical transverse isotropic (VTI) resistivity, VTI
 electric permittivity, and VTI magnetic permeability, from very low frequencies
-(DC) to very high frequencies (GPR). The calculation is carried out in the
+(DC) to very high frequencies (GPR). The computation is carried out in the
 wavenumber-frequency domain, and various Hankel- and Fourier-transform methods
 are included to transform the responses into the space-frequency and space-time
 domains.
@@ -50,8 +50,8 @@ and much more, see
 Features
 ========
 
-- Calculates the complete (diffusion and wave phenomena) 3D electromagnetic
-  field in a layered-earth model including vertical transverse isotropic (VTI)
+- Computes the complete (diffusion and wave phenomena) 3D electromagnetic field
+  in a layered-earth model including vertical transverse isotropic (VTI)
   resistivity, VTI electric permittivity, and VTI magnetic permeability, for
   electric and magnetic sources as well as electric and magnetic receivers.
 
@@ -66,23 +66,23 @@ Features
     space-frequency and space-time domains.
   - ``dipole_k``: as ``dipole``, but returns the wavenumber-frequency domain
     response.
-  - ``gpr``: calculates the ground-penetrating radar response for given central
+  - ``gpr``: computes the ground-penetrating radar response for given central
     frequency, using a Ricker wavelet (experimental).
   - ``analytical``: interface to the analytical, space-frequency and space-time
     domain solutions.
 
 - Hankel transforms (wavenumber-frequency to space-frequency transform):
 
-  - Digital Linear Filters DLF (using included filters or providing own ones)
-  - Quadrature with extrapolation QWE
-  - Adaptive quadrature QUAD
+  - DLF: Digital Linear Filters (using included filters or providing own ones)
+  - QWE: Quadrature with extrapolation
+  - QUAD: Adaptive quadrature
 
 - Fourier transforms (space-frequency to space-time transform):
 
-  - Digital Linear Filters DLF (using included filters or providing own ones)
-  - Quadrature with extrapolation QWE
-  - Logarithmic Fast Fourier Transform FFTLog
-  - Fast Fourier Transform FFT
+  - DLF: Digital Linear Filters (using included filters or providing own ones)
+  - QWE: Quadrature with extrapolation
+  - FFTLog: Logarithmic Fast Fourier Transform
+  - FFT: Fast Fourier Transform
 
 - Analytical, space-frequency and space-time domain solutions:
 
@@ -95,7 +95,7 @@ Features
     - Reflected wave
     - Airwave (semi-analytical in the case of step responses)
 
-- Add-ons (``empymod.scripts``) and hidden features:
+- Add-ons (``empymod.scripts``):
 
   The add-ons for empymod provide some very specific, additional
   functionalities:
@@ -106,30 +106,30 @@ Features
   - ``fdesign``: Design digital linear filters for the Hankel and Fourier
     transforms.
 
-- Incomplete list of hidden features (see manual):
+- Hidden features (incomplete list, see manual for more):
 
   - Models with frequency-dependent resistivity (e.g., Cole-Cole IP).
-  - Space-Laplace domain calculation for the numerical and analytical
+  - Space-Laplace domain computation for the numerical and analytical
     solutions.
 
 
 Installation
 ============
 
-You can install empymod either via ``conda``:
+You can install empymod either via **conda**:
 
 .. code-block:: console
 
    conda install -c conda-forge empymod
 
-or via ``pip``:
+or via **pip**:
 
 .. code-block:: console
 
    pip install empymod
 
-Required are Python version 3.6 or higher and the modules ``NumPy``, ``SciPy``,
-and ``Numba``. Consult the installation notes in the `manual
+Required are Python version 3.6 or higher and the modules NumPy, SciPy, and
+Numba. Consult the installation notes in the `manual
 <https://empymod.readthedocs.io/en/stable/manual.html#installation>`_ for more
 information regarding installation and requirements.
 
@@ -141,7 +141,7 @@ If you publish results for which you used empymod, please give credit by citing
 `Werthmüller (2017)  <https://doi.org/10.1190/geo2016-0626.1>`_:
 
     Werthmüller, D., 2017, An open-source full 3D electromagnetic modeler for
-    1D VTI media in Python: empymod: Geophysics, 82(6), WB9--WB19; DOI:
+    1D VTI media in Python: empymod: Geophysics, 82(6), WB9-WB19; DOI:
     `10.1190/geo2016-0626.1 <https://doi.org/10.1190/geo2016-0626.1>`_.
 
 All releases have a Zenodo-DOI, which can be found on `10.5281/zenodo.593094
@@ -156,5 +156,5 @@ License information
 
 Copyright 2016-2020 The empymod Developers.
 
-Licensed under the Apache License, Version 2.0. See the ``LICENSE``- and
-``NOTICE``-files or the documentation for more information.
+Licensed under the Apache License, Version 2.0. See the LICENSE- and
+NOTICE-files or the documentation for more information.

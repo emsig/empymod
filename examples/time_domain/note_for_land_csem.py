@@ -1,5 +1,5 @@
 r"""
-Improve land CSEM calculation
+Improve land CSEM computation
 =============================
 
 The problem
@@ -15,7 +15,7 @@ case of a land CSEM survey.
 This singularity leads to noise at very high frequencies and therefore at very
 early times because the Hankel transform cannot handle the singularity
 correctly (or, if you would choose a sufficiently precise quadrature, it would
-take literally forever to calculate it).
+take literally forever to compute it).
 
 The "solution"
 --------------
@@ -46,8 +46,7 @@ model = {
     'rec': [6000, 0, 0.0001],       # 6 km off., in-line, slightly bel. interf.
     'depth': [0, 2000, 2100],       # Target of 100 m at 2 km depth
     'res': [2e14, 10, 100, 10],     # Res: [air, overb., target, half-space]
-    'epermH': [1, 1, 1, 1],         # epermH/epermV: correspond to the default
-    'epermV': [1, 1, 1, 1],         # #              values if not provided
+    'epermH': [1, 1, 1, 1],         # El. permittivity: default values
     'freqtime': t,                  # Times
     'signal': 0,                    # 0: Impulse response
     'ftarg': 'key_81_CosSin_2009',  # Choose a shorter filter then the default
@@ -55,17 +54,19 @@ model = {
 }
 
 ###############################################################################
-# Calculate
-# ---------
+# Compute
+# -------
 
-# Calculate with default eperm_air = 1
+# Compute with default eperm_air = 1
 res_1 = empymod.dipole(**model)
 
 # Set horizontal and vertical electric permittivity of air to 0
 model['epermH'][0] = 0
-model['epermV'][0] = 0
+# Note that for empymod < v2.0.0 you have to set `epermH` AND `epermV`. From
+# v2.0.0 onwards `eperm` is assumed isotropic if `epermV` is not provided, and
+# `epermV` is therefore internally a copy of `epermH`.
 
-# Calculate with eperm_air = 0
+# Compute with eperm_air = 0
 res_0 = empymod.dipole(**model)
 
 ###############################################################################

@@ -56,12 +56,12 @@ filter abscissae is a function of the spacing :math:`\Delta` and the shift
     b_n = \exp\left\{\Delta(-N/2+n) + \delta\right\} \ .
 
 From the penultimate equation it can be seen that the filter method requires
-:math:`N` evaluations at each :math:`r`. For example, to calculate the
-frequency domain result for 100 offsets with a 201 pt filter requires 20,100
-evaluations in the wavenumber domain. This is why the DLF often uses
-interpolation to minimize the required evaluations, either for :math:`F(r)` in
-what is referred to as *lagged convolution DLF*, or for :math:`f(l)`, which we
-call here *splined DLF*.
+:math:`N` evaluations at each :math:`r`. For example, to compute the frequency
+domain result for 100 offsets with a 201 pt filter requires 20,100 evaluations
+in the wavenumber domain. This is why the DLF often uses interpolation to
+minimize the required evaluations, either for :math:`F(r)` in what is referred
+to as *lagged convolution DLF*, or for :math:`f(l)`, which we call here
+*splined DLF*.
 """
 import empymod
 import numpy as np
@@ -123,16 +123,16 @@ k = filt.base/x[:, None]
 # Get the theoretical transform pair
 tp = empymod.fdesign.j0_1()
 
-# Calculate the value at the five required wavenumbers
+# Compute the value at the five required wavenumbers
 k_val = tp.lhs(k)
 
 # Weight the values and sum them up
 x_val_filt = np.dot(k_val, filt.j0)/x
 
-# Calculate the theoretical value for comparison
+# Compute the theoretical value for comparison
 x_val_theo = tp.rhs(x)
 
-# Calculate relative error
+# Compute relative error
 print('A DLF for this problem with only a 5 pt filter is difficult. We used')
 print('an error-limit of 0.05 in the filter design, so we expect the result')
 print('to have a relative error of less than 5 %.\n')
@@ -196,7 +196,7 @@ base = np.array([1e-2, 1e-1, 1e0, 1e1, 1e2])
 # 3.1 Standard DLF
 # ----------------
 #
-# For each point in the output domain you have to calculate :math:`n` points in
+# For each point in the output domain you have to compute :math:`n` points in
 # the input domain, where :math:`n` is the filter length.
 #
 # **Implementation in ``empymod``**
@@ -263,9 +263,9 @@ plt.show()
 # The spacing of the filter base is used to get from minimum to maximum
 # required input-domain point (:math:`k` in the case of the Hankel transform,
 # :math:`f` in the case of the Fourier transform); for each complete set the
-# DLF is executed to calculate the output-domain response (:math:`f` in the
-# case of the Hankel transform, :math:`t` in the case of the Fourier
-# transform), and interpolation is carried out in the output-domain.
+# DLF is executed to compute the output-domain response (:math:`f` in the case
+# of the Hankel transform, :math:`t` in the case of the Fourier transform), and
+# interpolation is carried out in the output-domain.
 #
 # **Implementation in ``empymod``**
 #
@@ -418,7 +418,7 @@ plt.show()
 #
 # The following is an example for the Hankel transform. **Be aware that the
 # actual differences in time and accuracy depend highly on the model.** If time
-# or accuracy is a critical issue in your calculation I suggest to run some
+# or accuracy is a critical issue in your computation I suggest to run some
 # preliminary tests. It also depends heavily if you have many offsets, or many
 # frequencies, or many layers, as one method might be better for many
 # frequencies but few offsets, but the other method might be better for many
@@ -442,7 +442,7 @@ plt.show()
 # onwards. The description here refers therefore to ``empymod v1.6.0`` and
 # newer.
 #
-# **Define model, calculate analytical solution**
+# **Define model, compute analytical solution**
 
 x = (np.arange(1, 1001))*10
 params = {
@@ -460,7 +460,7 @@ params = {
 # Used Hankel filter
 hfilt = empymod.filters.key_201_2009()
 
-# Calculate analytical solution
+# Compute analytical solution
 resp = empymod.analytical(
         params['src'], params['rec'], params['res'][1], params['freqtime'],
         solution='dhs', aniso=params['aniso'][1], ab=params['ab'],
@@ -468,8 +468,8 @@ resp = empymod.analytical(
 )
 
 ###############################################################################
-# Calculate numerically the model using different Hankel options
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Compute numerically the model using different Hankel options
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 standard = empymod.dipole(**params, htarg=[hfilt, 0])
 laggedco = empymod.dipole(**params, htarg=[hfilt, -1])
@@ -554,8 +554,8 @@ plt.show()
 # the higher is the time gain you get by using the lagged convolution or
 # splined version of the DLF.
 #
-# Define model, calculate analytical solution
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Define model, compute analytical solution
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 t = np.logspace(0, 2, 100)
 xt = 2000
@@ -568,7 +568,7 @@ tparam['signal'] = 0  # Impulse response
 # Used Fourier filter
 ffilt = empymod.filters.key_81_CosSin_2009()
 
-# Calculate analytical solution
+# Compute analytical solution
 tresp = empymod.analytical(
         tparam['src'], tparam['rec'], tparam['res'][1], tparam['freqtime'],
         signal=tparam['signal'], solution='dhs', aniso=tparam['aniso'][1],
@@ -576,8 +576,8 @@ tresp = empymod.analytical(
 )
 
 ###############################################################################
-# Calculate numerically the model using different Fourier options
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Compute numerically the model using different Fourier options
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 tstandard = empymod.dipole(**tparam, htarg=hfilt, ftarg=[ffilt, 0])
 tlaggedco = empymod.dipole(**tparam, htarg=hfilt, ftarg=[ffilt, -1])

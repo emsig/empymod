@@ -35,14 +35,12 @@ inp = {
     'aniso': aniso,
     'ab': ab,
     'epermH': perm,
-    'epermV': perm,
     'mpermH': perm,
-    'mpermV': perm,
     'verb': 0
 }
 
 ###############################################################################
-# Calculation
+# Computation
 # -----------
 
 # Halfspace

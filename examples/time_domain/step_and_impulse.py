@@ -25,13 +25,13 @@ colors = [color['color'] for color in list(plt.rcParams['axes.prop_cycle'])]
 # half-spaces
 #
 # The time-domain step and impulse responses for a source at the origin
-# (:math:`x_s = y_s = z_s = 0\,`m) and an in-line receiver at the surface
-# (:math:`y_r = z_r = 0\,`m), is given by the following equations, where
-# :math:`\rho_h` is horizontal resistivity (:math:`\Omega\,`m), :math:`\lambda`
-# is anisotropy (-), with :math:`\lambda = \sqrt{\rho_v/\rho_h}`, :math:`r` is
-# offset (m), :math:`t` is time (s), and :math:`\tau_h = \sqrt{\mu_0
-# r^2/(\rho_h t)}`; :math:`\mu_0` is the magnetic permeability of free space
-# (H/m).
+# (:math:`x_s = y_s = z_s = 0` m) and an in-line receiver at the surface
+# (:math:`y_r = z_r = 0` m), is given by the following equations, where
+# :math:`\rho_h` is horizontal resistivity (:math:`\Omega` m),
+# :math:`\lambda` is anisotropy (-), with :math:`\lambda =
+# \sqrt{\rho_v/\rho_h}`, :math:`r` is offset (m), :math:`t` is time (s), and
+# :math:`\tau_h = \sqrt{\mu_0 r^2/(\rho_h t)}`; :math:`\mu_0` is the magnetic
+# permeability of free space (H/m).
 #
 # Time Domain: Step Response :math:`\mathbf{\mathcal{H}(t)}`
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,8 +58,8 @@ colors = [color['color'] for color in list(plt.rcParams['axes.prop_cycle'])]
 # ~~~~~~~~~
 # Equations 3.2 and 3.3 in Werthmüller, D., 2009, Inversion of multi-transient
 # EM data from anisotropic media: M.S. thesis, TU Delft, ETH Zürich, RWTH
-# Aachen;
-# http://repository.tudelft.nl/islandora/object/uuid:f4b071c1-8e55-4ec5-86c6-a2d54c3eda5a.
+# Aachen; UUID: `f4b071c1-8e55-4ec5-86c6-a2d54c3eda5a
+# <http://repository.tudelft.nl/islandora/object/uuid:f4b071c1-8e55-4ec5-86c6-a2d54c3eda5a>`_.
 #
 # Analytical functions
 # ~~~~~~~~~~~~~~~~~~~~
@@ -115,8 +115,7 @@ t = np.logspace(-2, 1, 301)  # Desired times (s)
 
 # Collect parameters
 inparg = {'src': src, 'rec': rec, 'depth': 0, 'freqtime': t, 'res': res,
-          'aniso': aniso, 'epermH': eperm, 'epermV': eperm, 'ht': 'dlf',
-          'verb': 2}
+          'aniso': aniso, 'epermH': eperm, 'ht': 'dlf', 'verb': 2}
 
 ###############################################################################
 # Impulse response
@@ -145,7 +144,7 @@ fft = empymod.dipole(**inparg, ft='fft', ftarg=[.0005, 2**20, '', 10])
 # - FFT: 61 (0.0005 - 524.288 Hz)
 #
 # Note that for the actual transform, `FFT` used 2^20 = 1'048'576 frequencies!
-# It only calculated 60 frequencies, and then interpolated the rest, as it
+# It only computed 60 frequencies, and then interpolated the rest, as it
 # requires regularly spaced data.
 
 plt.figure()
@@ -177,8 +176,8 @@ plt.show()
 
 ###############################################################################
 # => The error is comparable in all cases. `FFT` is not too good at later
-# times. This could be improved by calculating lower frequencies. But because
-# FFT needs regularly spaced data, our vector would soon explode (and you would
+# times. This could be improved by computing lower frequencies. But because FFT
+# needs regularly spaced data, our vector would soon explode (and you would
 # need a lot of memory). In the current case we are already using 2^20 samples!
 #
 # Step response
@@ -236,7 +235,7 @@ plt.show()
 # ''''''''''
 # For switch-off to work properly you need `empymod`-version bigger than 1.3.0!
 # You can do it with previous releases too, but you will have to do the
-# DC-calculation and subtraction manually, as is done here for `ee_xx_step`.
+# DC-computation and subtraction manually, as is done here for `ee_xx_step`.
 
 exDC = ee_xx_step(res[1], aniso[1], rec[0], 60*60)
 ex = exDC - ee_xx_step(res[1], aniso[1], rec[0], t)

@@ -1,19 +1,19 @@
 r"""
 
-:mod:`kernel` -- Kernel calculation
-===================================
+:mod:`empymod.kernel` -- Kernel calculation
+===========================================
 
-Kernel of ``empymod``, calculates the wavenumber-domain electromagnetic
+Kernel of empymod, calculates the wavenumber-domain electromagnetic
 response. Plus analytical full- and half-space solutions.
 
-The functions ``wavenumber``, ``angle_factor``, ``fullspace``, ``greenfct``,
-``reflections``, and ``fields`` are based on source files (specified in each
-function) from the source code distributed with [HuTS15]_, which can be found
-at `software.seg.org/2015/0001 <https://software.seg.org/2015/0001>`_.  These
-functions are (c) 2015 by Hunziker et al. and the Society of Exploration
-Geophysicists, https://software.seg.org/disclaimer.txt.  Please read the
-NOTICE-file in the root directory for more information regarding the involved
-licenses.
+The functions :func:`wavenumber`, :func:`angle_factor`, :func:`fullspace`,
+:func:`greenfct`, :func:`reflections`, and :func:`fields` are based on source
+files (specified in each function) from the source code distributed with
+[HuTS15]_, which can be found at `software.seg.org/2015/0001
+<https://software.seg.org/2015/0001>`_.  These functions are (c) 2015 by
+Hunziker et al. and the Society of Exploration Geophysicists,
+https://software.seg.org/disclaimer.txt.  Please read the NOTICE-file in the
+root directory for more information regarding the involved licenses.
 
 """
 # Copyright 2016-2020 The empymod Developers.
@@ -54,35 +54,38 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                ab, xdirect, msrc, mrec):
     r"""Calculate wavenumber domain solution.
 
-    Return the wavenumber domain solutions ``PJ0``, ``PJ1``, and ``PJ0b``,
-    which have to be transformed with a Hankel transform to the frequency
-    domain. ``PJ0``/``PJ0b`` and ``PJ1`` have to be transformed with Bessel
-    functions of order 0 (:math:`J_0`) and 1 (:math:`J_1`), respectively.
+    Return the wavenumber domain solutions `PJ0`, `PJ1`, and `PJ0b`, which have
+    to be transformed with a Hankel transform to the frequency domain.
+    `PJ0`/`PJ0b` and `PJ1` have to be transformed with Bessel functions of
+    order 0 (:math:`J_0`) and 1 (:math:`J_1`), respectively.
 
     This function corresponds loosely to equations 105--107, 111--116,
     119--121, and 123--128 in [HuTS15]_, and equally loosely to the file
-    ``kxwmod.c``.
+    `kxwmod.c`.
 
     [HuTS15]_ uses Bessel functions of orders 0, 1, and 2 (:math:`J_0, J_1,
     J_2`). The implementations of the *Fast Hankel Transform* and the
-    *Quadrature-with-Extrapolation* in ``transform`` are set-up with Bessel
-    functions of order 0 and 1 only. This is achieved by applying the
+    *Quadrature-with-Extrapolation* in :mod:`empymod.transform` are set-up with
+    Bessel functions of order 0 and 1 only. This is achieved by applying the
     recurrence formula
 
-    .. math:: J_2(kr) = \frac{2}{kr} J_1(kr) - J_0(kr) \ .
+    .. math::
+        :label: wavenumber
+
+        J_2(kr) = \frac{2}{kr} J_1(kr) - J_0(kr) \ .
 
 
     .. note::
 
-        ``PJ0`` and ``PJ0b`` could theoretically be added here into one, and
-        then be transformed in one go.  However, ``PJ0b`` has to be multiplied
-        by ``ang_fact`` later. This has to be done after the Hankel transform
+        `PJ0` and `PJ0b` could theoretically be added here into one, and then
+        be transformed in one go.  However, `PJ0b` has to be multiplied by
+        :func:`ang_fact` later. This has to be done after the Hankel transform
         for methods which make use of spline interpolation, in order to work
         for offsets that are not in line with each other.
 
     This function is called from one of the Hankel functions in
-    :mod:`transform`.  Consult the modelling routines in :mod:`model` for a
-    description of the input and output parameters.
+    :mod:`empymod.transform`.  Consult the modelling routines in
+    :mod:`empymod.model` for a description of the input and output parameters.
 
     If you are solely interested in the wavenumber-domain solution you can call
     this function directly. However, you have to make sure all input arguments
@@ -175,20 +178,23 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
              ab, xdirect, msrc, mrec):
     r"""Calculate Green's function for TM and TE.
 
-    .. math:: \tilde{g}^{tm}_{hh}, \tilde{g}^{tm}_{hz},
-              \tilde{g}^{tm}_{zh}, \tilde{g}^{tm}_{zz},
-              \tilde{g}^{te}_{hh}, \tilde{g}^{te}_{zz}
+    .. math::
+        :label: greenfct
+
+        \tilde{g}^{tm}_{hh}, \tilde{g}^{tm}_{hz},
+        \tilde{g}^{tm}_{zh}, \tilde{g}^{tm}_{zz},
+        \tilde{g}^{te}_{hh}, \tilde{g}^{te}_{zz}
 
     This function corresponds to equations 108--110, 117/118, 122; 89--94,
     A18--A23, B13--B15; 97--102 A26--A31, and B16--B18 in [HuTS15]_, and
-    loosely to the corresponding files ``Gamma.F90``, ``Wprop.F90``,
-    ``Ptotalx.F90``, ``Ptotalxm.F90``, ``Ptotaly.F90``, ``Ptotalym.F90``,
-    ``Ptotalz.F90``, and ``Ptotalzm.F90``.
+    loosely to the corresponding files `Gamma.F90`, `Wprop.F90`, `Ptotalx.F90`,
+    `Ptotalxm.F90`, `Ptotaly.F90`, `Ptotalym.F90`, `Ptotalz.F90`, and
+    `Ptotalzm.F90`.
 
     The Green's functions are multiplied according to Eqs 105-107, 111-116,
     119-121, 123-128; with the factors inside the integrals.
 
-    This function is called from the function :mod:`kernel.wavenumber`.
+    This function is called from the function :func:`wavenumber`.
 
     """
     nfreq, nlayer = etaH.shape
@@ -418,13 +424,16 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 def reflections(depth, e_zH, Gam, lrec, lsrc):
     r"""Calculate Rp, Rm.
 
-    .. math:: R^\pm_n, \bar{R}^\pm_n
+    .. math::
+        :label: reflections
+
+        R^\pm_n, \bar{R}^\pm_n
 
     This function corresponds to equations 64/65 and A-11/A-12 in
-    [HuTS15]_, and loosely to the corresponding files ``Rmin.F90`` and
-    ``Rplus.F90``.
+    [HuTS15]_, and loosely to the corresponding files `Rmin.F90` and
+    `Rplus.F90`.
 
-    This function is called from the function :mod:`kernel.greenfct`.
+    This function is called from the function :func:`greenfct`.
 
     """
 
@@ -514,16 +523,18 @@ def reflections(depth, e_zH, Gam, lrec, lsrc):
 def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
     r"""Calculate Pu+, Pu-, Pd+, Pd-.
 
-    .. math:: P^{u\pm}_s, P^{d\pm}_s, \bar{P}^{u\pm}_s, \bar{P}^{d\pm}_s;
-          P^{u\pm}_{s-1}, P^{u\pm}_n, \bar{P}^{u\pm}_{s-1}, \bar{P}^{u\pm}_n;
-          P^{d\pm}_{s+1}, P^{d\pm}_n, \bar{P}^{d\pm}_{s+1}, \bar{P}^{d\pm}_n
+    .. math::
+        :label: fields
+
+        P^{u\pm}_s, P^{d\pm}_s, \bar{P}^{u\pm}_s, \bar{P}^{d\pm}_s;
+        P^{u\pm}_{s-1}, P^{u\pm}_n, \bar{P}^{u\pm}_{s-1}, \bar{P}^{u\pm}_n;
+        P^{d\pm}_{s+1}, P^{d\pm}_n, \bar{P}^{d\pm}_{s+1}, \bar{P}^{d\pm}_n
 
     This function corresponds to equations 81/82, 95/96, 103/104, A-8/A-9,
     A-24/A-25, and A-32/A-33 in [HuTS15]_, and loosely to the corresponding
-    files ``Pdownmin.F90``, ``Pdownplus.F90``, ``Pupmin.F90``, and
-    ``Pdownmin.F90``.
+    files `Pdownmin.F90`, `Pdownplus.F90`, `Pupmin.F90`, and `Pdownmin.F90`.
 
-    This function is called from the function :mod:`kernel.greenfct`.
+    This function is called from the function :func:`greenfct`.
 
     """
 
@@ -697,12 +708,12 @@ def angle_factor(angle, ab, msrc, mrec):
     angel. The angle-dependency is this factor, which can be applied to the
     corresponding parts in the wavenumber or in the frequency domain.
 
-    The ``angle_factor`` corresponds to the sine and cosine-functions in Eqs
-    105-107, 111-116, 119-121, 123-128.
+    The :func:`angle_factor` corresponds to the sine and cosine-functions in
+    Eqs 105-107, 111-116, 119-121, 123-128.
 
     This function is called from one of the Hankel functions in
-    :mod:`transform`.  Consult the modelling routines in :mod:`model` for a
-    description of the input and output parameters.
+    :mod:`empymod.transform`.  Consult the modelling routines in
+    :mod:`empymod.model` for a description of the input and output parameters.
 
     """
 
@@ -748,19 +759,21 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
               mrec):
     r"""Analytical full-space solutions in the frequency domain.
 
-    .. math:: \hat{G}^{ee}_{\alpha\beta}, \hat{G}^{ee}_{3\alpha},
-              \hat{G}^{ee}_{33}, \hat{G}^{em}_{\alpha\beta},
-              \hat{G}^{em}_{\alpha 3}
+    .. math::
+        :label: fullspace
+
+        \hat{G}^{ee}_{\alpha\beta}, \hat{G}^{ee}_{3\alpha},
+        \hat{G}^{ee}_{33}, \hat{G}^{em}_{\alpha\beta}, \hat{G}^{em}_{\alpha 3}
 
     This function corresponds to equations 45--50 in [HuTS15]_, and loosely to
-    the corresponding files ``Gin11.F90``, ``Gin12.F90``, ``Gin13.F90``,
-    ``Gin22.F90``, ``Gin23.F90``, ``Gin31.F90``, ``Gin32.F90``, ``Gin33.F90``,
-    ``Gin41.F90``, ``Gin42.F90``, ``Gin43.F90``, ``Gin51.F90``, ``Gin52.F90``,
-    ``Gin53.F90``, ``Gin61.F90``, and ``Gin62.F90``.
+    the corresponding files `Gin11.F90`, `Gin12.F90`, `Gin13.F90`, `Gin22.F90`,
+    `Gin23.F90`, `Gin31.F90`, `Gin32.F90`, `Gin33.F90`, `Gin41.F90`,
+    `Gin42.F90`, `Gin43.F90`, `Gin51.F90`, `Gin52.F90`, `Gin53.F90`,
+    `Gin61.F90`, and `Gin62.F90`.
 
-    This function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
+    This function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and output parameters.
 
     """
     xco = np.cos(angle)*off
@@ -927,11 +940,11 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
     It can also be used to calculate the fullspace solution or the separate
     fields: direct field, reflected field, and airwave; always using the
-    diffusive approximation. See ``solution``-parameter.
+    diffusive approximation. See `solution`-parameter.
 
-    This function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and
-    solution parameters.
+    This function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and solution parameters.
 
     """
     xco = np.cos(angle)*off
