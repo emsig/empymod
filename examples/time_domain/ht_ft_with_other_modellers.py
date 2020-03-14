@@ -35,8 +35,7 @@ model = {
     'rec': [6000, 0, 0.001],  # Receivers in-line, 0.5m below interface
     'depth': [0],             # Air interface
     'res': [2e14, 1],         # Resistivity: [air, half-space]
-    'epermH': [0, 1],         # Set electric permittivity of air to 0 because
-    'epermV': [0, 1],         # of numerical noise
+    'epermH': [0, 1],         # Set el. perm. of air to 0 because of num. noise
 }
 
 # Specify desired times
