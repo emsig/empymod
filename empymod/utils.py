@@ -1901,7 +1901,7 @@ def printstartfinish(verb, inp=None, kcount=None):
     else:
         t0 = default_timer()
         if verb > 2:
-            print(f"\n:: empymod START  ::  v{__version__.split('+')[0]}\n")
+            print(f"\n:: empymod START  ::  v{__version__}\n")
         return t0
 
 
