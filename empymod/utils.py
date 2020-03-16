@@ -85,77 +85,73 @@ VariableCatch = (LookupError, AttributeError, ValueError, TypeError, NameError)
 # 1. Class EMArray
 
 class EMArray(np.ndarray):
-    r"""Subclassing an ndarray: add *amplitude* <amp> and *phase* <pha>.
+    r"""Create an EM-ndarray: add *amplitude* <amp> and *phase* <pha> methods.
 
     Parameters
     ----------
     data : array
         Data to which to add `.amp` and `.pha` attributes.
 
-    Attributes
-    ----------
-    amp : ndarray
-        Amplitude of the input data.
-
-    pha : ndarray
-        Phase of the input data, in radians, lag-defined (increasing with
-        increasing offset), not unwrapped. You can set class-wise flags to
-        change this (<default>):
-
-        - data.deg = True/<False>
-        - data.unwrap = True/<False>
-        - data.lead = True/<False>
-
 
     Examples
     --------
     >>> import numpy as np
     >>> from empymod.utils import EMArray
-    >>> emvalues = EMArray(np.array([1,2,3])+1j*np.array([1, 0, -1]))
-    >>> print(f"Amplitude           : {emvalues.amp}")
-    Amplitude           : [ 1.41421356    2.          3.16227766]
-    >>> print(f"Phase               : {emvalues.pha}")
-    Phase               : [ 0.78539816    0.         -0.32175055]
-    >>> emvalues.deg = True
-    >>> emvalues.unwrap = True
-    >>> print(f"Phase (unwrap(deg)) : {emvalues.pha}")
-    Phase (unwrap(deg)) : [ 45.           0.         -18.43494882]
-    >>> emvalues.lead = True
-    >>> print(f"Phase lead of prev. : {emvalues.pha}")
-    Phase (unwrap(deg)) : [-45.           0.          18.43494882]
+    >>> emvalues = EMArray(np.array([1+1j, 1-4j, -1+2j]))
+    >>> print(f"Amplitude         : {emvalues.amp()}")
+    Amplitude         : [1.41421356 4.12310563 2.23606798]
+    >>> print(f"Phase (rad)       : {emvalues.pha()}")
+    Phase (rad)       : [ 0.78539816 -1.32581766 -4.24874137]
+    >>> print(f"Phase (deg)       : {emvalues.pha(deg=True)}")
+    Phase (deg)       : [  45.          -75.96375653 -243.43494882]
+    >>> print(f"Phase (deg; lead) : {emvalues.pha(deg=True, lag=False)}")
+    Phase (deg; lead) : [-45.          75.96375653 243.43494882]
 
     """
 
     def __new__(cls, data, deg=False, unwrap=False, lead=False):
         r"""Create a new EMArray."""
-        cls.unwrap = unwrap
-        cls.deg = deg
-        cls.lead = lead
         return np.asarray(data).view(cls)
 
-    @property
     def amp(self):
-        """Make the absolute value (amplitude [amp]) an attribute."""
+        """Amplitude of the electromagnetic field."""
         return np.abs(self.view())
 
-    @property
-    def pha(self):
-        """Make angle (phase [pha]) an attribute."""
-        # Get angle, lead or lag defined.
-        if self.lead:
-            ang = np.angle(np.conj(self.view()))
+    def pha(self, deg=False, unwrap=True, lag=True):
+        """Phase of the electromagnetic field.
+
+        Parameters
+        ----------
+        deg : bool
+            If True the returned phase is in degrees, else in radians.
+            Default is False (radians).
+
+        unwrap : bool
+            If True the returned phase is unwrapped.
+            Default is True (unwrapped).
+
+        lag : bool
+            If True the returned phase is lag, else lead defined.
+            Default is True (lag defined).
+
+        """
+        # Get phase, lead or lag defined.
+        if lag:
+            pha = np.angle(self.view())
         else:
-            ang = np.angle(self.view())
+            pha = np.angle(np.conj(self.view()))
 
-        # Unwrap if desired.
-        if self.unwrap:
-            ang = np.unwrap(ang)
+        # Unwrap if `unwrap`.
+        # np.unwrap removes the EMArray class;
+        # for consistency, we wrap it in EMArray again.
+        if unwrap and self.size > 1:
+            pha = EMArray(np.unwrap(pha))
 
-        # Convert to degrees if desired.
-        if self.deg:
-            ang *= 180/np.pi
+        # Convert to degrees if `deg`.
+        if deg:
+            pha *= 180/np.pi
 
-        return ang
+        return pha
 
 
 # 2. Input parameter checks for modelling
