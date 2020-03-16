@@ -52,8 +52,9 @@ fs = empymod.analytical(**inp)
 fs = fs.reshape(np.shape(rx))
 
 # Relative error (%)
-amperr = np.abs((fs.amp - hs.amp)/fs.amp)*100
-phaerr = np.abs((np.angle(fs) - np.angle(hs))/np.angle(fs))*100
+amperr = np.abs((fs.amp() - hs.amp())/fs.amp())*100
+phaerr = np.abs((fs.pha(unwrap=False) - hs.pha(unwrap=False)) /
+                fs.pha(unwrap=False))*100
 
 ###############################################################################
 # Plot

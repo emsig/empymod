@@ -23,9 +23,10 @@ This version will be backwards incompatible, and only support Python 3.6+.
 
 - New defaults:
 
-  - ``EMArray``: Phase is now in radians and not unwrapped. To unwrap it, have
-    it in degrees, or lead-defined, set the class arguments ``.unwrap``,
-    ``.deg``, and ``.lead`` to ``True``, respectively.
+  - ``EMArray``: ``.amp`` and ``.pha`` are now methods, not properties. Phase
+    takes three optional boolean parameters ``deg=False``, ``unwrap=True``, and
+    ``lag=True``, to get radians or degrees; unwrapped or not; and lag or lead
+    defined phases.
   - The parameters ``epermV`` and ``mpermV`` are set to the values of
     ``epermH`` and ``mpermH``, respectively, if not provided (hence assuming
     isotropic behaviour). Before they were set to ones if not provided.

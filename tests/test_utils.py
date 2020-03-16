@@ -13,26 +13,24 @@ from empymod import utils, filters
 
 def test_emarray():
     out = utils.EMArray(3)
-    assert out.amp == 3
-    assert out.pha == 0
+    assert out.amp() == 3
+    assert out.pha() == 0
     assert out.real == 3
     assert out.imag == 0
 
     out = utils.EMArray(1+1j)
-    assert out.amp == np.sqrt(2)
-    assert_allclose(out.pha, np.pi/4)
+    assert out.amp() == np.sqrt(2)
+    assert_allclose(out.pha(), np.pi/4)
     assert out.real == 1
     assert out.imag == 1
 
     out = utils.EMArray([1+1j, 0+1j, -1-1j])
-    assert_allclose(out.amp, [np.sqrt(2), 1, np.sqrt(2)])
-    assert_allclose(out.pha, [np.pi/4, np.pi/2, -3*np.pi/4])
-    out.deg = True
-    assert_allclose(out.pha, [45., 90., -135.])
-    out.lead = True
-    assert_allclose(out.pha, [-45., -90., 135.])
-    out.unwrap = True
-    assert_allclose(out.pha, [-45., -90., -225.])
+    assert_allclose(out.amp(), [np.sqrt(2), 1, np.sqrt(2)])
+    assert_allclose(out.pha(unwrap=False), [np.pi/4, np.pi/2, -3*np.pi/4])
+    assert_allclose(out.pha(deg=True, unwrap=False), [45., 90., -135.])
+    assert_allclose(out.pha(deg=True, unwrap=False, lag=False),
+                    [-45., -90., 135.])
+    assert_allclose(out.pha(deg=True, lag=False), [-45., -90., -225.])
     assert_allclose(out.real, [1, 0, -1])
     assert_allclose(out.imag, [1, 1, -1])
 

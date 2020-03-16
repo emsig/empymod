@@ -86,9 +86,6 @@ inpdat['srcpts'] = 10
 fEMbp = empymod.bipole(**inpdat, res=res)
 fEMBGbp = empymod.bipole(**inpdat, res=resBG)
 
-# Change the phases to unwrapped degrees.
-empymod.EMArray.deg = True
-empymod.EMArray.unwrap = True
 
 ###############################################################################
 # Plot
@@ -100,10 +97,10 @@ fig.suptitle(name+': src-x, rec-x; f = 1 Hz', fontsize=16, y=1)
 
 # Plot Amplitude
 ax1 = plt.subplot(2, 2, 1)
-plt.semilogy(fx/1000, fEMBG.amp, label='BG')
-plt.semilogy(fx/1000, fEM.amp, label='Anomaly')
-plt.semilogy(fx/1000, fEMBGbp.amp, '--', label='BG bipole')
-plt.semilogy(fx/1000, fEMbp.amp, '--', label='Anomaly bipole')
+plt.semilogy(fx/1000, fEMBG.amp(), label='BG')
+plt.semilogy(fx/1000, fEM.amp(), label='Anomaly')
+plt.semilogy(fx/1000, fEMBGbp.amp(), '--', label='BG bipole')
+plt.semilogy(fx/1000, fEMbp.amp(), '--', label='Anomaly bipole')
 plt.legend(loc='best')
 plt.title(r'Amplitude ($V/(A\ $m$^2$))')
 plt.xlabel('Offset (km)')
@@ -111,10 +108,10 @@ plt.xlabel('Offset (km)')
 # Plot Phase
 ax2 = plt.subplot(2, 2, 2)
 plt.title(r'Phase ($^\circ$)')
-plt.plot(fx/1000, fEMBG.pha, label='BG')
-plt.plot(fx/1000, fEM.pha, label='Anomaly')
-plt.plot(fx/1000, fEMBGbp.pha, '--', label='BG bipole')
-plt.plot(fx/1000, fEMbp.pha, '--', label='Anomaly bipole')
+plt.plot(fx/1000, fEMBG.pha(deg=True), label='BG')
+plt.plot(fx/1000, fEM.pha(deg=True), label='Anomaly')
+plt.plot(fx/1000, fEMBGbp.pha(deg=True), '--', label='BG bipole')
+plt.plot(fx/1000, fEMbp.pha(deg=True), '--', label='Anomaly bipole')
 plt.xlabel('Offset (km)')
 
 plt.show()
