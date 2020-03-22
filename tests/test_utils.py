@@ -254,7 +254,7 @@ def test_check_hankel(capsys):
     out, _ = capsys.readouterr()
     assert "   Hankel          :  DLF (Fast Hankel Transform)\n     > F" in out
     assert "     > DLF type    :  Standard" in out
-    assert ht == 'fht'
+    assert ht == 'dlf'
     assert htarg['dlf'].name == filters.key_201_2009().name
     assert htarg['pts_per_dec'] == 0
 

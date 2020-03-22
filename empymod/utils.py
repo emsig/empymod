@@ -512,6 +512,8 @@ def check_hankel(ht, htarg, verb):
     ht = ht.lower()
 
     if ht in ['dlf', 'fht']:    # If DLF, check filter settings
+        # Rename ht
+        ht = 'dlf'
 
         # Get and check input or set defaults
         htarg = _check_targ(htarg, ['dlf', 'pts_per_dec'])
