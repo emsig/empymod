@@ -474,10 +474,10 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     mu_0 = 4e-7*np.pi          # Magn. permeability of free space [H/m]
     epsilon_0 = 1./(mu_0*c*c)  # Elec. permittivity of free space [F/m]
 
-    etaH = 1/res + np.outer(sval, epermH*epsilon_0)
-    etaV = 1/(res*aniso*aniso) + np.outer(sval, epermV*epsilon_0)
-    zetaH = np.outer(sval, mpermH*mu_0)
-    zetaV = np.outer(sval, mpermV*mu_0)
+    etaH = 1/res + sval[:, None]*epermH[None, :]*epsilon_0
+    etaV = 1/(res*aniso*aniso) + sval[:, None]*epermV[None, :]*epsilon_0
+    zetaH = sval[:, None]*mpermH[None, :]*mu_0
+    zetaV = sval[:, None]*mpermV[None, :]*mu_0
 
     return freq, etaH, etaV, zetaH, zetaV
 
