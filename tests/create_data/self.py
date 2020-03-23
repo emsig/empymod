@@ -33,7 +33,7 @@ inp1 = {'src': [[-200, 200], [300, -300], [-100, -200], [-200, -100],
         'ht': 'dlf',
         'htarg': {'dlf': 'key_51_2012', 'pts_per_dec': -1},
         'ft': 'dlf',
-        'ftarg': None,
+        'ftarg': {},
         'loop': None,
         'verb': 0}
 EM1 = bipole(**inp1)
@@ -60,7 +60,7 @@ inp2 = {'src': [[-30, 10], [40, -20], [-15, -10], [-30, -20], [3, 5], [3, 5]],
         'ht': 'dlf',
         'htarg': {'dlf': 'key_201_2009'},
         'ft': 'dlf',
-        'ftarg': None,
+        'ftarg': {},
         'loop': None,
         'verb': 0}
 EM2 = bipole(**inp2)
@@ -87,7 +87,7 @@ inp3 = {'src': [[0, 1000], [100, 1200], [0, 0], [0, 100], 10, 10],
         'htarg': {'rtol': 1e-10, 'atol': 1e-20, 'nquad': 21, 'maxint': 40,
                   'pts_per_dec': 40},
         'ft': 'dlf',
-        'ftarg': None,
+        'ftarg': {},
         'loop': 'freq',
         'verb': 0}
 EM3 = bipole(**inp3)
@@ -111,9 +111,9 @@ inp4 = {'src': [0, 100, 0, 0, 10, 10],
         'strength': 0,
         'xdirect': True,
         'ht': 'dlf',
-        'htarg': None,
+        'htarg': {},
         'ft': 'fftlog',
-        'ftarg': None,
+        'ftarg': {},
         'loop': None,
         'verb': 0}
 EM4 = bipole(**inp4)
@@ -233,9 +233,9 @@ for i in range(34):
                          'strength': 0,
                          'xdirect': False,
                          'ht': 'dlf',
-                         'htarg': None,
-                         'ft': None,
-                         'ftarg': None,
+                         'htarg': {},
+                         'ft': 'dlf',
+                         'ftarg': {},
                          'loop': None,
                          'verb': 0}
 
@@ -321,9 +321,9 @@ for i in range(9):
                          'strength': 0,
                          'xdirect': False,
                          'ht': 'dlf',
-                         'htarg': None,
+                         'htarg': {},
                          'ft': 'dlf',
-                         'ftarg': None,
+                         'ftarg': {},
                          'loop': None,
                          'verb': 0}
 
@@ -346,7 +346,7 @@ igpr = {'src': [[0, 0], [0, 1], 0.0000001],
         'mpermV': None,
         'xdirect': True,
         'ht': 'dlf',
-        'htarg': {'pts_per_dec': 'key_201_2009'},
+        'htarg': {'dlf': 'key_201_2009'},
         'loop': None,
         'verb': 3}
 igpr2a = dc(igpr)

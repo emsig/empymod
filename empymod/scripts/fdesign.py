@@ -1182,6 +1182,8 @@ def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=None, aniso=None,
         verb-values provided to empymod for lhs and rhs.
 
     """
+    if htarg is None:
+        htarg = {}
 
     # Loop over ftypes, if there are several
     if isinstance(ftype, list):
