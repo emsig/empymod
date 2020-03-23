@@ -49,7 +49,7 @@ signal = 1
 # => See the docstrings (e.g., empymod.model.dipole) for available transforms
 #    and their arguments.
 time, freq, ft, ftarg = empymod.utils.check_time(
-        time=time, signal=signal, ft='sin', ftarg=None, verb=3)
+        time=time, signal=signal, ft='dlf', ftarg={}, verb=3)
 
 ###############################################################################
 # Frequency-domain computation

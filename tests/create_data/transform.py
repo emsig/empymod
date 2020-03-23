@@ -57,51 +57,63 @@ tEM2 = test_time(res, off, t, -1)
 
 # # B -- Fourier FFTLog # #
 # Signal = 0
-_, f, _, ftarg = utils.check_time(t, 0, 'fftlog', ['', [-3, 2]], 0)
+_, f, _, ftarg = utils.check_time(t, 0, 'fftlog', {'add_dec': [-3, 2]}, 0)
 fEM = test_freq(res, off, f)
 fourier_fftlog0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1
-_, f, _, ftarg = utils.check_time(t, 1, 'fftlog', [30, [-3, 2], -.5], 0)
+_, f, _, ftarg = utils.check_time(
+        t, 1, 'fftlog',
+        {'pts_per_dec': 30, 'add_dec': [-3, 2], 'q': -.5}, 0)
 fEM = test_freq(res, off, f)
 fourier_fftlog1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = -1
-_, f, _, ftarg = utils.check_time(t, -1, 'fftlog', [30, [-5, 2], .1], 0)
+_, f, _, ftarg = utils.check_time(
+        t, -1, 'fftlog',
+        {'pts_per_dec': 30, 'add_dec': [-5, 2], 'q': .1}, 0)
 fEM = test_freq(res, off, f)
 fourier_fftlog2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
 # # C -- Fourier DLF # #
 # Signal = 0
-_, f, _, ftarg = utils.check_time(t, 0, 'cos', {'pts_per_dec': 0}, 0)
+_, f, _, ftarg = utils.check_time(
+        t, 0, 'dlf', {'pts_per_dec': 0, 'kind': 'cos'}, 0)
 fEM = test_freq(res, off, f)
 fourier_dlf0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1
-_, f, _, ftarg = utils.check_time(t, 1, 'sin', ['key_201_CosSin_2012', -1], 0)
+_, f, _, ftarg = utils.check_time(
+        t, 1, 'dlf', {'dlf': 'key_201_CosSin_2012', 'pts_per_dec': -1}, 0)
 fEM = test_freq(res, off, f)
 fourier_dlf1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = -1
-_, f, _, ftarg = utils.check_time(t, -1, 'sin', ['key_201_CosSin_2012', 20], 0)
+_, f, _, ftarg = utils.check_time(
+        t, -1, 'dlf', {'dlf': 'key_201_CosSin_2012', 'pts_per_dec': 20}, 0)
 fEM = test_freq(res, off, f)
 fourier_dlf2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
 # # D -- Fourier QWE # #
 # Signal = 0
-_, f, _, ftarg = utils.check_time(t, 0, 'qwe', None, 0)
+_, f, _, ftarg = utils.check_time(t, 0, 'qwe', {}, 0)
 fEM = test_freq(res, off, f)
 fourier_qwe0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1
-_, f, _, ftarg = utils.check_time(t, 1, 'qwe', [1e-6, '', 41, 300, '', '',
-                                                1e-4, 1e4, 1000], 0)
+_, f, _, ftarg = utils.check_time(
+        t, 1, 'qwe', {'rtol': 1e-6, 'nquad': 41, 'maxint': 300, 'a': 1e-4,
+                      'b': 1e4, 'limit': 1000},
+        0)
 fEM = test_freq(res, off, f)
 fourier_qwe1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = -1
-_, f, _, ftarg = utils.check_time(t, -1, 'qwe', [1e-6, '', 41, 300, '', '',
-                                                 1e-5, 1e5, 1000], 0)
+_, f, _, ftarg = utils.check_time(
+        t, -1, 'qwe', {'rtol': 1e-6, 'nquad': 41, 'maxint': 300, 'a': 1e-5,
+                       'b': 1e5, 'limit': 1000},
+        0)
 fEM = test_freq(res, off, f)
 fourier_qwe2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
 # # E -- Fourier FFT # #
 # Signal = 0
-_, f, _, ftarg = utils.check_time(t, 0, 'fft', [0.0005, 2**20, '', 10], 0)
+_, f, _, ftarg = utils.check_time(
+        t, 0, 'fft', {'dfreq': 0.0005, 'nfreq': 2**20, 'pts_per_dec': 10}, 0)
 fEM = test_freq(res, off, f)
 fourier_fft0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 
@@ -220,7 +232,7 @@ frequency = utils.check_frequency(1, res, aniso, epermH, epermV, mpermH,
 freq, etaH, etaV, zetaH, zetaV = frequency
 src, nsrc = utils.check_dipole([0, 0, 0], 'src', 0)
 ab, msrc, mrec = utils.check_ab(11, 0)
-ht, htarg = utils.check_hankel('quad', None, 0)
+ht, htarg = utils.check_hankel('quad', {}, 0)
 rec = [5000, 0, 300]
 rec, nrec = utils.check_dipole(rec, 'rec', 0)
 off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)

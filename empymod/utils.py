@@ -109,7 +109,7 @@ class EMArray(np.ndarray):
 
     """
 
-    def __new__(cls, data, deg=False, unwrap=False, lead=False):
+    def __new__(cls, data):
         r"""Create a new EMArray."""
         return np.asarray(data).view(cls)
 
@@ -474,10 +474,10 @@ def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     mu_0 = 4e-7*np.pi          # Magn. permeability of free space [H/m]
     epsilon_0 = 1./(mu_0*c*c)  # Elec. permittivity of free space [F/m]
 
-    etaH = 1/res + sval[:, None]*epermH[None, :]*epsilon_0
-    etaV = 1/(res*aniso*aniso) + sval[:, None]*epermV[None, :]*epsilon_0
-    zetaH = sval[:, None]*mpermH[None, :]*mu_0
-    zetaV = sval[:, None]*mpermV[None, :]*mu_0
+    etaH = 1/res + np.outer(sval, epermH*epsilon_0)
+    etaV = 1/(res*aniso*aniso) + np.outer(sval, epermV*epsilon_0)
+    zetaH = np.outer(sval, mpermH*mu_0)
+    zetaV = np.outer(sval, mpermV*mu_0)
 
     return freq, etaH, etaV, zetaH, zetaV
 
@@ -494,8 +494,8 @@ def check_hankel(ht, htarg, verb):
     ht : {'dlf', 'qwe', 'quad'}
         Flag to choose the Hankel transform.
 
-    htarg : str or filter from empymod.filters or array_like,
-        Depends on the value for `ht`.
+    htarg : dict
+        Arguments of Hankel transform; depends on the value for `ht`.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -511,193 +511,149 @@ def check_hankel(ht, htarg, verb):
     # Ensure ht is all lowercase
     ht = ht.lower()
 
-    if ht in ['dlf', 'fht']:    # If DLF, check filter settings
-        # Rename ht
-        ht = 'dlf'
+    # Initiate output dict
+    targ = {}
 
-        # Get and check input or set defaults
-        htarg = _check_targ(htarg, ['dlf', 'pts_per_dec'])
+    if ht == 'dlf':     # DLF
 
-        # Check filter; defaults to key_201_2009
-        try:
-            dlf = htarg['dlf']
-            if not hasattr(dlf, 'base'):
-                htarg['dlf'] = getattr(filters, dlf)()
-        except VariableCatch:
-            htarg['dlf'] = filters.key_201_2009()
+        # If filter is a name (str), get it
+        targ['dlf'] = htarg.pop('dlf', filters.key_201_2009())
+        if isinstance(targ['dlf'], str):
+            targ['dlf'] = getattr(filters, targ['dlf'])()
 
-        # Check pts_per_dec; defaults to 0
-        try:
-            htarg['pts_per_dec'] = _check_var(
-                    htarg['pts_per_dec'], float, 0, 'dlf: pts_per_dec', ())
-        except VariableCatch:
-            htarg['pts_per_dec'] = 0.0
+        # Ensure the provided filter has the necessary attributes.
+        base = hasattr(targ['dlf'], 'base')
+        j0 = hasattr(targ['dlf'], 'j0')
+        j1 = hasattr(targ['dlf'], 'j1')
+        factor = hasattr(targ['dlf'], 'factor')
+        if not base or not j0 or not j1 or not factor:
+            print("* ERROR   :: DLF-filter is missing some attributes; "
+                  f"base: {base}; j0: {j0}; j1: {j1}; factor: {factor}.")
+            raise AttributeError('ht')
+
+        # Check dimension and type of pts_per_dec
+        targ['pts_per_dec'] = _check_var(
+                htarg.pop('pts_per_dec', 0.0), float, 0, 'dlf: pts_per_dec',
+                ())
 
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  DLF (Fast Hankel Transform)")
-            print(f"     > Filter      :  {htarg['dlf'].name}")
+            print(f"     > Filter      :  {targ['dlf'].name}")
             pstr = "     > DLF type    :  "
-            if htarg['pts_per_dec'] < 0:
+            if targ['pts_per_dec'] < 0:
                 print(f"{pstr}Lagged Convolution")
-            elif htarg['pts_per_dec'] > 0:
-                print(f"{pstr}Splined, {htarg['pts_per_dec']} pts/dec")
+            elif targ['pts_per_dec'] > 0:
+                print(f"{pstr}Splined, {targ['pts_per_dec']} pts/dec")
             else:
                 print(f"{pstr}Standard")
 
-    elif ht in ['qwe', 'hqwe']:
-        # Rename ht
-        ht = 'qwe'
-
-        # Get and check input or set defaults
-        htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
-                            'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
+    elif ht == 'qwe':   # QWE
 
         # rtol : 1e-12
-        try:
-            htarg['rtol'] = _check_var(
-                    htarg['rtol'], float, 0, 'qwe: rtol', ())
-        except VariableCatch:
-            htarg['rtol'] = np.array(1e-12, dtype=float)
+        targ['rtol'] = _check_var(
+                htarg.pop('rtol', 1e-12), float, 0, 'qwe: rtol', ())
 
         # atol : 1e-30
-        try:
-            htarg['atol'] = _check_var(
-                    htarg['atol'], float, 0, 'qwe: atol', ())
-        except VariableCatch:
-            htarg['atol'] = np.array(1e-30, dtype=float)
+        targ['atol'] = _check_var(
+                htarg.pop('atol', 1e-30), float, 0, 'qwe: atol', ())
 
         # nquad : 51
-        try:
-            htarg['nquad'] = _check_var(
-                    htarg['nquad'], int, 0, 'qwe: nquad', ())
-        except VariableCatch:
-            htarg['nquad'] = np.array(51, dtype=int)
+        targ['nquad'] = _check_var(
+                htarg.pop('nquad', 51), int, 0, 'qwe: nquad', ())
 
         # maxint : 100
-        try:
-            htarg['maxint'] = _check_var(
-                    htarg['maxint'], int, 0, 'qwe: maxint', ())
-        except VariableCatch:
-            htarg['maxint'] = np.array(100, dtype=int)
+        targ['maxint'] = _check_var(
+                htarg.pop('maxint', 100), int, 0, 'qwe: maxint', ())
 
         # pts_per_dec : 0  # No spline
-        try:
-            pts_per_dec = _check_var(
-                    htarg['pts_per_dec'], int, 0, 'qwe: pts_per_dec', ())
-            htarg['pts_per_dec'] = _check_min(
-                    pts_per_dec, 0, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            htarg['pts_per_dec'] = np.array(0, dtype=int)
+        pts_per_dec = _check_var(
+                htarg.pop('pts_per_dec', 0), int, 0, 'qwe: pts_per_dec', ())
+        targ['pts_per_dec'] = _check_min(
+                pts_per_dec, 0, 'pts_per_dec', '', verb)
 
         # diff_quad : 100
-        try:
-            htarg['diff_quad'] = _check_var(
-                    htarg['diff_quad'], float, 0, 'qwe: diff_quad', ())
-        except VariableCatch:
-            htarg['diff_quad'] = np.array(100, dtype=float)
+        targ['diff_quad'] = _check_var(
+                htarg.pop('diff_quad', 100), float, 0, 'qwe: diff_quad', ())
 
         # a : None
-        try:
-            htarg['a'] = _check_var(htarg['a'], float, 0, 'qwe: a (quad)', ())
-        except VariableCatch:
-            htarg['a'] = None
+        targ['a'] = htarg.pop('a', None)
+        if targ['a'] is not None:
+            targ['a'] = _check_var(targ['a'], float, 0, 'qwe: a (quad)', ())
 
         # b : None
-        try:
-            htarg['b'] = _check_var(htarg['b'], float, 0, 'qwe: b (quad)', ())
-        except VariableCatch:
-            htarg['b'] = None
+        targ['b'] = htarg.pop('b', None)
+        if targ['b'] is not None:
+            targ['b'] = _check_var(targ['b'], float, 0, 'qwe: b (quad)', ())
 
         # limit : None
-        try:
-            htarg['limit'] = _check_var(
-                    htarg['limit'], int, 0, 'qwe: limit (quad)', ())
-        except VariableCatch:
-            htarg['limit'] = None
+        targ['limit'] = htarg.pop('limit', None)
+        if targ['limit'] is not None:
+            targ['limit'] = _check_var(
+                    targ['limit'], int, 0, 'qwe: limit (quad)', ())
 
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  Quadrature-with-Extrapolation")
-            print(f"     > rtol        :  {htarg['rtol']}")
-            print(f"     > atol        :  {htarg['atol']}")
-            print(f"     > nquad       :  {htarg['nquad']}")
-            print(f"     > maxint      :  {htarg['maxint']}")
-            print(f"     > pts_per_dec :  {htarg['pts_per_dec']}")
-            print(f"     > diff_quad   :  {htarg['diff_quad']}")
-            if htarg['a']:
-                print(f"     > a     (quad):  {htarg['a']}")
-            if htarg['b']:
-                print(f"     > b     (quad):  {htarg['b']}")
-            if htarg['limit']:
-                print(f"     > limit (quad):  {htarg['limit']}")
+            print(f"     > rtol        :  {targ['rtol']}")
+            print(f"     > atol        :  {targ['atol']}")
+            print(f"     > nquad       :  {targ['nquad']}")
+            print(f"     > maxint      :  {targ['maxint']}")
+            print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
+            print(f"     > diff_quad   :  {targ['diff_quad']}")
+            if targ['a']:
+                print(f"     > a     (quad):  {targ['a']}")
+            if targ['b']:
+                print(f"     > b     (quad):  {targ['b']}")
+            if targ['limit']:
+                print(f"     > limit (quad):  {targ['limit']}")
 
-    elif ht in ['quad', 'hquad']:
-        # Rename ht
-        ht = 'quad'
-
-        # Get and check input or set defaults
-        htarg = _check_targ(htarg, ['rtol', 'atol', 'limit', 'a', 'b',
-                                    'pts_per_dec'])
+    elif ht in 'quad':  # QUAD
 
         # rtol : 1e-12
-        try:
-            htarg['rtol'] = _check_var(
-                    htarg['rtol'], float, 0, 'quad: rtol', ())
-        except VariableCatch:
-            htarg['rtol'] = np.array(1e-12, dtype=float)
+        targ['rtol'] = _check_var(
+                htarg.pop('rtol', 1e-12), float, 0, 'quad: rtol', ())
 
         # atol : 1e-20
-        try:
-            htarg['atol'] = _check_var(
-                    htarg['atol'], float, 0, 'quad: atol', ())
-        except VariableCatch:
-            htarg['atol'] = np.array(1e-20, dtype=float)
+        targ['atol'] = _check_var(
+                htarg.pop('atol', 1e-20), float, 0, 'quad: atol', ())
 
         # limit : 500
-        try:
-            htarg['limit'] = _check_var(
-                    htarg['limit'], int, 0, 'quad: limit', ())
-        except VariableCatch:
-            htarg['limit'] = np.array(500, dtype=int)
+        targ['limit'] = _check_var(
+                htarg.pop('limit', 500), int, 0, 'quad: limit', ())
 
         # a : 1e-6
-        try:
-            htarg['a'] = _check_var(htarg['a'], float, 0, 'quad: a', ())
-        except VariableCatch:
-            htarg['a'] = np.array(1e-6, dtype=float)
+        targ['a'] = _check_var(htarg.pop('a', 1e-6), float, 0, 'quad: a', ())
 
         # b : 0.1
-        try:
-            htarg['b'] = _check_var(htarg['b'], float, 0, 'quad: b', ())
-        except VariableCatch:
-            htarg['b'] = np.array(0.1, dtype=float)
+        targ['b'] = _check_var(htarg.pop('b', 0.1), float, 0, 'quad: b', ())
 
         # pts_per_dec : 40
-        try:
-            pts_per_dec = _check_var(
-                    htarg['pts_per_dec'], int, 0, 'quad: pts_per_dec', ())
-            htarg['pts_per_dec'] = _check_min(
-                    pts_per_dec, 1, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            htarg['pts_per_dec'] = np.array(40, dtype=int)
+        pts_per_dec = _check_var(
+                htarg.pop('pts_per_dec', 40), int, 0, 'quad: pts_per_dec', ())
+        targ['pts_per_dec'] = _check_min(
+                pts_per_dec, 1, 'pts_per_dec', '', verb)
 
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  Quadrature")
-            print(f"     > rtol        :  {htarg['rtol']}")
-            print(f"     > atol        :  {htarg['atol']}")
-            print(f"     > limit       :  {htarg['limit']}")
-            print(f"     > a           :  {htarg['a']}")
-            print(f"     > b           :  {htarg['b']}")
-            print(f"     > pts_per_dec :  {htarg['pts_per_dec']}")
+            print(f"     > rtol        :  {targ['rtol']}")
+            print(f"     > atol        :  {targ['atol']}")
+            print(f"     > limit       :  {targ['limit']}")
+            print(f"     > a           :  {targ['a']}")
+            print(f"     > b           :  {targ['b']}")
+            print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
 
     else:
         print("* ERROR   :: <ht> must be one of: ['dlf', 'qwe', 'quad'];"
               f" <ht> provided: {ht}")
         raise ValueError('ht')
 
-    return ht, htarg
+    # Check remaining arguments.
+    if htarg and verb > 0:
+        print(f"* WARNING :: Unknown htarg {htarg} for method '{ht}'")
+
+    return ht, targ
 
 
 def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
@@ -904,11 +860,11 @@ def check_loop(loop, ht, htarg, verb):
     loop : {None, 'freq', 'off'}
         Loop flag.
 
-    ht : str
+    ht : {'dlf', 'qwe', 'quad'}
         Flag to choose the Hankel transform.
 
-    htarg : array_like,
-        Depends on the value for `ht`.
+    htarg : dict
+        Arguments of Hankel transform; depends on the value for `ht`.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -970,11 +926,11 @@ def check_time(time, signal, ft, ftarg, verb):
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}
+    ft : {'dlf', 'qwe', 'fftlog', 'fft'}
         Flag for Fourier transform.
 
-    ftarg : str or filter from empymod.filters or array_like,
-        Only used if `signal!=None`. Depends on the value for `ft`:
+    ftarg : dict
+        Arguments of Fourier transform; depends on the value for `ft`.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -1000,272 +956,242 @@ def check_time(time, signal, ft, ftarg, verb):
     # Ensure ft is all lowercase
     ft = ft.lower()
 
-    if ft in ['dlf', 'cos', 'sin', 'ffht']:  # Fourier-DLF (sin/cos-filters)
+    # Initiate output dict
+    targ = {}
 
-        # Check Input
-        ftarg = _check_targ(ftarg, ['dlf', 'pts_per_dec', 'kind'])
+    if ft == 'dlf':       # Fourier-DLF (sin/cos-filters)
 
-        # Check filter; defaults to key_201_CosSin_2012
-        try:
-            dlf = ftarg['dlf']
-            if not hasattr(dlf, 'base'):
-                ftarg['dlf'] = getattr(filters, dlf)()
-        except VariableCatch:
-            ftarg['dlf'] = filters.key_201_CosSin_2012()
-
-        # Check pts_per_dec; defaults to -1
-        try:
-            ftarg['pts_per_dec'] = _check_var(ftarg['pts_per_dec'], float, 0,
-                                              ft + 'pts_per_dec', ())
-        except VariableCatch:
-            ftarg['pts_per_dec'] = -1.0
+        # Check dimension and type of pts_per_dec
+        targ['pts_per_dec'] = _check_var(
+                ftarg.pop('pts_per_dec', -1.0), float, 0, 'dlf: pts_per_dec',
+                ())
 
         # Check kind; if switch-off/on is required, ensure kind is cosine/sine
-        kind = ftarg.get('kind', ft)
-        if kind in ['dlf', 'ffht']:  # 'sin' is default.
-            kind = 'sin'
+        targ['kind'] = ftarg.pop('kind', 'sin')
         if signal > 0:
-            kind = 'sin'
+            targ['kind'] = 'sin'
         elif signal < 0:
-            kind = 'cos'
-        ftarg['kind'] = kind
+            targ['kind'] = 'cos'
+        if targ['kind'] not in ['sin', 'cos']:
+            print("* ERROR   :: 'kind' must be either 'sin' or 'cos'; "
+                  f"provided: targ['kind'].")
+            raise ValueError('ft')
+
+        # If filter is a name (str), get it
+        targ['dlf'] = ftarg.pop('dlf', filters.key_201_CosSin_2012())
+        if isinstance(targ['dlf'], str):
+            targ['dlf'] = getattr(filters, targ['dlf'])()
+
+        # Ensure the provided filter has the necessary attributes.
+        base = hasattr(targ['dlf'], 'base')
+        if targ['kind'] == 'sin':
+            sincos = hasattr(targ['dlf'], 'sin')
+        else:
+            sincos = hasattr(targ['dlf'], 'cos')
+        factor = hasattr(targ['dlf'], 'factor')
+        if not base or not sincos or not factor:
+            print("* ERROR   :: DLF-filter is missing some attributes; "
+                  f"base: {base}; {targ['kind']}: {sincos}; factor: {factor}.")
+            raise AttributeError('ft')
 
         # If verbose, print Fourier transform information
         if verb > 2:
-            if ftarg['kind'] == 'sin':
+            if targ['kind'] == 'sin':
                 print("   Fourier         :  DLF (Sine-Filter)")
             else:
                 print("   Fourier         :  DLF (Cosine-Filter)")
-            print(f"     > Filter      :  {ftarg['dlf'].name}")
+            print(f"     > Filter      :  {targ['dlf'].name}")
             pstr = "     > DLF type    :  "
-            if ftarg['pts_per_dec'] < 0:
+            if targ['pts_per_dec'] < 0:
                 print(f"{pstr}Lagged Convolution")
-            elif ftarg['pts_per_dec'] > 0:
-                print(f"{pstr}Splined, {ftarg['pts_per_dec']} pts/dec")
+            elif targ['pts_per_dec'] > 0:
+                print(f"{pstr}Splined, {targ['pts_per_dec']} pts/dec")
             else:
                 print(f"{pstr}Standard")
 
         # Get required frequencies
         omega, _ = transform.get_dlf_points(
-                ftarg['dlf'], time, ftarg['pts_per_dec'])
+                targ['dlf'], time, targ['pts_per_dec'])
         freq = np.squeeze(omega/2/np.pi)
 
-        # Rename ft
-        ft = 'dlf'
-
-    elif ft in ['qwe', 'fqwe']:       # QWE (using sine and imag-part)
-        # Rename ft
-        ft = 'qwe'
-
-        # Get and check input or set defaults
-        ftarg = _check_targ(ftarg, ['rtol', 'atol', 'nquad', 'maxint',
-                                    'pts_per_dec', 'diff_quad', 'a', 'b',
-                                    'limit', 'sincos'])
+    elif ft == 'qwe':     # QWE (using sine and imag-part)
 
         # If switch-off is required, use cosine, else sine
         if signal >= 0:
-            ftarg['sincos'] = np.sin
-        elif signal < 0:
-            ftarg['sincos'] = np.cos
+            targ['sincos'] = np.sin
+        else:
+            targ['sincos'] = np.cos
 
-        try:  # rtol
-            ftarg['rtol'] = _check_var(
-                    ftarg['rtol'], float, 0, 'qwe: rtol', ())
-        except VariableCatch:
-            ftarg['rtol'] = np.array(1e-8, dtype=float)
+        # rtol : 1e-8
+        targ['rtol'] = _check_var(
+                ftarg.pop('rtol', 1e-8), float, 0, 'qwe: rtol', ())
 
-        try:  # atol
-            ftarg['atol'] = _check_var(
-                    ftarg['atol'], float, 0, 'qwe: atol', ())
-        except VariableCatch:
-            ftarg['atol'] = np.array(1e-20, dtype=float)
+        # atol : 1e-20
+        targ['atol'] = _check_var(
+                ftarg.pop('atol', 1e-20), float, 0, 'qwe: atol', ())
 
-        try:  # nquad
-            ftarg['nquad'] = _check_var(
-                    ftarg['nquad'], int, 0, 'qwe: nquad', ())
-        except VariableCatch:
-            ftarg['nquad'] = np.array(21, dtype=int)
+        # nquad : 21
+        targ['nquad'] = _check_var(
+                ftarg.pop('nquad', 21), int, 0, 'qwe: nquad', ())
 
-        try:  # maxint
-            ftarg['maxint'] = _check_var(
-                    ftarg['maxint'], int, 0, 'qwe: maxint', ())
-        except VariableCatch:
-            ftarg['maxint'] = np.array(200, dtype=int)
+        # maxint : 200
+        targ['maxint'] = _check_var(
+                ftarg.pop('maxint', 200), int, 0, 'qwe: maxint', ())
 
-        try:  # pts_per_dec
-            pts_per_dec = _check_var(
-                    ftarg['pts_per_dec'], int, 0, 'qwe: pts_per_dec', ())
-            ftarg['pts_per_dec'] = _check_min(
-                    pts_per_dec, 1, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            ftarg['pts_per_dec'] = np.array(20, dtype=int)
+        # pts_per_dec : 20
+        pts_per_dec = _check_var(
+                ftarg.pop('pts_per_dec', 20), int, 0, 'qwe: pts_per_dec', ())
+        targ['pts_per_dec'] = _check_min(
+                pts_per_dec, 1, 'pts_per_dec', '', verb)
 
         # diff_quad : 100
-        try:
-            ftarg['diff_quad'] = _check_var(
-                    ftarg['diff_quad'], int, 0, 'qwe: diff_quad', ())
-        except VariableCatch:
-            ftarg['diff_quad'] = np.array(100, dtype=int)
+        targ['diff_quad'] = _check_var(
+                ftarg.pop('diff_quad', 100), int, 0, 'qwe: diff_quad', ())
 
         # a : None
-        try:
-            ftarg['a'] = _check_var(ftarg['a'], float, 0, 'qwe: a (quad)', ())
-        except VariableCatch:
-            ftarg['a'] = None
+        targ['a'] = ftarg.pop('a', None)
+        if targ['a'] is not None:
+            targ['a'] = _check_var(targ['a'], float, 0, 'qwe: a (quad)', ())
 
         # b : None
-        try:
-            ftarg['b'] = _check_var(ftarg['b'], float, 0, 'qwe: b (quad)', ())
-        except VariableCatch:
-            ftarg['b'] = None
+        targ['b'] = ftarg.pop('b', None)
+        if targ['b'] is not None:
+            targ['b'] = _check_var(targ['b'], float, 0, 'qwe: b (quad)', ())
 
         # limit : None
-        try:
-            ftarg['limit'] = _check_var(
-                    ftarg['limit'], int, 0, 'qwe: limit (quad)', ())
-        except VariableCatch:
-            ftarg['limit'] = None
+        targ['limit'] = ftarg.pop('limit', None)
+        if targ['limit'] is not None:
+            targ['limit'] = _check_var(
+                    targ['limit'], int, 0, 'qwe: limit (quad)', ())
 
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  Quadrature-with-Extrapolation")
-            print(f"     > rtol        :  {ftarg['rtol']}")
-            print(f"     > atol        :  {ftarg['atol']}")
-            print(f"     > nquad       :  {ftarg['nquad']}")
-            print(f"     > maxint      :  {ftarg['maxint']}")
-            print(f"     > pts_per_dec :  {ftarg['pts_per_dec']}")
-            print(f"     > diff_quad   :  {ftarg['diff_quad']}")
-            if ftarg['a']:
-                print(f"     > a     (quad):  {ftarg['a']}")
-            if ftarg['b']:
-                print(f"     > b     (quad):  {ftarg['b']}")
-            if ftarg['limit']:
-                print(f"     > limit (quad):  {ftarg['limit']}")
+            print(f"     > rtol        :  {targ['rtol']}")
+            print(f"     > atol        :  {targ['atol']}")
+            print(f"     > nquad       :  {targ['nquad']}")
+            print(f"     > maxint      :  {targ['maxint']}")
+            print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
+            print(f"     > diff_quad   :  {targ['diff_quad']}")
+            if targ['a']:
+                print(f"     > a     (quad):  {targ['a']}")
+            if targ['b']:
+                print(f"     > b     (quad):  {targ['b']}")
+            if targ['limit']:
+                print(f"     > limit (quad):  {targ['limit']}")
 
         # Get required frequencies
-        g_x, _ = special.p_roots(ftarg['nquad'])
+        g_x, _ = special.p_roots(targ['nquad'])
         minf = np.floor(10*np.log10((g_x.min() + 1)*np.pi/2/time.max()))/10
-        maxf = np.ceil(10*np.log10(ftarg['maxint']*np.pi/time.min()))/10
-        freq = np.logspace(minf, maxf, int((maxf-minf)*ftarg['pts_per_dec']+1))
+        maxf = np.ceil(10*np.log10(targ['maxint']*np.pi/time.min()))/10
+        freq = np.logspace(minf, maxf, int((maxf-minf)*targ['pts_per_dec']+1))
 
-    elif ft == 'fftlog':              # FFTLog (using sine and imag-part)
+    elif ft == 'fftlog':  # FFTLog (using sine and imag-part)
 
-        # Get and check input or set defaults
-        ftarg = _check_targ(ftarg, ['pts_per_dec', 'add_dec', 'q', 'mu',
-                                    'tcalc', 'dlnr', 'kr', 'rk'])
+        # pts_per_dec : 10
+        pts_per_dec = _check_var(
+                ftarg.pop('pts_per_dec', 10), int, 0,
+                'fftlog: pts_per_dec', ())
+        targ['pts_per_dec'] = _check_min(
+                pts_per_dec, 1, 'pts_per_dec', '', verb)
 
-        try:  # pts_per_dec
-            pts_per_dec = _check_var(
-                    ftarg['pts_per_dec'], int, 0, 'fftlog: pts_per_dec', ())
-            ftarg['pts_per_dec'] = _check_min(
-                    pts_per_dec, 1, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            ftarg['pts_per_dec'] = np.array(10, dtype=int)
+        # add_dec : [-2, 1]
+        targ['add_dec'] = _check_var(
+                ftarg.pop('add_dec', np.array([-2, 1])), float, 1,
+                'fftlog: add_dec', (2,))
 
-        try:  # add_dec
-            ftarg['add_dec'] = _check_var(
-                    ftarg['add_dec'], float, 1, 'fftlog: add_dec', (2,))
-        except VariableCatch:
-            ftarg['add_dec'] = np.array([-2, 1], dtype=float)
-
-        try:  # q
-            ftarg['q'] = _check_var(ftarg['q'], float, 0, 'fftlog: q', ())
-            # Restrict q to +/- 1
-            if np.abs(ftarg['q']) > 1:
-                ftarg['q'] = np.sign(ftarg['q'])
-        except VariableCatch:
-            ftarg['q'] = np.array(0, dtype=float)
+        # q : 0
+        targ['q'] = _check_var(ftarg.pop('q', 0), float, 0, 'fftlog: q', ())
+        # Restrict q to +/- 1
+        if np.abs(targ['q']) > 1:
+            targ['q'] = np.sign(targ['q'])
 
         # If switch-off is required, use cosine, else sine
         if signal >= 0:
-            ftarg['mu'] = 0.5
-        elif signal < 0:
-            ftarg['mu'] = -0.5
+            targ['mu'] = 0.5
+        else:
+            targ['mu'] = -0.5
 
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  FFTLog")
-            print(f"     > pts_per_dec :  {ftarg['pts_per_dec']}")
-            print(f"     > add_dec     :  {ftarg['add_dec']}")
-            print(f"     > q           :  {ftarg['q']}")
+            print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
+            print(f"     > add_dec     :  {targ['add_dec']}")
+            print(f"     > q           :  {targ['q']}")
 
         # Calculate minimum and maximum required frequency
-        minf = np.log10(1/time.max()) + ftarg['add_dec'][0]
-        maxf = np.log10(1/time.min()) + ftarg['add_dec'][1]
-        n = np.int(maxf - minf)*ftarg['pts_per_dec']
+        minf = np.log10(1/time.max()) + targ['add_dec'][0]
+        maxf = np.log10(1/time.min()) + targ['add_dec'][1]
+        n = np.int(maxf - minf)*targ['pts_per_dec']
 
         # Initialize FFTLog, get required parameters
         freq, tcalc, dlnr, kr, rk = transform.get_fftlog_input(
-                minf, maxf, n, ftarg['q'], ftarg['mu'])
-        ftarg['tcalc'] = tcalc
-        ftarg['dlnr'] = dlnr
-        ftarg['kr'] = kr
-        ftarg['rk'] = rk
+                minf, maxf, n, targ['q'], targ['mu'])
+        targ['tcalc'] = tcalc
+        targ['dlnr'] = dlnr
+        targ['kr'] = kr
+        targ['rk'] = rk
 
-    elif ft == 'fft':                 # FFT
+    elif ft == 'fft':     # FFT
+        # Keys: dfreq, nfreq, ntot, pts_per_dec, fftfreq
 
-        # Get and check input or set defaults
-        ftarg = _check_targ(ftarg, ['dfreq', 'nfreq', 'ntot', 'pts_per_dec',
-                                    'fftfreq'])
+        # dfreq : 0.002
+        targ['dfreq'] = _check_var(
+                ftarg.pop('dfreq', 0.002), float, 0, 'fft: dfreq', ())
 
-        try:  # dfreq
-            ftarg['dfreq'] = _check_var(
-                    ftarg['dfreq'], float, 0, 'fft: dfreq', ())
-        except VariableCatch:
-            ftarg['dfreq'] = np.array(0.002, dtype=float)
+        # nfreq : 2048
+        targ['nfreq'] = _check_var(
+                ftarg.pop('nfreq', 2048), int, 0, 'fft: nfreq', ())
 
-        try:  # nfreq
-            ftarg['nfreq'] = _check_var(
-                    ftarg['nfreq'], int, 0, 'fft: nfreq', ())
-        except VariableCatch:
-            ftarg['nfreq'] = np.array(2048, dtype=int)
-
+        # ntot
         nall = 2**np.arange(30)
-        try:  # ntot
-            ftarg['ntot'] = _check_var(ftarg['ntot'], int, 0, 'fft: ntot', ())
-        except VariableCatch:
-            # We could use here fftpack.next_fast_len, but tests have shown
-            # that powers of two yield better results in this case.
-            ftarg['ntot'] = nall[np.argmax(nall >= ftarg['nfreq'])]
-        else:  # Assure that input ntot is not bigger than nfreq
-            if ftarg['nfreq'] > ftarg['ntot']:
-                ftarg['ntot'] = nall[np.argmax(nall >= ftarg['nfreq'])]
+        targ['ntot'] = _check_var(
+            ftarg.pop('ntot', nall[np.argmax(nall >= targ['nfreq'])]),  # (*)
+            int, 0, 'fft: ntot', ())
+        # Assure that input ntot is not bigger than nfreq
+        if targ['nfreq'] > targ['ntot']:
+            targ['ntot'] = nall[np.argmax(nall >= targ['nfreq'])]
+        # (*) We could use here fftpack.next_fast_len, but tests have shown
+        #     that powers of two yield better results in this case.
 
-        # Check pts_per_dec; defaults to None
-        try:
+        # pts_per_dec : None
+        targ['pts_per_dec'] = ftarg.pop('pts_per_dec', None)
+        if targ['pts_per_dec'] is not None:
             pts_per_dec = _check_var(
-                    ftarg['pts_per_dec'], int, 0, 'fft: pts_per_dec', ())
-            ftarg['pts_per_dec'] = _check_min(
+                    targ['pts_per_dec'], int, 0, 'fft: pts_per_dec', ())
+            targ['pts_per_dec'] = _check_min(
                     pts_per_dec, 1, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            ftarg['pts_per_dec'] = None
 
         # Get required frequencies
-        if ftarg['pts_per_dec']:  # Space actually calc. freqs logarithmically.
-            start = np.log10(ftarg['dfreq'])
-            stop = np.log10(ftarg['nfreq']*ftarg['dfreq'])
+        if targ['pts_per_dec']:  # Space actually calc. freqs logarithmically.
+            start = np.log10(targ['dfreq'])
+            stop = np.log10(targ['nfreq']*targ['dfreq'])
             freq = np.logspace(
-                    start, stop, int((stop-start)*ftarg['pts_per_dec'] + 1))
+                    start, stop, int((stop-start)*targ['pts_per_dec'] + 1))
         else:
-            freq = np.arange(1, ftarg['nfreq']+1)*ftarg['dfreq']
+            freq = np.arange(1, targ['nfreq']+1)*targ['dfreq']
 
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  Fast Fourier Transform FFT")
-            print(f"     > dfreq       :  {ftarg['dfreq']}")
-            print(f"     > nfreq       :  {ftarg['nfreq']}")
-            print(f"     > ntot        :  {ftarg['ntot']}")
-            if ftarg['pts_per_dec']:
-                print(f"     > pts_per_dec :  {ftarg['pts_per_dec']}")
+            print(f"     > dfreq       :  {targ['dfreq']}")
+            print(f"     > nfreq       :  {targ['nfreq']}")
+            print(f"     > ntot        :  {targ['ntot']}")
+            if targ['pts_per_dec']:
+                print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
             else:
                 print("     > pts_per_dec :  (linear)")
 
     else:
-        print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', "
+        print("* ERROR   :: <ft> must be one of: ['dlf', 'qwe', "
               f"'fftlog', 'fft']; <ft> provided: {ft}")
         raise ValueError('ft')
 
-    return time, freq, ft, ftarg
+    # Check remaining arguments.
+    if ftarg and verb > 0:
+        print(f"* WARNING :: Unknown ftarg {ftarg} for method '{ft}'")
+
+    return time, freq, ft, targ
 
 
 def check_time_only(time, signal, verb):
@@ -2012,8 +1938,6 @@ def _check_shape(var, name, shape, shape2=None):
 
 def _check_var(var, dtype, ndmin, name, shape=None, shape2=None):
     r"""Return variable as array of dtype, ndmin; shape-checked."""
-    if var is None:
-        raise ValueError
     var = np.array(var, dtype=dtype, copy=True, ndmin=ndmin)
     if shape:
         _check_shape(var, name, shape, shape2)
@@ -2052,25 +1976,6 @@ def _check_min(par, minval, name, unit, verb):
         return np.squeeze(par)
     else:
         return par
-
-
-def _check_targ(targ, keys):
-    r"""Check format of htarg/ftarg and return dict."""
-    if targ is None:   # If None
-        targ = {}
-    elif isinstance(targ, (list, tuple, dict)):  # All good, except if empty
-        if len(targ) == 0:
-            targ = {}
-    elif isinstance(targ, str) and targ == '':   # Empty string
-        targ = {}
-    elif isinstance(targ, np.ndarray) and targ.size == 0:  # Empty array
-        targ = {}
-    else:              # If only one value
-        targ = [targ, ]
-
-    if isinstance(targ, (list, tuple)):  # Put list into dict
-        targ = {keys[i]: targ[i] for i in range(min(len(targ), len(keys)))}
-    return targ
 
 
 # 5. Report

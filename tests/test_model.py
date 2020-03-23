@@ -235,7 +235,7 @@ class TestBipole:
         for i in ['1', '2', '3', '4']:
             res = DATAEMPYMOD['out'+i][()]
             tEM = bipole(**res['inp'])
-            assert_allclose(tEM, res['EM'])
+            assert_allclose(tEM, res['EM'], rtol=5e-5)  # 5e-5 shouldn't be...
 
     def test_dipole_bipole(self):
         # Compare a dipole to a bipole
@@ -280,13 +280,29 @@ class TestBipole:
         dlf = bipole(ht='dlf', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  DLF (Fast Hankel Transform)" in out
+        assert "  > DLF type    :  Standard" in out
+        assert "Loop over       :  None" in out
+
+        dlf2 = bipole(ht='dlf', htarg={'pts_per_dec': -1}, verb=3, **inp)
+        out, _ = capsys.readouterr()
+        assert "Hankel          :  DLF (Fast Hankel Transform)" in out
+        assert "  > DLF type    :  Lagged Convolution" in out
+        assert "Loop over       :  Frequencies" in out
+        assert_allclose(dlf, dlf2, rtol=1e-4)
+
+        dlf3 = bipole(ht='dlf', htarg={'pts_per_dec': 40}, verb=3, **inp)
+        out, _ = capsys.readouterr()
+        assert "Hankel          :  DLF (Fast Hankel Transform)" in out
+        assert "  > DLF type    :  Splined, 40.0 pts/dec" in out
+        assert "Loop over       :  Frequencies" in out
+        assert_allclose(dlf, dlf3, rtol=1e-3)
 
         qwe = bipole(ht='qwe', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  Quadrature-with-Extrapolation" in out
         assert_allclose(dlf, qwe, equal_nan=True)
 
-        quad = bipole(ht='quad', htarg=['', '', '', '', 1, 1000], verb=3,
+        quad = bipole(ht='quad', htarg={'b': 1, 'pts_per_dec': 1000}, verb=3,
                       **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  Quadrature" in out
@@ -302,7 +318,7 @@ class TestBipole:
         out, _ = capsys.readouterr()
         assert "Fourier         :  FFTLog" in out
 
-        qwe = bipole(ft='qwe', ftarg=['', '', '', '', 30], verb=3, **inp)
+        qwe = bipole(ft='qwe', ftarg={'pts_per_dec': 30}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Fourier         :  Quadrature-with-Extrapolation" in out
         assert_allclose(qwe, ftl, 1e-2, equal_nan=True)
@@ -314,7 +330,10 @@ class TestBipole:
 
         # FFT: We keep the error-check very low, otherwise we would have to
         #      calculate too many frequencies.
-        fft = bipole(ft='fft', ftarg=[0.002, 2**13, 2**16], verb=3, **inp)
+        fft = bipole(
+                ft='fft',
+                ftarg={'dfreq': 0.002, 'nfreq': 2**13, 'ntot': 2**16},
+                verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Fourier         :  Fast Fourier Transform FFT" in out
         assert_allclose(fft, ftl, 1e-1, 1e-13, equal_nan=True)

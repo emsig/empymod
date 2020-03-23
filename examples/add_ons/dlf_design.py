@@ -84,11 +84,11 @@ def plotresult(depth, res, zsrc, zrec):
         'verb': 1,
     }
 
-    kong241 = empymod.dipole(htarg='kong_241_2007', **inp)
-    key201 = empymod.dipole(htarg='key_201_2012', **inp)
-    and801 = empymod.dipole(htarg='anderson_801_1982', **inp)
-    test = empymod.dipole(htarg=filt, **inp)
-    wer201 = empymod.dipole(htarg='wer_201_2018', **inp)
+    kong241 = empymod.dipole(htarg={'dlf': 'kong_241_2007'}, **inp)
+    key201 = empymod.dipole(htarg={'dlf': 'key_201_2012'}, **inp)
+    and801 = empymod.dipole(htarg={'dlf': 'anderson_801_1982'}, **inp)
+    test = empymod.dipole(htarg={'dlf': filt}, **inp)
+    wer201 = empymod.dipole(htarg={'dlf': 'wer_201_2018'}, **inp)
     qwe = empymod.dipole(ht='qwe', **inp)
 
     plt.figure(figsize=(8, 3.5))

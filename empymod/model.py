@@ -389,7 +389,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     """
     # Get kwargs with defaults.
     out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
-                     [2, 'dlf', None, 'dlf', None, False, None], kwargs)
+                     [2, 'dlf', {}, 'dlf', {}, False, None], kwargs)
     verb, ht, htarg, ft, ftarg, xdirect, loop = out
 
     # === 1.  LET'S START ============
@@ -710,7 +710,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     """
     # Get kwargs with defaults.
     out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
-                     [2, 'dlf', None, 'dlf', None, False, None], kwargs)
+                     [2, 'dlf', {}, 'dlf', {}, False, None], kwargs)
     verb, ht, htarg, ft, ftarg, xdirect, loop = out
 
     # === 1.  LET'S START ============
@@ -1009,7 +1009,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
     """
     # Get kwargs with defaults.
     out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
-                     [2, 'dlf', None, 'dlf', None, False, None], kwargs)
+                     [2, 'dlf', {}, 'dlf', {}, False, None], kwargs)
     verb, ht, htarg, ft, ftarg, xdirect, loop = out
 
     # === 1.  LET'S START ============
@@ -1479,7 +1479,7 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
     """
     # Get kwargs with defaults.
     out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
-                     [2, 'quad', None, 'fft', None, False, None], kwargs)
+                     [2, 'quad', {}, 'fft', {}, False, None], kwargs)
     verb, ht, htarg, ft, ftarg, xdirect, loop = out
 
     if verb > 2:

@@ -30,7 +30,7 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
     src, nsrc = utils.check_dipole(src, 'src', 0)
     for ab_inp in [11, 12, 13, 33]:
         ab, msrc, mrec = utils.check_ab(ab_inp, 0)
-        _, htarg = utils.check_hankel(htype, None, 0)
+        _, htarg = utils.check_hankel(htype, {}, 0)
         xdirect = False  # Important, as we want to compare wavenr-frequency!
         rec = [np.arange(1, 11)*500, np.zeros(10), 300]
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
@@ -63,7 +63,7 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
         # # # 1. Spline; One angle # # #
         _, htarg = utils.check_hankel(htype, {'pts_per_dec': 80}, 0)
         if htype == 'quad':  # Lower atol to ensure convergence
-            _, htarg = utils.check_hankel('quad', [1e-8], 0)
+            _, htarg = utils.check_hankel('quad', {'rtol': 1e-8}, 0)
         elif htype == 'dlf':  # Adjust htarg for dlf
             lambd, int_pts = transform.get_dlf_points(
                     htarg['dlf'], off, htarg['pts_per_dec'])
@@ -90,8 +90,11 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
         ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
         if htype == 'qwe':  # Put a very low diff_quad, to test it.; lower err
-            _, htarg = utils.check_hankel('qwe', [1e-8, '', '', 200, 80, .1,
-                                                  1e-6, .1, 1000], 0)
+            _, htarg = utils.check_hankel(
+                    'qwe',
+                    {'rtol': 1e-8, 'maxint': 200, 'pts_per_dec': 80,
+                     'diff_quad': .1, 'a': 1e-6, 'b': .1, 'limit': 1000},
+                    0)
         elif htype == 'dlf':  # Adjust htarg for dlf
             lambd, int_pts = transform.get_dlf_points(
                     htarg['dlf'], off, htarg['pts_per_dec'])
@@ -111,13 +114,15 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
 
         # # # 3. Spline; pts_per_dec # # #
         if htype == 'dlf':
-            _, htarg = utils.check_hankel('dlf', ['key_201_2012', 20], 0)
+            _, htarg = utils.check_hankel(
+                    'dlf', {'dlf': 'key_201_2012', 'pts_per_dec': 20}, 0)
             lambd, int_pts = transform.get_dlf_points(
                     htarg['dlf'], off, htarg['pts_per_dec'])
             htarg['lambd'] = lambd
             htarg['int_pts'] = int_pts
         elif htype == 'qwe':
-            _, htarg = utils.check_hankel('qwe', ['', '', '', 80, 100], 0)
+            _, htarg = utils.check_hankel(
+                    'qwe', {'maxint': 80, 'pts_per_dec': 100}, 0)
         if htype != 'quad':  # quad is always pts_per_dec
             # Analytical frequency-domain solution
             wvnr3, _, conv = calc(zsrc, zrec, lsrc, lrec, off, ang_fact, depth,
@@ -136,9 +141,10 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
         off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
         ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
         if htype == 'qwe':
-            _, htarg = utils.check_hankel('qwe', ['', '', '', 200, 80], 0)
+            _, htarg = utils.check_hankel(
+                    'qwe', {'maxint': 200, 'pts_per_dec': 80}, 0)
         elif htype == 'quad':
-            _, htarg = utils.check_hankel('quad', None, 0)
+            _, htarg = utils.check_hankel('quad', {}, 0)
         elif htype == 'dlf':
             lambd, int_pts = transform.get_dlf_points(
                     htarg['dlf'], off, htarg['pts_per_dec'])
@@ -380,7 +386,7 @@ def test_dlf():                                                       # 10. dlf
         src = [0, 0, 0]
         src, nsrc = utils.check_dipole(src, 'src', 0)
         ab, msrc, mrec = utils.check_ab(ab, 0)
-        ht, htarg = utils.check_hankel('dlf', None, 0)
+        ht, htarg = utils.check_hankel('dlf', {}, 0)
         xdirect = False  # Important, as we want to comp. wavenumber-frequency!
         rec = [np.arange(1, 11)*500, np.zeros(10), 300]
         rec, nrec = utils.check_dipole(rec, 'rec', 0)
