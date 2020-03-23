@@ -1191,7 +1191,7 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
     return out, conv
 
 
-def get_dlf_points(filt, inp, nr_per_dec=None):
+def get_dlf_points(filt, inp, nr_per_dec):
     r"""Return calculation points required for DLF."""
 
     # Standard DLF
