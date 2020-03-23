@@ -46,8 +46,9 @@ This version will be backwards incompatible, and only support Python 3.6+.
   - In ``htarg``-dict: ``fftfilt``-> ``dlf`` (filter name for Hankel-DLF)
   - In ``ftarg``-dict: ``fhtfilt``-> ``dlf`` (filter name for Fourier-DLF)
   - In ``ftarg``-dict: ``ft``-> ``kind`` (method in Fourier-DLF [sine/cosine])
-  - ``htarg`` and ``ftarg`` MUST BE dictionaries, lists are not allowed any
-    longer.
+  - Only dictionaries allowed for ``htarg`` and ``ftarg``; strings, lists, or
+    tuples are not allowed any longer. They are also dictionaries internally
+    now.
   - ``ht``: There is only one unique name for each method:  'dlf', 'qwe',
     'quad'.
   - ``ft``: There is only one unique name for each method:  'dlf', 'qwe',
@@ -63,7 +64,6 @@ This version will be backwards incompatible, and only support Python 3.6+.
     raised if a particular parameter is not used in this function, but it
     doesn't fail (it fails, however, for unknown parameters). Pure positional
     calls including those parameters will therefore not work any longer.
-  - ``htarg`` and ``ftarg`` internally are now dictionaries, not lists.
   - Undo a change introduced in v1.8.0: ``get_dlf_points`` is calculated
     directly within ``transform.fht`` [`empymod#26
     <https://github.com/empymod/empymod/issues/26>`_].
