@@ -1019,7 +1019,7 @@ def check_time(time, signal, ft, ftarg, verb):
         # If switch-off is required, use cosine, else sine
         if signal >= 0:
             targ['sincos'] = np.sin
-        elif signal < 0:
+        else:
             targ['sincos'] = np.cos
 
         # rtol : 1e-8
@@ -1109,7 +1109,7 @@ def check_time(time, signal, ft, ftarg, verb):
         # If switch-off is required, use cosine, else sine
         if signal >= 0:
             targ['mu'] = 0.5
-        elif signal < 0:
+        else:
             targ['mu'] = -0.5
 
         # If verbose, print Fourier transform information
@@ -1938,8 +1938,6 @@ def _check_shape(var, name, shape, shape2=None):
 
 def _check_var(var, dtype, ndmin, name, shape=None, shape2=None):
     r"""Return variable as array of dtype, ndmin; shape-checked."""
-    if var is None:
-        raise ValueError
     var = np.array(var, dtype=dtype, copy=True, ndmin=ndmin)
     if shape:
         _check_shape(var, name, shape, shape2)

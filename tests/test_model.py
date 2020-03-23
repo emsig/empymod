@@ -280,6 +280,22 @@ class TestBipole:
         dlf = bipole(ht='dlf', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  DLF (Fast Hankel Transform)" in out
+        assert "  > DLF type    :  Standard" in out
+        assert "Loop over       :  None" in out
+
+        dlf2 = bipole(ht='dlf', htarg={'pts_per_dec': -1}, verb=3, **inp)
+        out, _ = capsys.readouterr()
+        assert "Hankel          :  DLF (Fast Hankel Transform)" in out
+        assert "  > DLF type    :  Lagged Convolution" in out
+        assert "Loop over       :  Frequencies" in out
+        assert_allclose(dlf, dlf2, rtol=1e-4)
+
+        dlf3 = bipole(ht='dlf', htarg={'pts_per_dec': 40}, verb=3, **inp)
+        out, _ = capsys.readouterr()
+        assert "Hankel          :  DLF (Fast Hankel Transform)" in out
+        assert "  > DLF type    :  Splined, 40.0 pts/dec" in out
+        assert "Loop over       :  Frequencies" in out
+        assert_allclose(dlf, dlf3, rtol=1e-3)
 
         qwe = bipole(ht='qwe', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
