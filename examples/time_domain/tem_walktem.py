@@ -313,7 +313,7 @@ def walktem(moment, depth, res):
     time, freq, ft, ftarg = empymod.utils.check_time(
         time=time,          # Required times
         signal=1,           # Switch-on response
-        ft='sin',           # Use DLF
+        ft='dlf',           # Use DLF
         ftarg={'dlf': 'key_81_CosSin_2009'},  # Short, fast filter; if you
         verb=2,                 # need higher accuracy choose a longer filter.
     )

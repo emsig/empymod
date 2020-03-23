@@ -127,11 +127,13 @@ inparg['signal'] = 0  # signal 0 = impulse
 print('QWE')
 qwe = empymod.dipole(**inparg, ft='qwe')
 print('DLF (Sine)')
-sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
+sin = empymod.dipole(**inparg, ft='dlf', ftarg={'dlf': 'key_81_CosSin_2009'})
 print('FFTLog')
 ftl = empymod.dipole(**inparg, ft='fftlog')
 print('FFT')
-fft = empymod.dipole(**inparg, ft='fft', ftarg=[.0005, 2**20, '', 10])
+fft = empymod.dipole(
+        **inparg, ft='fft',
+        ftarg={'dfreq': .0005, 'nfreq': 2**20, 'pts_per_dec': 10})
 
 ###############################################################################
 # => `FFTLog` is the fastest by quite a margin, followed by the `Sine`-filter.
@@ -195,9 +197,9 @@ inparg['signal'] = 1  # signal 1 = switch-on
 print('QWE')
 qwe = empymod.dipole(**inparg, ft='qwe')
 print('DLF (Sine)')
-sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
+sin = empymod.dipole(**inparg, ft='dlf', ftarg={'dlf': 'key_81_CosSin_2009'})
 print('FFTLog')
-ftl = empymod.dipole(**inparg, ft='fftlog', ftarg=['', '', -0.6])
+ftl = empymod.dipole(**inparg, ft='fftlog', ftarg={'q': -0.6})
 
 ###############################################################################
 # Used number of frequencies:
@@ -244,9 +246,9 @@ inparg['signal'] = -1  # signal -1 = switch-off
 print('QWE')
 qwe = empymod.dipole(**inparg, ft='qwe')
 print('DLF (Cosine/Sine)')
-sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
+sin = empymod.dipole(**inparg, ft='dlf', ftarg={'dlf': 'key_81_CosSin_2009'})
 print('FFTLog')
-ftl = empymod.dipole(**inparg, ft='fftlog', ftarg=['', [-5, 3]])
+ftl = empymod.dipole(**inparg, ft='fftlog', ftarg={'add_dec': [-5, 3]})
 
 ###############################################################################
 
@@ -297,13 +299,16 @@ inparg = {'src': src, 'rec': rec, 'depth': [0, 1000], 'freqtime': t,
 
 inparg['signal'] = 0  # signal 0 = impulse
 print('QWE')
-qwe = empymod.dipole(**inparg, ft='qwe', ftarg=['', '', '', 500])
+qwe = empymod.dipole(**inparg, ft='qwe', ftarg={'maxint': 500})
 print('DLF (Sine)')
-sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
+sin = empymod.dipole(**inparg, ft='dlf', ftarg={'dlf': 'key_81_CosSin_2009'})
 print('FFTLog')
 ftl = empymod.dipole(**inparg, ft='fftlog')
 print('FFT')
-fft = empymod.dipole(**inparg, ft='fft', ftarg=[.001, 2**15, 2**16, 10])
+fft = empymod.dipole(
+        **inparg, ft='fft',
+        ftarg={'dfreq': .001, 'nfreq': 2**15, 'ntot': 2**16, 'pts_per_dec': 10}
+        )
 
 ###############################################################################
 # Used number of frequencies:
@@ -331,11 +336,11 @@ plt.show()
 
 inparg['signal'] = 1  # signal 1 = step
 print('QWE')
-qwe = empymod.dipole(**inparg, ft='qwe', ftarg=['', '', 31, 500])
+qwe = empymod.dipole(**inparg, ft='qwe', ftarg={'nquad': 31, 'maxint': 500})
 print('DLF (Sine)')
-sin = empymod.dipole(**inparg, ft='sin', ftarg='key_81_CosSin_2009')
+sin = empymod.dipole(**inparg, ft='dlf', ftarg={'dlf': 'key_81_CosSin_2009'})
 print('FFTLog')
-ftl = empymod.dipole(**inparg, ft='fftlog', ftarg=['', [-2, 4]])
+ftl = empymod.dipole(**inparg, ft='fftlog', ftarg={'add_dec': [-2, 4]})
 
 ###############################################################################
 # Used number of frequencies:

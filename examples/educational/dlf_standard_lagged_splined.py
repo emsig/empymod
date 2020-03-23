@@ -438,10 +438,6 @@ plt.show()
 # splined versions, which comes from the interpolation and is not present in
 # the standard version.
 #
-# **Note** These settings where simplified and unified from ``empymod v1.6.0``
-# onwards. The description here refers therefore to ``empymod v1.6.0`` and
-# newer.
-#
 # **Define model, compute analytical solution**
 
 x = (np.arange(1, 1001))*10
@@ -471,11 +467,11 @@ resp = empymod.analytical(
 # Compute numerically the model using different Hankel options
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-standard = empymod.dipole(**params, htarg=[hfilt, 0])
-laggedco = empymod.dipole(**params, htarg=[hfilt, -1])
-spline10 = empymod.dipole(**params, htarg=[hfilt, 10])
-spline30 = empymod.dipole(**params, htarg=[hfilt, 30])
-splin100 = empymod.dipole(**params, htarg=[hfilt, 100])
+standard = empymod.dipole(**params, htarg={'dlf': hfilt, 'pts_per_dec': 0})
+laggedco = empymod.dipole(**params, htarg={'dlf': hfilt, 'pts_per_dec': -1})
+spline10 = empymod.dipole(**params, htarg={'dlf': hfilt, 'pts_per_dec': 10})
+spline30 = empymod.dipole(**params, htarg={'dlf': hfilt, 'pts_per_dec': 30})
+splin100 = empymod.dipole(**params, htarg={'dlf': hfilt, 'pts_per_dec': 100})
 
 ###############################################################################
 # Results
@@ -579,18 +575,20 @@ tresp = empymod.analytical(
 # Compute numerically the model using different Fourier options
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-tstandard = empymod.dipole(**tparam, htarg=hfilt, ftarg=[ffilt, 0])
-tlaggedco = empymod.dipole(**tparam, htarg=hfilt, ftarg=[ffilt, -1])
-tsplined4 = empymod.dipole(**tparam, htarg=hfilt, ftarg=[ffilt, 4])
-tspline10 = empymod.dipole(**tparam, htarg=hfilt, ftarg=[ffilt, 10])
+htarg = {'dlf': hfilt}
+
+tstandard = empymod.dipole(
+        **tparam, htarg=htarg, ftarg={'dlf': ffilt, 'pts_per_dec': 0})
+tlaggedco = empymod.dipole(
+        **tparam, htarg=htarg, ftarg={'dlf': ffilt, 'pts_per_dec': -1})
+tsplined4 = empymod.dipole(
+        **tparam, htarg=htarg, ftarg={'dlf': ffilt, 'pts_per_dec': 4})
+tspline10 = empymod.dipole(
+        **tparam, htarg=htarg, ftarg={'dlf': ffilt, 'pts_per_dec': 10})
 
 ###############################################################################
 # Results
 # ~~~~~~~
-#
-# **NOTE:**; The standard DLF for the Fourier transform
-# (``ftarg={'pts_per_dec': 0}``) is only available from ``empymod v1.5.2``
-# onwards.
 
 plt.figure(figsize=(10, 4))
 plt.suptitle('Fourier transform example: impulse response; offset = ' +

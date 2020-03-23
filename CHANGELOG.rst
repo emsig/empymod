@@ -46,6 +46,12 @@ This version will be backwards incompatible, and only support Python 3.6+.
   - In ``htarg``-dict: ``fftfilt``-> ``dlf`` (filter name for Hankel-DLF)
   - In ``ftarg``-dict: ``fhtfilt``-> ``dlf`` (filter name for Fourier-DLF)
   - In ``ftarg``-dict: ``ft``-> ``kind`` (method in Fourier-DLF [sine/cosine])
+  - ``htarg`` and ``ftarg`` MUST BE dictionaries, lists are not allowed any
+    longer.
+  - ``ht``: There is only one unique name for each method:  'dlf', 'qwe',
+    'quad'.
+  - ``ft``: There is only one unique name for each method:  'dlf', 'qwe',
+    'fftlog', 'fft'.
   - Within ``transform``, change ``fhtarg``, ``qweargs``, and ``quadargs`` to
     ``htarg``; ``qweargs`` to ``ftarg``.
 

@@ -49,7 +49,7 @@ model = {
     'epermH': [1, 1, 1, 1],         # El. permittivity: default values
     'freqtime': t,                  # Times
     'signal': 0,                    # 0: Impulse response
-    'ftarg': 'key_81_CosSin_2009',  # Choose a shorter filter then the default
+    'ftarg': {'dlf': 'key_81_CosSin_2009'},  # Shorter filter then the default
     'verb': 1,                      # Verbosity; set to 3 to see all parameters
 }
 

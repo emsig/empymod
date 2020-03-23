@@ -302,7 +302,7 @@ def test_check_hankel(capsys):
     assert htarg['b'] is None
     assert htarg['limit'] is None
 
-    # only last argument
+    # limit
     _, htarg = utils.check_hankel('qwe', {'limit': 30}, 0)
     assert htarg['rtol'] == 1e-12
     assert htarg['atol'] == 1e-30
@@ -348,7 +348,7 @@ def test_check_hankel(capsys):
     assert htarg['b'] == 0.1
     assert htarg['pts_per_dec'] == 40
 
-    # only last argument
+    # pts_per_dec
     _, htarg = utils.check_hankel('quad', {'pts_per_dec': 100}, 0)
     assert htarg['rtol'] == 1e-12
     assert htarg['atol'] == 1e-20
@@ -514,13 +514,16 @@ def test_check_time(capsys):
     assert_allclose(f.size, 201+3)
     assert ftarg['kind'] == 'sin'
 
-    # [filter str]
+    # filter-string and unknown parameter
     _, f, _, ftarg = utils.check_time(
-            time, -1, 'dlf', {'dlf': 'key_201_CosSin_2012', 'kind': 'cos'}, 4)
+            time, -1, 'dlf',
+            {'dlf': 'key_201_CosSin_2012', 'kind': 'cos', 'notused': 1},
+            4)
     out, _ = capsys.readouterr()
     outstr = "   time        [s] :  3\n"
     outstr += "   Fourier         :  DLF (Cosine-Filter)\n     > Filter"
-    assert out[:79] == outstr
+    assert outstr in out
+    assert "WARNING :: Unknown ftarg {'notused': 1} for method 'dlf'" in out
     assert ft == 'dlf'
     assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
     assert ftarg['pts_per_dec'] == -1
@@ -529,7 +532,7 @@ def test_check_time(capsys):
     assert_allclose(f.size, 201+3)
     assert ftarg['kind'] == 'cos'
 
-    # [filter inst]
+    # filter instance
     _, _, _, ftarg = utils.check_time(
             time, 1, 'dlf',
             {'dlf': filters.key_201_CosSin_2012(), 'kind': 'sin'}, 0)
@@ -537,7 +540,7 @@ def test_check_time(capsys):
     assert ftarg['pts_per_dec'] == -1
     assert ftarg['kind'] == 'sin'
 
-    # ['', pts_per_dec]
+    # pts_per_dec
     out, _ = capsys.readouterr()  # clear buffer
     _, _, _, ftarg = utils.check_time(time, 0, 'dlf', {'pts_per_dec': 30}, 4)
     assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
@@ -546,7 +549,7 @@ def test_check_time(capsys):
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Splined, 30.0 pts/dec" in out
 
-    # [filter str, pts_per_dec]
+    # filter-string and pts_per_dec
     _, _, _, ftarg = utils.check_time(
             time, 0, 'dlf',
             {'dlf': 'key_81_CosSin_2009', 'pts_per_dec': -1, 'kind': 'cos'}, 4)
@@ -556,7 +559,7 @@ def test_check_time(capsys):
     assert ftarg['pts_per_dec'] == -1
     assert ftarg['kind'] == 'cos'
 
-    # ['', 0]
+    # pts_per_dec
     _, freq, _, ftarg = utils.check_time(
             time, 0, 'dlf', {'pts_per_dec': 0, 'kind': 'sin'}, 4)
     out, _ = capsys.readouterr()
@@ -565,7 +568,7 @@ def test_check_time(capsys):
     f_base = filters.key_201_CosSin_2012().base
     assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
 
-    # [filter str, pts_per_dec] :: dict
+    # filter-string and pts_per_dec
     _, _, _, ftarg = utils.check_time(
             time, 0, 'dlf',
             {'dlf': 'key_81_CosSin_2009', 'pts_per_dec': 50, 'kind': 'cos'}, 0)
@@ -573,9 +576,9 @@ def test_check_time(capsys):
     assert ftarg['pts_per_dec'] == 50
     assert ftarg['kind'] == 'cos'
 
-    # ['', 0]  :: dict
+    # just kind
     _, f, _, ftarg = utils.check_time(
-            time, 0, 'dlf', {'pts_per_dec': None, 'kind': 'sin'}, 0)
+            time, 0, 'dlf', {'kind': 'sin'}, 0)
     assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
@@ -608,7 +611,7 @@ def test_check_time(capsys):
     assert ftarg['limit'] is None
     assert ftarg['sincos'] is np.sin
 
-    # only last argument
+    # only limit
     _, _, _, ftarg = utils.check_time(time, 1, 'qwe', {'limit': 30}, 0)
     assert ftarg['rtol'] == 1e-8
     assert ftarg['atol'] == 1e-20
@@ -744,6 +747,14 @@ def test_check_time(capsys):
     # ft != cos, sin, dlf, qwe, fftlog,
     with pytest.raises(ValueError):
         utils.check_time(time, 0, 'bla', {}, 0)
+
+    # filter missing attributes
+    with pytest.raises(AttributeError):
+        utils.check_time(time, 0, 'dlf', {'dlf': 'key_201_2012'}, 1)
+
+    # filter with wrong kind
+    with pytest.raises(ValueError):
+        utils.check_time(time, 0, 'dlf', {'kind': 'wrongkind'}, 1)
 
 
 def test_check_solution(capsys):
