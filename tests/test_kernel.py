@@ -139,7 +139,7 @@ def test_halfspace():                                            # 7. halfspace
     hsbp['21']['depth'] = []
     hsbp['21']['res'] = hsbp['21']['res'][1]
     hsbp['21']['aniso'] = hsbp['21']['aniso'][1]
-    hsbp['21']['ft'] = 'sin'
+    hsbp['21']['ft'] = 'dlf'
     hs_res = bipole(**hsbp['21'])
     assert_allclose(direct, hs_res, rtol=1e-2)
 

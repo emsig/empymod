@@ -250,7 +250,7 @@ def test_check_frequency(capsys):
 def test_check_hankel(capsys):
     # # DLF # #
     # verbose
-    ht, htarg = utils.check_hankel('fht', None, 4)  # OLD 'fht' instead 'dlf'
+    ht, htarg = utils.check_hankel('dlf', None, 4)
     out, _ = capsys.readouterr()
     assert "   Hankel          :  DLF (Fast Hankel Transform)\n     > F" in out
     assert "     > DLF type    :  Standard" in out
@@ -504,8 +504,8 @@ def test_check_time(capsys):
     assert ftarg['kind'] == 'sin'
 
     # [filter str]
-    _, f, _, ftarg = utils.check_time(time, -1, 'cos', 'key_201_CosSin_2012',
-                                      4)
+    _, f, _, ftarg = utils.check_time(
+            time, -1, 'dlf', ['key_201_CosSin_2012', '', 'cos'] , 4)
     out, _ = capsys.readouterr()
     outstr = "   time        [s] :  3\n"
     outstr += "   Fourier         :  DLF (Cosine-Filter)\n     > Filter"
@@ -519,8 +519,8 @@ def test_check_time(capsys):
     assert ftarg['kind'] == 'cos'
 
     # [filter inst]
-    _, _, _, ftarg = utils.check_time(time, 1, 'sin',
-                                      filters.key_201_CosSin_2012(), 0)
+    _, _, _, ftarg = utils.check_time(
+            time, 1, 'dlf', [filters.key_201_CosSin_2012(), '', 'sin'], 0)
     assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
     assert ftarg['pts_per_dec'] == -1
     assert ftarg['kind'] == 'sin'
@@ -535,8 +535,8 @@ def test_check_time(capsys):
     assert "     > DLF type    :  Splined, 30.0 pts/dec" in out
 
     # [filter str, pts_per_dec]
-    _, _, _, ftarg = utils.check_time(time, 0, 'cos',
-                                      ['key_81_CosSin_2009', -1], 4)
+    _, _, _, ftarg = utils.check_time(
+            time, 0, 'dlf', ['key_81_CosSin_2009', -1, 'cos'], 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Lagged Convolution" in out
     assert ftarg['dlf'].name == filters.key_81_CosSin_2009().name
@@ -544,7 +544,8 @@ def test_check_time(capsys):
     assert ftarg['kind'] == 'cos'
 
     # ['', 0]
-    _, freq, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': 0}, 4)
+    _, freq, _, ftarg = utils.check_time(
+            time, 0, 'dlf', {'pts_per_dec': 0, 'kind': 'sin'}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Standard" in out
     assert ftarg['pts_per_dec'] == 0
@@ -552,15 +553,16 @@ def test_check_time(capsys):
     assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
 
     # [filter str, pts_per_dec] :: dict
-    _, _, _, ftarg = utils.check_time(time, 0, 'cos',
+    _, _, _, ftarg = utils.check_time(time, 0, 'dlf',
                                       {'dlf': 'key_81_CosSin_2009',
-                                       'pts_per_dec': 50}, 0)
+                                       'pts_per_dec': 50, 'kind': 'cos'}, 0)
     assert ftarg['dlf'].name == filters.key_81_CosSin_2009().name
     assert ftarg['pts_per_dec'] == 50
     assert ftarg['kind'] == 'cos'
 
     # ['', 0]  :: dict
-    _, f, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': None}, 0)
+    _, f, _, ftarg = utils.check_time(
+            time, 0, 'dlf', {'pts_per_dec': None, 'kind': 'sin'}, 0)
     assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
@@ -711,7 +713,7 @@ def test_check_time(capsys):
     # # Various # #
 
     # minimum time
-    _ = utils.check_time(0, 0, 'cos', 'key_201_CosSin_2012', 1)
+    _ = utils.check_time(0, 0, 'dlf', ['key_201_CosSin_2012', '', 'cos'], 1)
     out, _ = capsys.readouterr()
     assert out[:21] == "* WARNING :: Times < "
 

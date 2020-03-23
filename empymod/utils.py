@@ -109,7 +109,7 @@ class EMArray(np.ndarray):
 
     """
 
-    def __new__(cls, data, deg=False, unwrap=False, lead=False):
+    def __new__(cls, data):
         r"""Create a new EMArray."""
         return np.asarray(data).view(cls)
 
@@ -511,9 +511,7 @@ def check_hankel(ht, htarg, verb):
     # Ensure ht is all lowercase
     ht = ht.lower()
 
-    if ht in ['dlf', 'fht']:    # If DLF, check filter settings
-        # Rename ht
-        ht = 'dlf'
+    if ht == 'dlf':     # DLF, check filter settings
 
         # Get and check input or set defaults
         htarg = _check_targ(htarg, ['dlf', 'pts_per_dec'])
@@ -545,9 +543,7 @@ def check_hankel(ht, htarg, verb):
             else:
                 print(f"{pstr}Standard")
 
-    elif ht in ['qwe', 'hqwe']:
-        # Rename ht
-        ht = 'qwe'
+    elif ht == 'qwe':   # QWE
 
         # Get and check input or set defaults
         htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
@@ -632,9 +628,7 @@ def check_hankel(ht, htarg, verb):
             if htarg['limit']:
                 print(f"     > limit (quad):  {htarg['limit']}")
 
-    elif ht in ['quad', 'hquad']:
-        # Rename ht
-        ht = 'quad'
+    elif ht in 'quad':  # QUAD
 
         # Get and check input or set defaults
         htarg = _check_targ(htarg, ['rtol', 'atol', 'limit', 'a', 'b',
@@ -1000,7 +994,7 @@ def check_time(time, signal, ft, ftarg, verb):
     # Ensure ft is all lowercase
     ft = ft.lower()
 
-    if ft in ['dlf', 'cos', 'sin', 'ffht']:  # Fourier-DLF (sin/cos-filters)
+    if ft == 'dlf':       # Fourier-DLF (sin/cos-filters)
 
         # Check Input
         ftarg = _check_targ(ftarg, ['dlf', 'pts_per_dec', 'kind'])
@@ -1021,14 +1015,13 @@ def check_time(time, signal, ft, ftarg, verb):
             ftarg['pts_per_dec'] = -1.0
 
         # Check kind; if switch-off/on is required, ensure kind is cosine/sine
-        kind = ftarg.get('kind', ft)
-        if kind in ['dlf', 'ffht']:  # 'sin' is default.
-            kind = 'sin'
+        if 'kind' not in ftarg:
+            ftarg['kind'] = 'sin'
+        # TODO check that they are 'sin/cos'
         if signal > 0:
-            kind = 'sin'
+            ftarg['kind'] = 'sin'
         elif signal < 0:
-            kind = 'cos'
-        ftarg['kind'] = kind
+            ftarg['kind'] = 'cos'
 
         # If verbose, print Fourier transform information
         if verb > 2:
@@ -1050,12 +1043,7 @@ def check_time(time, signal, ft, ftarg, verb):
                 ftarg['dlf'], time, ftarg['pts_per_dec'])
         freq = np.squeeze(omega/2/np.pi)
 
-        # Rename ft
-        ft = 'dlf'
-
-    elif ft in ['qwe', 'fqwe']:       # QWE (using sine and imag-part)
-        # Rename ft
-        ft = 'qwe'
+    elif ft == 'qwe':     # QWE (using sine and imag-part)
 
         # Get and check input or set defaults
         ftarg = _check_targ(ftarg, ['rtol', 'atol', 'nquad', 'maxint',
@@ -1148,7 +1136,7 @@ def check_time(time, signal, ft, ftarg, verb):
         maxf = np.ceil(10*np.log10(ftarg['maxint']*np.pi/time.min()))/10
         freq = np.logspace(minf, maxf, int((maxf-minf)*ftarg['pts_per_dec']+1))
 
-    elif ft == 'fftlog':              # FFTLog (using sine and imag-part)
+    elif ft == 'fftlog':  # FFTLog (using sine and imag-part)
 
         # Get and check input or set defaults
         ftarg = _check_targ(ftarg, ['pts_per_dec', 'add_dec', 'q', 'mu',
@@ -1202,7 +1190,7 @@ def check_time(time, signal, ft, ftarg, verb):
         ftarg['kr'] = kr
         ftarg['rk'] = rk
 
-    elif ft == 'fft':                 # FFT
+    elif ft == 'fft':     # FFT
 
         # Get and check input or set defaults
         ftarg = _check_targ(ftarg, ['dfreq', 'nfreq', 'ntot', 'pts_per_dec',
