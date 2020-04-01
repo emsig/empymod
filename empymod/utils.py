@@ -30,6 +30,7 @@ This module consists of four groups of functions:
 
 
 # Mandatory imports
+import copy
 import numpy as np
 from scipy import special
 from timeit import default_timer
@@ -513,11 +514,12 @@ def check_hankel(ht, htarg, verb):
 
     # Initiate output dict
     targ = {}
+    args = copy.deepcopy(htarg)
 
     if ht == 'dlf':     # DLF
 
         # If filter is a name (str), get it
-        targ['dlf'] = htarg.pop('dlf', filters.key_201_2009())
+        targ['dlf'] = args.pop('dlf', filters.key_201_2009())
         if isinstance(targ['dlf'], str):
             targ['dlf'] = getattr(filters, targ['dlf'])()
 
@@ -533,7 +535,7 @@ def check_hankel(ht, htarg, verb):
 
         # Check dimension and type of pts_per_dec
         targ['pts_per_dec'] = _check_var(
-                htarg.pop('pts_per_dec', 0.0), float, 0, 'dlf: pts_per_dec',
+                args.pop('pts_per_dec', 0.0), float, 0, 'dlf: pts_per_dec',
                 ())
 
         # If verbose, print Hankel transform information
@@ -552,42 +554,42 @@ def check_hankel(ht, htarg, verb):
 
         # rtol : 1e-12
         targ['rtol'] = _check_var(
-                htarg.pop('rtol', 1e-12), float, 0, 'qwe: rtol', ())
+                args.pop('rtol', 1e-12), float, 0, 'qwe: rtol', ())
 
         # atol : 1e-30
         targ['atol'] = _check_var(
-                htarg.pop('atol', 1e-30), float, 0, 'qwe: atol', ())
+                args.pop('atol', 1e-30), float, 0, 'qwe: atol', ())
 
         # nquad : 51
         targ['nquad'] = _check_var(
-                htarg.pop('nquad', 51), int, 0, 'qwe: nquad', ())
+                args.pop('nquad', 51), int, 0, 'qwe: nquad', ())
 
         # maxint : 100
         targ['maxint'] = _check_var(
-                htarg.pop('maxint', 100), int, 0, 'qwe: maxint', ())
+                args.pop('maxint', 100), int, 0, 'qwe: maxint', ())
 
         # pts_per_dec : 0  # No spline
         pts_per_dec = _check_var(
-                htarg.pop('pts_per_dec', 0), int, 0, 'qwe: pts_per_dec', ())
+                args.pop('pts_per_dec', 0), int, 0, 'qwe: pts_per_dec', ())
         targ['pts_per_dec'] = _check_min(
                 pts_per_dec, 0, 'pts_per_dec', '', verb)
 
         # diff_quad : 100
         targ['diff_quad'] = _check_var(
-                htarg.pop('diff_quad', 100), float, 0, 'qwe: diff_quad', ())
+                args.pop('diff_quad', 100), float, 0, 'qwe: diff_quad', ())
 
         # a : None
-        targ['a'] = htarg.pop('a', None)
+        targ['a'] = args.pop('a', None)
         if targ['a'] is not None:
             targ['a'] = _check_var(targ['a'], float, 0, 'qwe: a (quad)', ())
 
         # b : None
-        targ['b'] = htarg.pop('b', None)
+        targ['b'] = args.pop('b', None)
         if targ['b'] is not None:
             targ['b'] = _check_var(targ['b'], float, 0, 'qwe: b (quad)', ())
 
         # limit : None
-        targ['limit'] = htarg.pop('limit', None)
+        targ['limit'] = args.pop('limit', None)
         if targ['limit'] is not None:
             targ['limit'] = _check_var(
                     targ['limit'], int, 0, 'qwe: limit (quad)', ())
@@ -612,25 +614,25 @@ def check_hankel(ht, htarg, verb):
 
         # rtol : 1e-12
         targ['rtol'] = _check_var(
-                htarg.pop('rtol', 1e-12), float, 0, 'quad: rtol', ())
+                args.pop('rtol', 1e-12), float, 0, 'quad: rtol', ())
 
         # atol : 1e-20
         targ['atol'] = _check_var(
-                htarg.pop('atol', 1e-20), float, 0, 'quad: atol', ())
+                args.pop('atol', 1e-20), float, 0, 'quad: atol', ())
 
         # limit : 500
         targ['limit'] = _check_var(
-                htarg.pop('limit', 500), int, 0, 'quad: limit', ())
+                args.pop('limit', 500), int, 0, 'quad: limit', ())
 
         # a : 1e-6
-        targ['a'] = _check_var(htarg.pop('a', 1e-6), float, 0, 'quad: a', ())
+        targ['a'] = _check_var(args.pop('a', 1e-6), float, 0, 'quad: a', ())
 
         # b : 0.1
-        targ['b'] = _check_var(htarg.pop('b', 0.1), float, 0, 'quad: b', ())
+        targ['b'] = _check_var(args.pop('b', 0.1), float, 0, 'quad: b', ())
 
         # pts_per_dec : 40
         pts_per_dec = _check_var(
-                htarg.pop('pts_per_dec', 40), int, 0, 'quad: pts_per_dec', ())
+                args.pop('pts_per_dec', 40), int, 0, 'quad: pts_per_dec', ())
         targ['pts_per_dec'] = _check_min(
                 pts_per_dec, 1, 'pts_per_dec', '', verb)
 
@@ -650,8 +652,8 @@ def check_hankel(ht, htarg, verb):
         raise ValueError('ht')
 
     # Check remaining arguments.
-    if htarg and verb > 0:
-        print(f"* WARNING :: Unknown htarg {htarg} for method '{ht}'")
+    if args and verb > 0:
+        print(f"* WARNING :: Unknown htarg {args} for method '{ht}'")
 
     return ht, targ
 
@@ -958,16 +960,17 @@ def check_time(time, signal, ft, ftarg, verb):
 
     # Initiate output dict
     targ = {}
+    args = copy.deepcopy(ftarg)
 
     if ft == 'dlf':       # Fourier-DLF (sin/cos-filters)
 
         # Check dimension and type of pts_per_dec
         targ['pts_per_dec'] = _check_var(
-                ftarg.pop('pts_per_dec', -1.0), float, 0, 'dlf: pts_per_dec',
+                args.pop('pts_per_dec', -1.0), float, 0, 'dlf: pts_per_dec',
                 ())
 
         # Check kind; if switch-off/on is required, ensure kind is cosine/sine
-        targ['kind'] = ftarg.pop('kind', 'sin')
+        targ['kind'] = args.pop('kind', 'sin')
         if signal > 0:
             targ['kind'] = 'sin'
         elif signal < 0:
@@ -978,7 +981,7 @@ def check_time(time, signal, ft, ftarg, verb):
             raise ValueError('ft')
 
         # If filter is a name (str), get it
-        targ['dlf'] = ftarg.pop('dlf', filters.key_201_CosSin_2012())
+        targ['dlf'] = args.pop('dlf', filters.key_201_CosSin_2012())
         if isinstance(targ['dlf'], str):
             targ['dlf'] = getattr(filters, targ['dlf'])()
 
@@ -1024,42 +1027,42 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # rtol : 1e-8
         targ['rtol'] = _check_var(
-                ftarg.pop('rtol', 1e-8), float, 0, 'qwe: rtol', ())
+                args.pop('rtol', 1e-8), float, 0, 'qwe: rtol', ())
 
         # atol : 1e-20
         targ['atol'] = _check_var(
-                ftarg.pop('atol', 1e-20), float, 0, 'qwe: atol', ())
+                args.pop('atol', 1e-20), float, 0, 'qwe: atol', ())
 
         # nquad : 21
         targ['nquad'] = _check_var(
-                ftarg.pop('nquad', 21), int, 0, 'qwe: nquad', ())
+                args.pop('nquad', 21), int, 0, 'qwe: nquad', ())
 
         # maxint : 200
         targ['maxint'] = _check_var(
-                ftarg.pop('maxint', 200), int, 0, 'qwe: maxint', ())
+                args.pop('maxint', 200), int, 0, 'qwe: maxint', ())
 
         # pts_per_dec : 20
         pts_per_dec = _check_var(
-                ftarg.pop('pts_per_dec', 20), int, 0, 'qwe: pts_per_dec', ())
+                args.pop('pts_per_dec', 20), int, 0, 'qwe: pts_per_dec', ())
         targ['pts_per_dec'] = _check_min(
                 pts_per_dec, 1, 'pts_per_dec', '', verb)
 
         # diff_quad : 100
         targ['diff_quad'] = _check_var(
-                ftarg.pop('diff_quad', 100), int, 0, 'qwe: diff_quad', ())
+                args.pop('diff_quad', 100), int, 0, 'qwe: diff_quad', ())
 
         # a : None
-        targ['a'] = ftarg.pop('a', None)
+        targ['a'] = args.pop('a', None)
         if targ['a'] is not None:
             targ['a'] = _check_var(targ['a'], float, 0, 'qwe: a (quad)', ())
 
         # b : None
-        targ['b'] = ftarg.pop('b', None)
+        targ['b'] = args.pop('b', None)
         if targ['b'] is not None:
             targ['b'] = _check_var(targ['b'], float, 0, 'qwe: b (quad)', ())
 
         # limit : None
-        targ['limit'] = ftarg.pop('limit', None)
+        targ['limit'] = args.pop('limit', None)
         if targ['limit'] is not None:
             targ['limit'] = _check_var(
                     targ['limit'], int, 0, 'qwe: limit (quad)', ())
@@ -1090,18 +1093,18 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # pts_per_dec : 10
         pts_per_dec = _check_var(
-                ftarg.pop('pts_per_dec', 10), int, 0,
+                args.pop('pts_per_dec', 10), int, 0,
                 'fftlog: pts_per_dec', ())
         targ['pts_per_dec'] = _check_min(
                 pts_per_dec, 1, 'pts_per_dec', '', verb)
 
         # add_dec : [-2, 1]
         targ['add_dec'] = _check_var(
-                ftarg.pop('add_dec', np.array([-2, 1])), float, 1,
+                args.pop('add_dec', np.array([-2, 1])), float, 1,
                 'fftlog: add_dec', (2,))
 
         # q : 0
-        targ['q'] = _check_var(ftarg.pop('q', 0), float, 0, 'fftlog: q', ())
+        targ['q'] = _check_var(args.pop('q', 0), float, 0, 'fftlog: q', ())
         # Restrict q to +/- 1
         if np.abs(targ['q']) > 1:
             targ['q'] = np.sign(targ['q'])
@@ -1137,16 +1140,16 @@ def check_time(time, signal, ft, ftarg, verb):
 
         # dfreq : 0.002
         targ['dfreq'] = _check_var(
-                ftarg.pop('dfreq', 0.002), float, 0, 'fft: dfreq', ())
+                args.pop('dfreq', 0.002), float, 0, 'fft: dfreq', ())
 
         # nfreq : 2048
         targ['nfreq'] = _check_var(
-                ftarg.pop('nfreq', 2048), int, 0, 'fft: nfreq', ())
+                args.pop('nfreq', 2048), int, 0, 'fft: nfreq', ())
 
         # ntot
         nall = 2**np.arange(30)
         targ['ntot'] = _check_var(
-            ftarg.pop('ntot', nall[np.argmax(nall >= targ['nfreq'])]),  # (*)
+            args.pop('ntot', nall[np.argmax(nall >= targ['nfreq'])]),  # (*)
             int, 0, 'fft: ntot', ())
         # Assure that input ntot is not bigger than nfreq
         if targ['nfreq'] > targ['ntot']:
@@ -1155,7 +1158,7 @@ def check_time(time, signal, ft, ftarg, verb):
         #     that powers of two yield better results in this case.
 
         # pts_per_dec : None
-        targ['pts_per_dec'] = ftarg.pop('pts_per_dec', None)
+        targ['pts_per_dec'] = args.pop('pts_per_dec', None)
         if targ['pts_per_dec'] is not None:
             pts_per_dec = _check_var(
                     targ['pts_per_dec'], int, 0, 'fft: pts_per_dec', ())
@@ -1188,8 +1191,8 @@ def check_time(time, signal, ft, ftarg, verb):
         raise ValueError('ft')
 
     # Check remaining arguments.
-    if ftarg and verb > 0:
-        print(f"* WARNING :: Unknown ftarg {ftarg} for method '{ft}'")
+    if args and verb > 0:
+        print(f"* WARNING :: Unknown ftarg {args} for method '{ft}'")
 
     return time, freq, ft, targ
 

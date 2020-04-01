@@ -13,11 +13,11 @@ matrix:
     - python: 3.7  # => without matplotlib
       env: PYTHON=3.7 PCKGS="" TEST="" INST=""
     - python: 3.7  # => just linkcheck
-      env: PYTHON=3.7 CHCKLNKS=true PCKGS="" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig sphinx_gallery memory_profiler"
+      env: PYTHON=3.7 CHCKLNKS=true PCKGS="matplotlib pillow" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig sphinx_gallery memory_profiler"
 
 jobs:
   allow_failures:  # env must be EXACTLY as env allowed to fail.
-    - env: PYTHON=3.7 CHCKLNKS=true PCKGS="" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig sphinx_gallery memory_profiler"
+    - env: PYTHON=3.7 CHCKLNKS=true PCKGS="matplotlib pillow" TEST="" INST="sphinx numpydoc sphinx_rtd_theme sphinx_numfig sphinx_gallery memory_profiler"
 
 install:
   - sudo apt-get update

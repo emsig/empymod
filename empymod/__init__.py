@@ -31,25 +31,18 @@ from empymod import filters
 from empymod import scripts
 from empymod import transform
 
-# Import most important functions for __all__
+# Import most important functions
 from empymod.filters import DigitalFilter
 from empymod.model import bipole, dipole, loop
-from empymod.utils import EMArray, set_minimum, get_minimum
+from empymod.utils import EMArray, set_minimum, get_minimum, Report
 
-# We import all (*) from the following modules.
-# What is imported is maintained in each module in `__all__`.
-from empymod.model import *      # noqa
-from empymod.utils import *      # noqa
-from empymod.kernel import *     # noqa
-from empymod.scripts import *    # noqa
-from empymod.transform import *  # noqa
+# For top-namespace
+from empymod.scripts import fdesign, tmtemod  # noqa
+from empymod.model import analytical, gpr, dipole_k, fem, tem  # noqa
 
-# Make only a selection available to __all__ to not clutter the namespace
-# Maybe also to discourage the use of `from empymod import *`.
 __all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts',
            'bipole', 'dipole', 'loop', 'EMArray', 'set_minimum', 'get_minimum',
-           'DigitalFilter']
+           'DigitalFilter', 'Report']
 
-# Version is sorted out in utils, so we can easier use it within the package
-# itself.
+# Version defined in utils, so we can easier use it within the package itself.
 __version__ = utils.__version__

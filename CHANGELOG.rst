@@ -68,6 +68,8 @@ This version will be backwards incompatible, and only support Python 3.6+.
     directly within ``transform.fht`` [`empymod#26
     <https://github.com/empymod/empymod/issues/26>`_].
   - Ensured that source and receiver inputs are not altered.
+  - Significantly reduced top namespace; only functions from ``model`` are
+    loaded into the top namespace now.
 
 
 Minor v1.10.x
