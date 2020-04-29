@@ -2,10 +2,20 @@ Changelog
 #########
 
 
-*latest* v2.0.0 development
-"""""""""""""""""""""""""""
+Version 2
+~~~~~~~~~
 
-This version will be backwards incompatible, and only support Python 3.6+.
+
+v2.0.x
+""""""
+
+
+v2.0.0: Numba
+-------------
+
+**2020-04-29**
+
+This version is backwards incompatible and requires Python 3.6+.
 
 - Numba:
 
@@ -72,11 +82,17 @@ This version will be backwards incompatible, and only support Python 3.6+.
     loaded into the top namespace now.
 
 
-Minor v1.10.x
-"""""""""""""
+Version 1
+~~~~~~~~~
+
+
+v1.10.x
+"""""""
 
 v1.10.6: Various azimuths and dips at same depth
 ------------------------------------------------
+
+**2020-03-04**
 
 - ``empymod.bipole``
 
@@ -91,6 +107,8 @@ v1.10.6: Various azimuths and dips at same depth
 
 v1.10.5: Continuously in- or decreasing
 ---------------------------------------
+
+**2020-02-21**
 
 This is a small appendix to v1.10.4: Depths can now be defined in increasing or
 decreasing order, as long as they are consistent. Model parameters have to be
@@ -174,8 +192,8 @@ v1.10.0: Loop source and receiver
   more inclusive and open the project for new contributors.
 
 
-Minor v1.9.x
-"""""""""""""
+v1.9.x
+"""""""
 
 v1.9.0 : Laplace
 ----------------
@@ -198,8 +216,8 @@ v1.9.0 : Laplace
 - Other tiny improvements and bug fixes.
 
 
-Minor v1.8.x
-""""""""""""
+v1.8.x
+""""""
 
 
 v1.8.3 : Scooby
@@ -287,8 +305,8 @@ for the user-facing routines in ``model``:
   Move there in version 2.0.
 
 
-Minor v1.7.x
-""""""""""""
+v1.7.x
+""""""
 
 
 v1.7.3 : Speed improvements following benchmarks
@@ -390,8 +408,8 @@ Merge ``empyscripts`` into ``empymod`` under ``empymod.scripts``.
   ``empymod`` directly.
 
 
-Minor v1.6.x
-""""""""""""
+v1.6.x
+""""""
 
 
 v1.6.2 : Speed improvements for QUAD/QWE
@@ -501,8 +519,8 @@ are affected.
 - Bugfix in ``model.wavenumber`` for ``ab=[36, 63]`` (zeroes).
 
 
-Minor v1.5.x
-""""""""""""
+v1.5.x
+""""""
 
 
 v1.5.2 : Improved DLF
@@ -568,8 +586,8 @@ v1.5.0 : Hankel filter wer_201_2018
 - Version of manuscript submission to geophysics for the DLF article.
 
 
-Minor v1.4.x
-""""""""""""
+v1.4.x
+""""""
 
 
 v1.4.4 : TE/TM split
@@ -640,8 +658,8 @@ push it to 1.4.1; so there isn't really a version 1.4.0.]
     only fullspace solution (all for the diffusive approximation).
 
 
-Minor v1.3.x
-"""""""""""""
+v1.3.x
+"""""""
 
 
 v1.3.0 : New transforms QUAD (Hankel) and FFT (Fourier)
@@ -677,8 +695,8 @@ v1.3.0 : New transforms QUAD (Hankel) and FFT (Fourier)
 - Bug fixes and documentation improvements
 
 
-Minor v1.2.x
-""""""""""""
+v1.2.x
+""""""
 
 
 v1.2.1 : Installable via pip and conda
@@ -731,8 +749,8 @@ v1.2.0 : Bipole
 - Bug fixes
 
 
-Minor v1.1.x
-""""""""""""
+v1.1.x
+""""""
 
 
 v1.1.0 : Include source bipole
@@ -762,8 +780,8 @@ v1.1.0 : Include source bipole
 - Bug fixes
 
 
-Minor v1.0.x
-""""""""""""
+v1.0.x
+""""""
 
 
 v1.0.0 : Initial release
