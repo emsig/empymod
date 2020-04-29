@@ -3,22 +3,22 @@ Transforms
 
 Included **Hankel transforms**:
 
-- Digital Linear Filters *DLF*
-- Quadrature with Extrapolation *QWE*
-- Adaptive quadrature *QUAD*
+- DLF: Digital Linear Filters
+- QWE: Quadrature with Extrapolation
+- QUAD: Adaptive quadrature
 
 Included **Fourier transforms**:
 
-- Digital Linear Filters *DLF*
-- Quadrature with Extrapolation *QWE*
-- Logarithmic Fast Fourier Transform *FFTLog*
-- Fast Fourier Transform *FFT*
+- DLF: Digital Linear Filters
+- QWE: Quadrature with Extrapolation
+- FFTLog: Logarithmic Fast Fourier Transform
+- FFT: Fast Fourier Transform
 
 
 Digital Linear Filters
 ----------------------
-The module ``empymod.filters`` comes with many DLFs for the Hankel and the
-Fourier transform. If you want to export one of these filters to plain ascii
+The module :mod:`empymod.filters` comes with many DLFs for the Hankel and the
+Fourier transform. If you want to export one of these filters to plain ASCII
 files you can use the ``tofile``-routine of each filter:
 
 .. code-block:: python
@@ -26,7 +26,7 @@ files you can use the ``tofile``-routine of each filter:
     >>> import empymod
     >>> # Load a filter
     >>> filt = empymod.filters.wer_201_2018()
-    >>> # Save it to pure ascii-files
+    >>> # Save it to pure ASCII-files
     >>> filt.tofile()
     >>> # This will save the following three files:
     >>> #    ./filters/wer_201_2018_base.txt
@@ -42,7 +42,7 @@ base and the filter coefficient have to be stored in separate files:
     >>> # Create an empty filter;
     >>> # Name has to be the base of the text files
     >>> filt = empymod.filters.DigitalFilter('my-filter')
-    >>> # Load the ascii-files
+    >>> # Load the ASCII-files
     >>> filt.fromfile()
     >>> # This will load the following three files:
     >>> #    ./filters/my-filter_base.txt
@@ -96,11 +96,11 @@ Notes on Fourier Transform
 --------------------------
 
 The Fourier transform to obtain the space-time domain impulse response from the
-complex-valued space-frequency response can be calculated by either a
-cosine transform with the real values, or a sine transform with the imaginary
-part,
+complex-valued space-frequency response can be computed by either a cosine
+transform with the real values, or a sine transform with the imaginary part,
 
 .. math::
+    :label: fourier
 
     E(r, t)^\text{Impulse} &= \ \frac{2}{\pi}\int^\infty_0 \Re[E(r, \omega)]\
                         \cos(\omega t)\ \text{d}\omega \ , \\
@@ -116,16 +116,17 @@ additionally multiplied by -1. The impulse-response is the time-derivative of
 the step-response,
 
 .. math::
+    :label: impulse
 
     E(r, t)^\text{Impulse} =
                         \frac{\partial\ E(r, t)^\text{step}}{\partial t}\ .
 
 Using :math:`\frac{\partial}{\partial t} \Leftrightarrow \mathrm{i}\omega` and
 going the other way, from impulse to step, leads to the divison by
-:math:`\mathrm{i}\omega`. (This only holds because we define in accordance with
-the causality principle that :math:`E(r, t \le 0) = 0`).
+:math:`\mathrm{i}\omega`. This only holds because we define in accordance with
+the causality principle that :math:`E(r, t \le 0) = 0`.
 
-With the sine/cosine transform (``ft='ffht'/'sin'/'cos'``) you can choose which
+With the sine/cosine transform (``ft='dlf'/'sin'/'cos'``) you can choose which
 one you want for the impulse responses. For the switch-on response, however,
 the sine-transform is enforced, and equally the cosine transform for the
 switch-off response. This is because these two do not need to now the field at
@@ -138,6 +139,7 @@ step-on responses. The FFT uses the full complex-valued response at the moment.
 For completeness sake, the step-on response is given by
 
 .. math::
+    :label: step-on
 
     E(r, t)^\text{Step-on} = - \frac{2}{\pi}\int^\infty_0
                             \Im\left[\frac{E(r,\omega)}{\mathrm{i}
@@ -147,6 +149,7 @@ For completeness sake, the step-on response is given by
 and the step-off by
 
 .. math::
+    :label: step-off
 
     E(r, t)^\text{Step-off} = - \frac{2}{\pi}\int^\infty_0
                              \Re\left[\frac{E(r,\omega)}{\mathrm{i}
@@ -157,12 +160,12 @@ and the step-off by
 Laplace domain
 --------------
 
-It is also possible to calculate the response in the **Laplace domain**, by
-using a real value for :math:`s` instead of the complex value
+It is also possible to compute the response in the **Laplace domain**, by using
+a real value for :math:`s` instead of the complex value
 :math:`\mathrm{i}\omega``. This simplifies the problem from complex numbers to
 real numbers. However, the transform from Laplace-to-time domain is not as
 robust as the transform from frequency-to-time domain, and is currently not
-implemented in ``empymod``. To calculate Laplace-domain responses instead
-of frequency-domain responses simply provide negative frequency values. If all
+implemented in ``empymod``. To compute Laplace-domain responses instead of
+frequency-domain responses simply provide negative frequency values. If all
 provided frequencies :math:`f` are negative then :math:`s` is set to :math:`-f`
 instead of the frequency-domain :math:`s=2\mathrm{i}\pi f`.

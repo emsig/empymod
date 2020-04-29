@@ -4,18 +4,11 @@ from scipy.special import erf
 from os.path import join, dirname
 from numpy.testing import assert_allclose
 
-# See if numexpr is installed, and if it is, if it uses VML
-try:
-    from numexpr import use_vml, evaluate as use_ne_eval
-except ImportError:
-    use_vml = False
-    use_ne_eval = False
-
 # Import main modelling routines from empymod directly to ensure they are in
 # the __init__.py-file.
 from empymod import bipole, dipole, analytical, loop
 # Import rest from model
-from empymod.model import gpr, dipole_k, wavenumber, fem, tem
+from empymod.model import gpr, dipole_k, fem, tem
 from empymod.kernel import fullspace, halfspace
 
 # These are kind of macro-tests, as they check the final results.
@@ -242,7 +235,7 @@ class TestBipole:
         for i in ['1', '2', '3', '4']:
             res = DATAEMPYMOD['out'+i][()]
             tEM = bipole(**res['inp'])
-            assert_allclose(tEM, res['EM'])
+            assert_allclose(tEM, res['EM'], rtol=5e-5)  # 5e-5 shouldn't be...
 
     def test_dipole_bipole(self):
         # Compare a dipole to a bipole
@@ -257,29 +250,6 @@ class TestBipole:
         # r = 100; sI = 33 => 3300
         assert_allclose(bip1, dip*3300, 1e-5)  # bipole as dipole
         assert_allclose(bip2, dip*3300, 1e-2)  # bipole, src/rec switched.
-
-    def test_optimization(self, capsys):
-        # Compare optimization options: None, parallel, spline
-        inp = {'depth': [0, 500], 'res': [10, 3, 50], 'freqtime': [1, 2, 3],
-               'rec': [[6000, 7000, 8000], [200, 200, 200], 300, 0, 0],
-               'src': [0, 0, 0, 0, 0]}
-
-        non = bipole(opt=None, verb=3, **inp)
-        out, _ = capsys.readouterr()
-        assert "Kernel Opt.     :  None" in out
-
-        par = bipole(opt='parallel', verb=3, **inp)
-        out, _ = capsys.readouterr()
-        if use_ne_eval and use_vml:
-            assert "Kernel Opt.     :  Use parallel" in out
-        else:
-            assert "Kernel Opt.     :  None" in out
-        assert_allclose(non, par, equal_nan=True)
-
-        spl = bipole(opt='spline', verb=3, **inp)
-        out, _ = capsys.readouterr()
-        assert "> DLF type    :  Lagged Convolution" in out
-        assert_allclose(non, spl, 1e-3, 1e-22, True)
 
     def test_loop(self, capsys):
         # Compare loop options: None, 'off', 'freq'
@@ -307,20 +277,36 @@ class TestBipole:
                'freqtime': [1.34, 23, 31], 'src': [0, 0, 0, 0, 90],
                'rec': [[200, 300, 400], [3000, 4000, 5000], 120, 90, 0]}
 
-        fht = bipole(ht='fht', htarg={'pts_per_dec': 0}, verb=3, **inp)
+        dlf = bipole(ht='dlf', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  DLF (Fast Hankel Transform)" in out
+        assert "  > DLF type    :  Standard" in out
+        assert "Loop over       :  None" in out
+
+        dlf2 = bipole(ht='dlf', htarg={'pts_per_dec': -1}, verb=3, **inp)
+        out, _ = capsys.readouterr()
+        assert "Hankel          :  DLF (Fast Hankel Transform)" in out
+        assert "  > DLF type    :  Lagged Convolution" in out
+        assert "Loop over       :  Frequencies" in out
+        assert_allclose(dlf, dlf2, rtol=1e-4)
+
+        dlf3 = bipole(ht='dlf', htarg={'pts_per_dec': 40}, verb=3, **inp)
+        out, _ = capsys.readouterr()
+        assert "Hankel          :  DLF (Fast Hankel Transform)" in out
+        assert "  > DLF type    :  Splined, 40.0 pts/dec" in out
+        assert "Loop over       :  Frequencies" in out
+        assert_allclose(dlf, dlf3, rtol=1e-3)
 
         qwe = bipole(ht='qwe', htarg={'pts_per_dec': 0}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  Quadrature-with-Extrapolation" in out
-        assert_allclose(fht, qwe, equal_nan=True)
+        assert_allclose(dlf, qwe, equal_nan=True)
 
-        quad = bipole(ht='quad', htarg=['', '', '', '', 1, 1000], verb=3,
+        quad = bipole(ht='quad', htarg={'b': 1, 'pts_per_dec': 1000}, verb=3,
                       **inp)
         out, _ = capsys.readouterr()
         assert "Hankel          :  Quadrature" in out
-        assert_allclose(fht, quad, equal_nan=True)
+        assert_allclose(dlf, quad, equal_nan=True)
 
     def test_fourier(self, capsys):
         # Compare Fourier transforms
@@ -332,19 +318,22 @@ class TestBipole:
         out, _ = capsys.readouterr()
         assert "Fourier         :  FFTLog" in out
 
-        qwe = bipole(ft='qwe', ftarg=['', '', '', '', 30], verb=3, **inp)
+        qwe = bipole(ft='qwe', ftarg={'pts_per_dec': 30}, verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Fourier         :  Quadrature-with-Extrapolation" in out
         assert_allclose(qwe, ftl, 1e-2, equal_nan=True)
 
-        ffht = bipole(ft='ffht', verb=3, **inp)
+        dlf = bipole(ft='dlf', verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Fourier         :  DLF (Sine-Filter)" in out
-        assert_allclose(ffht, ftl, 1e-2, equal_nan=True)
+        assert_allclose(dlf, ftl, 1e-2, equal_nan=True)
 
         # FFT: We keep the error-check very low, otherwise we would have to
         #      calculate too many frequencies.
-        fft = bipole(ft='fft', ftarg=[0.002, 2**13, 2**16], verb=3, **inp)
+        fft = bipole(
+                ft='fft',
+                ftarg={'dfreq': 0.002, 'nfreq': 2**13, 'ntot': 2**16},
+                verb=3, **inp)
         out, _ = capsys.readouterr()
         assert "Fourier         :  Fast Fourier Transform FFT" in out
         assert_allclose(fft, ftl, 1e-1, 1e-13, equal_nan=True)
@@ -651,29 +640,26 @@ def test_all_depths():
     mpermV = [2.5, 2.6, 2.7, 2.8, 2.9]
 
     # 1. Ordering as internally used:
+    inp = {'ab': 11, 'aniso': aniso, 'epermH': epermH, 'epermV': epermV,
+           'mpermH': mpermH, 'mpermV': mpermV}
 
     # LHS low-to-high (+1, ::+1)
-    lhs_l2h = dipole(
-            src, rec, depth, res, freq, None, 11, aniso, epermH, epermV,
-            mpermH, mpermV)
+    lhs_l2h = dipole(src, rec, depth, res, freq, **inp)
 
     # RHS high-to-low (-1, ::+1)
-    rhs_h2l = dipole(
-            [src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]], -depth, res,
-            freq, None, 11, aniso, epermH, epermV, mpermH, mpermV)
+    rhs_h2l = dipole([src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]],
+                     -depth, res, freq, **inp)
 
     # 2. Reversed ordering:
+    inp_r = {'ab': 11, 'aniso': aniso[::-1], 'epermH': epermH[::-1], 'epermV':
+             epermV[::-1], 'mpermH': mpermH[::-1], 'mpermV': mpermV[::-1]}
 
     # LHS high-to-low (+1, ::-1)
-    lhs_h2l = dipole(
-            src, rec, depth[::-1], res[::-1], freq, None, 11, aniso[::-1],
-            epermH[::-1], epermV[::-1], mpermH[::-1], mpermV[::-1])
+    lhs_h2l = dipole(src, rec, depth[::-1], res[::-1], freq, **inp_r)
 
     # RHS low-to-high (-1, ::-1)
-    rhs_l2h = dipole(
-            [src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]], -depth[::-1],
-            res[::-1], freq, None, 11, aniso[::-1], epermH[::-1], epermV[::-1],
-            mpermH[::-1], mpermV[::-1])
+    rhs_l2h = dipole([src[0], src[1], -src[2]], [rec[0], rec[1], -rec[2]],
+                     -depth[::-1], res[::-1], freq, **inp_r)
 
     assert_allclose(lhs_l2h, lhs_h2l)
     assert_allclose(lhs_l2h, rhs_l2h)
@@ -951,11 +937,6 @@ def test_dipole_k():
     w_res0, w_res1 = dipole_k(**res['inp'])
     assert_allclose(w_res0, res['PJ0'])
     assert_allclose(w_res1, res['PJ1'])
-
-    # Test depreciated model.wavenumber
-    w_res0b, w_res1b = wavenumber(**res['inp'])
-    assert_allclose(w_res0, w_res0b)
-    assert_allclose(w_res1, w_res1b)
 
     # Check that ab=36 returns zeros
     res['inp']['ab'] = 36

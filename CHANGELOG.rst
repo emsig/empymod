@@ -2,11 +2,97 @@ Changelog
 #########
 
 
-Minor v1.10.x
-"""""""""""""
+Version 2
+~~~~~~~~~
+
+
+v2.0.x
+""""""
+
+
+v2.0.0: Numba
+-------------
+
+**2020-04-29**
+
+This version is backwards incompatible and requires Python 3.6+.
+
+- Numba:
+
+  - Using ``numexpr`` is no longer a possibility. Instead, ``numba`` is a new
+    dependency. All four kernel routines (``wavenumber``, ``greenfct``,
+    ``reflections``, and ``fields``) are now numba-jitted functions.
+
+- Removed:
+
+  - Removed all deprecated functions.
+  - Dropped support for Python 3.5; moved to f-strings.
+  - Dropped testing for channel conda-forge. The problems encountered at the
+    early development cycle of empymod with conda-forge do not exist any
+    longer.
+
+- New defaults:
+
+  - ``EMArray``: ``.amp`` and ``.pha`` are now methods, not properties. Phase
+    takes three optional boolean parameters ``deg=False``, ``unwrap=True``, and
+    ``lag=True``, to get radians or degrees; unwrapped or not; and lag or lead
+    defined phases.
+  - The parameters ``epermV`` and ``mpermV`` are set to the values of
+    ``epermH`` and ``mpermH``, respectively, if not provided (hence assuming
+    isotropic behaviour). Before they were set to ones if not provided.
+
+- Renaming:
+
+  - ``transform.fht`` -> ``transform.hankel_dlf``
+  - ``transform.hqwe`` -> ``transform.hankel_qwe``
+  - ``transform.hquad`` -> ``transform.hankel_quad``
+  - ``transform.ffht`` -> ``transform.fourier_dlf``
+  - ``transform.fqwe`` -> ``transform.fourier_qwe``
+  - ``transform.fftlog`` -> ``transform.fourier_fftlog``
+  - ``transform.fft`` -> ``transform.fourier_fft``
+  - ``transform.fhti`` -> ``transform.get_fftlog_input``
+  - ``transform.get_spline_values`` -> ``transform.get_dlf_points``.
+  - ``factAng`` -> ``ang_fact``
+  - In ``htarg``-dict: ``fftfilt``-> ``dlf`` (filter name for Hankel-DLF)
+  - In ``ftarg``-dict: ``fhtfilt``-> ``dlf`` (filter name for Fourier-DLF)
+  - In ``ftarg``-dict: ``ft``-> ``kind`` (method in Fourier-DLF [sine/cosine])
+  - Only dictionaries allowed for ``htarg`` and ``ftarg``; strings, lists, or
+    tuples are not allowed any longer. They are also dictionaries internally
+    now.
+  - ``ht``: There is only one unique name for each method:  'dlf', 'qwe',
+    'quad'.
+  - ``ft``: There is only one unique name for each method:  'dlf', 'qwe',
+    'fftlog', 'fft'.
+  - Within ``transform``, change ``fhtarg``, ``qweargs``, and ``quadargs`` to
+    ``htarg``; ``qweargs`` to ``ftarg``.
+
+- Other changes:
+
+  - All settings (``xdirect``, ``ht``, ``htarg``, ``ft``, ``ftarg``, ``loop``,
+    ``verb``) are now extracted from ``kwargs``. This makes it possible that
+    all ``model``-functions take the same keyword-arguments; warnings are
+    raised if a particular parameter is not used in this function, but it
+    doesn't fail (it fails, however, for unknown parameters). Pure positional
+    calls including those parameters will therefore not work any longer.
+  - Undo a change introduced in v1.8.0: ``get_dlf_points`` is calculated
+    directly within ``transform.fht`` [`empymod#26
+    <https://github.com/empymod/empymod/issues/26>`_].
+  - Ensured that source and receiver inputs are not altered.
+  - Significantly reduced top namespace; only functions from ``model`` are
+    loaded into the top namespace now.
+
+
+Version 1
+~~~~~~~~~
+
+
+v1.10.x
+"""""""
 
 v1.10.6: Various azimuths and dips at same depth
 ------------------------------------------------
+
+**2020-03-04**
 
 - ``empymod.bipole``
 
@@ -21,6 +107,8 @@ v1.10.6: Various azimuths and dips at same depth
 
 v1.10.5: Continuously in- or decreasing
 ---------------------------------------
+
+**2020-02-21**
 
 This is a small appendix to v1.10.4: Depths can now be defined in increasing or
 decreasing order, as long as they are consistent. Model parameters have to be
@@ -104,8 +192,8 @@ v1.10.0: Loop source and receiver
   more inclusive and open the project for new contributors.
 
 
-Minor v1.9.x
-"""""""""""""
+v1.9.x
+"""""""
 
 v1.9.0 : Laplace
 ----------------
@@ -128,8 +216,8 @@ v1.9.0 : Laplace
 - Other tiny improvements and bug fixes.
 
 
-Minor v1.8.x
-""""""""""""
+v1.8.x
+""""""
 
 
 v1.8.3 : Scooby
@@ -196,7 +284,7 @@ v1.8.0 : Hook for Cole-Cole IP and similar
 
 - ``model.wavenumber`` renamed to ``model.dipole_k`` to avoid name clash with
   ``kernel.wavenumber``. For now ``model.wavenumber`` continues to exist, but
-  raises a depreciation warning.
+  raises a deprecation warning.
 
 - ``xdirect`` default value changed from ``True`` to ``False``.
 
@@ -217,8 +305,8 @@ for the user-facing routines in ``model``:
   Move there in version 2.0.
 
 
-Minor v1.7.x
-""""""""""""
+v1.7.x
+""""""
 
 
 v1.7.3 : Speed improvements following benchmarks
@@ -320,8 +408,8 @@ Merge ``empyscripts`` into ``empymod`` under ``empymod.scripts``.
   ``empymod`` directly.
 
 
-Minor v1.6.x
-""""""""""""
+v1.6.x
+""""""
 
 
 v1.6.2 : Speed improvements for QUAD/QWE
@@ -431,8 +519,8 @@ are affected.
 - Bugfix in ``model.wavenumber`` for ``ab=[36, 63]`` (zeroes).
 
 
-Minor v1.5.x
-""""""""""""
+v1.5.x
+""""""
 
 
 v1.5.2 : Improved DLF
@@ -498,8 +586,8 @@ v1.5.0 : Hankel filter wer_201_2018
 - Version of manuscript submission to geophysics for the DLF article.
 
 
-Minor v1.4.x
-""""""""""""
+v1.4.x
+""""""
 
 
 v1.4.4 : TE/TM split
@@ -570,8 +658,8 @@ push it to 1.4.1; so there isn't really a version 1.4.0.]
     only fullspace solution (all for the diffusive approximation).
 
 
-Minor v1.3.x
-"""""""""""""
+v1.3.x
+"""""""
 
 
 v1.3.0 : New transforms QUAD (Hankel) and FFT (Fourier)
@@ -607,8 +695,8 @@ v1.3.0 : New transforms QUAD (Hankel) and FFT (Fourier)
 - Bug fixes and documentation improvements
 
 
-Minor v1.2.x
-""""""""""""
+v1.2.x
+""""""
 
 
 v1.2.1 : Installable via pip and conda
@@ -661,8 +749,8 @@ v1.2.0 : Bipole
 - Bug fixes
 
 
-Minor v1.1.x
-""""""""""""
+v1.1.x
+""""""
 
 
 v1.1.0 : Include source bipole
@@ -692,8 +780,8 @@ v1.1.0 : Include source bipole
 - Bug fixes
 
 
-Minor v1.0.x
-""""""""""""
+v1.0.x
+""""""
 
 
 v1.0.0 : Initial release

@@ -44,7 +44,7 @@ import matplotlib.pyplot as plt
 #
 # .. image:: ../../_static/figures/Ziolkowski2007.jpg
 #
-# Calculation
+# Computation
 # ~~~~~~~~~~~
 
 # Time
@@ -63,7 +63,7 @@ inp1 = dc(inp2)
 inp1['depth'] = inp2['depth'][0]
 inp1['res'] = inp2['res'][:2]
 
-# Calculate responses
+# Compute responses
 sths = empymod.dipole(**inp1, signal=1)  # Step, HS
 sttg = empymod.dipole(**inp2, signal=1)  # " "   Target
 imhs = empymod.dipole(**inp1, signal=0, ft='fftlog')  # Impulse, HS
@@ -115,7 +115,7 @@ plt.show()
 #
 # .. image:: ../../_static/figures/Constable2006.jpg
 #
-# Calculation
+# Computation
 # ~~~~~~~~~~~
 
 # Offsets
@@ -134,17 +134,18 @@ inp4 = dc(inp3)
 inp4['depth'] = inp3['depth'][:2]
 inp4['res'] = inp3['res'][:3]
 
-# Calculate radial responses
+# Compute radial responses
 rhs = empymod.dipole(**inp4)  # Step, HS
 rhs = empymod.utils.EMArray(np.nan_to_num(rhs))
 rtg = empymod.dipole(**inp3)  # " "   Target
 rtg = empymod.utils.EMArray(np.nan_to_num(rtg))
 
-# Calculate azimuthal response
+# Compute azimuthal response
 ahs = empymod.dipole(**inp4, ab=22)  # Step, HS
 ahs = empymod.utils.EMArray(np.nan_to_num(ahs))
 atg = empymod.dipole(**inp3, ab=22)  # " "   Target
 atg = empymod.utils.EMArray(np.nan_to_num(atg))
+
 
 ###############################################################################
 # Plot
@@ -156,8 +157,8 @@ plt.subplots_adjust(wspace=.3, hspace=.3)
 # Radial amplitude
 plt.subplot(321)
 plt.title('(a) Radial mode fields')
-plt.plot(x/1000, np.log10(rtg.amp), 'k', label='Model')
-plt.plot(x/1000, np.log10(rhs.amp), 'k-.', label='Half-space response')
+plt.plot(x/1000, np.log10(rtg.amp()), 'k', label='Model')
+plt.plot(x/1000, np.log10(rhs.amp()), 'k-.', label='Half-space response')
 plt.axis([0, 20, -18, -8])
 plt.xlabel('Range (km)')
 plt.ylabel(r'Log$_{10}$(E-field magnitude, V/Am$^2$)')
@@ -166,8 +167,8 @@ plt.legend()
 # Radial phase
 plt.subplot(323)
 plt.title('(b) Radial mode phase')
-plt.plot(x/1000, rtg.pha, 'k')
-plt.plot(x/1000, rhs.pha, 'k-.')
+plt.plot(x/1000, rtg.pha(deg=True), 'k')
+plt.plot(x/1000, rhs.pha(deg=True), 'k-.')
 plt.axis([0, 20, -500, 0])
 plt.xlabel('Range (km)')
 plt.ylabel('Phase (degrees)')
@@ -175,8 +176,8 @@ plt.ylabel('Phase (degrees)')
 # Azimuthal amplitude
 plt.subplot(325)
 plt.title('(c) Azimuthal mode fields')
-plt.plot(x/1000, np.log10(atg.amp), 'k', label='Model')
-plt.plot(x/1000, np.log10(ahs.amp), 'k-.', label='Half-space response')
+plt.plot(x/1000, np.log10(atg.amp()), 'k', label='Model')
+plt.plot(x/1000, np.log10(ahs.amp()), 'k-.', label='Half-space response')
 plt.axis([0, 20, -18, -8])
 plt.xlabel('Range (km)')
 plt.ylabel(r'Log$_{10}$(E-field magnitude, V/Am$^2$)')
@@ -185,8 +186,8 @@ plt.legend()
 # Azimuthal phase
 plt.subplot(322)
 plt.title('(d) Azimuthal mode phase')
-plt.plot(x/1000, atg.pha+180, 'k')
-plt.plot(x/1000, ahs.pha+180, 'k-.')
+plt.plot(x/1000, atg.pha(deg=True)+180, 'k')
+plt.plot(x/1000, ahs.pha(deg=True)+180, 'k-.')
 plt.axis([0, 20, -500, 0])
 plt.xlabel('Range (km)')
 plt.ylabel('Phase (degrees)')

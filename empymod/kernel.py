@@ -1,19 +1,19 @@
 r"""
 
-:mod:`kernel` -- Kernel calculation
-===================================
+:mod:`empymod.kernel` -- Kernel calculation
+===========================================
 
-Kernel of ``empymod``, calculates the wavenumber-domain electromagnetic
+Kernel of empymod, calculates the wavenumber-domain electromagnetic
 response. Plus analytical full- and half-space solutions.
 
-The functions ``wavenumber``, ``angle_factor``, ``fullspace``, ``greenfct``,
-``reflections``, and ``fields`` are based on source files (specified in each
-function) from the source code distributed with [HuTS15]_, which can be found
-at `software.seg.org/2015/0001 <https://software.seg.org/2015/0001>`_.  These
-functions are (c) 2015 by Hunziker et al. and the Society of Exploration
-Geophysicists, https://software.seg.org/disclaimer.txt.  Please read the
-NOTICE-file in the root directory for more information regarding the involved
-licenses.
+The functions :func:`wavenumber`, :func:`angle_factor`, :func:`fullspace`,
+:func:`greenfct`, :func:`reflections`, and :func:`fields` are based on source
+files (specified in each function) from the source code distributed with
+[HuTS15]_, which can be found at `software.seg.org/2015/0001
+<https://software.seg.org/2015/0001>`_.  These functions are (c) 2015 by
+Hunziker et al. and the Society of Exploration Geophysicists,
+https://software.seg.org/disclaimer.txt.  Please read the NOTICE-file in the
+root directory for more information regarding the involved licenses.
 
 """
 # Copyright 2016-2020 The empymod Developers.
@@ -34,6 +34,7 @@ licenses.
 
 
 import numpy as np
+import numba as nb
 from scipy import special  # Only used for halfspace solution
 
 np.seterr(all='ignore')
@@ -41,63 +42,87 @@ np.seterr(all='ignore')
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']
 
+# Numba-settings
+_numba_setting = {'nogil': True, 'cache': True}
+_numba_with_fm = {'fastmath': True, **_numba_setting}
+
 
 # Wavenumber-frequency domain kernel
 
+@nb.njit(**_numba_with_fm)
 def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
-               ab, xdirect, msrc, mrec, use_ne_eval):
+               ab, xdirect, msrc, mrec):
     r"""Calculate wavenumber domain solution.
 
-    Return the wavenumber domain solutions ``PJ0``, ``PJ1``, and ``PJ0b``,
-    which have to be transformed with a Hankel transform to the frequency
-    domain. ``PJ0``/``PJ0b`` and ``PJ1`` have to be transformed with Bessel
-    functions of order 0 (:math:`J_0`) and 1 (:math:`J_1`), respectively.
+    Return the wavenumber domain solutions `PJ0`, `PJ1`, and `PJ0b`, which have
+    to be transformed with a Hankel transform to the frequency domain.
+    `PJ0`/`PJ0b` and `PJ1` have to be transformed with Bessel functions of
+    order 0 (:math:`J_0`) and 1 (:math:`J_1`), respectively.
 
     This function corresponds loosely to equations 105--107, 111--116,
     119--121, and 123--128 in [HuTS15]_, and equally loosely to the file
-    ``kxwmod.c``.
+    `kxwmod.c`.
 
     [HuTS15]_ uses Bessel functions of orders 0, 1, and 2 (:math:`J_0, J_1,
     J_2`). The implementations of the *Fast Hankel Transform* and the
-    *Quadrature-with-Extrapolation* in ``transform`` are set-up with Bessel
-    functions of order 0 and 1 only. This is achieved by applying the
+    *Quadrature-with-Extrapolation* in :mod:`empymod.transform` are set-up with
+    Bessel functions of order 0 and 1 only. This is achieved by applying the
     recurrence formula
 
-    .. math:: J_2(kr) = \frac{2}{kr} J_1(kr) - J_0(kr) \ .
+    .. math::
+        :label: wavenumber
+
+        J_2(kr) = \frac{2}{kr} J_1(kr) - J_0(kr) \ .
 
 
     .. note::
 
-        ``PJ0`` and ``PJ0b`` could theoretically be added here into one, and
-        then be transformed in one go.  However, ``PJ0b`` has to be multiplied
-        by ``factAng`` later. This has to be done after the Hankel transform
+        `PJ0` and `PJ0b` could theoretically be added here into one, and then
+        be transformed in one go.  However, `PJ0b` has to be multiplied by
+        :func:`ang_fact` later. This has to be done after the Hankel transform
         for methods which make use of spline interpolation, in order to work
         for offsets that are not in line with each other.
 
     This function is called from one of the Hankel functions in
-    :mod:`transform`.  Consult the modelling routines in :mod:`model` for a
-    description of the input and output parameters.
+    :mod:`empymod.transform`.  Consult the modelling routines in
+    :mod:`empymod.model` for a description of the input and output parameters.
 
     If you are solely interested in the wavenumber-domain solution you can call
     this function directly. However, you have to make sure all input arguments
     are correct, as no checks are carried out here.
 
     """
+    nfreq, _ = etaH.shape
+    noff, nlambda = lambd.shape
 
     # ** CALCULATE GREEN'S FUNCTIONS
     # Shape of PTM, PTE: (nfreq, noffs, nfilt)
     PTM, PTE = greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                        zetaV, lambd, ab, xdirect, msrc, mrec, use_ne_eval)
+                        zetaV, lambd, ab, xdirect, msrc, mrec)
 
     # ** AB-SPECIFIC COLLECTION OF PJ0, PJ1, AND PJ0b
 
     # Pre-allocate output
-    PJ0 = None
-    PJ1 = None
-    PJ0b = None
+    if ab in [11, 22, 24, 15, 33]:
+        PJ0 = np.zeros_like(PTM)
+    else:
+        PJ0 = None
+    if ab in [11, 12, 21, 22, 14, 24, 15, 25]:
+        PJ0b = np.zeros_like(PTM)
+    else:
+        PJ0b = None
+    if ab not in [33, ]:
+        PJ1 = np.zeros_like(PTM)
+    else:
+        PJ1 = None
+    Ptot = np.zeros_like(PTM)
 
     # Calculate Ptot which is used in all cases
-    Ptot = (PTM + PTE)/(4*np.pi)
+    fourpi = 4*np.pi
+    for i in range(nfreq):
+        for ii in range(noff):
+            for iv in range(nlambda):
+                Ptot[i, ii, iv] = (PTM[i, ii, iv] + PTE[i, ii, iv])/fourpi
 
     # If rec is magnetic switch sign (reciprocity MM/ME => EE/EM).
     if mrec:
@@ -110,45 +135,71 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         # J2(kr) = 2/(kr)*J1(kr) - J0(kr)         #     119, 120, 123, 124
         if ab in [14, 22]:
             sign *= -1
-        PJ0b = sign/2*Ptot*lambd
-        PJ1 = -sign*Ptot
+
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    PJ0b[i, ii, iv] = sign/2*Ptot[i, ii, iv]*lambd[ii, iv]
+                    PJ1[i, ii, iv] = -sign*Ptot[i, ii, iv]
+
         if ab in [11, 22, 24, 15]:
             if ab in [22, 24]:
                 sign *= -1
-            PJ0 = sign*(PTM - PTE)/(8*np.pi)*lambd
+
+            eightpi = sign*8*np.pi
+            for i in range(nfreq):
+                for ii in range(noff):
+                    for iv in range(nlambda):
+                        PJ0[i, ii, iv] = PTM[i, ii, iv] - PTE[i, ii, iv]
+                        PJ0[i, ii, iv] *= lambd[ii, iv]/eightpi
 
     elif ab in [13, 23, 31, 32, 34, 35, 16, 26]:  # Eqs 107, 113, 114, 115,
-        PJ1 = sign*Ptot*lambd*lambd               # .   121, 125, 126, 127
-        if ab in [34, 26]:
-            PJ1 *= -1
+        if ab in [34, 26]:                        # .   121, 125, 126, 127
+            sign *= -1
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    dlambd = lambd[ii, iv]*lambd[ii, iv]
+                    PJ1[i, ii, iv] = sign*Ptot[i, ii, iv]*dlambd
 
     elif ab in [33, ]:                            # Eq 116
-        PJ0 = sign*Ptot*lambd*lambd*lambd
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    tlambd = lambd[ii, iv]*lambd[ii, iv]*lambd[ii, iv]
+                    PJ0[i, ii, iv] = sign*Ptot[i, ii, iv]*tlambd
 
     # Return PJ0, PJ1, PJ0b
     return PJ0, PJ1, PJ0b
 
 
+@nb.njit(**_numba_setting)
 def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
-             ab, xdirect, msrc, mrec, use_ne_eval):
+             ab, xdirect, msrc, mrec):
     r"""Calculate Green's function for TM and TE.
 
-    .. math:: \tilde{g}^{tm}_{hh}, \tilde{g}^{tm}_{hz},
-              \tilde{g}^{tm}_{zh}, \tilde{g}^{tm}_{zz},
-              \tilde{g}^{te}_{hh}, \tilde{g}^{te}_{zz}
+    .. math::
+        :label: greenfct
+
+        \tilde{g}^{tm}_{hh}, \tilde{g}^{tm}_{hz},
+        \tilde{g}^{tm}_{zh}, \tilde{g}^{tm}_{zz},
+        \tilde{g}^{te}_{hh}, \tilde{g}^{te}_{zz}
 
     This function corresponds to equations 108--110, 117/118, 122; 89--94,
     A18--A23, B13--B15; 97--102 A26--A31, and B16--B18 in [HuTS15]_, and
-    loosely to the corresponding files ``Gamma.F90``, ``Wprop.F90``,
-    ``Ptotalx.F90``, ``Ptotalxm.F90``, ``Ptotaly.F90``, ``Ptotalym.F90``,
-    ``Ptotalz.F90``, and ``Ptotalzm.F90``.
+    loosely to the corresponding files `Gamma.F90`, `Wprop.F90`, `Ptotalx.F90`,
+    `Ptotalxm.F90`, `Ptotaly.F90`, `Ptotalym.F90`, `Ptotalz.F90`, and
+    `Ptotalzm.F90`.
 
     The Green's functions are multiplied according to Eqs 105-107, 111-116,
     119-121, 123-128; with the factors inside the integrals.
 
-    This function is called from the function :mod:`kernel.wavenumber`.
+    This function is called from the function :func:`wavenumber`.
 
     """
+    nfreq, nlayer = etaH.shape
+    noff, nlambda = lambd.shape
+
     # GTM/GTE have shape (frequency, offset, lambda).
     # gamTM/gamTE have shape (frequency, offset, layer, lambda):
 
@@ -178,72 +229,88 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
             e_zH, e_zV, z_eH = zetaH, zetaV, etaH  # TE: etaV not used
 
         # Uppercase gamma
-        if use_ne_eval:
-            ez_ratio = (e_zH/e_zV)[:, None, :, None]  # NOQA
-            ez_prod = (z_eH*e_zH)[:, None, :, None]  # NOQA
-            lambd2 = use_ne_eval("lambd*lambd")[None, :, None, :]  # NOQA
-            Gam = use_ne_eval("sqrt(ez_ratio*lambd2 + ez_prod)")
-        else:
-            Gam = np.sqrt((e_zH/e_zV)[:, None, :, None] *
-                          (lambd*lambd)[None, :, None, :] +
-                          (z_eH*e_zH)[:, None, :, None])
+        Gam = np.zeros((nfreq, noff, nlayer, nlambda), etaH.dtype)
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iii in range(nlayer):
+                    h_div_v = e_zH[i, iii]/e_zV[i, iii]
+                    h_times_h = z_eH[i, iii]*e_zH[i, iii]
+                    for iv in range(nlambda):
+                        l2 = lambd[ii, iv]*lambd[ii, iv]
+                        Gam[i, ii, iii, iv] = np.sqrt(h_div_v*l2 + h_times_h)
 
         # Gamma in receiver layer
         lrecGam = Gam[:, :, lrec, :]
 
         # Reflection (coming from below (Rp) and above (Rm) rec)
         if depth.size > 1:  # Only if more than 1 layer
-            Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval)
+            Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
 
             # Field propagators
             # (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74
+            Wu = np.zeros_like(lrecGam)
+            Wd = np.zeros_like(lrecGam)
+
             if lrec != depth.size-1:  # No upgoing field prop. if rec in last
                 ddepth = depth[lrec + 1] - zrec
-                if use_ne_eval:
-                    Wu = use_ne_eval("exp(-lrecGam*ddepth)")
-                else:
-                    Wu = np.exp(-lrecGam*ddepth)
-            else:
-                Wu = np.zeros_like(lrecGam)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            Wu[i, ii, iv] = np.exp(-lrecGam[i, ii, iv]*ddepth)
+
             if lrec != 0:     # No downgoing field propagator if rec in first
                 ddepth = zrec - depth[lrec]
-                if use_ne_eval:
-                    Wd = use_ne_eval("exp(-lrecGam*ddepth)")
-                else:
-                    Wd = np.exp(-lrecGam*ddepth)
-            else:
-                Wd = np.zeros_like(lrecGam)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            Wd[i, ii, iv] = np.exp(-lrecGam[i, ii, iv]*ddepth)
 
             # Field at rec level (coming from below (Pu) and above (Pd) rec)
-            Pu, Pd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM,
-                            use_ne_eval)
+            Pu, Pd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM)
 
         # Green's functions
+        green = np.zeros_like(lrecGam)
         if lsrc == lrec:  # Rec in src layer; Eqs 108, 109, 110, 117, 118, 122
 
             # Green's function depending on <ab>
-            if depth.size == 1:  # If only one layer, no reflections/fields
-                green = np.zeros_like(lrecGam)
-            elif ab in [13, 23, 31, 32, 14, 24, 15, 25]:
-                green = Pu*Wu - Pd*Wd
-            else:
-                green = Pu*Wu + Pd*Wd
+            # (If only one layer, no reflections/fields)
+            if depth.size > 1 and ab in [13, 23, 31, 32, 14, 24, 15, 25]:
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            green[i, ii, iv] = Pu[i, ii, iv]*Wu[i, ii, iv]
+                            green[i, ii, iv] -= Pd[i, ii, iv]*Wd[i, ii, iv]
+
+            elif depth.size > 1:
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            green[i, ii, iv] = Pu[i, ii, iv]*Wu[i, ii, iv]
+                            green[i, ii, iv] += Pd[i, ii, iv]*Wd[i, ii, iv]
 
             # Direct field, if it is computed in the wavenumber domain
             if not xdirect:
-                # Direct field
-                directf = np.exp(-lrecGam*abs(zsrc - zrec))
+                ddepth = abs(zsrc - zrec)
+                dsign = np.sign(zrec - zsrc)
+                minus_ab = [11, 12, 13, 14, 15, 21, 22, 23, 24, 25]
 
-                # Swap TM for certain <ab>
-                if TM and ab in [11, 12, 13, 14, 15, 21, 22, 23, 24, 25]:
-                    directf *= -1
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
 
-                # Multiply by zrec-zsrc-sign for certain <ab>
-                if ab in [13, 14, 15, 23, 24, 25, 31, 32]:
-                    directf *= np.sign(zrec - zsrc)
+                            # Direct field
+                            directf = np.exp(-lrecGam[i, ii, iv]*ddepth)
 
-                # Add direct field to Green's function
-                green += directf
+                            # Swap TM for certain <ab>
+                            if TM and ab in minus_ab:
+                                directf *= -1
+
+                            # Multiply by zrec-zsrc-sign for certain <ab>
+                            if ab in [13, 14, 15, 23, 24, 25, 31, 32]:
+                                directf *= dsign
+
+                            # Add direct field to Green's function
+                            green[i, ii, iv] += directf
 
         else:
 
@@ -252,10 +319,12 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 ddepth = 0
             else:
                 ddepth = depth[lrec+1] - depth[lrec]
-            if use_ne_eval:
-                fexp = use_ne_eval("exp(-lrecGam*ddepth)")
-            else:
-                fexp = np.exp(-lrecGam*ddepth)
+
+            fexp = np.zeros_like(lrecGam)
+            for i in range(nfreq):
+                for ii in range(noff):
+                    for iv in range(nlambda):
+                        fexp[i, ii, iv] = np.exp(-lrecGam[i, ii, iv]*ddepth)
 
             # Sign-switch for Green calculation
             if TM and ab in [11, 12, 13, 21, 22, 23, 14, 24, 15, 25]:
@@ -265,11 +334,22 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
             if lrec < lsrc:  # Rec above src layer: Pd not used
                 #              Eqs 89-94, A18-A23, B13-B15
-                green = Pu*(Wu + pmw*Rm[:, :, 0, :]*fexp*Wd)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            green[i, ii, iv] = Pu[i, ii, iv]*(
+                                    Wu[i, ii, iv] + pmw*Rm[i, ii, 0, iv] *
+                                    fexp[i, ii, iv]*Wd[i, ii, iv])
 
             elif lrec > lsrc:  # rec below src layer: Pu not used
                 #                Eqs 97-102 A26-A30, B16-B18
-                green = Pd*(pmw*Wd + Rp[:, :, abs(lsrc-lrec), :]*fexp*Wu)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            green[i, ii, iv] = Pd[i, ii, iv]*(
+                                    pmw*Wd[i, ii, iv] +
+                                    Rp[i, ii, abs(lsrc-lrec), iv] *
+                                    fexp[i, ii, iv]*Wu[i, ii, iv])
 
         # Store in corresponding variable
         if TM:
@@ -281,50 +361,86 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     # These are the factors inside the integrals
     # Eqs 105-107, 111-116, 119-121, 123-128
 
-    # PTM, PTE
     if ab in [11, 12, 21, 22]:
-        PTM = GTM*gamTM[:, :, lrec, :]/etaH[:, None, lrec, None]
-        PTE = zetaH[:, None, lsrc, None]*GTE/gamTE[:, :, lsrc, :]
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= gamTM[i, ii, lrec, iv]/etaH[i, lrec]
+                    GTE[i, ii, iv] *= zetaH[i, lsrc]/gamTE[i, ii, lsrc, iv]
+
     elif ab in [14, 15, 24, 25]:
-        PTM = ((etaH[:, lsrc]/etaH[:, lrec])[:, None, None] *
-               GTM*gamTM[:, :, lrec, :]/gamTM[:, :, lsrc, :])
-        PTE = GTE
+        for i in range(nfreq):
+            fact = etaH[i, lsrc]/etaH[i, lrec]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= fact*gamTM[i, ii, lrec, iv]
+                    GTM[i, ii, iv] /= gamTM[i, ii, lsrc, iv]
+
     elif ab in [13, 23]:
-        PTM = -((etaH[:, lsrc]/etaH[:, lrec]/etaV[:, lsrc])[:, None, None] *
-                GTM*gamTM[:, :, lrec, :]/gamTM[:, :, lsrc, :])
-        PTE = 0
+        GTE = np.zeros_like(GTM)
+        for i in range(nfreq):
+            fact = etaH[i, lsrc]/etaH[i, lrec]/etaV[i, lsrc]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= -fact*gamTM[i, ii, lrec, iv]
+                    GTM[i, ii, iv] /= gamTM[i, ii, lsrc, iv]
+
     elif ab in [31, 32]:
-        PTM = GTM/etaV[:, None, lrec, None]
-        PTE = 0
+        GTE = np.zeros_like(GTM)
+        for i in range(nfreq):
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] /= etaV[i, lrec]
+
     elif ab in [34, 35]:
-        PTM = ((etaH[:, lsrc]/etaV[:, lrec])[:, None, None] *
-               GTM/gamTM[:, :, lsrc, :])
-        PTE = 0
+        GTE = np.zeros_like(GTM)
+        for i in range(nfreq):
+            fact = etaH[i, lsrc]/etaV[i, lrec]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= fact/gamTM[i, ii, lsrc, iv]
+
     elif ab in [16, 26]:
-        PTM = 0
-        PTE = ((zetaH[:, lsrc]/zetaV[:, lsrc])[:, None, None] *
-               GTE/gamTE[:, :, lsrc, :])
+        GTM = np.zeros_like(GTE)
+        for i in range(nfreq):
+            fact = zetaH[i, lsrc]/zetaV[i, lsrc]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTE[i, ii, iv] *= fact/gamTE[i, ii, lsrc, iv]
+
     elif ab in [33, ]:
-        PTM = ((etaH[:, lsrc]/etaV[:, lsrc]/etaV[:, lrec])[:, None, None] *
-               GTM/gamTM[:, :, lsrc, :])
-        PTE = 0
+        GTE = np.zeros_like(GTM)
+        for i in range(nfreq):
+            fact = etaH[i, lsrc]/etaV[i, lsrc]/etaV[i, lrec]
+            for ii in range(noff):
+                for iv in range(nlambda):
+                    GTM[i, ii, iv] *= fact/gamTM[i, ii, lsrc, iv]
 
     # Return Green's functions
-    return PTM, PTE
+    return GTM, GTE
 
 
-def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
+@nb.njit(**_numba_with_fm)
+def reflections(depth, e_zH, Gam, lrec, lsrc):
     r"""Calculate Rp, Rm.
 
-    .. math:: R^\pm_n, \bar{R}^\pm_n
+    .. math::
+        :label: reflections
+
+        R^\pm_n, \bar{R}^\pm_n
 
     This function corresponds to equations 64/65 and A-11/A-12 in
-    [HuTS15]_, and loosely to the corresponding files ``Rmin.F90`` and
-    ``Rplus.F90``.
+    [HuTS15]_, and loosely to the corresponding files `Rmin.F90` and
+    `Rplus.F90`.
 
-    This function is called from the function :mod:`kernel.greenfct`.
+    This function is called from the function :func:`greenfct`.
 
     """
+
+    # Get numbers and max/min layer.
+    nfreq, noff, nlambda = Gam[:, :, 0, :].shape
+    maxl = max([lrec, lsrc])
+    minl = min([lrec, lsrc])
 
     # Loop over Rp, Rm
     for plus in [True, False]:
@@ -332,14 +448,14 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
         # Switches depending if plus or minus
         if plus:
             pm = 1
-            layer_count = np.arange(depth.size-2, min(lrec, lsrc)-1, -1)
+            layer_count = np.arange(depth.size-2, minl-1, -1)
             izout = abs(lsrc-lrec)
-            minmax = max(lrec, lsrc)
+            minmax = pm*maxl
         else:
             pm = -1
-            layer_count = np.arange(1, max(lrec, lsrc)+1, 1)
+            layer_count = np.arange(1, maxl+1, 1)
             izout = 0
-            minmax = -min(lrec, lsrc)
+            minmax = pm*minl
 
         # If rec in last  and rec below src (plus) or
         # if rec in first and rec above src (minus), shift izout
@@ -348,25 +464,22 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
         if shiftplus or shiftminus:
             izout -= pm
 
-        # Pre-allocate Ref
-        Ref = np.zeros((Gam.shape[0], Gam.shape[1], abs(lsrc-lrec)+1,
-                        Gam.shape[3]), dtype=Gam.dtype)
+        # Pre-allocate Ref and rloc
+        Ref = np.zeros_like(Gam[:, :, :maxl-minl+1, :])
+        rloc = np.zeros_like(Gam[:, :, 0, :])
 
         # Calculate the reflection
         for iz in layer_count:
 
             # Eqs 65, A-12
-            e_zHa = e_zH[:, None, iz+pm, None]
-            Gama = Gam[:, :, iz, :]
-            e_zHb = e_zH[:, None, iz, None]
-            Gamb = Gam[:, :, iz+pm, :]
-            if use_ne_eval:
-                rlocstr = "(e_zHa*Gama - e_zHb*Gamb)/(e_zHa*Gama + e_zHb*Gamb)"
-                rloc = use_ne_eval(rlocstr)
-            else:
-                rloca = e_zHa*Gama
-                rlocb = e_zHb*Gamb
-                rloc = (rloca - rlocb)/(rloca + rlocb)
+            for i in range(nfreq):
+                ra = e_zH[i, iz+pm]
+                rb = e_zH[i, iz]
+                for ii in range(noff):
+                    for iv in range(nlambda):
+                        rloca = ra*Gam[i, ii, iz, iv]
+                        rlocb = rb*Gam[i, ii, iz+pm, iv]
+                        rloc[i, ii, iv] = (rloca - rlocb)/(rloca + rlocb)
 
             # In first layer tRef = rloc
             if iz == layer_count[0]:
@@ -375,12 +488,13 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
                 ddepth = depth[iz+1+pm]-depth[iz+pm]
 
                 # Eqs 64, A-11
-                if use_ne_eval:
-                    term = use_ne_eval("tRef*exp(-2*Gamb*ddepth)")
-                    tRef = use_ne_eval("(rloc + term)/(1 + rloc*term)")
-                else:
-                    term = tRef*np.exp(-2*Gamb*ddepth)  # NOQA
-                    tRef = (rloc + term)/(1 + rloc*term)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            term = tRef[i, ii, iv]*np.exp(
+                                    -2*Gam[i, ii, iz+pm, iv]*ddepth)
+                            tRef[i, ii, iv] = (rloc[i, ii, iv] + term)/(
+                                    1 + rloc[i, ii, iv]*term)
 
             # The global reflection coefficient is given back for all layers
             # between and including src- and rec-layer
@@ -390,33 +504,41 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, use_ne_eval):
 
         # If lsrc = lrec, we just store the last values
         if lsrc == lrec and layer_count.size > 0:
-            Ref = tRef
+            out = np.zeros_like(Ref[:, :, :1, :])
+            out[:, :, 0, :] = tRef
+        else:
+            out = Ref
 
         # Store Ref in Rm/Rp
         if plus:
-            Rm = Ref
+            Rm = out
         else:
-            Rp = Ref
+            Rp = out
 
     # Return reflections (minus and plus)
     return Rm, Rp
 
 
-def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
+@nb.njit(**_numba_setting)
+def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
     r"""Calculate Pu+, Pu-, Pd+, Pd-.
 
-    .. math:: P^{u\pm}_s, P^{d\pm}_s, \bar{P}^{u\pm}_s, \bar{P}^{d\pm}_s;
-          P^{u\pm}_{s-1}, P^{u\pm}_n, \bar{P}^{u\pm}_{s-1}, \bar{P}^{u\pm}_n;
-          P^{d\pm}_{s+1}, P^{d\pm}_n, \bar{P}^{d\pm}_{s+1}, \bar{P}^{d\pm}_n
+    .. math::
+        :label: fields
+
+        P^{u\pm}_s, P^{d\pm}_s, \bar{P}^{u\pm}_s, \bar{P}^{d\pm}_s;
+        P^{u\pm}_{s-1}, P^{u\pm}_n, \bar{P}^{u\pm}_{s-1}, \bar{P}^{u\pm}_n;
+        P^{d\pm}_{s+1}, P^{d\pm}_n, \bar{P}^{d\pm}_{s+1}, \bar{P}^{d\pm}_n
 
     This function corresponds to equations 81/82, 95/96, 103/104, A-8/A-9,
     A-24/A-25, and A-32/A-33 in [HuTS15]_, and loosely to the corresponding
-    files ``Pdownmin.F90``, ``Pdownplus.F90``, ``Pupmin.F90``, and
-    ``Pdownmin.F90``.
+    files `Pdownmin.F90`, `Pdownplus.F90`, `Pupmin.F90`, and `Pdownmin.F90`.
 
-    This function is called from the function :mod:`kernel.greenfct`.
+    This function is called from the function :func:`greenfct`.
 
     """
+
+    nfreq, noff, nlambda = Gam[:, :, 0, :].shape
 
     # Variables
     nlsr = abs(lsrc-lrec)+1  # nr of layers btw and incl. src and rec layer
@@ -484,21 +606,29 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
             if not plus:
                 mupm = -1
 
+        P = np.zeros_like(iGam)
+
         # Calculate Pu+, Pu-, Pd+, Pd-
         if lsrc == lrec:  # rec in src layer; Eqs  81/82, A-8/A-9
             if last_layer:  # If src/rec are in top (up) or bottom (down) layer
-                if use_ne_eval:
-                    P = use_ne_eval("Rmp*exp(-iGam*dm)")
-                else:
-                    P = Rmp*np.exp(-iGam*dm)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            tRmp = Rmp[i, ii, 0, iv]
+                            tiGam = iGam[i, ii, iv]
+                            P[i, ii, iv] = tRmp*np.exp(-tiGam*dm)
+
             else:           # If src and rec are in any layer in between
-                if use_ne_eval:
-                    Pstr = "(exp(-iGam*dm) + pm*Rpm*exp(-iGam*(ds+dp)))"
-                    Pstr += "* Rmp/(1-Rmp*Rpm*exp(-2*iGam*ds))"
-                    P = use_ne_eval(Pstr)
-                else:
-                    P = np.exp(-iGam*dm) + pm*Rpm*np.exp(-iGam*(ds+dp))
-                    P *= Rmp/(1 - Rmp*Rpm*np.exp(-2*iGam*ds))
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            tiGam = iGam[i, ii, iv]
+                            tRpm = Rpm[i, ii, 0, iv]
+                            tRmp = Rmp[i, ii, 0, iv]
+                            p1 = np.exp(-tiGam*dm)
+                            p2 = pm*tRpm*np.exp(-tiGam*(ds+dp))
+                            p3 = 1 - tRmp * tRpm * np.exp(-2*tiGam*ds)
+                            P[i, ii, iv] = (p1 + p2) * tRmp/p3
 
         else:           # rec above (up) / below (down) src layer
             #           # Eqs  95/96,  A-24/A-25 for rec above src layer
@@ -507,53 +637,56 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, use_ne_eval):
             # First compute P_{s-1} (up) / P_{s+1} (down)
             iRpm = Rpm[:, :, rsrcl, :]
             if first_layer:  # If src is in bottom (up) / top (down) layer
-                if use_ne_eval:
-                    P = use_ne_eval("(1 + iRpm)*mupm*exp(-iGam*dp)")
-                else:
-                    P = (1 + iRpm)*mupm*np.exp(-iGam*dp)
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            tiRpm = iRpm[i, ii, iv]
+                            tiGam = iGam[i, ii, iv]
+                            P[i, ii, iv] = (1 + tiRpm)*mupm*np.exp(-tiGam*dp)
             else:
-                iRmp = Rmp[:, :, rsrcl, :]
-                if use_ne_eval:
-                    Pstr = "(mupm*exp(-iGam*dp) + "
-                    Pstr += "pm*mupm*iRmp*exp(-iGam*(ds+dm)))"
-                    Pstr += "*(1 + iRpm)/(1 - iRmp*iRpm * exp(-2*iGam*ds))"
-                    P = use_ne_eval(Pstr)
-                else:
-                    P = mupm*np.exp(-iGam*dp)
-                    P += pm*mupm*iRmp*np.exp(-iGam * (ds+dm))
-                    P *= (1 + iRpm)/(1 - iRmp*iRpm * np.exp(-2*iGam*ds))
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            iRmp = Rmp[i, ii, rsrcl, iv]
+                            tiGam = iGam[i, ii, iv]
+                            tRpm = iRpm[i, ii, iv]
+                            p1 = mupm*np.exp(-tiGam*dp)
+                            p2 = pm*mupm*iRmp*np.exp(-tiGam * (ds+dm))
+                            p3 = (1 + tRpm)/(1 - iRmp*tRpm*np.exp(-2*tiGam*ds))
+                            P[i, ii, iv] = (p1 + p2) * p3
 
             # If up or down and src is in last but one layer
             if up or (not up and lsrc+1 < depth.size-1):
                 ddepth = depth[lsrc+1-1*pup]-depth[lsrc-1*pup]
-                iRpm = Rpm[:, :, rsrcl-1*pup, :]
-                miGam = Gam[:, :, lsrc-1*pup, :]
-                if use_ne_eval:
-                    P = use_ne_eval("P/(1 + iRpm*exp(-2*miGam * ddepth))")
-                else:
-                    P /= (1 + iRpm*np.exp(-2*miGam * ddepth))
+                for i in range(nfreq):
+                    for ii in range(noff):
+                        for iv in range(nlambda):
+                            tiRpm = Rpm[i, ii, rsrcl-1*pup, iv]
+                            tiGam = Gam[i, ii, lsrc-1*pup, iv]
+                            P[i, ii, iv] /= 1 + tiRpm*np.exp(-2*tiGam*ddepth)
 
             # Second compute P for all other layers
             if nlsr > 2:
                 for iz in izrange:
                     ddepth = depth[isr+iz+pup+1]-depth[isr+iz+pup]
-                    iRpm = Rpm[:, :, iz+pup, :]
-                    piGam = Gam[:, :, isr+iz+pup, :]
-                    if use_ne_eval:
-                        P = use_ne_eval("P*(1 + iRpm)*exp(-piGam * ddepth)")
-                    else:
-                        P *= (1 + iRpm)*np.exp(-piGam * ddepth)
+                    for i in range(nfreq):
+                        for ii in range(noff):
+                            for iv in range(nlambda):
+                                tiRpm = Rpm[i, ii, iz+pup, iv]
+                                piGam = Gam[i, ii, isr+iz+pup, iv]
+                                p1 = (1+tiRpm)*np.exp(-piGam*ddepth)
+                                P[i, ii, iv] *= p1
 
                     # If rec/src NOT in first/last layer (up/down)
                     if isr+iz != last:
                         ddepth = depth[isr+iz+1] - depth[isr+iz]
-                        iRpm = Rpm[:, :, iz, :]
-                        piGam2 = Gam[:, :, isr+iz, :]
-                        if use_ne_eval:
-                            Pstr = "P/(1 + iRpm*exp(-2*piGam2 * ddepth))"
-                            P = use_ne_eval(Pstr)
-                        else:
-                            P /= 1 + iRpm*np.exp(-2*piGam2 * ddepth)
+                        for i in range(nfreq):
+                            for ii in range(noff):
+                                for iv in range(nlambda):
+                                    tiRpm = Rpm[i, ii, iz, iv]
+                                    piGam2 = Gam[i, ii, isr+iz, iv]
+                                    p1 = 1 + tiRpm*np.exp(-2*piGam2 * ddepth)
+                                    P[i, ii, iv] /= p1
 
         # Store P in Pu/Pd
         if up:
@@ -575,12 +708,12 @@ def angle_factor(angle, ab, msrc, mrec):
     angel. The angle-dependency is this factor, which can be applied to the
     corresponding parts in the wavenumber or in the frequency domain.
 
-    The ``angle_factor`` corresponds to the sine and cosine-functions in Eqs
-    105-107, 111-116, 119-121, 123-128.
+    The :func:`angle_factor` corresponds to the sine and cosine-functions in
+    Eqs 105-107, 111-116, 119-121, 123-128.
 
     This function is called from one of the Hankel functions in
-    :mod:`transform`.  Consult the modelling routines in :mod:`model` for a
-    description of the input and output parameters.
+    :mod:`empymod.transform`.  Consult the modelling routines in
+    :mod:`empymod.model` for a description of the input and output parameters.
 
     """
 
@@ -611,13 +744,13 @@ def angle_factor(angle, ab, msrc, mrec):
         eval_angle *= 2
 
     # Get factor
-    factAng = fct(eval_angle)
+    ang_fact = fct(eval_angle)
 
     # Ensure cos([pi/2, 3pi/2]) and sin([pi, 2pi]) are zero (floating pt issue)
-    factAng[np.isclose(np.abs(eval_angle), test_ang_1, 1e-10, 1e-14)] = 0
-    factAng[np.isclose(np.abs(eval_angle), test_ang_2, 1e-10, 1e-14)] = 0
+    ang_fact[np.isclose(np.abs(eval_angle), test_ang_1, 1e-10, 1e-14)] = 0
+    ang_fact[np.isclose(np.abs(eval_angle), test_ang_2, 1e-10, 1e-14)] = 0
 
-    return factAng
+    return ang_fact
 
 
 # Analytical solutions
@@ -626,19 +759,21 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
               mrec):
     r"""Analytical full-space solutions in the frequency domain.
 
-    .. math:: \hat{G}^{ee}_{\alpha\beta}, \hat{G}^{ee}_{3\alpha},
-              \hat{G}^{ee}_{33}, \hat{G}^{em}_{\alpha\beta},
-              \hat{G}^{em}_{\alpha 3}
+    .. math::
+        :label: fullspace
+
+        \hat{G}^{ee}_{\alpha\beta}, \hat{G}^{ee}_{3\alpha},
+        \hat{G}^{ee}_{33}, \hat{G}^{em}_{\alpha\beta}, \hat{G}^{em}_{\alpha 3}
 
     This function corresponds to equations 45--50 in [HuTS15]_, and loosely to
-    the corresponding files ``Gin11.F90``, ``Gin12.F90``, ``Gin13.F90``,
-    ``Gin22.F90``, ``Gin23.F90``, ``Gin31.F90``, ``Gin32.F90``, ``Gin33.F90``,
-    ``Gin41.F90``, ``Gin42.F90``, ``Gin43.F90``, ``Gin51.F90``, ``Gin52.F90``,
-    ``Gin53.F90``, ``Gin61.F90``, and ``Gin62.F90``.
+    the corresponding files `Gin11.F90`, `Gin12.F90`, `Gin13.F90`, `Gin22.F90`,
+    `Gin23.F90`, `Gin31.F90`, `Gin32.F90`, `Gin33.F90`, `Gin41.F90`,
+    `Gin42.F90`, `Gin43.F90`, `Gin51.F90`, `Gin52.F90`, `Gin53.F90`,
+    `Gin61.F90`, and `Gin62.F90`.
 
-    This function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and output
-    parameters.
+    This function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and output parameters.
 
     """
     xco = np.cos(angle)*off
@@ -805,11 +940,11 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
     It can also be used to calculate the fullspace solution or the separate
     fields: direct field, reflected field, and airwave; always using the
-    diffusive approximation. See ``solution``-parameter.
+    diffusive approximation. See `solution`-parameter.
 
-    This function is called from one of the modelling routines in :mod:`model`.
-    Consult these modelling routines for a description of the input and
-    solution parameters.
+    This function is called from one of the modelling routines in
+    :mod:`empymod.model`. Consult these modelling routines for a description of
+    the input and solution parameters.
 
     """
     xco = np.cos(angle)*off

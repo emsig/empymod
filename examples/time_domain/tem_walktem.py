@@ -6,9 +6,9 @@ The modeller ``empymod`` models the electromagnetic (EM) full wavefield Greens
 function for electric and magnetic point sources and receivers. As such, it can
 model any EM method from DC to GPR. However, how to actually implement a
 particular EM method and survey layout can be tricky, as there are many more
-things involved than just calculating the EM Greens function.
+things involved than just computing the EM Greens function.
 
-**In this example we are going to calculate a TEM response, in particular from
+**In this example we are going to compute a TEM response, in particular from
 the system** `WalkTEM <https://www.guidelinegeo.com/product/abem-walktem>`_,
 and compare it with data obtained from `AarhusInv
 <https://hgg.au.dk/software/aarhusinv>`_. However, you can use and adapt this
@@ -137,8 +137,8 @@ def waveform(times, resp, times_wanted, wave_time, wave_amp, nquad=3):
     Parameters
     ----------
     times : ndarray
-        Times of calculated input response; should start before and
-        end after `times_wanted`.
+        Times of computed input response; should start before and end after
+        `times_wanted`.
 
     resp : ndarray
         EM-response corresponding to `times`.
@@ -211,17 +211,17 @@ def waveform(times, resp, times_wanted, wave_time, wave_amp, nquad=3):
 def get_time(time, r_time):
     """Additional time for ramp.
 
-    Because of the arbitrary waveform, we need to calculate some times before
-    and after the actually wanted times for interpolation of the waveform.
+    Because of the arbitrary waveform, we need to compute some times before and
+    after the actually wanted times for interpolation of the waveform.
 
     Some implementation details: The actual times here don't really matter. We
     create a vector of time.size+2, so it is similar to the input times and
     accounts that it will require a bit earlier and a bit later times. Really
     important are only the minimum and maximum times. The Fourier DLF, with
-    `pts_per_dec=-1`, calculates times from minimum to at least the maximum,
+    `pts_per_dec=-1`, computes times from minimum to at least the maximum,
     where the actual spacing is defined by the filter spacing. It subsequently
     interpolates to the wanted times. Afterwards, we interpolate those again to
-    calculate the actual waveform response.
+    compute the actual waveform response.
 
     Note: We could first call `waveform`, and get the actually required times
           from there. This would make this function obsolete. It would also
@@ -252,11 +252,11 @@ def get_time(time, r_time):
 def walktem(moment, depth, res):
     """Custom wrapper of empymod.model.bipole.
 
-    Here, we calculate WalkTEM data using the ``empymod.model.bipole`` routine
-    as an example. We could achieve the same using ``empymod.model.dipole`` or
+    Here, we compute WalkTEM data using the ``empymod.model.bipole`` routine as
+    an example. We could achieve the same using ``empymod.model.dipole`` or
     ``empymod.model.loop``.
 
-    We model the big source square loop by calculating only half of one side of
+    We model the big source square loop by computing only half of one side of
     the electric square loop and approximating the finite length dipole with 3
     point dipole sources. The result is then multiplied by 8, to account for
     all eight half-sides of the square loop.
@@ -313,12 +313,12 @@ def walktem(moment, depth, res):
     time, freq, ft, ftarg = empymod.utils.check_time(
         time=time,          # Required times
         signal=1,           # Switch-on response
-        ft='sin',           # Use DLF
-        ftarg={'fftfilt': 'key_81_CosSin_2009'},  # Short, fast filter; if you
+        ft='dlf',           # Use DLF
+        ftarg={'dlf': 'key_81_CosSin_2009'},  # Short, fast filter; if you
         verb=2,                 # need higher accuracy choose a longer filter.
     )
 
-    # === CALCULATE FREQUENCY-DOMAIN RESPONSE ===
+    # === COMPUTE FREQUENCY-DOMAIN RESPONSE ===
     # We only define a few parameters here. You could extend this for any
     # parameter possible to provide to empymod.model.bipole.
     EM = empymod.model.bipole(
@@ -332,7 +332,7 @@ def walktem(moment, depth, res):
         mrec=True,                    # It is an el. source, but a magn. rec.
         strength=8,                   # To account for 4 sides of square loop.
         srcpts=3,                     # Approx. the finite dip. with 3 points.
-        htarg={'fhtfilt': 'key_101_2009'},  # Short filter, so fast.
+        htarg={'dlf': 'key_101_2009'},  # Short filter, so fast.
     )
 
     # Multiply the frequecny-domain result with
@@ -359,14 +359,14 @@ def walktem(moment, depth, res):
 
 
 ###############################################################################
-# 3. Calculation
+# 3. Computation
 # --------------
 
-# Calculate resistive model
+# Compute resistive model
 lm_empymod_res = walktem('lm', depth=[75], res=[500, 20])
 hm_empymod_res = walktem('hm', depth=[75], res=[500, 20])
 
-# Calculate conductive model
+# Compute conductive model
 lm_empymod_con = walktem('lm', depth=[30], res=[10, 1])
 hm_empymod_con = walktem('hm', depth=[30], res=[10, 1])
 

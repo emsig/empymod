@@ -31,7 +31,7 @@ See the notebooks in the repo `empymod/article-geo2017
 The notebooks contain:
 
 - Comparison to analytical solution
-- FHT filter comparison
+- DLF filter comparison
 - GPR example
 - Time-domain example
 

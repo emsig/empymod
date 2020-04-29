@@ -14,7 +14,6 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-from empymod.scripts import tmtemod
-from empymod.scripts import fdesign
+from empymod.scripts import tmtemod, fdesign
 
 __all__ = ['tmtemod', 'fdesign']

@@ -1,16 +1,16 @@
 r"""
-:mod:`tmtemod` -- Calculate up- and down-going TM and TE modes
-==============================================================
+:mod:`empymod.scripts.tmtemod` -- Calculate up- and down-going TM and TE modes
+==============================================================================
 
-This add-on for ``empymod`` adjusts [HuTS15]_ for TM/TE-split. The development
-was initiated by the development of
+This add-on for empymod adjusts [HuTS15]_ for TM/TE-split. The development was
+initiated by the development of
 https://github.com/empymod/csem-ziolkowski-and-slob ([ZiSl19]_).
 
-This is a stripped-down version of ``empymod`` with a lot of simplifications
-but an important addition. The modeller ``empymod`` returns the total field,
+This is a stripped-down version of empymod with a lot of simplifications
+but an important addition. The modeller empymod returns the total field,
 hence not distinguishing between TM and TE mode, and even less between up- and
 down-going fields. The reason behind this is simple: The derivation of
-[HuTS15]_, on which ``empymod`` is based, returns the total field. In this
+[HuTS15]_, on which empymod is based, returns the total field. In this
 derivation each mode (TM and TE) contains non-physical contributions. The
 non-physical contributions have opposite signs in TM and TE, so they cancel
 each other out in the total field. However, in order to obtain the correct TM
@@ -18,24 +18,24 @@ and TE contributions one has to remove these non-physical parts.
 
 This is what this routine does, but only for an x-directed electric source with
 an x-directed electric receiver, and in the frequency domain (src and rec in
-same layer). This version of ``dipole`` returns the signal separated into TM++,
-TM+-, TM-+, TM--, TE++, TE+-, TE-+, and TE-- as well as the direct field TM and
-TE contributions. The first superscript denotes the direction in which the
-field diffuses towards the receiver and the second superscript denotes the
-direction in which the field diffuses away from the source. For both the
-plus-sign indicates the field diffuses in the downward direction and the
-minus-sign indicates the field diffuses in the upward direction. It uses
-``empymod`` wherever possible. See the corresponding functions in ``empymod``
-for more explanation and documentation regarding input parameters. There are
-important limitations:
+same layer). This version of :func:`empymod.dipole` returns the signal
+separated into TM++, TM+-, TM-+, TM--, TE++, TE+-, TE-+, and TE-- as well as
+the direct field TM and TE contributions. The first superscript denotes the
+direction in which the field diffuses towards the receiver and the second
+superscript denotes the direction in which the field diffuses away from the
+source. For both the plus-sign indicates the field diffuses in the downward
+direction and the minus-sign indicates the field diffuses in the upward
+direction. It uses empymod wherever possible. See the corresponding functions
+in empymod for more explanation and documentation regarding input parameters.
+There are important limitations:
 
-- ``ab`` == 11                   [=> x-directed el. source & el. receivers]
-- ``signal`` == None             [=> only frequency domain]
-- ``xdirect`` == False           [=> direct field calc. in wavenr-domain]
-- ``ht`` == 'fht'
-- ``htarg`` == 'key_201_2012'
-- Options ``ft``, ``ftarg``, ``opt``, and ``loop`` are not available.
-- ``lsrc`` == ``lrec``           [=> src & rec are assumed in same layer!]
+- `ab` == 11                   [=> x-directed el. source & el. receivers]
+- `signal` == None             [=> only frequency domain]
+- `xdirect` == False           [=> direct field calc. in wavenr-domain]
+- `ht` == 'dlf'
+- `htarg` == 'key_201_2012'
+- Options `ft`, `ftarg`, and `loop` are not available.
+- `lsrc` == `lrec`             [=> src & rec are assumed in same layer!]
 - Model must have more than 1 layer
 - Electric permittivity and magnetic permeability are isotropic.
 - Only one frequency at once.
@@ -44,7 +44,7 @@ important limitations:
 Theory
 ------
 
-The derivation of [HuTS15]_, on which ``empymod`` is based, returns the total
+The derivation of [HuTS15]_, on which empymod is based, returns the total
 field. Internally it also calculates TM and TE modes, and sums these up.
 However, the separation into TM and TE mode introduces a singularity at
 :math:`\kappa = 0`. It has no contribution in the space-frequency domain to the
@@ -52,19 +52,18 @@ total fields, but it introduces non-physical events in each mode with opposite
 sign (so they cancel each other out in the total field). In order to obtain the
 correct TM and TE contributions one has to remove these non-physical parts.
 
-To remove the non-physical part we use the file ``tmtemod.py`` in this
-directory. This routine is basically a heavily simplified version of
-``empymod`` with the following limitations outlined above.
+This routine removes the non-physical part. It is basically a heavily
+simplified version of empymod with the following limitations outlined above.
 
-So ``tmtemod.py`` returns the signal separated into TM++, TM+-, TM-+, TM--,
-TE++, TE+-, TE-+, and TE-- as well as the direct field TM and TE contributions.
-The first superscript denotes the direction in which the field diffuses towards
-the receiver and the second superscript denotes the direction in which the
-field diffuses away from the source. For both the plus-sign indicates the field
+It returns the signal separated into TM++, TM+-, TM-+, TM--, TE++, TE+-, TE-+,
+and TE-- as well as the direct field TM and TE contributions. The first
+superscript denotes the direction in which the field diffuses towards the
+receiver and the second superscript denotes the direction in which the field
+diffuses away from the source. For both the plus-sign indicates the field
 diffuses in the downward direction and the minus-sign indicates the field
-diffuses in the upward direction. The routine uses ``empymod`` wherever
-possible, see the corresponding functions in ``empymod`` for more explanation
-and documentation regarding input parameters.
+diffuses in the upward direction. The routine uses empymod wherever possible,
+see the corresponding functions in empymod for more explanation and
+documentation regarding input parameters.
 
 Please note that the notation in [HuTS15]_ differs from the notation in
 [ZiSl19]_. I specify therefore always, which notification applies, either
@@ -73,6 +72,7 @@ Please note that the notation in [HuTS15]_ differs from the notation in
 We start with equation (105) in *Hun15*:
 
 .. math::
+    :label: hun1
 
     \hat{G}^{ee}_{xx}(\boldsymbol{x}, \boldsymbol{x'}, \omega) =
     \hat{G}^{ee;i}_{xx;s}(\boldsymbol{x}-\boldsymbol{x'}, \omega)
@@ -82,6 +82,7 @@ We start with equation (105) in *Hun15*:
     J_0(\kappa r)\kappa d \kappa
 
 .. math::
+    :label: hun2
 
     - \frac{\cos(2\phi)}{8\pi}\int^\infty_{\kappa=0}
     \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} +
@@ -93,6 +94,7 @@ Ignoring the incident field, and using
 :math:`J_2`-integrals, we get
 
 .. math::
+    :label: hun3
 
     \hat{G}^{ee}_{xx}(\boldsymbol{x}, \boldsymbol{x'}, \omega) =
     \frac{1}{8\pi}\int^\infty_{\kappa=0}
@@ -101,6 +103,7 @@ Ignoring the incident field, and using
     J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
 
 .. math::
+    :label: hun4
 
     + \frac{\cos(2\phi)}{8\pi}\int^\infty_{\kappa=0}
     \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} +
@@ -108,6 +111,7 @@ Ignoring the incident field, and using
     J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
 
 .. math::
+    :label: hun5
 
     - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
     \left(\frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s} +
@@ -117,34 +121,38 @@ Ignoring the incident field, and using
 From this the TM- and TE-parts follow as
 
 .. math::
+    :label: hun6
 
-     {\mathrm{TE}} = \frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
-     \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}
-     J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
-      - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
-     \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}
-     J_1(\kappa r)\,{\mathrm{d}}\kappa ,
+    {\mathrm{TE}} = \frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
+    \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}
+    J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
+    - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+    \frac{\zeta_s \tilde{g}^{te}_{zz;s}}{\bar{\Gamma}_s}
+    J_1(\kappa r)\,{\mathrm{d}}\kappa ,
 
 .. math::
+    :label: hun7
 
-       {\mathrm{TM}} = \frac{\cos(2\phi)+1}{8\pi}\int^\infty_{\kappa=0}
-     \frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}
-     J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
-     - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
-     \frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}
-     J_1(\kappa r)\,{\mathrm{d}}\kappa .
+      {\mathrm{TM}} = \frac{\cos(2\phi)+1}{8\pi}\int^\infty_{\kappa=0}
+    \frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}
+    J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
+    - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+    \frac{\Gamma_s \tilde{g}^{tm}_{hh;s}}{\eta_s}
+    J_1(\kappa r)\,{\mathrm{d}}\kappa .
 
 Equations (108) and (109) in Hun15 yield the required parameters
 :math:`\tilde{g}^{tm}_{hh;s}` and :math:`\tilde{g}^{te}_{zz;s}`,
 
 .. math::
+    :label: hun8
 
-     \tilde{g}^{tm}_{hh;s} = P^{u-}_s W^u_s + P^{d-}_s W^d_s ,
+    \tilde{g}^{tm}_{hh;s} = P^{u-}_s W^u_s + P^{d-}_s W^d_s ,
 
 .. math::
+    :label: hun9
 
-     \tilde{g}^{te}_{zz;s} = \bar{P}^{u+}_s \bar{W}^u_s +
-                              \bar{P}^{d+}_s \bar{W}^d_s \ .
+    \tilde{g}^{te}_{zz;s} = \bar{P}^{u+}_s \bar{W}^u_s +
+                             \bar{P}^{d+}_s \bar{W}^d_s \ .
 
 The parameters :math:`P^{u\pm}_s` and :math:`P^{d\pm}_s` are given in equations
 (81) and (82), :math:`\bar{P}^{u\pm}_s` and :math:`\bar{P}^{d\pm}_s` in
@@ -152,27 +160,31 @@ equations (A-8) and (A-9); :math:`W^u_s` and :math:`W^d_s` in equation (74)
 in Hun15. This yields
 
 .. math::
+    :label: hun10
 
-     \tilde{g}^{te}_{zz;s} =
-     \frac{\bar{R}_s^+}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(z_s-z+d^+)] +
-     \bar{R}_s^-\exp[-\bar{\Gamma}_s(z_s-z+d_s+d^-)]\right\}
-
-.. math::
-
-     + \frac{\bar{R}_s^-}{\bar{M}_s}
-     \left\{\exp[-\bar{\Gamma}_s(z-z_{s-1}+d^-)]+
-     \bar{R}_s^+\exp[-\bar{\Gamma}_s(z-z_{s-1}+d_s+d^+)]\right\} ,
+    \tilde{g}^{te}_{zz;s} =
+    \frac{\bar{R}_s^+}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(z_s-z+d^+)] +
+    \bar{R}_s^-\exp[-\bar{\Gamma}_s(z_s-z+d_s+d^-)]\right\}
 
 .. math::
+    :label: hun11
 
-     =\frac{\bar{R}_s^+}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(2z_s-z-z')]
-     + \bar{R}_s^-\exp[-\bar{\Gamma}_s(z'-z+2d_s)]\right\}
+    + \frac{\bar{R}_s^-}{\bar{M}_s}
+    \left\{\exp[-\bar{\Gamma}_s(z-z_{s-1}+d^-)]+
+    \bar{R}_s^+\exp[-\bar{\Gamma}_s(z-z_{s-1}+d_s+d^+)]\right\} ,
 
 .. math::
+    :label: hun12
 
-     + \frac{\bar{R}_s^-}{\bar{M}_s}
-     \left\{\exp[-\bar{\Gamma}_s(z+z'-2z_{s-1})]+
-     \bar{R}_s^+\exp[-\bar{\Gamma}_s(z-z'+2d_s)]\right\} ,
+    =\frac{\bar{R}_s^+}{\bar{M}_s}\left\{\exp[-\bar{\Gamma}_s(2z_s-z-z')]
+    + \bar{R}_s^-\exp[-\bar{\Gamma}_s(z'-z+2d_s)]\right\}
+
+.. math::
+    :label: hun13
+
+    + \frac{\bar{R}_s^-}{\bar{M}_s}
+    \left\{\exp[-\bar{\Gamma}_s(z+z'-2z_{s-1})]+
+    \bar{R}_s^+\exp[-\bar{\Gamma}_s(z-z'+2d_s)]\right\} ,
 
 
 where :math:`d^\pm` is taken from the text below equation (67). There are four
@@ -184,50 +196,57 @@ and the second term in the second line is TE--.
 If we look at TE+-, we have
 
 .. math::
+    :label: hun14
 
-   \tilde{g}^{te+-}_{zz;s} =
-   \frac{\bar{R}_s^+}{\bar{M}_s}\exp[-\bar{\Gamma}_s(2z_s-z-z')] \ ,
+    \tilde{g}^{te+-}_{zz;s} =
+    \frac{\bar{R}_s^+}{\bar{M}_s}\exp[-\bar{\Gamma}_s(2z_s-z-z')] \ ,
 
 
 and therefore
 
 .. math::
+    :label: hun15
 
-   {\mathrm{TE}}^{+-} = \frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
-   \frac{\zeta_s \bar{R}_s^+}{\bar{\Gamma}_s\bar{M}_s}
-   \exp[-\bar{\Gamma}_s(2z_s-z-z')]
-   J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
+    {\mathrm{TE}}^{+-} = \frac{\cos(2\phi)-1}{8\pi}\int^\infty_{\kappa=0}
+    \frac{\zeta_s \bar{R}_s^+}{\bar{\Gamma}_s\bar{M}_s}
+    \exp[-\bar{\Gamma}_s(2z_s-z-z')]
+    J_0(\kappa r)\kappa\,{\mathrm{d}}\kappa
 
 .. math::
-   - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
-   \frac{\zeta_s \bar{R}_s^+}{\bar{\Gamma}_s\bar{M}_s}
-   \exp[-\bar{\Gamma}_s(2z_s-z-z')]
-   J_1(\kappa r)\,{\mathrm{d}}\kappa .
+    :label: hun16
+
+    - \frac{\cos(2\phi)}{4\pi r}\int^\infty_{\kappa=0}
+    \frac{\zeta_s \bar{R}_s^+}{\bar{\Gamma}_s\bar{M}_s}
+    \exp[-\bar{\Gamma}_s(2z_s-z-z')]
+    J_1(\kappa r)\,{\mathrm{d}}\kappa .
 
 We can compare this to equation (4.165) in Zio19, with :math:`\hat{I}^e_x=1`
 and slightly re-arranging it to look more alike, we get
 
 .. math::
+    :label: hun17
 
-   \hat{E}^{+-}_{xx;H} = \frac{y^2}{4\pi r^2}
+    \hat{E}^{+-}_{xx;H} = \frac{y^2}{4\pi r^2}
+    \int^\infty_{\kappa=0} \frac{\zeta_1}{\Gamma_1}
+    \frac{R^-_{H;1}}{M_{H;1}}
+    \exp(-\Gamma_1 h^{+-})J_0(\kappa r)\kappa d\kappa
+
+.. math::
+    :label: hun18
+
+   + \frac{x^2-y^2}{4\pi r^3}
    \int^\infty_{\kappa=0} \frac{\zeta_1}{\Gamma_1}
-   \frac{R^-_{H;1}}{M_{H;1}}
-   \exp(-\Gamma_1 h^{+-})J_0(\kappa r)\kappa d\kappa
-
-.. math::
-
-  + \frac{x^2-y^2}{4\pi r^3}
-  \int^\infty_{\kappa=0} \frac{\zeta_1}{\Gamma_1}
-  \left(\frac{R^-_{H;1}}{M_{H;1}} -
-  \frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}\right)
-  \exp(-\Gamma_1 h^{+-})J_1(\kappa r) d\kappa
+   \left(\frac{R^-_{H;1}}{M_{H;1}} -
+   \frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}\right)
+   \exp(-\Gamma_1 h^{+-})J_1(\kappa r) d\kappa
 
 
 .. math::
+    :label: hun19
 
-   - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-   \frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}
-   \exp(-\gamma_1 R^{+-}) .
+    - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+    \frac{R^-_{H;1}(\kappa=0)}{M_{H;1}(\kappa=0)}
+    \exp(-\gamma_1 R^{+-}) .
 
 The notation in this equation follows Zio19.
 
@@ -239,50 +258,58 @@ contributions only affect the :math:`J_1`-integrals, and only for :math:`\kappa
 = 0`.
 
 The following lists for all 8 cases the term that has to be removed, in the
-notation of Zio19 (for the notation as in Hun15 see the implementation in
-``tmtemod.py``):
+notation of Zio19 (for the notation as in Hun15 see the implementation in this
+file):
 
 .. math::
+    :label: hun20
 
-  TE^{++} = + \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \frac{\exp(-\gamma_1 |h^-|) }{M_{H;1}(\kappa=0)} ,
-
-.. math::
-
-  TE^{-+} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \frac{R^+_{H;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{H;1}(\kappa=0)} ,
+    TE^{++} = + \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+    \frac{\exp(-\gamma_1 |h^-|) }{M_{H;1}(\kappa=0)} ,
 
 .. math::
+    :label: hun21
 
-  TE^{+-} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \frac{R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{H;1}(\kappa=0)} ,
-
-.. math::
-
-  TE^{--} = + \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \frac{R^+_{H;1}(\kappa=0)R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
-  {M_{H;1}(\kappa=0)} ,
+    TE^{-+} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+    \frac{R^+_{H;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{H;1}(\kappa=0)} ,
 
 .. math::
+    :label: hun22
 
-  TM^{++} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \frac{\exp(-\gamma_1 |h^-|) }{M_{V;1}(\kappa=0)} ,
-
-.. math::
-
-  TM^{-+} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \frac{R^+_{V;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{V;1}(\kappa=0)} ,
+    TE^{+-} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+    \frac{R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{H;1}(\kappa=0)} ,
 
 .. math::
+    :label: hun23
 
-  TM^{+-} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \frac{R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{V;1}(\kappa=0)} ,
+    TE^{--} = + \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+    \frac{R^+_{H;1}(\kappa=0)R^-_{H;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
+    {M_{H;1}(\kappa=0)} ,
 
 .. math::
+    :label: hun24
 
-  TM^{--} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
-  \frac{R^+_{V;1}(\kappa=0)R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
-  {M_{V;1}(\kappa=0)} .
+    TM^{++} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+    \frac{\exp(-\gamma_1 |h^-|) }{M_{V;1}(\kappa=0)} ,
+
+.. math::
+    :label: hun25
+
+    TM^{-+} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+    \frac{R^+_{V;1}(\kappa=0)\exp(-\gamma_1 h^{-+}) }{M_{V;1}(\kappa=0)} ,
+
+.. math::
+    :label: hun26
+
+    TM^{+-} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+    \frac{R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{+-}) }{M_{V;1}(\kappa=0)} ,
+
+.. math::
+    :label: hun27
+
+    TM^{--} = - \frac{\zeta_1 (x^2-y^2)}{4\pi\gamma_1 r^4}
+    \frac{R^+_{V;1}(\kappa=0)R^-_{V;1}(\kappa=0)\exp(-\gamma_1 h^{--}) }
+    {M_{V;1}(\kappa=0)} .
 
 
 
@@ -298,8 +325,9 @@ Hun15 uses :math:`\phi`, whereas Zio19 uses :math:`x`, :math:`y`, for which we
 can use
 
 .. math::
+    :label: hun28
 
-   \cos(2\phi) = -\frac{x^2-y^2}{r^2} \ .
+    \cos(2\phi) = -\frac{x^2-y^2}{r^2} \ .
 
 
 """
@@ -333,7 +361,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
            verb=2):
     r"""Return the electromagnetic field due to a dipole source.
 
-    This is a modified version of ``empymod.model.dipole()``. It returns the
+    This is a modified version of :func:`empymod.model.dipole`. It returns the
     separated contributions of TM--, TM-+, TM+-, TM++, TMdirect, TE--, TE-+,
     TE+-, TE++, and TEdirect.
 
@@ -357,8 +385,8 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
         Horizontal resistivities rho_h (Ohm.m); #res = #depth + 1.
 
     freqtime : float
-        Frequency f (Hz). (The name ``freqtime`` is kept for consistency with
-        ``empymod.model.dipole()``. Only one frequency at once.
+        Frequency f (Hz). (The name `freqtime` is kept for consistency with
+        :func:`empymod.model.dipole`. Only one frequency at once.
 
     aniso : array_like, optional
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
@@ -374,11 +402,12 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
 
     verb : {0, 1, 2, 3, 4}, optional
         Level of verbosity, default is 2:
-            - 0: Print nothing.
-            - 1: Print warnings.
-            - 2: Print additional runtime and kernel calls
-            - 3: Print additional start/stop, condensed parameter information.
-            - 4: Print additional full parameter information
+
+        - 0: Print nothing.
+        - 1: Print warnings.
+        - 2: Print additional runtime and kernel calls
+        - 3: Print additional start/stop, condensed parameter information.
+        - 4: Print additional full parameter information
 
 
     Returns
@@ -423,19 +452,19 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
     lsrc, zsrc = get_layer_nr(src, depth)
     lrec, zrec = get_layer_nr(rec, depth)
 
-    # Check limitations of this routine compared to the standard ``dipole``
+    # Check limitations of this routine compared to the standard `dipole`
     if lsrc != lrec:                           # src and rec in same layer
-        print("* ERROR   :: src and rec must be in the same layer; " +
-              "<lsrc>/<lrec> provided: "+str(lsrc)+"/"+str(lrec))
+        print("* ERROR   :: src and rec must be in the same layer; "
+              f"<lsrc>/<lrec> provided: {lsrc}/{lrec}")
         raise ValueError('src-z/rec-z')
 
     if depth.size < 2:                         # at least two layers
-        print("* ERROR   :: model must have more than one layer; " +
+        print("* ERROR   :: model must have more than one layer; "
               "<depth> provided: "+_strvar(depth[1:]))
         raise ValueError('depth')
 
     if freq.size > 1:                          # only 1 frequency
-        print("* ERROR   :: only one frequency permitted; " +
+        print("* ERROR   :: only one frequency permitted; "
               "<freqtime> provided: "+_strvar(freqtime))
         raise ValueError('frequency')
 
@@ -456,20 +485,20 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
                         zetaV, lambd)
 
     # 3.3. CARRY OUT THE HANKEL TRANSFORM WITH DLF
-    factAng = angle_factor(ang, 11, False, False)
-    zmfactAng = (factAng[:, np.newaxis]-1)/2
-    zpfactAng = (factAng[:, np.newaxis]+1)/2
+    ang_fact = angle_factor(ang, 11, False, False)
+    zm_ang_fact = (ang_fact[:, np.newaxis]-1)/2
+    zp_ang_fact = (ang_fact[:, np.newaxis]+1)/2
     fact = 4*np.pi*off
 
     # TE [uu, ud, du, dd, df]
     for i, val in enumerate(PTE):
-        PTE[i] = (factAng*np.dot(-val, filt.j1)/off +
-                  np.dot(zmfactAng*val*lambd, filt.j0))/fact
+        PTE[i] = (ang_fact*np.dot(-val, filt.j1)/off +
+                  np.dot(zm_ang_fact*val*lambd, filt.j0))/fact
 
     # TM [uu, ud, du, dd, df]
     for i, val in enumerate(PTM):
-        PTM[i] = (factAng*np.dot(-val, filt.j1)/off +
-                  np.dot(zpfactAng*val*lambd, filt.j0))/fact
+        PTM[i] = (ang_fact*np.dot(-val, filt.j1)/off +
+                  np.dot(zp_ang_fact*val*lambd, filt.j0))/fact
 
     # 3.4. Remove non-physical contributions
 
@@ -488,7 +517,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
         r"""Return Rp, Rm."""
 
         # Get Rp/Rm for lambd=0
-        Rp, Rm = reflections(depth, z_eta, Gam, lrec, lsrc, False)
+        Rp, Rm = reflections(depth, z_eta, Gam, lrec, lsrc)
 
         # Depending on model Rp/Rm have 3 or 4 dimensions. Last two are
         # wavenumbers and layers btw src and rec, which both are 1.
@@ -501,7 +530,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
 
         # Calculate reverberation M and general factor npfct
         Ms = 1 - Rp*Rm*np.exp(-2*iGam*ds)
-        npfct = factAng*zetaH[:, lsrc]/(fact*off*lgam*Ms)
+        npfct = ang_fact*zetaH[:, lsrc]/(fact*off*lgam*Ms)
 
         return Rp, Rm, npfct
 
@@ -562,7 +591,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd):
         lrecGam = Gam[:, :, lrec, :]
 
         # Reflection (coming from below (Rp) and above (Rm) rec)
-        Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc, False)
+        Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
 
         # Field propagators
         # (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74
@@ -648,12 +677,12 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, TM):
         # Calculate Pu+, Pu-, Pd+, Pd-; rec in src layer; Eqs  81/82, A-8/A-9
         iGam = Gam[:, :, lsrc, :]
         if last_layer:  # If src/rec are in top (up) or bottom (down) layer
-            Pd = Rmp*np.exp(-iGam*dm)
+            Pd = Rmp[:, :, 0, :]*np.exp(-iGam*dm)
             Pu = np.full_like(Gam[:, :, lsrc, :], 0+0j)
         else:           # If src and rec are in any layer in between
-            Ms = 1 - Rmp*Rpm*np.exp(-2*iGam*ds)
-            Pd = Rmp/Ms*np.exp(-iGam*dm)
-            Pu = Rmp/Ms*pm*Rpm*np.exp(-iGam*(ds+dp))
+            Ms = 1 - Rmp[:, :, 0, :]*Rpm[:, :, 0, :]*np.exp(-2*iGam*ds)
+            Pd = Rmp[:, :, 0, :]/Ms*np.exp(-iGam*dm)
+            Pu = Rmp[:, :, 0, :]/Ms*pm*Rpm[:, :, 0, :]*np.exp(-iGam*(ds+dp))
 
         # Store P's
         if up:

@@ -2,13 +2,6 @@ import pytest
 import numpy as np
 from numpy.testing import assert_allclose
 
-# See if numexpr is installed, and if it is, if it uses VML
-try:
-    from numexpr import use_vml, evaluate as use_ne_eval
-except ImportError:
-    use_vml = False
-    use_ne_eval = False
-
 # Optional import
 try:
     import scooby
@@ -20,22 +13,26 @@ from empymod import utils, filters
 
 def test_emarray():
     out = utils.EMArray(3)
-    assert out.amp == 3
-    assert out.pha == 0
+    assert out.amp() == 3
+    assert out.pha() == 0
     assert out.real == 3
     assert out.imag == 0
 
     out = utils.EMArray(1+1j)
-    assert out.amp == np.sqrt(2)
-    assert out.pha == 45.
+    assert out.amp() == np.sqrt(2)
+    assert_allclose(out.pha(), np.pi/4)
     assert out.real == 1
     assert out.imag == 1
 
-    out = utils.EMArray([1+1j, 0+1j])
-    assert_allclose(out.amp, [np.sqrt(2), 1])
-    assert_allclose(out.pha, [45., 90.])
-    assert_allclose(out.real, [1, 0])
-    assert_allclose(out.imag, [1, 1])
+    out = utils.EMArray([1+1j, 0+1j, -1-1j])
+    assert_allclose(out.amp(), [np.sqrt(2), 1, np.sqrt(2)])
+    assert_allclose(out.pha(unwrap=False), [np.pi/4, np.pi/2, -3*np.pi/4])
+    assert_allclose(out.pha(deg=True, unwrap=False), [45., 90., -135.])
+    assert_allclose(out.pha(deg=True, unwrap=False, lag=False),
+                    [-45., -90., 135.])
+    assert_allclose(out.pha(deg=True, lag=False), [-45., -90., -225.])
+    assert_allclose(out.real, [1, 0, -1])
+    assert_allclose(out.imag, [1, 1, -1])
 
 
 def test_check_ab(capsys):
@@ -84,8 +81,11 @@ def test_check_bipole():
     # # Dipole stuff
 
     # Normal case
-    pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 0, 32]
-    pole, nout, outz, isdipole = utils.check_bipole(pole, 'tvar')
+    ipole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 0, 32]
+    inp_type = type(ipole[0])
+    pole, nout, outz, isdipole = utils.check_bipole(ipole, 'tvar')
+    out_type = type(ipole[0])
+    assert inp_type == out_type  # Check input wasn't altered.
     assert_allclose(pole[0], np.array([0, 0, 0]))
     assert_allclose(pole[1], np.array([10, 20, 30]))
     assert_allclose(pole[2], np.array([100, 0, 100]))
@@ -122,8 +122,11 @@ def test_check_bipole():
         utils.check_bipole(pole, 'tvar')
 
     # Normal case
-    pole = [0, 0, 1000, 1000, 10, 20]
-    pole, nout, outz, isdipole = utils.check_bipole(pole, 'tvar')
+    ipole = [0, 0, 1000, 1000, 10, 20]
+    inp_type = type(ipole[0])
+    pole, nout, outz, isdipole = utils.check_bipole(ipole, 'tvar')
+    out_type = type(ipole[0])
+    assert inp_type == out_type  # Check input wasn't altered.
     assert_allclose(pole[0], 0)
     assert_allclose(pole[1], 0)
     assert_allclose(pole[2], 1000)
@@ -153,8 +156,12 @@ def test_check_bipole():
 
 def test_check_dipole(capsys):
     # correct input, verb > 2, src
-    src, nsrc = utils.check_dipole([[1000, 2000], [0, 0], 0], 'src', 3)
+    isrc = [[1000, 2000], [0, 0], 0]
+    inp_type = type(isrc[0])
+    src, nsrc = utils.check_dipole(isrc, 'src', 3)
     out, _ = capsys.readouterr()
+    out_type = type(isrc[0])
+    assert inp_type == out_type  # Check input wasn't altered.
     assert nsrc == 2
     assert_allclose(src[0], [1000, 2000])
     assert_allclose(src[1], [0, 0])
@@ -241,89 +248,133 @@ def test_check_frequency(capsys):
 
 
 def test_check_hankel(capsys):
-    # # FHT # #
+    # # DLF # #
     # verbose
-    ht, htarg = utils.check_hankel('fht', None, 4)
+    ht, htarg = utils.check_hankel('dlf', {}, 4)
     out, _ = capsys.readouterr()
     assert "   Hankel          :  DLF (Fast Hankel Transform)\n     > F" in out
     assert "     > DLF type    :  Standard" in out
-    assert ht == 'fht'
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == 0
+    assert ht == 'dlf'
+    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['pts_per_dec'] == 0
 
-    # [filter str]
-    _, htarg = utils.check_hankel('fht', 'key_201_2009', 0)
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == 0
-    # [filter inst]
-    _, htarg = utils.check_hankel('fht', filters.kong_61_2007(), 0)
-    assert htarg[0].name == filters.kong_61_2007().name
-    assert htarg[1] == 0
-    # ['', pts_per_dec]  :: list
-    _, htarg = utils.check_hankel('fht', ['', 20], 0)
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == 20
-    # ['', pts_per_dec]  :: dict
-    _, htarg = utils.check_hankel('fht', {'pts_per_dec': -1}, 4)
+    # provide filter-string and unknown parameter
+    _, htarg = utils.check_hankel('dlf', {'dlf': 'key_201_2009', 'abc': 0}, 1)
+    out, _ = capsys.readouterr()
+    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['pts_per_dec'] == 0
+    assert "WARNING :: Unknown htarg {'abc': 0} for method 'dlf'" in out
+
+    # provide filter-instance
+    _, htarg = utils.check_hankel('dlf', {'dlf': filters.kong_61_2007()}, 0)
+    assert htarg['dlf'].name == filters.kong_61_2007().name
+    assert htarg['pts_per_dec'] == 0
+
+    # provide pts_per_dec
+    _, htarg = utils.check_hankel('dlf', {'pts_per_dec': -1}, 3)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Lagged Convolution" in out
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == -1
-    # [filter str, pts_per_dec]
-    _, htarg = utils.check_hankel('fht', ['key_201_2009', 20], 4)
+    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['pts_per_dec'] == -1
+
+    # provide filter-string and pts_per_dec
+    _, htarg = utils.check_hankel(
+            'dlf', {'dlf': 'key_201_2009', 'pts_per_dec': 20}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Splined, 20.0 pts/dec" in out
-    assert htarg[0].name == filters.key_201_2009().name
-    assert htarg[1] == 20
+    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['pts_per_dec'] == 20
 
     # # QWE # #
     # verbose
-    ht, htarg = utils.check_hankel('qwe', None, 4)
+    ht, htarg = utils.check_hankel('qwe', {}, 4)
     out, _ = capsys.readouterr()
     outstr = "   Hankel          :  Quadrature-with-Extrapolation\n     > rtol"
     assert outstr in out
-    assert ht == 'hqwe'
-    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 0, 100])
-    assert htarg[-3] is None
-    assert htarg[-2] is None
-    assert htarg[-1] is None
+    assert ht == 'qwe'
+    assert htarg['rtol'] == 1e-12
+    assert htarg['atol'] == 1e-30
+    assert htarg['nquad'] == 51
+    assert htarg['maxint'] == 100
+    assert htarg['pts_per_dec'] == 0
+    assert htarg['diff_quad'] == 100
+    assert htarg['a'] is None
+    assert htarg['b'] is None
+    assert htarg['limit'] is None
 
-    # only last argument
-    _, htarg = utils.check_hankel('qwe', ['', '', '', '', '', '', '', '', 30],
-                                  0)
-    assert_allclose(htarg[:-3], [1e-12, 1e-30, 51, 100, 0, 100])
-    assert htarg[-3] is None
-    assert htarg[-2] is None
-    assert htarg[-1] == 30
+    # limit
+    _, htarg = utils.check_hankel('qwe', {'limit': 30}, 0)
+    assert htarg['rtol'] == 1e-12
+    assert htarg['atol'] == 1e-30
+    assert htarg['nquad'] == 51
+    assert htarg['maxint'] == 100
+    assert htarg['pts_per_dec'] == 0
+    assert htarg['diff_quad'] == 100
+    assert htarg['a'] is None
+    assert htarg['b'] is None
+    assert htarg['limit'] == 30
 
     # all arguments
-    _, htarg = utils.check_hankel('qwe', [1e-3, 1e-4, 31, 20, 30, 200, 1e-6,
-                                          160, 30], 3)
+    _, htarg = utils.check_hankel(
+            'qwe', {'rtol': 1e-3, 'atol': 1e-4, 'nquad': 31, 'maxint': 20,
+                    'pts_per_dec': 30, 'diff_quad': 200, 'a': 1e-6, 'b': 160,
+                    'limit': 30},
+            3)
     out, _ = capsys.readouterr()
     assert "     > a     (quad):  1e-06" in out
     assert "     > b     (quad):  160" in out
     assert "     > limit (quad):  30" in out
-    assert_allclose(htarg, [1e-3, 1e-4, 31, 20, 30, 200, 1e-6, 160, 30])
+    assert htarg['rtol'] == 1e-3
+    assert htarg['atol'] == 1e-4
+    assert htarg['nquad'] == 31
+    assert htarg['maxint'] == 20
+    assert htarg['pts_per_dec'] == 30
+    assert htarg['diff_quad'] == 200
+    assert htarg['a'] == 1e-6
+    assert htarg['b'] == 160
+    assert htarg['limit'] == 30
 
     # # QUAD # #
     # verbose
-    ht, htarg = utils.check_hankel('quad', None, 4)
+    ht, htarg = utils.check_hankel('quad', {}, 4)
     out, _ = capsys.readouterr()
     outstr = "   Hankel          :  Quadrature\n     > rtol"
     assert outstr in out
-    assert ht == 'hquad'
-    assert_allclose(htarg, [1e-12, 1e-20, 500, 1e-6, 0.1, 40])
+    assert ht == 'quad'
+    assert htarg['rtol'] == 1e-12
+    assert htarg['atol'] == 1e-20
+    assert htarg['limit'] == 500
+    assert htarg['a'] == 1e-6
+    assert htarg['b'] == 0.1
+    assert htarg['pts_per_dec'] == 40
 
-    # only last argument
-    _, htarg = utils.check_hankel('quad', ['', '', '', '', '', 100], 0)
-    assert_allclose(htarg, [1e-12, 1e-20, 500, 1e-6, 0.1, 100])
+    # pts_per_dec
+    _, htarg = utils.check_hankel('quad', {'pts_per_dec': 100}, 0)
+    assert htarg['rtol'] == 1e-12
+    assert htarg['atol'] == 1e-20
+    assert htarg['limit'] == 500
+    assert htarg['a'] == 1e-6
+    assert htarg['b'] == 0.1
+    assert htarg['pts_per_dec'] == 100
     # all arguments
-    _, htarg = utils.check_hankel('quad', [1e-3, 1e-4, 100, 1e-10, 200, 50], 0)
-    assert_allclose(htarg, [1e-3, 1e-4, 100, 1e-10, 200, 50])
+    _, htarg = utils.check_hankel(
+            'quad', {'rtol': 1e-3, 'atol': 1e-4, 'limit': 100, 'a': 1e-10,
+                     'b': 200, 'pts_per_dec': 50},
+            0)
+    assert htarg['rtol'] == 1e-3
+    assert htarg['atol'] == 1e-4
+    assert htarg['limit'] == 100
+    assert htarg['a'] == 1e-10
+    assert htarg['b'] == 200
+    assert htarg['pts_per_dec'] == 50
 
     # wrong ht
     with pytest.raises(ValueError):
-        utils.check_hankel('doesnotexist', None, 1)
+        utils.check_hankel('doesnotexist', {}, 1)
+
+    # filter missing attributes
+    with pytest.raises(AttributeError):
+        utils.check_hankel('dlf', {'dlf': 'key_101_CosSin_2012'}, 1)
 
 
 def test_check_model(capsys):
@@ -333,7 +384,7 @@ def test_check_model(capsys):
     depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace = res
     out, _ = capsys.readouterr()
     assert "* WARNING :: Parameter aniso < " in out
-    assert "   direct field    :  Calc. in frequency domain" in out
+    assert "   direct field    :  Comp. in frequency domain" in out
     assert_allclose(depth, [-np.infty, 0])
     assert_allclose(res, [1e20, 20])
     assert_allclose(aniso, [1, np.sqrt(1e-20/20)])
@@ -347,7 +398,7 @@ def test_check_model(capsys):
     res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
                             [1, 1], False, 3)
     out, _ = capsys.readouterr()
-    assert "   direct field    :  Calc. in wavenumber domain" in out
+    assert "   direct field    :  Comp. in wavenumber domain" in out
 
     # xdirect=None
     res = utils.check_model(0, [1e20, 20], [1, 2], [0, 1], [50, 80], [10, 1],
@@ -439,65 +490,19 @@ def test_check_all_depths():
         assert_allclose(lhs_l2h[6], var[6][::swap])
 
 
-def test_check_opt(capsys):
-    fhtarg = [filters.kong_61_2007(), 43]
-    qwehtarg = [np.array(1e-12), np.array(1e-30), np.array(51), np.array(100),
-                np.array(33)]
-
-    res = utils.check_opt(None, None, 'fht', fhtarg, 4)
-    assert_allclose(res, (False, True, False))
-    out, _ = capsys.readouterr()
-    outstr = "   Kernel Opt.     :  None\n   Loop over       :  Freq"
-    assert out[:53] == outstr
-
-    res = utils.check_opt(None, 'off', 'hqwe', qwehtarg, 4)
-    assert_allclose(res, (False, True, False))
-    out, _ = capsys.readouterr()
-    outstr = "   Kernel Opt.     :  None\n   Loop over       :  Freq"
-    assert out[:53] == outstr
-
-    res = utils.check_opt('parallel', 'off', 'fht', [fhtarg[0], 0], 4)
-    if use_vml:
-        assert_allclose(callable(res[0]), True)
-        outstr = "   Kernel Opt.     :  Use parallel\n   Loop over       :  Of"
-    elif not use_ne_eval:
-        assert_allclose(callable(res[0]), False)
-        outstr = "* WARNING :: `numexpr` is not installed, `opt=='parallel'` "
-    else:
-        assert_allclose(callable(res[0]), False)
-        outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"
-    assert_allclose(res[1:], (False, True))
-    out, _ = capsys.readouterr()
-    assert out[:59] == outstr
-
-    res = utils.check_opt('parallel', 'freq', 'hqwe', qwehtarg, 4)
-    if use_vml:
-        assert_allclose(callable(res[0]), True)
-        outstr = "   Kernel Opt.     :  Use parallel\n   Loop over       :  Fr"
-    elif not use_ne_eval:
-        assert_allclose(callable(res[0]), False)
-        outstr = "* WARNING :: `numexpr` is not installed, `opt=='parallel'` "
-    else:
-        assert_allclose(callable(res[0]), False)
-        outstr = "* WARNING :: `numexpr` is not installed with VML, `opt=='pa"
-    assert_allclose(res[1:], (True, False))
-    out, _ = capsys.readouterr()
-    assert out[:59] == outstr
-
-
 def test_check_time(capsys):
     time = np.array([3])
 
-    # # FFHT # #
+    # # DLF # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'ffht', None, 4)
+    _, f, ft, ftarg = utils.check_time(time, 0, 'dlf', {}, 4)
     out, _ = capsys.readouterr()
     assert "   time        [s] :  3" in out
     assert "   Fourier         :  DLF (Sine-Filter)" in out
     assert "> DLF type    :  Lagged Convolution" in out
-    assert ft == 'ffht'
-    assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] == -1
+    assert ft == 'dlf'
+    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['pts_per_dec'] == -1
     f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
                    7.39786458e-08, 8.50106448e-08, 9.76877807e-08,
                    1.12255383e-07, 1.28995366e-07, 1.48231684e-07])
@@ -507,79 +512,91 @@ def test_check_time(capsys):
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 201+3)
-    assert ftarg[2] == 'sin'
+    assert ftarg['kind'] == 'sin'
 
-    # [filter str]
-    _, f, _, ftarg = utils.check_time(time, -1, 'cos', 'key_201_CosSin_2012',
-                                      4)
+    # filter-string and unknown parameter
+    _, f, _, ftarg = utils.check_time(
+            time, -1, 'dlf',
+            {'dlf': 'key_201_CosSin_2012', 'kind': 'cos', 'notused': 1},
+            4)
     out, _ = capsys.readouterr()
     outstr = "   time        [s] :  3\n"
     outstr += "   Fourier         :  DLF (Cosine-Filter)\n     > Filter"
-    assert out[:79] == outstr
-    assert ft == 'ffht'
-    assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] == -1
+    assert outstr in out
+    assert "WARNING :: Unknown ftarg {'notused': 1} for method 'dlf'" in out
+    assert ft == 'dlf'
+    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 201+3)
-    assert ftarg[2] == 'cos'
+    assert ftarg['kind'] == 'cos'
 
-    # [filter inst]
-    _, _, _, ftarg = utils.check_time(time, 1, 'sin',
-                                      filters.key_201_CosSin_2012(), 0)
-    assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] == -1
-    assert ftarg[2] == 'sin'
+    # filter instance
+    _, _, _, ftarg = utils.check_time(
+            time, 1, 'dlf',
+            {'dlf': filters.key_201_CosSin_2012(), 'kind': 'sin'}, 0)
+    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['pts_per_dec'] == -1
+    assert ftarg['kind'] == 'sin'
 
-    # ['', pts_per_dec]
+    # pts_per_dec
     out, _ = capsys.readouterr()  # clear buffer
-    _, _, _, ftarg = utils.check_time(time, 0, 'ffht', ['', 30], 4)
-    assert ftarg[0].name == filters.key_201_CosSin_2012().name
-    assert ftarg[1] == 30
-    assert ftarg[2] == 'sin'
+    _, _, _, ftarg = utils.check_time(time, 0, 'dlf', {'pts_per_dec': 30}, 4)
+    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['pts_per_dec'] == 30
+    assert ftarg['kind'] == 'sin'
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Splined, 30.0 pts/dec" in out
 
-    # [filter str, pts_per_dec]
-    _, _, _, ftarg = utils.check_time(time, 0, 'cos',
-                                      ['key_81_CosSin_2009', -1], 4)
+    # filter-string and pts_per_dec
+    _, _, _, ftarg = utils.check_time(
+            time, 0, 'dlf',
+            {'dlf': 'key_81_CosSin_2009', 'pts_per_dec': -1, 'kind': 'cos'}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Lagged Convolution" in out
-    assert ftarg[0].name == filters.key_81_CosSin_2009().name
-    assert ftarg[1] == -1
-    assert ftarg[2] == 'cos'
+    assert ftarg['dlf'].name == filters.key_81_CosSin_2009().name
+    assert ftarg['pts_per_dec'] == -1
+    assert ftarg['kind'] == 'cos'
 
-    # ['', 0]
-    _, freq, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': 0}, 4)
+    # pts_per_dec
+    _, freq, _, ftarg = utils.check_time(
+            time, 0, 'dlf', {'pts_per_dec': 0, 'kind': 'sin'}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Standard" in out
-    assert ftarg[1] == 0
+    assert ftarg['pts_per_dec'] == 0
     f_base = filters.key_201_CosSin_2012().base
     assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
 
-    # [filter str, pts_per_dec] :: dict, deprecated
-    _, _, _, ftarg = utils.check_time(time, 0, 'cos',
-                                      {'fftfilt': 'key_81_CosSin_2009',
-                                       'pts_per_dec': 50}, 0)
-    assert ftarg[0].name == filters.key_81_CosSin_2009().name
-    assert ftarg[1] == 50
-    assert ftarg[2] == 'cos'
+    # filter-string and pts_per_dec
+    _, _, _, ftarg = utils.check_time(
+            time, 0, 'dlf',
+            {'dlf': 'key_81_CosSin_2009', 'pts_per_dec': 50, 'kind': 'cos'}, 0)
+    assert ftarg['dlf'].name == filters.key_81_CosSin_2009().name
+    assert ftarg['pts_per_dec'] == 50
+    assert ftarg['kind'] == 'cos'
 
-    # ['', 0]  :: dict, deprecated
-    _, f, _, ftarg = utils.check_time(time, 0, 'sin', {'pts_per_dec': None}, 0)
-    assert ftarg[1] == -1
+    # just kind
+    _, f, _, ftarg = utils.check_time(
+            time, 0, 'dlf', {'kind': 'sin'}, 0)
+    assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 204)
 
     # # QWE # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'qwe', None, 4)
+    _, f, ft, ftarg = utils.check_time(time, 0, 'qwe', {}, 4)
     out, _ = capsys.readouterr()
     outstr = "   Fourier         :  Quadrature-with-Extrapolation\n     > rtol"
     assert out[24:87] == outstr
-    assert ft == 'fqwe'
-    assert_allclose(ftarg[:-4], [1e-8, 1e-20, 21, 200, 20, 100])
+    assert ft == 'qwe'
+    assert ftarg['rtol'] == 1e-8
+    assert ftarg['atol'] == 1e-20
+    assert ftarg['nquad'] == 21
+    assert ftarg['maxint'] == 200
+    assert ftarg['pts_per_dec'] == 20
+    assert ftarg['diff_quad'] == 100
     f1 = np.array([3.16227766e-03, 3.54813389e-03, 3.98107171e-03,
                    4.46683592e-03, 5.01187234e-03, 5.62341325e-03,
                    6.30957344e-03, 7.07945784e-03, 7.94328235e-03])
@@ -589,40 +606,56 @@ def test_check_time(capsys):
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 99)
-    assert ftarg[-4] is None
-    assert ftarg[-3] is None
-    assert ftarg[-2] is None
-    assert ftarg[-1] is np.sin
+    assert ftarg['a'] is None
+    assert ftarg['b'] is None
+    assert ftarg['limit'] is None
+    assert ftarg['sincos'] is np.sin
 
-    # only last argument
-    _, _, _, ftarg = utils.check_time(time, 1, 'fqwe',
-                                      ['', '', '', '', '', '', '', '', 30], 0)
-    assert_allclose(ftarg[:-4], [1e-8, 1e-20, 21, 200, 20, 100])
-    assert ftarg[-4] is None
-    assert ftarg[-3] is None
-    assert ftarg[-2] == 30
-    assert ftarg[-1] is np.sin
+    # only limit
+    _, _, _, ftarg = utils.check_time(time, 1, 'qwe', {'limit': 30}, 0)
+    assert ftarg['rtol'] == 1e-8
+    assert ftarg['atol'] == 1e-20
+    assert ftarg['nquad'] == 21
+    assert ftarg['maxint'] == 200
+    assert ftarg['pts_per_dec'] == 20
+    assert ftarg['diff_quad'] == 100
+    assert ftarg['a'] is None
+    assert ftarg['b'] is None
+    assert ftarg['limit'] == 30
+    assert ftarg['sincos'] is np.sin
 
     # all arguments
-    _, _, _, ftarg = utils.check_time(time, -1, 'qwe', [1e-3, 1e-4, 31, 20, 30,
-                                                        200, 0.01, .2, 100], 3)
+    _, _, _, ftarg = utils.check_time(
+            time, -1, 'qwe',
+            {'rtol': 1e-3, 'atol': 1e-4, 'nquad': 31, 'maxint': 20,
+             'pts_per_dec': 30, 'diff_quad': 200, 'a': 0.01, 'b': 0.2,
+             'limit': 100},
+            3)
     out, _ = capsys.readouterr()
     assert "     > a     (quad):  0.01" in out
     assert "     > b     (quad):  0.2" in out
     assert "     > limit (quad):  100" in out
-    assert_allclose(ftarg[:-1], [1e-3, 1e-4, 31, 20, 30, 200, 0.01, .2, 100])
-    assert ftarg[-1] is np.cos
+    assert ftarg['rtol'] == 1e-3
+    assert ftarg['atol'] == 1e-4
+    assert ftarg['nquad'] == 31
+    assert ftarg['maxint'] == 20
+    assert ftarg['pts_per_dec'] == 30
+    assert ftarg['diff_quad'] == 200
+    assert ftarg['a'] == 0.01
+    assert ftarg['b'] == 0.2
+    assert ftarg['limit'] == 100
+    assert ftarg['sincos'] is np.cos
 
     # # FFTLog # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'fftlog', None, 4)
+    _, f, ft, ftarg = utils.check_time(time, 0, 'fftlog', {}, 4)
     out, _ = capsys.readouterr()
     outstr = "   Fourier         :  FFTLog\n     > pts_per_dec"
     assert outstr in out
     assert ft == 'fftlog'
-    assert ftarg[0] == 10
-    assert_allclose(ftarg[1], np.array([-2.,  1.]))
-    assert ftarg[2] == 0
+    assert ftarg['pts_per_dec'] == 10
+    assert_allclose(ftarg['add_dec'], np.array([-2.,  1.]))
+    assert ftarg['q'] == 0
     tres = np.array([0.3571562, 0.44963302, 0.56605443, 0.71262031, 0.89713582,
                      1.12942708, 1.42186445, 1.79002129, 2.25350329,
                      2.83699255, 3.57156202, 4.49633019, 5.66054433,
@@ -631,10 +664,11 @@ def test_check_time(capsys):
                      44.96330186, 56.60544331, 71.26203102, 89.71358175,
                      112.94270785, 142.18644499, 179.00212881, 225.35032873,
                      283.69925539])
-    assert ftarg[3] == 0.5
-    assert_allclose(ftarg[4], tres)
-    assert_allclose(ftarg[5:], [0.23025850929940461, 1.0610526667295022,
-                    0.016449035064149849])
+    assert ftarg['mu'] == 0.5
+    assert_allclose(ftarg['tcalc'], tres)
+    assert_allclose(ftarg['dlnr'], 0.23025850929940461)
+    assert_allclose(ftarg['kr'], 1.0610526667295022)
+    assert_allclose(ftarg['rk'], 0.016449035064149849)
 
     fres = np.array([0.00059525, 0.00074937, 0.00094341, 0.00118768, 0.0014952,
                      0.00188234, 0.00236973, 0.00298331, 0.00375577,
@@ -647,44 +681,48 @@ def test_check_time(capsys):
     assert_allclose(f, fres, rtol=1e-5)
 
     # Several parameters
-    _, _, _, ftarg = utils.check_time(time, -1, 'fftlog', [10, [-3, 4], 2], 0)
-    assert ftarg[0] == 10
-    assert_allclose(ftarg[1], np.array([-3.,  4.]))
-    assert ftarg[2] == 1  # q > 1 reset to 1...
-    assert ftarg[3] == -0.5
-    assert_allclose(ftarg[5:], [0.23025850929940461, 0.94312869748639161,
-                                1.8505737940600746])
+    _, _, _, ftarg = utils.check_time(
+            time, -1, 'fftlog',
+            {'pts_per_dec': 10, 'add_dec': [-3, 4], 'q': 2}, 0)
+    assert ftarg['pts_per_dec'] == 10
+    assert_allclose(ftarg['add_dec'], np.array([-3.,  4.]))
+    assert ftarg['q'] == 1  # q > 1 reset to 1...
+    assert ftarg['mu'] == -0.5
+    assert_allclose(ftarg['dlnr'], 0.23025850929940461)
+    assert_allclose(ftarg['kr'], 0.94312869748639161)
+    assert_allclose(ftarg['rk'], 1.8505737940600746)
 
     # # FFT # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'fft', None, 4)
+    _, f, ft, ftarg = utils.check_time(time, 0, 'fft', {}, 4)
     out, _ = capsys.readouterr()
     assert "Fourier         :  Fast Fourier Transform FFT\n     > dfreq" in out
     assert "     > pts_per_dec :  (linear)" in out
     assert ft == 'fft'
-    assert ftarg[0] == 0.002
-    assert ftarg[1] == 2048
-    assert ftarg[2] == 2048
-    assert ftarg[3] is None
+    assert ftarg['dfreq'] == 0.002
+    assert ftarg['nfreq'] == 2048
+    assert ftarg['ntot'] == 2048
+    assert ftarg['pts_per_dec'] is None
     fres = np.array([0.002, 0.004, 0.006, 0.008, 0.01, 4.088, 4.09, 4.092,
                      4.094, 4.096])
     assert_allclose(f[:5], fres[:5])
     assert_allclose(f[-5:], fres[-5:])
 
     # Several parameters
-    _, _, _, ftarg = utils.check_time(time, 0, 'fft', [1e-3, 2**15+1, 3], 0)
-    assert ftarg[0] == 0.001
-    assert ftarg[1] == 2**15+1
-    assert ftarg[2] == 2**16
+    _, _, _, ftarg = utils.check_time(
+            time, 0, 'fft', {'dfreq': 1e-3, 'nfreq': 2**15+1, 'ntot': 3}, 0)
+    assert ftarg['dfreq'] == 0.001
+    assert ftarg['nfreq'] == 2**15+1
+    assert ftarg['ntot'] == 2**16
 
     # Several parameters; pts_per_dec
-    _, f, _, ftarg = utils.check_time(time, 0, 'fft', ['', '', '', 5], 3)
+    _, f, _, ftarg = utils.check_time(time, 0, 'fft', {'pts_per_dec': 5}, 3)
     out, _ = capsys.readouterr()
     assert "     > pts_per_dec :  5" in out
-    assert ftarg[0] == 0.002
-    assert ftarg[1] == 2048
-    assert ftarg[2] == 2048
-    assert ftarg[3] == 5
+    assert ftarg['dfreq'] == 0.002
+    assert ftarg['nfreq'] == 2048
+    assert ftarg['ntot'] == 2048
+    assert ftarg['pts_per_dec'] == 5
     outf = np.array([2.00000000e-03, 3.22098066e-03, 5.18735822e-03,
                      8.35419026e-03, 1.34543426e-02, 2.16680888e-02,
                      3.48962474e-02, 5.62000691e-02, 9.05096680e-02,
@@ -697,17 +735,26 @@ def test_check_time(capsys):
     # # Various # #
 
     # minimum time
-    _ = utils.check_time(0, 0, 'cos', 'key_201_CosSin_2012', 1)
+    _ = utils.check_time(
+            0, 0, 'dlf', {'dlf': 'key_201_CosSin_2012', 'kind': 'cos'}, 1)
     out, _ = capsys.readouterr()
     assert out[:21] == "* WARNING :: Times < "
 
     # Signal != -1, 0, 1
     with pytest.raises(ValueError):
-        utils.check_time(time, -2, 'ffht', None, 0)
+        utils.check_time(time, -2, 'dlf', {}, 0)
 
-    # ft != cos, sin, ffht, qwe, hqwe, fftlog,
+    # ft != cos, sin, dlf, qwe, fftlog,
     with pytest.raises(ValueError):
-        utils.check_time(time, 0, 'fht', None, 0)
+        utils.check_time(time, 0, 'bla', {}, 0)
+
+    # filter missing attributes
+    with pytest.raises(AttributeError):
+        utils.check_time(time, 0, 'dlf', {'dlf': 'key_201_2012'}, 1)
+
+    # filter with wrong kind
+    with pytest.raises(ValueError):
+        utils.check_time(time, 0, 'dlf', {'kind': 'wrongkind'}, 1)
 
 
 def test_check_solution(capsys):
@@ -920,6 +967,19 @@ def test_get_azm_dip(capsys):
     assert outstr[:47] == "   Receiver(s)     :  1 bipole(s)\n     > intpts"
 
 
+def test_get_kwargs(capsys):
+    kwargs1 = {'ft': 'sin', 'depth': []}
+    ft, ht = utils.get_kwargs(['ft', 'ht'], ['dlf', 'dlf'], kwargs1)
+    out, _ = capsys.readouterr()
+    assert ft == 'sin'
+    assert ht == 'dlf'
+    assert "* WARNING :: Unused **kwargs: {'depth': []}" in out
+
+    kwargs2 = {'depth': [], 'unknown': 1}
+    with pytest.raises(ValueError):
+        utils.get_kwargs(['verb', ], [0, ], kwargs2)
+
+
 def test_printstartfinish(capsys):
     t0 = utils.printstartfinish(0)
     assert isinstance(t0, float)
@@ -929,7 +989,7 @@ def test_printstartfinish(capsys):
     t0 = utils.printstartfinish(3)
     assert isinstance(t0, float)
     out, _ = capsys.readouterr()
-    assert out == "\n:: empymod START  ::\n\n"
+    assert ":: empymod START  ::  v" in out
 
     utils.printstartfinish(0, t0)
     out, _ = capsys.readouterr()
@@ -1050,34 +1110,6 @@ def test_check_min(capsys):
     assert_allclose(np.array([1e-15, 1e-3]), out4)
 
 
-def test_check_targ():
-    # No input
-    assert utils._check_targ(None, ['test']) == {}
-    assert utils._check_targ([], ['test']) == {}
-    assert utils._check_targ((), ['test']) == {}
-    assert utils._check_targ({}, ['test']) == {}
-    assert utils._check_targ('', ['test']) == {}
-    assert utils._check_targ(np.array([]), ['test']) == {}
-
-    # One input
-    assert utils._check_targ(2.3, ['test']) == {'test': 2.3}
-    assert utils._check_targ([2.3], ['test']) == {'test': 2.3}
-    assert utils._check_targ((2.3), ['test']) == {'test': 2.3}
-    assert utils._check_targ({'test': 2.3}, ['test']) == {'test': 2.3}
-    assert utils._check_targ(np.array([2.3]), ['test']) == {'test': 2.3}
-
-    # Several inputs
-    # a: less than keys
-    assert utils._check_targ([2], ['a', 'b']) == {'a': 2}
-    assert utils._check_targ((2), ['a', 'b']) == {'a': 2}
-    # b: equal keys
-    assert utils._check_targ([2, 4], ['a', 'b']) == {'a': 2, 'b': 4}
-    assert utils._check_targ((2, 4), ['a', 'b']) == {'a': 2, 'b': 4}
-    # c: more than keys
-    assert utils._check_targ([2, 4, 5], ['a', 'b']) == {'a': 2, 'b': 4}
-    assert utils._check_targ((2, 4, 5), ['a', 'b']) == {'a': 2, 'b': 4}
-
-
 def test_minimum():
     # Check default values
     d = utils.get_minimum()
@@ -1099,29 +1131,6 @@ def test_minimum():
     assert d['min_angle'] == 1e-5
 
 
-def test_spline_backwards_hankel():
-    out1, out2 = utils.spline_backwards_hankel('fht', None, None)
-    assert out1 == {}
-    assert out2 is None
-
-    out1, out2 = utils.spline_backwards_hankel('fht', {'pts_per_dec': 45},
-                                               'parallel')
-    assert out1 == {'pts_per_dec': 45}
-    assert out2 == 'parallel'
-
-    out1, out2 = utils.spline_backwards_hankel('FHT', None, 'spline')
-    assert out1 == {'pts_per_dec': -1}
-    assert out2 is None
-
-    out1, out2 = utils.spline_backwards_hankel('qwe', None, 'spline')
-    assert out1 == {'pts_per_dec': 80}
-    assert out2 is None
-
-    out1, out2 = utils.spline_backwards_hankel('QWE', None, None)
-    assert out1 == {}
-    assert out2 is None
-
-
 def test_report(capsys):
     out, _ = capsys.readouterr()  # Empty capsys
 
@@ -1129,8 +1138,8 @@ def test_report(capsys):
     # We just ensure the shown packages do not change (core and optional).
     if scooby:
         out1 = scooby.Report(
-                core=['numpy', 'scipy', 'empymod'],
-                optional=['numexpr', 'IPython', 'matplotlib'],
+                core=['numpy', 'scipy', 'numba', 'empymod'],
+                optional=['IPython', 'matplotlib'],
                 ncol=3)
         out2 = utils.Report()
 
@@ -1141,34 +1150,3 @@ def test_report(capsys):
         _ = utils.Report()
         out, _ = capsys.readouterr()  # Empty capsys
         assert 'WARNING :: `empymod.Report` requires `scooby`' in out
-
-
-def test_versions_backwards():
-    if scooby:
-        out1 = utils.Report()
-        out2 = utils.Versions()
-        out3 = utils.versions()
-
-        # Exclude minutes and seconds, to avoid stupid failures.
-        assert out1.__repr__()[150:] == out2.__repr__()[150:]
-        assert out1.__repr__()[150:] == out3.__repr__()[150:]
-
-
-def test_emarray_backwards():
-    out = utils.EMArray(3)
-    assert out.amp == 3
-    assert out.pha == 0
-    assert out.real == 3
-    assert out.imag == 0
-
-    out = utils.EMArray(1, 1)
-    assert out.amp == np.sqrt(2)
-    assert out.pha == 45.
-    assert out.real == 1
-    assert out.imag == 1
-
-    out = utils.EMArray([1, 0], [1, 1])
-    assert_allclose(out.amp, [np.sqrt(2), 1])
-    assert_allclose(out.pha, [45., 90.])
-    assert_allclose(out.real, [1, 0])
-    assert_allclose(out.imag, [1, 1])

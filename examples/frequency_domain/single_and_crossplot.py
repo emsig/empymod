@@ -70,14 +70,16 @@ plt.show()
 # 1. Frequency response for f = 1 Hz
 # ----------------------------------
 #
-# Calculate
-# ~~~~~~~~~
+# Compute
+# ~~~~~~~
 
 inpdat = {'src': [0, 0, zsrc], 'rec': [fx, fy, zrec], 'depth': depth,
-          'freqtime': 1, 'aniso': aniso, 'ab': ab, 'verb': verb}
+          'freqtime': 1, 'aniso': aniso, 'ab': ab,
+          'htarg': {'pts_per_dec': -1}, 'verb': verb}
 
 fEM = empymod.dipole(**inpdat, res=res)
 fEMBG = empymod.dipole(**inpdat, res=resBG)
+
 
 ###############################################################################
 # Plot
@@ -89,8 +91,8 @@ fig.suptitle(name+': src-x, rec-x; f = 1 Hz', fontsize=16, y=1)
 
 # Plot Amplitude
 ax1 = plt.subplot(2, 2, 1)
-plt.semilogy(fx/1000, fEMBG.amp, label='BG')
-plt.semilogy(fx/1000, fEM.amp, label='Anomaly')
+plt.semilogy(fx/1000, fEMBG.amp(), label='BG')
+plt.semilogy(fx/1000, fEM.amp(), label='Anomaly')
 plt.legend(loc='best')
 plt.title(r'Amplitude (V/(A m$^2$))')
 plt.xlabel('Offset (km)')
@@ -98,8 +100,8 @@ plt.xlabel('Offset (km)')
 # Plot Phase
 ax2 = plt.subplot(2, 2, 2)
 plt.title(r'Phase ($^\circ$)')
-plt.plot(fx/1000, fEMBG.pha, label='BG')
-plt.plot(fx/1000, fEM.pha, label='Anomaly')
+plt.plot(fx/1000, fEMBG.pha(deg=True), label='BG')
+plt.plot(fx/1000, fEM.pha(deg=True), label='Anomaly')
 plt.xlabel('Offset (km)')
 
 plt.show()
@@ -109,13 +111,14 @@ plt.show()
 # 2. Crossplot
 # ------------
 #
-# Calculate
-# ~~~~~~~~~
+# Compute
+# ~~~~~~~
 
-# Calculate responses
+# Compute responses
 freq = np.logspace(-1.5, .5, 33)  # 33 frequencies from -1.5 to 0.5 (logspace)
 inpdat = {'src': [0, 0, zsrc], 'rec': [fx, fy, zrec], 'depth': depth,
-          'freqtime': freq, 'aniso': aniso, 'ab': ab, 'verb': verb}
+          'freqtime': freq, 'aniso': aniso, 'ab': ab,
+          'htarg': {'pts_per_dec': -1}, 'verb': verb}
 
 xfEM = empymod.dipole(**inpdat, res=res)
 xfEMBG = empymod.dipole(**inpdat, res=resBG)

@@ -1,9 +1,9 @@
 r"""
 
-:mod:`utils` -- Utilites
-========================
+:mod:`empymod.utils` -- Utilites
+================================
 
-Utilities for ``model`` such as checking input parameters.
+Utilities for :mod:`empymod.model` such as checking input parameters.
 
 This module consists of four groups of functions:
    0. General settings
@@ -30,11 +30,14 @@ This module consists of four groups of functions:
 
 
 # Mandatory imports
-import warnings
+import copy
 import numpy as np
 from scipy import special
-from datetime import timedelta
 from timeit import default_timer
+from datetime import timedelta, datetime
+
+# Relative imports
+from empymod import filters, transform
 
 # scooby is a soft dependency for empymod
 try:
@@ -45,29 +48,26 @@ except ImportError:
             print("\n* WARNING :: `empymod.Report` requires `scooby`."
                   "\n             Install it via `pip install scooby`.\n")
 
-# Optional imports
+# Version: We take care of it here instead of in __init__, so we can use it
+# within the package itself (logs).
 try:
-    import numexpr
-    # Ensure Intel's Vector Math Library
-    if not numexpr.use_vml:
-        numexpr = False
-        numexpr_msg = "* WARNING :: `numexpr` is not installed with VML, "
-        numexpr_msg += "`opt=='parallel'` has no effect."
+    # - Released versions just tags:       1.10.0
+    # - GitHub commits add .dev#+hash:     1.10.1.dev3+g973038c
+    # - Uncommitted changes add timestamp: 1.10.1.dev3+g973038c.d20191022
+    from empymod.version import version as __version__
 except ImportError:
-    numexpr = False
-    numexpr_msg = "* WARNING :: `numexpr` is not installed, "
-    numexpr_msg += "`opt=='parallel'` has no effect."
-
-# Relative imports
-from empymod import filters, transform
+    # If it was not installed, then we don't know the version. We could throw a
+    # warning here, but this case *should* be rare. empymod should be installed
+    # properly!
+    __version__ = 'unknown-'+datetime.today().strftime('%Y%m%d')
 
 
 __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
-           'check_frequency', 'check_hankel', 'check_opt', 'check_dipole',
+           'check_frequency', 'check_hankel', 'check_loop', 'check_dipole',
            'check_bipole', 'check_ab', 'check_solution', 'get_abs',
            'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
            'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum',
-           'spline_backwards_hankel', 'Report', 'Versions', 'versions']
+           'Report']
 
 # 0. General settings
 
@@ -86,53 +86,73 @@ VariableCatch = (LookupError, AttributeError, ValueError, TypeError, NameError)
 # 1. Class EMArray
 
 class EMArray(np.ndarray):
-    r"""Subclassing an ndarray: add *amplitude* <amp> and *phase* <pha>.
+    r"""Create an EM-ndarray: add *amplitude* <amp> and *phase* <pha> methods.
 
     Parameters
     ----------
     data : array
-        Data to which to add ``.amp`` and ``.pha`` attributes.
+        Data to which to add `.amp` and `.pha` attributes.
 
-    Attributes
-    ----------
-    amp : ndarray
-        Amplitude of the input data.
-
-    pha : ndarray
-        Phase of the input data, in degrees, lag-defined (increasing with
-        increasing offset). To get lead-defined phases, provide
-        ``data.conjugate()``.
 
     Examples
     --------
     >>> import numpy as np
     >>> from empymod.utils import EMArray
-    >>> emvalues = EMArray(np.array([1,2,3])+1j*np.array([1, 0, -1]))
-    >>> print('Amplitude : ', emvalues.amp)
-    Amplitude :  [ 1.41421356  2.          3.16227766]
-    >>> print('Phase     : ', emvalues.pha)
-    Phase     :  [ 45.           0.         -18.43494882]
+    >>> emvalues = EMArray(np.array([1+1j, 1-4j, -1+2j]))
+    >>> print(f"Amplitude         : {emvalues.amp()}")
+    Amplitude         : [1.41421356 4.12310563 2.23606798]
+    >>> print(f"Phase (rad)       : {emvalues.pha()}")
+    Phase (rad)       : [ 0.78539816 -1.32581766 -4.24874137]
+    >>> print(f"Phase (deg)       : {emvalues.pha(deg=True)}")
+    Phase (deg)       : [  45.          -75.96375653 -243.43494882]
+    >>> print(f"Phase (deg; lead) : {emvalues.pha(deg=True, lag=False)}")
+    Phase (deg; lead) : [-45.          75.96375653 243.43494882]
 
     """
 
-    def __new__(cls, data, backwards_comp=None):
+    def __new__(cls, data):
         r"""Create a new EMArray."""
-        if np.any(backwards_comp):  # Delete for v2.0.0
-            data = np.asarray(data) + 1j*np.asarray(backwards_comp)
         return np.asarray(data).view(cls)
 
-    @property
     def amp(self):
-        """Make amplitude an attribute."""
+        """Amplitude of the electromagnetic field."""
         return np.abs(self.view())
 
-    @property
-    def pha(self):
-        """Make phase an attribute (unwrapped and in degrees."""
-        ang = np.angle(self.view())
-        if ang.size > 1:
-            ang = np.unwrap(ang)
-        return 180*ang/np.pi
+    def pha(self, deg=False, unwrap=True, lag=True):
+        """Phase of the electromagnetic field.
+
+        Parameters
+        ----------
+        deg : bool
+            If True the returned phase is in degrees, else in radians.
+            Default is False (radians).
+
+        unwrap : bool
+            If True the returned phase is unwrapped.
+            Default is True (unwrapped).
+
+        lag : bool
+            If True the returned phase is lag, else lead defined.
+            Default is True (lag defined).
+
+        """
+        # Get phase, lead or lag defined.
+        if lag:
+            pha = np.angle(self.view())
+        else:
+            pha = np.angle(np.conj(self.view()))
+
+        # Unwrap if `unwrap`.
+        # np.unwrap removes the EMArray class;
+        # for consistency, we wrap it in EMArray again.
+        if unwrap and self.size > 1:
+            pha = EMArray(np.unwrap(pha))
+
+        # Convert to degrees if `deg`.
+        if deg:
+            pha *= 180/np.pi
+
+        return pha
 
 
 # 2. Input parameter checks for modelling
@@ -143,8 +163,8 @@ def check_ab(ab, verb):
     r"""Check source-receiver configuration.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`. Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -169,7 +189,7 @@ def check_ab(ab, verb):
     try:
         ab = int(ab)
     except VariableCatch:
-        print('* ERROR   :: <ab> must be an integer')
+        print("* ERROR   :: <ab> must be an integer")
         raise
 
     # Check src and rec orientation (<ab> for alpha-beta)
@@ -178,13 +198,12 @@ def check_ab(ab, verb):
            31, 32, 33, 34, 35, 36, 41, 42, 43, 44, 45, 46,
            51, 52, 53, 54, 55, 56, 61, 62, 63, 64, 65, 66]
     if ab not in pab:
-        print('* ERROR   :: <ab> must be one of: ' + str(pab) + ';' +
-              ' <ab> provided: ' + str(ab))
+        print(f"* ERROR   :: <ab> must be one of: {pab}; <ab> provided: {ab}")
         raise ValueError('ab')
 
     # Print input <ab>
     if verb > 2:
-        print("   Input ab        : ", ab)
+        print(f"   Input ab        :  {ab}")
 
     # Check if src and rec are magnetic or electric
     msrc = ab % 10 > 3   # If True: magnetic src
@@ -204,9 +223,9 @@ def check_ab(ab, verb):
     # Print actual calculated <ab>
     if verb > 2:
         if ab in [36, 63]:
-            print("\n>  <ab> IS "+str(ab)+" WHICH IS ZERO; returning")
+            print(f"\n>  <ab> IS {ab} WHICH IS ZERO; returning")
         else:
-            print("   Calculated ab   : ", ab_calc)
+            print(f"   Calculated ab   :  {ab_calc}")
 
     return ab_calc, msrc, mrec
 
@@ -215,8 +234,8 @@ def check_bipole(inp, name):
     r"""Check di-/bipole parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -247,25 +266,25 @@ def check_bipole(inp, name):
     def chck_dipole(inp, name):
         r"""Check inp for shape and type."""
         # Check x
-        inp[0] = _check_var(inp[0], float, 1, name+'-x')
+        inp_x = _check_var(inp[0], float, 1, name+'-x')
 
         # Check y and ensure it has same dimension as x
-        inp[1] = _check_var(inp[1], float, 1, name+'-y', inp[0].shape)
+        inp_y = _check_var(inp[1], float, 1, name+'-y', inp_x.shape)
 
         # Check z
-        inp[2] = _check_var(inp[2], float, 1, name+'-z', (1,), inp[0].shape)
+        inp_z = _check_var(inp[2], float, 1, name+'-z', (1,), inp_x.shape)
 
         # Check if all depths are the same, if so replace by one value
-        if np.all(np.isclose(inp[2]-inp[2][0], 0)):
-            inp[2] = np.array([inp[2][0]])
+        if np.all(np.isclose(inp_z-inp_z[0], 0)):
+            inp_z = np.array([inp_z[0]])
 
-        return inp
+        return [inp_x, inp_y, inp_z]
 
     # Check length of inp.
     narr = len(inp)
     if narr not in [5, 6]:
-        print('* ERROR   :: Parameter ' + name + ' has wrong length! : ' +
-              str(narr) + ' instead of 5 (dipole) or 6 (bipole).')
+        print(f"* ERROR   :: Parameter {name} has wrong length! : "
+              f"{narr} instead of 5 (dipole) or 6 (bipole).")
         raise ValueError(name)
 
     # Flag if it is a dipole or not
@@ -273,60 +292,62 @@ def check_bipole(inp, name):
 
     if isdipole:  # dipole checks
         # Check x, y, and z
-        inp = chck_dipole(inp, name)
+        out = chck_dipole(inp, name)
 
         # Check azimuth and dip
-        inp[3] = _check_var(inp[3], float, 1, 'azimuth', (1,), inp[0].shape)
-        inp[4] = _check_var(inp[4], float, 1, 'dip', (1,), inp[0].shape)
+        inp_a = _check_var(inp[3], float, 1, 'azimuth', (1,), out[0].shape)
+        inp_d = _check_var(inp[4], float, 1, 'dip', (1,), out[0].shape)
 
         # How many different depths
-        inpz = inp[2].size
+        nz = out[2].size
 
         # Expand azimuth and dip to match number of depths
-        if inpz > 1:
-            if inp[3].size == 1:
-                inp[3] = np.ones(inpz)*inp[3]
-            if inp[4].size == 1:
-                inp[4] = np.ones(inpz)*inp[4]
+        if nz > 1:
+            if inp_a.size == 1:
+                inp_a = np.ones(nz)*inp_a
+            if inp_d.size == 1:
+                inp_d = np.ones(nz)*inp_d
+
+        out = [*out, inp_a, inp_d]
 
     else:         # bipole checks
         # Check each pole for x, y, and z
-        inp0 = chck_dipole(inp[::2], name+'-1')   # [x0, y0, z0]
-        inp1 = chck_dipole(inp[1::2], name+'-2')  # [x1, y1, z1]
+        out0 = chck_dipole(inp[::2], name+'-1')   # [x0, y0, z0]
+        out1 = chck_dipole(inp[1::2], name+'-2')  # [x1, y1, z1]
 
         # If one pole has a single depth, but the other has various
         # depths, we have to repeat the single depth, as we will have
         # to loop over them.
-        if inp0[2].size != inp1[2].size:
-            if inp0[2].size == 1:
-                inp0[2] = np.repeat(inp0[2], inp1[2].size)
+        if out0[2].size != out1[2].size:
+            if out0[2].size == 1:
+                out0[2] = np.repeat(out0[2], out1[2].size)
             else:
-                inp1[2] = np.repeat(inp1[2], inp0[2].size)
+                out1[2] = np.repeat(out1[2], out0[2].size)
 
         # Check if inp is a dipole instead of a bipole
         # (This is a problem, as we would could not define the angles then.)
-        if not np.all((inp0[0] != inp1[0]) + (inp0[1] != inp1[1]) +
-                      (inp0[2] != inp1[2])):
-            print("* ERROR   :: At least one of <" + name + "> is a point " +
-                  "dipole, use the format [x, y, z, azimuth, dip] instead " +
+        if not np.all((out0[0] != out1[0]) + (out0[1] != out1[1]) +
+                      (out0[2] != out1[2])):
+            print(f"* ERROR   :: At least one of <{name}> is a point "
+                  "dipole, use the format [x, y, z, azimuth, dip] instead "
                   "of [x0, x1, y0, y1, z0, z1].")
             raise ValueError('Bipole: bipole-' + name)
 
         # Collect elements
-        inp = [inp0[0], inp1[0], inp0[1], inp1[1], inp0[2], inp1[2]]
+        out = [out0[0], out1[0], out0[1], out1[1], out0[2], out1[2]]
 
         # How many different depths
-        inpz = inp[4].size
+        nz = out[4].size
 
-    return inp, inp[0].size, inpz, isdipole
+    return out, out[0].size, nz, isdipole
 
 
 def check_dipole(inp, name, verb):
     r"""Check dipole parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -351,9 +372,10 @@ def check_dipole(inp, name, verb):
 
     # Check inp for x, y, and z; x & y must have same length, z is a float
     _check_shape(np.squeeze(inp), name, (3,))
-    inp[0] = _check_var(inp[0], float, 1, name+'-x')
-    inp[1] = _check_var(inp[1], float, 1, name+'-y', inp[0].shape)
-    inp[2] = _check_var(inp[2], float, 1, name+'-z', (1,))
+    inp_x = _check_var(inp[0], float, 1, name+'-x')
+    inp_y = _check_var(inp[1], float, 1, name+'-y', inp_x.shape)
+    inp_z = _check_var(inp[2], float, 1, name+'-z', (1,))
+    out = [inp_x, inp_y, inp_z]
 
     # Print spatial parameters
     if verb > 2:
@@ -363,21 +385,21 @@ def check_dipole(inp, name, verb):
         else:
             longname = '   Receiver(s)     : '
 
-        print(longname, str(inp[0].size), 'dipole(s)')
+        print(f"{longname} {out[0].size} dipole(s)")
         tname = ['x  ', 'y  ', 'z  ']
         for i in range(3):
             text = "     > " + tname[i] + "     [m] : "
-            _prnt_min_max_val(inp[i], text, verb)
+            _prnt_min_max_val(out[i], text, verb)
 
-    return inp, inp[0].size
+    return out, out[0].size
 
 
 def check_frequency(freq, res, aniso, epermH, epermV, mpermH, mpermV, verb):
     r"""Calculate frequency-dependent parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -465,16 +487,16 @@ def check_hankel(ht, htarg, verb):
     r"""Check Hankel transform parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
-    ht : {'fht', 'qwe', 'quad'}
+    ht : {'dlf', 'qwe', 'quad'}
         Flag to choose the Hankel transform.
 
-    htarg : str or filter from empymod.filters or array_like,
-        Depends on the value for ``ht``.
+    htarg : dict
+        Arguments of Hankel transform; depends on the value for `ht`.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -490,191 +512,150 @@ def check_hankel(ht, htarg, verb):
     # Ensure ht is all lowercase
     ht = ht.lower()
 
-    if ht == 'fht':    # If FHT, check filter settings
+    # Initiate output dict
+    targ = {}
+    args = copy.deepcopy(htarg)
 
-        # Get and check input or set defaults
-        htarg = _check_targ(htarg, ['fhtfilt', 'pts_per_dec'])
+    if ht == 'dlf':     # DLF
 
-        # Check filter; defaults to key_201_2009
-        try:
-            fhtfilt = htarg['fhtfilt']
-            if not hasattr(fhtfilt, 'base'):
-                fhtfilt = getattr(filters, fhtfilt)()
-        except VariableCatch:
-            fhtfilt = filters.key_201_2009()
+        # If filter is a name (str), get it
+        targ['dlf'] = args.pop('dlf', filters.key_201_2009())
+        if isinstance(targ['dlf'], str):
+            targ['dlf'] = getattr(filters, targ['dlf'])()
 
-        # Check pts_per_dec; defaults to 0
-        try:
-            pts_per_dec = _check_var(htarg['pts_per_dec'], float, 0,
-                                     'fht: pts_per_dec', ())
-        except VariableCatch:
-            pts_per_dec = 0.0
+        # Ensure the provided filter has the necessary attributes.
+        base = hasattr(targ['dlf'], 'base')
+        j0 = hasattr(targ['dlf'], 'j0')
+        j1 = hasattr(targ['dlf'], 'j1')
+        factor = hasattr(targ['dlf'], 'factor')
+        if not base or not j0 or not j1 or not factor:
+            print("* ERROR   :: DLF-filter is missing some attributes; "
+                  f"base: {base}; j0: {j0}; j1: {j1}; factor: {factor}.")
+            raise AttributeError('ht')
 
-        # Assemble htarg
-        htarg = (fhtfilt, pts_per_dec)
+        # Check dimension and type of pts_per_dec
+        targ['pts_per_dec'] = _check_var(
+                args.pop('pts_per_dec', 0.0), float, 0, 'dlf: pts_per_dec',
+                ())
 
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  DLF (Fast Hankel Transform)")
-            print("     > Filter      :  " + fhtfilt.name)
+            print(f"     > Filter      :  {targ['dlf'].name}")
             pstr = "     > DLF type    :  "
-            if pts_per_dec < 0:
-                print(pstr + "Lagged Convolution")
-            elif pts_per_dec > 0:
-                print(pstr + "Splined, " + str(pts_per_dec) + " pts/dec")
+            if targ['pts_per_dec'] < 0:
+                print(f"{pstr}Lagged Convolution")
+            elif targ['pts_per_dec'] > 0:
+                print(f"{pstr}Splined, {targ['pts_per_dec']} pts/dec")
             else:
-                print(pstr + "Standard")
+                print(f"{pstr}Standard")
 
-    elif ht in ['qwe', 'hqwe']:
-        # Rename ht
-        ht = 'hqwe'
-
-        # Get and check input or set defaults
-        htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
-                            'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
+    elif ht == 'qwe':   # QWE
 
         # rtol : 1e-12
-        try:
-            rtol = _check_var(htarg['rtol'], float, 0, 'qwe: rtol', ())
-        except VariableCatch:
-            rtol = np.array(1e-12, dtype=float)
+        targ['rtol'] = _check_var(
+                args.pop('rtol', 1e-12), float, 0, 'qwe: rtol', ())
 
         # atol : 1e-30
-        try:
-            atol = _check_var(htarg['atol'], float, 0, 'qwe: atol', ())
-        except VariableCatch:
-            atol = np.array(1e-30, dtype=float)
+        targ['atol'] = _check_var(
+                args.pop('atol', 1e-30), float, 0, 'qwe: atol', ())
 
         # nquad : 51
-        try:
-            nquad = _check_var(htarg['nquad'], int, 0, 'qwe: nquad', ())
-        except VariableCatch:
-            nquad = np.array(51, dtype=int)
+        targ['nquad'] = _check_var(
+                args.pop('nquad', 51), int, 0, 'qwe: nquad', ())
 
         # maxint : 100
-        try:
-            maxint = _check_var(htarg['maxint'], int, 0, 'qwe: maxint', ())
-        except VariableCatch:
-            maxint = np.array(100, dtype=int)
+        targ['maxint'] = _check_var(
+                args.pop('maxint', 100), int, 0, 'qwe: maxint', ())
 
         # pts_per_dec : 0  # No spline
-        try:
-            pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
-                                     'qwe: pts_per_dec', ())
-            pts_per_dec = _check_min(pts_per_dec, 0, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            pts_per_dec = np.array(0, dtype=int)
+        pts_per_dec = _check_var(
+                args.pop('pts_per_dec', 0), int, 0, 'qwe: pts_per_dec', ())
+        targ['pts_per_dec'] = _check_min(
+                pts_per_dec, 0, 'pts_per_dec', '', verb)
 
         # diff_quad : 100
-        try:
-            diff_quad = _check_var(htarg['diff_quad'], float, 0,
-                                   'qwe: diff_quad', ())
-        except VariableCatch:
-            diff_quad = np.array(100, dtype=float)
+        targ['diff_quad'] = _check_var(
+                args.pop('diff_quad', 100), float, 0, 'qwe: diff_quad', ())
 
         # a : None
-        try:
-            a = _check_var(htarg['a'], float, 0, 'qwe: a (quad)', ())
-        except VariableCatch:
-            a = None
+        targ['a'] = args.pop('a', None)
+        if targ['a'] is not None:
+            targ['a'] = _check_var(targ['a'], float, 0, 'qwe: a (quad)', ())
 
         # b : None
-        try:
-            b = _check_var(htarg['b'], float, 0, 'qwe: b (quad)', ())
-        except VariableCatch:
-            b = None
+        targ['b'] = args.pop('b', None)
+        if targ['b'] is not None:
+            targ['b'] = _check_var(targ['b'], float, 0, 'qwe: b (quad)', ())
 
         # limit : None
-        try:
-            limit = _check_var(htarg['limit'], int, 0, 'qwe: limit (quad)', ())
-        except VariableCatch:
-            limit = None
-
-        # Assemble htarg
-        htarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad, a, b,
-                 limit)
+        targ['limit'] = args.pop('limit', None)
+        if targ['limit'] is not None:
+            targ['limit'] = _check_var(
+                    targ['limit'], int, 0, 'qwe: limit (quad)', ())
 
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  Quadrature-with-Extrapolation")
-            print("     > rtol        :  " + str(rtol))
-            print("     > atol        :  " + str(atol))
-            print("     > nquad       :  " + str(nquad))
-            print("     > maxint      :  " + str(maxint))
-            print("     > pts_per_dec :  " + str(pts_per_dec))
-            print("     > diff_quad   :  " + str(diff_quad))
-            if a:
-                print("     > a     (quad):  " + str(a))
-            if b:
-                print("     > b     (quad):  " + str(b))
-            if limit:
-                print("     > limit (quad):  " + str(limit))
+            print(f"     > rtol        :  {targ['rtol']}")
+            print(f"     > atol        :  {targ['atol']}")
+            print(f"     > nquad       :  {targ['nquad']}")
+            print(f"     > maxint      :  {targ['maxint']}")
+            print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
+            print(f"     > diff_quad   :  {targ['diff_quad']}")
+            if targ['a']:
+                print(f"     > a     (quad):  {targ['a']}")
+            if targ['b']:
+                print(f"     > b     (quad):  {targ['b']}")
+            if targ['limit']:
+                print(f"     > limit (quad):  {targ['limit']}")
 
-    elif ht in ['quad', 'hquad']:
-        # Rename ht
-        ht = 'hquad'
-
-        # Get and check input or set defaults
-        htarg = _check_targ(htarg, ['rtol', 'atol', 'limit', 'a', 'b',
-                                    'pts_per_dec'])
+    elif ht in 'quad':  # QUAD
 
         # rtol : 1e-12
-        try:
-            rtol = _check_var(htarg['rtol'], float, 0, 'quad: rtol', ())
-        except VariableCatch:
-            rtol = np.array(1e-12, dtype=float)
+        targ['rtol'] = _check_var(
+                args.pop('rtol', 1e-12), float, 0, 'quad: rtol', ())
 
         # atol : 1e-20
-        try:
-            atol = _check_var(htarg['atol'], float, 0, 'quad: atol', ())
-        except VariableCatch:
-            atol = np.array(1e-20, dtype=float)
+        targ['atol'] = _check_var(
+                args.pop('atol', 1e-20), float, 0, 'quad: atol', ())
 
         # limit : 500
-        try:
-            limit = _check_var(htarg['limit'], int, 0, 'quad: limit', ())
-        except VariableCatch:
-            limit = np.array(500, dtype=int)
+        targ['limit'] = _check_var(
+                args.pop('limit', 500), int, 0, 'quad: limit', ())
 
         # a : 1e-6
-        try:
-            a = _check_var(htarg['a'], float, 0, 'quad: a', ())
-        except VariableCatch:
-            a = np.array(1e-6, dtype=float)
+        targ['a'] = _check_var(args.pop('a', 1e-6), float, 0, 'quad: a', ())
 
         # b : 0.1
-        try:
-            b = _check_var(htarg['b'], float, 0, 'quad: b', ())
-        except VariableCatch:
-            b = np.array(0.1, dtype=float)
+        targ['b'] = _check_var(args.pop('b', 0.1), float, 0, 'quad: b', ())
 
         # pts_per_dec : 40
-        try:
-            pts_per_dec = _check_var(htarg['pts_per_dec'], int, 0,
-                                     'quad: pts_per_dec', ())
-            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            pts_per_dec = np.array(40, dtype=int)
-
-        # Assemble htarg
-        htarg = (rtol, atol, limit, a, b, pts_per_dec)
+        pts_per_dec = _check_var(
+                args.pop('pts_per_dec', 40), int, 0, 'quad: pts_per_dec', ())
+        targ['pts_per_dec'] = _check_min(
+                pts_per_dec, 1, 'pts_per_dec', '', verb)
 
         # If verbose, print Hankel transform information
         if verb > 2:
             print("   Hankel          :  Quadrature")
-            print("     > rtol        :  " + str(rtol))
-            print("     > atol        :  " + str(atol))
-            print("     > limit       :  " + str(limit))
-            print("     > a           :  " + str(a))
-            print("     > b           :  " + str(b))
-            print("     > pts_per_dec :  " + str(pts_per_dec))
+            print(f"     > rtol        :  {targ['rtol']}")
+            print(f"     > atol        :  {targ['atol']}")
+            print(f"     > limit       :  {targ['limit']}")
+            print(f"     > a           :  {targ['a']}")
+            print(f"     > b           :  {targ['b']}")
+            print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
 
     else:
-        print("* ERROR   :: <ht> must be one of: ['fht', 'qwe', 'quad'];" +
-              " <ht> provided: " + str(ht))
+        print("* ERROR   :: <ht> must be one of: ['dlf', 'qwe', 'quad'];"
+              f" <ht> provided: {ht}")
         raise ValueError('ht')
 
-    return ht, htarg
+    # Check remaining arguments.
+    if args and verb > 0:
+        print(f"* WARNING :: Unknown htarg {args} for method '{ht}'")
+
+    return ht, targ
 
 
 def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
@@ -682,8 +663,8 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     r"""Check the model: depth and corresponding layer parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -753,9 +734,9 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
     # Ensure depth is increasing
     if np.any(depth[1:] - depth[:-1] < 0):
-        print('* ERROR   :: Depth must be continuously increasing or ' +
-              'decreasing.\n             <depth> provided: ' +
-              _strvar(depth[::swap]))
+        print(f"* ERROR   :: Depth must be continuously increasing or "
+              f"decreasing.\n             <depth> provided: "
+              f"{_strvar(depth[::swap])}")
         raise ValueError('depth')
 
     # Add -infinity at the beginning
@@ -794,9 +775,17 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     # => min_res can be set with utils.set_min
     aniso = check_inp(aniso, 'aniso', _min_res)
     epermH = check_inp(epermH, 'epermH', 0.0)
-    epermV = check_inp(epermV, 'epermV', 0.0)
+    # We assume isotropic behaviour if epermH was provided but not epermV
+    if epermV is None:
+        epermV = epermH
+    else:
+        epermV = check_inp(epermV, 'epermV', 0.0)
     mpermH = check_inp(mpermH, 'mpermH', 0.0)
-    mpermV = check_inp(mpermV, 'mpermV', 0.0)
+    # We assume isotropic behaviour if mpermH was provided but not mpermV
+    if mpermV is None:
+        mpermV = mpermH
+    else:
+        mpermV = check_inp(mpermV, 'mpermV', 0.0)
 
     # Swap parameters if depths were given in reverse.
     res = res[::swap]
@@ -808,13 +797,13 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
     # Print model parameters
     if verb > 2:
-        print("   depth       [m] : ", _strvar(depth[1:]))
-        print("   res     [Ohm.m] : ", _strvar(res))
-        print("   aniso       [-] : ", _strvar(aniso))
-        print("   epermH      [-] : ", _strvar(epermH))
-        print("   epermV      [-] : ", _strvar(epermV))
-        print("   mpermH      [-] : ", _strvar(mpermH))
-        print("   mpermV      [-] : ", _strvar(mpermV))
+        print(f"   depth       [m] :  {_strvar(depth[1:])}")
+        print(f"   res     [Ohm.m] :  {_strvar(res)}")
+        print(f"   aniso       [-] :  {_strvar(aniso)}")
+        print(f"   epermH      [-] :  {_strvar(epermH)}")
+        print(f"   epermV      [-] :  {_strvar(epermV)}")
+        print(f"   mpermH      [-] :  {_strvar(mpermH)}")
+        print(f"   mpermV      [-] :  {_strvar(mpermV)}")
 
     # Check if medium is a homogeneous full-space. If that is the case, the
     # EM-field is computed analytically directly in the frequency-domain.
@@ -844,7 +833,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     # Print fullspace info
     if verb > 2 and isfullspace:
         if xdirect:
-            print("\n>  MODEL IS A FULLSPACE; returning analytical " +
+            print("\n>  MODEL IS A FULLSPACE; returning analytical "
                   "frequency-domain solution")
         else:
             print("\n>  MODEL IS A FULLSPACE")
@@ -854,33 +843,30 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
         if xdirect is None:
             print("   direct field    :  Not calculated (secondary field)")
         elif xdirect:
-            print("   direct field    :  Calc. in frequency domain")
+            print("   direct field    :  Comp. in frequency domain")
         else:
-            print("   direct field    :  Calc. in wavenumber domain")
+            print("   direct field    :  Comp. in wavenumber domain")
 
     return depth, res, aniso, epermH, epermV, mpermH, mpermV, isfullspace
 
 
-def check_opt(opt, loop, ht, htarg, verb):
-    r"""Check optimization parameters.
+def check_loop(loop, ht, htarg, verb):
+    r"""Check loop parameter.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
-    opt : {None, 'parallel'}
-        Optimization flag; use ``numexpr`` or not.
-
     loop : {None, 'freq', 'off'}
         Loop flag.
 
-    ht : str
+    ht : {'dlf', 'qwe', 'quad'}
         Flag to choose the Hankel transform.
 
-    htarg : array_like,
-        Depends on the value for ``ht``.
+    htarg : dict
+        Arguments of Hankel transform; depends on the value for `ht`.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -888,9 +874,6 @@ def check_opt(opt, loop, ht, htarg, verb):
 
     Returns
     -------
-    use_ne_eval : bool
-        Boolean if to use ``numexpr``.
-
     loop_freq : bool
         Boolean if to loop over frequencies.
 
@@ -899,33 +882,21 @@ def check_opt(opt, loop, ht, htarg, verb):
 
     """
 
-    # Check optimization flag
-    use_ne_eval = False
-    if opt == 'parallel':
-        if numexpr:
-            use_ne_eval = numexpr.evaluate
-        elif verb > 0:
-            print(numexpr_msg)
-
     # Define if to loop over frequencies or over offsets
-    lagged_splined_fht = False
-    if ht == 'fht':
-        if htarg[1] != 0:
-            lagged_splined_fht = True
+    lagged_splined_dlf = False
+    if ht == 'dlf':
+        if htarg['pts_per_dec'] != 0:
+            lagged_splined_dlf = True
 
-    if ht in ['hqwe', 'hquad'] or lagged_splined_fht:
+    if ht in ['qwe', 'quad'] or lagged_splined_dlf:
         loop_freq = True
         loop_off = False
     else:
         loop_off = loop == 'off'
         loop_freq = loop == 'freq'
 
-    # If verbose, print optimization information
+    # If verbose, print loop information
     if verb > 2:
-        if use_ne_eval:
-            print("   Kernel Opt.     :  Use parallel")
-        else:
-            print("   Kernel Opt.     :  None")
 
         if loop_off:
             print("   Loop over       :  Offsets")
@@ -934,15 +905,15 @@ def check_opt(opt, loop, ht, htarg, verb):
         else:
             print("   Loop over       :  None (all vectorized)")
 
-    return use_ne_eval, loop_freq, loop_off
+    return loop_freq, loop_off
 
 
 def check_time(time, signal, ft, ftarg, verb):
     r"""Check time domain specific input parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -951,16 +922,17 @@ def check_time(time, signal, ft, ftarg, verb):
 
     signal : {None, 0, 1, -1}
         Source signal:
-            - None: Frequency-domain response
-            - -1 : Switch-off time-domain response
-            - 0 : Impulse time-domain response
-            - +1 : Switch-on time-domain response
 
-    ft : {'sin', 'cos', 'qwe', 'fftlog', 'fft'}
+        - None: Frequency-domain response
+        - -1 : Switch-off time-domain response
+        - 0 : Impulse time-domain response
+        - +1 : Switch-on time-domain response
+
+    ft : {'dlf', 'qwe', 'fftlog', 'fft'}
         Flag for Fourier transform.
 
-    ftarg : str or filter from empymod.filters or array_like,
-        Only used if ``signal`` !=None. Depends on the value for ``ft``:
+    ftarg : dict
+        Arguments of Fourier transform; depends on the value for `ft`.
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -986,282 +958,251 @@ def check_time(time, signal, ft, ftarg, verb):
     # Ensure ft is all lowercase
     ft = ft.lower()
 
-    if ft in ['cos', 'sin', 'ffht']:  # Fourier-FHT (Sine/Cosine-filters)
+    # Initiate output dict
+    targ = {}
+    args = copy.deepcopy(ftarg)
 
-        # If `ft='ffht'`, we assume that it run the check before, and get
-        # sin/cos from ftarg. If not, defaults to 'sin'. To ensure that this
-        # check can be re-run without failing.
-        if ft == 'ffht':
-            try:
-                ft = ftarg[2]
-            except VariableCatch:
-                ft = 'sin'
+    if ft == 'dlf':       # Fourier-DLF (sin/cos-filters)
 
-        # If switch-off/on is required, ensure ft is cosine/sine
+        # Check dimension and type of pts_per_dec
+        targ['pts_per_dec'] = _check_var(
+                args.pop('pts_per_dec', -1.0), float, 0, 'dlf: pts_per_dec',
+                ())
+
+        # Check kind; if switch-off/on is required, ensure kind is cosine/sine
+        targ['kind'] = args.pop('kind', 'sin')
         if signal > 0:
-            ft = 'sin'
+            targ['kind'] = 'sin'
         elif signal < 0:
-            ft = 'cos'
+            targ['kind'] = 'cos'
+        if targ['kind'] not in ['sin', 'cos']:
+            print("* ERROR   :: 'kind' must be either 'sin' or 'cos'; "
+                  f"provided: targ['kind'].")
+            raise ValueError('ft')
 
-        # Check Input
-        ftarg = _check_targ(ftarg, ['fftfilt', 'pts_per_dec', 'ft'])
+        # If filter is a name (str), get it
+        targ['dlf'] = args.pop('dlf', filters.key_201_CosSin_2012())
+        if isinstance(targ['dlf'], str):
+            targ['dlf'] = getattr(filters, targ['dlf'])()
 
-        # Check filter; defaults to key_201_CosSin_2012
-        try:
-            fftfilt = ftarg['fftfilt']
-            if not hasattr(fftfilt, 'base'):
-                fftfilt = getattr(filters, fftfilt)()
-        except VariableCatch:
-            fftfilt = filters.key_201_CosSin_2012()
-
-        # Check pts_per_dec; defaults to -1
-        try:
-            pts_per_dec = _check_var(ftarg['pts_per_dec'], float, 0,
-                                     ft + 'pts_per_dec', ())
-        except VariableCatch:
-            pts_per_dec = -1.0
-
-        # Assemble ftarg
-        ftarg = (fftfilt, pts_per_dec, ft)
+        # Ensure the provided filter has the necessary attributes.
+        base = hasattr(targ['dlf'], 'base')
+        if targ['kind'] == 'sin':
+            sincos = hasattr(targ['dlf'], 'sin')
+        else:
+            sincos = hasattr(targ['dlf'], 'cos')
+        factor = hasattr(targ['dlf'], 'factor')
+        if not base or not sincos or not factor:
+            print("* ERROR   :: DLF-filter is missing some attributes; "
+                  f"base: {base}; {targ['kind']}: {sincos}; factor: {factor}.")
+            raise AttributeError('ft')
 
         # If verbose, print Fourier transform information
         if verb > 2:
-            if ft == 'sin':
+            if targ['kind'] == 'sin':
                 print("   Fourier         :  DLF (Sine-Filter)")
             else:
                 print("   Fourier         :  DLF (Cosine-Filter)")
-            print("     > Filter      :  " + fftfilt.name)
+            print(f"     > Filter      :  {targ['dlf'].name}")
             pstr = "     > DLF type    :  "
-            if pts_per_dec < 0:
-                print(pstr + "Lagged Convolution")
-            elif pts_per_dec > 0:
-                print(pstr + "Splined, " + str(pts_per_dec) + " pts/dec")
+            if targ['pts_per_dec'] < 0:
+                print(f"{pstr}Lagged Convolution")
+            elif targ['pts_per_dec'] > 0:
+                print(f"{pstr}Splined, {targ['pts_per_dec']} pts/dec")
             else:
-                print(pstr + "Standard")
+                print(f"{pstr}Standard")
 
         # Get required frequencies
-        omega, _ = transform.get_spline_values(ftarg[0], time, ftarg[1])
+        omega, _ = transform.get_dlf_points(
+                targ['dlf'], time, targ['pts_per_dec'])
         freq = np.squeeze(omega/2/np.pi)
 
-        # Rename ft
-        ft = 'ffht'
-
-    elif ft in ['qwe', 'fqwe']:       # QWE (using sine and imag-part)
-        # Rename ft
-        ft = 'fqwe'
-
-        # Get and check input or set defaults
-        ftarg = _check_targ(ftarg, ['rtol', 'atol', 'nquad', 'maxint',
-                                    'pts_per_dec', 'diff_quad', 'a', 'b',
-                                    'limit', 'sincos'])
+    elif ft == 'qwe':     # QWE (using sine and imag-part)
 
         # If switch-off is required, use cosine, else sine
         if signal >= 0:
-            sincos = np.sin
-        elif signal < 0:
-            sincos = np.cos
+            targ['sincos'] = np.sin
+        else:
+            targ['sincos'] = np.cos
 
-        try:  # rtol
-            rtol = _check_var(ftarg['rtol'], float, 0, 'qwe: rtol', ())
-        except VariableCatch:
-            rtol = np.array(1e-8, dtype=float)
+        # rtol : 1e-8
+        targ['rtol'] = _check_var(
+                args.pop('rtol', 1e-8), float, 0, 'qwe: rtol', ())
 
-        try:  # atol
-            atol = _check_var(ftarg['atol'], float, 0, 'qwe: atol', ())
-        except VariableCatch:
-            atol = np.array(1e-20, dtype=float)
+        # atol : 1e-20
+        targ['atol'] = _check_var(
+                args.pop('atol', 1e-20), float, 0, 'qwe: atol', ())
 
-        try:  # nquad
-            nquad = _check_var(ftarg['nquad'], int, 0, 'qwe: nquad', ())
-        except VariableCatch:
-            nquad = np.array(21, dtype=int)
+        # nquad : 21
+        targ['nquad'] = _check_var(
+                args.pop('nquad', 21), int, 0, 'qwe: nquad', ())
 
-        try:  # maxint
-            maxint = _check_var(ftarg['maxint'], int, 0, 'qwe: maxint', ())
-        except VariableCatch:
-            maxint = np.array(200, dtype=int)
+        # maxint : 200
+        targ['maxint'] = _check_var(
+                args.pop('maxint', 200), int, 0, 'qwe: maxint', ())
 
-        try:  # pts_per_dec
-            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
-                                     'qwe: pts_per_dec', ())
-            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            pts_per_dec = np.array(20, dtype=int)
+        # pts_per_dec : 20
+        pts_per_dec = _check_var(
+                args.pop('pts_per_dec', 20), int, 0, 'qwe: pts_per_dec', ())
+        targ['pts_per_dec'] = _check_min(
+                pts_per_dec, 1, 'pts_per_dec', '', verb)
 
         # diff_quad : 100
-        try:
-            diff_quad = _check_var(ftarg['diff_quad'], int, 0,
-                                   'qwe: diff_quad', ())
-        except VariableCatch:
-            diff_quad = np.array(100, dtype=int)
+        targ['diff_quad'] = _check_var(
+                args.pop('diff_quad', 100), int, 0, 'qwe: diff_quad', ())
 
         # a : None
-        try:
-            a = _check_var(ftarg['a'], float, 0, 'qwe: a (quad)', ())
-        except VariableCatch:
-            a = None
+        targ['a'] = args.pop('a', None)
+        if targ['a'] is not None:
+            targ['a'] = _check_var(targ['a'], float, 0, 'qwe: a (quad)', ())
 
         # b : None
-        try:
-            b = _check_var(ftarg['b'], float, 0, 'qwe: b (quad)', ())
-        except VariableCatch:
-            b = None
+        targ['b'] = args.pop('b', None)
+        if targ['b'] is not None:
+            targ['b'] = _check_var(targ['b'], float, 0, 'qwe: b (quad)', ())
 
         # limit : None
-        try:
-            limit = _check_var(ftarg['limit'], int, 0, 'qwe: limit (quad)', ())
-        except VariableCatch:
-            limit = None
-
-        # Assemble ftarg
-        ftarg = (rtol, atol, nquad, maxint, pts_per_dec, diff_quad, a, b,
-                 limit, sincos)
+        targ['limit'] = args.pop('limit', None)
+        if targ['limit'] is not None:
+            targ['limit'] = _check_var(
+                    targ['limit'], int, 0, 'qwe: limit (quad)', ())
 
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  Quadrature-with-Extrapolation")
-            print("     > rtol        :  " + str(rtol))
-            print("     > atol        :  " + str(atol))
-            print("     > nquad       :  " + str(nquad))
-            print("     > maxint      :  " + str(maxint))
-            print("     > pts_per_dec :  " + str(pts_per_dec))
-            print("     > diff_quad   :  " + str(diff_quad))
-            if a:
-                print("     > a     (quad):  " + str(a))
-            if b:
-                print("     > b     (quad):  " + str(b))
-            if limit:
-                print("     > limit (quad):  " + str(limit))
+            print(f"     > rtol        :  {targ['rtol']}")
+            print(f"     > atol        :  {targ['atol']}")
+            print(f"     > nquad       :  {targ['nquad']}")
+            print(f"     > maxint      :  {targ['maxint']}")
+            print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
+            print(f"     > diff_quad   :  {targ['diff_quad']}")
+            if targ['a']:
+                print(f"     > a     (quad):  {targ['a']}")
+            if targ['b']:
+                print(f"     > b     (quad):  {targ['b']}")
+            if targ['limit']:
+                print(f"     > limit (quad):  {targ['limit']}")
 
         # Get required frequencies
-        g_x, _ = special.p_roots(nquad)
+        g_x, _ = special.p_roots(targ['nquad'])
         minf = np.floor(10*np.log10((g_x.min() + 1)*np.pi/2/time.max()))/10
-        maxf = np.ceil(10*np.log10(maxint*np.pi/time.min()))/10
-        freq = np.logspace(minf, maxf, int((maxf-minf)*pts_per_dec + 1))
+        maxf = np.ceil(10*np.log10(targ['maxint']*np.pi/time.min()))/10
+        freq = np.logspace(minf, maxf, int((maxf-minf)*targ['pts_per_dec']+1))
 
-    elif ft == 'fftlog':              # FFTLog (using sine and imag-part)
+    elif ft == 'fftlog':  # FFTLog (using sine and imag-part)
 
-        # Get and check input or set defaults
-        ftarg = _check_targ(ftarg, ['pts_per_dec', 'add_dec', 'q', 'mu',
-                                    'tcalc', 'dlnr', 'kr', 'rk'])
+        # pts_per_dec : 10
+        pts_per_dec = _check_var(
+                args.pop('pts_per_dec', 10), int, 0,
+                'fftlog: pts_per_dec', ())
+        targ['pts_per_dec'] = _check_min(
+                pts_per_dec, 1, 'pts_per_dec', '', verb)
 
-        try:  # pts_per_dec
-            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
-                                     'fftlog: pts_per_dec', ())
-            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            pts_per_dec = np.array(10, dtype=int)
+        # add_dec : [-2, 1]
+        targ['add_dec'] = _check_var(
+                args.pop('add_dec', np.array([-2, 1])), float, 1,
+                'fftlog: add_dec', (2,))
 
-        try:  # add_dec
-            add_dec = _check_var(ftarg['add_dec'], float, 1, 'fftlog: add_dec',
-                                 (2,))
-        except VariableCatch:
-            add_dec = np.array([-2, 1], dtype=float)
-
-        try:  # q
-            q = _check_var(ftarg['q'], float, 0, 'fftlog: q', ())
-            # Restrict q to +/- 1
-            if np.abs(q) > 1:
-                q = np.sign(q)
-        except VariableCatch:
-            q = np.array(0, dtype=float)
+        # q : 0
+        targ['q'] = _check_var(args.pop('q', 0), float, 0, 'fftlog: q', ())
+        # Restrict q to +/- 1
+        if np.abs(targ['q']) > 1:
+            targ['q'] = np.sign(targ['q'])
 
         # If switch-off is required, use cosine, else sine
         if signal >= 0:
-            mu = 0.5
-        elif signal < 0:
-            mu = -0.5
+            targ['mu'] = 0.5
+        else:
+            targ['mu'] = -0.5
 
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  FFTLog")
-            print("     > pts_per_dec :  " + str(pts_per_dec))
-            print("     > add_dec     :  " + str(add_dec))
-            print("     > q           :  " + str(q))
+            print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
+            print(f"     > add_dec     :  {targ['add_dec']}")
+            print(f"     > q           :  {targ['q']}")
 
         # Calculate minimum and maximum required frequency
-        minf = np.log10(1/time.max()) + add_dec[0]
-        maxf = np.log10(1/time.min()) + add_dec[1]
-        n = np.int(maxf - minf)*pts_per_dec
+        minf = np.log10(1/time.max()) + targ['add_dec'][0]
+        maxf = np.log10(1/time.min()) + targ['add_dec'][1]
+        n = np.int(maxf - minf)*targ['pts_per_dec']
 
         # Initialize FFTLog, get required parameters
-        freq, tcalc, dlnr, kr, rk = transform.fhti(minf, maxf, n, q, mu)
+        freq, tcalc, dlnr, kr, rk = transform.get_fftlog_input(
+                minf, maxf, n, targ['q'], targ['mu'])
+        targ['tcalc'] = tcalc
+        targ['dlnr'] = dlnr
+        targ['kr'] = kr
+        targ['rk'] = rk
 
-        # Assemble ftarg
-        # Keep first 3 entries, so re-running this check is stable
-        ftarg = (pts_per_dec, add_dec, q, mu, tcalc, dlnr, kr, rk)
+    elif ft == 'fft':     # FFT
+        # Keys: dfreq, nfreq, ntot, pts_per_dec, fftfreq
 
-    elif ft == 'fft':                 # FFT
+        # dfreq : 0.002
+        targ['dfreq'] = _check_var(
+                args.pop('dfreq', 0.002), float, 0, 'fft: dfreq', ())
 
-        # Get and check input or set defaults
-        ftarg = _check_targ(ftarg, ['dfreq', 'nfreq', 'ntot', 'pts_per_dec',
-                                    'fftfreq'])
+        # nfreq : 2048
+        targ['nfreq'] = _check_var(
+                args.pop('nfreq', 2048), int, 0, 'fft: nfreq', ())
 
-        try:  # dfreq
-            dfreq = _check_var(ftarg['dfreq'], float, 0, 'fft: dfreq', ())
-        except VariableCatch:
-            dfreq = np.array(0.002, dtype=float)
-
-        try:  # nfreq
-            nfreq = _check_var(ftarg['nfreq'], int, 0, 'fft: nfreq', ())
-        except VariableCatch:
-            nfreq = np.array(2048, dtype=int)
-
+        # ntot
         nall = 2**np.arange(30)
-        try:  # ntot
-            ntot = _check_var(ftarg['ntot'], int, 0, 'fft: ntot', ())
-        except VariableCatch:
-            # We could use here fftpack.next_fast_len, but tests have shown
-            # that powers of two yield better results in this case.
-            ntot = nall[np.argmax(nall >= nfreq)]
-        else:  # Assure that input ntot is not bigger than nfreq
-            if nfreq > ntot:
-                ntot = nall[np.argmax(nall >= nfreq)]
+        targ['ntot'] = _check_var(
+            args.pop('ntot', nall[np.argmax(nall >= targ['nfreq'])]),  # (*)
+            int, 0, 'fft: ntot', ())
+        # Assure that input ntot is not bigger than nfreq
+        if targ['nfreq'] > targ['ntot']:
+            targ['ntot'] = nall[np.argmax(nall >= targ['nfreq'])]
+        # (*) We could use here fftpack.next_fast_len, but tests have shown
+        #     that powers of two yield better results in this case.
 
-        # Check pts_per_dec; defaults to None
-        try:
-            pts_per_dec = _check_var(ftarg['pts_per_dec'], int, 0,
-                                     'fft: pts_per_dec', ())
-            pts_per_dec = _check_min(pts_per_dec, 1, 'pts_per_dec', '', verb)
-        except VariableCatch:
-            pts_per_dec = None
+        # pts_per_dec : None
+        targ['pts_per_dec'] = args.pop('pts_per_dec', None)
+        if targ['pts_per_dec'] is not None:
+            pts_per_dec = _check_var(
+                    targ['pts_per_dec'], int, 0, 'fft: pts_per_dec', ())
+            targ['pts_per_dec'] = _check_min(
+                    pts_per_dec, 1, 'pts_per_dec', '', verb)
 
         # Get required frequencies
-        if pts_per_dec:  # Space actually calculated freqs logarithmically.
-            start = np.log10(dfreq)
-            stop = np.log10(nfreq*dfreq)
-            freq = np.logspace(start, stop, int((stop-start)*pts_per_dec + 1))
+        if targ['pts_per_dec']:  # Space actually calc. freqs logarithmically.
+            start = np.log10(targ['dfreq'])
+            stop = np.log10(targ['nfreq']*targ['dfreq'])
+            freq = np.logspace(
+                    start, stop, int((stop-start)*targ['pts_per_dec'] + 1))
         else:
-            freq = np.arange(1, nfreq+1)*dfreq
-
-        # Assemble ftarg
-        ftarg = (dfreq, nfreq, ntot, pts_per_dec)
+            freq = np.arange(1, targ['nfreq']+1)*targ['dfreq']
 
         # If verbose, print Fourier transform information
         if verb > 2:
             print("   Fourier         :  Fast Fourier Transform FFT")
-            print("     > dfreq       :  " + str(ftarg[0]))
-            print("     > nfreq       :  " + str(ftarg[1]))
-            print("     > ntot        :  " + str(ftarg[2]))
-            if pts_per_dec:
-                print("     > pts_per_dec :  " + str(ftarg[3]))
+            print(f"     > dfreq       :  {targ['dfreq']}")
+            print(f"     > nfreq       :  {targ['nfreq']}")
+            print(f"     > ntot        :  {targ['ntot']}")
+            if targ['pts_per_dec']:
+                print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
             else:
                 print("     > pts_per_dec :  (linear)")
 
     else:
-        print("* ERROR   :: <ft> must be one of: ['cos', 'sin', 'qwe', " +
-              "'fftlog', 'fft']; <ft> provided: "+str(ft))
+        print("* ERROR   :: <ft> must be one of: ['dlf', 'qwe', "
+              f"'fftlog', 'fft']; <ft> provided: {ft}")
         raise ValueError('ft')
 
-    return time, freq, ft, ftarg
+    # Check remaining arguments.
+    if args and verb > 0:
+        print(f"* WARNING :: Unknown ftarg {args} for method '{ft}'")
+
+    return time, freq, ft, targ
 
 
 def check_time_only(time, signal, verb):
     r"""Check time and signal parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1270,10 +1211,11 @@ def check_time_only(time, signal, verb):
 
     signal : {None, 0, 1, -1}
         Source signal:
-            - None: Frequency-domain response
-            - -1 : Switch-off time-domain response
-            - 0 : Impulse time-domain response
-            - +1 : Switch-on time-domain response
+
+        - None: Frequency-domain response
+        - -1 : Switch-off time-domain response
+        - 0 : Impulse time-domain response
+        - +1 : Switch-on time-domain response
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
@@ -1289,7 +1231,7 @@ def check_time_only(time, signal, verb):
 
     # Check input signal
     if int(signal) not in [-1, 0, 1]:
-        print("* ERROR   :: <signal> must be one of: [None, -1, 0, 1]; " +
+        print("* ERROR   :: <signal> must be one of: [None, -1, 0, 1]; "
               "<signal> provided: "+str(signal))
         raise ValueError('signal')
 
@@ -1309,8 +1251,8 @@ def check_solution(solution, signal, ab, msrc, mrec):
     r"""Check required solution with parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`. Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1319,10 +1261,11 @@ def check_solution(solution, signal, ab, msrc, mrec):
 
     signal : {None, 0, 1, -1}
         Source signal:
-            - None: Frequency-domain response
-            - -1 : Switch-off time-domain response
-            - 0 : Impulse time-domain response
-            - +1 : Switch-on time-domain response
+
+        - None: Frequency-domain response
+        - -1 : Switch-off time-domain response
+        - 0 : Impulse time-domain response
+        - +1 : Switch-on time-domain response
 
     msrc, mrec : bool
         True if src/rec is magnetic, else False.
@@ -1331,21 +1274,20 @@ def check_solution(solution, signal, ab, msrc, mrec):
 
     # Ensure valid solution.
     if solution not in ['fs', 'dfs', 'dhs', 'dsplit', 'dtetm']:
-        print("* ERROR   :: Solution must be one of ['fs', 'dfs', 'dhs', " +
-              "'dsplit', 'dtetm']; <solution> provided: " + solution)
+        print("* ERROR   :: Solution must be one of ['fs', 'dfs', 'dhs', "
+              f"'dsplit', 'dtetm']; <solution> provided: {solution}")
         raise ValueError('solution')
 
     # If diffusive solution is required, ensure EE-field.
     if solution[0] == 'd' and (msrc or mrec):
-        print('* ERROR   :: Diffusive solution is only implemented for ' +
-              'electric sources and electric receivers, <ab> provided: ' +
-              str(ab))
+        print("* ERROR   :: Diffusive solution is only implemented for "
+              f"electric sources and electric receivers, <ab> provided: {ab}")
         raise ValueError('ab')
 
     # If full solution is required, ensure frequency-domain.
     if solution == 'fs' and signal is not None:
-        print('* ERROR   :: Full fullspace solution is only implemented for ' +
-              'the frequency domain, <signal> provided: ' + str(signal))
+        print("* ERROR   :: Full fullspace solution is only implemented for "
+              f"the frequency domain, <signal> provided: {signal}")
         raise ValueError('signal')
 
 
@@ -1355,8 +1297,8 @@ def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
     r"""Get required ab's for given angles.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1443,7 +1385,7 @@ def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
 
     # Print actual calculated <ab>
     if verb > 2:
-        print("   Required ab's   : ", _strvar(ab_calc))
+        print(f"   Required ab's   :  {_strvar(ab_calc)}")
 
     return ab_calc
 
@@ -1452,8 +1394,8 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
     r"""Get required geometrical scaling factor for given angles.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1508,12 +1450,14 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
 def get_layer_nr(inp, depth):
     r"""Get number of layer in which inp resides.
 
-    Note:
-    If zinp is on a layer interface, the layer above the interface is chosen.
+    .. note::
+
+        If zinp is on a layer interface, the layer above the interface is
+        chosen.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1533,7 +1477,7 @@ def get_layer_nr(inp, depth):
         inp[2] (depths).
 
     """
-    zinp = inp[2]
+    zinp = np.array(inp[2], dtype=float)
 
     #  depth = [-infty : last interface]; create additional depth-array
     # pdepth = [fist interface : +infty]
@@ -1546,15 +1490,15 @@ def get_layer_nr(inp, depth):
     linp = np.where((depth[None, :] < b_zinp)*(pdepth[None, :] >= b_zinp))[1]
 
     # Return; squeeze in case of only one inp-depth
-    return np.squeeze(linp), zinp
+    return np.squeeze(linp), np.squeeze(zinp)
 
 
 def get_off_ang(src, rec, nsrc, nrec, verb):
     r"""Get depths, offsets, angles, hence spatial input parameters.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
@@ -1607,15 +1551,16 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     r"""Get angles, interpolation weights and normalization weights.
 
     This check-function is called from one of the modelling routines in
-    :mod:`model`.  Consult these modelling routines for a detailed description
-    of the input parameters.
+    :mod:`empymod.model`. Consult these modelling routines for a detailed
+    description of the input parameters.
 
     Parameters
     ----------
     inp : list of floats or arrays
         Input coordinates (m):
-            - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
-            - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
+
+        - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
+        - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
 
     iz : int
         Index of current di-/bipole depth (-).
@@ -1631,10 +1576,11 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
     strength : float, optional
         Source strength (A):
-          - If 0, output is normalized to source and receiver of 1 m length,
-            and source strength of 1 A.
-          - If != 0, output is returned for given source and receiver length,
-            and source strength.
+
+        - If 0, output is normalized to source and receiver of 1 m length, and
+          source strength of 1 A.
+        - If != 0, output is returned for given source and receiver length, and
+          source strength.
 
     name : str, {'src', 'rec'}
         Pole-type.
@@ -1775,24 +1721,24 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
         # Print dipole/bipole information
         if isdipole:
-            print(longname, str(tout[0].size), 'dipole(s)')
+            print(f"{longname} {tout[0].size} dipole(s)")
             tname = ['x  ', 'y  ', 'z  ']
             prntinp = tout
         else:
-            print(longname, str(int(tout[0].size/intpts)), 'bipole(s)')
+            print(f"{longname} {int(tout[0].size/intpts)} bipole(s)")
             tname = ['x_c', 'y_c', 'z_c']
             if intpts == 1:
                 print("     > intpts      :  1 (as dipole)")
                 prntinp = tout
             else:
-                print("     > intpts      : ", intpts)
+                print(f"     > intpts      :  {intpts}")
                 prntinp = [np.atleast_1d(tinp[0])[0] + dx/2,
                            np.atleast_1d(tinp[2])[0] + dy/2,
                            np.atleast_1d(tinp[4])[0] + dz/2]
 
             # Print bipole length and strength
             _prnt_min_max_val(dl, "     > length  [m] : ", verb)
-            print("     > strength[A] : ", _strvar(strength))
+            print(f"     > strength[A] :  {_strvar(strength)}")
 
         # Print coordinates
         for i in range(3):
@@ -1806,6 +1752,77 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     return tout, azm, dip, g_w, intpts, inp_w
 
 
+def get_kwargs(names, defaults, kwargs):
+    """Return wanted parameters, check remaining.
+
+    1. Extracts parameters `names` from `kwargs`, filling them with the
+       `defaults`-value if it is not in `kwargs`.
+    2. Check remaining kwargs;
+
+       - Raise an error if it is an unknown keyword;
+       - Print warning if it is a keyword from another routine (verb>0).
+
+    List of possible kwargs:
+
+    - ALL functions: src, rec, res, aniso, epermH, epermV, mpermH, mpermV, verb
+    - ONLY gpr: cf, gain
+    - ONLY bipole: msrc, srcpts
+    - ONLY dipole_k: freq, wavenumber
+    - ONLY analytical: solution
+    - ONLY bipole, loop: mrec, recpts, strength
+    - ONLY bipole, dipole, loop, gpr: ht, htarg, ft, ftarg, xdirect, loop
+    - ONLY bipole, dipole, loop, analytical: signal
+    - ONLY dipole, analytical, gpr, dipole_k: ab
+    - ONLY bipole, dipole, loop, gpr, dipole_k: depth
+    - ONLY bipole, dipole, loop, analytical, gpr: freqtime
+
+    Parameters
+    ----------
+    names: list
+        Names of wanted parameters as strings.
+
+    defaults: list
+        Default values of wanted parameters, in same order.
+
+    kwargs : dict
+        Passed-through kwargs.
+
+    Returns
+    ------
+    values : list
+        Wanted parameters.
+
+    """
+    # Known keys (excludes keys present in ALL routines).
+    known_keys = set([
+            'depth', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'signal',
+            'ab', 'freqtime', 'freq', 'wavenumber', 'solution', 'cf', 'gain',
+            'msrc', 'srcpts', 'mrec', 'recpts', 'strength'
+    ])
+
+    # Loop over wanted parameters.
+    out = list()
+    verb = 2  # get_kwargs-internal default.
+    for i, name in enumerate(names):
+
+        # Catch verb for warnings later on.
+        if name == 'verb':
+            verb = kwargs.get(name, defaults[i])
+
+        # Add this parameter to the list.
+        out.append(kwargs.pop(name, defaults[i]))
+
+    # Check remaining parameters.
+    if kwargs:
+        if not set(kwargs.keys()).issubset(known_keys):
+            print(f"* ERROR   :: Unexpected **kwargs: {kwargs}")
+            raise ValueError('kwargs')
+        elif verb > 0:
+            print(f"* WARNING :: Unused **kwargs: {kwargs}")
+
+    return out
+
+
 def printstartfinish(verb, inp=None, kcount=None):
     r"""Print start and finish with time measure and kernel count."""
     if inp:
@@ -1814,20 +1831,20 @@ def printstartfinish(verb, inp=None, kcount=None):
             ktxt = ' '
             if kcount:
                 ktxt += str(kcount) + ' kernel call(s)'
-            print('\n:: empymod END; runtime = ' + ttxt + ' ::' + ktxt + '\n')
+            print(f"\n:: empymod END; runtime = {ttxt} ::{ktxt}\n")
     else:
         t0 = default_timer()
         if verb > 2:
-            print("\n:: empymod START  ::\n")
+            print(f"\n:: empymod START  ::  v{__version__}\n")
         return t0
 
 
 def conv_warning(conv, targ, name, verb):
     r"""Print error if QWE/QUAD did not converge at least once."""
     if verb > 0 and not conv:
-        print('* WARNING :: ' + name +
-              '-quadrature did not converge at least once;\n             ' +
-              '=> desired `atol` and `rtol` might not be achieved.')
+        print(f"* WARNING :: {name}"
+              "-quadrature did not converge at least once;\n             "
+              "=> desired `atol` and `rtol` might not be achieved.")
 
 
 # 3. Set/get min values
@@ -1838,6 +1855,11 @@ def set_minimum(min_freq=None, min_time=None, min_off=None, min_res=None,
     Set minimum values of parameters.
 
     The given parameters are set to its minimum value if they are smaller.
+
+    .. note::
+
+        set_minimum and get_minimum are derived after set_printoptions and
+        get_printoptions from arrayprint.py in numpy.
 
     Parameters
     ----------
@@ -1852,11 +1874,6 @@ def set_minimum(min_freq=None, min_time=None, min_off=None, min_res=None,
         Minimum horizontal and vertical resistivity [Ohm.m] (default 1e-20).
     min_angle : float, optional
         Minimum angle [-] (default 1e-10).
-
-    Note
-    ----
-    set_minimum and get_minimum are derived after set_printoptions and
-    get_printoptions from arrayprint.py in numpy.
 
     """
 
@@ -1878,23 +1895,23 @@ def get_minimum():
     r"""
     Return the current minimum values.
 
+    .. note::
+
+        set_minimum and get_minimum are derived after set_printoptions and
+        get_printoptions from arrayprint.py in numpy.
+
     Returns
     -------
     min_vals : dict
         Dictionary of current minimum values with keys
 
-          - min_freq : float
-          - min_time : float
-          - min_off : float
-          - min_res : float
-          - min_angle : float
+        - min_freq : float
+        - min_time : float
+        - min_off : float
+        - min_res : float
+        - min_angle : float
 
         For a full description of these options, see `set_minimum`.
-
-    Note
-    ----
-    set_minimum and get_minimum are derived after set_printoptions and
-    get_printoptions from arrayprint.py in numpy.
 
     """
     d = dict(min_freq=_min_freq,
@@ -1913,20 +1930,17 @@ def _check_shape(var, name, shape, shape2=None):
     if shape != varshape:
         if shape2:
             if shape2 != varshape:
-                print('* ERROR   :: Parameter ' + name + ' has wrong shape!' +
-                      ' : ' + str(varshape) + ' instead of ' + str(shape) +
-                      'or' + str(shape2) + '.')
+                print(f"* ERROR   :: Parameter {name} has wrong shape!"
+                      f" : {varshape} instead of {shape} or {shape2}.")
                 raise ValueError(name)
         else:
-            print('* ERROR   :: Parameter ' + name + ' has wrong shape! : ' +
-                  str(varshape) + ' instead of ' + str(shape) + '.')
+            print(f"* ERROR   :: Parameter {name} has wrong shape! : "
+                  f"{varshape} instead of {shape}.")
             raise ValueError(name)
 
 
 def _check_var(var, dtype, ndmin, name, shape=None, shape2=None):
     r"""Return variable as array of dtype, ndmin; shape-checked."""
-    if var is None:
-        raise ValueError
     var = np.array(var, dtype=dtype, copy=True, ndmin=ndmin)
     if shape:
         _check_shape(var, name, shape, shape2)
@@ -1941,12 +1955,12 @@ def _strvar(a, prec='{:G}'):
 def _prnt_min_max_val(var, text, verb):
     r"""Print variable; if more than three, just min/max, unless verb > 3."""
     if var.size > 3:
-        print(text, _strvar(var.min()), "-", _strvar(var.max()),
-              ":", _strvar(var.size), " [min-max; #]")
+        print(f"{text} {_strvar(var.min())} - {_strvar(var.max())} "
+              f": {_strvar(var.size)}  [min-max; #]")
         if verb > 3:
-            print("                   : ", _strvar(var))
+            print(f"                   :  {_strvar(var)}")
     else:
-        print(text, _strvar(np.atleast_1d(var)))
+        print(f"{text} {_strvar(np.atleast_1d(var))}")
 
 
 def _check_min(par, minval, name, unit, verb):
@@ -1959,91 +1973,34 @@ def _check_min(par, minval, name, unit, verb):
         ipar = np.where(par < minval)
         par[ipar] = minval
         if verb > 0 and np.size(ipar) != 0:
-            print('* WARNING :: ' + name + ' < ' + str(minval) + ' ' + unit +
-                  ' are set to ' + str(minval) + ' ' + unit + '!')
+            print(f"* WARNING :: {name} < {str(minval)} {unit}"
+                  f" are set to {minval} {unit}!")
     if scalar:
         return np.squeeze(par)
     else:
         return par
 
 
-def _check_targ(targ, keys):
-    r"""Check format of htarg/ftarg and return dict."""
-    if targ is None:   # If None
-        targ = {}
-    elif isinstance(targ, (list, tuple, dict)):  # All good, except if empty
-        if len(targ) == 0:
-            targ = {}
-    elif targ == '':   # Empty string
-        targ = {}
-    elif isinstance(targ, np.ndarray) and targ.size == 0:  # Empty array
-        targ = {}
-    else:              # If only one value
-        targ = [targ, ]
-
-    if isinstance(targ, (list, tuple)):  # Put list into dict
-        targ = {keys[i]: targ[i] for i in range(min(len(targ), len(keys)))}
-    return targ
-
-
-# 5. Backwards compatibility
-
-def spline_backwards_hankel(ht, htarg, opt):
-    r"""Check opt if deprecated 'spline' is used.
-
-    Returns corrected htarg, opt.
-    r"""
-    # Ensure ht is all lowercase
-    ht = ht.lower()
-
-    # Only relevant for 'fht' and 'hqwe', not for 'quad'
-    if ht in ['fht', 'qwe', 'hqwe']:
-
-        # Get corresponding htarg
-        if ht == 'fht':
-            htarg = _check_targ(htarg, ['fhtfilt', 'pts_per_dec'])
-        elif ht in ['qwe', 'hqwe']:
-            htarg = _check_targ(htarg, ['rtol', 'atol', 'nquad', 'maxint',
-                                'pts_per_dec', 'diff_quad', 'a', 'b', 'limit'])
-
-        # If spline (qwe, fht) or lagged (fht)
-        if opt == 'spline':
-
-            # Issue warning
-            mesg = ("\n    The use of `opt='spline'` is deprecated and will " +
-                    "be removed\n    in v2.0.0; use the corresponding " +
-                    "setting in `htarg`.")
-            warnings.warn(mesg, DeprecationWarning)
-
-            # Reset opt
-            opt = None
-
-            # Check pts_per_dec; set to old default values if not given
-            if 'pts_per_dec' not in htarg:
-                if ht == 'fht':
-                    htarg['pts_per_dec'] = -1  # Lagged Convolution DLF
-
-                elif ht in ['qwe', 'hqwe']:
-                    htarg['pts_per_dec'] = 80  # Splined QWE; old default value
-
-    return htarg, opt
-
-
-# 6. Report
+# 5. Report
 class Report(ScoobyReport):
     r"""Print date, time, and version information.
 
-    Use ``scooby`` to print date, time, and package version information in any
+    Use `scooby` to print date, time, and package version information in any
     environment (Jupyter notebook, IPython console, Python console, QT
     console), either as html-table (notebook) or as plain text (anywhere).
 
-    Always shown are the OS, number of CPU(s), ``numpy``, ``scipy``,
-    ``empymod``, ``sys.version``, and time/date.
+    Always shown are the OS, number of CPU(s), `numpy`, `scipy`, `numba`,
+    `empymod`, `sys.version`, and time/date.
 
-    Additionally shown are, if they can be imported, ``numexpr``, ``IPython``,
-    and ``matplotlib``. It also shows MKL information, if available.
+    Additionally shown are, if they can be imported, `IPython`, and
+    `matplotlib`. It also shows MKL information, if available.
 
-    All modules provided in ``add_pckg`` are also shown.
+    All modules provided in `add_pckg` are also shown.
+
+    .. note::
+
+        The package `scooby` has to be installed in order to use `Report`:
+        ``pip install scooby``.
 
 
     Parameters
@@ -2063,13 +2020,6 @@ class Report(ScoobyReport):
         Sort the packages when the report is shown
 
 
-    NOTE
-    ----
-
-    The package ``scooby`` has to be installed in order to use ``Report``:
-    ``pip install scooby``.
-
-
     Examples
     --------
     >>> import pytest
@@ -2085,28 +2035,10 @@ class Report(ScoobyReport):
         """Initiate a scooby.Report instance."""
 
         # Mandatory packages.
-        core = ['numpy', 'scipy', 'empymod']
+        core = ['numpy', 'scipy', 'numba', 'empymod']
 
         # Optional packages.
-        optional = ['numexpr', 'IPython', 'matplotlib']
+        optional = ['IPython', 'matplotlib']
 
         super().__init__(additional=add_pckg, core=core, optional=optional,
                          ncol=ncol, text_width=text_width, sort=sort)
-
-
-class Versions(Report):
-    r"""New name is `Report`, here for backwards compatibility."""
-    mesg = ("\n    Class `Versions` is deprecated and will " +
-            "be removed; use class `Report` instead.")
-    warnings.warn(mesg, DeprecationWarning)
-
-    def __init__(self, add_pckg=None, ncol=3):
-        super().__init__(add_pckg, ncol)
-
-
-def versions(mode=None, add_pckg=None, ncol=4):
-    r"""Old func-way of class `Report`, here for backwards compatibility."""
-    mesg = ("\n    Func `versions` is deprecated and will " +
-            "be removed; use class `Report` instead.")
-    warnings.warn(mesg, DeprecationWarning)
-    return Report(add_pckg, ncol)

@@ -17,7 +17,7 @@ plt.style.use('ggplot')
 # Define model
 # ------------
 
-x = (np.arange(1051))*10-500
+x = (np.arange(526))*20-500
 rx = np.repeat([x, ], np.size(x), axis=0)
 ry = rx.transpose()
 zsrc = 150
@@ -35,14 +35,12 @@ inp = {
     'aniso': aniso,
     'ab': ab,
     'epermH': perm,
-    'epermV': perm,
     'mpermH': perm,
-    'mpermV': perm,
     'verb': 0
 }
 
 ###############################################################################
-# Calculation
+# Computation
 # -----------
 
 # Halfspace
@@ -54,8 +52,9 @@ fs = empymod.analytical(**inp)
 fs = fs.reshape(np.shape(rx))
 
 # Relative error (%)
-amperr = np.abs((fs.amp - hs.amp)/fs.amp)*100
-phaerr = np.abs((np.angle(fs) - np.angle(hs))/np.angle(fs))*100
+amperr = np.abs((fs.amp() - hs.amp())/fs.amp())*100
+phaerr = np.abs((fs.pha(unwrap=False) - hs.pha(unwrap=False)) /
+                fs.pha(unwrap=False))*100
 
 ###############################################################################
 # Plot

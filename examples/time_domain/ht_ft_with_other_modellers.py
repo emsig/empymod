@@ -35,8 +35,7 @@ model = {
     'rec': [6000, 0, 0.001],  # Receivers in-line, 0.5m below interface
     'depth': [0],             # Air interface
     'res': [2e14, 1],         # Resistivity: [air, half-space]
-    'epermH': [0, 1],         # Set electric permittivity of air to 0 because
-    'epermV': [0, 1],         # of numerical noise
+    'epermH': [0, 1],         # Set el. perm. of air to 0 because of num. noise
 }
 
 # Specify desired times
@@ -50,14 +49,14 @@ signal = 1
 # => See the docstrings (e.g., empymod.model.dipole) for available transforms
 #    and their arguments.
 time, freq, ft, ftarg = empymod.utils.check_time(
-        time=time, signal=signal, ft='sin', ftarg={'pts_per_dec'}, verb=3)
+        time=time, signal=signal, ft='dlf', ftarg={}, verb=3)
 
 ###############################################################################
-# Frequency-domain calculation
+# Frequency-domain computation
 # ----------------------------
 #
-# **=> Here we calculate the frequency-domain result with `empymod`, but you
-# could calculate it with any other modeller.**
+# **=> Here we compute the frequency-domain result with `empymod`, but you
+# could compute it with any other modeller.**
 
 fresp = empymod.dipole(freqtime=freq, **model)
 
@@ -80,10 +79,10 @@ plt.show()
 # Fourier transform
 # -----------------
 
-# Calculate corresponding time-domain signal.
+# Compute corresponding time-domain signal.
 tresp, _ = empymod.model.tem(
     fEM=fresp[:, None],
-    off=model['rec'][0],
+    off=np.array(model['rec'][0]),
     freq=freq,
     time=time,
     signal=signal,

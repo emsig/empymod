@@ -127,7 +127,6 @@ for i in np.arange(np.size(srcn)):
                    'aniso': ianiso,
                    'freqtime': ifreq,
                    'ab': ab,
-                   'opt': 'parallel',
                    'epermH': iepermH,
                    'epermV': iepermV,
                    'mpermH': impermH,

@@ -33,7 +33,7 @@ off, angle = utils.get_off_ang(src, rec, nsrc, nrec, 0)
 lsrc, zsrc = utils.get_layer_nr(src, depth)
 lrec, zrec = utils.get_layer_nr(rec, depth)
 
-ht, htarg = utils.check_hankel('fht', None, 0)
+ht, htarg = utils.check_hankel('dlf', {}, 0)
 
 # 1. FULLSPACE
 inp1 = {'ab': 12,
@@ -53,7 +53,6 @@ inp1 = {'ab': 12,
         'isfullspace': True,
         'ht': ht,
         'htarg': htarg,
-        'use_ne_eval': False,
         'msrc': True,
         'mrec': True,
         'loop_freq': False,
@@ -94,7 +93,7 @@ EM5, kcount5, _ = fem(**inp5)
 
 # ab = 22
 time = [1, 2, 3]
-time, freq, ft, ftarg = utils.check_time(time, 0, 'fftlog', None, 0)
+time, freq, ft, ftarg = utils.check_time(time, 0, 'fftlog', {}, 0)
 frequency = utils.check_frequency(freq, res, aniso, epermH, epermV, mpermH,
                                   mpermV, 0)
 freq, etaH, etaV, zetaH, zetaV = frequency
@@ -118,8 +117,8 @@ inp7['signal'] = 1
 EM7, _ = tem(**inp7)
 
 # 8. TIME; SIGNAL = -1
-_, freq1, _, _ = utils.check_time(time, 1, 'fftlog', None, 0)
-_, freq2, _, _ = utils.check_time(time, -1, 'fftlog', None, 0)
+_, freq1, _, _ = utils.check_time(time, 1, 'fftlog', {}, 0)
+_, freq2, _, _ = utils.check_time(time, -1, 'fftlog', {}, 0)
 frequency2 = utils.check_frequency(freq2, res, aniso, epermH, epermV, mpermH,
                                    mpermV, 0)
 freq2, etaH2, etaV2, zetaH2, zetaV2 = frequency2

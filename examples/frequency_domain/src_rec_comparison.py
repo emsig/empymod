@@ -4,9 +4,9 @@ Comparison of all src-rec combinations
 
 Comparison of all source-receiver combinations; electric and magnetic
 
-We calculate the secondary field for a simple model of a 1 Ohm.m halfspace
-below air. Source is 50 m above the surface in the air, receivers are on the
-surface, frequency is 1 Hz.
+We compute the secondary field for a simple model of a 1 Ohm.m halfspace below
+air. Source is 50 m above the surface in the air, receivers are on the surface,
+frequency is 1 Hz.
 
 """
 import empymod
@@ -26,20 +26,20 @@ inp = {'src': [0, 0, -50],
        'depth': 0,
        'res': [2e14, 1],
        'freqtime': 1,
-       'xdirect': None,  # Secondary field calc., req. empymod >= v1.6.1.
+       'xdirect': None,  # Secondary field comp., req. empymod >= v1.6.1.
        'htarg': {'pts_per_dec': -1},  # To speed-up the calculation
        'verb': 0}
 
 ###############################################################################
-# Calculate
-# ---------
+# Compute
+# -------
 
 # All possible combinations
 pab = [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26,
        31, 32, 33, 34, 35, 36, 41, 42, 43, 44, 45, 46,
        51, 52, 53, 54, 55, 56, 61, 62, 63, 64, 65, 66]
 
-# Calculate and store them in fs
+# Compute and store them in fs
 fs = dict()
 for ab in pab:
     fs[str(ab)] = empymod.dipole(ab=ab, **inp).reshape(np.shape(rx))
