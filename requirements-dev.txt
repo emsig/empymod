@@ -14,4 +14,4 @@ pytest_flake8
 scooby
 coveralls
 memory_profiler
-numba
+numba >= 0.44
