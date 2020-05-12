@@ -26,7 +26,6 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     install_requires=[
-        'numpy',
         'scipy>=1.0.0',
         'numba>=0.44',
     ],
