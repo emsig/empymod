@@ -977,7 +977,7 @@ def check_time(time, signal, ft, ftarg, verb):
             targ['kind'] = 'cos'
         if targ['kind'] not in ['sin', 'cos']:
             print("* ERROR   :: 'kind' must be either 'sin' or 'cos'; "
-                  f"provided: targ['kind'].")
+                  "provided: targ['kind'].")
             raise ValueError('ft')
 
         # If filter is a name (str), get it
