@@ -32,18 +32,12 @@ of NumPy and SciPy; I recommend using `Anaconda
 simply start the *Anaconda Navigator*, add the channel **conda-forge** and
 **empymod** will appear in the package list and can be installed with a click.
 
-You should ensure that you have NumPy and SciPy installed with the Intel Math
-Kernel Library (*mkl*), as this makes quite a difference in terms of
-speed. You can check that by running
-
-.. code-block:: python
-
-    >>> import numpy as np
-    >>> np.show_config()
-
-The output should contain a lot of references to ``mkl``, and it should NOT
-contain references to ``blas``, ``lapack``, ``openblas``, or similar.
-
+Using NumPy and SciPy with the Intel Math Kernel Library (*mkl*) can
+significantly improve computation time. You can check if ``mkl`` is used via
+``conda list``: The entries for the BLAS and LAPACK libraries should contain
+something with ``mkl``, not with ``openblas``. To enforce it you might have to
+create a file ``pinned``, containing the line ``libblas[build=*mkl]`` in the
+folder ``path-to-your-conda-env/conda-meta/``.
 
 The structure of empymod is:
 
