@@ -17,8 +17,7 @@ or via **pip**:
 
    pip install empymod
 
-Required are Python version 3.6 or higher and the modules NumPy, SciPy, and
-Numba.
+Required are Python version 3.6 or higher and the modules `SciPy` and `Numba`.
 
 The modeller empymod comes with add-ons (``empymod.scripts``). These add-ons
 provide some very specific, additional functionalities. Some of these add-ons
