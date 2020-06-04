@@ -1,17 +1,24 @@
-numpy
-scipy >= 1.0.0
+# GLOBAL REQUIREMENTS
+-r requirements.txt
+
+# SOFT DEPENDENCIES
+scooby
+matplotlib
+
+# SETUP RELATED
+setuptools_scm
+
+# FOR DOCUMENTATION
 sphinx
 numpydoc >= 0.9
-matplotlib
 sphinx_numfig
-sphinx_rtd_theme
-setuptools_scm
 sphinx_gallery
+memory_profiler
+sphinx_rtd_theme
+
+# FOR TESTING
 pytest
+coveralls
 pytest_cov
 pytest_mpl
 pytest_flake8
-scooby
-coveralls
-memory_profiler
-numba >= 0.44

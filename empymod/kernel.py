@@ -877,12 +877,12 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
             pm = 1
 
         # 15/25: Swap x/y
-        if ab in[15, 25]:
+        if ab in [15, 25]:
             coo1, coo3 = coo3, coo1
             coo2, coo4 = coo4, coo2
 
         # 24/25: Swap src/rec
-        if ab in[24, 25]:
+        if ab in [24, 25]:
             zrec, zsrc = zsrc, zrec
 
         # Calculate response
