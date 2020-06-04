@@ -15,11 +15,11 @@ matrix:
     - python: 3.7  # => without matplotlib
       env: PYTHON=3.7
     - python: 3.7  # => just linkcheck
-      env: PYTHON=3.7 CHCKLNKS=true CONDA="matplotlib pillow" PIP="sphinx numpydoc sphinx_rtd_theme sphinx_numfig sphinx_gallery memory_profiler"
+      env: PYTHON=3.7 CHCKLNKS=true
 
 jobs:
   allow_failures:  # env must be EXACTLY as env allowed to fail.
-    - env: PYTHON=3.7 CHCKLNKS=true CONDA="matplotlib pillow" PIP="sphinx numpydoc sphinx_rtd_theme sphinx_numfig sphinx_gallery memory_profiler"
+    - env: PYTHON=3.7 CHCKLNKS=true
 
 install:
   - sudo apt-get update
@@ -35,10 +35,11 @@ install:
   - conda info -a
 
   # Install and activate environment, install packages
-  - conda create -q -n test-environment python=$PYTHON ${SP:-"scipy"} ${NB:-"numba"} $CONDA pytest pytest-cov
-  - source activate test-environment
+  - conda create -q -n tenv python=$PYTHON ${SP:-"scipy"} ${NB:-"numba"} $CONDA pytest pytest-cov
+  - source activate tenv
   - pip install setuptools_scm coveralls pytest-flake8 $PIP
   - if [ "$CHCKLNKS" = true ]; then
+        pip install -r requirements-dev.txt;
         pip install .;
     else
         python setup.py install;
