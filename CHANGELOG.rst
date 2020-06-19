@@ -10,6 +10,18 @@ v2.0.x
 """"""
 
 
+v2.0.1: Bug fixes: ftarg, docs, CI, req
+---------------------------------------
+
+**2020-06-19**
+
+- Bugfix that using `ftarg` returned from `utils.check_time` as input for the
+  same `utils.check_time` does not throw a warning in the case of `fftlog` and
+  `qwe`.
+- Various micro-improvements and simplifications with regards to the
+  documentation, testing, and requirement specifications.
+
+
 v2.0.0: Numba
 -------------
 
