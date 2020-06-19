@@ -1020,6 +1020,7 @@ def check_time(time, signal, ft, ftarg, verb):
     elif ft == 'qwe':     # QWE (using sine and imag-part)
 
         # If switch-off is required, use cosine, else sine
+        args.pop('sincos', None)
         if signal >= 0:
             targ['sincos'] = np.sin
         else:
@@ -1110,6 +1111,7 @@ def check_time(time, signal, ft, ftarg, verb):
             targ['q'] = np.sign(targ['q'])
 
         # If switch-off is required, use cosine, else sine
+        args.pop('mu', None)
         if signal >= 0:
             targ['mu'] = 0.5
         else:
@@ -1134,6 +1136,9 @@ def check_time(time, signal, ft, ftarg, verb):
         targ['dlnr'] = dlnr
         targ['kr'] = kr
         targ['rk'] = rk
+        for name in ['tcalc', 'dlnr', 'kr', 'rk']:
+            # So they don't get caught in the args-check.
+            args.pop(name, None)
 
     elif ft == 'fft':     # FFT
         # Keys: dfreq, nfreq, ntot, pts_per_dec, fftfreq

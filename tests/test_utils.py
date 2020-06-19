@@ -285,6 +285,13 @@ def test_check_hankel(capsys):
     assert htarg['dlf'].name == filters.key_201_2009().name
     assert htarg['pts_per_dec'] == 20
 
+    # Assert it can be called repetitively
+    _, _ = capsys.readouterr()
+    ht, htarg = utils.check_hankel('dlf', {}, 1)
+    _, _ = utils.check_hankel(ht, htarg, 1)
+    out, _ = capsys.readouterr()
+    assert out == ""
+
     # # QWE # #
     # verbose
     ht, htarg = utils.check_hankel('qwe', {}, 4)
@@ -334,6 +341,13 @@ def test_check_hankel(capsys):
     assert htarg['b'] == 160
     assert htarg['limit'] == 30
 
+    # Assert it can be called repetitively
+    _, _ = capsys.readouterr()
+    ht, htarg = utils.check_hankel('qwe', {}, 1)
+    _, _ = utils.check_hankel(ht, htarg, 1)
+    out, _ = capsys.readouterr()
+    assert out == ""
+
     # # QUAD # #
     # verbose
     ht, htarg = utils.check_hankel('quad', {}, 4)
@@ -367,6 +381,13 @@ def test_check_hankel(capsys):
     assert htarg['a'] == 1e-10
     assert htarg['b'] == 200
     assert htarg['pts_per_dec'] == 50
+
+    # Assert it can be called repetitively
+    _, _ = capsys.readouterr()
+    ht, htarg = utils.check_hankel('quad', {}, 1)
+    _, _ = utils.check_hankel(ht, htarg, 1)
+    out, _ = capsys.readouterr()
+    assert out == ""
 
     # wrong ht
     with pytest.raises(ValueError):
@@ -584,6 +605,13 @@ def test_check_time(capsys):
     assert_allclose(f[-9:], f2)
     assert_allclose(f.size, 204)
 
+    # Assert it can be called repetitively
+    _, _ = capsys.readouterr()
+    _, _, _, ftarg = utils.check_time(time, 0, 'dlf', {}, 1)
+    _, _, _, _ = utils.check_time(time, 0, 'dlf', ftarg, 1)
+    out, _ = capsys.readouterr()
+    assert out == ""
+
     # # QWE # #
     # verbose
     _, f, ft, ftarg = utils.check_time(time, 0, 'qwe', {}, 4)
@@ -646,6 +674,13 @@ def test_check_time(capsys):
     assert ftarg['limit'] == 100
     assert ftarg['sincos'] is np.cos
 
+    # Assert it can be called repetitively
+    _, _ = capsys.readouterr()
+    _, _, _, ftarg = utils.check_time(time, 0, 'qwe', {}, 1)
+    _, _, _, _ = utils.check_time(time, 0, 'qwe', ftarg, 1)
+    out, _ = capsys.readouterr()
+    assert out == ""
+
     # # FFTLog # #
     # verbose
     _, f, ft, ftarg = utils.check_time(time, 0, 'fftlog', {}, 4)
@@ -692,6 +727,13 @@ def test_check_time(capsys):
     assert_allclose(ftarg['kr'], 0.94312869748639161)
     assert_allclose(ftarg['rk'], 1.8505737940600746)
 
+    # Assert it can be called repetitively
+    _, _ = capsys.readouterr()
+    _, _, _, ftarg = utils.check_time(time, 0, 'fftlog', {}, 1)
+    _, _, _, _ = utils.check_time(time, 0, 'fftlog', ftarg, 1)
+    out, _ = capsys.readouterr()
+    assert out == ""
+
     # # FFT # #
     # verbose
     _, f, ft, ftarg = utils.check_time(time, 0, 'fft', {}, 4)
@@ -731,6 +773,13 @@ def test_check_time(capsys):
                      2.54332480e+00, 4.09600000e+00])
 
     assert_allclose(f, outf)
+
+    # Assert it can be called repetitively
+    _, _ = capsys.readouterr()
+    _, _, _, ftarg = utils.check_time(time, 0, 'fft', {}, 1)
+    _, _, _, _ = utils.check_time(time, 0, 'fft', ftarg, 1)
+    out, _ = capsys.readouterr()
+    assert out == ""
 
     # # Various # #
 
