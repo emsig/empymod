@@ -4,13 +4,13 @@
 usage="
 $(basename "$0") [-hcpmdw] [-v VERSION(S)]
 
-Run pytest for empymod locally in an isolated venv before submitting to
-GitHub/Travis-CI; by default for all supported python versions of empymod.
+Run pytest for empymod locally in an isolated virtual environment before
+submitting to GitHub/Travis-CI; by default for all supported python versions of
+empymod.
 
 where:
     -h : Show this help text.
     -v : Python 3.x version, e.g. '-v 7' for Python 3.7. Default: '6 7 8'.
-    -c : Use channel 'conda-forge' instead of channel 'defaults'.
     -p : Print output of conda.
     -m : Run tests without matplotlib/IPython.
     -d : Delete environments after tests
@@ -19,19 +19,18 @@ where:
 "
 
 # Set default values
-CHAN=defaults
 PYTHON3VERSION="6 7 8"
 PRINT="/dev/null"
-PCKGS="numpy scipy numba pytest pytest-cov"
+PCKGS="numpy scipy numba pytest pytest-cov scooby pytest-flake8 pip"
 MPLIPY="matplotlib IPython"
-STR2="**  WITH matplotlib/IPython  "
+STR2="WITH matplotlib/IPython  "
 PROPS="--mpl --flake8"
-INST="pytest-flake8 pytest-mpl scooby"
+INST="pytest-mpl"
 SD="_soft-dep"
 WARN=""
 
 # Get Optional Input
-while getopts "hv:cpmdw" opt; do
+while getopts "hv:pmdw" opt; do
 
   case $opt in
     h) echo "$usage"
@@ -39,12 +38,10 @@ while getopts "hv:cpmdw" opt; do
        ;;
     v) PYTHON3VERSION=$OPTARG
        ;;
-    c) CHAN=conda-forge
-       ;;
     p) PRINT="/dev/tty"
        ;;
     m) MPLIPY=""
-       STR2="**  NO matplotlib/IPython  "
+       STR2="NO matplotlib/IPython  "
        PROPS="--flake8"
        INST="pytest-flake8"
        SD=""
@@ -69,10 +66,10 @@ done
 for i in ${PYTHON3VERSION[@]}; do
 
   # Environment name
-  NAME=test_3${i}_${CHAN}${SD}
+  NAME=test_empymod_3${i}_${SD}
 
   # Print info
-  STR="  PYTHON 3.${i}  **  Channel $CHAN  $STR2"
+  STR="  PYTHON 3.${i}  **  $STR2"
   LENGTH=$(( ($(tput cols) - ${#STR}) / 2 - 2 ))
   printf "\n  "
   printf '\e[1m\e[34m%*s' "${LENGTH}" '' | tr ' ' -
@@ -84,12 +81,12 @@ for i in ${PYTHON3VERSION[@]}; do
   printf '%*s\n' "${LENGTH}" '' | tr ' ' -
   printf "\e[0m\n"
 
-  # Create venv, with channel CHAN
+  # Create virtual environment
   if [ ! -d "$HOME/anaconda3/envs/$NAME" ]; then
-    conda create -y -n $NAME -c $CHAN python=3.${i} $PCKGS $MPLIPY &> $PRINT
+    conda create -y -n $NAME -c conda-forge python=3.${i} $PCKGS $MPLIPY &> $PRINT
   fi
 
-  # Activate venv
+  # Activate virtual environment
   source activate $NAME
 
   # Install flake8
@@ -103,10 +100,10 @@ for i in ${PYTHON3VERSION[@]}; do
   rm matplotlibrc
   coverage html
 
-  # De-activate venv
+  # De-activate virtual environment
   conda deactivate
 
-  # Remove venv
+  # Remove virtual environment
   if [ "$DELETE" = true ] ; then
     conda remove -y -n $NAME --all &> $PRINT
   fi

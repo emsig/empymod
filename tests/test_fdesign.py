@@ -1,5 +1,4 @@
 import os
-import sys
 import pytest
 import numpy as np
 from timeit import default_timer
@@ -90,8 +89,6 @@ def test_design():
         fdesign.design(fI=fI2, verb=0, plot=0, **dat4[0])
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6),
-                    reason="tmpdir seems to fail for Python<3.6.")
 def test_save_load_filter(tmpdir):
     # Save two filters, with and without inversion result. In test_load_filter
     # we check, if they were saved correctly
