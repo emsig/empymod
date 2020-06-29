@@ -10,6 +10,13 @@ v2.0.x
 """"""
 
 
+latest
+------
+
+- Change error reporting to native (instead of `print(bla)` and `raise Error`
+  do `raise Error(bla)`; improve corresponding error testing.
+
+
 v2.0.1: Bug fixes: ftarg, docs, CI, req
 ---------------------------------------
 

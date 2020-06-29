@@ -63,19 +63,19 @@ def test_check_ab(capsys):
     assert out == outstr
 
     # Check it raises a ValueError if a non-existing ab is provided.
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='<ab> must be one of: '):
         utils.check_ab(77, 0)
 
     # We just check one other thing here, that it fails with a TypeError if a
     # list instead of one value is provided. Generally the try/except statement
     # with int() should take proper care of all the checking right in check_ab.
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match='<ab> must be an integer'):
         utils.check_ab([12, ], 0)
 
 
 def test_check_bipole():
     # Wrong size
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Parameter tvar has wrong length!'):
         utils.check_bipole([0, 0, 0], 'tvar')
 
     # # Dipole stuff
@@ -111,14 +111,14 @@ def test_check_bipole():
 
     # x.size != y.size
     pole = [[0, 0], [10, 20, 30], [100, 0, 100], 0, 0]
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Parameter tvar-y has wrong shape'):
         utils.check_bipole(pole, 'tvar')
 
     # # Bipole stuff
 
     # Dipole instead bipole
     pole = [0, 0, 1000, 1000, 10, 10]
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='At least one of <tvar> is a point'):
         utils.check_bipole(pole, 'tvar')
 
     # Normal case
@@ -199,10 +199,10 @@ def test_check_dipole(capsys):
     assert out == outstr
 
     # Check Errors: more than one z
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Parameter src has wrong shape'):
         utils.check_dipole([[0, 0], [0, 0], [0, 0]], 'src', 3)
     # Check Errors: wrong number of elements
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Parameter rec has wrong shape'):
         utils.check_dipole([0, 0, 0, 0], 'rec', 3)
 
 
@@ -390,11 +390,11 @@ def test_check_hankel(capsys):
     assert out == ""
 
     # wrong ht
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='must be one of: '):
         utils.check_hankel('doesnotexist', {}, 1)
 
     # filter missing attributes
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match='DLF-filter is missing some'):
         utils.check_hankel('dlf', {'dlf': 'key_101_CosSin_2012'}, 1)
 
 
@@ -453,15 +453,12 @@ def test_check_model(capsys):
     assert "MODEL IS A FULLSPACE\n" in out
 
     # Non-continuously in/de-creasing depth
-    _, _ = capsys.readouterr()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Depth must be continuously incr'):
         var = [1, 1, 1, 1]
         utils.check_model([0, 100, 90], var, var, var, var, var, var, True, 1)
-    out, _ = capsys.readouterr()
-    assert out[:23] == "* ERROR   :: Depth must"
 
     # A ValueError check
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Parameter res has wrong shape'):
         utils.check_model(
                 0, 1, [2, 2], [10, 10], [1, 1], [2, 2], [3, 3], True, 1)
 
@@ -790,33 +787,33 @@ def test_check_time(capsys):
     assert out[:21] == "* WARNING :: Times < "
 
     # Signal != -1, 0, 1
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='<signal> must be one of:'):
         utils.check_time(time, -2, 'dlf', {}, 0)
 
     # ft != cos, sin, dlf, qwe, fftlog,
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='<ft> must be one of:'):
         utils.check_time(time, 0, 'bla', {}, 0)
 
     # filter missing attributes
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match='DLF-filter is missing some att'):
         utils.check_time(time, 0, 'dlf', {'dlf': 'key_201_2012'}, 1)
 
     # filter with wrong kind
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'kind' must be either 'sin' or"):
         utils.check_time(time, 0, 'dlf', {'kind': 'wrongkind'}, 1)
 
 
 def test_check_solution(capsys):
     # wrong solution
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Solution must be one of'):
         utils.check_solution('hs', 1, 13, False, False)
 
     # wrong ab/msrc/mrec
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Diffusive solution is only imple'):
         utils.check_solution('dhs', None, 11, True, False)
 
     # wrong domain
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Full fullspace solution is only'):
         utils.check_solution('fs', 1, 21, True, True)
 
 
@@ -1025,7 +1022,7 @@ def test_get_kwargs(capsys):
     assert "* WARNING :: Unused **kwargs: {'depth': []}" in out
 
     kwargs2 = {'depth': [], 'unknown': 1}
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Unexpected '):
         utils.get_kwargs(['verb', ], [0, ], kwargs2)
 
 
@@ -1081,9 +1078,9 @@ def test_check_shape():
     utils._check_shape(np.zeros((3, 4)), 'tvar', (3, 4), (2, ))
     utils._check_shape(np.zeros((3, 4)), 'tvar', (2,), (3, 4))
     # Ensure Error is raised
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Parameter tvar has wrong shape'):
         utils._check_shape(np.zeros((3, 4)), 'tvar', (2,))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Parameter tvar has wrong shape'):
         utils._check_shape(np.zeros((3, 4)), 'tvar', (2,), (1, 4))
 
 
@@ -1097,7 +1094,7 @@ def test_check_var():
     assert out[0, 0, 0] == 3
 
     # One shape, but wrong
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Parameter tvar has wrong shape'):
         out = utils._check_var(np.arange(3)*.5, float, 1, 'tvar', (1, 3))
 
     # Two shapes, second one is correct

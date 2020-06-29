@@ -84,7 +84,7 @@ def test_design():
     os.remove('./filters/dlf_201_j1.txt')
 
     # 5. j2 for fI
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="is only implemented for fC"):
         fI2 = fdesign.empy_hankel('j2', 0, 50, 100, 1)
         fdesign.design(fI=fI2, verb=0, plot=0, **dat4[0])
 
@@ -534,7 +534,7 @@ def test_ls2ar():
     assert_allclose(np.arange(*tout), np.array([np.pi]))
 
     # Error
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="must be a float or a tuple of 3"):
         fdesign._ls2ar(np.array([1, 2, 3, 4]), 'TooMany')  # (d) array
 
 

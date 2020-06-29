@@ -454,19 +454,16 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
 
     # Check limitations of this routine compared to the standard `dipole`
     if lsrc != lrec:                           # src and rec in same layer
-        print("* ERROR   :: src and rec must be in the same layer; "
-              f"<lsrc>/<lrec> provided: {lsrc}/{lrec}")
-        raise ValueError('src-z/rec-z')
+        raise ValueError("src and rec must be in the same layer; "
+                         f"<lsrc>/<lrec> provided: {lsrc}/{lrec}.")
 
     if depth.size < 2:                         # at least two layers
-        print("* ERROR   :: model must have more than one layer; "
-              "<depth> provided: "+_strvar(depth[1:]))
-        raise ValueError('depth')
+        raise ValueError("model must have more than one layer; "
+                         f"<depth> provided: {_strvar(depth[1:])}.")
 
     if freq.size > 1:                          # only 1 frequency
-        print("* ERROR   :: only one frequency permitted; "
-              "<freqtime> provided: "+_strvar(freqtime))
-        raise ValueError('frequency')
+        raise ValueError("only one frequency permitted; "
+                         f"<freqtime> provided: {_strvar(freqtime)}.")
 
     # === 3. EM-FIELD CALCULATION ============
     # This part is a simplification of:

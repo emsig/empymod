@@ -396,9 +396,8 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
         fC = dc(fI)
     fI = check_f(fI)
     if fI[0].name == 'j2':
-        print("* ERROR   :: j2 (jointly j0 and j1) is only implemented for "
-              "fC, not for fI!")
-        raise ValueError('j2')
+        raise ValueError("j2 (jointly j0 and j1) is only implemented for "
+                         "fC, not for fI!")
     fC = check_f(fC)
 
     # Check default input values
@@ -1382,9 +1381,8 @@ def _ls2ar(inp, strinp):
         stop = inp[1]
         num = inp[2]
     else:
-        print(f"* ERROR   :: <{strinp}> must be a float or a tuple of 3 "
-              f"elements (start, stop, num); <{strinp} provided: {inp}")
-        raise ValueError(strinp)
+        raise ValueError(f"<{strinp}> must be a float or a tuple of 3 elements"
+                         f" (start, stop, num); <{strinp} provided: {inp}")
 
     # Re-arrange it to be compatible with np.arange/slice for brute
     if num < 2 or start == stop:

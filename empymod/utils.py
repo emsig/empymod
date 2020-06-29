@@ -78,10 +78,6 @@ _min_off = 1e-3     # Minimum offset     [m]
 _min_res = 1e-20    # Minimum value for horizontal/vertical resistivity
 _min_angle = 1e-10  # Angle factors smaller than that are set to 0
 
-# Define all errors we want to catch with the variable-checks and setting of
-# default values. This is not perfect, but better than 'except Exception'.
-VariableCatch = (LookupError, AttributeError, ValueError, TypeError, NameError)
-
 
 # 1. Class EMArray
 
@@ -188,9 +184,8 @@ def check_ab(ab, verb):
     # Try to cast ab into an integer
     try:
         ab = int(ab)
-    except VariableCatch:
-        print("* ERROR   :: <ab> must be an integer")
-        raise
+    except TypeError:
+        raise TypeError("<ab> must be an integer.")
 
     # Check src and rec orientation (<ab> for alpha-beta)
     # pab: all possible values that <ab> can take
@@ -198,8 +193,7 @@ def check_ab(ab, verb):
            31, 32, 33, 34, 35, 36, 41, 42, 43, 44, 45, 46,
            51, 52, 53, 54, 55, 56, 61, 62, 63, 64, 65, 66]
     if ab not in pab:
-        print(f"* ERROR   :: <ab> must be one of: {pab}; <ab> provided: {ab}")
-        raise ValueError('ab')
+        raise ValueError(f"<ab> must be one of: {pab}; <ab> provided: {ab}.")
 
     # Print input <ab>
     if verb > 2:
@@ -283,9 +277,8 @@ def check_bipole(inp, name):
     # Check length of inp.
     narr = len(inp)
     if narr not in [5, 6]:
-        print(f"* ERROR   :: Parameter {name} has wrong length! : "
-              f"{narr} instead of 5 (dipole) or 6 (bipole).")
-        raise ValueError(name)
+        raise ValueError(f"Parameter {name} has wrong length! : "
+                         f"{narr} instead of 5 (dipole) or 6 (bipole).")
 
     # Flag if it is a dipole or not
     isdipole = narr == 5
@@ -328,10 +321,9 @@ def check_bipole(inp, name):
         # (This is a problem, as we would could not define the angles then.)
         if not np.all((out0[0] != out1[0]) + (out0[1] != out1[1]) +
                       (out0[2] != out1[2])):
-            print(f"* ERROR   :: At least one of <{name}> is a point "
-                  "dipole, use the format [x, y, z, azimuth, dip] instead "
-                  "of [x0, x1, y0, y1, z0, z1].")
-            raise ValueError('Bipole: bipole-' + name)
+            raise ValueError(f"At least one of <{name}> is a point dipole, "
+                             "use the format\n[x, y, z, azimuth, dip] "
+                             "instead of [x0, x1, y0, y1, z0, z1].")
 
         # Collect elements
         out = [out0[0], out1[0], out0[1], out1[1], out0[2], out1[2]]
@@ -529,9 +521,9 @@ def check_hankel(ht, htarg, verb):
         j1 = hasattr(targ['dlf'], 'j1')
         factor = hasattr(targ['dlf'], 'factor')
         if not base or not j0 or not j1 or not factor:
-            print("* ERROR   :: DLF-filter is missing some attributes; "
-                  f"base: {base}; j0: {j0}; j1: {j1}; factor: {factor}.")
-            raise AttributeError('ht')
+            raise AttributeError(
+                    "DLF-filter is missing some attributes; "
+                    f"base: {base}; j0: {j0}; j1: {j1}; factor: {factor}.")
 
         # Check dimension and type of pts_per_dec
         targ['pts_per_dec'] = _check_var(
@@ -647,9 +639,8 @@ def check_hankel(ht, htarg, verb):
             print(f"     > pts_per_dec :  {targ['pts_per_dec']}")
 
     else:
-        print("* ERROR   :: <ht> must be one of: ['dlf', 'qwe', 'quad'];"
-              f" <ht> provided: {ht}")
-        raise ValueError('ht')
+        raise ValueError("<ht> must be one of: ['dlf', 'qwe', 'quad'];"
+                         f" <ht> provided: {ht}.")
 
     # Check remaining arguments.
     if args and verb > 0:
@@ -734,10 +725,8 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
     # Ensure depth is increasing
     if np.any(depth[1:] - depth[:-1] < 0):
-        print(f"* ERROR   :: Depth must be continuously increasing or "
-              f"decreasing.\n             <depth> provided: "
-              f"{_strvar(depth[::swap])}")
-        raise ValueError('depth')
+        raise ValueError(f"Depth must be continuously increasing or decreasing"
+                         f".\n<depth> provided: {_strvar(depth[::swap])}.")
 
     # Add -infinity at the beginning
     # => The top-layer (-infinity to first interface) is layer 0.
@@ -976,9 +965,8 @@ def check_time(time, signal, ft, ftarg, verb):
         elif signal < 0:
             targ['kind'] = 'cos'
         if targ['kind'] not in ['sin', 'cos']:
-            print("* ERROR   :: 'kind' must be either 'sin' or 'cos'; "
-                  "provided: targ['kind'].")
-            raise ValueError('ft')
+            raise ValueError("'kind' must be either 'sin' or 'cos'; "
+                             f"provided: {targ['kind']}.")
 
         # If filter is a name (str), get it
         targ['dlf'] = args.pop('dlf', filters.key_201_CosSin_2012())
@@ -993,9 +981,9 @@ def check_time(time, signal, ft, ftarg, verb):
             sincos = hasattr(targ['dlf'], 'cos')
         factor = hasattr(targ['dlf'], 'factor')
         if not base or not sincos or not factor:
-            print("* ERROR   :: DLF-filter is missing some attributes; "
-                  f"base: {base}; {targ['kind']}: {sincos}; factor: {factor}.")
-            raise AttributeError('ft')
+            raise AttributeError(
+                    "DLF-filter is missing some attributes; base: "
+                    f"{base}; {targ['kind']}: {sincos}; factor: {factor}.")
 
         # If verbose, print Fourier transform information
         if verb > 2:
@@ -1191,9 +1179,8 @@ def check_time(time, signal, ft, ftarg, verb):
                 print("     > pts_per_dec :  (linear)")
 
     else:
-        print("* ERROR   :: <ft> must be one of: ['dlf', 'qwe', "
-              f"'fftlog', 'fft']; <ft> provided: {ft}")
-        raise ValueError('ft')
+        raise ValueError("<ft> must be one of: ['dlf', 'qwe', "
+                         f"'fftlog', 'fft']; <ft> provided: {ft}")
 
     # Check remaining arguments.
     if args and verb > 0:
@@ -1236,9 +1223,8 @@ def check_time_only(time, signal, verb):
 
     # Check input signal
     if int(signal) not in [-1, 0, 1]:
-        print("* ERROR   :: <signal> must be one of: [None, -1, 0, 1]; "
-              "<signal> provided: "+str(signal))
-        raise ValueError('signal')
+        raise ValueError("<signal> must be one of: [None, -1, 0, 1]; "
+                         f"<signal> provided: {signal}")
 
     # Check time
     time = _check_var(time, float, 1, 'time')
@@ -1279,21 +1265,21 @@ def check_solution(solution, signal, ab, msrc, mrec):
 
     # Ensure valid solution.
     if solution not in ['fs', 'dfs', 'dhs', 'dsplit', 'dtetm']:
-        print("* ERROR   :: Solution must be one of ['fs', 'dfs', 'dhs', "
-              f"'dsplit', 'dtetm']; <solution> provided: {solution}")
-        raise ValueError('solution')
+        raise ValueError(
+                "Solution must be one of ['fs', 'dfs', 'dhs', "
+                f"'dsplit', 'dtetm']; <solution> provided: {solution}")
 
     # If diffusive solution is required, ensure EE-field.
     if solution[0] == 'd' and (msrc or mrec):
-        print("* ERROR   :: Diffusive solution is only implemented for "
-              f"electric sources and electric receivers, <ab> provided: {ab}")
-        raise ValueError('ab')
+        raise ValueError(
+                "Diffusive solution is only implemented for electric "
+                f"sources and electric receivers, <ab> provided: {ab}")
 
     # If full solution is required, ensure frequency-domain.
     if solution == 'fs' and signal is not None:
-        print("* ERROR   :: Full fullspace solution is only implemented for "
-              f"the frequency domain, <signal> provided: {signal}")
-        raise ValueError('signal')
+        raise ValueError(
+                "Full fullspace solution is only implemented for "
+                f"the frequency domain, <signal> provided: {signal}")
 
 
 # 2.b <Get>s (alphabetically)
@@ -1820,10 +1806,9 @@ def get_kwargs(names, defaults, kwargs):
     # Check remaining parameters.
     if kwargs:
         if not set(kwargs.keys()).issubset(known_keys):
-            print(f"* ERROR   :: Unexpected **kwargs: {kwargs}")
-            raise ValueError('kwargs')
+            raise ValueError(f"Unexpected **kwargs: {kwargs}.")
         elif verb > 0:
-            print(f"* WARNING :: Unused **kwargs: {kwargs}")
+            print(f"* WARNING :: Unused **kwargs: {kwargs}.")
 
     return out
 
@@ -1935,13 +1920,11 @@ def _check_shape(var, name, shape, shape2=None):
     if shape != varshape:
         if shape2:
             if shape2 != varshape:
-                print(f"* ERROR   :: Parameter {name} has wrong shape!"
-                      f" : {varshape} instead of {shape} or {shape2}.")
-                raise ValueError(name)
+                raise ValueError(f"Parameter {name} has wrong shape! : "
+                                 f"{varshape} instead of {shape} or {shape2}.")
         else:
-            print(f"* ERROR   :: Parameter {name} has wrong shape! : "
-                  f"{varshape} instead of {shape}.")
-            raise ValueError(name)
+            raise ValueError(f"Parameter {name} has wrong shape! : "
+                             f"{varshape} instead of {shape}.")
 
 
 def _check_var(var, dtype, ndmin, name, shape=None, shape2=None):
