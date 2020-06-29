@@ -15,6 +15,8 @@ latest
 
 - Change error reporting to native (instead of `print(bla)` and `raise Error`
   do `raise Error(bla)`; improve corresponding error testing.
+- Replace old name `scipy.special.p_roots` by new name
+  `scipy.special.roots_legendre`.
 
 
 v2.0.1: Bug fixes: ftarg, docs, CI, req

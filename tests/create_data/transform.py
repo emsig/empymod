@@ -126,7 +126,7 @@ freq = fourier_qwe0['f']
 # doqwe-part
 xint = np.concatenate((np.array([1e-20]), np.arange(1, maxint+1)*np.pi))
 intervals = xint/t[:, None]
-g_x, g_w = special.p_roots(nquad)
+g_x, g_w = special.roots_legendre(nquad)
 dx = np.repeat(np.diff(xint)/2, nquad)
 Bx = dx*(np.tile(g_x, maxint) + 1) + np.repeat(xint[:-1], nquad)
 SS = np.sin(Bx)*np.tile(g_w, maxint)
@@ -167,7 +167,7 @@ diff_quad = htarg['diff_quad']
 a = htarg['a']
 b = htarg['b']
 limit = htarg['limit']
-g_x, g_w = special.p_roots(nquad)
+g_x, g_w = special.roots_legendre(nquad)
 b_zero = np.pi*np.arange(1.25, maxint+1)
 for i in range(10):
     b_x0 = special.j1(b_zero)

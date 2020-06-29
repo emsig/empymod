@@ -1073,7 +1073,7 @@ def check_time(time, signal, ft, ftarg, verb):
                 print(f"     > limit (quad):  {targ['limit']}")
 
         # Get required frequencies
-        g_x, _ = special.p_roots(targ['nquad'])
+        g_x, _ = special.roots_legendre(targ['nquad'])
         minf = np.floor(10*np.log10((g_x.min() + 1)*np.pi/2/time.max()))/10
         maxf = np.ceil(10*np.log10(targ['maxint']*np.pi/time.min()))/10
         freq = np.logspace(minf, maxf, int((maxf-minf)*targ['pts_per_dec']+1))
@@ -1662,7 +1662,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         # Gauss quadrature if intpts > 2; else set to center of tinp
         if intpts > 2:  # Calculate the dipole positions
             # Get integration positions and weights
-            g_x, g_w = special.p_roots(intpts)
+            g_x, g_w = special.roots_legendre(intpts)
             g_x = np.outer(g_x, dl/2.0)  # Adjust to tinp length
             g_w /= 2.0  # Adjust to tinp length (dl/2), normalize (1/dl)
 

@@ -186,7 +186,7 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     # corresponding Gauss quadrature weights
 
     # Get Gauss quadrature weights
-    g_x, g_w = special.p_roots(nquad)
+    g_x, g_w = special.roots_legendre(nquad)
 
     # Compute n zeros of the Bessel function of the first kind of order 1 using
     # the Newton-Raphson method, which is fast enough for our purposes.  Could
@@ -581,7 +581,7 @@ def fourier_qwe(fEM, time, freq, ftarg):
     intervals = xint/time[:, None]
 
     # Get Gauss Quadrature Weights
-    g_x, g_w = special.p_roots(nquad)
+    g_x, g_w = special.roots_legendre(nquad)
 
     # Pre-compute the Bessel functions at fixed quadrature points, multiplied
     # by the corresponding Gauss quadrature weight.
