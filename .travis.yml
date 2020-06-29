@@ -40,7 +40,7 @@ install:
   - pip install setuptools_scm coveralls pytest-flake8 $PIP
   - if [ "$CHCKLNKS" = true ]; then
         pip install -r requirements-dev.txt;
-        pip install -e . ;
+        pip install . ;
     else
         python setup.py install;
     fi

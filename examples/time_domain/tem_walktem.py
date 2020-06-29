@@ -31,8 +31,8 @@ based on work from Kerry Key (`@kerrykey <https://github.com/kerrykey>`_) from
 import empymod
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.special import roots_legendre
 from matplotlib.ticker import LogLocator, NullFormatter
-from scipy.integrate.quadrature import _cached_roots_legendre
 from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 plt.style.use('ggplot')
 # sphinx_gallery_thumbnail_number = 2
@@ -172,7 +172,8 @@ def waveform(times, resp, times_wanted, wave_time, wave_amp, nquad=3):
     dIdt = dI/dt
 
     # Gauss-Legendre Quadrature; 3 is generally good enough.
-    g_x, g_w = _cached_roots_legendre(nquad)
+    # (Roots/weights could be cached.)
+    g_x, g_w = roots_legendre(nquad)
 
     # Pre-allocate output.
     resp_wanted = np.zeros_like(times_wanted)
