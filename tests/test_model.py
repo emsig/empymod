@@ -340,7 +340,7 @@ class TestBipole:
 
     def test_example_wrong(self):
         # One example of wrong input. But inputs are checked in test_utils.py.
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Parameter src has wrong length"):
             bipole([0, 0, 0], [0, 0, 0, 0, 0], [], 1, 1, verb=0)
 
     def test_combinations(self):

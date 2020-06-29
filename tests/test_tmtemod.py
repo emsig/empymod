@@ -52,13 +52,13 @@ def test_dipole():
             assert_allclose(out, TM + TE, rtol=1e-5, atol=1e-50)
 
     # Check the 3 errors
-    with pytest.raises(ValueError):  # scr/rec not in same layer
+    with pytest.raises(ValueError, match='src and rec must be in the same l'):
         tmtemod.dipole([0, 0, 90], [4000, 0, 180], depth[1:-1], res, 1)
 
-    with pytest.raises(ValueError):  # more than one frequency
+    with pytest.raises(ValueError, match='only one frequency permitted'):
         tmtemod.dipole([0, 0, 90], [4000, 0, 110], depth[1:-1], res, [1, 10])
 
-    with pytest.raises(ValueError):  # only one layer
+    with pytest.raises(ValueError, match='model must have more than one lay'):
         tmtemod.dipole([0, 0, 90], [4000, 0, 110], [], 10, 1)
 
 
