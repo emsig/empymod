@@ -10,13 +10,19 @@ v2.0.x
 """"""
 
 
-latest
-------
+v2.0.2: Fix example: `tem_walktem`
+----------------------------------
 
-- Change error reporting to native (instead of `print(bla)` and `raise Error`
-  do `raise Error(bla)`; improve corresponding error testing.
-- Replace old name `scipy.special.p_roots` by new name
+- Fix example `tem_walktem`, related to changes in `scipy.quadrature`: Replace
+  not-existing private name `scipy.integrate.quadrature._cached_roots_legendre`
+  with the public name `scipy.special.roots_legendre`.
+- As a consequence of the above, changed in `empymod` the used, old name
+  `scipy.special.p_roots` by new, more descriptive name
   `scipy.special.roots_legendre`.
+- Improve *publications*-section in the example gallery.
+- Change error reporting to native (instead of `print(bla)` and `raise Error`
+  do `raise Error(bla)`); improve corresponding error testing by checking the
+  error message too.
 
 
 v2.0.1: Bug fixes: ftarg, docs, CI, req
