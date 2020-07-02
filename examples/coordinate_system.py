@@ -1,6 +1,6 @@
 r"""
-Coordinate system
-=================
+Definition of the coordinate system in empymod
+==============================================
 
 Short version
 -------------
