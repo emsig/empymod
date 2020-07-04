@@ -489,7 +489,7 @@ class TestBipole:
         out0t = bipole(src=src0, rec=rec0, signal=0, **model)
 
         # Calculate the single-src/single-rec correspondents
-        out1f = np.zeros((2, 2), dtype=complex)
+        out1f = np.zeros((2, 2), dtype=np.complex_)
         out1t = np.zeros((2, 2))
         for i, rec in enumerate([rec1, rec2]):
             for ii, src in enumerate([src1, src2]):
@@ -941,8 +941,8 @@ def test_dipole_k():
     # Check that ab=36 returns zeros
     res['inp']['ab'] = 36
     w_res0, w_res1 = dipole_k(**res['inp'])
-    assert_allclose(w_res0, np.zeros(res['PJ0'].shape, dtype=complex))
-    assert_allclose(w_res1, np.zeros(res['PJ1'].shape, dtype=complex))
+    assert_allclose(w_res0, np.zeros(res['PJ0'].shape, dtype=np.complex_))
+    assert_allclose(w_res1, np.zeros(res['PJ1'].shape, dtype=np.complex_))
 
 
 def test_fem():

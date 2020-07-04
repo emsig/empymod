@@ -961,7 +961,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         if signal == -1:  # Calculate DC
             time = np.r_[time[:, 0], 1e4][:, None]
             freqtime = time
-        dtype = float
+        dtype = np.float_
 
     # Other defined parameters
     rh = np.sqrt(xco**2 + yco**2)  # Horizontal distance in space
@@ -1167,7 +1167,8 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
             def coeff_dk(k, K):
                 r"""Return coefficients Dk for k, K."""
-                n = np.arange(int((k+1)/2), np.min([k, K/2])+.5, 1, dtype=int)
+                n = np.arange(
+                        int((k+1)/2), np.min([k, K/2])+.5, 1, dtype=np.int_)
                 Dk = n**(K/2)*fn(2*n)
                 Dk /= fn(n)*fn(n-1)*fn(k-n)*fn(2*n-k)*fn(K/2-n)
                 return Dk.sum()*(-1)**(k+K/2)

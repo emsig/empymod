@@ -1115,7 +1115,7 @@ def check_time(time, signal, ft, ftarg, verb):
         # Calculate minimum and maximum required frequency
         minf = np.log10(1/time.max()) + targ['add_dec'][0]
         maxf = np.log10(1/time.min()) + targ['add_dec'][1]
-        n = np.int(maxf - minf)*targ['pts_per_dec']
+        n = np.int_(maxf - minf)*targ['pts_per_dec']
 
         # Initialize FFTLog, get required parameters
         freq, tcalc, dlnr, kr, rk = transform.get_fftlog_input(
@@ -1329,7 +1329,7 @@ def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
             ab_calc = ab_calc % 10*10 + ab_calc // 10  # Swap alpha/beta
 
     # Remove unnecessary ab's
-    bab = np.asarray(ab_calc*0+1, dtype=bool)
+    bab = np.asarray(ab_calc*0+1, dtype=np.bool_)
 
     # Remove if source is x- or y-directed
     check = np.atleast_1d(srcazm)
@@ -1468,7 +1468,7 @@ def get_layer_nr(inp, depth):
         inp[2] (depths).
 
     """
-    zinp = np.array(inp[2], dtype=float)
+    zinp = np.array(inp[2], dtype=np.float_)
 
     #  depth = [-infty : last interface]; create additional depth-array
     # pdepth = [fist interface : +infty]
