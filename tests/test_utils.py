@@ -1022,7 +1022,7 @@ def test_get_kwargs(capsys):
     assert "* WARNING :: Unused **kwargs: {'depth': []}" in out
 
     kwargs2 = {'depth': [], 'unknown': 1}
-    with pytest.raises(ValueError, match='Unexpected '):
+    with pytest.raises(TypeError, match='Unexpected '):
         utils.get_kwargs(['verb', ], [0, ], kwargs2)
 
 

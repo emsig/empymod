@@ -184,8 +184,8 @@ def check_ab(ab, verb):
     # Try to cast ab into an integer
     try:
         ab = int(ab)
-    except TypeError:
-        raise TypeError("<ab> must be an integer.")
+    except TypeError as e:
+        raise TypeError("<ab> must be an integer.") from e
 
     # Check src and rec orientation (<ab> for alpha-beta)
     # pab: all possible values that <ab> can take
@@ -1806,7 +1806,7 @@ def get_kwargs(names, defaults, kwargs):
     # Check remaining parameters.
     if kwargs:
         if not set(kwargs.keys()).issubset(known_keys):
-            raise ValueError(f"Unexpected **kwargs: {kwargs}.")
+            raise TypeError(f"Unexpected **kwargs: {kwargs}.")
         elif verb > 0:
             print(f"* WARNING :: Unused **kwargs: {kwargs}.")
 
