@@ -227,8 +227,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           - `atol`: absolute tolerance (default: 1e-20)
           - `limit`: An upper bound on the number of subintervals used in the
             adaptive algorithm (default: 500)
-          - `lmin`: Minimum wavenumber (default 1e-6)
-          - `lmax`: Maximum wavenumber (default 0.1)
+          - `a`: Minimum wavenumber (default 1e-6)
+          - `b`: Maximum wavenumber (default 0.1)
           - `pts_per_dec`: points per decade (default: 40)
 
     ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
