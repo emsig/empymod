@@ -363,7 +363,7 @@ def check_dipole(inp, name, verb):
     """
 
     # Check inp for x, y, and z; x & y must have same length, z is a float
-    _check_shape(np.squeeze(inp), name, (3,))
+    _check_shape(np.squeeze(np.asarray(inp, dtype=object)), name, (3,))
     inp_x = _check_var(inp[0], float, 1, name+'-x')
     inp_y = _check_var(inp[1], float, 1, name+'-y', inp_x.shape)
     inp_z = _check_var(inp[2], float, 1, name+'-z', (1,))
@@ -1648,7 +1648,8 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         dz = np.squeeze(tinp[5] - tinp[4])
 
         # Length of bipole
-        dl = np.atleast_1d(np.linalg.norm([dx, dy, dz], axis=0))
+        dl = np.atleast_1d(np.linalg.norm(
+            np.array([dx, dy, dz], dtype=object), axis=0))
 
         # Horizontal deviation from x-axis
         azm = np.atleast_1d(np.arctan2(dy, dx))

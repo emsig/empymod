@@ -136,13 +136,11 @@ x_val_theo = tp.rhs(x)
 print('A DLF for this problem with only a 5 pt filter is difficult. We used')
 print('an error-limit of 0.05 in the filter design, so we expect the result')
 print('to have a relative error of less than 5 %.\n')
-print('Theoretical value   ::', '; '.join(
-      ['{:G}'.format(i) for i in x_val_theo]))
-print('DLF value           ::', '; '.join(
-      ['{:G}'.format(i) for i in x_val_filt]))
+print('Theoretical value   ::', '; '.join([f'{i:G}' for i in x_val_theo]))
+print('DLF value           ::', '; '.join([f'{i:G}' for i in x_val_filt]))
 relerror = np.abs((x_val_theo-x_val_filt)/x_val_theo)
 print('Rel. error 5 pt DLF ::', ' %   ; '.join(
-      ['{:G}'.format(i) for i in np.round(relerror*100, 1)]), '%')
+      [f'{i:G}' for i in np.round(relerror*100, 1)]), '%')
 
 # Figure
 plt.figure(figsize=(10, 4))

@@ -1,5 +1,6 @@
 import os
 import pytest
+import warnings
 import numpy as np
 from timeit import default_timer
 from os.path import join, dirname
@@ -14,9 +15,18 @@ except ImportError:
 from empymod import filters, model
 from empymod.scripts import fdesign
 
+
 # Load required data
 # Data generated with create_data/fdesign.py
 DATA = np.load(join(dirname(__file__), 'data/fdesign.npz'), allow_pickle=True)
+
+
+def switch_off_matplotlib_agg_warning():
+    """Remove matplotlib agg warnings."""
+    warnings.filterwarnings(
+            "ignore", category=UserWarning,
+            message='Matplotlib is currently using agg, which is a'
+                    ' non-GUI backend, so cannot show the figure.')
 
 
 def test_design():
@@ -127,6 +137,7 @@ class TestFiguresMatplotlib:
 
     @pytest.mark.mpl_image_compare(remove_text=True)
     def test_plot_result1(self):
+        switch_off_matplotlib_agg_warning()
         # Quick run `design` with all verb/plot on, just to check that no
         # errors occur. Actually plots are checked in test below and the other
         # tests.
@@ -140,6 +151,7 @@ class TestFiguresMatplotlib:
 
     @pytest.mark.mpl_image_compare(remove_text=True)
     def test_plot_result2(self):
+        switch_off_matplotlib_agg_warning()
         # plot_result one shift several spacings
         dat5 = DATA['case5'][()]
         fdesign.plot_result(dat5[1], dat5[2])
@@ -147,6 +159,7 @@ class TestFiguresMatplotlib:
 
     @pytest.mark.mpl_image_compare(remove_text=True)
     def test_plot_result3(self):
+        switch_off_matplotlib_agg_warning()
         # plot_result several shifts one spacing for max r
         dat6 = DATA['case6'][()]
         fdesign.plot_result(dat6[1], dat6[2])
@@ -154,6 +167,7 @@ class TestFiguresMatplotlib:
 
     @pytest.mark.mpl_image_compare(remove_text=True, tolerance=8)
     def test_call_qc_transform_pairs1(self):
+        switch_off_matplotlib_agg_warning()
         # plot_transform_pair "normal" case
         r = np.logspace(1, 2, 50)
         fI = (fdesign.j0_1(5), fdesign.j1_1(5))
@@ -166,6 +180,7 @@ class TestFiguresMatplotlib:
 
     @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
     def test_call_qc_transform_pairs2(self):
+        switch_off_matplotlib_agg_warning()
         # plot_transform_pair J2
         r = np.logspace(1, 2, 50)
         fI = (fdesign.j0_1(5), fdesign.j1_1(5))
@@ -177,6 +192,7 @@ class TestFiguresMatplotlib:
 
     @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
     def test_call_qc_transform_pairs3(self):
+        switch_off_matplotlib_agg_warning()
         # plot_transform_pair Sine/Cosine
         r = np.logspace(1, 2, 50)
         fI = (fdesign.sin_1(), fdesign.cos_1())
@@ -189,6 +205,7 @@ class TestFiguresMatplotlib:
 
     @pytest.mark.mpl_image_compare(remove_text=True)
     def test_plot_inversion1(self):
+        switch_off_matplotlib_agg_warning()
         # plot_inversion minimum amplitude
         f = fdesign.j0_1(5)
         filt = filters.key_201_2009()
@@ -209,6 +226,7 @@ class TestFiguresMatplotlib:
 
     @pytest.mark.mpl_image_compare(remove_text=True)
     def test_plot_inversion2(self):
+        switch_off_matplotlib_agg_warning()
         # plot_inversion maximum r
         f = fdesign.empy_hankel('j2', 50, 100, 1, 1)
         filt = filters.key_201_2009()
