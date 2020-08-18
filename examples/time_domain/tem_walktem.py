@@ -352,8 +352,9 @@ def walktem(moment, depth, res):
 
     # === CONVERT TO TIME DOMAIN ===
     delay_rst = 1.8e-7               # As stated in the WalkTEM manual
-    EM, _ = np.squeeze(empymod.model.tem(EM[:, None], np.array([1]),
-                       freq, time+delay_rst, 1, ft, ftarg))
+    EM, _ = empymod.model.tem(EM[:, None], np.array([1]),
+                              freq, time+delay_rst, 1, ft, ftarg)
+    EM = np.squeeze(EM)
 
     # === APPLY WAVEFORM ===
     return waveform(time, EM, off_time, waveform_times, waveform_current)

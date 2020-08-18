@@ -1,23 +1,22 @@
 """
-Magnetic loop sources and magnetic receivers
-============================================
+Ward and Hohmann, 1988, SEG
+===========================
 
 Frequency and time-domain modelling of magnetic loop sources and magnetic
-receivers
+receivers.
 
 Reproducing Figures 2.2-2.5, 4.2-4.5, and 4.7-4.8 of Ward and Hohmann (1988):
 Frequency- and time-domain isotropic solutions for a full-space (2.2-2.5) and a
-half-space, where source and receiver are at the interface (4.2-4.5, 4.7-4.8).
+half-space (4.2-4.5, 4.7-4.8), where source and receiver are at the interface.
 Source is a loop, receiver is a magnetic dipole.
 
 **Reference**
 
-- Ward, S. H., and G. W. Hohmann, 1988, Electromagnetic theory for geophysical
-  applications, Chapter 4 of Electromagnetic Methods in Applied Geophysics:
-  SEG, Investigations in Geophysics No. 3, 130--311; DOI:
+- **Ward, S. H., and G. W. Hohmann, 1988**, Electromagnetic theory for
+  geophysical applications, Chapter 4 of Electromagnetic Methods in Applied
+  Geophysics: SEG, Investigations in Geophysics No. 3, 130--311; DOI:
   `10.1190/1.9781560802631.ch4 <https://doi.org/10.1190/1.9781560802631.ch4>`_.
 
-**Requires** `empymod v1.10.0` or newer.
 """
 import empymod
 import numpy as np
@@ -53,8 +52,9 @@ from scipy.constants import mu_0
 #
 #     \theta = \sqrt{\frac{\mu_0}{4t\rho}} \, ,
 #
-# :math:`t` is time (s), :math:`\rho` is resistivity (:math:`\Omega\,`m),
-# :math:`r` is offset (m), and :math:`m` the magnetic moment (A m^2).
+# :math:`t` is time in s, :math:`\rho` is resistivity in
+# :math:`\Omega\,\text{m}`, :math:`r` is offset in m, and :math:`m` the
+# magnetic moment in :math:`\text{A}\,\text{m}^2` .
 #
 # Analytical solutions
 # ~~~~~~~~~~~~~~~~~~~~
