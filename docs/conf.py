@@ -79,7 +79,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'empymod'
-copyright = u'2016-{}, The empymod Developers.'.format(time.strftime("%Y"))
+copyright = f"2016-{time.strftime('%Y')}, The empymod Developers."
 author = 'The empymod Developers'
 
 # |version| and |today| tags (|release|-tag is not used).

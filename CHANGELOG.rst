@@ -10,8 +10,23 @@ v2.0.x
 """"""
 
 
+*latest*
+--------
+
+- Maintenance:
+
+  - Take care of deprecation warnings:
+
+    - numpy: https://numpy.org/neps/nep-0034-infer-dtype-is-object.html
+    - matplotlib: matplotlib/matplotlib#16258
+
+  - Correct docs re `htarg` for `ht='quad'` (`a`/`b` vs `lmin`/`lmax`).
+
+
 v2.0.2: Fix example: `tem_walktem`
 ----------------------------------
+
+**2020-07-02**
 
 - Fix example `tem_walktem`, related to changes in `scipy.quadrature`: Replace
   not-existing private name `scipy.integrate.quadrature._cached_roots_legendre`

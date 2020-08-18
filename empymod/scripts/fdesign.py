@@ -511,16 +511,16 @@ def save_filter(name, filt, full=None, path='filters'):
         header += 'Line 14: Best shift value\n'
         header += 'Line 15: Min amplitude or max offset\n'
 
-        header += 'Lines 16-{}: Spacing matrix '.format(nspace+15)
-        header += '({} x {})\n'.format(nspace, nshift)
+        header += f'Lines 16-{nspace+15}: Spacing matrix '
+        header += f'({nspace} x {nshift})\n'
 
-        header += 'Lines {}-{}: Spacing matrix '.format(nspace+16, 2*nspace+15)
-        header += '({} x {})\n'.format(nspace, nshift)
+        header += f'Lines {nspace+16}-{2*nspace+15}: Spacing matrix '
+        header += f'({nspace} x {nshift})\n'
 
-        header += 'Lines {}-{}: Spacing '.format(2*nspace+16, 3*nspace+15)
-        header += 'matrix ({} x {})\n'.format(nspace, nshift)
+        header += f'Lines {2*nspace+16}-{3*nspace+15}: Spacing '
+        header += f'matrix ({nspace} x {nshift})\n'
 
-        header += 'Line {}: Integer: 0: min amp, 1: max r'.format(3*nspace+16)
+        header += f'Line {3*nspace+16}: Integer: 0: min amp, 1: max r'
 
         # Create arrays; put single values in arrays of nshift values
         nr_spacing = np.r_[nspace, np.zeros(nshift-1)]
