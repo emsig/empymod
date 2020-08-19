@@ -124,7 +124,7 @@ htmlhelp_basename = 'empymoddoc'
 
 # -- CSS fixes --
 def setup(app):
-    app.add_stylesheet("style.css")
+    app.add_css_file("style.css")
 
 
 # ==== 4. Other Document Type Settings ====
