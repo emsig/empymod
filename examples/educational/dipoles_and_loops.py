@@ -249,37 +249,43 @@ def plot_result(data1, data2, x, title, vmin=-15., vmax=-7., rx=0):
     ax1 = plt.subplot(231)
     setplot(r"(a) |Re(magn.dip*iwu)|")
     cf0 = plt.pcolormesh(rx, rx, np.log10(np.abs(data1.real)), linewidth=0,
-                         rasterized=True, cmap="viridis", vmin=vmin, vmax=vmax)
+                         rasterized=True, cmap="viridis", vmin=vmin, vmax=vmax,
+                         shading='nearest')
 
     ax2 = plt.subplot(232)
     setplot(r"(b) |Re(el. square)|")
     plt.pcolormesh(rx, rx, np.log10(np.abs(data2.real)), linewidth=0,
-                   rasterized=True, cmap="viridis", vmin=vmin, vmax=vmax)
+                   rasterized=True, cmap="viridis", vmin=vmin, vmax=vmax,
+                   shading='nearest')
 
     ax3 = plt.subplot(233)
     setplot(r"(c) Error real part")
     error_r = np.abs((data1.real-data2.real)/data1.real)*100
     cf2 = plt.pcolormesh(rx, rx, np.log10(error_r), vmin=-2, vmax=2,
                          linewidth=0, rasterized=True,
-                         cmap=plt.cm.get_cmap("RdBu_r", 8))
+                         cmap=plt.cm.get_cmap("RdBu_r", 8),
+                         shading='nearest')
 
     # Plot Im(data)
     ax4 = plt.subplot(234)
     setplot(r"(d) |Im(magn.dip*iwu)|")
     plt.pcolormesh(rx, rx, np.log10(np.abs(data1.imag)), linewidth=0,
-                   rasterized=True, cmap="viridis", vmin=vmin, vmax=vmax)
+                   rasterized=True, cmap="viridis", vmin=vmin, vmax=vmax,
+                   shading='nearest')
 
     ax5 = plt.subplot(235)
     setplot(r"(e) |Im(el. square)|")
     plt.pcolormesh(rx, rx, np.log10(np.abs(data2.imag)), linewidth=0,
-                   rasterized=True, cmap="viridis", vmin=vmin, vmax=vmax)
+                   rasterized=True, cmap="viridis", vmin=vmin, vmax=vmax,
+                   shading='nearest')
 
     ax6 = plt.subplot(236)
     setplot(r"(f) Error imag part")
     error_i = np.abs((data1.imag-data2.imag)/data1.imag)*100
     plt.pcolormesh(rx, rx, np.log10(error_i), vmin=-2, vmax=2,
                    linewidth=0, rasterized=True,
-                   cmap=plt.cm.get_cmap("RdBu_r", 8))
+                   cmap=plt.cm.get_cmap("RdBu_r", 8),
+                   shading='nearest')
 
     # Colorbars
     fig.colorbar(cf0, ax=[ax1, ax2, ax3], label=r"$\log_{10}$ Amplitude (A/m)")
@@ -396,7 +402,7 @@ plot_result(epm_loop, square_dip, x, 'Loop made of four dipoles',
 # - (3) an electric loop consisting of four finite length dipoles,
 #
 # differ, as expected. However, for the vast majority they are identical. Skin
-# depth for our example with :math:`\rho=1\Omega` m and :math:`f=100\,` Hz is
+# depth for our example with :math:`\rho=1\Omega` m and :math:`f=100` Hz is
 # roughly 50 m, so the results are basically identical for 4-5 skin depths,
 # after which the signal is very low.
 

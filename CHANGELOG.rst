@@ -13,6 +13,17 @@ v2.0.x
 *latest*
 --------
 
+- Documentation:
+
+  - New section under *Tips and tricks* regarding *Zero horizontal offset*.
+
+- Example gallery:
+
+  - Re-organization of the section *Reproducing*: split *CSEM* into the
+    two examples, rename all.
+  - New example *Hunziker et al., 2015*, in the section *Reproducing*.
+  - Update and maintain all of them.
+
 - Maintenance:
 
   - Take care of deprecation warnings:
