@@ -13,6 +13,10 @@ v2.0.x
 *latest*
 --------
 
+- Documentation:
+
+  - New section under *Tips and tricks* regarding *Zero horizontal offset*.
+
 - Example gallery:
 
   - Re-organization of the section *Reproducing*: split *CSEM* into the

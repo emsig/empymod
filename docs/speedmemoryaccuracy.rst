@@ -247,3 +247,142 @@ Have a look at the corresponding example in the Gallery, where this hook is
 exploited in the low-frequency range to use the Cole-Cole model for IP
 computation. It could also be used in the high-frequency range to model
 dielectricity.
+
+
+Zero horizontal offset
+----------------------
+
+By default, ``empymod`` enforces a minimum horizontal offset of 1 mm. The
+reason for this lies in the Hankel transform. The digital linear filter method
+computes the required wavenumbers via
+
+.. math::
+    :label: wavenumbers
+
+    \lambda = b_n/r
+
+where :math:`b_n` are the base values of the filter, and :math:`r` is the
+horizontal offset. It can be seen from Equation :eq:`wavenumbers` that this
+breaks down for a zero horizontal offset (something similar applies for the QWE
+Hankel transform method).
+
+However, the quadrature method for the Hankel transform as well as the
+analytical solutions do not have this limitation, and both can be used to
+compute actual zero horizontal offset responses. One can set the minimum
+(horizontal) offset to zero (or any other value) by running
+
+.. code-block:: python
+
+    empymod.set_minimum(min_off=0)
+
+So if you have to compute actual zero horizontal offset data you have to use
+the quadrature method (`ht='quad'`). However, be aware that this method is
+usually significantly slower than the DLF method, and needs careful adjustments
+of the `htarg`-parameters depending on the model and the survey layout.
+
+There exist probably clever workarounds to this limitation of the DLF. However,
+depending on the source-receiver configuration a minimum offset of one to ten
+millimeters is generally enough to give a sufficiently precise approximation of
+the actual zero-offset response, at least for practical purposes.
+
+Here is a script that computes the responses for all possible source-receiver
+configurations for a fullspace, comparing the analytical space-frequency domain
+solution with the solutions using the quadrature and using the DLF for the
+Hankel transform. The analytical solution and the quadrature transform compute
+the zero offset explicitly, the DLF transform has a minimum offset of 1 mm. You
+can adjust it to your model and survey layout.
+
+.. code-block:: python
+
+    import empymod
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    xy = np.arange(1001.)/500-1         # x=y-offsets
+    off = np.sign(xy)*np.sqrt(2*xy**2)  # Offset
+
+    res = 1   # Fullspace resistivity
+    zoff = 1  # Vertical distance
+    freq = 1  # Frequency
+
+    # Collect input
+    inp = {'src': [0, 0, 0], 'rec': [xy, xy, zoff], 'depth': [],
+           'res': res, 'freqtime': freq, 'verb': 2}
+
+    pab = [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26,
+           31, 32, 33, 34, 35, 36, 41, 42, 43, 44, 45, 46,
+           51, 52, 53, 54, 55, 56, 61, 62, 63, 64, 65, 66]
+
+    # Loop over all source-receiver combinations
+    for ab in pab:
+
+        # Enforce minimum offset
+        empymod.set_minimum(min_off=1e-3)
+
+        print('    --- DLF ---')
+        num = empymod.dipole(
+                ab=ab, xdirect=False, htarg={'pts_per_dec': 0}, **inp)
+
+        # Remove minimum offset
+        empymod.set_minimum(min_off=0)
+
+        print('    --- QUAD ---')
+        qua = empymod.dipole(
+                ab=ab, xdirect=False, ht='quad', **inp,
+                htarg={'a': 1e-3, 'b': 5e1, 'rtol': 1e-4, 'pts_per_dec': 100})
+        print('    --- Analytical ---')
+        ana = empymod.dipole(ab=ab, xdirect=True, **inp)
+
+        # Plot the result
+        plt.figure(num=ab)
+        plt.suptitle(f"ab = {ab}")
+
+        ax1 = plt.subplot(221)
+        plt.title('Real')
+        plt.ylabel('E-field (V/m)')
+        plt.plot(off, ana.real, 'k-')
+        plt.plot(off, qua.real, 'C0--')
+        plt.plot(off, num.real, 'C1-.')
+        plt.xticks([-1, -0.5, 0, 0.5, 1], ())
+
+        ax3 = plt.subplot(223)
+        plt.xlabel('Offset (m)')
+        plt.ylabel('Rel. Error (%)')
+        plt.plot(off, 100*abs((qua.real-ana.real)/ana.real), 'C0--')
+        plt.plot(off, 100*abs((num.real-ana.real)/ana.real), 'C1-.')
+        plt.yscale('log')
+
+        ax2 = plt.subplot(222, sharey=ax1)
+        plt.title('Imag')
+        plt.plot(off, ana.imag, 'k-', label='analytical')
+        plt.plot(off, qua.imag, 'C0--', label='QUAD')
+        plt.plot(off, num.imag, 'C1-.', label='DLF')
+        ax2.yaxis.set_label_position("right")
+        ax2.yaxis.tick_right()
+        plt.xticks([-1, -0.5, 0, 0.5, 1], ())
+        plt.legend()
+
+        ax4 = plt.subplot(224, sharey=ax3)
+        plt.xlabel('Offset (m)')
+        plt.plot(off, 100*abs((qua.imag-ana.imag)/ana.imag), 'C0--')
+        plt.plot(off, 100*abs((num.imag-ana.imag)/ana.imag), 'C1-.')
+        ax4.yaxis.set_label_position("right")
+        ax4.yaxis.tick_right()
+        plt.yscale('log')
+
+        plt.tight_layout()
+        plt.show()
+
+
+The result for x-directed source and receiver (`ab=11`) is shown in the
+following figure:
+
+.. figure:: _static/figures/ZeroOffset.png
+   :scale: 100 %
+   :align: center
+   :alt: Zero offset check for ab=11.
+   :name: ZeroOffset
+
+   Comparison for zero offset computation. The `DLF` has a minimum horizontal
+   offset of 1 mm in this examples, the other two methods do have an actual
+   zero horizontal offset.
