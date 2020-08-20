@@ -25,6 +25,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
+    python_requires='>=3.6',
     install_requires=[
         'scipy>=1.0.0',
         'numba>=0.44',
