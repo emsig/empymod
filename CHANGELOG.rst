@@ -10,8 +10,11 @@ v2.0.x
 """"""
 
 
-*latest*
---------
+v2.0.3: Docs and gallery
+------------------------
+
+**2020-09-22**
+
 
 - Documentation:
 
@@ -29,9 +32,16 @@ v2.0.x
   - Take care of deprecation warnings:
 
     - numpy: https://numpy.org/neps/nep-0034-infer-dtype-is-object.html
-    - matplotlib: matplotlib/matplotlib#16258
+    - matplotlib: https://github.com/matplotlib/matplotlib/pull/16258
 
   - Correct docs re `htarg` for `ht='quad'` (`a`/`b` vs `lmin`/`lmax`).
+
+  - Sphinx: Ensure `_html_repr_` is captured by RTD and other small
+    improvements.
+
+  - Chain errors.
+
+  - Improve NumPy types.
 
 
 v2.0.2: Fix example: `tem_walktem`
