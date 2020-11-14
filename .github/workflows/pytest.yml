@@ -30,12 +30,18 @@ jobs:
       matrix:
         os: [ubuntu, ]  # macos, windows]  # Only Linux currently.
         case:
-          - python-version: 3.6
-            name: full
+#           - python-version: 3.7
+#             name: full
+#             os: ubuntu
+#             conda: scipy numba matplotlib
+#             pip: pytest-mpl scooby
+#             test: "--mpl"
+          - python-version: 3.7
+            name: plain
             os: ubuntu
-            conda: scipy numba matplotlib
-            pip: pytest-mpl scooby
-            test: "--mpl"
+            conda: scipy numba
+            pip: ""
+            test: ""
 #           - python-version: 3.7
 #             name: minimal  # <= TODO minimal environment
 #             os: ubuntu
@@ -47,11 +53,7 @@ jobs:
 #             os: ubuntu
 #             conda: scipy numba
 #             test: ""
-#           - python-version: 3.7
-#             name: full
-#             os: ubuntu
-#             conda: scipy numba matplotlib scooby
-#             test: "--mpl"
+#
 #           - python-version: 3.8
 #             name: plain
 #             os: ubuntu
