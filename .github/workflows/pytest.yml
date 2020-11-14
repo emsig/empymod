@@ -30,45 +30,42 @@ jobs:
       matrix:
         os: [ubuntu, ]  # macos, windows]  # Only Linux currently.
         case:
-#           - python-version: 3.7
-#             name: full
-#             os: ubuntu
-#             conda: scipy numba matplotlib
-#             pip: pytest-mpl scooby
-#             test: "--mpl"
+          - python-version: 3.6
+            name: minimal
+            os: ubuntu
+            conda: "'scipy=1.0' 'numba=0.44'"
+            pip: ""
+            test: ""
+          - python-version: 3.6
+            name: plain
+            os: ubuntu
+            conda: scipy numba
+            pip: ""
+            test: ""
           - python-version: 3.7
             name: plain
             os: ubuntu
             conda: scipy numba
             pip: ""
             test: ""
-#           - python-version: 3.7
-#             name: minimal  # <= TODO minimal environment
-#             os: ubuntu
-#             conda: "'scipy<1.1' 'numba<0.45' matplotlib scooby"
-#             pip: ""
-#             test: ""
-#           - python-version: 3.7
-#             name: plain
-#             os: ubuntu
-#             conda: scipy numba
-#             test: ""
-#
-#           - python-version: 3.8
-#             name: plain
-#             os: ubuntu
-#             conda: scipy numba
-#             test: ""
-#           - python-version: 3.8
-#             name: plain
-#             os: macos
-#             conda: scipy numba
-#             test: ""
-#           - python-version: 3.8
-#             name: plain
-#             os: windows
-#             conda: scipy numba
-#             test: ""
+          - python-version: 3.7
+            name: full
+            os: ubuntu
+            conda: scipy numba matplotlib
+            pip: pytest-mpl scooby
+            test: "--mpl"
+          - python-version: 3.8
+            name: plain
+            os: ubuntu
+            conda: scipy numba
+            pip: ""
+            test: ""
+          - python-version: 3.8
+            name: full
+            os: ubuntu
+            conda: scipy numba matplotlib
+            pip: pytest-mpl scooby
+            test: "--mpl"
 
     env:
       # Used to tag CodeCov submissions
