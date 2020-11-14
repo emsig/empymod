@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - master
-      - travis-to-GA  ################ TODO ########### TODO ######### TODO ####
   release:
     types:
       - published
@@ -169,8 +168,7 @@ jobs:
     name: Deploy to PyPI
     runs-on: ubuntu-latest
     # Only from the origin repository, not forks; only master.
-    # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-    # if: github.repository_owner == 'empymod' && github.ref == 'refs/heads/master'
+    if: github.repository_owner == 'empymod' && github.ref == 'refs/heads/master'
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE
