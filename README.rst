@@ -11,9 +11,9 @@
 .. image:: https://github.com/empymod/empymod/workflows/pytest/badge.svg?branch=master
    :target: https://github.com/empymod/empymod/actions
    :alt: GitHub Actions
-.. image:: https://codecov.io/gh/empymod/empymod/branch/master/graph/badge.svg
-   :target: https://codecov.io/gh/empymod/empymod
-   :alt: CodeCov
+.. image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
+   :target: https://coveralls.io/github/empymod/empymod?branch=master
+   :alt: Coveralls
 .. image:: https://img.shields.io/codacy/grade/b28ed3989ed248fe95e34288e43667b9/master.svg
    :target: https://www.codacy.com/app/prisae/empymod
    :alt: Codacy
