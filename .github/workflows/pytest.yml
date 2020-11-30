@@ -125,7 +125,7 @@ jobs:
         run: |
           python setup.py install
           cp ./tests/matplotlibrc ./.
-#           pytest --cov=empymod --flake8 ${{ matrix.case.test }}
+          # pytest --cov=empymod --flake8 ${{ matrix.case.test }}   # TODO #
           pytest --cov=empymod --flake8 ${{ matrix.case.test }} tests/test_utils.py
 
       - name: Coveralls
