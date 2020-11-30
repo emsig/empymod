@@ -7,3 +7,4 @@ exclude requirements-dev.txt
 exclude runtests.sh
 exclude .readthedocs.yml
 exclude .gitignore
+exclude .coveragerc

@@ -114,13 +114,12 @@ jobs:
           conda info -a
           conda list
 
-      - name: Install and test with pytest
+      - name: Test with pytest
         shell: bash -l {0}
         run: |
           python setup.py install
           cp ./tests/matplotlibrc ./.
           pytest --cov=empymod --flake8 ${{ matrix.case.test }}
-          coveralls
 
       - name: Coveralls
         # [pin v20201129]
