@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - master
+      - travis-to-GA
   release:
     types:
       - published
