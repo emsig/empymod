@@ -30,42 +30,42 @@ jobs:
       matrix:
         os: [ubuntu, ]  # macos, windows]  # Only Linux currently.
         case:
-#           - python-version: 3.6
-#             name: minimal
-#             os: ubuntu
-#             conda: "'scipy=1.0' 'numba=0.44'"
-#             pip: ""
-#             test: ""
-#           - python-version: 3.6
-#             name: plain
-#             os: ubuntu
-#             conda: scipy numba
-#             pip: ""
-#             test: ""
-#           - python-version: 3.7
-#             name: plain
-#             os: ubuntu
-#             conda: scipy numba
-#             pip: ""
-#             test: ""
-#           - python-version: 3.7
-#             name: full
-#             os: ubuntu
-#             conda: scipy numba matplotlib
-#             pip: pytest-mpl scooby
-#             test: "--mpl"
+          - python-version: 3.6
+            name: minimal
+            os: ubuntu
+            conda: "'scipy=1.0' 'numba=0.44'"
+            pip: ""
+            test: ""
+          - python-version: 3.6
+            name: plain
+            os: ubuntu
+            conda: scipy numba
+            pip: ""
+            test: ""
+          - python-version: 3.7
+            name: plain
+            os: ubuntu
+            conda: scipy numba
+            pip: ""
+            test: ""
+          - python-version: 3.7
+            name: full
+            os: ubuntu
+            conda: scipy numba matplotlib
+            pip: pytest-mpl scooby
+            test: "--mpl"
           - python-version: 3.8
             name: plain
             os: ubuntu
             conda: scipy numba
             pip: ""
             test: ""
-#           - python-version: 3.8
-#             name: full
-#             os: ubuntu
-#             conda: scipy numba matplotlib
-#             pip: pytest-mpl scooby
-#             test: "--mpl"
+          - python-version: 3.8
+            name: full
+            os: ubuntu
+            conda: scipy numba matplotlib
+            pip: pytest-mpl scooby
+            test: "--mpl"
 
     env:
       # Used to for coveralls flag
@@ -176,7 +176,7 @@ jobs:
     name: Deploy to PyPI
     runs-on: ubuntu-latest
     # Only from the origin repository, not forks; only master.
-    if: github.repository_owner == 'empymod' && github.ref == 'refs/heads/master'
+#     if: github.repository_owner == 'empymod' && github.ref == 'refs/heads/master'
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE
@@ -232,11 +232,11 @@ jobs:
           # NOT TO BE USED in PyPI!
           skip_existing: true
 
-      - name: Publish to PyPI
-        # Only for releases
-        if: success() && github.event_name == 'release'
-        # Hash corresponds to v1.4.1
-        uses: pypa/gh-action-pypi-publish@54b39fb9371c0b3a6f9f14bb8a67394defc7a806
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_PASSWORD }}
+#      - name: Publish to PyPI
+#        # Only for releases
+#        if: success() && github.event_name == 'release'
+#        # Hash corresponds to v1.4.1
+#        uses: pypa/gh-action-pypi-publish@54b39fb9371c0b3a6f9f14bb8a67394defc7a806
+#        with:
+#          user: __token__
+#          password: ${{ secrets.PYPI_PASSWORD }}
