@@ -1,14 +1,8 @@
 name: linkcheck
 
-# Only build PRs, the master branch, and releases.
+# Only build PRs.
 on:
   pull_request:
-  push:
-    branches:
-      - master
-  release:
-    types:
-      - published
 
 jobs:
   linkcheck:
