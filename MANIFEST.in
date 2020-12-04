@@ -2,6 +2,7 @@ prune docs
 prune tests
 prune examples
 exclude MAINTENANCE.rst
+exclude Makefile
 exclude requirements.txt
 exclude requirements-dev.txt
 exclude runtests.sh

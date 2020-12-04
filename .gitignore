@@ -8,7 +8,6 @@ docs/examples/
 # Pytest and coverage related
 htmlcov
 .coverage
-.coverage.*
 .pytest_cache/
 
 # Examples related
@@ -18,7 +17,4 @@ examples/educational/filters/
 empymod/version.py
 
 # Build related
-.eggs/
-build/
-dist/
 empymod.egg-info/

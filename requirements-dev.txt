@@ -12,10 +12,7 @@ setuptools_scm
 sphinx>3
 numpydoc >= 0.9
 sphinx_numfig
-# A fix that RTD did not show _html_repr_ was made after v0.7.0. Once
-# the next version of sphinx-gallery is out this line should change back to:
-# sphinx_gallery
-git+git://github.com/sphinx-gallery/sphinx-gallery.git#egg=sphinx-gallery
+sphinx_gallery
 memory_profiler
 sphinx_rtd_theme
 
