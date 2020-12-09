@@ -5,7 +5,7 @@ Contributions of up- and downgoing TM- and TE-modes
 This is an example for the add-on ``tmtemod``. The example is taken from the
 CSEM-book by Ziolkowski and Slob, 2019. Have a look at the CSEM-book repository
 on `empymod/csem-ziolkowski-and-slob
-<https://github.com/empymod/csem-ziolkowski-and-slob>`_ for many more examples.
+<https://github.com/emsig/csem-ziolkowski-and-slob>`_ for many more examples.
 
 **Reference**
 

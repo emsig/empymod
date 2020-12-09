@@ -3,7 +3,7 @@ CSEM-Book: Ziolkowski & Slob, 2019, CUP
 =======================================
 
 See the notebooks in the repo `empymod/csem-ziolkowski-and-slob
-<https://github.com/empymod/csem-ziolkowski-and-slob>`_ for:
+<https://github.com/emsig/csem-ziolkowski-and-slob>`_ for:
 
     Ziolkowski, A., and E. Slob, 2019, **Introduction to Controlled-Source
     Electromagnetic Methods**: Cambridge University Press; ISBN `9781107058620

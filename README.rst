@@ -1,6 +1,6 @@
 
-.. image:: https://raw.githubusercontent.com/empymod/logo/master/logo-empymod-plain-250px.png
-   :target: https://empymod.github.io
+.. image:: https://raw.githubusercontent.com/emsig/empymod-logo/master/logo-empymod-plain-250px.png
+   :target: https://emsig.github.io
    :alt: empymod logo
    
 ----
@@ -8,17 +8,17 @@
 .. image:: https://readthedocs.org/projects/empymod/badge/?version=latest
    :target: https://empymod.readthedocs.io/en/latest
    :alt: Documentation Status
-.. image:: https://github.com/empymod/empymod/workflows/pytest/badge.svg?branch=master
-   :target: https://github.com/empymod/empymod/actions
+.. image:: https://github.com/emsig/empymod/workflows/pytest/badge.svg?branch=master
+   :target: https://github.com/emsig/empymod/actions
    :alt: GitHub Actions
-.. image:: https://coveralls.io/repos/github/empymod/empymod/badge.svg?branch=master
-   :target: https://coveralls.io/github/empymod/empymod?branch=master
+.. image:: https://coveralls.io/repos/github/emsig/empymod/badge.svg?branch=master
+   :target: https://coveralls.io/github/emsig/empymod?branch=master
    :alt: Coveralls
 .. image:: https://img.shields.io/codacy/grade/b28ed3989ed248fe95e34288e43667b9/master.svg
    :target: https://www.codacy.com/app/prisae/empymod
    :alt: Codacy
 .. image:: https://img.shields.io/badge/benchmark-asv-blue.svg?style=flat
-   :target: https://empymod.github.io/empymod-asv
+   :target: https://emsig.github.io/empymod-asv
    :alt: Airspeed Velocity
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.593094.svg
    :target: https://doi.org/10.5281/zenodo.593094
@@ -42,9 +42,9 @@ More information
 For more information regarding installation, usage, contributing, bug reports,
 and much more, see
 
-- **Website**: https://empymod.github.io
+- **Website**: https://emsig.github.io
 - **Documentation**: https://empymod.readthedocs.io
-- **Source Code**: https://github.com/empymod
+- **Source Code**: https://github.com/emsig/empymod
 - **Examples**: https://empymod.readthedocs.io/en/stable/examples
 
 Features

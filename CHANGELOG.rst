@@ -16,6 +16,7 @@ v2.0.x
 - Maintenance:
 
   - Moved from Travis CI to GitHub Actions.
+  - Update github.com/empymod to github.com/emsig.
 
 
 v2.0.3: Docs and gallery

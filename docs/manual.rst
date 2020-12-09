@@ -174,9 +174,9 @@ Contributing
 ------------
 
 New contributions, bug reports, or any kind of feedback is always welcomed!
-Have a look at the `Projects <https://github.com/empymod/empymod/projects>`_ on
+Have a look at the `Projects <https://github.com/emsig/empymod/projects>`_ on
 GitHub to get an idea of things that could be implemented. The best way for
-interaction is at https://github.com/empymod. If you prefer to contact me
+interaction is at https://github.com/emsig. If you prefer to contact me
 outside of GitHub use the contact form on my personal website,
 https://werthmuller.org.
 
@@ -216,10 +216,10 @@ test-suite included. To run the test-suite you must download ``empymod`` from
 GitHub.
 
 There is also a benchmark suite using *airspeed velocity*, located in the
-`empymod/empymod-asv <https://github.com/empymod/empymod-asv>`_-repository. The
-results of my machine can be found in the `empymod/empymod-bench
-<https://github.com/empymod/empymod-bench>`_, its rendered version at
-`empymod.github.io/empymod-asv <https://empymod.github.io/empymod-asv>`_.
+`emsig/empymod-asv <https://github.com/emsig/empymod-asv>`_-repository. The
+results of my machine can be found in the `emsig/empymod-bench
+<https://github.com/emsig/empymod-bench>`_, its rendered version at
+`emsig.github.io/empymod-asv <https://emsig.github.io/empymod-asv>`_.
 
 
 License

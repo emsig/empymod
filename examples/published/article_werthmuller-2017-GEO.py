@@ -3,7 +3,7 @@ empymod-paper: Werthmüller, 2017, Geophysics
 ============================================
 
 See the notebooks in the repo `empymod/article-geo2017
-<https://github.com/empymod/article-geo2017>`_ for:
+<https://github.com/emsig/article-geo2017>`_ for:
 
     Werthmüller, D., 2017, **An open-source full 3D electromagnetic modeler for
     1D VTI media in Python: empymod**: Geophysics, 82(6), WB9-WB19; DOI:

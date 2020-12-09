@@ -3,7 +3,7 @@ fdesign-paper: Werthmüller et al., 2019, Geophysics
 ===================================================
 
 See the notebooks in the repo `empymod/article-fdesign
-<https://github.com/empymod/article-fdesign>`_ for:
+<https://github.com/emsig/article-fdesign>`_ for:
 
     Werthmüller, D., K. Key, and E. Slob, 2019, **A tool for designing digital
     filters for the Hankel and Fourier transforms in potential, diffusive, and

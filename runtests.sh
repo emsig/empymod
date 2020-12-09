@@ -5,8 +5,7 @@ usage="
 $(basename "$0") [-hcpmdw] [-v VERSION(S)]
 
 Run pytest for empymod locally in an isolated virtual environment before
-submitting to GitHub/Travis-CI; by default for all supported python versions of
-empymod.
+submitting to GitHub; by default for all supported python versions of empymod.
 
 where:
     -h : Show this help text.
