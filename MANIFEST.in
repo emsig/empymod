@@ -1,7 +1,9 @@
 prune docs
 prune tests
 prune examples
+prune .github
 exclude MAINTENANCE.rst
+exclude MANIFEST.in
 exclude Makefile
 exclude requirements.txt
 exclude requirements-dev.txt
