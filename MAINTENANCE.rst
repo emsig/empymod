@@ -52,7 +52,7 @@ CI
   - Ensure all http(s)-links work (``sphinx linkcheck``)
 
 - Line-coverage with ``pytest-cov`` on `Coveralls
-  <https://coveralls.io/github/emgis/empymod>`_
+  <https://coveralls.io/github/emsig/empymod>`_
 - Code-quality on `Codacy
   <https://app.codacy.com/manual/prisae/empymod/dashboard>`_
 - Manual on `ReadTheDocs <https://empymod.readthedocs.io/en/latest>`_,
