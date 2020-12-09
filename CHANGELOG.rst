@@ -10,20 +10,21 @@ v2.0.x
 """"""
 
 
-*latest*
---------
+v2.0.4: Move to EMSiG
+---------------------
 
-- Maintenance:
+**2020-12-09**
 
-  - Moved from Travis CI to GitHub Actions.
-  - Update github.com/empymod to github.com/emsig.
+Small maintenance release:
+
+- Update github.com/empymod to github.com/emsig.
+- Moved from Travis CI to GitHub Actions.
 
 
 v2.0.3: Docs and gallery
 ------------------------
 
 **2020-09-22**
-
 
 - Documentation:
 
@@ -150,7 +151,7 @@ This version is backwards incompatible and requires Python 3.6+.
     calls including those parameters will therefore not work any longer.
   - Undo a change introduced in v1.8.0: ``get_dlf_points`` is calculated
     directly within ``transform.fht`` [`empymod#26
-    <https://github.com/empymod/empymod/issues/26>`_].
+    <https://github.com/emsig/empymod/issues/26>`_].
   - Ensured that source and receiver inputs are not altered.
   - Significantly reduced top namespace; only functions from ``model`` are
     loaded into the top namespace now.
@@ -176,7 +177,7 @@ v1.10.6: Various azimuths and dips at same depth
   - Bugfix (in ``utils.get_abs``): When different orientations were used
     exactly along the principal axes, at the same depth, only the first source
     was calculated [`empymod#74
-    <https://github.com/empymod/empymod/issues/74>`_].
+    <https://github.com/emsig/empymod/issues/74>`_].
 
 
 v1.10.5: Continuously in- or decreasing
@@ -323,7 +324,7 @@ v1.8.2 : pts_per_dec for DLF are now floats
   - Adjust website, move stuff from website into README.md.
   - /empymod/example-notebooks -> /empymod/empymod-examples.
   - /empymod/asv -> /empymod/empymod-asv (and therefore now available at
-    `empymod.github.io/empymod-asv <https://empymod.github.io/empymod-asv>`_).
+    empymod.github.io/empymod-asv).
   - /empymod/bench -> /empymod/empymod-bench.
 
 - Move manual from ``empymod/__init__.py`` to the ``docs/manual.rst``, and the
@@ -340,9 +341,9 @@ v1.8.1 : Version of Filter-article and CSEM-book
 - Many little improvements in the documentation.
 - Some code improvements through the use of codacy.
 - Remove testing of Python 3.4; officially supported are now Python 3.5-3.7.
-- Version of the `filter article <https://github.com/empymod/article-fdesign>`_
+- Version of the `filter article <https://github.com/emsig/article-fdesign>`_
   (DLF) in geophysics and of the `CSEM book
-  <https://github.com/empymod/csem-ziolkowski-and-slob>`_.
+  <https://github.com/emsig/csem-ziolkowski-and-slob>`_.
 
 
 v1.8.0 : Hook for Cole-Cole IP and similar
@@ -411,8 +412,8 @@ v1.7.2 : Benchmarked with asv
 
 **2018-07-07**
 
-- Benchmarks: ``empymod`` has now a benchmark suite, see `empymod/asv
-  <https://github.com/empymod/asv>`_.
+- Benchmarks: ``empymod`` has now a benchmark suite, see `emsig/empymod-asv
+  <https://github.com/emsig/empymod-asv>`_.
 
 - Fixed a bug in ``bipole`` for time-domain responses with several receivers or
   sources with different depths. (Simply failed, as wrong dimension was
@@ -495,7 +496,7 @@ These changes should make calculations using ``QWE`` and ``QUAD`` for the
 Hankel transform for cases which do not require all kernels faster; sometimes
 as much as twice as fast. However, it might make calculations which do require
 all kernels a tad slower, as more checks had to be included. (Related to
-[`empymod#11 <https://github.com/empymod/empymod/issues/11>`_]; basically
+[`empymod#11 <https://github.com/emsig/empymod/issues/11>`_]; basically
 including for ``QWE`` and ``QUAD`` what was included for ``DLF`` in version
 1.6.0.)
 
@@ -539,7 +540,7 @@ Secondary field calculation.
     fields are returned (secondary field).
 
 - Bugfix in ``model.analytical`` for ``ab=[36, 63]`` (zeroes)
-  [`empymod#16 <https://github.com/empymod/empymod/issues/16>`_].
+  [`empymod#16 <https://github.com/emsig/empymod/issues/16>`_].
 
 
 v1.6.0 : More DLF improvements
@@ -552,7 +553,7 @@ routines in ``empymod.model``, but almost. Read below to see which functions
 are affected.
 
 - Improved Hankel DLF
-  [`empymod#11 <https://github.com/empymod/empymod/issues/11>`_].
+  [`empymod#11 <https://github.com/emsig/empymod/issues/11>`_].
   ``empymod.kernel.wavenumber`` always returns three kernels, ``PJ0``, ``PJ1``,
   and ``PJ0b``. The first one is angle-independent, the latter two depend on
   the angle. Now, depending of what source-receiver configuration is chosen,
@@ -561,7 +562,7 @@ are affected.
   improves speed for these cases.
 
 - Unified DLF arguments
-  [`empymod#10 <https://github.com/empymod/empymod/issues/10>`_].
+  [`empymod#10 <https://github.com/emsig/empymod/issues/10>`_].
 
   These changes are backwards compatible for all main modelling routines in
   ``empymod.model``. However, they are not backwards compatible for the
@@ -624,10 +625,9 @@ v1.5.1 : Improved docs
 - Documentation:
 
   - Simplifications: avoid duplication as much as possible between the website
-    (`empymod.github.io <https://empymod.github.io>`_), the manual
+    (empymod.github.io), the manual
     (`empymod.readthedocs.io <https://empymod.readthedocs.io>`_), and the
-    ``README`` (`github.com/empymod/empymod
-    <https://github.com/empymod/empymod>`_).
+    ``README`` (github.com/empymod/empymod).
 
     - Website has now only *Features* and *Installation* in full, all other
       information comes in the form of links.
@@ -703,9 +703,8 @@ v1.4.1 : Own organisation github.com/empymod
 [This was meant to be 1.4.0, but due to a setup/pypi/anaconda-issue I had to
 push it to 1.4.1; so there isn't really a version 1.4.0.]
 
-- New home: `empymod.github.io <https://empymod.github.io>`_ as entry point,
-  and the project page on `github.com/empymod <https://github.com/empymod>`_.
-  All empymod-repos moved to the new home.
+- New home: empymod.github.io as entry point, and the project page on
+  github.com/empymod. All empymod-repos moved to the new home.
 
   - /prisae/empymod -> /empymod/empymod
   - /prisae/empymod-notebooks -> /empymod/example-notebooks
