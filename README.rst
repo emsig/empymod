@@ -14,8 +14,8 @@
 .. image:: https://coveralls.io/repos/github/emsig/empymod/badge.svg?branch=master
    :target: https://coveralls.io/github/emsig/empymod?branch=master
    :alt: Coveralls
-.. image:: https://img.shields.io/codacy/grade/b28ed3989ed248fe95e34288e43667b9/master.svg
-   :target: https://www.codacy.com/app/prisae/empymod
+.. image:: https://app.codacy.com/project/badge/Grade/f2db5d9f0f3a4cd6b8457a6e1c47203a
+   :target: https://www.codacy.com/gh/emsig/empymod/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emsig/empymod&amp;utm_campaign=Badge_Grade
    :alt: Codacy
 .. image:: https://img.shields.io/badge/benchmark-asv-blue.svg?style=flat
    :target: https://emsig.github.io/empymod-asv
