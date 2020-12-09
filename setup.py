@@ -15,7 +15,7 @@ setup(
     long_description=readme,
     author='The empymod Developers',
     author_email='dieter@werthmuller.org',
-    url='https://empymod.github.io',
+    url='https://emsig.github.io',
     license='Apache License V2.0',
     packages=['empymod', 'empymod.scripts'],
     classifiers=[

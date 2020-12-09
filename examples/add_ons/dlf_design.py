@@ -4,7 +4,7 @@ Calculating a Digital Linear Filter
 
 This is an example for the add-on ``fdesign``. The example is taken from the
 article Werthmüller et al., 2019. Have a look at the article repository on
-`empymod/article-fdesign <https://github.com/empymod/article-fdesign>`_ for
+`empymod/article-fdesign <https://github.com/emsig/article-fdesign>`_ for
 many more examples.
 
 **Reference**

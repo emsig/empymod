@@ -29,7 +29,7 @@ distributed with [Key12]_ and available at https://software.seg.org/2012/0003
 (SEG-2012-003_). These filters are distributed under the SEG license.
 
 The filter `wer_201_2018` was designed with the add-on `fdesign`, see
-https://github.com/empymod/article-fdesign.
+https://github.com/emsig/article-fdesign.
 
 .. _1DCSEM: https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM
 .. _SEG-2012-003: https://software.seg.org/2012/0003
@@ -3099,7 +3099,7 @@ def wer_201_2018():
     r"""Werthmüller 201 pt Hankel filter, 2018.
 
     Designed with the empymod add-on `fdesign`, see
-    https://github.com/empymod/article-fdesign.
+    https://github.com/emsig/article-fdesign.
 
     License: `Apache License, Version 2.0,
     <https://www.apache.org/licenses/LICENSE-2.0>`_.

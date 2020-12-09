@@ -44,7 +44,7 @@ Useful things
 CI
 --
 
-- Testing on `Travis <https://travis-ci.org/empymod/empymod>`_, includes:
+- Testing on GitHub Actions includes:
 
   - Tests using ``pytest``
   - Linting / code style with ``pytest-flake8``
@@ -52,13 +52,13 @@ CI
   - Ensure all http(s)-links work (``sphinx linkcheck``)
 
 - Line-coverage with ``pytest-cov`` on `Coveralls
-  <https://coveralls.io/github/empymod/empymod>`_
+  <https://coveralls.io/github/emsig/empymod>`_
 - Code-quality on `Codacy
   <https://app.codacy.com/manual/prisae/empymod/dashboard>`_
 - Manual on `ReadTheDocs <https://empymod.readthedocs.io/en/latest>`_,
   including the Gallery (examples run each time).
 - DOI minting on `Zenodo <https://doi.org/10.5281/zenodo.593094>`_
-- Benchmarks with `Airspeed Velocity <https://empymod.github.io/empymod-asv>`_
+- Benchmarks with `Airspeed Velocity <https://emsig.github.io/empymod-asv>`_
   (``asv``) [currently manually]
 - Automatically deploys if tagged:
 

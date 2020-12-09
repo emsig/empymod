@@ -17,7 +17,7 @@ the space-frequency domain (:math:`x-f`) to the space-time domain
 
 *This introduction is taken from Werthmüller et al. (2018), which can be found
 in the repo* `empymod/article-fdesign
-<https://github.com/empymod/article-fdesign>`_.
+<https://github.com/emsig/article-fdesign>`_.
 
 In electromagnetics we often have to evaluate integrals of the form
 
@@ -79,7 +79,7 @@ plt.style.use('ggplot')
 #
 # For this we use ``empymod.fdesign``. This is outside the scope of this
 # notebook. If you are interested have a look at the `article-fdesign
-# <https://github.com/empymod/article-fdesign>`_-repo for more information
+# <https://github.com/emsig/article-fdesign>`_-repo for more information
 # regarding the design of digital linear filters.
 #
 # We design a 5pt filter using the theoretical transform pair

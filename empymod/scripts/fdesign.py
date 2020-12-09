@@ -11,7 +11,7 @@ model as numerical transform pair.
 More information can be found in the following places:
 
 - The article about fdesign is in the repo
-  https://github.com/empymod/article-fdesign
+  https://github.com/emsig/article-fdesign
 - Example notebooks to design a filter can be found in the repo
   https://empymod.readthedocs.io/en/stable/examples
 

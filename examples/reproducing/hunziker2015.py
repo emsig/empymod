@@ -10,7 +10,7 @@ in the manual of the code in Figure 3.
 
 If you are interested in reproducing the figures of the actual paper have a
 look at the notebooks in the repo `article-geo2017
-<https://github.com/empymod/article-geo2017>`_.
+<https://github.com/emsig/article-geo2017>`_.
 
 **Reference**
 

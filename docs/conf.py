@@ -113,9 +113,9 @@ html_context = {
     'menu_links_name': 'Links',
     'menu_links': [
         ('<i class="fa fa-link fa-fw"></i> Website',
-         'https://empymod.github.io'),
+         'https://emsig.github.io'),
         ('<i class="fa fa-github fa-fw"></i> Source Code',
-         'https://github.com/empymod/empymod'),
+         'https://github.com/emsig/empymod'),
     ],
 }
 
@@ -154,11 +154,13 @@ texinfo_documents = [
 
 # ==== 5. linkcheck ====
 
-# software.seg.org results in "403 Client Error: Forbidden for url" on Travis.
-# Everything from Oxford Academic results in "104, 'Connection reset by peer'".
+# software.seg.org results in "403 Client Error: Forbidden for url" in the
+# linkcheck. Everything from Oxford Academic results in "104, 'Connection reset
+# by peer'".
 linkcheck_ignore = [
     'https://software.seg.org',
     'https://doi.org/10.1046/j.1365-8711.2000.03071.x',
     'https://doi.org/10.1111/j.1365-246X.1988.tb01131.x',
     'https://doi.org/10.1093/gji/ggt251',
+    'https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM',
 ]

@@ -4,7 +4,7 @@ r"""
 
 This add-on for empymod adjusts [HuTS15]_ for TM/TE-split. The development was
 initiated by the development of
-https://github.com/empymod/csem-ziolkowski-and-slob ([ZiSl19]_).
+https://github.com/emsig/csem-ziolkowski-and-slob ([ZiSl19]_).
 
 This is a stripped-down version of empymod with a lot of simplifications
 but an important addition. The modeller empymod returns the total field,
