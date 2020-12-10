@@ -18,7 +18,7 @@
    :target: https://www.codacy.com/gh/emsig/empymod/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emsig/empymod&amp;utm_campaign=Badge_Grade
    :alt: Codacy
 .. image:: https://img.shields.io/badge/benchmark-asv-blue.svg?style=flat
-   :target: https://emsig.github.io/empymod-asv
+   :target: https://emsig.github.io/empymod-asv/
    :alt: Airspeed Velocity
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.593094.svg
    :target: https://doi.org/10.5281/zenodo.593094

@@ -58,7 +58,7 @@ CI
 - Manual on `ReadTheDocs <https://empymod.readthedocs.io/en/latest>`_,
   including the Gallery (examples run each time).
 - DOI minting on `Zenodo <https://doi.org/10.5281/zenodo.593094>`_
-- Benchmarks with `Airspeed Velocity <https://emsig.github.io/empymod-asv>`_
+- Benchmarks with `Airspeed Velocity <https://emsig.github.io/empymod-asv/>`_
   (``asv``) [currently manually]
 - Automatically deploys if tagged:
 
