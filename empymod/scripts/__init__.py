@@ -1,4 +1,4 @@
-# Copyright 2017-2020 The empymod Developers.
+# Copyright 2016-2021 The empymod Developers.
 #
 # This file is part of empymod.
 #
