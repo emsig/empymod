@@ -113,7 +113,7 @@ jobs:
           conda config --set always_yes yes --set changeps1 no
           conda config --show-sources
           conda config --show
-          mamba install ${{ matrix.case.conda }} pytest pytest-cov pip
+          conda install ${{ matrix.case.conda }} pytest pytest-cov pip
           pip install setuptools_scm coveralls pytest-flake8 ${{ matrix.case.pip }}
           conda info -a
           conda list
