@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - master
+      - dev
   release:
     types:
       - published
@@ -102,12 +103,9 @@ jobs:
         with:
           auto-update-conda: true
           miniconda-version: "latest"
-          mamba-version: "*"
           python-version: ${{ matrix.case.python-version }}
-          activate-environment: tenv
-          auto-activate-base: false
-          channels: conda-forge,defaults
-          channel-priority: strict
+          miniforge-variant: Mambaforge
+          use-mamba: true
 
       - name: Install dependencies
         shell: bash -l {0}
