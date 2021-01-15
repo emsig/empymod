@@ -106,7 +106,7 @@ jobs:
           python-version: ${{ matrix.case.python-version }}
           activate-environment: tenv
           auto-activate-base: false
-          channels: conda-forge,defaults
+          channels: conda-forge
           channel-priority: strict
 
       - name: Install dependencies
