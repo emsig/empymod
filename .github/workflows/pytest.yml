@@ -104,8 +104,8 @@ jobs:
           auto-update-conda: true
           miniconda-version: "latest"
           python-version: ${{ matrix.case.python-version }}
+          mamba-version: "*"
           miniforge-variant: Mambaforge
-          use-mamba: true
 
       - name: Install dependencies
         shell: bash -l {0}
