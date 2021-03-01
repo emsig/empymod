@@ -8,13 +8,17 @@ from sphinx_gallery.sorting import ExplicitOrder, FileNameSortKey
 # Load extensions
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
     'sphinx.ext.intersphinx',
     'numpydoc',
     'sphinx_gallery.gen_gallery',
+    'sphinx_automodapi.automodapi',
 ]
+autosummary_generate = True
+add_module_names = True
 
 # Numpydoc settings
 numpydoc_show_class_members = False
@@ -58,15 +62,12 @@ warnings.filterwarnings("ignore", category=UserWarning,
 
 # Intersphinx configuration
 intersphinx_mapping = {
-    "numpy": ("https://docs.scipy.org/doc/numpy", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
 }
 
 # ==== 2. General Settings ====
-description = 'A multigrid solver for 3D electromagnetic diffusion.'
-
-# The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'friendly'
+description = '3D EM modeller for 1D VTI media.'
 
 # The templates path.
 templates_path = ['_templates']
@@ -90,6 +91,9 @@ today_fmt = '%d %B %Y'
 # List of patterns to ignore, relative to source directory.
 exclude_patterns = ['_build', 'PermissionToRelicenseFilters.txt',
                     'LaTeX', '../tests']
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = 'friendly'
 
 # ==== 3. HTML settings ====
 html_theme = 'sphinx_rtd_theme'
@@ -127,32 +131,7 @@ def setup(app):
     app.add_css_file("style.css")
 
 
-# ==== 4. Other Document Type Settings ====
-# Options for LaTeX output
-latex_elements = {
-    'papersize': 'a4paper',
-    'pointsize': '10pt',
-}
-latex_documents = [
-    (master_doc, 'empymod.tex', 'empymod Documentation',
-     'The empymod Developers', 'manual'),
-]
-
-# Options for manual page output
-man_pages = [
-    (master_doc, 'empymod', 'empymod Documentation',
-     [author], 1)
-]
-
-# Options for Texinfo output
-texinfo_documents = [
-    (master_doc, 'empymod', 'empymod Documentation',
-     author, 'empymod', description,
-     'Electromagnetic geophysical modelling'),
-]
-
-
-# ==== 5. linkcheck ====
+# ==== 4. linkcheck ====
 
 # software.seg.org results in "403 Client Error: Forbidden for url" in the
 # linkcheck. Everything from Oxford Academic results in "104, 'Connection reset

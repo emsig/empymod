@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - master
-      - dev
   release:
     types:
       - published
@@ -98,8 +97,8 @@ jobs:
         run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup miniconda
-        # [pin v2.0.1]
-        uses: conda-incubator/setup-miniconda@73b9a8098aade40363e43af145303c23542ccb97
+        # [pin master Feb 8, 2001]
+        uses: conda-incubator/setup-miniconda@77b16ed746da28724c61e1f1ad23395a4b695ef5
         with:
           auto-update-conda: true
           miniconda-version: "latest"
