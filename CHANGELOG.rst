@@ -13,7 +13,9 @@ v2.0.x
 v2.0.5: M&B I
 -------------
 
-Maintenance and bugfixes:
+**2021-03-01**
+
+Maintenance and small bug fix:
 
 - Time-domain modelling failed when using DLF for the Fourier transform with
   ``pts_per_dec=0`` and ``signal={-1;1}`` (broadcasting error).
