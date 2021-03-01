@@ -1826,7 +1826,7 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
     # in frequency domain
     if signal in [-1, 1]:
         # Divide by signal/(2j*pi*f) to obtain step response
-        fact = signal/(2j*np.pi*freq)
+        fact = signal/(2j*np.pi*freq).ravel()
     else:
         fact = 1
 

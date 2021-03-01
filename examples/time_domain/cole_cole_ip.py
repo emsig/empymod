@@ -6,7 +6,7 @@ There are various different definitions of a Cole-Cole model, see for instance
 Tarasov and Titov (2013). We try a few different ones here, but you can supply
 your preferred version.
 
-The original Cole-Cole (1940) model was formulated for the complex dielectric
+The original Cole-Cole (1941) model was formulated for the complex dielectric
 permittivity. It is reformulated to conductivity to use it for IP,
 
 .. math::
