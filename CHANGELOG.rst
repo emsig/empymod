@@ -10,6 +10,15 @@ v2.0.x
 """"""
 
 
+*latest*
+--------
+
+Bugfix:
+
+- Time-domain modelling failed when using DLF for the Fourier transform with
+  ``pts_per_dec=0`` and ``signal={-1;1}`` (broadcasting error).
+
+
 v2.0.4: Move to EMSiG
 ---------------------
 
