@@ -10,13 +10,14 @@ v2.0.x
 """"""
 
 
-*latest*
---------
+v2.0.5: M&B I
+-------------
 
-Bugfix:
+Maintenance and bugfixes:
 
 - Time-domain modelling failed when using DLF for the Fourier transform with
   ``pts_per_dec=0`` and ``signal={-1;1}`` (broadcasting error).
+- RTD and GitHub Action fixes; update year.
 
 
 v2.0.4: Move to EMSiG

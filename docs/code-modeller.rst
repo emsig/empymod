@@ -3,5 +3,5 @@ Main modelling routines
 
 .. automodule:: empymod
 
-.. automodule:: empymod.model
-    :members:
+.. automodapi:: empymod.model
+   :no-inheritance-diagram:

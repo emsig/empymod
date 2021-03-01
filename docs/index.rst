@@ -28,6 +28,6 @@ Version: |version| ~ Date: |today|
    :hidden:
    :caption: API
 
-   modeller
-   code
-   addons
+   code-modeller
+   code-other
+   code-addons

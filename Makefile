@@ -18,6 +18,7 @@ dev-install:
 	pip install -r requirements-dev.txt && pip install -e .
 
 pytest:
+	rm -rf .coverage htmlcov/ .pytest_cache/    # clean up
 	pytest --cov=empymod tests/ --flake8 --mpl && coverage html
 
 flake8:
@@ -33,9 +34,9 @@ linkcheck:
 	cd docs && make html -b linkcheck && cd ..
 
 clean:
-	rm -rf empymod.egg-info/ empymod/version.py # build
-	rm -rf */__pycache__/ */*/__pycache__/      # python cache
-	rm -rf .coverage htmlcov/ .pytest_cache/    # tests and coverage
-	rm -rf docs/examples/ docs/_build/          # docs
+	rm -rf empymod.egg-info/ empymod/version.py  # build
+	rm -rf */__pycache__/ */*/__pycache__/       # python cache
+	rm -rf .coverage htmlcov/ .pytest_cache/     # tests and coverage
+	rm -rf docs/examples/ docs/_build/ docs/api/ # docs
 	rm -rf matplotlibrc
 	rm -rf filters/ examples/educational/filters/
