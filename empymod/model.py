@@ -1839,3 +1839,253 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
         conv *= out[1]
 
     return tEM*2/np.pi, conv  # Scaling from Fourier transform
+
+
+class Bipole:
+    """
+    Quick and dirty test. It should be better re-built from scratch, with a
+    BaseClass, and then consequent Bipole, Dipole, Loop, DipoleK, etc.,
+    classes.
+
+    Similar there should be a better OO abstraction for the transformations and
+    the filters.
+    """
+
+    def __init__(self, **kwargs):
+        """Initiate a Bipole source(s)."""
+
+        self._src = kwargs.pop('src', None)
+        self._rec = kwargs.pop('rec', None)
+        self._verb = kwargs.pop('verb', 2)
+
+        # Initiate times and Fourier Transform arguments and get required
+        # frequencies
+        freqtime = kwargs.pop('freqtime', None)
+        self._signal = kwargs.pop('signal', None)
+        self._ft = kwargs.pop('ft', 'dlf')
+        self._ftarg = kwargs.pop('ftarg', {})
+        if self._signal is None:
+            self._freq = freqtime
+            self._time = None
+        else:
+            self._time = freqtime
+            self._check_time()
+
+        # Check layers
+        self._depth = kwargs.pop('depth', None)
+        self._res = kwargs.pop('res', None)
+        self._aniso = kwargs.pop('aniso', None)
+        self._epermH = kwargs.pop('epermH', None)
+        self._epermV = kwargs.pop('epermV', None)
+        self._mpermH = kwargs.pop('mpermH', None)
+        self._mpermV = kwargs.pop('mpermV', None)
+        self._xdirect = kwargs.pop('xdirect', False)
+        self.set_model()
+
+        self._set_frequency()
+
+        self._msrc = kwargs.pop('msrc', False)
+        self._srcpts = kwargs.pop('srcpts', 1)
+        self._mrec = kwargs.pop('mrec', False)
+        self._recpts = kwargs.pop('recpts', 1)
+        self._strength = kwargs.pop('strength', 0)
+
+        self._ht, self._htarg = check_hankel(
+                kwargs.pop('ht', 'dlf'), kwargs.pop('htarg', {}), self._verb)
+        self._loop_freq, self._loop_off = check_loop(
+                kwargs.pop('loop', None), self._ht, self._htarg, self._verb)
+
+        # Ensure no kwargs left.
+        if kwargs:
+            raise TypeError(f"Unexpected **kwargs: {list(kwargs.keys())}")
+
+    @property
+    def time(self):
+        return self._time
+
+    @time.setter
+    def time(self, time):
+        if self.signal is None:
+            # No effect, print this!
+            raise NotImplementedError
+        self._check_time()
+
+    @property
+    def signal(self):
+        return self._signal
+
+    @signal.setter
+    def signal(self, signal):
+        old = self._signal
+        self._signal = signal
+        if signal is None and old is not None:  # Change t -> f
+            self._freq = self._time  # Times become frequencies
+            self._time = None
+        elif signal is not None and old is None:  # Change f -> t
+            self._time = self._freq  # Frequencies become time
+            self._check_time()
+        elif signal != old:  # Different t-signal
+            self._check_time()
+
+    @property
+    def depth(self):
+        return self._depth
+
+    @property
+    def res(self):
+        return self._res
+
+    @property
+    def aniso(self):
+        return self._aniso
+
+    @property
+    def epermH(self):
+        return self._epermH
+
+    @property
+    def epermV(self):
+        return self._epermV
+
+    @property
+    def mpermH(self):
+        return self._mpermH
+
+    @property
+    def mpermV(self):
+        return self._mpermV
+
+    @property
+    def etaH(self):
+        return self._epermH
+
+    @property
+    def etaV(self):
+        return self._epermV
+
+    @property
+    def zetaH(self):
+        return self._mpermH
+
+    @property
+    def zetaV(self):
+        return self._mpermV
+
+    @property
+    def xdirect(self):
+        return self._xdirect
+
+    @property
+    def isfullspace(self):
+        return self._isfullspace
+
+    # Wrapping fcts.
+    def _check_time(self):
+        out = check_time(
+                self._time, self._signal, self._ft, self._ftarg, self._verb)
+        self._time, self._freq, self._ft, self._ftarg = out
+
+    def set_model(self, **kwargs):
+        out = check_model(
+                kwargs.pop('depth', self._depth),
+                kwargs.pop('res', self._res),
+                kwargs.pop('aniso', self._aniso),
+                kwargs.pop('epermH', self._epermH),
+                kwargs.pop('epermV', self._epermV),
+                kwargs.pop('mpermH', self._mpermH),
+                kwargs.pop('mpermV', self._mpermV),
+                kwargs.pop('xdirect', self._xdirect),
+                kwargs.pop('verb', self._verb),
+        )
+
+        # Ensure no kwargs left.
+        if kwargs:
+            raise TypeError(f"Unexpected **kwargs: {list(kwargs.keys())}")
+
+        self._depth, self._res, self._aniso, self._epermH = out[:4]
+        self._epermV, self._mpermH, self._mpermV, self._isfullspace = out[4:]
+        self._set_frequency()
+
+    @property
+    def freq(self):
+        return self._freq
+
+    @freq.setter
+    def freq(self, freq):
+        if self.signal is not None:
+            # No effect, frequencies defined by FT!
+            raise NotImplementedError
+        self._set_frequency(freq)
+
+    def _set_frequency(self, frequency=None):
+        if frequency is not None:
+            self._freq = frequency
+        freq = check_frequency(
+                self._freq, self._res, self._aniso, self._epermH, self._epermV,
+                self._mpermH, self._mpermV, self._verb)
+        self._freq, self._etaH, self._etaV, self._zetaH, self._zetaV = freq
+
+    @property
+    def srcpts(self):
+        return self._srcpts
+
+    @property
+    def recpts(self):
+        return self._recpts
+
+    @property
+    def msrc(self):
+        return self._msrc
+
+    @property
+    def mrec(self):
+        return self._mrec
+
+    @property
+    def strength(self):
+        return self._strength
+
+    @property
+    def verb(self):
+        return self._verb
+
+    @verb.setter
+    def verb(self, verb):
+        self._verb = verb
+
+    # This currently doesn't work
+    #
+    # # Update etaH/etaV and zetaH/zetaV according to user-provided model
+    # if isinstance(res, dict) and 'func_eta' in res:
+    #     etaH, etaV = res['func_eta'](res, locals())
+    # if isinstance(res, dict) and 'func_zeta' in res:
+    #     zetaH, zetaV = res['func_zeta'](res, locals())
+
+    # # Check Hankel transform parameters TODO setters
+    # ht, htarg = check_hankel(ht, htarg, verb)
+
+    # # Check loop TODO setters
+    # loop_freq, loop_off = check_loop(loop, ht, htarg, verb)
+
+    # # # ONE bipole_fem-fct # # #
+    def fd_field(self):
+        # self._fd_field = # call fem_bipole() fct
+        return EMArray(np.squeeze(
+            self._fem.reshape((-1, self._nrec, self._nsrc), order='F')))
+
+    def td_field(self):
+        return EMArray(np.squeeze(
+            self._tem.reshape((-1, self._nrec, self._nsrc), order='F')))
+
+    def td_field(self):
+        if self.signal is None:
+            raise NotImplementedError
+
+        # self._fd_field()
+
+        self._tem, conv = tem(
+                self._fem, self._fem[0, :], self.freq, self.time, self.signal,
+                self.ft, self.ftarg)
+
+        # In case of QWE/QUAD, print Warning if not converged
+        conv_warning(conv, self.ftarg, 'Fourier', self.verb)
