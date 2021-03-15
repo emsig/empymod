@@ -10,6 +10,12 @@ v2.0.x
 """"""
 
 
+*latest*
+--------
+
+- New example "Magnetotelluric".
+
+
 v2.0.5: M&B I
 -------------
 
