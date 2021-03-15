@@ -2,8 +2,23 @@ r"""
 Magnetotelluric data
 ====================
 
+The magnetotelluric (MT) method is a passive method using as a source
+variations in Earth's magnetic field, which create telluric currents in the
+Earth. The variation of Earth's magnetic field has many origins, e.g.,
+lightning or the interaction between the Earth's magnetic field and solar wind.
+
+Ubiquitous in MT is the plane-wave approximation, hence, that the source signal
+is a plane wave hitting the Earth's surface. Having a 1D source (vertical plane
+wave) for a layered, 1D model reduces the computation of the impedances and
+from there the apparent resistivity and apparent phase a simple recursion
+algorithm. As such it does not make sense to use a full EM wavefield algorithm
+with three-dimensional sources such as empymod to compute MT responses.
+However, it is still interesting to see if we can compute MT impedances with a
+three-dimensional point source.
+
 As background theory we reproduce here Equations (11) to (17) from Pedersen and
-Hermance (1986), with surrounding text:
+Hermance (1986), with surrounding text. For a more in-depth read we refer to
+Chave and Jones (2012).
 
 --------
 
@@ -63,7 +78,7 @@ calculate the apparent resistivity, :math:`\rho_a`, and phase,
 .. math::
     :label: ph-17
 
-    \theta_a = \tan^{-1}\frac{\Im(Z1)}{\Re(Z_1)} \, ,
+    \theta_a = \tan^{-1}\frac{\Im(Z1)}{\Re(Z_1)} \, .
 
 This calculation is repeated for a range of periods and is used to model the
 magnetotelluric response of the layered structure.
@@ -72,10 +87,13 @@ magnetotelluric response of the layered structure.
 
 **Reference**:
 
+- Chave, A., and Jones, A. (Eds.). (2012). The Magnetotelluric Method: Theory
+  and Practice. Cambridge: Cambridge University Press;
+  https://doi.org/10.1017/CBO9781139020138.
 - Pedersen, J., Hermance, J.F. Least squares inversion of one-dimensional
   magnetotelluric data: An assessment of procedures employed by Brown
-  University. Surv Geophys 8, 187–231 (1986).
-  https://doi.org/10.1007/BF01902413
+  University. Surv Geophys 8, 187–231 (1986);
+  https://doi.org/10.1007/BF01902413.
 - This example was strongly motivated by Andrew Pethicks blog post
   https://www.digitalearthlab.com/tutorial/tutorial-1d-mt-forward.
 
@@ -94,48 +112,52 @@ plt.style.use('ggplot')
 
 resistivities = np.array([2e14, 300, 2500, 0.8, 3000, 2500])
 depths = np.array([0, 200, 600, 640, 1140])
-frequencies = np.logspace(-4, 4, 31)
+frequencies = np.logspace(-4, 5, 101)
 omega = 2 * np.pi * frequencies
 
 ###############################################################################
-# 1D-MT following Pedersen & Hermance
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 1D-MT recursion following Pedersen & Hermance
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Using the variable names as in the paper.
 
 # Initiate recursive formula with impedance of the deepest layer.
-impedance = np.sqrt(2j * np.pi * frequencies * mu_0 * resistivities[-1])
+Z_j = np.sqrt(2j * np.pi * frequencies * mu_0 * resistivities[-1])
 
 # Move up the stack of layers till the top (without air).
-for l in range(depths.size-1, 0, -1):
+for j in range(depths.size-1, 0, -1):
 
     # Thickness
-    t_j = depths[l] - depths[l-1]
+    t_j = depths[j] - depths[j-1]
 
     # Intrinsic impedance
-    z_oj = np.sqrt(1j * omega * mu_0 * resistivities[l])
+    z_oj = np.sqrt(1j * omega * mu_0 * resistivities[j])
 
     # Reflection coefficient
-    refl_coeff = (z_oj - impedance) / (z_oj + impedance)
+    R_j = (z_oj - Z_j) / (z_oj + Z_j)
 
     # Exponential factor
-    gamma = np.sqrt(1j * omega * mu_0 / resistivities[l])
-    exp_fact = np.exp(-2 * gamma * t_j)
+    gamma_j = np.sqrt(1j * omega * mu_0 / resistivities[j])
+    exp_j = np.exp(-2 * gamma_j * t_j)
 
     # Impedance at this layer
-    impedance = z_oj * (1 - refl_coeff*exp_fact) / (1 + refl_coeff*exp_fact)
+    Z_j = z_oj * (1 - R_j * exp_j) / (1 + R_j * exp_j)
 
 # Step 3. Compute apparent resistivity last impedance
-apres_mt1d = abs(impedance)**2/(omega * mu_0)
-phase_mt1d = np.arctan2(impedance.imag, impedance.real)
+apres_mt1d = abs(Z_j)**2/(omega * mu_0)
+phase_mt1d = np.arctan2(Z_j.imag, Z_j.real)
 
 ###############################################################################
-# Reproducing using empymod
-# -------------------------
+# 1D MT using empymod
+# -------------------
 #
 # The above derivation and code assume plane waves. We can "simulate" plane
-# waves by putting the source far away. In this example, we set it one million
-# km away in all directions. As the impedance is the ratio of the Ex and Hy
-# fields the source type (electric or magnetic) and the source orientation do
-# not matter.
+# waves by putting the source _very_ far away. In this example, we set it one
+# million km away in all directions. As the impedance is the ratio of the Ex
+# and Hy fields the source type (electric or magnetic) and the source
+# orientation do not matter; hence, it can be an arbitrarily rotated electric
+# or magnetic source, the apparent resistivity and apparent phase will always
+# be the same.
 
 dist = 1_000_000_000  # 1 million kilometer (!)
 inp = {
@@ -147,10 +169,15 @@ inp = {
     'verb': 1,
 }
 
+# Get Ex, Hy.
 ex = empymod.dipole(ab=11, **inp)
 hy = empymod.dipole(ab=51, **inp)
+
+# Impedance.
 Z = ex/hy
-apres_empy = abs(Z)**2 / (2*np.pi*frequencies*mu_0)
+
+# Apparent resistivity and apparent phase.
+apres_empy = abs(Z)**2 / (omega * mu_0)
 phase_empy = np.arctan2(Z.imag, Z.real)
 
 ###############################################################################
@@ -161,7 +188,7 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
 
 ax1.set_title('Apparent resistivity')
 ax1.plot(frequencies, apres_mt1d, label='MT-1D')
-ax1.plot(frequencies, apres_empy, 'o', label='empymod')
+ax1.plot(frequencies, apres_empy, '--', label='empymod')
 ax1.set_xscale('log')
 ax1.set_yscale('log')
 ax1.set_xlabel('Frequency (Hz)')
@@ -170,7 +197,7 @@ ax1.legend()
 
 ax2.set_title('Phase')
 ax2.plot(frequencies, phase_mt1d*180/np.pi)
-ax2.plot(frequencies, phase_empy*180/np.pi, 'o')
+ax2.plot(frequencies, phase_empy*180/np.pi, '--')
 ax2.set_xscale('log')
 ax2.yaxis.tick_right()
 ax2.set_xlabel('Frequency (Hz)')

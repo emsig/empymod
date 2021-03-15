@@ -22,7 +22,7 @@ pytest:
 	pytest --cov=empymod tests/ --flake8 --mpl && coverage html
 
 flake8:
-	flake8 docs/conf.py setup.py empymod/ tests/
+	flake8 docs/conf.py setup.py empymod/ tests/ examples/
 
 doc:
 	cd docs && make html && cd ..
