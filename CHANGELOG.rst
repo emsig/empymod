@@ -10,9 +10,10 @@ v2.0.x
 """"""
 
 
-*latest*
---------
+v2.0.6: Bugfix Windows int32/64
+-------------------------------
 
+- Bugfix Windows int32/64.
 - New example "Magnetotelluric".
 
 
