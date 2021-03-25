@@ -1167,8 +1167,7 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
             def coeff_dk(k, K):
                 r"""Return coefficients Dk for k, K."""
-                n = np.arange(
-                        int((k+1)/2), np.min([k, K/2])+.5, 1, dtype=np.int64)
+                n = np.arange((k+1)//2, min([k, K/2])+.5, 1, dtype=np.int64)
                 Dk = n**(K/2)*fn(2*n)
                 Dk /= fn(n)*fn(n-1)*fn(k-n)*fn(2*n-k)*fn(K/2-n)
                 return Dk.sum()*(-1)**(k+K/2)
