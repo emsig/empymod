@@ -29,9 +29,9 @@ jobs:
       matrix:
         os: [ubuntu, macos, windows]  # Only Linux currently.
         python: [3.6, 3.7, 3.8, 3.9]
-        conda: ""
-        pip: ""
-        test: ""
+        conda: [""]
+        pip: [""]
+        test: [""]
         include:
           - python-version: 3.6
             name: minimal
