@@ -307,8 +307,8 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
         # as QWE is not designed for these intervals.
         check0 = np.log(intervals[:, :-1])
         check1 = np.log(intervals[:, 1:])
-        numerator = np.zeros((off.size, maxint), dtype=np.complex_)
-        denominator = np.zeros((off.size, maxint), dtype=np.complex_)
+        numerator = np.zeros((off.size, maxint), dtype=np.complex128)
+        denominator = np.zeros((off.size, maxint), dtype=np.complex128)
 
         if k_used[0]:
             numerator += sPJ0r(check0) + 1j*sPJ0i(check0)
@@ -325,7 +325,7 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
         doqwe = np.all((np.abs(numerator)/np.abs(denominator) < diff_quad), 1)
 
         # Pre-allocate output array
-        fEM = np.zeros(off.size, dtype=np.complex_)
+        fEM = np.zeros(off.size, dtype=np.complex128)
         conv = True
 
         # Carry out SciPy's Quad if required
@@ -357,7 +357,7 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
                 sPJ0b = sPJ0br(np.log(lambd)) + 1j*sPJ0bi(np.log(lambd))
 
             # Carry out and return the Hankel transform for this interval
-            sEM = np.zeros_like(numerator, dtype=np.complex_)
+            sEM = np.zeros_like(numerator, dtype=np.complex128)
             if k_used[1]:
                 sEM += np.sum(np.reshape(sPJ1*BJ1, (off.size, nquad, -1),
                               order='F'), 1)
@@ -395,7 +395,7 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
                                                ab, xdirect, msrc, mrec)
 
             # Carry out and return the Hankel transform for this interval
-            gEM = np.zeros_like(inpoff, dtype=np.complex_)
+            gEM = np.zeros_like(inpoff, dtype=np.complex128)
             if k_used[1]:
                 gEM += inpfang*np.dot(PJ1[0, :], BJ1[iB])
                 if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Because of J2
@@ -481,7 +481,7 @@ def hankel_quad(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
         sPJ0bi = None
 
     # Pre-allocate output array
-    fEM = np.zeros(off.size, dtype=np.complex_)
+    fEM = np.zeros(off.size, dtype=np.complex128)
     conv = True
 
     # Input-dictionary for quad
@@ -746,7 +746,7 @@ def fourier_fftlog(fEM, time, freq, ftarg):
     a = fftpack.rfft(a)
 
     # 4.b
-    m = np.arange(1, n//2, dtype=np.int_)  # index variable
+    m = np.arange(1, n//2, dtype=np.int64)  # index variable
     if q == 0:  # unbiased (q = 0) transform
         # multiply by (kr)^[- i 2 m pi/(n dlnr)] U_mu[i 2 m pi/(n dlnr)]
         ar = a[2*m-1]
@@ -918,7 +918,7 @@ def dlf(signal, points, out_pts, filt, pts_per_dec, kind=None, ang_fact=None,
     def spline(values, points, int_pts):
         r"""Return `values` at `points` interpolated in log at `int_pts`."""
         out = iuSpline(np.log(points), values.real)(np.log(int_pts))
-        if values.dtype == np.complex_:
+        if values.dtype == np.complex128:
             out = out+1j*iuSpline(np.log(points), values.imag)(np.log(int_pts))
         return out
 
