@@ -27,24 +27,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, ]  # macos, windows]  # Only Linux currently.
-        case:
+        os: [ubuntu, macos, windows]  # Only Linux currently.
+        python: [3.6, 3.7, 3.8, 3.9]
+        name: plain
+        conda: ""
+        pip: ""
+        test: ""
+        include:
           - python-version: 3.6
             name: minimal
             os: ubuntu
             conda: "'scipy=1.0' 'numba=0.44'"
-            pip: ""
-            test: ""
-          - python-version: 3.6
-            name: plain
-            os: ubuntu
-            conda: scipy numba
-            pip: ""
-            test: ""
-          - python-version: 3.7
-            name: plain
-            os: ubuntu
-            conda: scipy numba
             pip: ""
             test: ""
           - python-version: 3.7
@@ -53,12 +46,6 @@ jobs:
             conda: scipy numba matplotlib
             pip: pytest-mpl scooby
             test: "--mpl"
-          - python-version: 3.8
-            name: plain
-            os: ubuntu
-            conda: scipy numba
-            pip: ""
-            test: ""
           - python-version: 3.8
             name: full
             os: ubuntu
