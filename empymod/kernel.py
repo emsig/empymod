@@ -1163,13 +1163,12 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
             K = 16
 
             # Coefficients Dk
-            fn = np.vectorize(np.math.factorial)
-
             def coeff_dk(k, K):
                 r"""Return coefficients Dk for k, K."""
-                n = np.arange((k+1)//2, min([k, K/2])+.5, 1, dtype=np.int64)
-                Dk = n**(K/2)*fn(2*n)
-                Dk /= fn(n)*fn(n-1)*fn(k-n)*fn(2*n-k)*fn(K/2-n)
+                n = np.arange((k+1)//2, min([k, K/2])+.5, 1)
+                Dk = n**(K/2)*special.factorial(2*n)/special.factorial(n)
+                Dk /= special.factorial(n-1)*special.factorial(k-n)
+                Dk /= special.factorial(2*n-k)*special.factorial(K/2-n)
                 return Dk.sum()*(-1)**(k+K/2)
 
             for k in range(1, K+1):

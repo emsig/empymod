@@ -13,6 +13,8 @@ v2.0.x
 v2.0.6: Bugfix Windows int32/64
 -------------------------------
 
+**2021-03-26**
+
 - Bugfix Windows int32/64.
 - New example "Magnetotelluric".
 
