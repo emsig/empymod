@@ -1,0 +1,83 @@
+name: pytest
+
+# Only build PRs, the master branch, and releases.
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - published
+
+# Use bash by default in all jobs
+defaults:
+  run:
+    # Using "-l {0}" is necessary for conda environments to be activated
+    # But this breaks on MacOS if using actions/setup-python:
+    # https://github.com/actions/setup-python/issues/132
+    shell: bash
+
+jobs:
+  test:
+
+    name: ${{ matrix.case.os }} py${{ matrix.case.python-version }} ${{ matrix.case.name }}
+    runs-on: ${{ matrix.case.os }}-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos, windows]
+        python: [3.8, ]
+
+    steps:
+
+      # Cancel any previous run of the test job; [pin v0.6.0]
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@ce177499ccf9fd2aded3b0426c97e5434c2e8a73
+        with:
+          access_token: ${{ github.token }}
+
+      # Checks-out your repository under $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # Need to fetch more than the last commit so that setuptools_scm can
+          # create the correct version string. If the number of commits since
+          # the last release is greater than this, the version still be wrong.
+          # Increase if necessary.
+          fetch-depth: 100
+          # The GitHub token is preserved by default but this job doesn't need
+          # to be able to push to GitHub.
+          persist-credentials: false
+
+      # Need the tags so that setuptools_scm can form a valid version number
+      - name: Fetch git tags
+        run: git fetch origin 'refs/tags/*:refs/tags/*'
+
+      - name: Setup miniconda
+        # [pin master Feb 8, 2001]
+        uses: conda-incubator/setup-miniconda@77b16ed746da28724c61e1f1ad23395a4b695ef5
+        with:
+          auto-update-conda: true
+          miniconda-version: "latest"
+          python-version: ${{ matrix.case.python-version }}
+          miniforge-variant: Mambaforge
+          use-mamba: true
+
+      - name: Install dependencies
+        shell: bash -l {0}
+        run: |
+          conda config --set always_yes yes --set changeps1 no
+          conda config --show-sources
+          conda config --show
+          conda install scipy numba pytest pip
+          pip install setuptools_scm scooby
+          conda info -a
+          conda list
+
+      - name: Test with pytest
+        shell: bash -l {0}
+        run: |
+          python setup.py install
+          pytest
