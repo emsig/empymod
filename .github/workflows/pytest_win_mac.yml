@@ -21,8 +21,8 @@ defaults:
 jobs:
   test:
 
-    name: ${{ matrix.case.os }} py${{ matrix.case.python-version }} ${{ matrix.case.name }}
-    runs-on: ${{ matrix.case.os }}-latest
+    name: ${{ matrix.os }} py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}-latest
 
     strategy:
       fail-fast: false
@@ -61,7 +61,7 @@ jobs:
         with:
           auto-update-conda: true
           miniconda-version: "latest"
-          python-version: ${{ matrix.case.python-version }}
+          python-version: ${{ matrix.python }}
           miniforge-variant: Mambaforge
           use-mamba: true
 
