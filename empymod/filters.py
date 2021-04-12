@@ -35,7 +35,7 @@ https://github.com/emsig/article-fdesign.
 .. _SEG-2012-003: https://software.seg.org/2012/0003
 
 """
-# Copyright 2016-2021 The empymod Developers.
+# Copyright 2016-2021 The EMSiG community.
 #
 # This file is part of empymod.
 #

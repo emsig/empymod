@@ -15,7 +15,7 @@ https://software.seg.org/disclaimer.txt. Please read the NOTICE-file in the
 root directory for more information regarding the involved licenses.
 
 """
-# Copyright 2016-2021 The empymod Developers.
+# Copyright 2016-2021 The EMSiG community.
 #
 # This file is part of empymod.
 #

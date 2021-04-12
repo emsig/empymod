@@ -40,7 +40,7 @@ The modelling routines make use of the following two core routines:
   :func:`fem`.
 
 """
-# Copyright 2016-2021 The empymod Developers.
+# Copyright 2016-2021 The EMSiG community.
 #
 # This file is part of empymod.
 #

@@ -13,9 +13,9 @@ setup(
     name='empymod',
     description=description,
     long_description=readme,
-    author='The empymod Developers',
-    author_email='dieter@werthmuller.org',
-    url='https://emsig.github.io',
+    author='The EMSiG community',
+    author_email='info@emsig.xyz',
+    url='https://emsig.xyz',
     license='Apache License V2.0',
     packages=['empymod', 'empymod.scripts'],
     classifiers=[

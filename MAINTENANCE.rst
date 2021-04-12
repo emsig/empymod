@@ -18,7 +18,7 @@ Making a release
   - `PyPi <https://pypi.org/project/empymod>`_ deployed;
   - `conda-forge <https://anaconda.org/conda-forge/empymod>`_ deployed;
   - `Zenodo <https://doi.org/10.5281/zenodo.593094>`_ minted a DOI;
-  - `empymod.rtfd.io <https://empymod.rtfd.io>`_ created a tagged version.
+  - `empymod.emsig.xyz <https://empymod.emsig.xyz>`_ created a tagged version.
 
 
 Useful things
@@ -55,10 +55,10 @@ CI
   <https://coveralls.io/github/emsig/empymod>`_
 - Code-quality on `Codacy
   <https://app.codacy.com/manual/prisae/empymod/dashboard>`_
-- Manual on `ReadTheDocs <https://empymod.readthedocs.io/en/latest>`_,
+- Manual on `ReadTheDocs <https://empymod.emsig.xyz/en/latest>`_,
   including the Gallery (examples run each time).
 - DOI minting on `Zenodo <https://doi.org/10.5281/zenodo.593094>`_
-- Benchmarks with `Airspeed Velocity <https://emsig.github.io/empymod-asv/>`_
+- Benchmarks with `Airspeed Velocity <https://emsig.xyz/empymod-asv/>`_
   (``asv``) [currently manually]
 - Automatically deploys if tagged:
 
