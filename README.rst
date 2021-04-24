@@ -8,11 +8,11 @@
 .. image:: https://readthedocs.org/projects/empymod/badge/?version=latest
    :target: https://empymod.emsig.xyz/en/latest
    :alt: Documentation Status
-.. image:: https://github.com/emsig/empymod/workflows/pytest/badge.svg?branch=master
+.. image:: https://github.com/emsig/empymod/workflows/pytest/badge.svg?branch=main
    :target: https://github.com/emsig/empymod/actions
    :alt: GitHub Actions
-.. image:: https://coveralls.io/repos/github/emsig/empymod/badge.svg?branch=master
-   :target: https://coveralls.io/github/emsig/empymod?branch=master
+.. image:: https://coveralls.io/repos/github/emsig/empymod/badge.svg?branch=main
+   :target: https://coveralls.io/github/emsig/empymod?branch=main
    :alt: Coveralls
 .. image:: https://app.codacy.com/project/badge/Grade/f2db5d9f0f3a4cd6b8457a6e1c47203a
    :target: https://www.codacy.com/gh/emsig/empymod/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emsig/empymod&amp;utm_campaign=Badge_Grade
