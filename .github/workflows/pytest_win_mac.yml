@@ -1,11 +1,11 @@
 name: pytest
 
-# Only build PRs, the master branch, and releases.
+# Only build PRs, the main branch, and releases.
 on:
   pull_request:
   push:
     branches:
-      - master
+      - main
   release:
     types:
       - published

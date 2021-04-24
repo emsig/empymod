@@ -1,24 +1,24 @@
 
 .. image:: https://raw.githubusercontent.com/emsig/empymod-logo/master/logo-empymod-plain-250px.png
-   :target: https://emsig.github.io
+   :target: https://emsig.xyz
    :alt: empymod logo
    
 ----
 
 .. image:: https://readthedocs.org/projects/empymod/badge/?version=latest
-   :target: https://empymod.readthedocs.io/en/latest
+   :target: https://empymod.emsig.xyz/en/latest
    :alt: Documentation Status
-.. image:: https://github.com/emsig/empymod/workflows/pytest/badge.svg?branch=master
+.. image:: https://github.com/emsig/empymod/workflows/pytest/badge.svg?branch=main
    :target: https://github.com/emsig/empymod/actions
    :alt: GitHub Actions
-.. image:: https://coveralls.io/repos/github/emsig/empymod/badge.svg?branch=master
-   :target: https://coveralls.io/github/emsig/empymod?branch=master
+.. image:: https://coveralls.io/repos/github/emsig/empymod/badge.svg?branch=main
+   :target: https://coveralls.io/github/emsig/empymod?branch=main
    :alt: Coveralls
 .. image:: https://app.codacy.com/project/badge/Grade/f2db5d9f0f3a4cd6b8457a6e1c47203a
    :target: https://www.codacy.com/gh/emsig/empymod/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emsig/empymod&amp;utm_campaign=Badge_Grade
    :alt: Codacy
 .. image:: https://img.shields.io/badge/benchmark-asv-blue.svg?style=flat
-   :target: https://emsig.github.io/empymod-asv/
+   :target: https://emsig.xyz/empymod-asv/
    :alt: Airspeed Velocity
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.593094.svg
    :target: https://doi.org/10.5281/zenodo.593094
@@ -42,10 +42,10 @@ More information
 For more information regarding installation, usage, contributing, bug reports,
 and much more, see
 
-- **Website**: https://emsig.github.io
-- **Documentation**: https://empymod.readthedocs.io
+- **Website**: https://emsig.xyz
+- **Documentation**: https://empymod.emsig.xyz
 - **Source Code**: https://github.com/emsig/empymod
-- **Examples**: https://empymod.readthedocs.io/en/stable/examples
+- **Examples**: https://empymod.emsig.xyz/en/stable/examples
 
 Features
 ========
@@ -130,7 +130,7 @@ or via **pip**:
 
 Required are Python version 3.6 or higher and the modules `SciPy` and `Numba`.
 Consult the installation notes in the `manual
-<https://empymod.readthedocs.io/en/stable/manual.html#installation>`_ for more
+<https://empymod.emsig.xyz/en/stable/manual.html#installation>`_ for more
 information regarding installation and requirements.
 
 
@@ -154,7 +154,7 @@ empymod would not exist.
 License information
 ===================
 
-Copyright 2016-2021 The empymod Developers.
+Copyright 2016-2021 The EMSiG community.
 
 Licensed under the Apache License, Version 2.0. See the LICENSE- and
 NOTICE-files or the documentation for more information.

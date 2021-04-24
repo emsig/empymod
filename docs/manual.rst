@@ -219,13 +219,13 @@ There is also a benchmark suite using *airspeed velocity*, located in the
 `emsig/empymod-asv <https://github.com/emsig/empymod-asv>`_-repository. The
 results of my machine can be found in the `emsig/empymod-bench
 <https://github.com/emsig/empymod-bench>`_, its rendered version at
-`emsig.github.io/empymod-asv <https://emsig.github.io/empymod-asv/>`_.
+`emsig.xyz/empymod-asv <https://emsig.xyz/empymod-asv/>`_.
 
 
 License
 -------
 
-Copyright 2016-2021 The empymod Developers.
+Copyright 2016-2021 The EMSiG community.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

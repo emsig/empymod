@@ -80,8 +80,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'empymod'
-copyright = f"2016-{time.strftime('%Y')}, The empymod Developers."
-author = 'The empymod Developers'
+copyright = f"2016-{time.strftime('%Y')}, The EMSiG community."
+author = 'The EMSiG community'
 
 # |version| and |today| tags (|release|-tag is not used).
 version = __version__
@@ -117,7 +117,7 @@ html_context = {
     'menu_links_name': 'Links',
     'menu_links': [
         ('<i class="fa fa-link fa-fw"></i> Website',
-         'https://emsig.github.io'),
+         'https://emsig.xyz'),
         ('<i class="fa fa-github fa-fw"></i> Source Code',
          'https://github.com/emsig/empymod'),
     ],

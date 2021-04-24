@@ -13,7 +13,7 @@ More information can be found in the following places:
 - The article about fdesign is in the repo
   https://github.com/emsig/article-fdesign
 - Example notebooks to design a filter can be found in the repo
-  https://empymod.readthedocs.io/en/stable/examples
+  https://empymod.emsig.xyz/en/stable/examples
 
 This filter designing tool uses the direct matrix inversion method as described
 in [Kong07]_ and is based on scripts by [Key12]_. The whole project of
@@ -217,7 +217,7 @@ Implemented Fourier transforms
 
 
 """
-# Copyright 2016-2021 The empymod Developers.
+# Copyright 2016-2021 The EMSiG community.
 #
 # This file is part of empymod.
 #
@@ -278,7 +278,7 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
     substantially.
 
     Example notebooks of its usage can be found in the documentation-gallery,
-    https://empymod.readthedocs.io/en/stable/examples
+    https://empymod.emsig.xyz/en/stable/examples
 
     Parameters
     ----------

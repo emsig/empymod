@@ -10,6 +10,15 @@ v2.0.x
 """"""
 
 
+latest
+------
+
+- Streamline some things with EMSiG/emg3d:
+
+  - New primary links https://emsig.xyz and https://empymod.emsig.xyz.
+  - Move copyright from «The empymod Developers» to «The EMSiG community».
+
+
 v2.0.6: Bugfix Windows int32/64
 -------------------------------
 

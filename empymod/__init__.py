@@ -7,7 +7,7 @@ frequencies (GPR). The calculation is carried out in the wavenumber-frequency
 domain, and various Hankel- and Fourier-transform methods are included to
 transform the responses into the space-frequency and space-time domains.
 """
-# Copyright 2016-2021 The empymod Developers.
+# Copyright 2016-2021 The EMSiG community.
 #
 # This file is part of empymod.
 #
