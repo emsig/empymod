@@ -9,7 +9,7 @@ particular EM method and survey layout can be tricky, as there are many more
 things involved than just computing the EM Greens function.
 
 **In this example we are going to compute a TEM response, in particular from
-the system** `WalkTEM <https://www.guidelinegeo.com/product/abem-walktem>`_,
+the system** `WalkTEM <https://www.guidelinegeo.com>`_,
 and compare it with data obtained from `AarhusInv
 <https://hgg.au.dk/software/aarhusinv>`_. However, you can use and adapt this
 example to model other TEM systems, such as skyTEM, SIROTEM, TEM-FAST, or any
