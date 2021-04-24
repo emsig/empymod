@@ -38,7 +38,7 @@ jobs:
           - python-version: 3.6
             name: plain
             os: ubuntu
-            conda: "'numba<0.50'"
+            conda: "'scipy<1.5' 'numba<0.50'"
             pip: ""
             test: ""
           - python-version: 3.7
