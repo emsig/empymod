@@ -21,6 +21,11 @@ References
    direct interpretation of geoelectrical resistivity measurements: Ph.D.
    Thesis, TU Delft; UUID: `88a568bb-ebee-4d7b-92df-6639b42da2b2
    <http://resolver.tudelft.nl/uuid:88a568bb-ebee-4d7b-92df-6639b42da2b2>`_.
+.. [GrKW21] Grayver, A., A. Kuvshinov, and D. Werthmüller, 2021, Time‐Domain
+   Modeling of Three‐Dimensional Earth's and Planetary Electromagnetic
+   Induction Effect in Ground and Satellite Observations: -- Journal of
+   Geophysical Research: Space Physics 126(3), e2020JA028672; DOI:
+   `10.1029/2020JA028672 <https://doi.org/10.1029/2020JA028672>`_.
 .. [GuSi97] Guptasarma, D., and B. Singh, 1997, New digital linear filters for
    Hankel J0 and J1 transforms: Geophysical Prospecting, 45, 745--762; DOI:
    `10.1046/j.1365-2478.1997.500292.x
