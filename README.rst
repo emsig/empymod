@@ -1,5 +1,5 @@
 
-.. image:: https://raw.githubusercontent.com/emsig/empymod-logo/master/logo-empymod-plain-250px.png
+.. image:: https://raw.github.com/emsig/logos/main/empymod/empymod-logo.png
    :target: https://emsig.xyz
    :alt: empymod logo
    
