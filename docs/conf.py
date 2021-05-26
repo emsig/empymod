@@ -7,18 +7,19 @@ from sphinx_gallery.sorting import ExplicitOrder, FileNameSortKey
 
 # Load extensions
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
+    # 'sphinx.ext.autodoc',
+    'numpydoc',
+    'sphinx.ext.intersphinx',
+    # 'sphinx.ext.autosummary',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
-    'sphinx.ext.intersphinx',
-    'numpydoc',
     'sphinx_gallery.gen_gallery',
     'sphinx_automodapi.automodapi',
 ]
 autosummary_generate = True
 add_module_names = True
+add_function_parentheses = False
 
 # Numpydoc settings
 numpydoc_show_class_members = False
@@ -70,7 +71,7 @@ intersphinx_mapping = {
 description = '3D EM modeller for 1D VTI media.'
 
 # The templates path.
-templates_path = ['_templates']
+# templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 source_suffix = '.rst'
@@ -80,8 +81,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'empymod'
-copyright = f"2016-{time.strftime('%Y')}, The EMSiG community."
-author = 'The EMSiG community'
+author = 'The emsig community'
+copyright = f'2016-{time.strftime("%Y")}, {author}'
 
 # |version| and |today| tags (|release|-tag is not used).
 version = __version__
@@ -96,40 +97,29 @@ exclude_patterns = ['_build', 'PermissionToRelicenseFilters.txt',
 pygments_style = 'friendly'
 
 # ==== 3. HTML settings ====
-html_theme = 'sphinx_rtd_theme'
-html_theme_options = {
-    'logo_only': True,
-    'display_version': True,
-    'prev_next_buttons_location': 'both',
-}
+html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
-html_logo = '_static/logo-empymod-plain.png'
+html_logo = '_static/empymod-logo.svg'
 html_favicon = '_static/favicon.ico'
-html_sidebars = {
-    '**': [
-        'about.html',
-        'navigation.html',
-        'searchbox.html',
-    ]
+
+html_theme_options = {
+    "github_url": "https://github.com/emsig/empymod",
+    "external_links": [
+        {"name": "emsig", "url": "https://emsig.xyz"},
+    ],
+    # "use_edit_page_button": True,
 }
 
 html_context = {
-    'menu_links_name': 'Links',
-    'menu_links': [
-        ('<i class="fa fa-link fa-fw"></i> Website',
-         'https://emsig.xyz'),
-        ('<i class="fa fa-github fa-fw"></i> Source Code',
-         'https://github.com/emsig/empymod'),
-    ],
+    "github_user": "emsig",
+    "github_repo": "empymod",
+    "github_version": "main",
+    "doc_path": "docs",
 }
 
-htmlhelp_basename = 'empymoddoc'
-
-
-# -- CSS fixes --
-def setup(app):
-    app.add_css_file("style.css")
-
+html_use_modindex = True
+html_file_suffix = '.html'
+htmlhelp_basename = 'emg3d'
 
 # ==== 4. linkcheck ====
 
