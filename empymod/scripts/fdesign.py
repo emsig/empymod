@@ -1,7 +1,4 @@
 r"""
-:mod:`empymod.scripts.fdesign` -- Digital Linear Filter (DLF) design
-====================================================================
-
 The add-on fdesign can be used to design digital linear filters for the Hankel
 or Fourier transform, or for any linear transform ([Ghos70]_). For this
 included or provided theoretical transform pairs can be used. Alternatively,
@@ -217,7 +214,7 @@ Implemented Fourier transforms
 
 
 """
-# Copyright 2016-2021 The EMSiG community.
+# Copyright 2016-2021 The emsig community.
 #
 # This file is part of empymod.
 #

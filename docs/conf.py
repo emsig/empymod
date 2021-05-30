@@ -9,6 +9,7 @@ from sphinx_gallery.sorting import ExplicitOrder, FileNameSortKey
 extensions = [
     # 'sphinx.ext.autodoc',
     'numpydoc',
+    'sphinx_panels',
     'sphinx.ext.intersphinx',
     # 'sphinx.ext.autosummary',
     'sphinx.ext.mathjax',
@@ -16,7 +17,11 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx_gallery.gen_gallery',
     'sphinx_automodapi.automodapi',
+    'matplotlib.sphinxext.plot_directive',
+    'IPython.sphinxext.ipython_console_highlighting',
+    'IPython.sphinxext.ipython_directive',
 ]
+panels_add_bootstrap_css = False
 autosummary_generate = True
 add_module_names = True
 add_function_parentheses = False
@@ -25,6 +30,8 @@ add_function_parentheses = False
 numpydoc_show_class_members = False
 # numfig = True
 # numfig_format = {'figure': 'Figure %s:'}
+# Make numpydoc to generate plots for example sections
+numpydoc_use_plots = True
 
 # Todo settings
 todo_include_todos = True
@@ -32,7 +39,7 @@ todo_include_todos = True
 # Sphinx gallery configuration
 sphinx_gallery_conf = {
     'examples_dirs': '../examples',
-    'gallery_dirs': 'examples',
+    'gallery_dirs': 'gallery',
     'subsection_order': ExplicitOrder([
         '../examples/frequency_domain',
         '../examples/time_domain',
@@ -119,7 +126,12 @@ html_context = {
 
 html_use_modindex = True
 html_file_suffix = '.html'
-htmlhelp_basename = 'emg3d'
+htmlhelp_basename = 'empymod'
+html_css_files = [
+    "style.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/" +
+    "css/font-awesome.min.css"
+]
 
 # ==== 4. linkcheck ====
 

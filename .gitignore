@@ -3,8 +3,9 @@ __pycache__/
 
 # Sphinx
 docs/_build/
-docs/examples/
-docs/api/
+docs/api/empymod*
+docs/savefig/
+docs/gallery/
 
 # Pytest and coverage related
 htmlcov
@@ -18,4 +19,7 @@ examples/educational/filters/
 empymod/version.py
 
 # Build related
+.eggs/
+build/
+dist/
 empymod.egg-info/

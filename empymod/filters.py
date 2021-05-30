@@ -1,8 +1,4 @@
-r"""
-
-:mod:`empymod.filters` -- Digital Linear Filters
-================================================
-
+"""
 Filters for the *Digital Linear Filter* (DLF) method for the Hankel
 [Ghos70]_) and the Fourier ([Ande75]_) transforms.
 
@@ -35,7 +31,7 @@ https://github.com/emsig/article-fdesign.
 .. _SEG-2012-003: https://software.seg.org/2012/0003
 
 """
-# Copyright 2016-2021 The EMSiG community.
+# Copyright 2016-2021 The emsig community.
 #
 # This file is part of empymod.
 #

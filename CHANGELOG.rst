@@ -10,13 +10,17 @@ v2.0.x
 """"""
 
 
-latest
-------
+v2.0.7: Theme change & streamline
+---------------------------------
 
-- Streamline some things with EMSiG/emg3d:
+**2021-05-30**
 
+- Streamline some things with emsig/emg3d:
+
+  - Change theme from rtd to pydata.
   - New primary links https://emsig.xyz and https://empymod.emsig.xyz.
-  - Move copyright from «The empymod Developers» to «The EMSiG community».
+  - Move copyright from «The empymod Developers» to «The emsig community».
+  - Slight rework of some parts of the docs.
 
 
 v2.0.6: Bugfix Windows int32/64

@@ -1,0 +1,33 @@
+/* "emsig"-colours
+ blue         : #447fc1
+ blue-lighter : #61a2d8
+ blue-darker  : #285985
+ red          : #ef413d
+*/
+
+/* Button colours */
+
+.btn-info {
+  font-weight: bold;
+  background: #447fc1;
+  border-color: #447fc1;
+}
+
+.btn-info:hover {
+  background: #ef413d;
+  border-color: #ef413d;
+}
+
+/* Card headers */
+.card-header {
+  font-size: var(--pst-font-size-h5);
+  font-weight: bold;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+/* fa stuff */
+.fa {
+  margin: 0 1rem 0 0;
+  color: #ef413d;
+}

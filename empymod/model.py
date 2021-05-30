@@ -1,8 +1,4 @@
-r"""
-
-:mod:`empymod.model` -- Model EM-responses
-==========================================
-
+"""
 EM-modelling routines. The implemented routines might not be the fastest
 solution to your specific problem. Use these routines as template to create
 your own, problem-specific modelling routine!
@@ -40,7 +36,7 @@ The modelling routines make use of the following two core routines:
   :func:`fem`.
 
 """
-# Copyright 2016-2021 The EMSiG community.
+# Copyright 2016-2021 The emsig community.
 #
 # This file is part of empymod.
 #

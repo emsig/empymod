@@ -1,18 +1,18 @@
 Credits
 #######
 
-This project was initiated and is still mainly maintained by **Dieter
-Werthmüller**. However, it is a community effort as many people helped to
-improve it over time. The copyright is therefore attributed to «The empymod
-Developers», which includes everyone involved in the project.
+This project was started by **Dieter Werthmüller** at
+`The Mexican Institute of Petroleum IMP <https://www.gob.mx/imp>`_
+(Instituto Mexicano del Petróleo), funded (till 01/2017) by
+`The Mexican National Council of Science and Technology
+<https://www.conacyt.gob.mx>`_ (Consejo Nacional de Ciencia y Tecnología).
+Today it is a community effort, and many people helped to improve it over time.
 
-Code contributors:
+For a list of code contributors see
+https://github.com/emsig/empymod/graphs/contributors.
 
-- `Dieter Werthmüller <https://github.com/prisae>`_
-
-
-There are various other ways how people have contributed. In the following some
-particular credits.
+There are various other ways than code how people have contributed. In the
+following some particular credits.
 
 Special thanks to
 
@@ -45,12 +45,3 @@ certainly incomplete list (get in touch if you think you should appear here):
 - Peter van der Sman
 - `Ralph-Uwe Börner <https://github.com/ruboerner>`_
 - `Leon Foks <https://github.com/leonfoks>`_
-
-
-.. note::
-
-    This software was initially (till 01/2017) developed with funding from *The
-    Mexican National Council of Science and Technology* (*Consejo Nacional de
-    Ciencia y Tecnología*, https://www.conacyt.gob.mx), carried out at *The
-    Mexican Institute of Petroleum IMP* (*Instituto Mexicano del Petróleo*,
-    https://www.gob.mx/imp).
