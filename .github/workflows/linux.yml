@@ -1,4 +1,4 @@
-name: pytest
+name: linux
 
 # Only build PRs, the main branch, and releases.
 on:
@@ -79,9 +79,9 @@ jobs:
 
     steps:
 
-      # Cancel any previous run of the test job; [pin v0.6.0]
+      # Cancel any previous run of the test job; [pin v0.8.0 (2021-02-13)]
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@ce177499ccf9fd2aded3b0426c97e5434c2e8a73
+        uses: styfle/cancel-workflow-action@3d86a7cc43670094ac248017207be0295edbc31d
         with:
           access_token: ${{ github.token }}
 
@@ -103,8 +103,8 @@ jobs:
         run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup miniconda
-        # [pin master Feb 8, 2001]
-        uses: conda-incubator/setup-miniconda@77b16ed746da28724c61e1f1ad23395a4b695ef5
+        # [pin v2.1.1 (2021-04-01)]
+        uses: conda-incubator/setup-miniconda@35d1405e78aa3f784fe3ce9a2eb378d5eeb62169
         with:
           auto-update-conda: true
           miniconda-version: "latest"
@@ -190,7 +190,7 @@ jobs:
           # Change setuptools-scm local_scheme to "no-local-version" so the
           # local part of the version isn't included, making the version string
           # compatible with Test PyPI.
-          sed --in-place "s/'root'/'local_scheme':'no-local-version','root'/g" setup.py
+          sed --in-place 's/"root"/"local_scheme":"no-local-version","root"/g' setup.py
 
       - name: Build source and wheel distributions
         run: |
