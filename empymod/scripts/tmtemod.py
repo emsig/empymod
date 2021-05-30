@@ -1,7 +1,4 @@
 r"""
-:mod:`empymod.scripts.tmtemod` -- Calculate up- and down-going TM and TE modes
-==============================================================================
-
 This add-on for empymod adjusts [HuTS15]_ for TM/TE-split. The development was
 initiated by the development of
 https://github.com/emsig/csem-ziolkowski-and-slob ([ZiSl19]_).
@@ -331,7 +328,7 @@ can use
 
 
 """
-# Copyright 2016-2021 The EMSiG community.
+# Copyright 2016-2021 The emsig community.
 #
 # This file is part of empymod.
 #

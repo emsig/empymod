@@ -1,5 +1,7 @@
-Tips and tricks
-###############
+.. _info-tips-tricks:
+
+Info, tips & tricks
+###################
 
 There is the usual trade-off between speed, memory, and accuracy. Very
 generally speaking we can say that the *DLF* is faster than *QWE*, but *QWE* is
@@ -127,7 +129,7 @@ the parameter ``htarg`` and ``ftarg``.
 For a graphical explanation of the differences between standard DLF, lagged
 convolution DLF, and splined DLF for the Hankel and the Fourier transforms see
 the example
-:ref:`sphx_glr_examples_educational_dlf_standard_lagged_splined.py`.
+:ref:`sphx_glr_gallery_educational_dlf_standard_lagged_splined.py`.
 
 
 Looping
@@ -177,8 +179,7 @@ times where the signal should be zero. To avoid the issue simply set the
 relative electric permittivity (``epermH``, ``epermV``) of the air to zero.
 This trick obviously uses the diffusive approximation for the air-layer, it
 therefore will not work for very high frequencies (e.g., GPR computations).
-An example is given in
-:ref:`sphx_glr_examples_time_domain_note_for_land_csem.py`.
+An example is given in :ref:`sphx_glr_gallery_tdomain_note_for_land_csem.py`.
 
 This trick works fine for all horizontal components, but not so much for the
 vertical component. But then it is not feasible to have a vertical source or
@@ -377,7 +378,7 @@ can adjust it to your model and survey layout.
 The result for x-directed source and receiver (`ab=11`) is shown in the
 following figure:
 
-.. figure:: _static/figures/ZeroOffset.png
+.. figure:: ../_static/figures/ZeroOffset.png
    :scale: 100 %
    :align: center
    :alt: Zero offset check for ab=11.

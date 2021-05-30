@@ -1,8 +1,4 @@
-r"""
-
-:mod:`empymod.transform` -- Hankel and Fourier Transforms
-=========================================================
-
+"""
 Methods to carry out the required Hankel transform from wavenumber to
 frequency domain and Fourier transform from frequency to time domain.
 
@@ -15,7 +11,7 @@ https://software.seg.org/disclaimer.txt. Please read the NOTICE-file in the
 root directory for more information regarding the involved licenses.
 
 """
-# Copyright 2016-2021 The EMSiG community.
+# Copyright 2016-2021 The emsig community.
 #
 # This file is part of empymod.
 #

@@ -1,8 +1,4 @@
-r"""
-
-:mod:`empymod.utils` -- Utilites
-================================
-
+"""
 Utilities for :mod:`empymod.model` such as checking input parameters.
 
 This module consists of four groups of functions:
@@ -12,7 +8,7 @@ This module consists of four groups of functions:
    3. Internal utilities
 
 """
-# Copyright 2016-2021 The EMSiG community.
+# Copyright 2016-2021 The emsig community.
 #
 # This file is part of empymod.
 #
@@ -2013,7 +2009,7 @@ class Report(ScoobyReport):
     --------
     >>> import pytest
     >>> import dateutil
-    >>> from emg3d import Report
+    >>> from empymod import Report
     >>> Report()                            # Default values
     >>> Report(pytest)                      # Provide additional package
     >>> Report([pytest, dateutil], ncol=5)  # Set nr of columns

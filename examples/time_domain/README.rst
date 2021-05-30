@@ -1,4 +1,4 @@
 Time Domain
 ===========
 
-Basic examples in the time domain.
+Basic examples of empymod in the time domain.

@@ -11,13 +11,16 @@ setuptools_scm
 # FOR DOCUMENTATION
 sphinx > 3
 numpydoc >= 0.9
+sphinx_panels
 sphinx_numfig
 sphinx_gallery
 memory_profiler
-sphinx_rtd_theme >= 0.5.0
+pydata_sphinx_theme
 sphinx_automodapi
+ipykernel
 
 # FOR TESTING
+asv
 pytest
 coveralls
 pytest_cov

@@ -1,32 +1,33 @@
-/* Customized styles */
+/* "emsig"-colours
+ blue         : #447fc1
+ blue-lighter : #61a2d8
+ blue-darker  : #285985
+ red          : #ef413d
+*/
 
-/* Sidebar header background */
-.wy-side-nav-search, .wy-nav-top {
-  background: #996666;
-}
+/* Button colours */
 
-/* Sidebar header text */
-.wy-side-nav-search > div.version {
-  color: #ffffff;
-}
-
-/* Navigation headings */
-.wy-menu .caption-text {
-  color: #cc3333;
+.btn-info {
   font-weight: bold;
-
+  background: #447fc1;
+  border-color: #447fc1;
 }
 
-/* To fix equation numbering in rtd theme. */
-span.eqno {
-  margin-left: 5px;
-  float: right;
-}
-span.eqno a {
-  display: none;
+.btn-info:hover {
+  background: #ef413d;
+  border-color: #ef413d;
 }
 
-/* Don't let captions be italic in Sphinx-Gallery */
-.rst-content div.figure p.caption {
-  font-style: normal;
+/* Card headers */
+.card-header {
+  font-size: var(--pst-font-size-h5);
+  font-weight: bold;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+/* fa stuff */
+.fa {
+  margin: 0 1rem 0 0;
+  color: #ef413d;
 }

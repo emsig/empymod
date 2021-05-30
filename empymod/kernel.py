@@ -1,8 +1,4 @@
-r"""
-
-:mod:`empymod.kernel` -- Kernel calculation
-===========================================
-
+"""
 Kernel of empymod, calculates the wavenumber-domain electromagnetic
 response. Plus analytical full- and half-space solutions.
 
@@ -16,7 +12,7 @@ https://software.seg.org/disclaimer.txt.  Please read the NOTICE-file in the
 root directory for more information regarding the involved licenses.
 
 """
-# Copyright 2016-2021 The EMSiG community.
+# Copyright 2016-2021 The emsig community.
 #
 # This file is part of empymod.
 #

@@ -1,13 +1,4 @@
-"""
-Electromagnetic modeller to model electric or magnetic responses due to a
-three-dimensional electric or magnetic source in a layered-earth model with
-vertical transverse isotropic (VTI) resistivity, VTI electric permittivity, and
-VTI magnetic permeability, from very low frequencies (DC) to very high
-frequencies (GPR). The calculation is carried out in the wavenumber-frequency
-domain, and various Hankel- and Fourier-transform methods are included to
-transform the responses into the space-frequency and space-time domains.
-"""
-# Copyright 2016-2021 The EMSiG community.
+# Copyright 2016-2021 The emsig community.
 #
 # This file is part of empymod.
 #
@@ -37,8 +28,8 @@ from empymod.model import bipole, dipole, loop
 from empymod.utils import EMArray, set_minimum, get_minimum, Report
 
 # For top-namespace
-from empymod.scripts import fdesign, tmtemod  # noqa
-from empymod.model import analytical, gpr, dipole_k, fem, tem  # noqa
+from empymod.scripts import fdesign, tmtemod
+from empymod.model import analytical, gpr, dipole_k, fem, tem
 
 __all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts',
            'bipole', 'dipole', 'loop', 'EMArray', 'set_minimum', 'get_minimum',
