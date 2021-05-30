@@ -71,8 +71,8 @@ Let's plot the resulting responses:
      ...: ax.set_xlabel('Offset (km)');
      ...: ax.set_ylabel('Electric field (V/m)');
 
-A good starting point is the :ref:`sphx_glr_gallery`-gallery or [Wert17b]_,
-and more detailed information can be found in [Wert17]_. The description of all
+A good starting point is the :ref:`empymod_gallery`-gallery or [Wert17b]_, and
+more detailed information can be found in [Wert17]_. The description of all
 parameters can be found in the API documentation for
 :func:`empymod.model.bipole`.
 
@@ -104,8 +104,9 @@ The used coordinate system is either a
 - Right-Handed System (RHS), where Easting is the :math:`x`-direction, Northing
   the :math:`y`-direction, and positive :math:`z` is pointing upwards.
 
-Have a look at the example :ref:`sphx_glr_gallery_coordinate_system.py` for
-further explanations.
+Have a look at the example
+:ref:`sphx_glr_gallery_educational_coordinate_system.py` for further
+explanations.
 
 
 Theory

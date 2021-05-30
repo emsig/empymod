@@ -179,8 +179,7 @@ times where the signal should be zero. To avoid the issue simply set the
 relative electric permittivity (``epermH``, ``epermV``) of the air to zero.
 This trick obviously uses the diffusive approximation for the air-layer, it
 therefore will not work for very high frequencies (e.g., GPR computations).
-An example is given in
-:ref:`sphx_glr_gallery_time_domain_note_for_land_csem.py`.
+An example is given in :ref:`sphx_glr_gallery_tdomain_note_for_land_csem.py`.
 
 This trick works fine for all horizontal components, but not so much for the
 vertical component. But then it is not feasible to have a vertical source or

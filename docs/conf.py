@@ -1,7 +1,7 @@
 import time
 import warnings
 from empymod import __version__
-from sphinx_gallery.sorting import ExplicitOrder, FileNameSortKey
+from sphinx_gallery.sorting import FileNameSortKey
 
 # ==== 1. Extensions  ====
 
@@ -38,17 +38,20 @@ todo_include_todos = True
 
 # Sphinx gallery configuration
 sphinx_gallery_conf = {
-    'examples_dirs': '../examples',
-    'gallery_dirs': 'gallery',
-    'subsection_order': ExplicitOrder([
+    'examples_dirs': [
         '../examples/frequency_domain',
         '../examples/time_domain',
-        '../examples/comparisons',
-        '../examples/add_ons',
-        '../examples/reproducing',
         '../examples/educational',
+        '../examples/reproducing',
         '../examples/published',
-        ]),
+        ],
+    'gallery_dirs': [
+        'gallery/fdomain',
+        'gallery/tdomain',
+        'gallery/educational',
+        'gallery/reproducing',
+        'gallery/published',
+        ],
     'capture_repr': ('_repr_html_', '__repr__'),
     # Patter to search for example files
     "filename_pattern": r"\.py",

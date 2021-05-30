@@ -9,7 +9,7 @@ API reference
 
 ----
 
-.. module:: emg3d
+.. module:: empymod
 
 .. toctree::
    :maxdepth: 2

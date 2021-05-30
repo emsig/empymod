@@ -10,12 +10,12 @@ v2.0.x
 """"""
 
 
-v2.0.7: Theme change & streamline
+v2.1.0: Theme change & streamline
 ---------------------------------
 
 **2021-05-30**
 
-- Streamline some things with emsig/emg3d:
+- Streamline some things with emsig and emg3d:
 
   - Change theme from rtd to pydata.
   - New primary links https://emsig.xyz and https://empymod.emsig.xyz.

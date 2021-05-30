@@ -323,64 +323,61 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     Examples
     --------
-    >>> import empymod
-    >>> import numpy as np
-    >>> # x-directed bipole source: x0, x1, y0, y1, z0, z1
-    >>> src = [-50, 50, 0, 0, 100, 100]
-    >>> # x-directed dipole receiver-array: x, y, z, azimuth, dip
-    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 0]
-    >>> # layer boundaries
-    >>> depth = [0, 300, 1000, 1050]
-    >>> # layer resistivities
-    >>> res = [1e20, .3, 1, 50, 1]
-    >>> # Frequency
-    >>> freq = 1
-    >>> # Calculate electric field due to an electric source at 1 Hz.
-    >>> # [msrc = mrec = False (default)]
-    >>> EMfield = empymod.bipole(src, rec, depth, res, freq, verb=4)
-    ~
-    :: empymod START  ::  v2.0.0
-    ~
-       depth       [m] :  0 300 1000 1050
-       res     [Ohm.m] :  1E+20 0.3 1 50 1
-       aniso       [-] :  1 1 1 1 1
-       epermH      [-] :  1 1 1 1 1
-       epermV      [-] :  1 1 1 1 1
-       mpermH      [-] :  1 1 1 1 1
-       mpermV      [-] :  1 1 1 1 1
-       direct field    :  Comp. in wavenumber domain
-       frequency  [Hz] :  1
-       Hankel          :  DLF (Fast Hankel Transform)
-         > Filter      :  Key 201 (2009)
-         > DLF type    :  Standard
-       Loop over       :  None (all vectorized)
-       Source(s)       :  1 bipole(s)
-         > intpts      :  1 (as dipole)
-         > length  [m] :  100
-         > strength[A] :  0
-         > x_c     [m] :  0
-         > y_c     [m] :  0
-         > z_c     [m] :  100
-         > azimuth [°] :  0
-         > dip     [°] :  0
-       Receiver(s)     :  10 dipole(s)
-         > x       [m] :  500 - 5000 : 10  [min-max; #]
-                       :  500 1000 1500 2000 2500 3000 3500 4000 4500 5000
-         > y       [m] :  0 - 0 : 10  [min-max; #]
-                       :  0 0 0 0 0 0 0 0 0 0
-         > z       [m] :  200
-         > azimuth [°] :  0
-         > dip     [°] :  0
-       Required ab's   :  11
-    ~
-    :: empymod END; runtime = 0:00:00.005536 :: 1 kernel call(s)
-    ~
-    >>> print(EMfield)
-    [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
-      -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
-       1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j
-       1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j
-       6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
+
+    .. ipython::
+
+       In [1]: import empymod
+          ...: import numpy as np
+          ...: # x-directed bipole source: x0, x1, y0, y1, z0, z1
+          ...: src = [-50, 50, 0, 0, 100, 100]
+          ...: # x-directed dipole receiver-array: x, y, z, azimuth, dip
+          ...: rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 0]
+          ...: # layer boundaries
+          ...: depth = [0, 300, 1000, 1050]
+          ...: # layer resistivities
+          ...: res = [1e20, .3, 1, 50, 1]
+          ...: # Frequency
+          ...: freq = 1
+          ...: # Calculate electric field due to an electric source at 1 Hz.
+          ...: # [msrc = mrec = False (default)]
+          ...: EMfield = empymod.bipole(src, rec, depth, res, freq, verb=3)
+       Out[1]:
+          ...: :: empymod START  ::  v2.0.0
+          ...:
+          ...:    depth       [m] :  0 300 1000 1050
+          ...:    res     [Ohm.m] :  1E+20 0.3 1 50 1
+          ...:    aniso       [-] :  1 1 1 1 1
+          ...:    epermH      [-] :  1 1 1 1 1
+          ...:    epermV      [-] :  1 1 1 1 1
+          ...:    mpermH      [-] :  1 1 1 1 1
+          ...:    mpermV      [-] :  1 1 1 1 1
+          ...:    direct field    :  Comp. in wavenumber domain
+          ...:    frequency  [Hz] :  1
+          ...:    Hankel          :  DLF (Fast Hankel Transform)
+          ...:      > Filter      :  Key 201 (2009)
+          ...:      > DLF type    :  Standard
+          ...:    Loop over       :  None (all vectorized)
+          ...:    Source(s)       :  1 bipole(s)
+          ...:      > intpts      :  1 (as dipole)
+          ...:      > length  [m] :  100
+          ...:      > strength[A] :  0
+          ...:      > x_c     [m] :  0
+          ...:      > y_c     [m] :  0
+          ...:      > z_c     [m] :  100
+          ...:      > azimuth [°] :  0
+          ...:      > dip     [°] :  0
+          ...:    Receiver(s)     :  10 dipole(s)
+          ...:      > x       [m] :  500 - 5000 : 10  [min-max; #]
+          ...:      > y       [m] :  0 - 0 : 10  [min-max; #]
+          ...:      > z       [m] :  200
+          ...:      > azimuth [°] :  0
+          ...:      > dip     [°] :  0
+          ...:    Required ab's   :  11
+          ...:
+          ...: :: empymod END; runtime = 0:00:00.005536 :: 1 kernel call(s)
+
+       In [2]: EMfield[0]
+       Out[2]: (1.6880934577857306e-10-3.083031298956568e-10j)
 
     """
     # Get kwargs with defaults.
@@ -689,19 +686,19 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     Examples
     --------
-    >>> import empymod
-    >>> import numpy as np
-    >>> src = [0, 0, 100]
-    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200]
-    >>> depth = [0, 300, 1000, 1050]
-    >>> res = [1e20, .3, 1, 50, 1]
-    >>> EMfield = empymod.dipole(src, rec, depth, res, freqtime=1, verb=0)
-    >>> print(EMfield)
-    [  1.68809346e-10 -3.08303130e-10j  -8.77189179e-12 -3.76920235e-11j
-      -3.46654704e-12 -4.87133683e-12j  -3.60159726e-13 -1.12434417e-12j
-       1.87807271e-13 -6.21669759e-13j   1.97200208e-13 -4.38210489e-13j
-       1.44134842e-13 -3.17505260e-13j   9.92770406e-14 -2.33950871e-13j
-       6.75287598e-14 -1.74922886e-13j   4.62724887e-14 -1.32266600e-13j]
+
+    .. ipython::
+
+       In [1]: import empymod
+          ...: import numpy as np
+          ...: src = [0, 0, 100]
+          ...: rec = [np.arange(1, 11)*500, np.zeros(10), 200]
+          ...: depth = [0, 300, 1000, 1050]
+          ...: res = [1e20, .3, 1, 50, 1]
+          ...: EMfield = empymod.dipole(
+          ...:         src, rec, depth, res, freqtime=1, verb=1)
+          ...: EMfield[0]
+       Out[1]: (1.6880934577857306e-10-3.083031298956568e-10j)
 
     """
     # Get kwargs with defaults.
@@ -946,61 +943,57 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     Examples
     --------
-    >>> import empymod
-    >>> import numpy as np
-    >>> # z-directed loop source: x, y, z, azimuth, dip
-    >>> src = [0, 0, 0, 0, 90]
-    >>> # z-directed magnetic dipole receiver-array: x, y, z, azimuth, dip
-    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 90]
-    >>> # layer boundaries
-    >>> depth = [0, 300, 500]
-    >>> # layer resistivities
-    >>> res = [2e14, 10, 500, 10]
-    >>> # Frequency
-    >>> freq = 1
-    >>> # Calculate magnetic field due to a loop source at 1 Hz.
-    >>> # [mrec = True (default)]
-    >>> EMfield = empymod.loop(src, rec, depth, res, freq, verb=4)
-    ~
-    :: empymod START  ::  w2.0.0
-    ~
-       depth       [m] :  0 300 500
-       res     [Ohm.m] :  2E+14 10 500 10
-       aniso       [-] :  1 1 1 1
-       epermH      [-] :  1 1 1 1
-       epermV      [-] :  1 1 1 1
-       mpermH      [-] :  1 1 1 1
-       mpermV      [-] :  1 1 1 1
-       direct field    :  Comp. in wavenumber domain
-       frequency  [Hz] :  1
-       Hankel          :  DLF (Fast Hankel Transform)
-         > Filter      :  Key 201 (2009)
-         > DLF type    :  Standard
-       Loop over       :  None (all vectorized)
-       Source(s)       :  1 dipole(s)
-         > x       [m] :  0
-         > y       [m] :  0
-         > z       [m] :  0
-         > azimuth [°] :  0
-         > dip     [°] :  90
-       Receiver(s)     :  10 dipole(s)
-         > x       [m] :  500 - 5000 : 10  [min-max; #]
-                       :  500 1000 1500 2000 2500 3000 3500 4000 4500 5000
-         > y       [m] :  0 - 0 : 10  [min-max; #]
-                       :  0 0 0 0 0 0 0 0 0 0
-         > z       [m] :  200
-         > azimuth [°] :  0
-         > dip     [°] :  90
-       Required ab's   :  33
-    ~
-    :: empymod END; runtime = 0:00:00.005025 :: 1 kernel call(s)
 
-    >>> print(EMfield)
-    [ -3.05449848e-10 -2.00374185e-11j  -7.12528991e-11 -5.37083268e-12j
-      -2.52076501e-11 -1.62732412e-12j  -1.18412295e-11 -8.99570998e-14j
-      -6.44054097e-12 +5.61150066e-13j  -3.77109625e-12 +7.89022722e-13j
-      -2.28484774e-12 +8.08897623e-13j  -1.40021365e-12 +7.32151174e-13j
-      -8.55487532e-13 +6.18402706e-13j  -5.15642408e-13 +4.99091919e-13j]
+    .. ipython::
+
+       In [1]: import empymod
+          ...: import numpy as np
+          ...: # z-directed loop source: x, y, z, azimuth, dip
+          ...: src = [0, 0, 0, 0, 90]
+          ...: # z-directed magn. dipole receiver-array: x, y, z, azimuth, dip
+          ...: rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 90]
+          ...: # layer boundaries
+          ...: depth = [0, 300, 500]
+          ...: # layer resistivities
+          ...: res = [2e14, 10, 500, 10]
+          ...: # Frequency
+          ...: freq = 1
+          ...: # Calculate magnetic field due to a loop source at 1 Hz.
+          ...: # [mrec = True (default)]
+          ...: EMfield = empymod.loop(src, rec, depth, res, freq, verb=3)
+       Out[1]:
+          ...: :: empymod START  ::  w2.0.0
+          ...:    depth       [m] :  0 300 500
+          ...:    res     [Ohm.m] :  2E+14 10 500 10
+          ...:    aniso       [-] :  1 1 1 1
+          ...:    epermH      [-] :  1 1 1 1
+          ...:    epermV      [-] :  1 1 1 1
+          ...:    mpermH      [-] :  1 1 1 1
+          ...:    mpermV      [-] :  1 1 1 1
+          ...:    direct field    :  Comp. in wavenumber domain
+          ...:    frequency  [Hz] :  1
+          ...:    Hankel          :  DLF (Fast Hankel Transform)
+          ...:      > Filter      :  Key 201 (2009)
+          ...:      > DLF type    :  Standard
+          ...:    Loop over       :  None (all vectorized)
+          ...:    Source(s)       :  1 dipole(s)
+          ...:      > x       [m] :  0
+          ...:      > y       [m] :  0
+          ...:      > z       [m] :  0
+          ...:      > azimuth [°] :  0
+          ...:      > dip     [°] :  90
+          ...:    Receiver(s)     :  10 dipole(s)
+          ...:      > x       [m] :  500 - 5000 : 10  [min-max; #]
+          ...:      > y       [m] :  0 - 0 : 10  [min-max; #]
+          ...:      > z       [m] :  200
+          ...:      > azimuth [°] :  0
+          ...:      > dip     [°] :  90
+          ...:    Required ab's   :  33
+          ...:
+          ...: :: empymod END; runtime = 0:00:00.005025 :: 1 kernel call(s)
+
+       In [2]: EMfield[0]
+       Out[2]: (-3.054498478653836e-10-2.0037418529368025e-11j)
 
     """
     # Get kwargs with defaults.
@@ -1331,18 +1324,18 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     Examples
     --------
-    >>> import empymod
-    >>> import numpy as np
-    >>> src = [0, 0, 0]
-    >>> rec = [np.arange(1, 11)*500, np.zeros(10), 200]
-    >>> res = 50
-    >>> EMfield = empymod.analytical(src, rec, res, freqtime=1, verb=0)
-    >>> print(EMfield)
-    [  4.03091405e-08 -9.69163818e-10j   6.97630362e-09 -4.88342150e-10j
-       2.15205979e-09 -2.97489809e-10j   8.90394459e-10 -1.99313433e-10j
-       4.32915802e-10 -1.40741644e-10j   2.31674165e-10 -1.02579391e-10j
-       1.31469130e-10 -7.62770461e-11j   7.72342470e-11 -5.74534125e-11j
-       4.61480481e-11 -4.36275540e-11j   2.76174038e-11 -3.32860932e-11j]
+
+    .. ipython::
+
+       In [1]: import empymod
+          ...: import numpy as np
+          ...: src = [0, 0, 0]
+          ...: rec = [np.arange(1, 11)*500, np.zeros(10), 200]
+          ...: res = 50
+          ...: EMfield = empymod.analytical(src, rec, res, freqtime=1, verb=0)
+          ...: EMfield[0]
+       Out[1]: (4.030914049602561e-08-9.691638183648923e-10j)
+
     """
     # Get kwargs with defaults.
     verb = get_kwargs(['verb', ], [2, ], kwargs)[0]
@@ -1630,27 +1623,25 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
     Examples
     --------
-    >>> import empymod
-    >>> import numpy as np
-    >>> src = [0, 0, 100]
-    >>> rec = [5000, 0, 200]
-    >>> depth = [0, 300, 1000, 1050]
-    >>> res = [1e20, .3, 1, 50, 1]
-    >>> freq = 1
-    >>> wavenr = np.logspace(-3.7, -3.6, 10)
-    >>> PJ0, PJ1 = empymod.dipole_k(src, rec, depth, res, freq, wavenr, verb=0)
-    >>> print(PJ0)
-    [ -1.02638329e-08 +4.91531529e-09j  -1.05289724e-08 +5.04222413e-09j
-      -1.08009148e-08 +5.17238608e-09j  -1.10798310e-08 +5.30588284e-09j
-      -1.13658957e-08 +5.44279805e-09j  -1.16592877e-08 +5.58321732e-09j
-      -1.19601897e-08 +5.72722830e-09j  -1.22687889e-08 +5.87492067e-09j
-      -1.25852765e-08 +6.02638626e-09j  -1.29098481e-08 +6.18171904e-09j]
-    >>> print(PJ1)
-    [  1.79483705e-10 -6.59235332e-10j   1.88672497e-10 -6.93749344e-10j
-       1.98325814e-10 -7.30068377e-10j   2.08466693e-10 -7.68286748e-10j
-       2.19119282e-10 -8.08503709e-10j   2.30308887e-10 -8.50823701e-10j
-       2.42062030e-10 -8.95356636e-10j   2.54406501e-10 -9.42218177e-10j
-       2.67371420e-10 -9.91530051e-10j   2.80987292e-10 -1.04342036e-09j]
+
+    .. ipython::
+
+       In [1]: import empymod
+          ...: import numpy as np
+          ...: src = [0, 0, 100]
+          ...: rec = [5000, 0, 200]
+          ...: depth = [0, 300, 1000, 1050]
+          ...: res = [1e20, .3, 1, 50, 1]
+          ...: freq = 1
+          ...: wavenr = np.logspace(-3.7, -3.6, 10)
+          ...: PJ0, PJ1 = empymod.dipole_k(
+          ...:         src, rec, depth, res, freq, wavenr, verb=0)
+          ...: PJ0[0]
+       Out[1]: (-2.5768974970445326e-08-2.0489943182087426e-09j)
+
+       In [2]: PJ1[0]
+       Out[2]: (1.9050482781619523e-10-6.842938067042929e-10j)
+
     """
     # Get kwargs with defaults.
     verb = get_kwargs(['verb', ], [2, ], kwargs)[0]

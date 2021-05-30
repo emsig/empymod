@@ -52,7 +52,7 @@ empymod Documentation
 
     +++
 
-    .. link-button:: gallery
+    .. link-button:: empymod_gallery
             :type: ref
             :text: To the gallery
             :classes: btn-block btn-info stretched-link

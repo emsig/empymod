@@ -1,4 +1,4 @@
-"""
+r"""
 Filters for the *Digital Linear Filter* (DLF) method for the Hankel
 [Ghos70]_) and the Fourier ([Ande75]_) transforms.
 
@@ -13,7 +13,7 @@ The filters `kong_61_2007` and `kong_241_2007` from [Kong07]_, and
 `key_101_2009`, `key_201_2009`, `key_401_2009`, `key_81_CosSin_2009`,
 `key_241_CosSin_2009`, and `key_601_CosSin_2009` from [Key09]_ are taken from
 *DIPOLE1D*, [Key09]_, which can be downloaded at
-https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM (1DCSEM_). *DIPOLE1D* is
+https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM ([1DCSEM]_). *DIPOLE1D* is
 distributed under the license GNU GPL version 3 or later. Kerry Key gave his
 written permission to re-distribute the filters under the Apache License,
 Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November 2016).
@@ -22,13 +22,10 @@ The filters `anderson_801_1982` from [Ande82]_ and `key_51_2012`,
 `key_101_2012`, `key_201_2012`, `key_101_CosSin_2012`, and
 `key_201_CosSin_2012`, all from [Key12]_, are taken from the software
 distributed with [Key12]_ and available at https://software.seg.org/2012/0003
-(SEG-2012-003_). These filters are distributed under the SEG license.
+([SEG-2012-003]_). These filters are distributed under the SEG license.
 
 The filter `wer_201_2018` was designed with the add-on `fdesign`, see
 https://github.com/emsig/article-fdesign.
-
-.. _1DCSEM: https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-.. _SEG-2012-003: https://software.seg.org/2012/0003
 
 """
 # Copyright 2016-2021 The emsig community.
@@ -185,7 +182,7 @@ class DigitalFilter:
 def kong_61_2007():
     r"""Kong 61 pt Hankel filter, as published in [Kong07]_.
 
-    Taken from file `FilterModules.f90` provided with 1DCSEM_.
+    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
 
     License: `Apache License, Version 2.0,
     <https://www.apache.org/licenses/LICENSE-2.0>`_.
@@ -301,7 +298,7 @@ def kong_61_2007():
 def kong_241_2007():
     r"""Kong 241 pt Hankel filter, as published in [Kong07]_.
 
-    Taken from file `FilterModules.f90` provided with 1DCSEM_.
+    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
 
     License: `Apache License, Version 2.0,
     <https://www.apache.org/licenses/LICENSE-2.0>`_.
@@ -687,7 +684,7 @@ def kong_241_2007():
 def key_101_2009():
     r"""Key 101 pt Hankel filter, as published in [Key09]_.
 
-    Taken from file `FilterModules.f90` provided with 1DCSEM_.
+    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
 
     License: `Apache License, Version 2.0,
     <https://www.apache.org/licenses/LICENSE-2.0>`_.
@@ -812,7 +809,7 @@ def key_101_2009():
 def key_201_2009():
     r"""Key 201 pt Hankel filter, as published in [Key09]_.
 
-    Taken from file `FilterModules.f90` provided with 1DCSEM_.
+    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
 
     License: `Apache License, Version 2.0,
     <https://www.apache.org/licenses/LICENSE-2.0>`_.
@@ -1036,7 +1033,7 @@ def key_201_2009():
 def key_401_2009():
     r"""Key 401 pt Hankel filter, as published in [Key09]_.
 
-    Taken from file `FilterModules.f90` provided with 1DCSEM_.
+    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
 
     License: `Apache License, Version 2.0,
     <https://www.apache.org/licenses/LICENSE-2.0>`_.
@@ -1460,7 +1457,7 @@ def key_401_2009():
 def anderson_801_1982():
     r"""Anderson 801 pt Hankel filter, as published in [Ande82]_.
 
-    Taken from file `wa801Hankel.txt` provided with SEG-2012-003_.
+    Taken from file `wa801Hankel.txt` provided with [SEG-2012-003]_.
 
     License: https://software.seg.org/disclaimer.txt.
 
@@ -2552,7 +2549,7 @@ def anderson_801_1982():
 def key_51_2012():
     r"""Key 51 pt Hankel filter, as published in [Key12]_.
 
-    Taken from file `kk51Hankel.txt` provided with SEG-2012-003_.
+    Taken from file `kk51Hankel.txt` provided with [SEG-2012-003]_.
 
     License: https://software.seg.org/disclaimer.txt.
 
@@ -2644,7 +2641,7 @@ def key_51_2012():
 def key_101_2012():
     r"""Key 101 pt Hankel filter, as published in [Key12]_.
 
-    Taken from file `kk101Hankel.txt` provided with SEG-2012-003_.
+    Taken from file `kk101Hankel.txt` provided with [SEG-2012-003]_.
 
     License: https://software.seg.org/disclaimer.txt.
 
@@ -2802,7 +2799,7 @@ def key_101_2012():
 def key_201_2012():
     r"""Key 201 pt Hankel filter, as published in [Key12]_.
 
-    Taken from file `kk201Hankel.txt` provided with SEG-2012-003_.
+    Taken from file `kk201Hankel.txt` provided with [SEG-2012-003]_.
 
     License: https://software.seg.org/disclaimer.txt.
 
@@ -3424,7 +3421,7 @@ def wer_201_2018():
 def key_81_CosSin_2009():
     r"""Key 81 pt CosSin filter, as published in [Key09]_.
 
-    Taken from file `FilterModules.f90` provided with 1DCSEM_.
+    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
 
     License: `Apache License, Version 2.0,
     <https://www.apache.org/licenses/LICENSE-2.0>`_.
@@ -3530,7 +3527,7 @@ def key_81_CosSin_2009():
 def key_241_CosSin_2009():
     r"""Key 241 pt CosSin filter, as published in [Key09]_.
 
-    Taken from file `FilterModules.f90` provided with 1DCSEM_.
+    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
 
     License: `Apache License, Version 2.0,
     <https://www.apache.org/licenses/LICENSE-2.0>`_.
@@ -3796,7 +3793,7 @@ def key_241_CosSin_2009():
 def key_601_CosSin_2009():
     r"""Key 601 pt CosSin filter, as published in [Key09]_.
 
-    Taken from file `FilterModules.f90` provided with 1DCSEM_.
+    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
 
     License: `Apache License, Version 2.0,
     <https://www.apache.org/licenses/LICENSE-2.0>`_.
@@ -4422,7 +4419,7 @@ def key_601_CosSin_2009():
 def key_101_CosSin_2012():
     r"""Key 101 pt CosSin filter, as published in [Key12]_.
 
-    Taken from file `kk101CosSin.txt` provided with SEG-2012-003_.
+    Taken from file `kk101CosSin.txt` provided with [SEG-2012-003]_.
 
     License: https://software.seg.org/disclaimer.txt.
 
@@ -4583,7 +4580,7 @@ def key_101_CosSin_2012():
 def key_201_CosSin_2012():
     r"""Key 201 pt CosSin filter, as published in [Key12]_.
 
-    Taken from file `kk201CosSin.txt` provided with SEG-2012-003_.
+    Taken from file `kk201CosSin.txt` provided with [SEG-2012-003]_.
 
     License: https://software.seg.org/disclaimer.txt.
 

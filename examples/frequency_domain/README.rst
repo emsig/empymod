@@ -1,4 +1,4 @@
 Frequency Domain
 ================
 
-Basic examples in the frequency domain.
+Basic examples of empymod in the frequency domain.

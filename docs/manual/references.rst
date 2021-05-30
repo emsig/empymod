@@ -85,3 +85,9 @@ References
 .. [ZiSl19] Ziolkowski, A., and E. Slob, 2019, Introduction to
    Controlled-Source Electromagnetic Methods: Cambridge University Press; ISBN:
    `9781107058620 <https://www.cambridge.org/9781107058620>`_.
+
+Software weblinks
+=================
+
+.. [1DCSEM] https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM
+.. [SEG-2012-003] https://software.seg.org/2012/0003
