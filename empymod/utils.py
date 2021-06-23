@@ -1425,7 +1425,7 @@ def get_geo_fact(ab, srcazm, srcdip, recazm, recdip, msrc, mrec):
     # Calculate src-rec-factor
     fsrc = gfact(fis, srcazm, srcdip)
     frec = gfact(fir, recazm, recdip)
-    fact = np.outer(fsrc, frec).ravel()
+    fact = np.outer(frec, fsrc)
 
     # Set very small angles to proper zero (because e.g. sin(pi/2) != exact 0)
     # => min_angle can be set with utils.set_min

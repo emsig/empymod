@@ -80,4 +80,5 @@ jobs:
         shell: bash -l {0}
         run: |
           python setup.py install
+          python -c 'import empymod; print(empymod.Report())'
           pytest

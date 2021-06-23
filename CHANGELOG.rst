@@ -10,6 +10,15 @@ v2.0.x
 """"""
 
 
+v2.1.1: Bugfix azm/dip broadcasting
+-----------------------------------
+
+**2021-06-23**
+
+- Bugfix in ``empymod.bipole`` and ``empymod.loop`` when using various azimuths
+  and dips (some cases used to cause a shape-mismatch error).
+
+
 v2.1.0: Theme change & streamline
 ---------------------------------
 

@@ -553,6 +553,40 @@ class TestBipole:
 
         assert_allclose(bip1[:, :], bip2[:, :])
 
+    def test_shape(self):
+
+        inp = {'depth': [], 'res': 1.0, 'freqtime': (1.0, 2.0), 'verb': 1}
+
+        a = bipole(src=[0, 10, 1, 0, 90], rec=[10, 10, 10, 11, 1], **inp)
+        b = bipole(src=[-50, 0, 1, 10, 90], rec=[10, 10, 10, 11, 1], **inp)
+        c = bipole(src=[0, 10, 1, 0, 90], rec=[20, 10, 10, 11, 0], **inp)
+        d = bipole(src=[-50, 0, 1, 10, 90], rec=[20, 10, 10, 11, 0], **inp)
+
+        # Several sources, several receivers
+        out = bipole(src=[[0, -50], [10, 0], 1, [0, 10], 90],
+                     rec=[[10, 20], [10, 10], 10, 11, [1, 0]], **inp)
+        assert_allclose(out[:, 0, 0], a)
+        assert_allclose(out[:, 0, 1], b)
+        assert_allclose(out[:, 1, 0], c)
+        assert_allclose(out[:, 1, 1], d)
+
+        # One source, one receiver
+        out = bipole(src=[-50, 0, 1, 10, 90],
+                     rec=[10, 10, 10, 11, 1], **inp)
+        assert_allclose(out, b)
+
+        # Several sources, one receiver
+        out = bipole(src=[[0, -50], [10, 0], 1, [0, 10], 90],
+                     rec=[10, 10, 10, 11, 1], **inp)
+        assert_allclose(out[:, 0], a)
+        assert_allclose(out[:, 1], b)
+
+        # One sources, several receivers
+        out = bipole(src=[-50, 0, 1, 10, 90],
+                     rec=[[10, 20], [10, 10], 10, 11, [1, 0]], **inp)
+        assert_allclose(out[:, 0], b)
+        assert_allclose(out[:, 1], d)
+
 
 def test_dipole():
     # As this is a subset of bipole, just run two tests to ensure

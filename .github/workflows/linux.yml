@@ -127,6 +127,7 @@ jobs:
         shell: bash -l {0}
         run: |
           python setup.py install
+          python -c 'import empymod; print(empymod.Report())'
           cp ./tests/matplotlibrc ./.
           pytest --cov=empymod --flake8 ${{ matrix.case.test }}
 

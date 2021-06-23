@@ -23,6 +23,28 @@ respectively. Use ``verb=3`` to see how many offsets and how many frequencies
 are computed internally.
 
 
+Speed
+-----
+
+Please be aware that the high-level routines :func:`empymod.model.bipole` and
+:func:`empymod.model.loop` are convenience functions, making it easy for the
+user to compute arbitrary rotated sources and receivers. However, the
+convenience comes at a price, these are certainly *not* the fastest
+implementations for a given scenario. There are simply too many different use
+cases, each with its particular layout of sources, receivers, geometrical
+factors, required fields, and so on. These convenience functions simply loop
+internally over different source and receiver depths, source and receiver
+integration points, and required fields. If you are going to model millions and
+millions of responses it will be worth to think about it carefully. Often it
+will be much faster to collect the same source and receiver depths and call
+these functions individually (loop yourself). Or write your own wrapper around
+either :func:`empymod.model.dipole`, or even around :func:`empymod.model.fem`
+and :func:`empymod.model.tem`.
+
+As such, the provided modelling routine can serve as a template to create your
+own, problem-specific modelling routine!
+
+
 
 Depths, Rotation, and Bipole
 ----------------------------
