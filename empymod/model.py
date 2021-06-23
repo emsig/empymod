@@ -433,7 +433,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     kcount = 0
     conv = True
 
-    # Define some indeces
+    # Define some indices
     isrc = int(nsrc/nsrcz)  # this is either 1 or nsrc
     irec = int(nrec/nrecz)  # this is either 1 or nrec
     isrz = int(isrc*irec)   # this is either 1, nsrc, nrec, or nsrc*nrec
@@ -1057,7 +1057,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
     kcount = 0
     conv = True
 
-    # Define some indeces
+    # Define some indices
     isrc = int(nsrc/nsrcz)  # this is either 1 or nsrc
     irec = int(nrec/nrecz)  # this is either 1 or nrec
     isrz = int(isrc*irec)   # this is either 1, nsrc, nrec, or nsrc*nrec

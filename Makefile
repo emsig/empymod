@@ -19,8 +19,13 @@ install:
 dev-install:
 	pip install -r requirements-dev.txt && pip install -e .
 
+.ONESHELL:
 pytest:
-	rm -rf .coverage htmlcov/ .pytest_cache/ && pytest --cov=empymod --flake8 --mpl && coverage html
+	cp tests/matplotlibrc .
+	rm -rf .coverage htmlcov/ .pytest_cache/
+	pytest --cov=empymod --flake8 --mpl
+	coverage html
+	rm  matplotlibrc
 
 flake8:
 	flake8 docs/conf.py setup.py empymod/ tests/ examples/
@@ -32,7 +37,7 @@ html-noplot:
 	cd docs && make html-noplot
 
 html-clean:
-	cd docs && rm -rf api/empymod* && rm -rf gallery/*/ && rm -rf _build/ && make html
+	cd docs && rm -rf api/empymod* gallery/*/ _build/ && make html
 
 preview:
 	xdg-open docs/_build/html/index.html
