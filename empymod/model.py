@@ -501,12 +501,14 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                         # Carry-out the frequency-domain calculation
                         out = fem(iab, *finp)
 
-                        # Get geometrical scaling factor
-                        tfact = get_geo_fact(iab, srcazm, srcdip, recazm,
-                                             recdip, msrc, mrec)
+                        # Get geometrical scaling factor,
+                        # broadcast to (irec, isrc)
+                        tfact = np.ones((irec, isrc))*get_geo_fact(
+                            iab, srcazm, srcdip, recazm, recdip, msrc, mrec
+                        )
 
                         # Add field to EM with geometrical factor
-                        abEM += out[0]*np.squeeze(tfact)
+                        abEM += out[0]*tfact.ravel('F')
 
                         # Update kernel count
                         kcount += out[1]
@@ -1126,12 +1128,13 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
                     # Carry-out the frequency-domain calculation
                     out = fem(iab, *finp)
 
-                    # Get geometrical scaling factor
-                    tfact = get_geo_fact(iab, srcazm, srcdip, recazm, recdip,
-                                         True, mrec)
+                    # Get geometrical scaling factor, broadcast to (irec, isrc)
+                    tfact = np.ones((irec, isrc))*get_geo_fact(
+                        iab, srcazm, srcdip, recazm, recdip, True, mrec
+                    )
 
                     # Add field to EM with geometrical factor
-                    abEM += out[0]*np.squeeze(tfact)
+                    abEM += out[0]*tfact.ravel('F')
 
                     # Update kernel count
                     kcount += out[1]
