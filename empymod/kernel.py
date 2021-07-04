@@ -33,8 +33,6 @@ import numpy as np
 import numba as nb
 from scipy import special  # Only used for halfspace solution
 
-np.seterr(all='ignore')
-
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']
 

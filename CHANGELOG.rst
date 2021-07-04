@@ -10,6 +10,25 @@ v2.0.x
 """"""
 
 
+v2.1.2: Bugfix np.seterr(all='ignore')
+--------------------------------------
+
+**2021-07-04**
+
+- Bumped the minimum requirements to:
+
+  - Python 3.7
+  - NumPy 1.17
+  - SciPy 1.4
+  - Numba 0.47
+
+- The kernel of empymod switched off all NumPy errors via
+  ``np.seterr(all='ignore')``. That means that any script or library that used
+  empymod switched off all warnings from NumPy, which is very bad. Furthermore,
+  since empymod v2, it does not make sense any more, as the entire kernel is
+  jitted with numba. *This setting is therefore removed.*
+
+
 v2.1.1: Bugfix azm/dip broadcasting
 -----------------------------------
 

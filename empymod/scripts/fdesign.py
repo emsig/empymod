@@ -257,6 +257,7 @@ __all__ = ['design', 'save_filter', 'load_filter', 'plot_result',
 
 # 1. PRINCIPAL FILTER DESIGNING ROUTINES
 
+@np.errstate(all='ignore')
 def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
            cvar='amp', error=0.01, name=None, full_output=False, finish=False,
            save=True, path='filters', verb=2, plot=1):
@@ -586,6 +587,7 @@ def load_filter(name, full=False, path='filters', filter_coeff=None):
 
 # # 2.a Public plotting routines for QC or direct use
 
+@np.errstate(all='ignore')
 def plot_result(filt, full, prntres=True):
     r"""QC the inversion result.
 
@@ -876,6 +878,7 @@ class Ghosh:
 
 # # 3.a Hankel J0 transform pairs
 
+@np.errstate(all='ignore')
 def j0_1(a=1):
     r"""Hankel transform pair J0_1 ([Ande75]_)."""
 
@@ -888,6 +891,7 @@ def j0_1(a=1):
     return Ghosh('j0', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def j0_2(a=1):
     r"""Hankel transform pair J0_2 ([Ande75]_)."""
 
@@ -900,6 +904,7 @@ def j0_2(a=1):
     return Ghosh('j0', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def j0_3(a=1):
     r"""Hankel transform pair J0_3 ([GuSi97]_)."""
 
@@ -912,6 +917,7 @@ def j0_3(a=1):
     return Ghosh('j0', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def j0_4(f=1, rho=0.3, z=50):
     r"""Hankel transform pair J0_4 ([ChCo82]_).
 
@@ -939,6 +945,7 @@ def j0_4(f=1, rho=0.3, z=50):
     return Ghosh('j0', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def j0_5(f=1, rho=0.3, z=50):
     r"""Hankel transform pair J0_5 ([ChCo82]_).
 
@@ -968,6 +975,7 @@ def j0_5(f=1, rho=0.3, z=50):
 
 # # 3.b Hankel J1 transform pairs
 
+@np.errstate(all='ignore')
 def j1_1(a=1):
     r"""Hankel transform pair J1_1 ([Ande75]_)."""
 
@@ -980,6 +988,7 @@ def j1_1(a=1):
     return Ghosh('j1', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def j1_2(a=1):
     r"""Hankel transform pair J1_2 ([Ande75]_)."""
 
@@ -992,6 +1001,7 @@ def j1_2(a=1):
     return Ghosh('j1', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def j1_3(a=1):
     r"""Hankel transform pair J1_3 ([Ande75]_)."""
 
@@ -1004,6 +1014,7 @@ def j1_3(a=1):
     return Ghosh('j1', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def j1_4(f=1, rho=0.3, z=50):
     r"""Hankel transform pair J1_4 ([ChCo82]_).
 
@@ -1031,6 +1042,7 @@ def j1_4(f=1, rho=0.3, z=50):
     return Ghosh('j1', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def j1_5(f=1, rho=0.3, z=50):
     r"""Hankel transform pair J1_5 ([ChCo82]_).
 
@@ -1060,6 +1072,7 @@ def j1_5(f=1, rho=0.3, z=50):
 
 # # 3.c Fourier sine transform pairs
 
+@np.errstate(all='ignore')
 def sin_1(a=1, inverse=False):
     r"""Fourier sine transform pair sin_1 ([Ande75]_)."""
 
@@ -1075,6 +1088,7 @@ def sin_1(a=1, inverse=False):
         return Ghosh('sin', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def sin_2(a=1, inverse=False):
     r"""Fourier sine transform pair sin_2 ([Ande75]_)."""
 
@@ -1090,6 +1104,7 @@ def sin_2(a=1, inverse=False):
         return Ghosh('sin', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def sin_3(a=1, inverse=False):
     r"""Fourier sine transform pair sin_3 ([Ande75]_)."""
 
@@ -1107,6 +1122,7 @@ def sin_3(a=1, inverse=False):
 
 # # 3.d Fourier cosine transform pairs
 
+@np.errstate(all='ignore')
 def cos_1(a=1, inverse=False):
     r"""Fourier cosine transform pair cos_1 ([Ande75]_)."""
 
@@ -1122,6 +1138,7 @@ def cos_1(a=1, inverse=False):
         return Ghosh('cos', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def cos_2(a=1, inverse=False):
     r"""Fourier cosine transform pair cos_2 ([Ande75]_)."""
 
@@ -1137,6 +1154,7 @@ def cos_2(a=1, inverse=False):
         return Ghosh('cos', lhs, rhs)
 
 
+@np.errstate(all='ignore')
 def cos_3(a=1, inverse=False):
     r"""Fourier cosine transform pair cos_3 ([Ande75]_)."""
 
@@ -1243,6 +1261,7 @@ def empy_hankel(ftype, zsrc, zrec, res, freqtime, depth=None, aniso=None,
 
 # 4. NON-USER-FACING ROUTINES
 
+@np.errstate(all='ignore')
 def _get_min_val(spaceshift, *params):
     r"""Calculate minimum resolved amplitude or maximum r."""
 
@@ -1325,6 +1344,7 @@ def _get_min_val(spaceshift, *params):
     return np.where(imin == 0, np.inf, min_val)
 
 
+@np.errstate(all='ignore')
 def _calculate_filter(n, spacing, shift, fI, r_def, reim, name):
     r"""Calculate filter for this spacing, shift, n."""
 
