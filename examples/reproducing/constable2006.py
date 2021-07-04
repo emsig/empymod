@@ -61,6 +61,7 @@ atg = empymod.utils.EMArray(np.nan_to_num(atg))
 
 plt.figure(figsize=(9, 13))
 plt.subplots_adjust(wspace=.3, hspace=.3)
+oldsettings = np.seterr(all='ignore')
 
 # Radial amplitude
 plt.subplot(321)
@@ -110,6 +111,7 @@ plt.xlabel('Range (km)')
 plt.legend()
 
 plt.show()
+np.seterr(**oldsettings)
 
 ###############################################################################
 # Original Figure
