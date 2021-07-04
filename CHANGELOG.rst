@@ -22,11 +22,11 @@ v2.1.2: Bugfix np.seterr(all='ignore')
   - SciPy 1.4
   - Numba 0.47
 
-- The kernel of empymod switched off all NumPy errors via
-  ``np.seterr(all='ignore')``. That means that any script or library that used
-  empymod switched off all warnings from NumPy, which is very bad. Furthermore,
-  since empymod v2, it does not make sense any more, as the entire kernel is
-  jitted with numba. *This setting is therefore removed.*
+- Legacy clean-up: The kernel of empymod used to switch off all NumPy errors
+  via ``np.seterr(all='ignore')``. That means that any script or library that
+  used empymod switched off all warnings from NumPy, which is not good. Since
+  empymod v2 this does make even less sense, as the entire kernel is jitted
+  with numba. *This setting is therefore removed.*
 
 
 v2.1.1: Bugfix azm/dip broadcasting
