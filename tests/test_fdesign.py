@@ -47,8 +47,9 @@ def test_design():
     # only affects the edge-cases, not the best result we are looking for.
     # However, we have to limit the following comparison; we check that at
     # least 50% are within a relative error of 0.1%.
-    rate = np.sum(np.abs((out1[3] - dat1[2][3])/dat1[2][3]) < 1e-3)
-    assert rate > out1[3].size/2
+    with np.errstate(all='ignore'):
+        rate = np.sum(np.abs((out1[3] - dat1[2][3])/dat1[2][3]) < 1e-3)
+        assert rate > out1[3].size/2
 
     # 2. Specific model with only one spacing/shift
     dat2 = DATA['case2'][()]

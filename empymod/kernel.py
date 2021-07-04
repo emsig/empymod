@@ -33,8 +33,6 @@ import numpy as np
 import numba as nb
 from scipy import special  # Only used for halfspace solution
 
-np.seterr(all='ignore')
-
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']
 
@@ -751,6 +749,7 @@ def angle_factor(angle, ab, msrc, mrec):
 
 # Analytical solutions
 
+@np.errstate(all='ignore')
 def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
               mrec):
     r"""Analytical full-space solutions in the frequency domain.
@@ -924,6 +923,7 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
     return gin
 
 
+@np.errstate(all='ignore')
 def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
               solution='dhs'):
     r"""Return frequency- or time-space domain VTI half-space solution.

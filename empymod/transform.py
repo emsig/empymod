@@ -1088,8 +1088,9 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
         for k in range(i, 0, -1):
             aux1, aux2 = aux2, S[om, k-1]
             ddff = S[om, k] - aux2
-            S[om, k-1] = np.where(np.abs(ddff) < np.finfo(np.double).tiny,
-                                  np.finfo(np.double).max, aux1 + 1/ddff)
+            with np.errstate(all='ignore'):
+                S[om, k-1] = np.where(np.abs(ddff) < np.finfo(np.double).tiny,
+                                      np.finfo(np.double).max, aux1 + 1/ddff)
 
         # The extrapolated result plus the first interval term
         extrap[om, i-1] = S[om, np.mod(i, 2)] + EM0[om]
