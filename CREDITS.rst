@@ -6,9 +6,23 @@ This project was started by **Dieter Werthmüller** at
 (Instituto Mexicano del Petróleo), funded (till 01/2017) by
 `The Mexican National Council of Science and Technology
 <https://www.conacyt.gob.mx>`_ (Consejo Nacional de Ciencia y Tecnología).
-Today it is a community effort, and many people helped to improve it over time.
+Dieter would like to thank his past and current employers who allowed and allow
+him to maintain and further develop the code after the initial funding ended,
+namely:
 
-For a list of code contributors see
+- 2017-2018: `The Mexican Institute of Petroleum IMP <https://www.gob.mx/imp>`_
+
+- 2018-today: `Delft University of Technology <https://www.tudelft.nl>`_
+
+  - 2018-2021:  Funded through *Gitaro.JIM*, a `MarTERA
+    <https://www.martera.eu>`_ funded project within *Horizon 2020*
+  - 2021-today: Funded through the `Delphi Consortium
+    <https://www.delphi-consortium.com>`_
+
+- 2021-today: `TERRASYS Geophysics GmbH & Co. KG <https://www.terrasys.de>`_
+
+Today it is a community effort, and many people helped to improve it over time.
+For a full list of code contributors see
 https://github.com/emsig/empymod/graphs/contributors.
 
 There are various other ways than code how people have contributed. In the
