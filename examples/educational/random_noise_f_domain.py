@@ -125,7 +125,7 @@ def add_noise(data, ntype, rel_error, noise_floor, mu):
 def stack(n, data, ntype, **kwargs):
     """Stack n-times the noise, return normalized."""
     out = add_noise(data, ntype, **kwargs)/n
-    for i in range(n-1):
+    for _ in range(n-1):
         out += add_noise(data, ntype, **kwargs)/n
     return out
 
