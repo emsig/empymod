@@ -3,10 +3,10 @@ Adding random noise to frequency-domain CSEM data
 =================================================
 
 Adding random noise to frequency-domain CSEM data is not a trivial task, and
-there are many different ways how it is done. The problem comes from the fact
-that we live in the time-domain, we do our measurements in the time-domain, our
-noise is therefore time-domain noise, but we have to add complex-valued
-frequency-domain noise.
+there are many different ways how it can be done. The problem comes from the
+fact that we live in the time domain, we do our measurements in the time
+domain, our noise is therefore time-domain noise, but we want to add
+complex-valued noise in the frequency domain.
 
 Here we are going to look at some possibilities. However, keep in mind that
 there are more possibilities than the ones shown here.
@@ -14,17 +14,18 @@ there are more possibilities than the ones shown here.
 1. Theory
 ---------
 
-Let's assume we have complex-valued data :math:`d`. We can add random noise to
-the data in the following way,
+Let's assume we have complex-valued data :math:`d=x+\text{i}y`. We can add
+random noise to the data in the following way,
 
 .. math::
     :label: generalnoise
 
-    \tilde{d} = d + \sigma \left[(1 + \text{i})\,\mu + \mathcal{R} \right] \, .
+    \tilde{d} = d + \sigma \left[(1 + \text{i})\,\mu + \mathcal{R} \right] \, ,
 
-where :math:`\sigma` is the standard deviation, :math:`\mu` is the mean value
-of the randomly distributed noise, and :math:`\mathcal{R}` is the random noise.
-We define the standard deviation as
+where :math:`\tilde{d}` is the data with added noise, :math:`\sigma` is the
+standard deviation, :math:`\mu` is the mean value of the randomly distributed
+noise, and :math:`\mathcal{R}` is the random noise. We define the standard
+deviation as
 
 .. math::
     :label: stdev
@@ -48,7 +49,8 @@ a random realization itself.
        \mathcal{R}_\text{wn} = \exp[\text{i}\,\mathcal{U}(0, 2\pi)] \, ,
 
    where :math:`\mathcal{U}(0, 2\pi)` is the uniform distribution and its
-   range.
+   range. This adds white noise with a flat amplitude spectrum and random
+   phases.
 
 
 2. Adding Gaussian noise to real and imaginary parts
@@ -83,11 +85,57 @@ plt.style.use('bmh')
 
 
 ###############################################################################
+# Noise computation
+# ~~~~~~~~~~~~~~~~~
+
+# Initiate random number generator.
+rng = np.random.default_rng()
+
+
+def add_noise(data, ntype, rel_error, noise_floor, mu):
+    """Add random noise to complex-valued data.
+
+    If `ntype='white_noise'`, complex noise is generated from uniform randomly
+    distributed phases.
+
+    If `ntype='gaussian_correlated'`, correlated Gaussian random noise is added
+    to real and imaginary part.
+
+    If `ntype='gaussian_uncorrelated'`, uncorrelated Gaussian random noise is
+    added to real and imaginary part.
+
+    """
+
+    # Standard deviation
+    std = np.sqrt(noise_floor**2 + (rel_error*abs(data))**2)
+
+    # Random noise
+    if ntype == 'gaussian_correlated':
+        noise = rng.standard_normal(data.size)*(1+1j)
+    elif ntype == 'gaussian_uncorrelated':
+        noise = 1j*rng.standard_normal(data.size)
+        noise += rng.standard_normal(data.size)
+    else:
+        noise = np.exp(1j * rng.uniform(0, 2*np.pi, data.size))
+
+    # Scale and move noise; add to data and return
+    return data + std*((1+1j)*mu + noise)
+
+
+def stack(n, data, ntype, **kwargs):
+    """Stack n-times the noise, return normalized."""
+    out = add_noise(data, ntype, **kwargs)/n
+    for i in range(n-1):
+        out += add_noise(data, ntype, **kwargs)/n
+    return out
+
+
+###############################################################################
 # 2. Graphical illustration
 # -------------------------
 #
 # The following is a graphical illustration. Please note that the relative
-# error is **very** high with 20 %! This is only for illustration purposes.
+# error is **very** high (20%)! This is only for illustration purposes.
 
 # Inputs
 d = np.array([6+2j])         # observed data point
@@ -110,12 +158,14 @@ for ax in axs:
     ax.plot(np.r_[0., d.real], np.r_[0., d.imag], '--', c='.5')
     ax.plot(d.real, d.imag, 'ko', ms=10, label='$d^{obs}$', zorder=10)
 
+
 # Mean and standard deviation
 ax1.plot(d.real+np.r_[0, std*mean], d.imag+np.r_[0, std*mean],
          'C8', label=r'Scaled mean $\sigma (1+i)\mu$', zorder=9)
 ax1.plot(d.real+np.r_[std*mean, std*(1+mean)],
          d.imag+np.r_[std*mean, std*mean],
          'C1', label=r'Standard deviation $\sigma$')
+
 
 # Random uniform phase
 uniform_mean = std * ((1+1j)*mean + np.exp(1j*np.linspace(0, 2*np.pi, 301)))
@@ -141,27 +191,15 @@ for i in range(1, 3):
 # Plot random realizations
 data = np.ones(300, dtype=complex)*d
 shape = data.shape
-standard_deviation = relative_error*abs(data)  # no noise floor
 rng = np.random.default_rng()
 ls = ['C0x', 'C3+', 'C2x']
-methods = ['white_noise', 'gaussian_correlated', 'gaussian_uncorrelated']
-for i, method in enumerate(methods):
+ntypes = ['white_noise', 'gaussian_correlated', 'gaussian_uncorrelated']
+for i, ntype in enumerate(ntypes):
 
-    # Random Gaussian noise independently for Real and Imaginary part.
-    if method == 'gaussian_uncorrelated':
-        noise = rng.standard_normal(shape) + 1j*rng.standard_normal(shape)
+    # Add random noise of ntype.
+    ndata = add_noise(data, ntype, relative_error, 0.0, mean)
+    ax2.plot(ndata.real, ndata.imag, ls[i], label=ntype)
 
-    # Random Gaussian noise; same for Real and Imaginary part.
-    elif method == 'gaussian_correlated':
-        noise = rng.standard_normal(shape)*(1+1j)
-
-    # Random Uniform phases with constant amplitude (white noise); default.
-    else:
-        noise = np.exp(1j * rng.uniform(0, 2*np.pi, shape))
-
-    # Add data and noise
-    ndata = data + standard_deviation * ((1+1j)*mean + noise)
-    ax2.plot(ndata.real, ndata.imag, ls[i], label=method)
 
 # Axis etc
 for ax in axs:
@@ -177,6 +215,19 @@ ax2.set_xlabel('Real part')
 fig.show()
 
 ###############################################################################
+#
+# Intuitively one might think that the Gaussian uncorrelated noise is the
+# "best" one, as it looks truly random. However, it is arguably the least
+# "physical" one, as real and imaginary part of the electromagnetic field are
+# not independent - if one changes, the other changes too. The uniformly
+# distributed phases (blue circle) is the most physical noise corresponding to
+# white noise adding random phases with a constant amplitude.
+#
+# To get a better understanding we look at some numerical examples where we
+# plot amplitude-vs-offset for a fixed frequency, and amplitude-vs-frequency
+# for a fixed offset; for single realizations and when we stack it many times
+# in order to reduce the noise.
+#
 # 3. Numerical examples
 # ---------------------
 #
@@ -211,60 +262,20 @@ fresp = empymod.dipole(
     **model,
 )
 
-# Phase settings: wrapped, radians, lag-defined (+iw)
-phase = {'unwrap': False, 'deg': False, 'lag': True}
-
-###############################################################################
-# Noise computation
-# ~~~~~~~~~~~~~~~~~
-
 # Relative error, noise floor, mean of noise
-rel_err = 0.05
+rel_error = 0.05
 noise_floor = 1e-15
 n_stack = 1000
 
-# Initiate random number generator.
-rng = np.random.default_rng()
-
-
-def add_noise(data, ntype='phase', rel_err=rel_err, noise_floor=noise_floor,
-              mu=0.0):
-    """Add random noise to complex-valued data.
-
-    If `ntype='phase'` (default), complex noise is generated from uniform
-    randomly distributed phases.
-
-    If `ntype='reim'`, Gaussian random noise is added to real and imaginary
-    part.
-
-    """
-
-    # Standard deviation
-    std = np.sqrt(noise_floor**2 + (rel_err*abs(data))**2)
-
-    # Random noise
-    if ntype == 'reim':
-        noise = rng.standard_normal(data.size)*(1+1j)
-    else:
-        noise = np.exp(1j * rng.uniform(0, 2*np.pi, data.size))
-
-    # Scale and move noise; add to data and return
-    return data + std*((1+1j)*mu + noise)
-
-
-def stack(n, data, ntype, **kwargs):
-    """Stack n-times the noise, return normalized."""
-    out = add_noise(data, ntype, **kwargs)/n
-    for i in range(n-1):
-        out += add_noise(data, ntype, **kwargs)/n
-    return out
+# Phase settings: wrapped, radians, lag-defined (+iw)
+phase = {'unwrap': False, 'deg': False, 'lag': True}
 
 
 ###############################################################################
 # Plotting function
 # ~~~~~~~~~~~~~~~~~
 
-def rel_error(resp, noise):
+def error(resp, noise):
     """Return relative error (%) of noise with respect to resp."""
     return 100*abs((noise-resp)/resp)
 
@@ -279,8 +290,8 @@ def figure(x, data, reim, comp):
     axs[0, 0].plot(x, abs(comp.real), 'C1--')
     axs[0, 0].set_yscale('log')
 
-    axs[1, 0].plot(x, rel_error(data.real, reim.real), 'C0')
-    axs[1, 0].plot(x, rel_error(data.real, comp.real), 'C1--')
+    axs[1, 0].plot(x, error(data.real, reim.real), 'C0')
+    axs[1, 0].plot(x, error(data.real, comp.real), 'C1--')
     axs[1, 0].set_ylabel('Rel. Error (%)')
 
     axs[0, 1].set_title('|Imaginary| (V/m)')
@@ -290,8 +301,8 @@ def figure(x, data, reim, comp):
     axs[0, 1].set_yscale('log')
     axs[0, 1].legend(fontsize=12, framealpha=1)
 
-    axs[1, 1].plot(x, rel_error(data.imag, reim.imag), 'C0')
-    axs[1, 1].plot(x, rel_error(data.imag, comp.imag), 'C1--')
+    axs[1, 1].plot(x, error(data.imag, reim.imag), 'C0')
+    axs[1, 1].plot(x, error(data.imag, comp.imag), 'C1--')
 
     axs[0, 2].set_title('Amplitude (V/m)')
     axs[0, 2].plot(x, data.amp(), 'k')
@@ -299,16 +310,16 @@ def figure(x, data, reim, comp):
     axs[0, 2].plot(x, comp.amp(), 'C1--')
     axs[0, 2].set_yscale('log')
 
-    axs[1, 2].plot(x, rel_error(data.amp(), reim.amp()), 'C0')
-    axs[1, 2].plot(x, rel_error(data.amp(), comp.amp()), 'C1--')
+    axs[1, 2].plot(x, error(data.amp(), reim.amp()), 'C0')
+    axs[1, 2].plot(x, error(data.amp(), comp.amp()), 'C1--')
 
     axs[0, 3].set_title('Phase (rad)')
     axs[0, 3].plot(x, data.pha(**phase), 'k')
     axs[0, 3].plot(x, reim.pha(**phase), 'C0')
     axs[0, 3].plot(x, comp.pha(**phase), 'C1--')
 
-    axs[1, 3].plot(x, rel_error(data.pha(**phase), reim.pha(**phase)), 'C0')
-    axs[1, 3].plot(x, rel_error(data.pha(**phase), comp.pha(**phase)), 'C1--')
+    axs[1, 3].plot(x, error(data.pha(**phase), reim.pha(**phase)), 'C0')
+    axs[1, 3].plot(x, error(data.pha(**phase), comp.pha(**phase)), 'C1--')
 
     return fig, axs
 
@@ -317,10 +328,12 @@ def figure(x, data, reim, comp):
 # 3.1 Offset-range for single frequency
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def o_single(mu):
+def offset_single(mu):
+    """Single frequency, many offsets, one realization."""
     # Add noise
-    onoise_reim = add_noise(oresp, 'reim', mu=mu)
-    onoise_comp = add_noise(oresp, 'phase', mu=mu)
+    inp = {'rel_error': rel_error, 'noise_floor': noise_floor, 'mu': mu}
+    onoise_reim = add_noise(oresp, 'gaussian_correlated', **inp)
+    onoise_comp = add_noise(oresp, 'white_noise', **inp)
 
     fig, axs = figure(offs, oresp, onoise_reim, onoise_comp)
     fig.suptitle(f"Inline $E_{{xx}}$; $s_z=r_z=0$; $f=${freq} Hz; "
@@ -338,11 +351,11 @@ def o_single(mu):
 
 ###############################################################################
 
-o_single(mu=0.0)
+offset_single(mu=0.0)
 
 ###############################################################################
 
-o_single(mu=0.5)
+offset_single(mu=0.5)
 
 
 ###############################################################################
@@ -350,10 +363,12 @@ o_single(mu=0.5)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def o_stacked(mu):
+def offset_stacked(mu):
+    """Single frequency, many offsets, stacked."""
     # Stack noise
-    sonoise_reim = stack(n_stack, oresp, 'reim', mu=mu)
-    sonoise_comp = stack(n_stack, oresp, 'phase', mu=mu)
+    inp = {'rel_error': rel_error, 'noise_floor': noise_floor, 'mu': mu}
+    sonoise_reim = stack(n_stack, oresp, 'gaussian_correlated', **inp)
+    sonoise_comp = stack(n_stack, oresp, 'white_noise', **inp)
 
     fig, axs = figure(offs, oresp, sonoise_reim, sonoise_comp)
     fig.suptitle(f"STACKED {n_stack} times; $\\mu=${mu}", fontsize=20)
@@ -368,21 +383,23 @@ def o_stacked(mu):
 
 ###############################################################################
 
-o_stacked(mu=0.0)
+offset_stacked(mu=0.0)
 
 ###############################################################################
 
-o_stacked(mu=0.5)
+offset_stacked(mu=0.5)
 
 
 ###############################################################################
 # 3.3 Frequency-range for single offset
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def f_single(mu):
+def frequency_single(mu):
+    """Single offset, many frequencies, one realization."""
     # Add noise
-    fnoise_reim = add_noise(fresp, 'reim', mu=mu)
-    fnoise_comp = add_noise(fresp, 'phase', mu=mu)
+    inp = {'rel_error': rel_error, 'noise_floor': noise_floor, 'mu': mu}
+    fnoise_reim = add_noise(fresp, 'gaussian_correlated', **inp)
+    fnoise_comp = add_noise(fresp, 'white_noise', **inp)
 
     fig, axs = figure(freqs, fresp, fnoise_reim, fnoise_comp)
     fig.suptitle(f"Inline $E_{{xx}}$; $s_z=r_z=0$; offset$=${off/1e3} km; "
@@ -401,21 +418,23 @@ def f_single(mu):
 
 ###############################################################################
 
-f_single(mu=0.0)
+frequency_single(mu=0.0)
 
 ###############################################################################
 
-f_single(mu=0.5)
+frequency_single(mu=0.5)
 
 
 ###############################################################################
 # 3.4 Frequency-range for single offset - STACKED
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def f_stacked(mu):
+def frequency_stacked(mu):
+    """Single offset, many frequencies, stacked."""
     # Stack noise
-    sfnoise_reim = stack(n_stack, fresp, 'reim', mu=mu)
-    sfnoise_comp = stack(n_stack, fresp, 'phase', mu=mu)
+    inp = {'rel_error': rel_error, 'noise_floor': noise_floor, 'mu': mu}
+    sfnoise_reim = stack(n_stack, fresp, 'gaussian_correlated', **inp)
+    sfnoise_comp = stack(n_stack, fresp, 'white_noise', **inp)
 
     fig, axs = figure(freqs, fresp, sfnoise_reim, sfnoise_comp)
     fig.suptitle(f"STACKED {n_stack} times; $\\mu=${mu}", fontsize=20)
@@ -431,11 +450,11 @@ def f_stacked(mu):
 
 ###############################################################################
 
-f_stacked(mu=0.0)
+frequency_stacked(mu=0.0)
 
 ###############################################################################
 
-f_stacked(mu=0.5)
+frequency_stacked(mu=0.5)
 
 
 ###############################################################################

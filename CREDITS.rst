@@ -19,7 +19,7 @@ namely:
   - 2021-today: Funded through the `Delphi Consortium
     <https://www.delphi-consortium.com>`_
 
-- 2021-today: `TERRASYS Geophysics GmbH & Co. KG <https://www.terrasys.de>`_
+- 2021-today: `TERRASYS Geophysics GmbH & Co. KG <https://www.terrasysgeo.com>`_
 
 Today it is a community effort, and many people helped to improve it over time.
 For a full list of code contributors see

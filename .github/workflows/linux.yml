@@ -38,7 +38,7 @@ jobs:
           - python-version: 3.7
             name: plain
             os: ubuntu
-            conda: ""
+            conda: "numba"
             pip: ""
             test: ""
           - python-version: 3.7
@@ -50,25 +50,25 @@ jobs:
           - python-version: 3.8
             name: plain
             os: ubuntu
-            conda: ""
+            conda: "numba"
             pip: ""
             test: ""
           - python-version: 3.8
             name: full
             os: ubuntu
-            conda: matplotlib
+            conda: "numba, matplotlib"
             pip: pytest-mpl scooby
             test: "--mpl"
           - python-version: 3.9
             name: plain
             os: ubuntu
-            conda: ""
+            conda: "numba"
             pip: ""
             test: ""
           - python-version: 3.9
             name: full
             os: ubuntu
-            conda: matplotlib
+            conda: "numba, matplotlib"
             pip: pytest-mpl scooby
             test: "--mpl"
 
