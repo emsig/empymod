@@ -10,6 +10,14 @@ v2.0.x
 """"""
 
 
+*latest*:
+---------
+
+
+- New example: Random noise for f-domain CSEM data.
+
+
+
 v2.1.2: Bugfix np.seterr(all='ignore')
 --------------------------------------
 

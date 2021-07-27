@@ -147,4 +147,5 @@ linkcheck_ignore = [
     'https://doi.org/10.1111/j.1365-246X.1988.tb01131.x',
     'https://doi.org/10.1093/gji/ggt251',
     'https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM',
+    'https://www.terrasysgeo.com',
 ]
