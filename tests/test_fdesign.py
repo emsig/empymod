@@ -136,7 +136,7 @@ def test_save_load_filter(tmpdir):
 @pytest.mark.skipif(not plt, reason="Matplotlib not installed.")
 class TestFiguresMatplotlib:
 
-    @pytest.mark.mpl_image_compare(remove_text=True)
+    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
     def test_plot_result1(self):
         switch_off_matplotlib_agg_warning()
         # Quick run `design` with all verb/plot on, just to check that no
