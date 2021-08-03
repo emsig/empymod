@@ -86,8 +86,8 @@ def hz(t, res, r, m=1.):
     theta = np.sqrt(mu_0/(4*res*t))
     theta_r = theta*r
 
-    s = -(9/theta_r+4*theta_r)*np.exp(-theta_r**2)/np.sqrt(np.pi)
-    s += erf(theta_r)*(9/(2*theta_r**2)-1)
+    s = 9/(2*theta_r**2)*erf(theta_r) - erf(theta_r)
+    s -= (9/theta_r+4*theta_r)*np.exp(-theta_r**2)/np.sqrt(np.pi)
     s *= m/(4*np.pi*r**3)
 
     return s
@@ -130,6 +130,18 @@ def dhzdt(t, res, r, m=1.):
 
 
 ###############################################################################
+
+def pos(data):
+    """Return positive data; set negative data to NaN."""
+    return np.array([x if x > 0 else np.nan for x in data])
+
+
+def neg(data):
+    """Return -negative data; set positive data to NaN."""
+    return np.array([-x if x < 0 else np.nan for x in data])
+
+
+###############################################################################
 # Survey parameters
 # ~~~~~~~~~~~~~~~~~
 
@@ -164,13 +176,15 @@ dhz_num = empymod.loop(signal=0, **inp)
 
 plt.figure(figsize=(5, 6))
 
-plt.plot(time*1e3, abs(dhz_ana), 'k-', lw=2, label='Ward & Hohmann')
-plt.plot(time*1e3, dhz_num, 'C1-', label='empymod; dHz/dt')
-plt.plot(time*1e3, -dhz_num, 'C1--')
+plt.plot(time*1e3, pos(dhz_ana), 'k-', lw=2, label='Ward & Hohmann')
+plt.plot(time*1e3, neg(dhz_ana), 'k--', lw=2)
+plt.plot(time*1e3, pos(dhz_num), 'C1-', label='empymod; dHz/dt')
+plt.plot(time*1e3, neg(dhz_num), 'C1--')
 
-plt.plot(time*1e3, abs(hz_ana), 'k-', lw=2)
-plt.plot(time*1e3, hz_num, 'C0-', label='empymod; Hz')
-plt.plot(time*1e3, -hz_num, 'C0--')
+plt.plot(time*1e3, pos(hz_ana), 'k-', lw=2)
+plt.plot(time*1e3, neg(hz_ana), 'k--', lw=2)
+plt.plot(time*1e3, pos(hz_num), 'C0-', label='empymod; Hz')
+plt.plot(time*1e3, neg(hz_num), 'C0--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -187,6 +201,10 @@ plt.show()
 # ~~~~~~~~~~~~~~~
 #
 # .. image:: ../../_static/figures/WardHohmannFig4-4.png
+#
+# Note that :math:`h_z` has the opposite sign in the original figure, which is
+# probably a typo (it is not what their equation yields).
+#
 #
 # The following examples are just compared to the figures, without the provided
 # analytical solutions.
@@ -209,11 +227,11 @@ fhz_num = empymod.loop(**inp)
 # Figure
 plt.figure(figsize=(5, 5))
 
-plt.plot(freq, fhz_num.real, 'C0-', label='Real')
-plt.plot(freq, -fhz_num.real, 'C0--')
+plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
+plt.plot(freq, neg(fhz_num.real), 'C0--')
 
-plt.plot(freq, fhz_num.imag, 'C1-', label='Imaginary')
-plt.plot(freq, -fhz_num.imag, 'C1--')
+plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+plt.plot(freq, neg(fhz_num.imag), 'C1--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -251,11 +269,11 @@ fhz_num = empymod.loop(**inp)
 # Figure
 plt.figure(figsize=(5, 5))
 
-plt.plot(freq, fhz_num.real, 'C0-', label='Real')
-plt.plot(freq, -fhz_num.real, 'C0--')
+plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
+plt.plot(freq, neg(fhz_num.real), 'C0--')
 
-plt.plot(freq, fhz_num.imag, 'C1-', label='Imaginary')
-plt.plot(freq, -fhz_num.imag, 'C1--')
+plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+plt.plot(freq, neg(fhz_num.imag), 'C1--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -294,8 +312,8 @@ fdhz_num = empymod.loop(signal=0, **inp)
 plt.figure(figsize=(5, 6))
 
 ax1 = plt.subplot(111)
-plt.plot(time*1e3, fdhz_num, 'C0-', label='dHz/dt')
-plt.plot(time*1e3, -fdhz_num, 'C0--')
+plt.plot(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
+plt.plot(time*1e3, neg(fdhz_num), 'C0--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -308,8 +326,8 @@ plt.legend(loc=8)
 
 ax2 = ax1.twinx()
 
-plt.plot(time*1e3, fhz_num, 'C1-', label='Hz')
-plt.plot(time*1e3, -fhz_num, 'C1--')
+plt.plot(time*1e3, pos(fhz_num), 'C1-', label='Hz')
+plt.plot(time*1e3, neg(fhz_num), 'C1--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -351,11 +369,11 @@ fhz_num = empymod.bipole(**inp)
 # Figure
 plt.figure(figsize=(5, 5))
 
-plt.plot(freq, fhz_num.real, 'C0-', label='Real')
-plt.plot(freq, -fhz_num.real, 'C0--')
+plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
+plt.plot(freq, neg(fhz_num.real), 'C0--')
 
-plt.plot(freq, fhz_num.imag, 'C1-', label='Imaginary')
-plt.plot(freq, -fhz_num.imag, 'C1--')
+plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+plt.plot(freq, neg(fhz_num.imag), 'C1--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -401,11 +419,11 @@ fdhz_num = empymod.bipole(signal=0, **inp)
 plt.figure(figsize=(4, 6))
 
 ax1 = plt.subplot(111)
-plt.plot(time*1e3, fdhz_num, 'C0-', label=r'dhz/dt (A/m-s)')
-plt.plot(time*1e3, -fdhz_num, 'C0--')
+plt.plot(time*1e3, pos(fdhz_num), 'C0-', label=r'dhz/dt (A/m-s)')
+plt.plot(time*1e3, neg(fdhz_num), 'C0--')
 
-plt.plot(time*1e3, fhz_num, 'C1-', label='hz (A/m)')
-plt.plot(time*1e3, -fhz_num, 'C1--')
+plt.plot(time*1e3, pos(fhz_num), 'C1-', label='hz (A/m)')
+plt.plot(time*1e3, neg(fhz_num), 'C1--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -443,11 +461,11 @@ fhz_num = empymod.loop(**inp)
 # Figure
 plt.figure(figsize=(5, 5))
 
-plt.plot(freq, fhz_num.real, 'C0-', label='Real')
-plt.plot(freq, -fhz_num.real, 'C0--')
+plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
+plt.plot(freq, neg(fhz_num.real), 'C0--')
 
-plt.plot(freq, fhz_num.imag, 'C1-', label='Imaginary')
-plt.plot(freq, -fhz_num.imag, 'C1--')
+plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+plt.plot(freq, neg(fhz_num.imag), 'C1--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -485,11 +503,11 @@ fhz_num = empymod.loop(**inp)
 # Figure
 plt.figure(figsize=(5, 5))
 
-plt.plot(freq, fhz_num.real, 'C0-', label='Real')
-plt.plot(freq, -fhz_num.real, 'C0--')
+plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
+plt.plot(freq, neg(fhz_num.real), 'C0--')
 
-plt.plot(freq, fhz_num.imag, 'C1-', label='Imaginary')
-plt.plot(freq, -fhz_num.imag, 'C1--')
+plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+plt.plot(freq, neg(fhz_num.imag), 'C1--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -529,8 +547,8 @@ plt.figure(figsize=(5, 5))
 
 ax1 = plt.subplot(111)
 
-plt.plot(time*1e3, fdhz_num, 'C0-', label='dHz/dt')
-plt.plot(time*1e3, -fdhz_num, 'C0--')
+plt.plot(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
+plt.plot(time*1e3, neg(fdhz_num), 'C0--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -543,8 +561,8 @@ plt.legend(loc=8)
 
 ax2 = ax1.twinx()
 
-plt.plot(time*1e3, fhz_num, 'C1-', label='Hz')
-plt.plot(time*1e3, -fhz_num, 'C1--')
+plt.plot(time*1e3, pos(fhz_num), 'C1-', label='Hz')
+plt.plot(time*1e3, neg(fhz_num), 'C1--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -583,10 +601,9 @@ fdhz_num = empymod.loop(signal=0, **inp)
 plt.figure(figsize=(5, 5))
 
 ax1 = plt.subplot(111)
-plt.title('New version')
 
-plt.plot(time*1e3, fdhz_num, 'C0-', label='dHz/dt')
-plt.plot(time*1e3, -fdhz_num, 'C0--')
+plt.plot(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
+plt.plot(time*1e3, neg(fdhz_num), 'C0--')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -599,8 +616,8 @@ plt.legend(loc=8)
 
 ax2 = ax1.twinx()
 
-plt.plot(time*1e3, fhz_num, 'C1-', label='Hz')
-plt.plot(time*1e3, -fhz_num, 'C1--')
+plt.plot(time*1e3, pos(fhz_num), 'C1-', label='Hz')
+plt.plot(time*1e3, neg(fhz_num), 'C1--')
 
 plt.xscale('log')
 plt.yscale('log')
