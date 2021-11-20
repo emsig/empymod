@@ -10,9 +10,10 @@ v2.0.x
 """"""
 
 
-*latest*:
----------
+v2.1.3: Random noise example
+----------------------------
 
+**2021-11-20**
 
 - New example: Random noise for f-domain CSEM data.
 
