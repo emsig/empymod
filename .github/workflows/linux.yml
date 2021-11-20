@@ -10,7 +10,7 @@ on:
     types:
       - published
   schedule:
-    - cron: "40 20 17 * *"
+    - cron: "14 14 20 * *"
 
 # Use bash by default in all jobs
 defaults:
