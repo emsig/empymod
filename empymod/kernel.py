@@ -43,7 +43,7 @@ _numba_with_fm = {'fastmath': True, **_numba_setting}
 
 # Wavenumber-frequency domain kernel
 
-@nb.njit(**_numba_with_fm)
+@nb.njit(**_numba_setting)
 def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                ab, xdirect, msrc, mrec):
     r"""Calculate wavenumber domain solution.

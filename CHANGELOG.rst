@@ -16,6 +16,10 @@ v2.0.x
 
 - New example: Random noise for f-domain CSEM data.
 
+- Maintenance:
+
+  - Change in the njit-settings of ``kernel.wavenumber`` to work with
+    ``numba>=0.54``.
 
 
 v2.1.2: Bugfix np.seterr(all='ignore')
