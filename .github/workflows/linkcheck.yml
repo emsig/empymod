@@ -9,6 +9,8 @@ on:
   release:
     types:
       - published
+  schedule:
+    - cron: "14 14 20 * *"
 
 jobs:
   linkcheck:
