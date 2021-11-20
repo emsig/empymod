@@ -3,7 +3,8 @@
 
 # SOFT DEPENDENCIES
 scooby
-matplotlib
+# https://github.com/matplotlib/matplotlib/issues/21688
+matplotlib != 3.5.0
 
 # SETUP RELATED
 setuptools_scm

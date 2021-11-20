@@ -20,6 +20,8 @@ v2.0.x
 
   - Change in the njit-settings of ``kernel.wavenumber`` to work with
     ``numba>=0.54``.
+  - Cannot use ``matplotlib==3.5.0`` to build the gallery (matplotlib#21688).
+  - Move up the minimum matplotlib in the tests.
 
 
 v2.1.2: Bugfix np.seterr(all='ignore')
