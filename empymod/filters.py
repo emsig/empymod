@@ -28,7 +28,7 @@ The filter `wer_201_2018` was designed with the add-on `fdesign`, see
 https://github.com/emsig/article-fdesign.
 
 """
-# Copyright 2016-2021 The emsig community.
+# Copyright 2016-2022 The emsig community.
 #
 # This file is part of empymod.
 #
