@@ -8,7 +8,7 @@ This module consists of four groups of functions:
    3. Internal utilities
 
 """
-# Copyright 2016-2021 The emsig community.
+# Copyright 2016-2022 The emsig community.
 #
 # This file is part of empymod.
 #
