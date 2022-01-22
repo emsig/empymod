@@ -4,15 +4,14 @@
 # SOFT DEPENDENCIES
 scooby
 # https://github.com/matplotlib/matplotlib/issues/21688
-# Keep an eye on the issue to see if it will be resolved!
-matplotlib != 3.5.0, != 3.5.1
+matplotlib != 3.5.0
 
 # SETUP RELATED
 setuptools_scm
 
 # FOR DOCUMENTATION
-sphinx > 3
-numpydoc >= 0.9
+sphinx
+numpydoc
 sphinx_panels
 sphinx_numfig
 sphinx_gallery

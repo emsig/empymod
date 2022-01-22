@@ -101,19 +101,19 @@ plt.style.use('ggplot')
 ###############################################################################
 
 class Arrow3D(FancyArrowPatch):
-    """https://stackoverflow.com/a/29188796"""
+    """https://github.com/matplotlib/matplotlib/issues/21688"""
 
     def __init__(self, xs, ys, zs):
-        FancyArrowPatch.__init__(
-                self, (0, 0), (0, 0), mutation_scale=20, lw=1.5,
+        super().__init__(
+                (0, 0), (0, 0), mutation_scale=20, lw=1.5,
                 arrowstyle='-|>', color='.2', zorder=100)
         self._verts3d = xs, ys, zs
 
-    def draw(self, renderer):
+    def do_3d_projection(self, renderer=None):
         xs3d, ys3d, zs3d = self._verts3d
-        xs, ys, _ = proj3d.proj_transform(xs3d, ys3d, zs3d, self.axes.M)
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, self.axes.M)
         self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
-        FancyArrowPatch.draw(self, renderer)
+        return np.min(zs)
 
 
 ###############################################################################
