@@ -13,8 +13,12 @@ v2.0.x
 latest
 ------
 
-- DOC: Expanded note on FFTLog.
-- MAINT: Use scipy through conda in CI.
+- Documentation: Expanded note on FFTLog.
+
+- Maintenance:
+
+ - Use scipy through conda in CI.
+ - Fix ``do_3d_projection`` for ``matplotlib>3.5.0``.
 
 
 v2.1.3: Random noise example
