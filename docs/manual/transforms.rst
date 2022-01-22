@@ -82,14 +82,16 @@ astronomy, and Haines and Jones was published in the *Geophysical Journal*.
 Logarithmic FFTs are not widely used in electromagnetics, as far as I know,
 probably because of the ease, speed, and generally sufficient precision of the
 digital filter methods with sine and cosine transforms ([Ande75]_). However,
-comparisons show that FFTLog can be faster and more precise than digital
-filters, specifically for responses with source and receiver at the interface
-between air and subsurface. Credit to use FFTLog in electromagnetics goes to
-David Taylor who, in the mid-2000s, implemented FFTLog into the forward
-modellers of the company Multi-Transient ElectroMagnetic (MTEM Ltd, later
-Petroleum Geo-Services PGS). The implementation was driven by land responses,
-where FFTLog can be much more precise than the filter method for very early
-times.
+comparisons show that under certain circumstances FFTLog can be faster and more
+precise than digital filters, particularly at early times for responses with
+source and receiver at the interface between air and subsurface. Credit to use
+FFTLog in electromagnetics goes to David Taylor and [PeMS06]_ who, as far as I
+know unaware of each other, used FFTLog in the mid-2000s for geophysical
+electromagnetic purposes. Taylor implemented FFTLog into the isotropic layered
+CSEM forward modellers of the company Multi-Transient ElectroMagnetic (MTEM
+Ltd, later Petroleum Geo-Services PGS). The implementation was driven by land
+responses. Pervago used it to model layered DC responses with arbitrary
+anisotropy.
 
 
 Notes on Fourier Transform

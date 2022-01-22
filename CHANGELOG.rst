@@ -10,6 +10,13 @@ v2.0.x
 """"""
 
 
+latest
+------
+
+- DOC: Expanded note on FFTLog.
+- MAINT: Use scipy through conda in CI.
+
+
 v2.1.3: Random noise example
 ----------------------------
 
