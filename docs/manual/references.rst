@@ -53,6 +53,11 @@ References
    radiation in a conductive medium: Geophysical Prospecting, 55, 83--89; DOI:
    `10.1111/j.1365-2478.2006.00585.x
    <https://doi.org/10.1111/j.1365-2478.2006.00585.x>`_.
+.. [PeMS06] Pervago, E., A. Mousatov, and V. Shevnin, 2006, Analytical solution
+   for the electric potential in arbitrary anisotropic layered media applying
+   the set of Hankel transforms of integer order: Geophysical Prospecting, 54,
+   651--661; DOI: `10.1111/j.1365-2478.2006.00555.x
+   <https://doi.org/10.1111/j.1365-2478.2006.00555.x>`_.
 .. [Shan55] Shanks, D., 1955, Non-linear transformations of divergent and
    slowly convergent sequences: Journal of Mathematics and Physics, 34, 1--42;
    DOI: `10.1002/sapm19553411 <https://doi.org/10.1002/sapm19553411>`_.
