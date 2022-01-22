@@ -37,18 +37,6 @@ jobs:
             conda: "'numpy=1.17' 'scipy=1.4' 'numba=0.47'"
             pip: ""
             test: ""
-          - python-version: "3.7"
-            name: plain
-            os: ubuntu
-            conda: "numba scipy"
-            pip: ""
-            test: ""
-          - python-version: "3.7"
-            name: full
-            os: ubuntu
-            conda: "numba 'matplotlib>=3.3' scipy"
-            pip: pytest-mpl scooby
-            test: "--mpl"
           - python-version: "3.8"
             name: plain
             os: ubuntu
@@ -67,6 +55,12 @@ jobs:
             conda: "numba scipy"
             pip: ""
             test: ""
+          - python-version: "3.9"
+            name: full
+            os: ubuntu
+            conda: "numba 'matplotlib>=3.3' scipy"
+            pip: pytest-mpl scooby
+            test: "--mpl"
           - python-version: "3.10"
             name: plain
             os: ubuntu
