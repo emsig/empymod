@@ -80,11 +80,10 @@ coordinate systems:
   interface. To force any of the other system you can define ``-np.infty`` at
   the appropriate place:
 
-  - ``0`` -> LHS low to high (default)
+  - ``0`` or ``[0, np.infty]`` -> LHS low to high (default)
   - ``[0, -np.infty]`` -> RHS high to low
+  - ``[np.infty, 0]`` -> LHS high to low
   - ``[-np.infty, 0]`` -> RHS low to high
-  - It is currently not possible to define a LHS high-to-low system with only
-    one interface; you need to define at least two interfaces (three layers).
 
 
 In this example we first create a sketch of the LHS and RHS for visualization,
