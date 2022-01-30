@@ -61,9 +61,6 @@ coordinate systems:
   - ``res = [1, 50, 1, 0.3, 1e12]`` -> LHS high to low
   - ``res = [1, 50, 1, 0.3, 1e12]`` -> RHS low to high
 
-  Note that in a two-layer scenario the values are always taken as low-to-high
-  (as it is not possible to detect the direction from only one interface).
-
 - A source or a receiver *exactly on* a boundary is taken as being in the lower
   layer. Hence, if :math:`z_\rm{rec} = z_0`, where :math:`z_0` is the surface,
   then the receiver is taken as in the air in the LHS, but as in the subsurface
@@ -75,6 +72,19 @@ coordinate systems:
   ``ab``'s containing vertical directions switch the sign for each vertical
   component.
 - Sign switches also occur for magnetic sources or receivers.
+
+.. note::
+
+  In a two-layer scenario with only one ``depth`` it always assumes **LHS
+  low-to-high**, as it is not possible to detect the direction from only one
+  interface. To force any of the other system you can define ``-np.infty`` at
+  the appropriate place:
+
+  - ``0`` -> LHS low to high (default)
+  - ``[0, -np.infty]`` -> RHS high to low
+  - ``[-np.infty, 0]`` -> RHS low to high
+  - It is currently not possible to define a LHS high-to-low system with only
+    one interface; you need to define at least two interfaces (three layers).
 
 
 In this example we first create a sketch of the LHS and RHS for visualization,
