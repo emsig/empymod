@@ -44,22 +44,17 @@ There are a few other important points to keep in mind when switching between
 coordinate systems:
 
 - The interfaces (``depth``) have to be defined continuously increasing or
-  decreasing, either from lowest to highest or the other way around. E.g., a
-  simple five-layer model with the sea-surface at 0 m, a 100 m water column,
-  and a target of 50 m 900 m below the seafloor can be defined in four ways:
+  decreasing. E.g., think of a simple five-layer model with the sea-surface at
+  0 m, a 100 m water column, and a target of 50 m 900 m below the seafloor,
+  with the following resistivities:
 
-  - ``[0, 100, 1000, 1050]`` -> LHS low to high
-  - ``[0, -100, -1000, -1050]`` -> RHS high to low
-  - ``[1050, 1000, 100, 0]`` -> LHS high to low
-  - ``[-1050, -1000, -100, 0]`` -> RHS low to high
+  - ``res = [1e12, 0.3, 1, 50, 1]``: air, water, background, target,
+    background.
 
-- The above point affects also all model parameters (``res``, ``aniso``,
-  ``{e;m}perm{H;V}``). E.g., for the above five-layer example this would be
+  We can now define the depths in two different ways:
 
-  - ``res = [1e12, 0.3, 1, 50, 1]`` -> LHS low to high
-  - ``res = [1e12, 0.3, 1, 50, 1]`` -> RHS high to low
-  - ``res = [1, 50, 1, 0.3, 1e12]`` -> LHS high to low
-  - ``res = [1, 50, 1, 0.3, 1e12]`` -> RHS low to high
+  - ``depth = [0, 100, 1000, 1050]``: **LHS** (+z down)
+  - ``depth = [0, -100, -1000, -1050]``: **RHS** (+z up)
 
 - A source or a receiver *exactly on* a boundary is taken as being in the lower
   layer. Hence, if :math:`z_\rm{rec} = z_0`, where :math:`z_0` is the surface,
@@ -68,22 +63,51 @@ coordinate systems:
   receiver is taken as in the sea in the LHS, but as in the subsurface in the
   RHS. This can be avoided by never placing it exactly on a boundary, but
   slightly (e.g., 1 mm) in the layer where you want to have it.
-- In ``bipole``, the ``dip`` switches sign. Correspondingly in ``dipole``, the
-  ``ab``'s containing vertical directions switch the sign for each vertical
-  component.
-- Sign switches also occur for magnetic sources or receivers.
+
+- Sign switches:
+
+  - In ``bipole``, the ``dip`` switches sign.
+  - In ``dipole``, the ``ab``'s containing vertical directions switch the sign
+    for each vertical component.
+  - Sign switches also occur for magnetic sources or receivers.
+
+  These sign switches multiply; e.g., ``ab=34`` has no sign switch, as the
+  switch due to the vertical source and the switch due to the magnetic receiver
+  cancel each other. Here an overview of the sign switches (--) for ``dipole``
+  when changing from the default LHS to a RHS:
+
+  +---------------+-------+------+------+------+------+------+------+
+  |                       | electric  source   | magnetic source    |
+  +===============+=======+======+======+======+======+======+======+
+  |                       | **x**| **y**| **z**| **x**| **y**| **z**|
+  +---------------+-------+------+------+------+------+------+------+
+  |               | **x** |      |      |  --  |  --  |  --  |      |
+  + **electric**  +-------+------+------+------+------+------+------+
+  |               | **y** |      |      |  --  |  --  |  --  |      |
+  + **receiver**  +-------+------+------+------+------+------+------+
+  |               | **z** |  --  |  --  |      |      |      |  --  |
+  +---------------+-------+------+------+------+------+------+------+
+  |               | **x** |  --  |  --  |      |      |      |  --  |
+  + **magnetic**  +-------+------+------+------+------+------+------+
+  |               | **y** |  --  |  --  |      |      |      |  --  |
+  + **receiver**  +-------+------+------+------+------+------+------+
+  |               | **z** |      |      |  --  |  --  |  --  |      |
+  +---------------+-------+------+------+------+------+------+------+
+
+- The depths can also be defined the other way around, starting at +/-1050
+  going to 0. You have to change the order of all model parameters (``res``,
+  ``aniso``, ``{e;m}perm{H;V}``) accordingly.
+
 
 .. note::
 
-  In a two-layer scenario with only one ``depth`` it always assumes **LHS
-  low-to-high**, as it is not possible to detect the direction from only one
-  interface. To force any of the other system you can define ``-np.infty`` at
-  the appropriate place:
+  In a two-layer scenario with only one ``depth`` it always assumes a **LHS**,
+  as it is not possible to detect the direction from only one interface. To
+  force any of the other system you can define ``+/-np.infty`` for the
+  down-most interface at the appropriate place:
 
-  - ``0`` or ``[0, np.infty]`` -> LHS low to high (default)
-  - ``[0, -np.infty]`` -> RHS high to low
-  - ``[np.infty, 0]`` -> LHS high to low
-  - ``[-np.infty, 0]`` -> RHS low to high
+  - ``0`` or ``[0, np.infty]``: **LHS** (+z down; default)
+  - ``[0, -np.infty]``: **RHS** (+z up)
 
 
 In this example we first create a sketch of the LHS and RHS for visualization,
