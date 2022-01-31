@@ -101,13 +101,13 @@ coordinate systems:
 
 .. note::
 
-  In a two-layer scenario with only one ``depth`` it always assumes a **LHS**,
-  as it is not possible to detect the direction from only one interface. To
-  force any of the other system you can define ``+/-np.infty`` for the
-  down-most interface at the appropriate place:
+  In a two-layer scenario with only one interface ``depth = z`` it always
+  assumes a **LHS**, as it is not possible to detect the direction from only
+  one interface. To force a **RHS** you have to add ``-np.infty`` for the
+  down-most interface:
 
-  - ``0`` or ``[0, np.infty]``: **LHS** (+z down; default)
-  - ``[0, -np.infty]``: **RHS** (+z up)
+  - **LHS**: ``depth = z`` (+z down); default, corresponds to ``[z, np.infty]``
+  - **RHS**: ``depth = [z, -np.infty]`` (+z up)
 
 
 In this example we first create a sketch of the LHS and RHS for visualization,
