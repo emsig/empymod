@@ -728,8 +728,13 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     # => The top-layer (-infinity to first interface) is layer 0.
     if depth.size == 0:
         depth = np.array([-np.infty, ])
-    elif depth[0] != -np.infty:
-        depth = np.insert(depth, 0, -np.infty)
+    else:
+        if depth[0] != -np.infty:
+            depth = np.r_[-np.infty, depth]
+
+        # Remove +np.infty (can be used to define 2-layer coordinate system).
+        if depth[-1] == np.infty:
+            depth = depth[:-1]
 
     # Check if the user provided a model for etaH/etaV/zetaH/zetaV
     if isinstance(res, dict):

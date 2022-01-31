@@ -700,6 +700,77 @@ def test_all_depths():
     assert_allclose(lhs_l2h, rhs_h2l)
 
 
+def test_coordinate_systems():
+    srcLHS = (0, 0, -10)
+    srcRHS = (0, 0, +10)
+
+    x = np.arange(1, 11)*1000
+    recLHS = (x, x, +3)
+    recRHS = (x, x, -3)
+
+    air, hs, tg = 2e14, 100, 1000
+    z0, z1, z2 = 0, 10, 20
+
+    inp = {'freqtime': 1, 'verb': 1}
+    inpLHS = {'src': srcLHS, 'rec': recLHS}
+    inpRHS = {'src': srcRHS, 'rec': recRHS}
+
+    for ab in [11, 31, 23, 33, 25, 35, 16, 66, 51, 61, 43, 63, 44, 65, 56, 66]:
+        # Sign switches occur for each z-component; each m-component
+        sign = 1
+        if ab % 10 > 3:   # If True: magnetic src
+            sign *= -1
+        if ab // 10 > 3:  # If True: magnetic rec
+            sign *= -1
+        if str(ab)[0] in ['3', '6']:  # Vertical source component
+            sign *= -1
+        if str(ab)[1] in ['3', '6']:  # Vertical receiver component
+            sign *= -1
+        inp['ab'] = ab
+
+        # # 2-layer case
+
+        # Default/original: LHS low to high
+        orig = dipole(depth=z0, res=[air, hs], **inpLHS, **inp)
+
+        # Alternatives LHS: low to high and high to low
+        LHSl2h = dipole(depth=[z0, np.infty], res=[air, hs], **inpLHS, **inp)
+        LHSh2l = dipole(depth=[np.infty, z0], res=[hs, air], **inpLHS, **inp)
+
+        assert_allclose(orig, LHSl2h)
+        assert_allclose(orig, LHSh2l)
+
+        # Alternatives LHS: low to high and high to low
+        RHSlth = sign*dipole(
+            depth=[-np.infty, -z0], res=[hs, air], **inpRHS, **inp)
+        RHSh2l = sign*dipole(
+            depth=[-z0, -np.infty], res=[air, hs], **inpRHS, **inp)
+
+        assert_allclose(orig, RHSlth)
+        assert_allclose(orig, RHSh2l)
+
+        # # 4-layer case
+
+        # Default/original: LHS low to high
+        orig = dipole(
+            depth=[z0, z1, z2], res=[air, hs, tg, hs], **inpLHS, **inp)
+
+        # Alternatives LHS: low to high and high to low
+        LHSh2l = dipole(
+            depth=[z2, z1, z0], res=[hs, tg, hs, air], **inpLHS, **inp)
+
+        assert_allclose(orig, LHSh2l)
+
+        # Alternatives LHS: low to high and high to low
+        RHSlth = sign*dipole(
+            depth=[-z2, -z1, -z0], res=[hs, tg, hs, air], **inpRHS, **inp)
+        RHSh2l = sign*dipole(
+            depth=[-z0, -z1, -z2], res=[air, hs, tg, hs], **inpRHS, **inp)
+
+        assert_allclose(orig, RHSlth)
+        assert_allclose(orig, RHSh2l)
+
+
 class TestLoop:
     # Loop is a subset of bipole, with a frequency-dependent factor at the
     # frequency level.

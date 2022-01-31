@@ -13,7 +13,14 @@ v2.0.x
 latest
 ------
 
-- Documentation: Expanded note on FFTLog.
+- One can define new ``+np.infty`` as interface. Only use-case is to enforce a
+  coordinate system in a two-layer case with an interface at ``z`` (see example
+  coordinate system in the educational section of the gallery).
+
+- Documentation:
+
+  - Expanded note on FFTLog.
+  - Expanded note on coordinate system.
 
 - Maintenance:
 
