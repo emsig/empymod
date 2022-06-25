@@ -335,6 +335,19 @@ def walktem(moment, depth, res):
         srcpts=3,                     # Approx. the finite dip. with 3 points.
         htarg={'dlf': 'key_101_2009'},  # Short filter, so fast.
     )
+    # Note: If the receiver wouldn't be in the center, we would have to model
+    # the actual complete loop (no symmetry to take advantage of).
+    #
+    #     EM = empymod.model.bipole(
+    #         src=[[20, 20, -20, -20],  # x1
+    #              [20, -20, -20, 20],  # x2
+    #              [-20, 20, 20, -20],  # y1
+    #              [20, 20, -20, -20],  # y2
+    #              0, 0],               # z1, z2
+    #         strength=1,
+    #         # ... all other parameters remain the same
+    #     )
+    #     EM = EM.sum(axis=1)  # Sum all source bipoles
 
     # Multiply the frequecny-domain result with
     # \mu for H->B, and i\omega for B->dB/dt.
