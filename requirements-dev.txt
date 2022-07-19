@@ -27,3 +27,4 @@ coveralls
 pytest_cov
 pytest_mpl
 pytest_flake8
+pytest-console-scripts

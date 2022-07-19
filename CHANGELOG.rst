@@ -10,6 +10,18 @@ v2.1.x
 """"""
 
 
+latest
+------
+
+- I/O & CLI:
+
+  - New Command-Line Interface (CLI) for the top-level modelling functions
+    ``bipole``, ``dipole``, ``loop``, and ``analytical``. Consult the manual
+    for its description, or type in your terminal ``empymod --help``. Note that
+    the CLI is currently missing proper logging.
+  - New module ``io`` to save and load inputs and data.
+
+
 v2.1.4: Squeeze
 ---------------
 

@@ -116,7 +116,7 @@ jobs:
           conda config --set always_yes yes --set changeps1 no
           conda config --show-sources
           conda config --show
-          conda install ${{ matrix.case.conda }} pytest pytest-cov coveralls pytest-flake8 setuptools_scm
+          conda install ${{ matrix.case.conda }} pytest pytest-cov pytest-console-scripts coveralls pytest-flake8 setuptools_scm
           conda info -a
           conda list
 

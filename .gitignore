@@ -6,6 +6,8 @@ docs/_build/
 docs/api/empymod*
 docs/savefig/
 docs/gallery/*/
+docs/my*.json
+docs/my*.txt
 
 # Pytest and coverage related
 htmlcov

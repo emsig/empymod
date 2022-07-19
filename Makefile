@@ -37,7 +37,7 @@ html-noplot:
 	cd docs && make html-noplot
 
 html-clean:
-	cd docs && rm -rf api/empymod* gallery/*/ _build/ && make html
+	cd docs && rm -rf api/empymod* gallery/*/ _build/ my*.json my*.txt && make html
 
 preview:
 	xdg-open docs/_build/html/index.html
@@ -50,6 +50,6 @@ clean:
 	rm -rf build/ dist/ .eggs/ empymod.egg-info/ empymod/version.py  # build
 	rm -rf */__pycache__/ */*/__pycache__/      # python cache
 	rm -rf .coverage htmlcov/ .pytest_cache/    # tests and coverage
-	rm -rf docs/gallery/*/ docs/gallery/*.zip docs/_build/ docs/api/empymod* # docs
+	rm -rf docs/gallery/*/ docs/gallery/*.zip docs/_build/ docs/api/empymod* docs/my*.json docs/my*.txt # docs
 	rm -rf matplotlibrc docs/savefig
 	rm -rf filters/ examples/educational/filters/

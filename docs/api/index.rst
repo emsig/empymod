@@ -20,6 +20,7 @@ API reference
    model
    transform
    utils
+   io
    fdesign
    tmtemod
 
