@@ -1096,3 +1096,46 @@ def test_regres():
     for _, val in dat.items():
         res = dipole(**val[0])
         assert_allclose(res, val[1], 3e-2, 1e-17, True)
+
+
+class TestSqueeze:
+
+    def test_bipole(self):
+        inp = {'src': [0, 0, 0, 0, 0], 'rec': [1000, 2000, 300, 0, 0],
+               'freqtime': 1.0, 'depth': [], 'res': 1.0}
+
+        a = bipole(**inp)
+        b = bipole(squeeze=False, **inp)
+
+        assert a.shape == ()
+        assert b.shape == (1, 1, 1)
+
+    def test_dipole(self):
+        inp = {'src': [0, 0, 0], 'rec': [1000, 2000, 300],
+               'freqtime': 1.0, 'depth': [], 'res': 1.0}
+
+        a = dipole(**inp)
+        b = dipole(squeeze=False, **inp)
+
+        assert a.shape == ()
+        assert b.shape == (1, 1, 1)
+
+    def test_loop(self):
+        inp = {'src': [0, 0, 0, 0, 0], 'rec': [1000, 2000, 300, 0, 0],
+               'freqtime': 1.0, 'depth': [], 'res': 1.0}
+
+        a = loop(**inp)
+        b = loop(squeeze=False, **inp)
+
+        assert a.shape == ()
+        assert b.shape == (1, 1, 1)
+
+    def test_analytical(self):
+        inp = {'src': [0, 0, 0], 'rec': [1000, 2000, 300],
+               'freqtime': 1.0, 'res': 1.0}
+
+        a = analytical(**inp)
+        b = analytical(squeeze=False, **inp)
+
+        assert a.shape == ()
+        assert b.shape == (1, 1, 1)
