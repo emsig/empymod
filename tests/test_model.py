@@ -1112,30 +1112,31 @@ class TestSqueeze:
 
     def test_dipole(self):
         inp = {'src': [0, 0, 0], 'rec': [1000, 2000, 300],
-               'freqtime': 1.0, 'depth': [], 'res': 1.0}
+               'freqtime': [0.1, 1.0], 'depth': [], 'res': 1.0}
 
         a = dipole(**inp)
         b = dipole(squeeze=False, **inp)
 
-        assert a.shape == ()
-        assert b.shape == (1, 1, 1)
+        assert a.shape == (2, )
+        assert b.shape == (2, 1, 1)
 
     def test_loop(self):
-        inp = {'src': [0, 0, 0, 0, 0], 'rec': [1000, 2000, 300, 0, 0],
+        inp = {'src': [[0, 10], [0, 0], 0, 0, 0],
+               'rec': [1000, 2000, 300, 0, 0],
                'freqtime': 1.0, 'depth': [], 'res': 1.0}
 
         a = loop(**inp)
         b = loop(squeeze=False, **inp)
 
-        assert a.shape == ()
-        assert b.shape == (1, 1, 1)
+        assert a.shape == (2, )
+        assert b.shape == (1, 1, 2)
 
     def test_analytical(self):
-        inp = {'src': [0, 0, 0], 'rec': [1000, 2000, 300],
+        inp = {'src': [0, 0, 0], 'rec': [[1000, 2000], [2000, 2000], 300],
                'freqtime': 1.0, 'res': 1.0}
 
         a = analytical(**inp)
         b = analytical(squeeze=False, **inp)
 
-        assert a.shape == ()
-        assert b.shape == (1, 1, 1)
+        assert a.shape == (2, )
+        assert b.shape == (1, 2, 1)
