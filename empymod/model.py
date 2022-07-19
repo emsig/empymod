@@ -374,10 +374,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     """
     # Get kwargs with defaults.
-    squeeze = kwargs.pop('squeeze', True)
-    out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
-                     [2, 'dlf', {}, 'dlf', {}, False, None], kwargs)
-    verb, ht, htarg, ft, ftarg, xdirect, loop = out
+    out = get_kwargs(
+        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
+        [2, 'dlf', {}, 'dlf', {}, False, None, True], kwargs,
+    )
+    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -701,10 +702,11 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     """
     # Get kwargs with defaults.
-    squeeze = kwargs.pop('squeeze', True)
-    out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
-                     [2, 'dlf', {}, 'dlf', {}, False, None], kwargs)
-    verb, ht, htarg, ft, ftarg, xdirect, loop = out
+    out = get_kwargs(
+        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
+        [2, 'dlf', {}, 'dlf', {}, False, None, True], kwargs,
+    )
+    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -998,10 +1000,11 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     """
     # Get kwargs with defaults.
-    squeeze = kwargs.pop('squeeze', True)
-    out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
-                     [2, 'dlf', {}, 'dlf', {}, False, None], kwargs)
-    verb, ht, htarg, ft, ftarg, xdirect, loop = out
+    out = get_kwargs(
+        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
+        [2, 'dlf', {}, 'dlf', {}, False, None, True], kwargs,
+    )
+    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -1348,8 +1351,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     """
     # Get kwargs with defaults.
-    squeeze = kwargs.pop('squeeze', True)
-    verb = get_kwargs(['verb', ], [2, ], kwargs)[0]
+    verb, squeeze = get_kwargs(['verb', 'squeeze'], [2, True], kwargs)
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
