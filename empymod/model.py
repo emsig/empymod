@@ -126,41 +126,37 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     freqtime : array_like
         Frequencies f (Hz) if `signal==None`, else times t (s); (f, t > 0).
 
-    signal : {None, 0, 1, -1}, optional
-        Source signal, default is None:
+    signal : {None, 0, 1, -1}, default: None
+        Source signal:
 
         - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
 
-    aniso : array_like, optional
+    aniso : array_like, default: ones
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
-        Defaults to ones.
 
-    epermH, epermV : array_like, optional
+    epermH, epermV : array_like, default: ones
         Relative horizontal/vertical electric permittivities
         epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
         provided but not epermV, isotropic behaviour is assumed.
-        Default is ones.
 
-    mpermH, mpermV : array_like, optional
+    mpermH, mpermV : array_like, default: ones
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
         isotropic behaviour is assumed.
-        Default is ones.
 
-    msrc, mrec : bool, optional
+    msrc, mrec : bool, default: False
         If True, source/receiver (msrc/mrec) is magnetic, else electric.
-        Default is False.
 
-    srcpts, recpts : int, optional
-        Number of integration points for bipole source/receiver, default is 1:
+    srcpts, recpts : int, default: 1
+        Number of integration points for bipole source/receiver:
 
         - srcpts/recpts < 3  : bipole, but calculated as dipole at centre
         - srcpts/recpts >= 3 : bipole
 
-    strength : float, optional
+    strength : float, default: 0.0
         Source strength (A):
 
         - If 0, output is normalized to source and receiver of 1 m length, and
@@ -168,10 +164,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         - If != 0, output is returned for given source and receiver length, and
           source strength.
 
-        Default is 0.
-
-    verb : {0, 1, 2, 3, 4}, optional
-        Level of verbosity, default is 2:
+    verb : {0, 1, 2, 3, 4}, default: 2
+        Level of verbosity:
 
         - 0: Print nothing.
         - 1: Print warnings.
@@ -179,11 +173,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         - 3: Print additional start/stop, condensed parameter information.
         - 4: Print additional full parameter information
 
-    ht : {'dlf', 'qwe', 'quad'}, optional
+    ht : {'dlf', 'qwe', 'quad'}, default: 'dlf'
         Flag to choose either the *Digital Linear Filter* (DLF) method, the
         *Quadrature-With-Extrapolation* (QWE), or a simple *Quadrature* (QUAD)
         for the Hankel transform.
-        Defaults to 'dlf'.
 
     htarg : dict, optional
         Possible parameters depends on the value for `ht`:
@@ -227,12 +220,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           - `b`: Maximum wavenumber (default 0.1)
           - `pts_per_dec`: points per decade (default: 40)
 
-    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, optional
+    ft : {'dlf', 'sin', 'cos', 'qwe', 'fftlog', 'fft'}, default: 'dlf'
         Only used if signal!=None. Flag to choose either the Digital Linear
         Filter method (Sine- or Cosine-Filter), the
         Quadrature-With-Extrapolation (QWE), the FFTLog, or the FFT for the
-        Fourier transform.
-        Defaults to 'dlf' (which is 'sin' if signal>=0, else 'cos').
+        Fourier transform. If 'dlf' it is 'sin' if signal>=0, else 'cos'.
 
     ftarg : dict, optional
         Only used if signal!=None. Possible parameters depends on the value for
@@ -284,7 +276,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           given number per decade, and then interpolated to yield the required
           frequencies for the FFT.
 
-    xdirect : bool or None, optional
+    xdirect : bool or None, default: False
         Direct field calculation (only if src and rec are in the same layer):
 
         - If True, direct field is calculated analytically in the frequency
@@ -293,17 +285,18 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         - If None, direct field is excluded from the calculation, and only
           reflected fields are returned (secondary field).
 
-        Defaults to False.
-
-    loop : {None, 'freq', 'off'}, optional
+    loop : {None, 'freq', 'off'}, default: None
         Define if to calculate everything vectorized or if to loop over
-        frequencies ('freq') or over offsets ('off'), default is None. It
-        always loops over frequencies if `ht='qwe'` or if `pts_per_dec=-1`.
-        Calculating everything vectorized is fast for few offsets OR for few
-        frequencies. However, if you calculate many frequencies for many
-        offsets, it might be faster to loop over frequencies. Only comparing
-        the different versions will yield the answer for your specific problem
-        at hand!
+        frequencies ('freq') or over offsets ('off'). It always loops over
+        frequencies if `ht='qwe'` or if `pts_per_dec=-1`. Calculating
+        everything vectorized is fast for few offsets OR for few frequencies.
+        However, if you calculate many frequencies for many offsets, it might
+        be faster to loop over frequencies. Only comparing the different
+        versions will yield the answer for your specific problem at hand!
+
+    squeeze : bool, default: True
+        If True, the output is squeezed. If False, the output will always be of
+        ``ndim=3``, (nfreqtime, nrec, nsrc).
 
 
     Returns
@@ -381,6 +374,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     """
     # Get kwargs with defaults.
+    squeeze = kwargs.pop('squeeze', True)
     out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
                      [2, 'dlf', {}, 'dlf', {}, False, None], kwargs)
     verb, ht, htarg, ft, ftarg, xdirect, loop = out
@@ -552,7 +546,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         conv_warning(conv, ftarg, 'Fourier', verb)
 
     # Reshape for number of sources
-    EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
+    EM = EM.reshape((-1, nrec, nsrc), order='F')
+    if squeeze:
+        EM = np.squeeze(EM)
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
@@ -613,16 +609,16 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     freqtime : array_like
         Frequencies f (Hz) if `signal==None`, else times t (s); (f, t > 0).
 
-    signal : {None, 0, 1, -1}, optional
-        Source signal, default is None:
+    signal : {None, 0, 1, -1}, default: None
+        Source signal:
 
         - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
 
-    ab : int, optional
-        Source-receiver configuration, defaults to 11.
+    ab : int, default: 11
+        Source-receiver configuration.
 
         +---------------+-------+------+------+------+------+------+------+
         |                       | electric  source   | magnetic source    |
@@ -642,24 +638,21 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         |               | **z** |  61  |  62  |  63  |  64  |  65  |  66  |
         +---------------+-------+------+------+------+------+------+------+
 
-    aniso : array_like, optional
+    aniso : array_like, default: ones
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
-        Defaults to ones.
 
-    epermH, epermV : array_like, optional
+    epermH, epermV : array_like, default: ones
         Relative horizontal/vertical electric permittivities
         epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
         provided but not epermV, isotropic behaviour is assumed.
-        Default is ones.
 
-    mpermH, mpermV : array_like, optional
+    mpermH, mpermV : array_like, default: ones
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
         isotropic behaviour is assumed.
-        Default is ones.
 
-    verb : {0, 1, 2, 3, 4}, optional
-        Level of verbosity, default is 2:
+    verb : {0, 1, 2, 3, 4}, default: 2
+        Level of verbosity:
 
         - 0: Print nothing.
         - 1: Print warnings.
@@ -669,6 +662,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     ht, htarg, ft, ftarg, xdirect, loop : settings, optinal
         See docstring of :func:`bipole` for a description.
+
+    squeeze : bool, default: True
+        If True, the output is squeezed. If False, the output will always be of
+        ``ndim=3``, (nfreqtime, nrec, nsrc).
 
 
     Returns
@@ -704,6 +701,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     """
     # Get kwargs with defaults.
+    squeeze = kwargs.pop('squeeze', True)
     out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
                      [2, 'dlf', {}, 'dlf', {}, False, None], kwargs)
     verb, ht, htarg, ft, ftarg, xdirect, loop = out
@@ -776,7 +774,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         conv_warning(conv, ftarg, 'Fourier', verb)
 
     # Reshape for number of sources
-    EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
+    EM = EM.reshape((-1, nrec, nsrc), order='F')
+    if squeeze:
+        EM = np.squeeze(EM)
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
@@ -862,49 +862,46 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
     freqtime : array_like
         Frequencies f (Hz) if `signal==None`, else times t (s); (f, t > 0).
 
-    signal : {None, 0, 1, -1}, optional
-        Source signal, default is None:
+    signal : {None, 0, 1, -1}, default: None
+        Source signal:
 
         - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
 
-    aniso : array_like, optional
+    aniso : array_like, default: ones
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
-        Defaults to ones.
 
-    epermH, epermV : array_like, optional
+    epermH, epermV : array_like, default: ones
         Relative horizontal/vertical electric permittivities
         epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
         provided but not epermV, isotropic behaviour is assumed.
-        Default is ones.
 
-    mpermH, mpermV : array_like, optional
+    mpermH, mpermV : array_like, default: ones
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
         isotropic behaviour is assumed.
-        Default is ones.
 
         Note that the relative horizontal and vertical magnetic permeabilities
         in layers with loop sources or receivers will be set to 1.
 
-    mrec : bool or string, optional
-        Receiver options; default is True:
+    mrec : bool or string, default: True
+        Receiver options:
 
         - True: Magnetic dipole receiver;
         - False: Electric dipole receiver;
         - 'loop': Magnetic receiver consisting of an electric-wire loop.
 
-    recpts : int, optional
-        Number of integration points for bipole receiver, default is 1:
+    recpts : int, default: 1
+        Number of integration points for bipole receiver:
 
         - recpts < 3  : bipole, but calculated as dipole at centre
         - recpts >= 3 : bipole
 
         Note that if `mrec='loop'`, `recpts` will be set to 1.
 
-    strength : float, optional
+    strength : float, default: 0.0
         Source strength (A):
 
         - If 0, output is normalized to source of 1 m2 area and receiver of 1 m
@@ -916,10 +913,8 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
         provide the source and receiver loop area, or also to multiply by
         :math:\mu_0`, if you want the B-field instead of the H-field.
 
-        Default is 0.
-
-    verb : {0, 1, 2, 3, 4}, optional
-        Level of verbosity, default is 2:
+    verb : {0, 1, 2, 3, 4}, default: 2
+        Level of verbosity:
 
         - 0: Print nothing.
         - 1: Print warnings.
@@ -929,6 +924,10 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     ht, htarg, ft, ftarg, xdirect, loop : settings, optinal
         See docstring of :func:`bipole` for a description.
+
+    squeeze : bool, default: True
+        If True, the output is squeezed. If False, the output will always be of
+        ``ndim=3``, (nfreqtime, nrec, nsrc).
 
 
     Returns
@@ -999,6 +998,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
     """
     # Get kwargs with defaults.
+    squeeze = kwargs.pop('squeeze', True)
     out = get_kwargs(['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop'],
                      [2, 'dlf', {}, 'dlf', {}, False, None], kwargs)
     verb, ht, htarg, ft, ftarg, xdirect, loop = out
@@ -1180,7 +1180,9 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
         conv_warning(conv, ftarg, 'Fourier', verb)
 
     # Reshape for number of sources
-    EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
+    EM = EM.reshape((-1, nrec, nsrc), order='F')
+    if squeeze:
+        EM = np.squeeze(EM)
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
@@ -1240,7 +1242,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     freqtime : array_like
         Frequencies f (Hz) if `signal==None`, else times t (s); (f, t > 0).
 
-    solution : str, optional
+    solution : str, default: 'fs'
       Defines which solution is returned:
 
       - 'fs' : Full fullspace solution (ee-, me-, em-, mm-fields); f-domain.
@@ -1251,16 +1253,16 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
       - 'dtetm' : as dsplit, but direct fielt TE, TM; reflected field TE, TM,
         and airwave (ee-fields only).
 
-    signal : {None, 0, 1, -1}, optional
-        Source signal, default is None:
+    signal : {None, 0, 1, -1}, default: None
+        Source signal:
 
         - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
 
-    ab : int, optional
-        Source-receiver configuration, defaults to 11.
+    ab : int, default: 11
+        Source-receiver configuration.
 
         +---------------+-------+------+------+------+------+------+------+
         |                       | electric  source   | magnetic source    |
@@ -1280,29 +1282,34 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         |               | **z** |  61  |  62  |  63  |  64  |  65  |  66  |
         +---------------+-------+------+------+------+------+------+------+
 
-    aniso : float, optional
-        Anisotropy lambda = sqrt(rho_v/rho_h) (-); defaults to one.
+    aniso : float, default: 1.0
+        Anisotropy lambda = sqrt(rho_v/rho_h) (-).
 
-    epermH, epermV : float, optional
+    epermH, epermV : float, default: 1.0
         Relative horizontal/vertical electric permittivity
         epsilon_h/epsilon_v (-). If epermH is provided but not epermV,
         isotropic behaviour is assumed.
-        Default is one; ignored for the diffusive solution.
+        These parameters are ignored for the diffusive solution.
 
-    mpermH, mpermV : float, optional
+    mpermH, mpermV : float, default: 1.0
         Relative horizontal/vertical magnetic permeability mu_h/mu_v (-);
         #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
         isotropic behaviour is assumed.
-        Default is one; ignored for the diffusive solution.
+        These parameters are ignored for the diffusive solution.
 
-    verb : {0, 1, 2, 3, 4}, optional
-        Level of verbosity, default is 2:
+    verb : {0, 1, 2, 3, 4}, default: 2
+        Level of verbosity:
 
         - 0: Print nothing.
         - 1: Print warnings.
         - 2: Print additional runtime
         - 3: Print additional start/stop, condensed parameter information.
         - 4: Print additional full parameter information
+
+    squeeze : bool, default: True
+        If True, the output is squeezed. If False, the output will always be of
+        ``ndim=3``, (nfreqtime, nrec, nsrc).
+
 
     Returns
     -------
@@ -1341,6 +1348,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     """
     # Get kwargs with defaults.
+    squeeze = kwargs.pop('squeeze', True)
     verb = get_kwargs(['verb', ], [2, ], kwargs)[0]
 
     # === 1.  LET'S START ============
@@ -1407,19 +1415,21 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
             # we have to take care of it separately
             EM = np.zeros((freq.size*nrec*nsrc), dtype=etaH.dtype)
 
-    # Squeeze
+    # Reshape for number of sources
     if solution[1:] == 'split':
-        EM = (np.squeeze(EM[0].reshape((-1, nrec, nsrc), order='F')),
-              np.squeeze(EM[1].reshape((-1, nrec, nsrc), order='F')),
-              np.squeeze(EM[2].reshape((-1, nrec, nsrc), order='F')))
+        EM = (EM[0].reshape((-1, nrec, nsrc), order='F'),
+              EM[1].reshape((-1, nrec, nsrc), order='F'),
+              EM[2].reshape((-1, nrec, nsrc), order='F'))
     elif solution[1:] == 'tetm':
-        EM = (np.squeeze(EM[0].reshape((-1, nrec, nsrc), order='F')),
-              np.squeeze(EM[1].reshape((-1, nrec, nsrc), order='F')),
-              np.squeeze(EM[2].reshape((-1, nrec, nsrc), order='F')),
-              np.squeeze(EM[3].reshape((-1, nrec, nsrc), order='F')),
-              np.squeeze(EM[4].reshape((-1, nrec, nsrc), order='F')))
+        EM = (EM[0].reshape((-1, nrec, nsrc), order='F'),
+              EM[1].reshape((-1, nrec, nsrc), order='F'),
+              EM[2].reshape((-1, nrec, nsrc), order='F'),
+              EM[3].reshape((-1, nrec, nsrc), order='F'),
+              EM[4].reshape((-1, nrec, nsrc), order='F'))
     else:
-        EM = np.squeeze(EM.reshape((-1, nrec, nsrc), order='F'))
+        EM = EM.reshape((-1, nrec, nsrc), order='F')
+    if squeeze:
+        EM = np.squeeze(EM)
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0)
@@ -1566,8 +1576,8 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     wavenumber : array
         Wavenumbers lambda (1/m)
 
-    ab : int, optional
-        Source-receiver configuration, defaults to 11.
+    ab : int, default: 11
+        Source-receiver configuration.
 
         +---------------+-------+------+------+------+------+------+------+
         |                       | electric  source   | magnetic source    |
@@ -1587,24 +1597,21 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
         |               | **z** |  61  |  62  |  63  |  64  |  65  |  66  |
         +---------------+-------+------+------+------+------+------+------+
 
-    aniso : array_like, optional
+    aniso : array_like, default: ones
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
-        Defaults to ones.
 
-    epermH, epermV : array_like, optional
+    epermH, epermV : array_like, default: ones
         Relative horizontal/vertical electric permittivities
         epsilon_h/epsilon_v (-); #epermH = #epermV = #res. If epermH is
         provided but not epermV, isotropic behaviour is assumed.
-        Default is ones.
 
-    mpermH, mpermV : array_like, optional
+    mpermH, mpermV : array_like, default: ones
         Relative horizontal/vertical magnetic permeabilities mu_h/mu_v (-);
         #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
         isotropic behaviour is assumed.
-        Default is ones.
 
-    verb : {0, 1, 2, 3, 4}, optional
-        Level of verbosity, default is 2:
+    verb : {0, 1, 2, 3, 4}, default: 2
+        Level of verbosity:
 
         - 0: Print nothing.
         - 1: Print warnings.
