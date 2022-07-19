@@ -13,6 +13,10 @@ v2.0.x
 latest
 ------
 
+- The main modelling routines ``bipole``, ``dipole``, ``loop``, and
+  ``analytical`` take a new keyword argument ``squeeze``, which is set to
+  ``True`` by default. If true, the output is squeezed (status quo); if false,
+  the output is always a three-dimensional array ``(nfreqtime, nrec, nsrc)``.
 - One can define new ``+np.infty`` as interface. Only use-case is to enforce a
   coordinate system in a two-layer case with an interface at ``z`` (see example
   coordinate system in the educational section of the gallery).
@@ -21,6 +25,8 @@ latest
 
   - Expanded note on FFTLog.
   - Expanded note on coordinate system.
+  - Changed the description from ``optional`` to ``default: xyz`` in the main
+    modelling routines.
 
 - Maintenance:
 

@@ -1764,7 +1764,7 @@ def get_kwargs(names, defaults, kwargs):
     - ONLY analytical: solution
     - ONLY bipole, loop: mrec, recpts, strength
     - ONLY bipole, dipole, loop, gpr: ht, htarg, ft, ftarg, xdirect, loop
-    - ONLY bipole, dipole, loop, analytical: signal
+    - ONLY bipole, dipole, loop, analytical: signal, squeeze
     - ONLY dipole, analytical, gpr, dipole_k: ab
     - ONLY bipole, dipole, loop, gpr, dipole_k: depth
     - ONLY bipole, dipole, loop, analytical, gpr: freqtime
@@ -1790,7 +1790,7 @@ def get_kwargs(names, defaults, kwargs):
     known_keys = set([
             'depth', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'signal',
             'ab', 'freqtime', 'freq', 'wavenumber', 'solution', 'cf', 'gain',
-            'msrc', 'srcpts', 'mrec', 'recpts', 'strength'
+            'msrc', 'srcpts', 'mrec', 'recpts', 'strength', 'squeeze'
     ])
 
     # Loop over wanted parameters.
