@@ -6,12 +6,15 @@ Version 2
 ~~~~~~~~~
 
 
-v2.0.x
+v2.1.x
 """"""
 
 
-latest
-------
+v2.1.4: Squeeze
+---------------
+
+**2022-07-20**
+
 
 - The main modelling routines ``bipole``, ``dipole``, ``loop``, and
   ``analytical`` take a new keyword argument ``squeeze``, which is set to
@@ -30,8 +33,8 @@ latest
 
 - Maintenance:
 
- - Use scipy through conda in CI.
- - Fix ``do_3d_projection`` for ``matplotlib>3.5.0``.
+  - Use scipy through conda in CI.
+  - Fix ``do_3d_projection`` for ``matplotlib>3.5.0``.
 
 
 v2.1.3: Random noise example
@@ -89,6 +92,10 @@ v2.1.0: Theme change & streamline
   - New primary links https://emsig.xyz and https://empymod.emsig.xyz.
   - Move copyright from «The empymod Developers» to «The emsig community».
   - Slight rework of some parts of the docs.
+
+
+v2.0.x
+""""""
 
 
 v2.0.6: Bugfix Windows int32/64
@@ -266,6 +273,7 @@ Version 1
 v1.10.x
 """""""
 
+
 v1.10.6: Various azimuths and dips at same depth
 ------------------------------------------------
 
@@ -371,6 +379,7 @@ v1.10.0: Loop source and receiver
 
 v1.9.x
 """""""
+
 
 v1.9.0 : Laplace
 ----------------

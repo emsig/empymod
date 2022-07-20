@@ -20,9 +20,9 @@ jobs:
 
     steps:
 
-      # Cancel any previous run of the test job; [pin v0.8.0 (2021-02-13)]
+      # Cancel any previous run of the test job; [pin v0.10.0 (2022-06-27)]
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@3d86a7cc43670094ac248017207be0295edbc31d
+        uses: styfle/cancel-workflow-action@bb6001c4ea612bf59c3abfc4756fbceee4f870c7
         with:
           access_token: ${{ github.token }}
 

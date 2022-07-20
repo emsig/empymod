@@ -4,8 +4,8 @@ import re
 import sys
 from setuptools import setup
 
-if not sys.version_info[:2] >= (3, 6):
-    sys.exit(f"empymod is only meant for Python 3.6 and up.\n"
+if not sys.version_info[:2] >= (3, 7):
+    sys.exit(f"empymod is only meant for Python 3.7 and up.\n"
              f"Current version: {sys.version_info[0]}.{sys.version_info[1]}.")
 
 # Get README and remove badges.
