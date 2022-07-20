@@ -10,8 +10,11 @@ v2.0.x
 """"""
 
 
-latest
-------
+v2.1.4: Squeeze
+---------------
+
+**2022-07-20**
+
 
 - The main modelling routines ``bipole``, ``dipole``, ``loop``, and
   ``analytical`` take a new keyword argument ``squeeze``, which is set to
