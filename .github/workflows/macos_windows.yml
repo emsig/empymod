@@ -66,6 +66,9 @@ jobs:
           python-version: ${{ matrix.python }}
           miniforge-variant: Mambaforge
           use-mamba: true
+          # The following should not be necessary with Mambaforge(?).
+          channels: conda-forge,defaults
+          channel-priority: strict
 
       - name: Install dependencies
         shell: bash -l {0}
@@ -73,8 +76,7 @@ jobs:
           conda config --set always_yes yes --set changeps1 no
           conda config --show-sources
           conda config --show
-          conda install numba scipy pytest pip
-          pip install setuptools_scm scooby
+          conda install numba scipy pytest setuptools_scm pytest-flake8 scooby setuptools_scm
           conda info -a
           conda list
 
@@ -82,5 +84,4 @@ jobs:
         shell: bash -l {0}
         run: |
           python setup.py install
-          python -c 'import empymod; print(empymod.Report())'
-          pytest
+          pytest --flake8
