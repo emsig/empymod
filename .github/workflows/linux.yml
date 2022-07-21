@@ -35,43 +35,36 @@ jobs:
             name: minimal
             os: ubuntu
             conda: "'numpy=1.17' 'scipy=1.4' 'numba=0.47'"
-            pip: ""
             test: ""
           - python-version: "3.8"
             name: plain
             os: ubuntu
             conda: "numba scipy"
-            pip: ""
             test: ""
           - python-version: "3.8"
             name: full
             os: ubuntu
-            conda: "numba 'matplotlib>=3.3' scipy"
-            pip: pytest-mpl scooby
+            conda: "numba 'matplotlib>=3.3' scipy scooby pytest-mpl"
             test: "--mpl"
           - python-version: "3.9"
             name: plain
             os: ubuntu
             conda: "numba scipy"
-            pip: ""
             test: ""
           - python-version: "3.9"
             name: full
             os: ubuntu
-            conda: "numba 'matplotlib>=3.3' scipy"
-            pip: pytest-mpl scooby
+            conda: "numba 'matplotlib>=3.3' scipy scooby pytest-mpl"
             test: "--mpl"
           - python-version: "3.10"
             name: plain
             os: ubuntu
             conda: "numba scipy"
-            pip: ""
             test: ""
           - python-version: "3.10"
             name: full
             os: ubuntu
-            conda: "numba 'matplotlib>=3.3' scipy"
-            pip: pytest-mpl scooby
+            conda: "numba 'matplotlib>=3.3' scipy scooby pytest-mpl"
             test: "--mpl"
 
     env:
@@ -123,8 +116,7 @@ jobs:
           conda config --set always_yes yes --set changeps1 no
           conda config --show-sources
           conda config --show
-          conda install ${{ matrix.case.conda }} pytest pytest-cov pip
-          pip install setuptools_scm coveralls pytest-flake8 ${{ matrix.case.pip }}
+          conda install ${{ matrix.case.conda }} pytest pytest-cov coveralls pytest-flake8 setuptools_scm
           conda info -a
           conda list
 
@@ -132,7 +124,6 @@ jobs:
         shell: bash -l {0}
         run: |
           python setup.py install
-          python -c 'import empymod; print(empymod.Report())'
           cp ./tests/matplotlibrc ./.
           pytest --cov=empymod --flake8 ${{ matrix.case.test }}
 
