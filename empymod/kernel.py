@@ -31,7 +31,6 @@ root directory for more information regarding the involved licenses.
 
 import numpy as np
 import numba as nb
-from scipy import special  # Only used for halfspace solution
 
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
            'reflections', 'fields', 'halfspace']
@@ -943,6 +942,8 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     the input and solution parameters.
 
     """
+    from scipy import special  # Lazy for faster CLI load
+
     xco = np.cos(angle)*off
     yco = np.sin(angle)*off
     res = np.real(1/etaH[0, 0])

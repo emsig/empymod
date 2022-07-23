@@ -1,4 +1,6 @@
+import sys
 import pytest
+import subprocess
 import numpy as np
 from numpy.testing import assert_allclose
 
@@ -1196,3 +1198,18 @@ def test_report(capsys):
         _ = utils.Report()
         out, _ = capsys.readouterr()  # Empty capsys
         assert 'WARNING :: `empymod.Report` requires `scooby`' in out
+
+
+@pytest.mark.skipif(not sys.platform.startswith('linux'), reason="Not Linux.")
+def test_import_time():
+    # Relevant for the CLI: How long does it take to import?
+    cmd = ["time", "-f", "%U", "python", "-c", "import empymod"]
+    # Run it twice, just in case.
+    subprocess.run(cmd)
+    subprocess.run(cmd)
+    # Capture it
+    out = subprocess.run(cmd, capture_output=True)
+
+    # Currently we check t < 1.2s.
+    # => That should come down to t < 0.5s in the future!
+    assert float(out.stderr.decode("utf-8")[:-1]) < 1.2

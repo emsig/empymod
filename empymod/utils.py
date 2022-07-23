@@ -28,7 +28,6 @@ This module consists of four groups of functions:
 # Mandatory imports
 import copy
 import numpy as np
-from scipy import special
 from timeit import default_timer
 from datetime import timedelta, datetime
 
@@ -1007,6 +1006,7 @@ def check_time(time, signal, ft, ftarg, verb):
         freq = np.squeeze(omega/2/np.pi)
 
     elif ft == 'qwe':     # QWE (using sine and imag-part)
+        from scipy import special  # Lazy for faster CLI load
 
         # If switch-off is required, use cosine, else sine
         args.pop('sincos', None)
@@ -1663,6 +1663,8 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
         # Gauss quadrature if intpts > 2; else set to center of tinp
         if intpts > 2:  # Calculate the dipole positions
+            from scipy import special  # Lazy for faster CLI load
+
             # Get integration positions and weights
             g_x, g_w = special.roots_legendre(intpts)
             g_x = np.outer(g_x, dl/2.0)  # Adjust to tinp length

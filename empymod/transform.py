@@ -29,7 +29,6 @@ root directory for more information regarding the involved licenses.
 
 
 import numpy as np
-from scipy import special, fftpack, integrate
 from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 
 from empymod import kernel
@@ -164,6 +163,8 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
         If true, QWE/QUAD converged. If not, `htarg` might have to be adjusted.
 
     """
+    from scipy import special  # Lazy for faster CLI load
+
     # Input params have an additional dimension for frequency, reduce here
     etaH = etaH[0, :]
     etaV = etaV[0, :]
@@ -559,6 +560,8 @@ def fourier_qwe(fEM, time, freq, ftarg):
         If true, QWE/QUAD converged. If not, `ftarg` might have to be adjusted.
 
     """
+    from scipy import special, integrate  # Lazy for faster CLI load
+
     # Get rtol, atol, nquad, maxint, diff_quad, a, b, and limit
     rtol = ftarg['rtol']
     atol = ftarg['atol']
@@ -680,6 +683,8 @@ def fourier_fftlog(fEM, time, freq, ftarg):
         Only relevant for QWE/QUAD.
 
     """
+    from scipy import fftpack, special  # Lazy for faster CLI load
+
     # Get tcalc, dlnr, kr, rk, q; a and n
     q = ftarg['q']
     mu = ftarg['mu']
@@ -804,6 +809,8 @@ def fourier_fft(fEM, time, freq, ftarg):
         Only relevant for QWE/QUAD.
 
     """
+    from scipy import fftpack  # Lazy for faster CLI load
+
     # Get ftarg values
     dfreq = ftarg['dfreq']
     nfreq = ftarg['nfreq']
@@ -1133,6 +1140,7 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
     suited for QWE).
 
     """
+    from scipy import special, integrate  # Lazy for faster CLI load
 
     # Define the quadrature kernels
     def quad_PJ0(klambd, sPJ0, koff):
@@ -1250,6 +1258,7 @@ def get_dlf_points(filt, inp, nr_per_dec):
 
 def get_fftlog_input(rmin, rmax, n, q, mu):
     r"""Return parameters required for FFTLog."""
+    from scipy import special  # Lazy for faster CLI load
 
     # Central point log10(r_c) of periodic interval
     logrc = (rmin + rmax)/2
