@@ -21,6 +21,11 @@ latest
     the CLI is currently missing proper logging.
   - New module ``io`` to save and load inputs and data.
 
+- Maintenance:
+
+  - Improved load time by lazy-loading matplotlib and some scipy submodules.
+  - Removed the file ``runtests.sh``; uses ``make`` instead.
+
 
 v2.1.4: Squeeze
 ---------------
