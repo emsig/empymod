@@ -1,3 +1,4 @@
+import sys
 import pytest
 import subprocess
 import numpy as np
@@ -1199,6 +1200,7 @@ def test_report(capsys):
         assert 'WARNING :: `empymod.Report` requires `scooby`' in out
 
 
+@pytest.mark.skipif(not sys.platform.startswith('linux'), reason="Not Linux.")
 def test_import_time():
     # Relevant for the CLI: How long does it take to import?
     cmd = ["time", "-f", "%U", "python", "-c", "import empymod"]
