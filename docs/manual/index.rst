@@ -17,6 +17,7 @@ User Guide
    installation
    usage
    info
+   iocli
    transforms
    credits
    citation

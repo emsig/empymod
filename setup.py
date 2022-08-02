@@ -31,6 +31,11 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
     ],
+    entry_points={
+        "console_scripts": [
+            "empymod=empymod.__main__:main",
+        ],
+    },
     python_requires=">=3.7",
     install_requires=[
         "scipy>=1.4",

@@ -15,6 +15,7 @@
 # the License.
 
 # Import all modules
+from empymod import io
 from empymod import model
 from empymod import utils
 from empymod import kernel
