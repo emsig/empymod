@@ -57,7 +57,8 @@ def save_input(fname, data, **kwargs):
     # Save JSON
     if fname.endswith(".json"):
 
-        # For brevity yet readability, we create our own json file.
+        # For brevity yet readability, we create our custom formatted json,
+        # where each model parameter is on a new line.
         out = "{"
         for k, v in data.items():
             out += "\n  "
@@ -122,6 +123,12 @@ def save_data(fname, data, **kwargs):
 
     data : ndarray
         The output from an empymod modelling routine.
+        Note: You must set ``squeeze=False`` when calling the modelling
+        routine, to obtain a 3D array (in case any of ``src``, ``rec``, or
+        ``freqtime`` has only one entry).
+
+    info : str, default: ""
+        Information (one-line) to put into the header.
 
     kwargs : optional
         Passed through to the saving method.
@@ -130,8 +137,9 @@ def save_data(fname, data, **kwargs):
     # Ensure the right dimensionality.
     if data.ndim != 3:
         raise ValueError(
-            "Data must be 3D (nfreqtime, nrec, nsrc); "
-            f"provided dimensions: {data.ndim}."
+            "Data must be 3D (nfreqtime, nrec, nsrc); provided dimensions:  "
+            f"{data.ndim}. You can achieve this by providing "
+            "``squeeze=False`` to the modelling routine."
         )
 
     # Ensure fname is absolute.
@@ -242,7 +250,10 @@ def load_data(fname):
 
 
 class _ComplexNumPyEncoder(json.JSONEncoder):
+    """Custom json-encoder for NumPy, including complex data."""
+
     def default(self, obj):
+        """Check if complex or NumPy, else pass on."""
 
         # If complex, stack [real, imag].
         if np.iscomplexobj(obj):

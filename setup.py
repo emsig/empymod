@@ -22,7 +22,7 @@ setup(
     author_email="info@emsig.xyz",
     url="https://emsig.xyz",
     license="Apache-2.0",
-    packages=["empymod", "empymod.scripts", "empymod.cli"],
+    packages=["empymod", "empymod.scripts"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: Apache Software License",
@@ -33,7 +33,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "empymod=empymod.cli.main:main",
+            "empymod=empymod.__main__:main",
         ],
     },
     python_requires=">=3.7",

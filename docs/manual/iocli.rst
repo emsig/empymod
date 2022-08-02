@@ -11,10 +11,10 @@ model EM responses relatively straight forward from any other code.
 I/O
 ---
 
-There are two saving and two loading routines, one each for inputs and one for
-data. «Input» in this context means all the parameters a modelling routine
-takes. The saving/loading routines are on one hand good for persistence and
-reproducibility, but on the other hand also necessary for the command-line
+There are currently two saving and two loading routines, one each for inputs
+and one for data. «Input» in this context means all the parameters a modelling
+routine takes. The saving/loading routines are on one hand good for persistence
+and reproducibility, but on the other hand also necessary for the command-line
 interface (see section `CLI`_).
 
 ``{save;load}_input``
@@ -40,7 +40,7 @@ in a dictionary instead of providing them directly to the function.
      ...: # Model it
      ...: efield = empymod.bipole(**inp)
 
-We can now easily save this dictionary to disk:
+We can now simply save this dictionary to disk via
 
 
 .. ipython::
@@ -81,7 +81,7 @@ text file:
 .. ipython::
 
   In [1]: empymod.io.save_data('mydata.json', efield)
-     ...: empymod.io.save_data('mydata.txt', efield)
+     ...: empymod.io.save_data('mydata.txt', efield, info='some data info')
 
 
 Let's have a look at the text file:
@@ -91,10 +91,11 @@ Let's have a look at the text file:
   In [1]: !cat mydata.txt
 
 First is a header with the date, the version of empymod with which it was
-generated, and the shape and type of the data. The columns are the sources (two
-in this case), and in the rows there are first all receivers for the first
-frequency (or time), then all receivers for the second frequency (or time), and
-so on.
+generated, and the shape and type of the data. This is followed by a line of
+additional information, which you can define by providing a string to the input
+parameter ``info``. The columns are the sources (two in this case), and in the
+rows there are first all receivers for the first frequency (or time), then all
+receivers for the second frequency (or time), and so on.
 
 The json file is very similar. Here we print just the first twenty lines as an
 example:
@@ -103,7 +104,7 @@ example:
 
   In [1]: !head -n 20 mydata.json
 
-The main difference, beside the structure, is that the json-format does not
+The main difference, besides the structure, is that the json-format does not
 support complex data. It lists therefore first all real parts, and then all
 imaginary parts. If you load it with another json reader it will therefore
 have the dimension ``(2, nfreqtime, nrec, nsrc)``, where the 2 stands for real
@@ -137,15 +138,15 @@ empymod-routine.
 CLI
 ---
 
-The command-line interface is implemented for the top-level modelling routines
-:func:`empymod.model.bipole`, :func:`empymod.model.dipole`,
+The command-line interface is a simple wrapper for the main top-level modelling
+routines :func:`empymod.model.bipole`, :func:`empymod.model.dipole`,
 :func:`empymod.model.loop`, and :func:`empymod.model.analytical`. To call it
 you must write a json-file containing all your input parameters as described in
 the section `I/O`_. The basic syntax of the CLI is
 
 .. code-block:: console
 
-   empymod <routine> --input <file> --output <file>
+   empymod <routine> <inputfile> <outputfile>
 
 You can find some description as well by running the regular help
 
@@ -157,9 +158,10 @@ As an example, to reproduce the example given above in the I/O-section, run
 
 .. code-block:: console
 
-   empymod bipole --input myrun.json --output mydata.txt
+   empymod bipole myrun.json mydata.txt
 
-If you do not specify ``--output`` the result will be printed to the STDOUT.
+If you do not specify the output file (the last argument) the result will be
+printed to the STDOUT.
 
 
 Warning re runtime

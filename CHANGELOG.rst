@@ -6,19 +6,21 @@ Version 2
 ~~~~~~~~~
 
 
-v2.1.x
+v2.2.x
 """"""
 
 
-latest
-------
+v2.2.0: I/O & CLI
+-----------------
+
+**2022-08-03**
 
 - I/O & CLI:
 
   - New Command-Line Interface (CLI) for the top-level modelling functions
     ``bipole``, ``dipole``, ``loop``, and ``analytical``. Consult the manual
     for its description, or type in your terminal ``empymod --help``. Note that
-    the CLI is currently missing proper logging.
+    the CLI is a simple wrapper and currently lacks proper logging.
   - New module ``io`` to save and load inputs and data.
 
 - Maintenance:
@@ -27,11 +29,14 @@ latest
   - Removed the file ``runtests.sh``; uses ``make`` instead.
 
 
+v2.1.x
+""""""
+
+
 v2.1.4: Squeeze
 ---------------
 
 **2022-07-20**
-
 
 - The main modelling routines ``bipole``, ``dipole``, ``loop``, and
   ``analytical`` take a new keyword argument ``squeeze``, which is set to

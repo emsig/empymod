@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose
 from contextlib import ContextDecorator
 
 import empymod
-from empymod import cli
+from empymod.__main__ import run
 
 
 class disable_numba(ContextDecorator):
@@ -49,11 +49,17 @@ def test_main(script_runner):
     assert ret.success
     assert "empymod v" in ret.stdout
 
-    # Wrong function -- VIA empymod/cli/_main_.py by calling the file.
+    # Wrong function -- VIA empymod/__main__.py by calling the file.
     ret = script_runner.run(
-            'python', join('empymod', 'cli', 'main.py'), 'wrong')
+            'python', join('empymod', '__main__.py'), 'wrong')
     assert not ret.success
-    assert "ValueError: Routine must be one of" in ret.stderr
+    assert "error: argument routine: invalid choice: 'wrong'" in ret.stderr
+
+    # try to run
+    ret = script_runner.run(
+            'empymod', 'bipole', 'test.json', 'output.txt')
+    assert not ret.success
+    assert "No such file or directory" in ret.stderr
 
 
 class TestRun:
@@ -80,7 +86,7 @@ class TestRun:
             'input': join(tmpdir, 't.json'),
             'output': join(tmpdir, 'out.txt')
         }
-        cli.run.simulation(args_dict)
+        run(args_dict)
         out = empymod.io.load_data(join(tmpdir, 'out.txt'))
         assert_allclose(out, empymod.bipole(**inp))
 
@@ -103,7 +109,7 @@ class TestRun:
             'output': None
         }
         _, _ = capsys.readouterr()
-        cli.run.simulation(args_dict)
+        run(args_dict)
         out, _ = capsys.readouterr()
         out = complex(out.strip().strip("[").strip("]"))
         assert_allclose(out, empymod.dipole(**inp))
@@ -124,7 +130,7 @@ class TestRun:
             'input': join(tmpdir, 't.json'),
             'output': join(tmpdir, 'out.txt')
         }
-        cli.run.simulation(args_dict)
+        run(args_dict)
         out = empymod.io.load_data(join(tmpdir, 'out.txt'))
         assert_allclose(out, empymod.loop(**inp))
 
@@ -143,7 +149,7 @@ class TestRun:
             'input': join(tmpdir, 't.json'),
             'output': join(tmpdir, 'out.json')
         }
-        cli.run.simulation(args_dict)
+        run(args_dict)
         out = empymod.io.load_data(join(tmpdir, 'out.json'))
         assert_allclose(out, empymod.analytical(**inp))
 
@@ -156,13 +162,4 @@ class TestRun:
         }
 
         with pytest.raises(FileNotFoundError, match="t.json'"):
-            cli.run.simulation(args_dict)
-
-        args_dict = {
-            'routine': 'wavenumber',
-            'input': join(tmpdir, 't.json'),
-            'output': join(tmpdir, 'out.json')
-        }
-
-        with pytest.raises(ValueError, match="Routine must be one of"):
-            cli.run.simulation(args_dict)
+            run(args_dict)
