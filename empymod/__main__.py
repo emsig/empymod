@@ -98,7 +98,7 @@ def main(args=None):
     else:
         try:
             run(args_dict)
-        except (ValueError, FileNotFoundError) as e:
+        except (AttributeError, TypeError, ValueError, FileNotFoundError) as e:
             return e
 
 
