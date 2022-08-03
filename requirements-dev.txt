@@ -22,6 +22,7 @@ ipykernel
 
 # FOR TESTING
 asv
+flake8<5  # github.com/tholo/pytest-flake8/issues/87
 pytest
 coveralls
 pytest_cov
