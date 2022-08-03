@@ -27,10 +27,10 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
 
     strategy:
-      fail-fast: false
+      fail-fast: true #false
       matrix:
-        os: [macos, windows]
-        python: [3.9, ]
+        os: [macos, ] #windows]
+        python: [3.7, 3.8, 3.9, 3.10]
 
     steps:
 
@@ -43,19 +43,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          # Need to fetch more than the last commit so that setuptools-scm can
-          # create the correct version string. If the number of commits since
-          # the last release is greater than this, the version still be wrong.
-          # Increase if necessary.
-          fetch-depth: 100
-          # The GitHub token is preserved by default but this job doesn't need
-          # to be able to push to GitHub.
-          persist-credentials: false
+        #with:
+        #  # Need to fetch more than the last commit so that setuptools-scm can
+        #  # create the correct version string. If the number of commits since
+        #  # the last release is greater than this, the version still be wrong.
+        #  # Increase if necessary.
+        #  fetch-depth: 100
+        #  # The GitHub token is preserved by default but this job doesn't need
+        #  # to be able to push to GitHub.
+        #  persist-credentials: false
 
       # Need the tags so that setuptools-scm can form a valid version number
-      - name: Fetch git tags
-        run: git fetch origin 'refs/tags/*:refs/tags/*'
+      #- name: Fetch git tags
+      #  run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup miniconda
         # [pin v2.1.1 (2021-04-01)]
@@ -76,7 +76,7 @@ jobs:
           conda config --set always_yes yes --set changeps1 no
           conda config --show-sources
           conda config --show
-          conda install numba scipy pytest pytest-console-scripts pytest-flake8 scooby setuptools-scm
+          conda install numba scipy pytest #pytest-console-scripts pytest-flake8 scooby setuptools-scm
           conda info -a
           conda list
 
@@ -84,4 +84,5 @@ jobs:
         shell: bash -l {0}
         run: |
           python setup.py install
-          pytest --flake8
+          pytest tests/test_transform.py
+          #pytest --flake8
