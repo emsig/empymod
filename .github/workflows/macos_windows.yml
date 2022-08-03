@@ -30,7 +30,7 @@ jobs:
       fail-fast: true #false
       matrix:
         os: [macos, ] #windows]
-        python: [3.7, 3.8, 3.9, 3.10]
+        python: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
 
@@ -62,13 +62,10 @@ jobs:
         uses: conda-incubator/setup-miniconda@35d1405e78aa3f784fe3ce9a2eb378d5eeb62169
         with:
           auto-update-conda: true
-          miniconda-version: "latest"
           python-version: ${{ matrix.python }}
+          miniforge-version: "latest"
           miniforge-variant: Mambaforge
           use-mamba: true
-          # The following should not be necessary with Mambaforge(?).
-          channels: conda-forge,defaults
-          channel-priority: strict
 
       - name: Install dependencies
         shell: bash -l {0}
