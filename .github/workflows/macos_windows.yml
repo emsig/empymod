@@ -74,6 +74,10 @@ jobs:
           conda config --show-sources
           conda config --show
           conda install numba "scipy<1.9.0" pytest #pytest-console-scripts pytest-flake8 scooby setuptools-scm
+
+      - name: Debug Mamba info
+        shell: bash -l {0}
+        run: |
           conda info -a
           conda list
 
