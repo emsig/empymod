@@ -2,7 +2,7 @@ name: linkcheck
 
 # Only build PRs, the main branch, and releases.
 on:
-  #pull_request:
+  pull_request:
   push:
     branches:
       - main
@@ -39,7 +39,6 @@ jobs:
         shell: bash -l {0}
         run: |
           python -m pip install --upgrade pip
-          pip install numba scipy
           pip install -r requirements-dev.txt
 
       - name: Check links
