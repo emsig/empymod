@@ -23,7 +23,7 @@ dev-install:
 pytest:
 	cp tests/matplotlibrc .
 	rm -rf .coverage htmlcov/ .pytest_cache/
-	pytest --cov=empymod --flake8 --mpl
+	pytest --cov=empymod --mpl
 	coverage html
 	rm  matplotlibrc
 
