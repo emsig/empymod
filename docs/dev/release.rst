@@ -34,7 +34,7 @@ Automatic
   includes:
 
   - Tests using ``pytest`` (Linux, MacOS, Windows)
-  - Linting / code style with ``pytest-flake8``
+  - Linting / code style with ``flake8``
   - Ensure all http(s)-links work (``sphinx -b linkcheck``)
 
 - Line-coverage with ``pytest-cov`` on `Coveralls

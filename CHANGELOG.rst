@@ -16,7 +16,7 @@ latest
 - Maintenance
 
   - Exclude ``scipy!=v1.9.0`` from MacOS/Windows test.
-  - Restrict ``flake8<5`` due to incompatibility with ``pytest-flake8``.
+  - Replace ``pytest-flake8`` by plain ``flake8``.
 
 
 v2.2.0: I/O & CLI

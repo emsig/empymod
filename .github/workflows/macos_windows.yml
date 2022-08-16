@@ -74,7 +74,7 @@ jobs:
           conda config --show-sources
           conda config --show
           conda info -a
-          conda install numba "scipy!=1.9.0" pytest pytest-console-scripts "flake8<5" pytest-flake8 scooby setuptools-scm
+          conda install numba "scipy!=1.9.0" pytest pytest-console-scripts scooby setuptools-scm
 
       - name: Conda list
         shell: bash -l {0}
@@ -84,4 +84,4 @@ jobs:
         shell: bash -l {0}
         run: |
           python setup.py install
-          pytest --flake8
+          pytest

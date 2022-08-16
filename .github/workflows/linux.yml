@@ -114,18 +114,22 @@ jobs:
           conda config --show-sources
           conda config --show
           conda info -a
-          conda install ${{ matrix.case.conda }} pytest pytest-cov pytest-console-scripts coveralls "flake8<5" pytest-flake8 setuptools-scm
+          conda install ${{ matrix.case.conda }} pytest pytest-cov pytest-console-scripts coveralls flake8 setuptools-scm
 
       - name: Conda list
         shell: bash -l {0}
         run: conda list
+
+      - name: Flake8
+        shell: bash -l {0}
+        run: flake8 docs/conf.py setup.py empymod/ tests/ examples/
 
       - name: Test with pytest
         shell: bash -l {0}
         run: |
           python setup.py install
           cp ./tests/matplotlibrc ./.
-          pytest --cov=empymod --flake8 ${{ matrix.case.test }}
+          pytest --cov=empymod ${{ matrix.case.test }}
 
       - name: Coveralls
         # [pin v20201129]
