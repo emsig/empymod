@@ -746,8 +746,8 @@ def test_coordinate_systems():
         RHSh2l = sign*dipole(
             depth=[-z0, -np.infty], res=[air, hs], **inpRHS, **inp)
 
-        assert_allclose(orig, RHSlth)
-        assert_allclose(orig, RHSh2l)
+        assert_allclose(orig, RHSlth, rtol=5e-6)
+        assert_allclose(orig, RHSh2l, rtol=5e-6)
 
         # # 4-layer case
 
