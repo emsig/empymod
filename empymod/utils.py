@@ -1533,7 +1533,6 @@ def get_off_ang(src, rec, nsrc, nrec, verb):
 
     # Minimum offset to avoid singularities at off = 0 m.
     # => min_off can be set with utils.set_min
-    angle[np.where(off < _min_off)] = np.nan
     off = _check_min(off, _min_off, 'Offsets', 'm', verb)
 
     return off, angle

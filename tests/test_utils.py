@@ -941,7 +941,7 @@ def test_get_off_ang(capsys):
     src = [np.array([0, 100]), np.array([0, 100]), np.array([0, 100])]
     rec = [np.array([0, 5000]), np.array([0, 100]), np.array([0, 200])]
     resoff = np.array([0.001, 5001, 141.42135623730951, 4900])
-    resang = np.array([np.nan, 0.019997333973150531, -2.3561944901923448, 0.])
+    resang = np.array([0.0, 0.019997333973150531, -2.3561944901923448, 0.])
     off, ang = utils.get_off_ang(src, rec, 2, 2, 3)
     out, _ = capsys.readouterr()
     assert out[:23] == "* WARNING :: Offsets < "

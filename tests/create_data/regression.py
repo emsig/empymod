@@ -108,7 +108,7 @@ for i in np.arange(np.size(srcn)):
             freq = fpow[ifr]  # Freq
 
             # Update model with frequency
-            ifreq = 10**np.float(freq)
+            ifreq = 10**float(freq)
 
             scl = ffac[ifr]  # Scaling factor
 
