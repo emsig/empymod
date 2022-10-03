@@ -10,8 +10,15 @@ v2.2.x
 """"""
 
 
-latest
-------
+v2.2.1: Minimum offset
+----------------------
+
+**2022-10-03**
+
+Change regarding the enforced minimum horizontal offset, which can be set
+through ``empymod.set_minimum(min_off=1e-3)``, where 1e-3, hence 1 mm, is the
+default. Until now, responses for smaller offsets were set to NaN. New, they
+return the response for the minimum offset. The raised warning stays the same.
 
 - Maintenance
 

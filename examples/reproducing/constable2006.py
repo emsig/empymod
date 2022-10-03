@@ -17,6 +17,8 @@ import numpy as np
 from copy import deepcopy as dc
 import matplotlib.pyplot as plt
 
+empymod.set_minimum(min_off=1e-10)
+
 ###############################################################################
 # Computation
 # -----------
