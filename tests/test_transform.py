@@ -1,3 +1,4 @@
+import sys
 import pytest
 import numpy as np
 from os.path import join, dirname
@@ -16,6 +17,7 @@ DATA = np.load(join(dirname(__file__), 'data/transform.npz'),
                allow_pickle=True)
 
 
+@pytest.mark.xfail(sys.platform != "linux", reason="unknown issue #171")
 @pytest.mark.parametrize("htype", ['dlf', 'qwe', 'quad'])
 def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
     # Compare wavenumber-domain calculation / DLF with analytical

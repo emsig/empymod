@@ -1,4 +1,5 @@
 import os
+import sys
 import pytest
 import warnings
 import numpy as np
@@ -275,6 +276,7 @@ class TestFiguresNoMatplotlib:
         assert "* WARNING :: `matplotlib` is not installed, no " in out
 
 
+@pytest.mark.xfail(sys.platform == "linux", reason="unknown issue #171")
 def test_print_data(capsys):
     # Test full with min amplitude with case 2
     dat1 = DATA['case2'][()]
