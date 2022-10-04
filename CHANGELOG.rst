@@ -25,6 +25,8 @@ latest
 
   - Exclude ``scipy!=v1.9.0`` from MacOS/Windows test.
   - Replace ``pytest-flake8`` by plain ``flake8``.
+  - Change the way ``spacing`` and ``shift`` are calculated in
+    ``fdesign.print_result`` to avoid numerical precision issues.
 
 
 v2.2.0: I/O & CLI
