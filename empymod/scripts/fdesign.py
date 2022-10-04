@@ -692,7 +692,7 @@ def print_result(filt, full=None):
         shift = full[0][1]
     else:  # Print what we can without full
         spacing = np.log(filt.base[-1] / filt.base[-2])
-        shift = np.log(filt.base[(filt.base.size + 1 ) // 2 - 1])
+        shift = np.log(filt.base[(filt.base.size + 1) // 2 - 1])
     print(f"   > Spacing       : {spacing:1.10g}")
     print(f"   > Shift         : {shift:1.10g}")
     print(f"   > Base min/max  : {filt.base.min():e} / {filt.base.max():e}")
