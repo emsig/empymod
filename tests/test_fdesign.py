@@ -304,7 +304,7 @@ def test_print_data(capsys):
     assert "Filter length   : 201" in out
     assert "Best filter" in out
     assert "> Spacing       : 0.074" in out
-    assert "> Shift         : 1.509903313e-14" in out
+    assert "> Shift         : 0" in out
     assert "> Base min/max  : 6.112528e-04 / 1.635984e+03" in out
 
 
