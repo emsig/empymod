@@ -133,9 +133,10 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
             freq3 = kernel.fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH,
                                      zetaV, ab, msrc, mrec)
             # Compare
-            if sys.sys.platform == "linux" or htype != "qwe":
-                # qwe for MacOS/Windows started to not convert in 2nd half of 2022.
-                # Not sure why.
+            if sys.platform == "linux" or htype != "qwe":
+                # Spline; pts_per_dec; QWE; on MacOS/Windows:
+                # Started to not convert in Sept. 2022; not sure why.
+                # Difference: Scipy 1.8.1 -> 1.9.1.
                 assert conv
             assert_allclose(np.squeeze(wvnr3), np.squeeze(freq3), rtol=1e-4)
 
