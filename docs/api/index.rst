@@ -25,23 +25,21 @@ API reference
    tmtemod
 
 
-.. panels::
-    :container: container-lg pb-1
-    :column: col-lg-12 p-2
+.. grid:: 1
+    :gutter: 2
 
-    Bipole: :func:`empymod.model.bipole`
+    .. grid-item-card::
 
-    ---
-    :column: col-lg-12 p-2
+        Bipole: :func:`empymod.model.bipole`
 
-    Dipole: :func:`empymod.model.dipole`
+    .. grid-item-card::
 
-    ---
-    :column: col-lg-12 p-2
+        Dipole: :func:`empymod.model.dipole`
 
-    Loop: :func:`empymod.model.loop`
+    .. grid-item-card::
 
-    ---
-    :column: col-lg-12 p-2
+        Loop: :func:`empymod.model.loop`
 
-    Analytical: :func:`empymod.model.analytical`
+    .. grid-item-card::
+
+        Analytical: :func:`empymod.model.analytical`
