@@ -33,7 +33,7 @@ User Guide
 
         :fa:`info;fa-4x`
 
-        .. button-link:: about
+        .. button-ref:: about
             :expand:
             :color: info
             :click-parent:
@@ -45,7 +45,7 @@ User Guide
 
         :fa:`laptop;fa-4x`
 
-        .. button-link:: installation
+        .. button-ref:: installation
             :expand:
             :color: info
             :click-parent:
@@ -57,7 +57,7 @@ User Guide
 
         :fa:`play;fa-4x`
 
-        .. button-link:: usage
+        .. button-ref:: usage
             :expand:
             :color: info
             :click-parent:
@@ -69,7 +69,7 @@ User Guide
 
         :fa:`lightbulb;fa-4x`
 
-        .. button-link:: info-tips-tricks
+        .. button-ref:: info-tips-tricks
             :expand:
             :color: info
             :click-parent:
@@ -81,7 +81,7 @@ User Guide
 
         :fa:`exchange;fa-4x`
 
-        .. button-link:: transforms
+        .. button-ref:: transforms
             :expand:
             :color: info
             :click-parent:
@@ -93,7 +93,7 @@ User Guide
 
         :fa:`pencil;fa-4x`
 
-        .. button-link:: citation
+        .. button-ref:: citation
             :expand:
             :color: info
             :click-parent:

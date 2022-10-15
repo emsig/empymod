@@ -32,7 +32,7 @@ Gallery
 
         +++
 
-        .. button-link:: fdomain/index.html
+        .. button-ref:: sphx_glr_gallery_fdomain
             :expand:
             :color: info
             :click-parent:
@@ -49,7 +49,7 @@ Gallery
 
         +++
 
-        .. button-link:: tdomain/index.html
+        .. button-ref:: sphx_glr_gallery_tdomain
             :expand:
             :color: info
             :click-parent:
@@ -66,7 +66,7 @@ Gallery
 
         +++
 
-        .. button-link:: educational/index.html
+        .. button-ref:: sphx_glr_gallery_educational
             :expand:
             :color: info
             :click-parent:

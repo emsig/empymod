@@ -26,7 +26,7 @@ Development
 
         :fa:`code;fa-4x`
 
-        .. button-link:: contributing
+        .. button-ref:: contributing
             :expand:
             :color: info
             :click-parent:
@@ -38,7 +38,7 @@ Development
 
         :fa:`fas fa-hourglass-half;fa-4x`
 
-        .. button-link:: tests
+        .. button-ref:: tests
             :expand:
             :color: info
             :click-parent:
@@ -50,7 +50,7 @@ Development
 
         :fa:`cogs;fa-4x`
 
-        .. button-link:: maintenance
+        .. button-ref:: maintenance
             :expand:
             :color: info
             :click-parent:
@@ -62,7 +62,7 @@ Development
 
         :fa:`rocket;fa-4x`
 
-        .. button-link:: release
+        .. button-ref:: release
             :expand:
             :color: info
             :click-parent:
