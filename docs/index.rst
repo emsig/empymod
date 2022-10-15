@@ -20,8 +20,10 @@ empymod Documentation
 
 
 .. grid:: 2
+    :gutter: 2
 
     .. grid-item-card::
+
         :fa:`book;fa-4x`
 
         User Guide
@@ -35,12 +37,13 @@ empymod Documentation
 
         .. button-ref:: manual
             :expand:
-            :color: secondary
+            :color: info
             :click-parent:
 
             To the user guide
 
     .. grid-item-card::
+
         :fa:`fas fa-picture-o;fa-4x`
 
         Gallery
@@ -54,12 +57,13 @@ empymod Documentation
 
         .. button-ref:: empymod_gallery
             :expand:
-            :color: secondary
+            :color: info
             :click-parent:
 
             To the gallery
 
     .. grid-item-card::
+
         :fa:`code;fa-4x`
 
         API reference
@@ -73,12 +77,13 @@ empymod Documentation
 
         .. button-ref:: api
             :expand:
-            :color: secondary
+            :color: info
             :click-parent:
 
             To the API reference
 
     .. grid-item-card::
+
         :fa:`terminal;fa-4x`
 
         Developer guide
@@ -92,27 +97,30 @@ empymod Documentation
 
         .. button-ref:: development
             :expand:
-            :color: secondary
+            :color: info
             :click-parent:
 
             To the development guide
 
     .. grid-item-card::
+        :columns: 12
+
         :fa:`comments;fa-4x`
 
         Contact
         ^^^^^^^
 
-        .. button-ref:: https://emsig.xyz/#contributing-contact
+        .. button-link:: https://emsig.xyz/#contributing-contact
             :expand:
-            :color: secondary
+            :color: info
             :click-parent:
 
             Go to «Contributing & Contact» @ emsig.xyz
 
     .. grid-item-card::
+        :columns: 12
 
-        .. dropdown:: About the name and logo of **empymod**
+        .. dropdown:: About the name and logo of empymod
 
             The name **empymod** is a portmanteau of *electromagnetic* (em),
             *python* (py), and *modelling* (mod): empymod is a an electromagnetic
