@@ -19,51 +19,56 @@ Gallery
    reproducing/index
    published/index
 
-.. panels::
-    :container: container-lg pb-3
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+.. grid:: 1 2 3 3
+    :gutter: 2
 
-    ---
-    :img-top: fdomain/images/sphx_glr_single_and_crossplot_003.png
+    .. grid-item-card::
+        :img-top: fdomain/images/sphx_glr_single_and_crossplot_003.png
 
-    Frequency domain
-    ^^^^^^^^^^^^^^^^
+        Frequency domain
+        ^^^^^^^^^^^^^^^^
 
-    Frequency-domain examples. A good place to get started.
+        Frequency-domain examples. A good place to get started.
 
-    +++
+        +++
 
-    .. link-button:: sphx_glr_gallery_fdomain
-            :type: ref
-            :text: To the examples
-            :classes: btn-block btn-info stretched-link
+        .. button-ref:: sphx_glr_gallery_fdomain
+            :expand:
+            :color: info
+            :click-parent:
 
-    ---
-    :img-top: tdomain/images/sphx_glr_tem_walktem_002.png
+            To the examples
 
-    Time domain
-    ^^^^^^^^^^^
+    .. grid-item-card::
+        :img-top: tdomain/images/sphx_glr_tem_walktem_002.png
 
-    Time-domain examples.
+        Time domain
+        ^^^^^^^^^^^
 
-    +++
+        Time-domain examples.
 
-    .. link-button:: sphx_glr_gallery_tdomain
-            :type: ref
-            :text: To the examples
-            :classes: btn-block btn-info stretched-link
+        +++
 
-    ---
-    :img-top: educational/images/sphx_glr_dlf_standard_lagged_splined_003.png
+        .. button-ref:: sphx_glr_gallery_tdomain
+            :expand:
+            :color: info
+            :click-parent:
 
-    Educational
-    ^^^^^^^^^^^
+            To the examples
 
-    Educational material and advanced examples.
+    .. grid-item-card::
+        :img-top: educational/images/sphx_glr_dlf_standard_lagged_splined_003.png
 
-    +++
+        Educational
+        ^^^^^^^^^^^
 
-    .. link-button:: sphx_glr_gallery_educational
-            :type: ref
-            :text: To the examples
-            :classes: btn-block btn-info stretched-link
+        Educational material and advanced examples.
+
+        +++
+
+        .. button-ref:: sphx_glr_gallery_educational
+            :expand:
+            :color: info
+            :click-parent:
+
+            To the examples

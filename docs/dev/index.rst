@@ -18,39 +18,53 @@ Development
    maintenance
    release
 
-.. panels::
-    :container: container-lg pb-2 text-center
+.. grid:: 1 2 2 2
+    :gutter: 2
 
-    :fa:`code,fa-4x`
+    .. grid-item-card::
+        :text-align: center
 
-    .. link-button:: contributing
-        :type: ref
-        :text: Contributing
-        :classes: btn-link stretched-link font-weight-bold
+        :fa:`code;fa-4x`
 
-    ---
+        .. button-ref:: contributing
+            :expand:
+            :color: info
+            :click-parent:
 
-    :fa:`fas fa-hourglass-half,fa-4x`
+            Contributing
 
-    .. link-button:: tests
-        :type: ref
-        :text: Tests & Benchmarks
-        :classes: btn-link stretched-link font-weight-bold
+    .. grid-item-card::
+        :text-align: center
 
-    ---
+        :fa:`fas fa-hourglass-half;fa-4x`
 
-    :fa:`cogs,fa-4x`
+        .. button-ref:: tests
+            :expand:
+            :color: info
+            :click-parent:
 
-    .. link-button:: maintenance
-        :type: ref
-        :text: Maintenance
-        :classes: btn-link stretched-link font-weight-bold
+            Tests & Benchmarks
 
-    ---
+    .. grid-item-card::
+        :text-align: center
 
-    :fa:`rocket,fa-4x`
+        :fa:`cogs;fa-4x`
 
-    .. link-button:: release
-        :type: ref
-        :text: Making a release
-        :classes: btn-link stretched-link font-weight-bold
+        .. button-ref:: maintenance
+            :expand:
+            :color: info
+            :click-parent:
+
+            Maintenance
+
+    .. grid-item-card::
+        :text-align: center
+
+        :fa:`rocket;fa-4x`
+
+        .. button-ref:: release
+            :expand:
+            :color: info
+            :click-parent:
+
+            Making a release

@@ -1,3 +1,5 @@
+.. _sphx_glr_gallery_educational:
+
 Educational material and tools
 ==============================
 

@@ -27,6 +27,7 @@ latest
   - Replace ``pytest-flake8`` by plain ``flake8``.
   - Change the way ``spacing`` and ``shift`` are calculated in
     ``fdesign.print_result`` to avoid numerical precision issues.
+  - Replace deprecated ``sphinx-panels`` with ``sphinx-design``.
 
 
 v2.2.0: I/O & CLI

@@ -25,58 +25,77 @@ User Guide
    changelog
    license
 
-.. panels::
-    :container: container-lg pb-3 text-center
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+.. grid:: 1 2 3 3
+    :gutter: 2
 
-    :fa:`info,fa-4x`
+    .. grid-item-card::
+        :text-align: center
 
-    .. link-button:: about
-        :type: ref
-        :text: About
-        :classes: btn-link stretched-link font-weight-bold
+        :fa:`info;fa-4x`
 
-    ---
+        .. button-ref:: about
+            :expand:
+            :color: info
+            :click-parent:
 
-    :fa:`laptop,fa-4x`
+            About
 
-    .. link-button:: installation
-        :type: ref
-        :text: Installation
-        :classes: btn-link stretched-link font-weight-bold
+    .. grid-item-card::
+        :text-align: center
 
-    ---
+        :fa:`laptop;fa-4x`
 
-    :fa:`play,fa-4x`
+        .. button-ref:: installation
+            :expand:
+            :color: info
+            :click-parent:
 
-    .. link-button:: usage
-        :type: ref
-        :text: Getting started
-        :classes: btn-link stretched-link font-weight-bold
+            Installation
 
-    ---
+    .. grid-item-card::
+        :text-align: center
 
-    :fa:`lightbulb,fa-4x`
+        :fa:`play;fa-4x`
 
-    .. link-button:: info-tips-tricks
-        :type: ref
-        :text: Info, tips & tricks
-        :classes: btn-link stretched-link font-weight-bold
+        .. button-ref:: usage
+            :expand:
+            :color: info
+            :click-parent:
 
-    ---
+            Getting started
 
-    :fa:`exchange,fa-4x`
+    .. grid-item-card::
+        :text-align: center
 
-    .. link-button:: transforms
-        :type: ref
-        :text: Transforms
-        :classes: btn-link stretched-link font-weight-bold
+        :fa:`lightbulb;fa-4x`
 
-    ---
+        .. button-ref:: info-tips-tricks
+            :expand:
+            :color: info
+            :click-parent:
 
-    :fa:`pencil,fa-4x`
+            Info, tips & tricks
 
-    .. link-button:: citation
-        :type: ref
-        :text: Citation
-        :classes: btn-link stretched-link font-weight-bold
+    .. grid-item-card::
+        :text-align: center
+
+        :fa:`exchange;fa-4x`
+
+        .. button-ref:: transforms
+            :expand:
+            :color: info
+            :click-parent:
+
+            Transforms
+
+    .. grid-item-card::
+        :text-align: center
+
+        :fa:`pencil;fa-4x`
+
+        .. button-ref:: citation
+            :expand:
+            :color: info
+            :click-parent:
+
+            Citation

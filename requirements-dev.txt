@@ -12,7 +12,7 @@ setuptools_scm
 # FOR DOCUMENTATION
 sphinx
 numpydoc
-sphinx_panels
+sphinx_design
 sphinx_numfig
 sphinx_gallery
 memory_profiler

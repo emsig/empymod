@@ -7,19 +7,19 @@
 
 /* Button colours */
 
-.btn-info {
+.sd-btn-info {
   font-weight: bold;
-  background: #447fc1;
-  border-color: #447fc1;
+  background: #447fc1 !important;
+  border-color: #447fc1 !important;
 }
 
-.btn-info:hover {
-  background: #ef413d;
-  border-color: #ef413d;
+.sd-btn-info:hover {
+  background: #ef413d !important;
+  border-color: #ef413d !important;
 }
 
 /* Card headers */
-.card-header {
+.sd-card-header {
   font-size: var(--pst-font-size-h5);
   font-weight: bold;
   padding: 1rem 2rem;

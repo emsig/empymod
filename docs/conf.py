@@ -9,7 +9,7 @@ from sphinx_gallery.sorting import FileNameSortKey
 extensions = [
     # 'sphinx.ext.autodoc',
     'numpydoc',
-    'sphinx_panels',
+    'sphinx_design',
     'sphinx.ext.intersphinx',
     # 'sphinx.ext.autosummary',
     'sphinx.ext.mathjax',
@@ -21,7 +21,6 @@ extensions = [
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',
 ]
-panels_add_bootstrap_css = False
 autosummary_generate = True
 add_module_names = True
 add_function_parentheses = False
