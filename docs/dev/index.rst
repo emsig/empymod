@@ -21,7 +21,7 @@ Development
 .. panels::
     :container: container-lg pb-2 text-center
 
-    :fa:`code,fa-4x`
+    :fa:`code;fa-4x`
 
     .. link-button:: contributing
         :type: ref
@@ -30,7 +30,7 @@ Development
 
     ---
 
-    :fa:`fas fa-hourglass-half,fa-4x`
+    :fa:`fas fa-hourglass-half;fa-4x`
 
     .. link-button:: tests
         :type: ref
@@ -39,7 +39,7 @@ Development
 
     ---
 
-    :fa:`cogs,fa-4x`
+    :fa:`cogs;fa-4x`
 
     .. link-button:: maintenance
         :type: ref
@@ -48,7 +48,7 @@ Development
 
     ---
 
-    :fa:`rocket,fa-4x`
+    :fa:`rocket;fa-4x`
 
     .. link-button:: release
         :type: ref

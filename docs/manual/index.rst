@@ -29,7 +29,7 @@ User Guide
     :container: container-lg pb-3 text-center
     :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
 
-    :fa:`info,fa-4x`
+    :fa:`info;fa-4x`
 
     .. link-button:: about
         :type: ref
@@ -38,7 +38,7 @@ User Guide
 
     ---
 
-    :fa:`laptop,fa-4x`
+    :fa:`laptop;fa-4x`
 
     .. link-button:: installation
         :type: ref
@@ -47,7 +47,7 @@ User Guide
 
     ---
 
-    :fa:`play,fa-4x`
+    :fa:`play;fa-4x`
 
     .. link-button:: usage
         :type: ref
@@ -56,7 +56,7 @@ User Guide
 
     ---
 
-    :fa:`lightbulb,fa-4x`
+    :fa:`lightbulb;fa-4x`
 
     .. link-button:: info-tips-tricks
         :type: ref
@@ -65,7 +65,7 @@ User Guide
 
     ---
 
-    :fa:`exchange,fa-4x`
+    :fa:`exchange;fa-4x`
 
     .. link-button:: transforms
         :type: ref
@@ -74,7 +74,7 @@ User Guide
 
     ---
 
-    :fa:`pencil,fa-4x`
+    :fa:`pencil;fa-4x`
 
     .. link-button:: citation
         :type: ref

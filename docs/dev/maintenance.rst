@@ -65,7 +65,7 @@ To check the environment in which the documentation was built.
 
     In [1]: import empymod
        ...: empymod.Report(
-       ...:     ['sphinx', 'numpydoc', 'sphinx_panels', 'sphinx_numfig',
+       ...:     ['sphinx', 'numpydoc', 'sphinx-design', 'sphinx_numfig',
        ...:      'sphinx_gallery', 'memory_profiler', 'pydata_sphinx_theme',
        ...:      'sphinx_automodapi', 'ipykernel', ]
        ...: )
