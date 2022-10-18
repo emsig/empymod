@@ -1077,7 +1077,7 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
     kcount = 1  # Initialize kernel count (only important for Hankel)
 
     # 3. The extrapolation transformation loop
-    for i in range(1, maxint):
+    for i in range(0, maxint):
         # 3.a Calculate the field for this interval
         if hasattr(inp, '__call__'):  # Hankel and not spline
             EMi = inp(i, lambd[om, :], off[om], ang_fact[om])
@@ -1088,7 +1088,13 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
 
         # 3.b Compute Shanks transformation
         # Using the epsilon algorithm: structured after [Weni89]_, p26.
-        S[:, i][om] = S[:, i-1][om] + EMi  # working array for transformation
+        # (S[:, i][om] = working array for transformation)
+        if i == 0:
+            S[:, i][om] = EMi
+            extrap[om, i] = S[:, i]
+            continue
+        else:
+            S[:, i][om] = S[:, i-1][om] + EMi
 
         # Recursive loop
         aux2 = np.zeros(om.sum(), dtype=EM0.dtype)
@@ -1099,15 +1105,16 @@ def qwe(rtol, atol, maxint, inp, intervals, lambd=None, off=None,
                 S[om, k-1] = np.where(np.abs(ddff) < np.finfo(np.double).tiny,
                                       np.finfo(np.double).max, aux1 + 1/ddff)
 
-        # The extrapolated result plus the first interval term
-        extrap[om, i-1] = S[om, np.mod(i, 2)] + EM0[om]
+        # The extrapolated result
+        extrap[om, i] = S[om, np.mod(i, 2)]
 
         # 3.c Analyze for convergence
-        if i > 1:
+        if i > 0:
             # Calculate relative and absolute error
-            rErr = (extrap[om, i-1] - extrap[om, i-2])/extrap[om, i-1]
-            relErr[om, i-1] = np.abs(rErr)
-            abserr = atol/np.abs(extrap[om, i-1])
+            with np.errstate(all='ignore'):
+                rErr = (extrap[om, i-1] - extrap[om, i-2])/extrap[om, i-1]
+                relErr[om, i-1] = np.abs(rErr)
+                abserr = atol/np.abs(extrap[om, i-1])
 
             # Update booleans
             om[om] *= relErr[om, i-1] >= rtol + abserr
