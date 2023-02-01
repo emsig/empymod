@@ -6,20 +6,6 @@ scooby
 # https://github.com/matplotlib/matplotlib/issues/21688
 matplotlib != 3.5.0
 
-# SETUP RELATED
-setuptools_scm
-
-# FOR DOCUMENTATION
-sphinx
-numpydoc
-sphinx_design
-sphinx_numfig
-sphinx_gallery
-memory_profiler
-pydata_sphinx_theme
-sphinx_automodapi
-ipykernel
-
 # FOR TESTING
 asv
 flake8

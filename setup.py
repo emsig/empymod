@@ -15,7 +15,7 @@ with open("README.rst") as f:
 description = "Open-source full 3D electromagnetic modeller for 1D VTI media"
 
 setup(
-    name="empymod",
+    name="empymod-plain",
     description=description,
     long_description=readme,
     author="The emsig community",
@@ -39,12 +39,6 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "scipy>=1.4",
-        "numba>=0.47",
     ],
-    use_scm_version={
-        "root": ".",
-        "relative_to": __file__,
-        "write_to": os.path.join("empymod", "version.py"),
-    },
-    setup_requires=["setuptools_scm"],
+    version="2.2.1",
 )

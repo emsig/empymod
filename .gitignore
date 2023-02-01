@@ -1,27 +1,13 @@
 # Directories
 __pycache__/
 
-# Sphinx
-docs/_build/
-docs/api/empymod*
-docs/savefig/
-docs/gallery/*/
-docs/my*.json
-docs/my*.txt
-
 # Pytest and coverage related
 htmlcov
 .coverage
 .pytest_cache/
 
-# Examples related
-examples/educational/filters/
-
-# setuptools_scm
-empymod/version.py
-
 # Build related
 .eggs/
 build/
 dist/
-empymod.egg-info/
+empymod_plain.egg-info/
