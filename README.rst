@@ -25,8 +25,11 @@ for ``pyodido`` and similar, browser-based client-side applications, which need
 plain python wheels. The name of the PyPI-package is ``empymod-plain``, but the
 module itself is ``empymod``.
 
+The version number follows the ``empymod`` version number, with an added
+``.post1`` to distinguish it.
+
 **Only use this version if you are sure why. In general it is always advisable
-to use the regular ``empymod`` package.**
+to use the regular empymod package.**
 
 Open-source full 3D electromagnetic modeller for 1D VTI media
 
