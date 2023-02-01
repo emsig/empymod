@@ -5,12 +5,8 @@ on:
   pull_request:
   push:
     branches:
-      - main
-  release:
-    types:
-      - published
-  schedule:
-    - cron: "14 14 20 * *"
+      - plain
+      - pdev
 
 # Use bash by default in all jobs
 defaults:
@@ -43,19 +39,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          # Need to fetch more than the last commit so that setuptools-scm can
-          # create the correct version string. If the number of commits since
-          # the last release is greater than this, the version still be wrong.
-          # Increase if necessary.
-          fetch-depth: 100
-          # The GitHub token is preserved by default but this job doesn't need
-          # to be able to push to GitHub.
-          persist-credentials: false
-
-      # Need the tags so that setuptools-scm can form a valid version number
-      - name: Fetch git tags
-        run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup miniconda
         # [pin v2.1.1 (2021-04-01)]
@@ -74,7 +57,7 @@ jobs:
           conda config --show-sources
           conda config --show
           conda info -a
-          conda install "scipy!=1.9.0" pytest pytest-console-scripts scooby setuptools-scm
+          conda install "scipy!=1.9.0" pytest pytest-console-scripts scooby
 
       - name: Conda list
         shell: bash -l {0}

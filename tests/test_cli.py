@@ -9,18 +9,6 @@ import empymod
 from empymod.__main__ import run
 
 
-class disable_numba(ContextDecorator):
-    """Context decorator to disable-enable JIT and remove log file."""
-    def __enter__(self):
-        os.environ["NUMBA_DISABLE_JIT"] = "1"
-        return self
-
-    def __exit__(self, *exc):
-        os.environ["NUMBA_DISABLE_JIT"] = "0"
-        return False
-
-
-@disable_numba()
 @pytest.mark.script_launch_mode('subprocess')
 def test_main(script_runner):
 
