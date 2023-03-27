@@ -1,7 +1,7 @@
 """
 Utility functions for writing and reading inputs and data.
 """
-# Copyright 2016-2022 The emsig community.
+# Copyright 2016-2023 The emsig community.
 #
 # This file is part of empymod.
 #
