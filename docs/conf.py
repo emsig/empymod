@@ -145,6 +145,7 @@ linkcheck_ignore = [
     'https://doi.org/10.1111/j.1365-246X.1988.tb01131.x',
     'https://doi.org/10.1137/1.9780898719598.ch12',
     'https://doi.org/10.1190/1.9781560802631.ch4',
+    'https://doi.org/10.1145/356012.356014',
     'https://doi.org/10.1002/sapm19553411',
     'https://doi.org/10.1029/JB087iB07p05327',
     'https://doi.org/10.1093/gji/ggt251',
@@ -152,5 +153,4 @@ linkcheck_ignore = [
     'https://doi.org/10.1190/geo2016-0626.1',
     'https://doi.org/10.1190/geo2018-0069.1',
     'https://doi.org/10.1190/tle36040352.1',
-
 ]
