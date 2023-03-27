@@ -9,7 +9,7 @@ CSEM example.
 
 - **Constable, S., and C. J. Weiss,  2006**, Mapping thin resistors and
   hydrocarbons with marine EM methods: Insights from 1D modeling: Geophysics,
-  71, G43-G51; DOI: `10.1190/1.2187748 <http://dx.doi.org/10.1190/1.2187748>`_.
+  71, G43-G51; DOI: `10.1190/1.2187748 <https://doi.org/10.1190/1.2187748>`_.
 
 """
 import empymod

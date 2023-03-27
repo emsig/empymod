@@ -653,7 +653,7 @@ def fourier_fftlog(fEM, time, freq, ftarg):
 
     FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT.
     FFTLog was presented in Appendix B of [Hami00]_ and published at
-    http://casa.colorado.edu/~ajsh/FFTLog.
+    https://casa.colorado.edu/~ajsh/FFTLog.
 
     This function uses a simplified version of `pyfftlog`, which is a
     python-version of `FFTLog`. For more details regarding `pyfftlog` see

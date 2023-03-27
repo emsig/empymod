@@ -7,7 +7,7 @@ See the notebooks in the repo `empymod/article-tle2017
 
     Werthmüller, D., 2017, **Getting started with controlled-source
     electromagnetic 1D modeling**: The Leading Edge, 36, 352-355; doi:
-    `10.1190/tle36040352.1 <http://dx.doi.org/10.1190/tle36040352.1>`_.
+    `10.1190/tle36040352.1 <https://doi.org/10.1190/tle36040352.1>`_.
 
 Contains 2 notebooks with eight frequency- and time-domain examples.
 
