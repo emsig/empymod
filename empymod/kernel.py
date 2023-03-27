@@ -29,7 +29,6 @@ root directory for more information regarding the involved licenses.
 # the License.
 
 
-import scipy as sp
 import numpy as np
 import numba as nb
 

@@ -9,7 +9,7 @@ MTEM example.
 
 - **Ziolkowski, A., B. Hobbs, and D. Wright,  2007**, Multitransient
   electromagnetic demonstration survey in France: Geophysics, 72, F197-F209;
-  DOI: `10.1190/1.2735802 <http://dx.doi.org/10.1190/1.2735802>`_.
+  DOI: `10.1190/1.2735802 <https://doi.org/10.1190/1.2735802>`_.
 
 """
 import empymod
