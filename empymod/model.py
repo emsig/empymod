@@ -593,8 +593,9 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     src, rec : list of floats or arrays
         Source and receiver coordinates [x, y, z] (m):
 
-        - The x- and y-coordinates can be arrays, z is a single value.
-        - The x- and y-coordinates must have the same dimension.
+        For `N` sources or receivers, the x- and y-coordinates must be of size
+        `N` or 1 (in the latter case it will be expanded to `N`); z is always a
+        single value.
 
         Sources or receivers placed on a layer interface are considered in the
         upper layer.
@@ -1235,8 +1236,9 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     src, rec : list of floats or arrays
         Source and receiver coordinates [x, y, z] (m):
 
-        - The x- and y-coordinates can be arrays, z is a single value.
-        - The x- and y-coordinates must have the same dimension.
+        For `N` sources or receivers, the x- and y-coordinates must be of size
+        `N` or 1 (in the latter case it will be expanded to `N`); z is always a
+        single value.
 
     res : float
         Horizontal resistivity rho_h (Ohm.m).
@@ -1562,8 +1564,9 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     src, rec : list of floats or arrays
         Source and receiver coordinates [x, y, z] (m):
 
-        - The x- and y-coordinates can be arrays, z is a single value.
-        - The x- and y-coordinates must have the same dimension.
+        - For `N` sources or receivers, the x- and y-coordinates must be of
+          size `N` or 1 (in the latter case it will be expanded to `N`); z is
+          always a single value.
         - The x- and y-coordinates only matter for the angle-dependent factor.
 
         Sources or receivers placed on a layer interface are considered in the

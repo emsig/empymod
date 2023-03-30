@@ -361,10 +361,23 @@ def check_dipole(inp, name, verb):
 
     """
 
-    # Check inp for x, y, and z; x & y must have same length, z is a float
+    # Check inp for x, y, and z; x & y must be of size N or 1, z is a float
     _check_shape(np.squeeze(np.asarray(inp, dtype=object)), name, (3,))
     inp_x = _check_var(inp[0], float, 1, name+'-x')
-    inp_y = _check_var(inp[1], float, 1, name+'-y', inp_x.shape)
+    inp_y = _check_var(inp[1], float, 1, name+'-y')
+
+    # Expand x or y coordinate if necessary.
+    if inp_x.size != inp_y.size:
+        if inp_x.size == 1:
+            inp_x = np.repeat(inp_x, inp_y.size)
+        elif inp_y.size == 1:
+            inp_y = np.repeat(inp_y, inp_x.size)
+        else:
+            raise ValueError(
+                f"Parameters {name}-x and {name}-y must be of same size or "
+                f"be a single value; provided: {inp_x.shape}; {inp_y.shape}."
+            )
+
     inp_z = _check_var(inp[2], float, 1, name+'-z', (1,))
     out = [inp_x, inp_y, inp_z]
 
