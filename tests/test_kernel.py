@@ -170,3 +170,7 @@ def test_halfspace():                                            # 7. halfspace
     hsbp['11']['aniso'] = hsbp['11']['aniso'][1]
     hs_res = bipole(**hsbp['11'])
     assert_allclose(direct, hs_res, atol=1e-2)
+
+
+def test_all_dir():
+    assert set(kernel.__all__) == set(dir(kernel))

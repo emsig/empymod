@@ -593,3 +593,7 @@ def test_print_count(capsys):
                                 'time': default_timer(), 'warn-r': 0})
     out, _ = capsys.readouterr()
     assert out == ""
+
+
+def test_all_dir():
+    assert set(fdesign.__all__) == set(dir(fdesign))

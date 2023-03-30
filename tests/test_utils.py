@@ -1222,3 +1222,7 @@ def test_import_time():
     # Currently we check t < 1.2s.
     # => That should come down to t < 0.5s in the future!
     assert float(out.stderr.decode("utf-8")[:-1]) < 1.2
+
+
+def test_all_dir():
+    assert set(utils.__all__) == set(dir(utils))
