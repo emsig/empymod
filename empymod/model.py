@@ -66,6 +66,10 @@ __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
            'tem']
 
 
+def __dir__():
+    return __all__
+
+
 def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
            epermH=None, epermV=None, mpermH=None, mpermV=None, msrc=False,
            srcpts=1, mrec=False, recpts=1, strength=0, **kwargs):

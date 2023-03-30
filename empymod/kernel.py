@@ -40,6 +40,10 @@ _numba_setting = {'nogil': True, 'cache': True}
 _numba_with_fm = {'fastmath': True, **_numba_setting}
 
 
+def __dir__():
+    return __all__
+
+
 # Wavenumber-frequency domain kernel
 
 @nb.njit(**_numba_setting)

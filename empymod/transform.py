@@ -38,6 +38,10 @@ __all__ = ['hankel_dlf', 'hankel_qwe', 'hankel_quad', 'fourier_dlf',
            'get_dlf_points', 'get_fftlog_input']
 
 
+def __dir__():
+    return __all__
+
+
 # 1. Hankel transforms (wavenumber -> frequency)
 
 def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
