@@ -74,6 +74,10 @@ _min_res = 1e-20    # Minimum value for horizontal/vertical resistivity
 _min_angle = 1e-10  # Angle factors smaller than that are set to 0
 
 
+def __dir__():
+    return __all__
+
+
 # 1. Class EMArray
 
 class EMArray(np.ndarray):

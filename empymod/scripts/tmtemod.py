@@ -354,6 +354,10 @@ from empymod.utils import (check_model, check_frequency, check_dipole, _strvar,
 __all__ = ['dipole']
 
 
+def __dir__():
+    return __all__
+
+
 def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
            verb=2):
     r"""Return the electromagnetic field due to a dipole source.

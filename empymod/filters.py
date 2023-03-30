@@ -55,6 +55,10 @@ __all__ = ['DigitalFilter', 'kong_61_2007', 'kong_241_2007', 'key_101_2009',
            'key_101_CosSin_2012', 'key_201_CosSin_2012']
 
 
+def __dir__():
+    return __all__
+
+
 # 0. Filter Class and saving/loading routines
 
 class DigitalFilter:

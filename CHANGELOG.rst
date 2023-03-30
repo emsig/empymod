@@ -10,6 +10,14 @@ v2.2.x
 """"""
 
 
+latest
+------
+
+- Bug fixes, small improvements and maintenance
+
+  - Cleaned-up the namespace by setting ``dir()`` explicitly.
+
+
 v2.2.1: Minimum offset
 ----------------------
 

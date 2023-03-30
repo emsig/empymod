@@ -30,6 +30,10 @@ from empymod import utils
 __all__ = ["save_input", "load_input", "save_data", "load_data"]
 
 
+def __dir__():
+    return __all__
+
+
 def save_input(fname, data, **kwargs):
     """Save input dict to disk.
 
