@@ -247,6 +247,10 @@ __all__ = ['design', 'save_filter', 'load_filter', 'plot_result',
            'cos_1', 'cos_2', 'cos_3', 'empy_hankel']
 
 
+def __dir__():
+    return __all__
+
+
 # 1. PRINCIPAL FILTER DESIGNING ROUTINES
 
 @np.errstate(all='ignore')
