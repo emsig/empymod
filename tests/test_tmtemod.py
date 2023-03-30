@@ -110,3 +110,7 @@ def test_fields():
             # Check
             assert_allclose(out[0], TMTE[0] + TMTE[1])
             assert_allclose(out[1], TMTE[2] + TMTE[3])
+
+
+def test_all_dir():
+    assert set(tmtemod.__all__) == set(dir(tmtemod))

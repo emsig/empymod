@@ -125,3 +125,7 @@ def test_ComplexNumPyEncoder():
     # Error
     with pytest.raises(TypeError, match="Object of type module"):
         test.default(io)
+
+
+def test_all_dir():
+    assert set(io.__all__) == set(dir(io))

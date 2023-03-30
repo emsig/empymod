@@ -200,12 +200,21 @@ def test_check_dipole(capsys):
     outstr += "     > z       [m] :  0\n"
     assert out == outstr
 
+    # Check expansion
+    rec, nrec = utils.check_dipole([[0, 1], 0, 0], 'rec', 0)
+    assert_allclose(rec[1], [0, 0])
+    rec, nrec = utils.check_dipole([3, [0, 1, 2], 0], 'rec', 0)
+    assert_allclose(rec[0], [3, 3, 3])
+
     # Check Errors: more than one z
     with pytest.raises(ValueError, match='Parameter src has wrong shape'):
         utils.check_dipole([[0, 0], [0, 0], [0, 0]], 'src', 3)
     # Check Errors: wrong number of elements
     with pytest.raises(ValueError, match='Parameter rec has wrong shape'):
         utils.check_dipole([0, 0, 0, 0], 'rec', 3)
+    # Check Errors: x- and y- of different sizes, != 1
+    with pytest.raises(ValueError, match='Parameters rec-x and rec-y must be'):
+        utils.check_dipole([[0, 1], [0, 1, 2], 0], 'rec', 3)
 
 
 def test_check_frequency(capsys):
@@ -1213,3 +1222,7 @@ def test_import_time():
     # Currently we check t < 1.2s.
     # => That should come down to t < 0.5s in the future!
     assert float(out.stderr.decode("utf-8")[:-1]) < 1.2
+
+
+def test_all_dir():
+    assert set(utils.__all__) == set(dir(utils))

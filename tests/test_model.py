@@ -6,6 +6,7 @@ from numpy.testing import assert_allclose
 
 # Import main modelling routines from empymod directly to ensure they are in
 # the __init__.py-file.
+from empymod import model
 from empymod import bipole, dipole, analytical, loop
 # Import rest from model
 from empymod.model import gpr, dipole_k, fem, tem
@@ -1140,3 +1141,7 @@ class TestSqueeze:
 
         assert a.shape == (2, )
         assert b.shape == (1, 2, 1)
+
+
+def test_all_dir():
+    assert set(model.__all__) == set(dir(model))

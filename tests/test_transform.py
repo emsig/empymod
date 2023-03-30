@@ -489,3 +489,7 @@ def test_dlf():                                                       # 10. dlf
 
         # Compare
         assert_allclose(np.squeeze(fEM3), np.squeeze(freq2), rtol=1e-3)
+
+
+def test_all_dir():
+    assert set(transform.__all__) == set(dir(transform))

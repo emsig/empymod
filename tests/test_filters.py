@@ -77,3 +77,7 @@ def test_fourier_dlf():                                    # 3. Fourier filters
         assert len(dlf.cos) == nr
         assert len(dlf.sin) == nr
         assert_allclose(dlf.factor, fact)
+
+
+def test_all_dir():
+    assert set(filters.__all__) == set(dir(filters))
