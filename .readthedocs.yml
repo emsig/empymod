@@ -16,3 +16,7 @@ python:
     - requirements: requirements-dev.txt
     - method: pip
       path: .
+
+# https://github.com/readthedocs/readthedocs-docker-images/issues/194
+build:
+  os: ubuntu-22.04
