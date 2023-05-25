@@ -4,8 +4,8 @@ import re
 import sys
 from setuptools import setup
 
-if not sys.version_info[:2] >= (3, 7):
-    sys.exit(f"empymod is only meant for Python 3.7 and up.\n"
+if not sys.version_info[:2] >= (3, 8):
+    sys.exit(f"empymod is only meant for Python 3.8 and up.\n"
              f"Current version: {sys.version_info[0]}.{sys.version_info[1]}.")
 
 # Get README and remove badges.
@@ -26,10 +26,10 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     entry_points={
         "console_scripts": [

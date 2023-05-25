@@ -20,6 +20,7 @@ latest
 - Bug fixes, small improvements and maintenance
 
   - Cleaned-up the namespace by setting ``dir()`` explicitly.
+  - Testing: added Python 3.11, dropped Python 3.7.
 
 
 v2.2.1: Minimum offset

@@ -1210,7 +1210,9 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
     sources are at the same depth, as well as all receivers are at the same
     depth.
 
-    In the case of a halfspace the air-interface is located at z = 0 m.
+    In the case of a halfspace the air-interface is located at z = 0 m, and
+    both sources and receiver must be either at the interface or within the
+    subsurface, not in the air (this is NOT checked by the code).
 
     You can call the functions :func:`empymod.kernel.fullspace` and
     :func:`empymod.kernel.halfspace` in :mod:`empymod.kernel` directly. This
@@ -1239,6 +1241,9 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
         For `N` sources or receivers, the x- and y-coordinates must be of size
         `N` or 1 (in the latter case it will be expanded to `N`); z is always a
         single value.
+
+        In the case of the diffusive halfspace, ``z`` is assumed to be at the
+        interface or below.
 
     res : float
         Horizontal resistivity rho_h (Ohm.m).

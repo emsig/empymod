@@ -13,7 +13,7 @@ or via ``pip``:
 
    pip install empymod
 
-Minimum requirements are Python version 3.7 or higher and the modules ``scipy``
+Minimum requirements are Python version 3.8 or higher and the modules ``scipy``
 and ``numba``.
 
 The modeller empymod comes with add-ons (``empymod.scripts``). These add-ons
