@@ -5,7 +5,7 @@ This project was started by **Dieter Werthmüller** at
 `The Mexican Institute of Petroleum IMP <https://www.gob.mx/imp>`_
 (Instituto Mexicano del Petróleo), funded (till 01/2017) by
 `The Mexican National Council of Science and Technology
-<https://www.conacyt.gob.mx>`_ (Consejo Nacional de Ciencia y Tecnología).
+<https://conahcyt.mx>`_ (Consejo Nacional de Ciencia y Tecnología).
 Dieter would like to thank his past and current employers who allowed and allow
 him to maintain and further develop the code after the initial funding ended,
 namely:
