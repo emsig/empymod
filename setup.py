@@ -36,7 +36,7 @@ setup(
             "empymod=empymod.__main__:main",
         ],
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         "scipy>=1.4",
         "numba>=0.47",
