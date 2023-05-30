@@ -328,7 +328,7 @@ can use
 
 
 """
-# Copyright 2016-2023 The emsig community.
+# Copyright 2016 The emsig community.
 #
 # This file is part of empymod.
 #
