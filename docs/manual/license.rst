@@ -18,7 +18,7 @@ This work is licensed under Attribution 4.0 International (CC-BY-4.0).
 License of Code
 ---------------
 
-Copyright 2016-2023 The emsig community.
+Copyright 2016 The emsig community.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

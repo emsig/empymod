@@ -21,6 +21,8 @@ latest
 
   - Cleaned-up the namespace by setting ``dir()`` explicitly.
   - Testing: added Python 3.11, dropped Python 3.7.
+  - Adjust copyright notice to only include original year, so it has not to be
+    adjusted each year.
 
 
 v2.2.1: Minimum offset
