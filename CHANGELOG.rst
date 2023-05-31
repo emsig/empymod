@@ -10,19 +10,14 @@ v2.2.x
 """"""
 
 
-latest
-------
+v2.2.2: Flexible dipole coordinates
+-----------------------------------
+
+**2023-05-31**
 
 - Modelling routines: The definition of the coordinates for ``dipole``,
   ``dipole_k``, and ``analytical`` is now more flexible (``x`` and ``y``
   coordinate can now have different dimension, as long as one is a scalar).
-
-- Bug fixes, small improvements and maintenance
-
-  - Cleaned-up the namespace by setting ``dir()`` explicitly.
-  - Testing: added Python 3.11, dropped Python 3.7.
-  - Adjust copyright notice to only include original year, so it has not to be
-    adjusted each year.
 
 - Bumped the minimum requirements to:
 
@@ -30,6 +25,13 @@ latest
   - NumPy 1.19
   - SciPy 1.5
   - Numba 0.50
+
+- Bug fixes, small improvements and maintenance:
+
+  - Cleaned-up the namespace by setting ``dir()`` explicitly.
+  - Testing: added Python 3.11, dropped Python 3.7.
+  - Adjust copyright notice to only include original year, so it has not to be
+    adjusted each year.
 
 
 v2.2.1: Minimum offset
