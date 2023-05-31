@@ -24,6 +24,13 @@ latest
   - Adjust copyright notice to only include original year, so it has not to be
     adjusted each year.
 
+- Bumped the minimum requirements to:
+
+  - Python 3.8
+  - NumPy 1.19
+  - SciPy 1.5
+  - Numba 0.50
+
 
 v2.2.1: Minimum offset
 ----------------------

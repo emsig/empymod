@@ -38,8 +38,8 @@ setup(
     },
     python_requires=">=3.8",
     install_requires=[
-        "scipy>=1.4",
-        "numba>=0.47",
+        "scipy>=1.5",
+        "numba>=0.50",
     ],
     use_scm_version={
         "root": ".",

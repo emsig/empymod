@@ -34,7 +34,7 @@ jobs:
           - python-version: "3.8"
             name: minimal
             os: ubuntu
-            conda: "'numpy=1.17' 'scipy=1.4' 'numba=0.47'"
+            conda: "'numpy=1.19' 'scipy=1.5' 'numba=0.50'"
             test: ""
           - python-version: "3.9"
             name: plain
