@@ -128,8 +128,11 @@ plt.style.use('ggplot')
 #
 # Note that in this notebook we use this hook to model relaxation in the low
 # frequency spectrum for IP measurements, replacing :math:`\rho` by a
-# frequency-dependent model :math:`\rho(\omega)`. However, this could also be
-# used to model dielectric phenomena in the high frequency spectrum, replacing
+# frequency-dependent model :math:`\rho(\omega)`. 
+# However, this could also be 
+# used to model dielectric phenomena in the high frequency spectrum, or for IP measurements in very resisitive ground where the 
+# permittivity can be included. Therefore, we also provide a Cole-Cole function for permittivity, which treats the conductivity as constant with 
+# frequency and adds the frequncy dependent complex permittivity. 
 # :math:`\varepsilon_r` by a frequency-dependent formula
 # :math:`\varepsilon_r(\omega)`.
 
@@ -161,6 +164,23 @@ def pelton_et_al(inp, p_dict):
     etaH = 1/rhoH + 1j*p_dict['etaH'].imag
     etaV = 1/rhoV + 1j*p_dict['etaV'].imag
 
+    return etaH, etaV
+
+
+def cole_perm(inp, p_dict):
+    """ Citation here. Work in progress. """
+
+    iotc = np.outer(1j*2*np.pi*p_dict['freq'], inp['tau'])**inp['c']
+
+    # Compute the complex admittivity described by a constant (DC) conductivity + the Cole-Cole permittivity
+    
+    epsilonH = inp['eperm_8'] + (inp['eperm_0']-inp['eperm_8'])/(1 + iotc)
+  
+    epsilonV = epsilonH/p_dict['aniso']**2
+    
+    etaH = 1/inp['rho_0'] + 1j*2*np.pi*np.transpose(matlib.repmat(p_dict['freq'],2,1))*epsilonH 
+    etaV = 1/inp['rho_0'] + 1j*2*np.pi*np.transpose(matlib.repmat(p_dict['freq'],2,1))*epsilonV 
+        
     return etaH, etaV
 
 
