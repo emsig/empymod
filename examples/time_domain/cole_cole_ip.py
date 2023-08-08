@@ -53,6 +53,7 @@ range of IP.
 """
 import empymod
 import numpy as np
+import numpy.matlib as matlib
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
