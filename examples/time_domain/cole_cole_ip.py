@@ -131,9 +131,9 @@ plt.style.use('ggplot')
 # frequency-dependent model :math:`\rho(\omega)`. 
 # However, this could also be 
 # used to model dielectric phenomena in the high frequency spectrum, or for IP measurements in very resisitive ground where the 
-# permittivity can be included. Therefore, we also provide a Cole-Cole function for permittivity, which treats the conductivity as constant with 
-# frequency and adds the frequncy dependent complex permittivity. 
-# :math:`\varepsilon_r` by a frequency-dependent formula
+# permittivity may be included. Therefore, we also provide a Cole-Cole function for permittivity, which treats the conductivity as constant with 
+# frequency, and adds the frequncy dependent complex permittivity, i.e. 
+# :math:`\varepsilon_r` is replaced by a frequency-dependent formula
 # :math:`\varepsilon_r(\omega)`.
 
 
@@ -168,7 +168,7 @@ def pelton_et_al(inp, p_dict):
 
 
 def cole_perm(inp, p_dict):
-    """ Citation here. Work in progress. """
+    """ Cole and Cole (1941)."""
 
     iotc = np.outer(1j*2*np.pi*p_dict['freq'], inp['tau'])**inp['c']
 
