@@ -180,7 +180,7 @@ def cole_perm(inp, p_dict):
     epsilonV = epsilonH/p_dict['aniso']**2
     
     etaH = 1/inp['rho_0'] + np.outer(2j*np.pi*p_dict['freq'], epsilonH) 
-    etaV = 1/inp['rho_0'] + 1j*2*np.pi*np.transpose(matlib.repmat(p_dict['freq'],2,1))*epsilonV
+    etaV = 1/inp['rho_0'] + np.outer(2j*np.pi*p_dict['freq'], epsilonV)
         
     return etaH, etaV
 
