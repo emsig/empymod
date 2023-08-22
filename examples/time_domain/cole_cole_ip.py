@@ -53,9 +53,19 @@ range of IP.
 """
 import empymod
 import numpy as np
-import numpy.matlib as matlib
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
+
+
+def pos(data):
+    """Return positive data; set negative data to NaN."""
+    return np.array([x if x > 0 else np.nan for x in data])
+
+
+def neg(data):
+    """Return -negative data; set positive data to NaN."""
+    return np.array([-x if x < 0 else np.nan for x in data])
+
 
 ###############################################################################
 # Use empymod with user-def. func. to adjust :math:`\eta` and :math:`\zeta`
@@ -129,11 +139,13 @@ plt.style.use('ggplot')
 #
 # Note that in this notebook we use this hook to model relaxation in the low
 # frequency spectrum for IP measurements, replacing :math:`\rho` by a
-# frequency-dependent model :math:`\rho(\omega)`. 
-# However, this could also be 
-# used to model dielectric phenomena in the high frequency spectrum, or for IP measurements in very resisitive ground where the 
-# permittivity may be included. Therefore, we also provide a Cole-Cole function for permittivity, which treats the conductivity as constant with 
-# frequency, and adds the frequncy dependent complex permittivity, i.e. 
+# frequency-dependent model :math:`\rho(\omega)`.
+# However, this could also be
+# used to model dielectric phenomena in the high frequency spectrum,
+# or for IP measurements in very resisitive ground where the
+# permittivity may be included. Therefore, we also provide a Cole-Cole
+# function for permittivity, which treats the conductivity as constant with
+# frequency, and adds the frequncy dependent complex permittivity, i.e.
 # :math:`\varepsilon_r` is replaced by a frequency-dependent formula
 # :math:`\varepsilon_r(\omega)`.
 
@@ -171,17 +183,19 @@ def pelton_et_al(inp, p_dict):
 def cole_perm(inp, p_dict):
     """ Cole and Cole (1941)."""
 
-    iotc = np.outer(1j*2*np.pi*p_dict['freq'], inp['tau'])**inp['c']
+    iotc = np.outer(2j*np.pi*p_dict['freq'], inp['tau'])**inp['c']
 
-    # Compute the complex admittivity described by a constant (DC) conductivity + the Cole-Cole permittivity
-    
+    jw = np.outer(2j*np.pi*p_dict['freq'], np.ones(2))
+
+    # Compute the complex admittivity described by a
+    # constant (DC) conductivity + the Cole-Cole permittivity
+
     epsilonH = inp['eperm_8'] + (inp['eperm_0']-inp['eperm_8'])/(1 + iotc)
-  
     epsilonV = epsilonH/p_dict['aniso']**2
-    
-    etaH = 1/inp['rho_0'] + np.outer(2j*np.pi*p_dict['freq'], epsilonH) 
-    etaV = 1/inp['rho_0'] + np.outer(2j*np.pi*p_dict['freq'], epsilonV)
-        
+
+    etaH = 1/inp['rho_0'] + jw*epsilonH
+    etaV = 1/inp['rho_0'] + jw*epsilonV
+
     return etaH, etaV
 
 
@@ -215,6 +229,7 @@ model = {
     'verb': 1
 }
 
+
 # Collect Cole-Cole models
 res_0 = np.array([2e14, 10])
 res_8 = np.array([2e14, 5])
@@ -222,26 +237,51 @@ tau = [0, 1]
 c = [0, 0.5]
 m = (res_0-res_8)/res_0
 
+e0 = 8.85e-12  # Vacuum permittivity
+eperm_0 = e0*np.array([1, 6e08])
+eperm_8 = e0*np.array([1, 3])
+
+
+m = (res_0-res_8)/res_0
+
 cole_model = {'res': res_0, 'cond_0': 1/res_0, 'cond_8': 1/res_8,
               'tau': tau, 'c': c, 'func_eta': cole_cole}
+
+cole_perm_model = {'res': res_0, 'rho_0': res_0, 'eperm_0': eperm_0,
+                   'eperm_8': eperm_8,
+                   'tau': tau, 'c': c, 'func_eta': cole_perm}
+
 pelton_model = {'res': res_0, 'rho_0': res_0, 'm': m,
                 'tau': tau, 'c': c, 'func_eta': pelton_et_al}
 
 # Compute
 out_bipole = empymod.bipole(res=res_0, **model)
 out_cole = empymod.bipole(res=cole_model, **model)
+out_cole_perm = empymod.bipole(res=cole_perm_model, **model)
 out_pelton = empymod.bipole(res=pelton_model, **model)
 
 # Plot
 plt.figure()
 plt.title('Switch-off')
-plt.plot(times, out_bipole, label='Regular Bipole')
-plt.plot(times, out_cole, '--', label='Cole and Cole (1941)')
-plt.plot(times, out_pelton, '-.', label='Pelton et al. (1978)')
+plt.plot(times, pos(out_bipole), '-', label='Regular Bipole')
+plt.plot(times, neg(out_bipole), '--', label='')
+
+plt.plot(times, pos(out_cole), '-', label='Cole and Cole (1941) Conductivity')
+plt.plot(times, neg(out_cole), '--', label='')
+
+plt.plot(times, pos(out_cole_perm), '-',
+         label='Cole and Cole (1941) Permittivity')
+plt.plot(times, neg(out_cole_perm), '--', label='')
+
+plt.plot(times, pos(out_pelton), '-', label='Pelton et al. (1978) Resistivity')
+plt.plot(times, neg(out_pelton), '--', label='')
+
 plt.legend()
 plt.yscale('log')
 plt.xscale('log')
+plt.ylabel('$H_z$ (A/m)')
 plt.xlabel('time (s)')
+plt.tight_layout()
 plt.show()
 
 ###############################################################################
