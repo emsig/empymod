@@ -144,7 +144,7 @@ def neg(data):
 # or for IP measurements in very resisitive ground where the
 # permittivity may be included. Therefore, we also provide a Cole-Cole
 # function for permittivity, which treats the conductivity as constant with
-# frequency, and adds the frequncy dependent complex permittivity, i.e.
+# frequency, and adds the frequency-dependent complex permittivity, i.e.,
 # :math:`\varepsilon_r` is replaced by a frequency-dependent formula
 # :math:`\varepsilon_r(\omega)`.
 
@@ -187,7 +187,7 @@ def cole_perm(inp, p_dict):
     jw = np.outer(2j*np.pi*p_dict['freq'], np.ones(2))
 
     # Compute the complex admittivity described by a
-    # constant (DC) conductivity + the Cole-Cole permittivity
+    # constant (DC) conductivity and the Cole-Cole permittivity
 
     epsilonH = inp['eperm_8'] + (inp['eperm_0']-inp['eperm_8'])/(1 + iotc)
     epsilonV = epsilonH/p_dict['aniso']**2
