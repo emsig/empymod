@@ -139,8 +139,7 @@ def neg(data):
 #
 # Note that in this notebook we use this hook to model relaxation in the low
 # frequency spectrum for IP measurements, replacing :math:`\rho` by a
-# frequency-dependent model :math:`\rho(\omega)`.
-# However, this could also be
+# frequency-dependent model :math:`\rho(\omega)`. However, this could also be
 # used to model dielectric phenomena in the high frequency spectrum,
 # or for IP measurements in very resisitive ground where the
 # permittivity may be included. Therefore, we also provide a Cole-Cole
@@ -228,7 +227,6 @@ model = {
     'signal': 1,
     'verb': 1
 }
-
 
 # Collect Cole-Cole models
 res_0 = np.array([2e14, 10])
