@@ -15,9 +15,10 @@ v2.2.2: Flexible dipole coordinates
 
 **2023-05-31**
 
-- Modelling routines: The definition of the coordinates for ``dipole``,
-  ``dipole_k``, and ``analytical`` is now more flexible (``x`` and ``y``
-  coordinate can now have different dimension, as long as one is a scalar).
+- Modelling routines: The definition of sources and receivers is more flexible:
+  all parameters  can now be either of shape ``(1,)`` or ``(N,)``, where ``N``
+  is the number of sources/receivers. The exception is ``z`` for dipoles, which
+  must be a scalar.
 
 - Bumped the minimum requirements to:
 
