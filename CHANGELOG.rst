@@ -12,6 +12,10 @@ v2.2.x
 latest
 ------
 
+- Examples:
+
+  - @efinden expanded the "Cole-Cole IP" example.
+
 - Maintenance:
 
   - Bumped the minimum requirements to:
