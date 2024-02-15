@@ -142,4 +142,5 @@ html_css_files = [
 linkcheck_ignore = [
     "https://doi.org/10.*",
     "https://conahcyt.mx",  # Check fails; check later again!
+    "https://software.seg.org",  # Page cannot be reached.
 ]

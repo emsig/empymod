@@ -14,10 +14,10 @@ help:
 	@echo ""
 
 install:
-	pip install -e .
+	python -m pip install --no-build-isolation --no-deps -e .
 
 dev-install:
-	pip install -r requirements-dev.txt && pip install -e .
+	python -m pip install -r requirements-dev.txt && python -m pip install --no-build-isolation --no-deps -e .
 
 .ONESHELL:
 pytest:
@@ -46,7 +46,7 @@ linkcheck:
 	cd docs && make linkcheck
 
 clean:
-	pip uninstall empymod -y
+	python -m pip uninstall empymod -y
 	rm -rf build/ dist/ .eggs/ empymod.egg-info/ empymod/version.py  # build
 	rm -rf */__pycache__/ */*/__pycache__/      # python cache
 	rm -rf .coverage htmlcov/ .pytest_cache/    # tests and coverage
