@@ -9,6 +9,21 @@ Version 2
 v2.2.x
 """"""
 
+latest
+------
+
+- Maintenance:
+
+  - Bumped the minimum requirements to:
+  
+    - Python 3.9
+    - SciPy 1.8
+    - Numba 0.53
+
+  - Testing: added Python 3.12, dropped Python 3.8.
+
+  - Fix remaining outdated ``python setup.py`` commands.
+
 
 v2.2.2: Flexible dipole coordinates
 -----------------------------------
