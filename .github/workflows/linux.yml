@@ -74,9 +74,9 @@ jobs:
 
     steps:
 
-      # Cancel any previous run of the test job; [pin v0.10.0 (2022-06-27)]
+      # Cancel any previous run of the test job; [pin v0.12.1 (2024-01-25)]
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@bb6001c4ea612bf59c3abfc4756fbceee4f870c7
+        uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa
         with:
           access_token: ${{ github.token }}
 
@@ -98,8 +98,8 @@ jobs:
         run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup miniconda
-        # [pin v2.1.1 (2021-04-01)]
-        uses: conda-incubator/setup-miniconda@35d1405e78aa3f784fe3ce9a2eb378d5eeb62169
+        # [pin v3.0.1 (2023-11-29)]
+        uses: conda-incubator/setup-miniconda@11b562958363ec5770fef326fe8ef0366f8cbf8a
         with:
           auto-update-conda: true
           python-version: ${{ matrix.case.python-version }}
@@ -177,7 +177,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
