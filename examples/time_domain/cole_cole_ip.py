@@ -57,16 +57,6 @@ import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
 
-def pos(data):
-    """Return positive data; set negative data to NaN."""
-    return np.array([x if x > 0 else np.nan for x in data])
-
-
-def neg(data):
-    """Return -negative data; set positive data to NaN."""
-    return np.array([-x if x < 0 else np.nan for x in data])
-
-
 ###############################################################################
 # Use empymod with user-def. func. to adjust :math:`\eta` and :math:`\zeta`
 # -------------------------------------------------------------------------
@@ -259,20 +249,26 @@ out_cole_perm = empymod.bipole(res=cole_perm_model, **model)
 out_pelton = empymod.bipole(res=pelton_model, **model)
 
 # Plot
+
+def pos(data):
+    """Return positive data; set negative data to NaN."""
+    return np.where(data > 0, data, np.nan)
+
+
 plt.figure()
 plt.title('Switch-off')
 plt.plot(times, pos(out_bipole), '-', label='Regular Bipole')
-plt.plot(times, neg(out_bipole), '--', label='')
+plt.plot(times, pos(-out_bipole), '--', label='')
 
 plt.plot(times, pos(out_cole), '-', label='Cole and Cole (1941) Conductivity')
-plt.plot(times, neg(out_cole), '--', label='')
+plt.plot(times, pos(-out_cole), '--', label='')
 
 plt.plot(times, pos(out_cole_perm), '-',
          label='Cole and Cole (1941) Permittivity')
-plt.plot(times, neg(out_cole_perm), '--', label='')
+plt.plot(times, pos(-out_cole_perm), '--', label='')
 
 plt.plot(times, pos(out_pelton), '-', label='Pelton et al. (1978) Resistivity')
-plt.plot(times, neg(out_pelton), '--', label='')
+plt.plot(times, pos(-out_pelton), '--', label='')
 
 plt.legend()
 plt.yscale('log')
