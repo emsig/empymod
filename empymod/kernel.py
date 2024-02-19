@@ -429,6 +429,9 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
     # TODO:
     #    - Currently only isotropic
     #    - Think about providing dGam instead to avoid code duplication.
+    #    - Memory Efficiency: We could store the dRef in one big 5d tensor.
+    #    Upper right part is the plus part, lewer left part is the minus part.
+    #    Then two vectors needed for the diagonals. This would approx. halve the memory usage of dRef.
     r"""Calculate Rp, Rm.
 
     .. math::
@@ -463,7 +466,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
         else:
             pm = -1
             # layer_count = np.arange(1, maxl + 1, 1)
-            layer_count = np.arange(1, nlayer - 1, 1)
+            layer_count = np.arange(1, nlayer, 1)
             izout = 0
             minmax = pm * minl
 
@@ -475,8 +478,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
             izout -= pm
 
         # Pre-allocate Ref and rloc
-
-        # TODO: The number of the reflection coeff = the number of the interfaces : nlayer - 1
+        # The number of the reflection coeff = the number of the interfaces : nlayer - 1
         Ref = np.zeros_like(
             Gam[:, :, :nlayer, :])  # Stores Ref for each layer with source and receiver and inbetween
         rloc = np.zeros_like(Gam[:, :, 0, :])  # TODO: Not all of them are needed, can be reduced (storing previous one)
@@ -484,7 +486,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
             dRef = np.zeros(list(Gam[:, :, :nlayer, :].shape) + [nlayer], dtype=Gam.dtype)  # fifth dimension for derivative of dRef[i, ii, izout, iv] w.r.t. cond_n
             drloc = np.zeros_like(Gam[:, :, 0, :], dtype=Gam.dtype)  # within layer n w.r.t. cond of layer n
             drloc_pm = np.zeros_like(Gam[:, :, 0, :], dtype=Gam.dtype)  # within layer n w.r.t. cond of layer n + pm
-            dRef_dRepm = np.zeros_like(Gam[:, :, :nlayer - 1, :], dtype=Gam.dtype)
+            dRef_dRepm = np.zeros_like(Gam[:, :, :nlayer, :], dtype=Gam.dtype)
             dGam = np.zeros_like(Gam, dtype=Gam.dtype)
             # TODO: Extend to VTI case, currently isotropic only
             for i in range(nfreq):
