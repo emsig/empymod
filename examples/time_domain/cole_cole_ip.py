@@ -248,7 +248,9 @@ out_cole = empymod.bipole(res=cole_model, **model)
 out_cole_perm = empymod.bipole(res=cole_perm_model, **model)
 out_pelton = empymod.bipole(res=pelton_model, **model)
 
+
 # Plot
+
 
 def pos(data):
     """Return positive data; set negative data to NaN."""
