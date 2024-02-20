@@ -1213,7 +1213,7 @@ def get_dlf_points(filt, inp, nr_per_dec):
 
     # Get pts_per_dec and define number of out-values, depending on pts_per_dec
     if nr_per_dec < 0:  # Lagged Convolution DLF
-        pts_per_dec = 1/np.log(filt.factor)
+        pts_per_dec = 1/np.log(filt.factor.item())
 
         # Calculate number of output values
         nout = int(np.ceil(np.log(outmax/outmin)*pts_per_dec) + 1)
