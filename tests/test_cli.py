@@ -26,7 +26,7 @@ def test_main(script_runner):
 
     # help
     for inp in ['--help', '-h']:
-        ret = script_runner.run('empymod', inp)
+        ret = script_runner.run(['empymod', inp])
         assert ret.success
         assert "3D electromagnetic modeller for 1D VTI media" in ret.stdout
 
@@ -37,7 +37,7 @@ def test_main(script_runner):
     assert "empymod v" in ret.stdout
 
     # report
-    ret = script_runner.run('empymod', '--report')
+    ret = script_runner.run(['empymod', '--report'])
     assert ret.success
     # Exclude time to avoid errors.
     # Exclude empymod-version (after 300), because if run locally without
@@ -45,19 +45,19 @@ def test_main(script_runner):
     assert empymod.utils.Report().__repr__()[115:300] in ret.stdout
 
     # version        -- VIA empymod/__main__.py by calling the folder empymod.
-    ret = script_runner.run('python', 'empymod', '--version')
+    ret = script_runner.run(['python', 'empymod', '--version'])
     assert ret.success
     assert "empymod v" in ret.stdout
 
     # Wrong function -- VIA empymod/__main__.py by calling the file.
     ret = script_runner.run(
-            'python', join('empymod', '__main__.py'), 'wrong')
+            ['python', join('empymod', '__main__.py'), 'wrong'])
     assert not ret.success
     assert "error: argument routine: invalid choice: 'wrong'" in ret.stderr
 
     # try to run
     ret = script_runner.run(
-            'empymod', 'bipole', 'test.json', 'output.txt')
+            ['empymod', 'bipole', 'test.json', 'output.txt'])
     assert not ret.success
     assert "No such file or directory" in ret.stderr
 
