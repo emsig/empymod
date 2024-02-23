@@ -21,7 +21,7 @@ latest
   - Bumped the minimum requirements to:
   
     - Python 3.9
-    - SciPy 1.8
+    - SciPy 1.9
     - Numba 0.53
 
   - Testing: added Python 3.12, dropped Python 3.8.
