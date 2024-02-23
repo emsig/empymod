@@ -28,6 +28,7 @@ This module consists of four groups of functions:
 # Mandatory imports
 import copy
 import numpy as np
+import scipy as sp
 from timeit import default_timer
 from datetime import timedelta, datetime
 
@@ -1023,8 +1024,6 @@ def check_time(time, signal, ft, ftarg, verb):
         freq = np.squeeze(omega/2/np.pi)
 
     elif ft == 'qwe':     # QWE (using sine and imag-part)
-        from scipy import special  # Lazy for faster CLI load
-
         # If switch-off is required, use cosine, else sine
         args.pop('sincos', None)
         if signal >= 0:
@@ -1091,7 +1090,7 @@ def check_time(time, signal, ft, ftarg, verb):
                 print(f"     > limit (quad):  {targ['limit']}")
 
         # Get required frequencies
-        g_x, _ = special.roots_legendre(targ['nquad'])
+        g_x, _ = sp.special.roots_legendre(targ['nquad'])
         minf = np.floor(10*np.log10((g_x.min() + 1)*np.pi/2/time.max()))/10
         maxf = np.ceil(10*np.log10(targ['maxint']*np.pi/time.min()))/10
         freq = np.logspace(minf, maxf, int((maxf-minf)*targ['pts_per_dec']+1))
@@ -1679,10 +1678,8 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
         # Gauss quadrature if intpts > 2; else set to center of tinp
         if intpts > 2:  # Calculate the dipole positions
-            from scipy import special  # Lazy for faster CLI load
-
             # Get integration positions and weights
-            g_x, g_w = special.roots_legendre(intpts)
+            g_x, g_w = sp.special.roots_legendre(intpts)
             g_x = np.outer(g_x, dl/2.0)  # Adjust to tinp length
             g_w /= 2.0  # Adjust to tinp length (dl/2), normalize (1/dl)
 

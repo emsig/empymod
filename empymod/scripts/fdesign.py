@@ -232,8 +232,8 @@ Implemented Fourier transforms
 
 import os
 import numpy as np
+import scipy as sp
 from copy import deepcopy as dc
-from scipy.constants import mu_0
 
 from empymod.filters import DigitalFilter
 from empymod.model import dipole, dipole_k
@@ -368,8 +368,6 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
         `full_output` is True.)
 
     """
-    from scipy.optimize import brute, fmin_powell  # Lazy for faster CLI load
-
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
 
@@ -396,7 +394,7 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
 
     # Check default input values
     if finish and not callable(finish):
-        finish = fmin_powell
+        finish = sp.optimize.fmin_powell
     if name is None:
         name = 'dlf_'+str(n)
     if r is None:
@@ -427,9 +425,11 @@ def design(n, spacing, shift, fI, fC=False, r=None, r_def=(1, 1, 2), reim=None,
         _call_qc_transform_pairs(n, ispacing, ishift, fI, fC, r, r_def, reim)
 
     # === 3. RUN BRUTE FORCE OVER THE GRID ============
-    full = brute(_get_min_val, (ispacing, ishift), full_output=True,
-                 args=(n, fI, fC, r, r_def, error, reim, cvar, verb, plot,
-                       log), finish=finish)
+    full = sp.optimize.brute(
+        _get_min_val, (ispacing, ishift), full_output=True,
+        args=(n, fI, fC, r, r_def, error, reim, cvar, verb, plot, log),
+        finish=finish
+    )
 
     # Add cvar-information to full: 0 for 'amp', 1 for 'r'
     if cvar == 'r':
@@ -927,7 +927,7 @@ def j0_4(f=1, rho=0.3, z=50):
 
     """
 
-    gam = np.sqrt(2j*np.pi*mu_0*f/rho)
+    gam = np.sqrt(2j*np.pi*sp.constants.mu_0*f/rho)
 
     def lhs(x):
         beta = np.sqrt(x**2 + gam**2)
@@ -955,7 +955,7 @@ def j0_5(f=1, rho=0.3, z=50):
 
     """
 
-    gam = np.sqrt(2j*np.pi*mu_0*f/rho)
+    gam = np.sqrt(2j*np.pi*sp.constants.mu_0*f/rho)
 
     def lhs(x):
         beta = np.sqrt(x**2 + gam**2)
@@ -1024,7 +1024,7 @@ def j1_4(f=1, rho=0.3, z=50):
 
     """
 
-    gam = np.sqrt(2j*np.pi*mu_0*f/rho)
+    gam = np.sqrt(2j*np.pi*sp.constants.mu_0*f/rho)
 
     def lhs(x):
         beta = np.sqrt(x**2 + gam**2)
@@ -1052,7 +1052,7 @@ def j1_5(f=1, rho=0.3, z=50):
 
     """
 
-    gam = np.sqrt(2j*np.pi*mu_0*f/rho)
+    gam = np.sqrt(2j*np.pi*sp.constants.mu_0*f/rho)
 
     def lhs(x):
         beta = np.sqrt(x**2 + gam**2)

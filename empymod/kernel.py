@@ -30,6 +30,7 @@ root directory for more information regarding the involved licenses.
 
 
 import numpy as np
+import scipy as sp
 import numba as nb
 
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
@@ -946,8 +947,6 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     the input and solution parameters.
 
     """
-    from scipy import special  # Lazy for faster CLI load
-
     xco = np.cos(angle)*off
     yco = np.sin(angle)*off
     res = np.real(1/etaH[0, 0])
@@ -1023,10 +1022,10 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
 
     elif abs(signal) == 1:  # Time-domain step response
         # Replace F(m) with F(m-2)
-        f0p = special.erfc(np.sqrt(tp/time))
-        f0m = special.erfc(np.sqrt(tm/time))
-        fs0p = special.erfc(np.sqrt(tsp/time))
-        fs0m = special.erfc(np.sqrt(tsm/time))
+        f0p = sp.special.erfc(np.sqrt(tp/time))
+        f0m = sp.special.erfc(np.sqrt(tm/time))
+        fs0p = sp.special.erfc(np.sqrt(tsp/time))
+        fs0m = sp.special.erfc(np.sqrt(tsm/time))
 
         f1p = np.exp(-tp/time)/np.sqrt(np.pi*time)
         f1m = np.exp(-tm/time)/np.sqrt(np.pi*time)
@@ -1117,15 +1116,15 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         # Bessel functions for airwave
         def BI(gamH, hp, nr, xim):
             r"""Return BI_nr."""
-            return np.exp(-np.real(gamH)*hp)*special.ive(nr, xim)
+            return np.exp(-np.real(gamH)*hp)*sp.special.ive(nr, xim)
 
         def BK(xip, nr):
             r"""Return BK_nr."""
             if np.isrealobj(xip):
                 # To keep it real in Laplace-domain [exp(-1j*0) = 1-0j].
-                return special.kve(nr, xip)
+                return sp.special.kve(nr, xip)
             else:
-                return np.exp(-1j*np.imag(xip))*special.kve(nr, xip)
+                return np.exp(-1j*np.imag(xip))*sp.special.kve(nr, xip)
 
         # Airwave calculation
         def airwave(sval, hp, rp, res, fab, delta):
@@ -1167,9 +1166,9 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
             def coeff_dk(k, K):
                 r"""Return coefficients Dk for k, K."""
                 n = np.arange((k+1)//2, min([k, K/2])+.5, 1)
-                Dk = n**(K/2)*special.factorial(2*n)/special.factorial(n)
-                Dk /= special.factorial(n-1)*special.factorial(k-n)
-                Dk /= special.factorial(2*n-k)*special.factorial(K/2-n)
+                Dk = n**(K/2)*sp.special.factorial(2*n)/sp.special.factorial(n)
+                Dk /= sp.special.factorial(n-1)*sp.special.factorial(k-n)
+                Dk /= sp.special.factorial(2*n-k)*sp.special.factorial(K/2-n)
                 return Dk.sum()*(-1)**(k+K/2)
 
             for k in range(1, K+1):
@@ -1181,9 +1180,9 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
             thp = mu_0*hp**2/(4*res)
             trh = mu_0*rh**2/(8*res)
             P1 = (mu_0**2*hp*np.exp(-thp/time))/(res*32*np.pi*time**3)
-            P2 = 2*(delta - (x*y)/rh**2)*special.ive(1, trh/time)
+            P2 = 2*(delta - (x*y)/rh**2)*sp.special.ive(1, trh/time)
             P3 = mu_0/(2*res*time)*(rh**2*delta - x*y)-delta
-            P4 = special.ive(0, trh/time) - special.ive(1, trh/time)
+            P4 = sp.special.ive(0, trh/time) - sp.special.ive(1, trh/time)
 
             air = P1*(P2 - P3*P4)
 

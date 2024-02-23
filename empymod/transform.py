@@ -29,7 +29,7 @@ root directory for more information regarding the involved licenses.
 
 
 import numpy as np
-from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
+import scipy as sp
 
 from empymod import kernel
 
@@ -40,6 +40,11 @@ __all__ = ['hankel_dlf', 'hankel_qwe', 'hankel_quad', 'fourier_dlf',
 
 def __dir__():
     return __all__
+
+
+def iuSpline(x, y, *args, **kwargs):
+    """Wrap in function so it does not affect import speed."""
+    return sp.interpolate.InterpolatedUnivariateSpline(x, y, *args, **kwargs)
 
 
 # 1. Hankel transforms (wavenumber -> frequency)
@@ -167,8 +172,6 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
         If true, QWE/QUAD converged. If not, `htarg` might have to be adjusted.
 
     """
-    from scipy import special  # Lazy for faster CLI load
-
     # Input params have an additional dimension for frequency, reduce here
     etaH = etaH[0, :]
     etaV = etaV[0, :]
@@ -187,7 +190,7 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     # corresponding Gauss quadrature weights
 
     # Get Gauss quadrature weights
-    g_x, g_w = special.roots_legendre(nquad)
+    g_x, g_w = sp.special.roots_legendre(nquad)
 
     # Compute n zeros of the Bessel function of the first kind of order 1 using
     # the Newton-Raphson method, which is fast enough for our purposes.  Could
@@ -201,8 +204,8 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     for i in range(10):   # 10 is more than enough, usually stops in 5
 
         # Evaluate
-        b_x0 = special.j1(b_zero)     # j0 and j1 have faster versions
-        b_x1 = special.jv(2, b_zero)  # j2 does not have a faster version
+        b_x0 = sp.special.j1(b_zero)     # j0 and j1 have faster versions
+        b_x1 = sp.special.jv(2, b_zero)  # j2 does not have a faster version
 
         # The step length
         b_h = -b_x0/(b_x0/b_zero - b_x1)
@@ -222,8 +225,8 @@ def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     # Assemble the output arrays
     dx = np.repeat(np.diff(xint)/2, nquad)
     Bx = dx*(np.tile(g_x, maxint) + 1) + np.repeat(xint[:-1], nquad)
-    BJ0 = special.j0(Bx)*np.tile(g_w, maxint)
-    BJ1 = special.j1(Bx)*np.tile(g_w, maxint)
+    BJ0 = sp.special.j0(Bx)*np.tile(g_w, maxint)
+    BJ1 = sp.special.j1(Bx)*np.tile(g_w, maxint)
 
     # 3. START QWE
 
@@ -564,8 +567,6 @@ def fourier_qwe(fEM, time, freq, ftarg):
         If true, QWE/QUAD converged. If not, `ftarg` might have to be adjusted.
 
     """
-    from scipy import special, integrate  # Lazy for faster CLI load
-
     # Get rtol, atol, nquad, maxint, diff_quad, a, b, and limit
     rtol = ftarg['rtol']
     atol = ftarg['atol']
@@ -584,7 +585,7 @@ def fourier_qwe(fEM, time, freq, ftarg):
     intervals = xint/time[:, None]
 
     # Get Gauss Quadrature Weights
-    g_x, g_w = special.roots_legendre(nquad)
+    g_x, g_w = sp.special.roots_legendre(nquad)
 
     # Pre-compute the Bessel functions at fixed quadrature points, multiplied
     # by the corresponding Gauss quadrature weight.
@@ -635,8 +636,8 @@ def fourier_qwe(fEM, time, freq, ftarg):
 
         # Loop over times that require QUAD
         for i in np.where(~doqwe)[0]:
-            out = integrate.quad(sEMquad, a[i], b[i], (time[i],), 1, atol,
-                                 rtol, limit)
+            out = sp.integrate.quad(
+                        sEMquad, a[i], b[i], (time[i],), 1, atol, rtol, limit)
             tEM[i] = out[0]
 
             # If there is a fourth output from QUAD, it means it did not conv.
@@ -687,8 +688,6 @@ def fourier_fftlog(fEM, time, freq, ftarg):
         Only relevant for QWE/QUAD.
 
     """
-    from scipy import fftpack, special  # Lazy for faster CLI load
-
     # Get tcalc, dlnr, kr, rk, q; a and n
     q = ftarg['q']
     mu = ftarg['mu']
@@ -710,15 +709,15 @@ def fourier_fftlog(fEM, time, freq, ftarg):
     y = m*d  # y = m*pi/(n*dlnr)
 
     if q == 0:  # unbiased case (q = 0)
-        zp = special.loggamma((mu + 1)/2.0 + 1j*y)
+        zp = sp.special.loggamma((mu + 1)/2.0 + 1j*y)
         arg = 2.0*(ln2kr*y + zp.imag)
 
     else:       # biased case (q != 0)
         xp = (mu + 1.0 + q)/2.0
         xm = (mu + 1.0 - q)/2.0
 
-        zp = special.loggamma(xp + 0j)
-        zm = special.loggamma(xm + 0j)
+        zp = sp.special.loggamma(xp + 0j)
+        zm = sp.special.loggamma(xm + 0j)
 
         # Amplitude and Argument of U_mu(q)
         amp = np.exp(np.log(2.0)*q + zp.real - zm.real)
@@ -729,8 +728,8 @@ def fourier_fftlog(fEM, time, freq, ftarg):
         argcos1 = amp*np.cos(arg)
 
         # remaining elements
-        zp = special.loggamma(xp + 1j*y)
-        zm = special.loggamma(xm + 1j*y)
+        zp = sp.special.loggamma(xp + 1j*y)
+        zm = sp.special.loggamma(xm + 1j*y)
 
         argamp = np.exp(np.log(2.0)*q + zp.real - zm.real)
         arg = 2*ln2kr*y + zp.imag + zm.imag
@@ -748,7 +747,7 @@ def fourier_fftlog(fEM, time, freq, ftarg):
     # 4. transform a(r) -> ã(k)
 
     # 4.a normal FFT
-    a = fftpack.rfft(a)
+    a = sp.fftpack.rfft(a)
 
     # 4.b
     m = np.arange(1, n//2, dtype=np.int64)  # index variable
@@ -782,7 +781,7 @@ def fourier_fftlog(fEM, time, freq, ftarg):
             a[-1] *= ar
 
     # 4.c normal FFT back
-    a = fftpack.irfft(a)
+    a = sp.fftpack.irfft(a)
 
     # Ã(k) = ã(k) k^[-dir*(q+.5)] rc^[-dir*(q-.5)]
     #      = ã(k) (k/kc)^[-dir*(q+.5)] (kc rc)^(-dir*q) (rc/kc)^(dir*.5)
@@ -813,8 +812,6 @@ def fourier_fft(fEM, time, freq, ftarg):
         Only relevant for QWE/QUAD.
 
     """
-    from scipy import fftpack  # Lazy for faster CLI load
-
     # Get ftarg values
     dfreq = ftarg['dfreq']
     nfreq = ftarg['nfreq']
@@ -832,8 +829,8 @@ def fourier_fft(fEM, time, freq, ftarg):
     fEM = np.pad(fEM, (0, ntot-nfreq), 'linear_ramp')
 
     # Carry out FFT
-    ifftEM = fftpack.ifft(np.r_[fEM[1:], 0, fEM[::-1].conj()]).real
-    stEM = 2*ntot*fftpack.fftshift(ifftEM*dfreq, 0)
+    ifftEM = sp.fftpack.ifft(np.r_[fEM[1:], 0, fEM[::-1].conj()]).real
+    stEM = 2*ntot*sp.fftpack.fftshift(ifftEM*dfreq, 0)
 
     # Interpolate in time domain
     dt = 1/(2*ntot*dfreq)
@@ -1144,12 +1141,10 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
     suited for QWE).
 
     """
-    from scipy import special, integrate  # Lazy for faster CLI load
-
     # Define the quadrature kernels
     def quad_PJ0(klambd, sPJ0, koff):
         r"""Quadrature for PJ0."""
-        return sPJ0(np.log(klambd))*special.j0(koff*klambd)
+        return sPJ0(np.log(klambd))*sp.special.j0(koff*klambd)
 
     def quad_PJ1(klambd, sPJ1, ab, koff, kang):
         r"""Quadrature for PJ1."""
@@ -1159,11 +1154,11 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
             # J2(kr) = 2/(kr)*J1(kr) - J0(kr)
             tP1 /= koff
 
-        return tP1*special.j1(koff*klambd)
+        return tP1*sp.special.j1(koff*klambd)
 
     def quad_PJ0b(klambd, sPJ0b, koff, kang):
         r"""Quadrature for PJ0b."""
-        return kang*sPJ0b(np.log(klambd))*special.j0(koff*klambd)
+        return kang*sPJ0b(np.log(klambd))*sp.special.j0(koff*klambd)
 
     # Pre-allocate output
     conv = True
@@ -1173,24 +1168,26 @@ def quad(sPJ0r, sPJ0i, sPJ1r, sPJ1i, sPJ0br, sPJ0bi, ab, off, ang_fact, iinp):
     iinp['full_output'] = 1
 
     if sPJ0r is not None:
-        re = integrate.quad(quad_PJ0, args=(sPJ0r, off), **iinp)
-        im = integrate.quad(quad_PJ0, args=(sPJ0i, off), **iinp)
+        re = sp.integrate.quad(quad_PJ0, args=(sPJ0r, off), **iinp)
+        im = sp.integrate.quad(quad_PJ0, args=(sPJ0i, off), **iinp)
         out += re[0] + 1j*im[0]
         # If there is a fourth output from QUAD, it means it did not converge
         if (len(re) or len(im)) > 3:
             conv = False
 
     if sPJ1r is not None:
-        re = integrate.quad(quad_PJ1, args=(sPJ1r, ab, off, ang_fact), **iinp)
-        im = integrate.quad(quad_PJ1, args=(sPJ1i, ab, off, ang_fact), **iinp)
+        re = sp.integrate.quad(
+                quad_PJ1, args=(sPJ1r, ab, off, ang_fact), **iinp)
+        im = sp.integrate.quad(
+                quad_PJ1, args=(sPJ1i, ab, off, ang_fact), **iinp)
         out += re[0] + 1j*im[0]
         # If there is a fourth output from QUAD, it means it did not converge
         if (len(re) or len(im)) > 3:
             conv = False
 
     if sPJ0br is not None:
-        re = integrate.quad(quad_PJ0b, args=(sPJ0br, off, ang_fact), **iinp)
-        im = integrate.quad(quad_PJ0b, args=(sPJ0bi, off, ang_fact), **iinp)
+        re = sp.integrate.quad(quad_PJ0b, args=(sPJ0br, off, ang_fact), **iinp)
+        im = sp.integrate.quad(quad_PJ0b, args=(sPJ0bi, off, ang_fact), **iinp)
         out += re[0] + 1j*im[0]
         # If there is a fourth output from QUAD, it means it did not converge
         if (len(re) or len(im)) > 3:
@@ -1213,7 +1210,7 @@ def get_dlf_points(filt, inp, nr_per_dec):
 
     # Get pts_per_dec and define number of out-values, depending on pts_per_dec
     if nr_per_dec < 0:  # Lagged Convolution DLF
-        pts_per_dec = 1/np.log(filt.factor.item())
+        pts_per_dec = 1/np.log(filt.factor)
 
         # Calculate number of output values
         nout = int(np.ceil(np.log(outmax/outmin)*pts_per_dec) + 1)
@@ -1262,8 +1259,6 @@ def get_dlf_points(filt, inp, nr_per_dec):
 
 def get_fftlog_input(rmin, rmax, n, q, mu):
     r"""Return parameters required for FFTLog."""
-    from scipy import special  # Lazy for faster CLI load
-
     # Central point log10(r_c) of periodic interval
     logrc = (rmin + rmax)/2
 
@@ -1276,8 +1271,8 @@ def get_fftlog_input(rmin, rmax, n, q, mu):
 
     # Get low-ringing kr
     y = 1j*np.pi/(2.0*dlnr)
-    zp = special.loggamma((mu + 1.0 + q)/2.0 + y)
-    zm = special.loggamma((mu + 1.0 - q)/2.0 + y)
+    zp = sp.special.loggamma((mu + 1.0 + q)/2.0 + y)
+    zm = sp.special.loggamma((mu + 1.0 - q)/2.0 + y)
     arg = np.log(2.0)/dlnr + (zp.imag + zm.imag)/np.pi
     kr = np.exp((arg - np.round(arg))*dlnr)
 
