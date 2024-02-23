@@ -20,6 +20,11 @@ defaults:
     # https://github.com/actions/setup-python/issues/132
     shell: bash
 
+# Cancel any previous run of the test job.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
 
@@ -34,15 +39,9 @@ jobs:
 
     steps:
 
-      # Cancel any previous run of the test job; [pin v0.10.0 (2022-06-27)]
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@bb6001c4ea612bf59c3abfc4756fbceee4f870c7
-        with:
-          access_token: ${{ github.token }}
-
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           # Need to fetch more than the last commit so that setuptools-scm can
           # create the correct version string. If the number of commits since
@@ -58,8 +57,7 @@ jobs:
         run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup miniconda
-        # [pin v2.1.1 (2021-04-01)]
-        uses: conda-incubator/setup-miniconda@35d1405e78aa3f784fe3ce9a2eb378d5eeb62169
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python }}
