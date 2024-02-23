@@ -163,3 +163,15 @@ class TestRun:
 
         with pytest.raises(FileNotFoundError, match="t.json'"):
             run(args_dict)
+
+
+@disable_numba()
+@pytest.mark.script_launch_mode('subprocess')
+def test_import_time(script_runner):
+    # Relevant for the responsiveness of the CLI:
+    # How long does it take to import?
+    cmd = ["python", "-Ximporttime", "-c", "import empymod"]
+    out = script_runner.run(cmd, print_result=False)
+    import_time_s = float(out.stderr.split('|')[-2])/1e6
+    # Currently we check t < 0.2 s.
+    assert import_time_s < 0.2
