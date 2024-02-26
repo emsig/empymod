@@ -28,6 +28,8 @@ latest
 
   - Fix remaining outdated ``python setup.py`` commands.
 
+  - Many small things to keep the package updated.
+
 
 v2.2.2: Flexible dipole coordinates
 -----------------------------------
