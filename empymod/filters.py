@@ -46,6 +46,7 @@ https://github.com/emsig/article-fdesign.
 
 
 import os
+import libdlf
 import numpy as np
 
 __all__ = ['DigitalFilter', 'kong_61_2007', 'kong_241_2007', 'key_101_2009',
@@ -179,6 +180,27 @@ class DigitalFilter:
 
         # Add factor
         self.factor = np.around(np.average(self.base[1:]/self.base[:-1]), 15)
+
+
+class GetDigitalFilter(DigitalFilter):
+    def __init__(self, name):
+        dd = getattr(libdlf.hankel, name)  # TODO how to hankel/fourier
+        filter_coeff = dd.values
+        values = dd()
+        super().__init__(name, savename=None, filter_coeff=values)
+        self.base = values[0]
+        for i, val in enumerate(filter_coeff):
+            setattr(self, val, values[i+1])
+        self.factor = np.around(self.base[1]/self.base[0], 15)
+
+
+# TODO: - add caching dictionary
+#       - do factor from base[1]/base[0]
+#       - auto-generate from libdlf
+#       - compare before replacing!
+#       - Should the classes live in libdlf?
+def new_wer_201_2018():
+    return GetDigitalFilter('wer_201_2018')
 
 
 # 1. Hankel DLF

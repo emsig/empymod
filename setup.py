@@ -32,6 +32,7 @@ setup(
     install_requires=[
         "scipy>=1.9",
         "numba>=0.53",
+        "libdlf",
     ],
     use_scm_version={
         "root": ".",
