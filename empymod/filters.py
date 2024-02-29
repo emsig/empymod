@@ -192,7 +192,7 @@ class DigitalFilter:
 # that lists all available filter names
 class Hankel:
     pass
-    # for name in libdlf.hankel.__all__:
+    # for name in hankel.__all__:
 
 
 # TODO: - add caching dictionary
@@ -203,15 +203,15 @@ class Hankel:
 #       - Deprecation warnings
 #       - Needs to work for filter instance, string, and libdlf instance
 #         hankel.key_201_2012.__name__, hankel.key_201_2012.__module__
-#         libdlf.hankel.key_101_2009.values
+#         hankel.key_101_2009.values
 # Note: below it will overwrite the current implementation
 def load_filter(name):
 
     if not hasattr(Hankel, name):
-        dd = getattr(libdlf.hankel, name)
+        dd = getattr(hankel, name)
         # TODO how to hankel/fourier
-        # libdlf.fourier.key_201_2012
-        # libdlf.hankel.key_201_2012
+        # fourier.key_201_2012
+        # hankel.key_201_2012
         filter_coeff = dd.values
         values = dd()
 
