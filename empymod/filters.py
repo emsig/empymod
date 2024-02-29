@@ -46,14 +46,15 @@ https://github.com/emsig/article-fdesign.
 
 
 import os
-import libdlf
+import sys
 import numpy as np
+from libdlf import hankel, fourier
 
-__all__ = ['DigitalFilter', 'kong_61_2007', 'kong_241_2007', 'key_101_2009',
-           'key_201_2009', 'key_401_2009', 'anderson_801_1982', 'key_51_2012',
-           'key_101_2012', 'key_201_2012', 'wer_201_2018',
-           'key_81_CosSin_2009', 'key_241_CosSin_2009', 'key_601_CosSin_2009',
-           'key_101_CosSin_2012', 'key_201_CosSin_2012']
+__all__ = ['DigitalFilter', 'hankel', 'fourier', 'kong_61_2007',
+           'kong_241_2007', 'key_101_2009', 'key_201_2009', 'key_401_2009',
+           'anderson_801_1982', 'key_51_2012', 'key_101_2012', 'key_201_2012',
+           'wer_201_2018', 'key_81_CosSin_2009', 'key_241_CosSin_2009',
+           'key_601_CosSin_2009', 'key_101_CosSin_2012', 'key_201_CosSin_2012']
 
 
 def __dir__():
@@ -182,16 +183,16 @@ class DigitalFilter:
         self.factor = np.around(np.average(self.base[1:]/self.base[:-1]), 15)
 
 
-class GetDigitalFilter(DigitalFilter):
-    def __init__(self, name):
-        dd = getattr(libdlf.hankel, name)  # TODO how to hankel/fourier
-        filter_coeff = dd.values
-        values = dd()
-        super().__init__(name, savename=None, filter_coeff=values)
-        self.base = values[0]
-        for i, val in enumerate(filter_coeff):
-            setattr(self, val, values[i+1])
-        self.factor = np.around(self.base[1]/self.base[0], 15)
+# def load_filter(name):
+#     module = sys.modules[__name__]
+#     setattr(module, name, GetDigitalFilter(name))
+
+
+# Class or Dict or Module level: we need to find a lazy load method,
+# that lists all available filter names
+class Hankel:
+    pass
+    # for name in libdlf.hankel.__all__:
 
 
 # TODO: - add caching dictionary
@@ -199,8 +200,30 @@ class GetDigitalFilter(DigitalFilter):
 #       - auto-generate from libdlf
 #       - compare before replacing!
 #       - Should the classes live in libdlf?
-def new_wer_201_2018():
-    return GetDigitalFilter('wer_201_2018')
+#       - Deprecation warnings
+#       - Needs to work for filter instance, string, and libdlf instance
+#         hankel.key_201_2012.__name__, hankel.key_201_2012.__module__
+#         libdlf.hankel.key_101_2009.values
+# Note: below it will overwrite the current implementation
+def load_filter(name):
+
+    if not hasattr(Hankel, name):
+        dd = getattr(libdlf.hankel, name)
+        # TODO how to hankel/fourier
+        # libdlf.fourier.key_201_2012
+        # libdlf.hankel.key_201_2012
+        filter_coeff = dd.values
+        values = dd()
+
+        dlf = DigitalFilter(name, filter_coeff=filter_coeff)
+        dlf.base = values[0]
+        for i, val in enumerate(filter_coeff):
+            setattr(dlf, val, values[i+1])
+        dlf.factor = np.around([dlf.base[1]/dlf.base[0]], 15)
+
+        setattr(Hankel, name, dlf)
+
+    return getattr(Hankel, name)
 
 
 # 1. Hankel DLF
