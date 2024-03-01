@@ -12,6 +12,13 @@ v2.2.x
 latest
 ------
 
+- Filters:
+
+  - The digital linear filters are outsourced to `libdlf
+    <https://github.com/emsig/libdlf>`_. Note: How to access filters changed!
+    The old way still works, with a deprecation note stating how to change your
+    code. The old way will be removed in v3.0.
+
 - Examples:
 
   - @efinden expanded the "Cole-Cole IP" example.
@@ -23,12 +30,14 @@ latest
     - Python 3.9
     - SciPy 1.9
     - Numba 0.53
+    - libdlf (NEW requirement)
 
   - Testing: added Python 3.12, dropped Python 3.8.
 
   - Fix remaining outdated ``python setup.py`` commands.
 
   - Many small things to keep the package updated.
+
 
 
 v2.2.2: Flexible dipole coordinates

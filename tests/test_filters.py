@@ -1,5 +1,4 @@
 import os
-import sys
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose
@@ -20,11 +19,9 @@ def test_digitalfilter():                                   # 1.a DigitalFilter
     assert out3.filter_coeff == ['j0', 'j1', 'sin', 'cos', 'abc']
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6),
-                    reason="tmpdir seems to fail for Python<3.6.")
 def test_storeandsave(tmpdir):                                  # 1.b Save/Load
     # Store a filter
-    inpfilt = filters.wer_201_2018()
+    inpfilt = filters.Hankel().wer_201_2018
     inpfilt.savename = 'savetest'
     inpfilt.tofile(tmpdir)
     assert len(tmpdir.listdir()) == 3
@@ -47,17 +44,25 @@ def test_hankel_dlf():                                      # 2. Hankel filters
     #   (b) base, j0, and j1 have right number of values
     #       (nothing got accidently deleted), and
     #   (c) factor is correct.
-    allfilt = ['kong_61_2007', 'kong_241_2007', 'key_101_2009', 'key_201_2009',
-               'key_401_2009', 'anderson_801_1982', 'key_51_2012',
-               'key_101_2012', 'key_201_2012', 'wer_201_2018']
+    allfilt = ['kong_61_2007b', 'kong_241_2007', 'key_101_2009',
+               'key_201_2009', 'key_401_2009', 'anderson_801_1982',
+               'key_51_2012', 'key_101_2012', 'key_201_2012', 'wer_201_2018']
+    H = filters.Hankel()
     for filt in allfilt:
-        dlf = getattr(filters, filt)()
+        dlf = getattr(H, filt)
         nr = int(filt.split('_')[1])
         fact = np.around(np.average(dlf.base[1:]/dlf.base[:-1]), 15)
         assert len(dlf.base) == nr
         assert len(dlf.j0) == nr
         assert len(dlf.j1) == nr
         assert_allclose(dlf.factor, fact)
+
+        # Test deprecated way
+        with pytest.warns(FutureWarning, match='in v3.0; use'):
+            if filt == 'kong_61_2007b':
+                filt = filt[:-1]
+            dlf0 = getattr(filters, filt)()
+            assert dlf == dlf0
 
 
 def test_fourier_dlf():                                    # 3. Fourier filters
@@ -66,17 +71,24 @@ def test_fourier_dlf():                                    # 3. Fourier filters
     #   (b) base, j0, and j1 have right number of values
     #       (nothing got accidently deleted), and
     #   (c) factor is correct.
-    allfilt = ['key_81_CosSin_2009', 'key_241_CosSin_2009',
-               'key_601_CosSin_2009', 'key_101_CosSin_2012',
-               'key_201_CosSin_2012']
+    allfilt = ['key_81_2009', 'key_241_2009', 'key_601_2009', 'key_101_2012',
+               'key_201_2012']
+    F = filters.Fourier()
     for filt in allfilt:
-        dlf = getattr(filters, filt)()
+        dlf = getattr(F, filt)
         nr = int(filt.split('_')[1])
         fact = np.around(np.average(dlf.base[1:]/dlf.base[:-1]), 15)
         assert len(dlf.base) == nr
         assert len(dlf.cos) == nr
         assert len(dlf.sin) == nr
         assert_allclose(dlf.factor, fact)
+
+        # Test deprecated way
+        with pytest.warns(FutureWarning, match='in v3.0; use'):
+            tmp = filt.split("_")
+            filt = tmp[0] + "_" + tmp[1] + "_CosSin_" + tmp[2]
+            dlf0 = getattr(filters, filt)()
+            assert dlf == dlf0
 
 
 def test_all_dir():

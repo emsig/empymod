@@ -2,26 +2,10 @@ r"""
 Filters for the *Digital Linear Filter* (DLF) method for the Hankel
 [Ghos70]_) and the Fourier ([Ande75]_) transforms.
 
-To calculate the `dlf.factor` I used
-
-.. code-block:: python
-
-    np.around([dlf.base[1]/dlf.base[0]], 15)
-
-The filters `kong_61_2007` and `kong_241_2007` from [Kong07]_, and
-`key_101_2009`, `key_201_2009`, `key_401_2009`, `key_81_CosSin_2009`,
-`key_241_CosSin_2009`, and `key_601_CosSin_2009` from [Key09]_ are taken from
-*DIPOLE1D*, [Key09]_, which can be downloaded at
-https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM ([1DCSEM]_). *DIPOLE1D* is
-distributed under the license GNU GPL version 3 or later. Kerry Key gave his
-written permission to re-distribute the filters under the Apache License,
-Version 2.0 (email from Kerry Key to Dieter Werthmüller, 21 November 2016).
-
-The filters `anderson_801_1982` from [Ande82]_ and `key_51_2012`,
-`key_101_2012`, `key_201_2012`, `key_101_CosSin_2012`, and
-`key_201_CosSin_2012`, all from [Key12]_, are taken from the software
-distributed with [Key12]_ and available at https://software.seg.org/2012/0003
-([SEG-2012-003]_). These filters are distributed under the SEG license.
+Starting with v2.3.0, the actual filters are not stored here any longer, but
+are loaded from **libdlf** (https://github.com/emsig/libdlf). Each filter is
+documented in its own docstring, also indicating the license under which it is
+distributed.
 
 The filter `wer_201_2018` was designed with the add-on `fdesign`, see
 https://github.com/emsig/article-fdesign.
@@ -57,13 +41,12 @@ def __dir__():
     return __all__
 
 
+# Filter-cache
 FILTERS = {
     'hankel': dict.fromkeys(libdlf.hankel.__all__),
     'fourier': dict.fromkeys(libdlf.fourier.__all__)
 }
 
-
-# 0. Filter Class and saving/loading routines
 
 class DigitalFilter:
     r"""Simple Class for Digital Linear Filters.
@@ -112,7 +95,7 @@ class DigitalFilter:
         --------
         >>> import empymod
         >>> # Load a filter
-        >>> filt = empymod.filters.wer_201_2018()
+        >>> filt = empymod.filters.Hankel().wer_201_2018
         >>> # Save it to pure ASCII-files
         >>> filt.tofile()
         >>> # This will save the following three files:
@@ -185,63 +168,140 @@ class DigitalFilter:
         self.factor = np.around([self.base[1]/self.base[0]], 15)
 
 
-class Hankel:
+class _BaseFilter:
+    """Base class for wrappers loading filters from libdlf."""
 
-    def __init__(self):
-        for k, v in FILTERS['hankel'].items():
+    def __init__(self, ftype):
+        """Initiate a new wrapper of `ftype` ('hankel' or 'fourier')."""
+
+        # Store the type
+        self._ftype = ftype
+        self.available = list(FILTERS[ftype].keys())
+
+        # Put all available filters as attributes
+        for k, v in FILTERS[ftype].items():
             setattr(self, k, v)
 
     def __getattribute__(self, name):
-        if name in FILTERS['hankel'].keys():
-            if FILTERS['hankel'][name] is None:
-                FILTERS['hankel'][name] = load_filter(name, 'hankel.'+name)
-            return FILTERS['hankel'][name]
+        """Modify to load filter if the attribute is a know filter name."""
+
+        # Get ftype
+        ftype = object.__getattribute__(self, '_ftype')
+
+        # If the `name` is in the corresponding dict => load filter
+        if name in FILTERS[ftype].keys():
+
+            # If filter is not yet cached, get it
+            if FILTERS[ftype][name] is None:
+                data = getattr(getattr(libdlf, ftype), name)
+                dlf = DigitalFilter(name)
+                for i, val in enumerate(['base', ] + data.values):
+                    setattr(dlf, val, data()[i])
+                dlf.factor = np.around([dlf.base[1]/dlf.base[0]], 15)
+
+                # Cache it
+                FILTERS[ftype][name] = dlf
+
+            # Return filter
+            return FILTERS[ftype][name]
+
+        # Else, fall back to regular __getattribute__
         else:
             return object.__getattribute__(self, name)
 
 
-class Fourier:
+class Hankel(_BaseFilter):
+    """Wrapper to load Hankel-Transform filters from libdlf.
+
+    You can either call a filter directly or first instantiate a Hankel object.
+    Latter will give the possibility to explore the available filters with tab
+    completion. A list of available filters is also stored in
+    ``Hankel.available``.
+
+
+    Examples
+    --------
+
+    .. ipython::
+
+       In [1]: import empymod
+          ...: dlf = empymod.filters.Hankel().wer_201_2018
+
+       In [2]: H = empymod.filters.Hankel()
+          ...: H.wer_201_2018.name
+       Out[2]: 'wer_201_2018'
+
+       In [3]: H.available
+       Out[3]:
+          ...: ['anderson_801_1982',
+          ...:  'gupt_61_1997',
+          ...:  'gupt_120_1997',
+          ...:  'gupt_47_1997',
+          ...:  'gupt_140_1997',
+          ...:  'kong_61_2007b',
+          ...:  'kong_121_2007',
+          ...:  'kong_241_2007',
+          ...:  'key_101_2009',
+          ...:  'key_201_2009',
+          ...:  'key_401_2009',
+          ...:  'key_51_2012',
+          ...:  'key_101_2012',
+          ...:  'key_201_2012',
+          ...:  'wer_201_2018',
+          ...:  'wer_2001_2018']
+
+    """
 
     def __init__(self):
-        for k, v in FILTERS['fourier'].items():
-            setattr(self, k, v)
-
-    def __getattribute__(self, name):
-        if name in FILTERS['fourier'].keys():
-            if FILTERS['fourier'][name] is None:
-                FILTERS['fourier'][name] = load_filter(name, 'fourier.'+name)
-            return FILTERS['fourier'][name]
-        else:
-            return object.__getattribute__(self, name)
+        super().__init__('hankel')
 
 
-def load_filter(name, libdlfname):
-    ftype, fname = libdlfname.split('.')
+class Fourier(_BaseFilter):
+    """Wrapper to load Fourier-Transform filters from libdlf.
 
-    TransformClass = [Hankel, Fourier][ftype == 'hankel']
+    You can either call a filter directly or first instantiate a Fourier object.
+    Latter will give the possibility to explore the available filters with tab
+    completion. A list of available filters is also stored in
+    ``Fourier.available``.
 
-    if not hasattr(TransformClass, fname):
-        dd = getattr(getattr(libdlf, ftype), fname)
-        filter_coeff = dd.values
-        values = dd()
 
-        dlf = DigitalFilter(name, filter_coeff=filter_coeff)
-        dlf.base = values[0]
-        for i, val in enumerate(filter_coeff):
-            setattr(dlf, val, values[i+1])
-        dlf.factor = np.around([dlf.base[1]/dlf.base[0]], 15)
+    Examples
+    --------
 
-        setattr(TransformClass, libdlfname, dlf)
+    .. ipython::
 
-    return getattr(TransformClass, libdlfname)
+       In [1]: import empymod
+          ...: dlf = empymod.filters.Fourier().key_201_2012
+
+       In [2]: F = empymod.filters.Fourier()
+          ...: F.key_201_2012.name
+       Out[2]: 'key_201_2012'
+
+       In [3]: F.available
+          ...: ['key_81_2009',
+          ...:  'key_241_2009',
+          ...:  'key_601_2009',
+          ...:  'key_101_2012',
+          ...:  'key_201_2012',
+          ...:  'grayver_50_2021']
+
+    """
+
+    def __init__(self):
+        super().__init__('fourier')
 
 
 # DEPRECATIONS - REMOVE in v3.0 #
 
 def _deprecate_filter(func):
+    """Decorator to deprecate filter functions."""
 
     def newfn():
+        """Inner wrapper."""
+
         name = func.__name__
+
+        # Check if Fourier or Hankel, adjust new name accordingly.
         if 'CosSin' in name:
             new = name.replace('_CosSin', '')
             ftype = 'Fourier'
@@ -249,20 +309,21 @@ def _deprecate_filter(func):
             ftype = 'Hankel'
             new = name
 
+        # Kong 61 has a different name in libdlf than here.
         if 'kong_61' in name:
             new += 'b'
 
+        # Throw warning.
         msg = (
             f"Calling `empymod.filters.{name}()` is deprecated and will be "
             f"removed in v3.0; use `empymod.filters.{ftype}().{new}`."
         )
         warnings.warn(msg, FutureWarning)
+
         return func()
 
     return newfn
 
-
-# 1. Hankel DLF
 
 @_deprecate_filter
 def kong_61_2007():
@@ -322,9 +383,6 @@ def key_201_2012():
 def wer_201_2018():
     """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().wer_201_2018
-
-
-# 2. Fourier DLF (cosine/sine)
 
 
 @_deprecate_filter

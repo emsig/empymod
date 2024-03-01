@@ -19,7 +19,7 @@ mperm = np.array([.5, 100, 30, 1, 30, 1])
 etaH = 1/res + np.outer(2j*np.pi*freq, eperm*epsilon_0)
 etaV = 1/(res*aniso*aniso) + np.outer(2j*np.pi*freq, eperm*epsilon_0)
 zeta = np.outer(2j*np.pi*freq, mperm*mu_0)
-filt = filters.key_201_2012()
+filt = filters.Hankel().key_201_2012
 lambd = filt.base/np.array([0.001, 1, 100, 10000])[:, None]
 depth = np.array([-np.infty, 0, 150, 300, 500, 600, 800])
 

@@ -266,26 +266,27 @@ def test_check_hankel(capsys):
     assert "   Hankel          :  DLF (Fast Hankel Transform)\n     > F" in out
     assert "     > DLF type    :  Standard" in out
     assert ht == 'dlf'
-    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['dlf'].name == filters.Hankel().key_201_2009.name
     assert htarg['pts_per_dec'] == 0
 
     # provide filter-string and unknown parameter
     _, htarg = utils.check_hankel('dlf', {'dlf': 'key_201_2009', 'abc': 0}, 1)
     out, _ = capsys.readouterr()
-    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['dlf'].name == filters.Hankel().key_201_2009.name
     assert htarg['pts_per_dec'] == 0
     assert "WARNING :: Unknown htarg {'abc': 0} for method 'dlf'" in out
 
     # provide filter-instance
-    _, htarg = utils.check_hankel('dlf', {'dlf': filters.kong_61_2007()}, 0)
-    assert htarg['dlf'].name == filters.kong_61_2007().name
+    _, htarg = utils.check_hankel(
+            'dlf', {'dlf': filters.Hankel().kong_61_2007b}, 0)
+    assert htarg['dlf'].name == filters.Hankel().kong_61_2007b.name
     assert htarg['pts_per_dec'] == 0
 
     # provide pts_per_dec
     _, htarg = utils.check_hankel('dlf', {'pts_per_dec': -1}, 3)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Lagged Convolution" in out
-    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['dlf'].name == filters.Hankel().key_201_2009.name
     assert htarg['pts_per_dec'] == -1
 
     # provide filter-string and pts_per_dec
@@ -293,7 +294,7 @@ def test_check_hankel(capsys):
             'dlf', {'dlf': 'key_201_2009', 'pts_per_dec': 20}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Splined, 20.0 pts/dec" in out
-    assert htarg['dlf'].name == filters.key_201_2009().name
+    assert htarg['dlf'].name == filters.Hankel().key_201_2009.name
     assert htarg['pts_per_dec'] == 20
 
     # Assert it can be called repetitively
@@ -405,8 +406,9 @@ def test_check_hankel(capsys):
         utils.check_hankel('doesnotexist', {}, 1)
 
     # filter missing attributes
+    dlf = filters.DigitalFilter('test')
     with pytest.raises(AttributeError, match='DLF-filter is missing some'):
-        utils.check_hankel('dlf', {'dlf': 'key_101_CosSin_2012'}, 1)
+        utils.check_hankel('dlf', {'dlf': dlf}, 1)
 
 
 def test_check_model(capsys):
@@ -530,7 +532,7 @@ def test_check_time(capsys):
     assert "   Fourier         :  DLF (Sine-Filter)" in out
     assert "> DLF type    :  Lagged Convolution" in out
     assert ft == 'dlf'
-    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['dlf'].name == filters.Fourier().key_201_2012.name
     assert ftarg['pts_per_dec'] == -1
     f1 = np.array([4.87534752e-08, 5.60237934e-08, 6.43782911e-08,
                    7.39786458e-08, 8.50106448e-08, 9.76877807e-08,
@@ -546,7 +548,7 @@ def test_check_time(capsys):
     # filter-string and unknown parameter
     _, f, _, ftarg = utils.check_time(
             time, -1, 'dlf',
-            {'dlf': 'key_201_CosSin_2012', 'kind': 'cos', 'notused': 1},
+            {'dlf': 'key_201_2012', 'kind': 'cos', 'notused': 1},
             4)
     out, _ = capsys.readouterr()
     outstr = "   time        [s] :  3\n"
@@ -554,7 +556,7 @@ def test_check_time(capsys):
     assert outstr in out
     assert "WARNING :: Unknown ftarg {'notused': 1} for method 'dlf'" in out
     assert ft == 'dlf'
-    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['dlf'].name == filters.Fourier().key_201_2012.name
     assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
     assert_allclose(f[-9:], f2)
@@ -564,15 +566,15 @@ def test_check_time(capsys):
     # filter instance
     _, _, _, ftarg = utils.check_time(
             time, 1, 'dlf',
-            {'dlf': filters.key_201_CosSin_2012(), 'kind': 'sin'}, 0)
-    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+            {'dlf': filters.Fourier().key_201_2012, 'kind': 'sin'}, 0)
+    assert ftarg['dlf'].name == filters.Fourier().key_201_2012.name
     assert ftarg['pts_per_dec'] == -1
     assert ftarg['kind'] == 'sin'
 
     # pts_per_dec
     out, _ = capsys.readouterr()  # clear buffer
     _, _, _, ftarg = utils.check_time(time, 0, 'dlf', {'pts_per_dec': 30}, 4)
-    assert ftarg['dlf'].name == filters.key_201_CosSin_2012().name
+    assert ftarg['dlf'].name == filters.Fourier().key_201_2012.name
     assert ftarg['pts_per_dec'] == 30
     assert ftarg['kind'] == 'sin'
     out, _ = capsys.readouterr()
@@ -581,10 +583,10 @@ def test_check_time(capsys):
     # filter-string and pts_per_dec
     _, _, _, ftarg = utils.check_time(
             time, 0, 'dlf',
-            {'dlf': 'key_81_CosSin_2009', 'pts_per_dec': -1, 'kind': 'cos'}, 4)
+            {'dlf': 'key_81_2009', 'pts_per_dec': -1, 'kind': 'cos'}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Lagged Convolution" in out
-    assert ftarg['dlf'].name == filters.key_81_CosSin_2009().name
+    assert ftarg['dlf'].name == filters.Fourier().key_81_2009.name
     assert ftarg['pts_per_dec'] == -1
     assert ftarg['kind'] == 'cos'
 
@@ -594,14 +596,14 @@ def test_check_time(capsys):
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Standard" in out
     assert ftarg['pts_per_dec'] == 0
-    f_base = filters.key_201_CosSin_2012().base
+    f_base = filters.Fourier().key_201_2012.base
     assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
 
     # filter-string and pts_per_dec
     _, _, _, ftarg = utils.check_time(
             time, 0, 'dlf',
-            {'dlf': 'key_81_CosSin_2009', 'pts_per_dec': 50, 'kind': 'cos'}, 0)
-    assert ftarg['dlf'].name == filters.key_81_CosSin_2009().name
+            {'dlf': 'key_81_2009', 'pts_per_dec': 50, 'kind': 'cos'}, 0)
+    assert ftarg['dlf'].name == filters.Fourier().key_81_2009.name
     assert ftarg['pts_per_dec'] == 50
     assert ftarg['kind'] == 'cos'
 
@@ -793,7 +795,7 @@ def test_check_time(capsys):
 
     # minimum time
     _ = utils.check_time(
-            0, 0, 'dlf', {'dlf': 'key_201_CosSin_2012', 'kind': 'cos'}, 1)
+            0, 0, 'dlf', {'dlf': 'key_201_2012', 'kind': 'cos'}, 1)
     out, _ = capsys.readouterr()
     assert out[:21] == "* WARNING :: Times < "
 
@@ -806,8 +808,9 @@ def test_check_time(capsys):
         utils.check_time(time, 0, 'bla', {}, 0)
 
     # filter missing attributes
+    dlf = filters.DigitalFilter('test')
     with pytest.raises(AttributeError, match='DLF-filter is missing some att'):
-        utils.check_time(time, 0, 'dlf', {'dlf': 'key_201_2012'}, 1)
+        utils.check_time(time, 0, 'dlf', {'dlf': dlf}, 1)
 
     # filter with wrong kind
     with pytest.raises(ValueError, match="'kind' must be either 'sin' or"):

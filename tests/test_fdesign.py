@@ -209,7 +209,7 @@ class TestFiguresMatplotlib:
         switch_off_matplotlib_agg_warning()
         # plot_inversion minimum amplitude
         f = fdesign.j0_1(5)
-        filt = filters.key_201_2009()
+        filt = filters.Hankel().key_201_2009
         n = filt.base.size
         a = filt.base[-1]
         b = filt.base[-2]
@@ -230,7 +230,7 @@ class TestFiguresMatplotlib:
         switch_off_matplotlib_agg_warning()
         # plot_inversion maximum r
         f = fdesign.empy_hankel('j2', 50, 100, 1, 1)
-        filt = filters.key_201_2009()
+        filt = filters.Hankel().key_201_2009
         n = filt.base.size
         a = filt.base[-1]
         b = filt.base[-2]
@@ -299,7 +299,7 @@ def test_print_data(capsys):
     assert "> Base min/max  : 4.552335e-04 / 1.682246e+02" in out
 
     # Test filter only with key_201_2009()
-    fdesign.print_result(filters.key_201_2009())
+    fdesign.print_result(filters.Hankel().key_201_2009)
     out, _ = capsys.readouterr()
     assert "Filter length   : 201" in out
     assert "Best filter" in out
@@ -319,7 +319,7 @@ def test_ghosh():
 def test_j01():
     # Check with Key201-filter if analytical transform pairs for J0 and J1 are
     # correct
-    filt = filters.key_201_2009()
+    filt = filters.Hankel().key_201_2009
     for j01 in ['1', '2', '3', '4', '5']:
         if j01 == '1':
             r = np.logspace(0, 1.15, 100)
@@ -344,7 +344,7 @@ def test_j01():
 def test_sincos():
     # Check with Key81-filter if analytical transform pairs for sine and cosine
     # are correct
-    filt = filters.key_81_CosSin_2009()
+    filt = filters.Fourier().key_81_2009
     for sc in ['1', '2', '3']:
         if sc == '1':
             r = np.logspace(0, 0.7, 100)
