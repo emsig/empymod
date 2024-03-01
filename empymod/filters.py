@@ -45,6 +45,8 @@ https://github.com/emsig/article-fdesign.
 
 
 import os
+import warnings
+
 import libdlf
 import numpy as np
 
@@ -53,6 +55,12 @@ __all__ = ['DigitalFilter', 'Hankel', 'Fourier']
 
 def __dir__():
     return __all__
+
+
+FILTERS = {
+    'hankel': dict.fromkeys(libdlf.hankel.__all__),
+    'fourier': dict.fromkeys(libdlf.fourier.__all__)
+}
 
 
 # 0. Filter Class and saving/loading routines
@@ -174,40 +182,38 @@ class DigitalFilter:
                     setattr(self, val, np.fromfile(f, sep="\n"))
 
         # Add factor
-        self.factor = np.around([self.base[1]/self.base[r]], 15)
-
-
-HANKEL = {k: None for k in libdlf.hankel.__all__}
-FOURIER = {k: None for k in libdlf.fourier.__all__}
+        self.factor = np.around([self.base[1]/self.base[0]], 15)
 
 
 class Hankel:
-    def __getattr__(self, name):
-        if name in HANKEL.keys():
-            if HANKEL[name] is None:
-                HANKEL[name] = load_filter(name, 'hankel.'+name)
-            return HANKEL[name]
+
+    def __init__(self):
+        for k, v in FILTERS['hankel'].items():
+            setattr(self, k, v)
+
+    def __getattribute__(self, name):
+        if name in FILTERS['hankel'].keys():
+            if FILTERS['hankel'][name] is None:
+                FILTERS['hankel'][name] = load_filter(name, 'hankel.'+name)
+            return FILTERS['hankel'][name]
         else:
-            raise AttributeError(
-                f"'{self.__class__.__name__}' object has no attribute '{name}'"
-            )
+            return object.__getattribute__(self, name)
 
 
 class Fourier:
-    def __getattr__(self, name):
-        if name in FOURIER.keys():
-            if FOURIER[name] is None:
-                FOURIER[name] = load_filter(name, 'fourier.'+name)
-            return FOURIER[name]
+
+    def __init__(self):
+        for k, v in FILTERS['fourier'].items():
+            setattr(self, k, v)
+
+    def __getattribute__(self, name):
+        if name in FILTERS['fourier'].keys():
+            if FILTERS['fourier'][name] is None:
+                FILTERS['fourier'][name] = load_filter(name, 'fourier.'+name)
+            return FILTERS['fourier'][name]
         else:
-            raise AttributeError(
-                f"'{self.__class__.__name__}' object has no attribute '{name}'"
-            )
+            return object.__getattribute__(self, name)
 
-
-# TODO:
-# - DEPRECATION WARNINGS
-# - NEEDS TO WORK FOR FILTER INSTANCE, STRING, AND LIBDLF INSTANCE
 
 def load_filter(name, libdlfname):
     ftype, fname = libdlfname.split('.')
@@ -230,181 +236,122 @@ def load_filter(name, libdlfname):
     return getattr(TransformClass, libdlfname)
 
 
+# DEPRECATIONS - REMOVE in v3.0 #
+
+def _deprecate_filter(func):
+
+    def newfn():
+        name = func.__name__
+        if 'CosSin' in name:
+            new = name.replace('_CosSin', '')
+            ftype = 'Fourier'
+        else:
+            ftype = 'Hankel'
+            new = name
+
+        if 'kong_61' in name:
+            new += 'b'
+
+        msg = (
+            f"Calling `empymod.filters.{name}()` is deprecated and will be "
+            f"removed in v3.0; use `empymod.filters.{ftype}().{new}`."
+        )
+        warnings.warn(msg, FutureWarning)
+        return func()
+
+    return newfn
+
+
 # 1. Hankel DLF
 
+@_deprecate_filter
 def kong_61_2007():
-    r"""Kong 61 pt Hankel filter, as published in [Kong07]_.
-
-    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
-
-    License: `Apache License, Version 2.0,
-    <https://www.apache.org/licenses/LICENSE-2.0>`_.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().kong_61_2007b
 
 
+@_deprecate_filter
 def kong_241_2007():
-    r"""Kong 241 pt Hankel filter, as published in [Kong07]_.
-
-    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
-
-    License: `Apache License, Version 2.0,
-    <https://www.apache.org/licenses/LICENSE-2.0>`_.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().kong_241_2007
 
 
+@_deprecate_filter
 def key_101_2009():
-    r"""Key 101 pt Hankel filter, as published in [Key09]_.
-
-    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
-
-    License: `Apache License, Version 2.0,
-    <https://www.apache.org/licenses/LICENSE-2.0>`_.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().key_101_2009
 
 
+@_deprecate_filter
 def key_201_2009():
-    r"""Key 201 pt Hankel filter, as published in [Key09]_.
-
-    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
-
-    License: `Apache License, Version 2.0,
-    <https://www.apache.org/licenses/LICENSE-2.0>`_.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().key_201_2009
 
 
+@_deprecate_filter
 def key_401_2009():
-    r"""Key 401 pt Hankel filter, as published in [Key09]_.
-
-    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
-
-    License: `Apache License, Version 2.0,
-    <https://www.apache.org/licenses/LICENSE-2.0>`_.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().key_401_2009
 
 
+@_deprecate_filter
 def anderson_801_1982():
-    r"""Anderson 801 pt Hankel filter, as published in [Ande82]_.
-
-    Taken from file `wa801Hankel.txt` provided with [SEG-2012-003]_.
-
-    License: https://software.seg.org/disclaimer.txt.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().anderson_801_1982
 
 
+@_deprecate_filter
 def key_51_2012():
-    r"""Key 51 pt Hankel filter, as published in [Key12]_.
-
-    Taken from file `kk51Hankel.txt` provided with [SEG-2012-003]_.
-
-    License: https://software.seg.org/disclaimer.txt.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().key_51_2012
 
 
+@_deprecate_filter
 def key_101_2012():
-    r"""Key 101 pt Hankel filter, as published in [Key12]_.
-
-    Taken from file `kk101Hankel.txt` provided with [SEG-2012-003]_.
-
-    License: https://software.seg.org/disclaimer.txt.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().key_101_2012
 
 
+@_deprecate_filter
 def key_201_2012():
-    r"""Key 201 pt Hankel filter, as published in [Key12]_.
-
-    Taken from file `kk201Hankel.txt` provided with [SEG-2012-003]_.
-
-    License: https://software.seg.org/disclaimer.txt.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().key_201_2012
 
 
+@_deprecate_filter
 def wer_201_2018():
-    r"""Werthmüller 201 pt Hankel filter, 2018.
-
-    Designed with the empymod add-on `fdesign`, see
-    https://github.com/emsig/article-fdesign.
-
-    License: `Apache License, Version 2.0,
-    <https://www.apache.org/licenses/LICENSE-2.0>`_.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Hankel().wer_201_2018
 
 
 # 2. Fourier DLF (cosine/sine)
 
 
+@_deprecate_filter
 def key_81_CosSin_2009():
-    r"""Key 81 pt CosSin filter, as published in [Key09]_.
-
-    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
-
-    License: `Apache License, Version 2.0,
-    <https://www.apache.org/licenses/LICENSE-2.0>`_.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Fourier().key_81_2009
 
 
+@_deprecate_filter
 def key_241_CosSin_2009():
-    r"""Key 241 pt CosSin filter, as published in [Key09]_.
-
-    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
-
-    License: `Apache License, Version 2.0,
-    <https://www.apache.org/licenses/LICENSE-2.0>`_.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Fourier().key_241_2009
 
 
+@_deprecate_filter
 def key_601_CosSin_2009():
-    r"""Key 601 pt CosSin filter, as published in [Key09]_.
-
-    Taken from file `FilterModules.f90` provided with [1DCSEM]_.
-
-    License: `Apache License, Version 2.0,
-    <https://www.apache.org/licenses/LICENSE-2.0>`_.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Fourier().key_601_2009
 
 
+@_deprecate_filter
 def key_101_CosSin_2012():
-    r"""Key 101 pt CosSin filter, as published in [Key12]_.
-
-    Taken from file `kk101CosSin.txt` provided with [SEG-2012-003]_.
-
-    License: https://software.seg.org/disclaimer.txt.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Fourier().key_101_2012
 
 
+@_deprecate_filter
 def key_201_CosSin_2012():
-    r"""Key 201 pt CosSin filter, as published in [Key12]_.
-
-    Taken from file `kk201CosSin.txt` provided with [SEG-2012-003]_.
-
-    License: https://software.seg.org/disclaimer.txt.
-
-    """
+    """Deprecated; just for backwards compatibility until v3.0."""
     return Fourier().key_201_2012
