@@ -259,9 +259,9 @@ class Hankel(_BaseFilter):
 class Fourier(_BaseFilter):
     """Wrapper to load Fourier-Transform filters from libdlf.
 
-    You can either call a filter directly or first instantiate a Fourier object.
-    Latter will give the possibility to explore the available filters with tab
-    completion. A list of available filters is also stored in
+    You can either call a filter directly or first instantiate a Fourier
+    object. Latter will give the possibility to explore the available filters
+    with tab completion. A list of available filters is also stored in
     ``Fourier.available``.
 
 

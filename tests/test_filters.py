@@ -91,5 +91,14 @@ def test_fourier_dlf():                                    # 3. Fourier filters
             assert dlf == dlf0
 
 
+def test_FilterClasses():
+
+    H = filters.Hankel()
+    # Check _BaseFilter can still access standard attributes
+    assert H.__class__.__name__ == 'Hankel'
+
+    assert H.wer_201_2018 == filters.FILTERS['hankel']['wer_201_2018']
+
+
 def test_all_dir():
     assert set(filters.__all__) == set(dir(filters))
