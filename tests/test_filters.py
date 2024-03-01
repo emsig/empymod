@@ -58,7 +58,7 @@ def test_hankel_dlf():                                      # 2. Hankel filters
         assert_allclose(dlf.factor, fact)
 
         # Test deprecated way
-        with pytest.warns(FutureWarning, match='in v3.0; use'):
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
             if filt == 'kong_61_2007b':
                 filt = filt[:-1]
             dlf0 = getattr(filters, filt)()
@@ -84,7 +84,7 @@ def test_fourier_dlf():                                    # 3. Fourier filters
         assert_allclose(dlf.factor, fact)
 
         # Test deprecated way
-        with pytest.warns(FutureWarning, match='in v3.0; use'):
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
             tmp = filt.split("_")
             filt = tmp[0] + "_" + tmp[1] + "_CosSin_" + tmp[2]
             dlf0 = getattr(filters, filt)()

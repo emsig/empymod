@@ -318,7 +318,7 @@ def _deprecate_filter(func):
             f"Calling `empymod.filters.{name}()` is deprecated and will be "
             f"removed in v3.0; use `empymod.filters.{ftype}().{new}`."
         )
-        warnings.warn(msg, FutureWarning)
+        warnings.warn(msg, DeprecationWarning)
 
         return func()
 
