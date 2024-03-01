@@ -1,14 +1,9 @@
 import sys
 import pytest
+import scooby
 import subprocess
 import numpy as np
 from numpy.testing import assert_allclose
-
-# Optional import
-try:
-    import scooby
-except ImportError:
-    scooby = False
 
 from empymod import utils, filters
 
@@ -1196,20 +1191,14 @@ def test_report(capsys):
 
     # Reporting is now done by the external package scooby.
     # We just ensure the shown packages do not change (core and optional).
-    if scooby:
-        out1 = scooby.Report(
-                core=['numpy', 'scipy', 'numba', 'empymod'],
-                optional=['IPython', 'matplotlib'],
-                ncol=3)
-        out2 = utils.Report()
+    out1 = scooby.Report(
+            core=['numpy', 'scipy', 'numba', 'empymod'],
+            optional=['IPython', 'matplotlib'],
+            ncol=3)
+    out2 = utils.Report()
 
-        # Ensure they're the same; exclude time to avoid errors.
-        assert out1.__repr__()[115:] == out2.__repr__()[115:]
-
-    else:  # soft dependency
-        _ = utils.Report()
-        out, _ = capsys.readouterr()  # Empty capsys
-        assert 'WARNING :: `empymod.Report` requires `scooby`' in out
+    # Ensure they're the same; exclude time to avoid errors.
+    assert out1.__repr__()[115:] == out2.__repr__()[115:]
 
 
 @pytest.mark.skipif(not sys.platform.startswith('linux'), reason="Not Linux.")

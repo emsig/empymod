@@ -6,11 +6,23 @@ Version 2
 ~~~~~~~~~
 
 
-v2.2.x
+v2.3.x
 """"""
 
-latest
-------
+
+v2.3.0: libdlf and scooby
+-------------------------
+
+**2024-03-01**
+
+The digital linear filters are outsourced to libdlf, reducing the lines of code
+of empymod by over 50%. In addition to the new requirement libdlf, scooby is
+added as a requirement. Most user questions can be adressed much better if they
+provide the output of ``empymod.Report()`` - however, most users do not have
+scooby installed. Having it as a requirement will make support smoother. Both
+new requirements are very lightweight modules, having at most numpy as a
+dependency.
+
 
 - Filters:
 
@@ -31,6 +43,7 @@ latest
     - SciPy 1.9
     - Numba 0.53
     - libdlf (NEW requirement)
+    - scooby (NEW requirement)
 
   - Testing: added Python 3.12, dropped Python 3.8.
 
@@ -38,6 +51,10 @@ latest
 
   - Many small things to keep the package updated.
 
+
+
+v2.2.x
+""""""
 
 
 v2.2.2: Flexible dipole coordinates

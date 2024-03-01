@@ -49,7 +49,7 @@ jobs:
           - python-version: "3.10"
             name: full
             os: ubuntu
-            conda: "numba 'matplotlib>=3.3' scipy scooby pytest-mpl"
+            conda: "numba 'matplotlib>=3.3' scipy pytest-mpl"
             test: "--mpl"
           - python-version: "3.11"
             name: plain
@@ -59,7 +59,7 @@ jobs:
           - python-version: "3.11"
             name: full
             os: ubuntu
-            conda: "numba 'matplotlib>=3.3' scipy scooby pytest-mpl"
+            conda: "numba 'matplotlib>=3.3' scipy pytest-mpl"
             test: "--mpl"
           - python-version: "3.12"
             name: plain
@@ -69,7 +69,7 @@ jobs:
           - python-version: "3.12"
             name: full
             os: ubuntu
-            conda: "numba 'matplotlib' scipy scooby pytest-mpl"
+            conda: "numba 'matplotlib' scipy pytest-mpl"
             test: "--mpl"
 
     env:

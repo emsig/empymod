@@ -2,7 +2,6 @@
 -r requirements.txt
 
 # SOFT DEPENDENCIES
-scooby
 matplotlib
 
 # SETUP RELATED

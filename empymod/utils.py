@@ -34,15 +34,7 @@ from datetime import timedelta, datetime
 
 # Relative imports
 from empymod import filters, transform
-
-# scooby is a soft dependency for empymod
-try:
-    from scooby import Report as ScoobyReport
-except ImportError:
-    class ScoobyReport:
-        def __init__(self, additional, core, optional, ncol, text_width, sort):
-            print("\n* WARNING :: `empymod.Report` requires `scooby`."
-                  "\n             Install it via `pip install scooby`.\n")
+from scooby import Report as ScoobyReport
 
 # Version: We take care of it here instead of in __init__, so we can use it
 # within the package itself (logs).
