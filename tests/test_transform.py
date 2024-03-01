@@ -226,7 +226,7 @@ def test_qwe():                                                        # 8. qwe
 
 def test_get_dlf_points():                                  # 9. get_dlf_points
     # Check one example
-    filt = filters.key_81_CosSin_2009()
+    filt = filters.Fourier().key_81_2009
     out, new_inp = transform.get_dlf_points(filt, np.arange(1, 6), -1)
     # Expected values
     oout = np.array([6.70925256e-05, 8.19469958e-05, 1.00090287e-04,
@@ -269,7 +269,7 @@ def test_get_dlf_points():                                  # 9. get_dlf_points
     assert_allclose(new_inp, onew_inp)
 
     # Ensure output dimension
-    hfilt = filters.anderson_801_1982()
+    hfilt = filters.Hankel().anderson_801_1982
     out, _ = transform.get_dlf_points(hfilt, np.array([1, 1.1]), -1)
     assert_allclose(out.size, 804)
 
@@ -281,7 +281,7 @@ def test_get_dlf_points():                                  # 9. get_dlf_points
     assert_allclose(out.size, 4)
 
     # Check standard example
-    ffilt = filters.key_81_CosSin_2009()
+    ffilt = filters.Fourier().key_81_2009
     inp = np.arange(1, 6)
     out, new_inp = transform.get_dlf_points(ffilt, inp, 0)
     assert_allclose(inp, new_inp)

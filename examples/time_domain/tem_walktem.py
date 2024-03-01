@@ -313,7 +313,7 @@ def walktem(moment, depth, res):
         time=time,          # Required times
         signal=1,           # Switch-on response
         ft='dlf',           # Use DLF
-        ftarg={'dlf': 'key_81_CosSin_2009'},  # Short, fast filter; if you
+        ftarg={'dlf': 'key_81_2009'},  # Short, fast filter; if you
         verb=2,                 # need higher accuracy choose a longer filter.
     )
 

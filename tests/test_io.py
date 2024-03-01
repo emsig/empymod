@@ -3,7 +3,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 
 import empymod
-from empymod import io
+from empymod import io, filters
 
 
 class TestSaveLoadInput:
@@ -18,7 +18,7 @@ class TestSaveLoadInput:
             "freqtime": [0.1, 1, 10, 100],
             "signal": None,
             "msrc": True,
-            "htarg": {"pts_per_dec": -1},  # <= in json forbidden.
+            "htarg": {"pts_per_dec": -1},
         }
 
         io.save_input(tmpdir+'/test.json', data=inp)
@@ -29,6 +29,13 @@ class TestSaveLoadInput:
         assert inp == out
 
         # Dummy check by comparing the produced result from the two inputs.
+        assert_allclose(empymod.bipole(**inp), empymod.bipole(**out), 0, 0)
+
+        # Test filter instance
+        inp["htarg"] = {"dlf": filters.Hankel().wer_201_2018}
+        io.save_input(tmpdir+'/test.json', data=inp)
+        out = io.load_input(tmpdir+'/test.json')
+        assert out["htarg"]["dlf"] == filters.Hankel().wer_201_2018.name
         assert_allclose(empymod.bipole(**inp), empymod.bipole(**out), 0, 0)
 
     def test_errors(self, tmpdir):
@@ -51,12 +58,7 @@ class TestSaveLoadData:
         'verb': 1,
     }
 
-    @pytest.mark.parametrize(
-        "extra", [{'signal': None, 'freqtime': [0.1, 1.0]},
-                  {'signal': 0, 'freqtime': [1.0, 5.0]},
-                  {'signal': None, 'freqtime': [-0.1, -1.0]}]
-    )
-    def test_basic(self, tmpdir, extra):
+    def test_basic(self, tmpdir):
 
         # Compute
         orig = empymod.dipole(**self.inp, freqtime=[0.1, 1, 10, 100])

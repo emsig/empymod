@@ -452,7 +452,7 @@ params = {
 }
 
 # Used Hankel filter
-hfilt = empymod.filters.key_201_2009()
+hfilt = empymod.filters.Hankel().key_201_2009
 
 # Compute analytical solution
 resp = empymod.analytical(
@@ -560,7 +560,7 @@ tparam['freqtime'] = t
 tparam['signal'] = 0  # Impulse response
 
 # Used Fourier filter
-ffilt = empymod.filters.key_81_CosSin_2009()
+ffilt = empymod.filters.Fourier().key_81_2009
 
 # Compute analytical solution
 tresp = empymod.analytical(

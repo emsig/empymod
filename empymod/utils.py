@@ -524,9 +524,9 @@ def check_hankel(ht, htarg, verb):
     if ht == 'dlf':     # DLF
 
         # If filter is a name (str), get it
-        targ['dlf'] = args.pop('dlf', filters.key_201_2009())
+        targ['dlf'] = args.pop('dlf', filters.Hankel().key_201_2009)
         if isinstance(targ['dlf'], str):
-            targ['dlf'] = getattr(filters, targ['dlf'])()
+            targ['dlf'] = getattr(filters.Hankel(), targ['dlf'])
 
         # Ensure the provided filter has the necessary attributes.
         base = hasattr(targ['dlf'], 'base')
@@ -987,9 +987,9 @@ def check_time(time, signal, ft, ftarg, verb):
                              f"provided: {targ['kind']}.")
 
         # If filter is a name (str), get it
-        targ['dlf'] = args.pop('dlf', filters.key_201_CosSin_2012())
+        targ['dlf'] = args.pop('dlf', filters.Fourier().key_201_2012)
         if isinstance(targ['dlf'], str):
-            targ['dlf'] = getattr(filters, targ['dlf'])()
+            targ['dlf'] = getattr(filters.Fourier(), targ['dlf'])
 
         # Ensure the provided filter has the necessary attributes.
         base = hasattr(targ['dlf'], 'base')

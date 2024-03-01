@@ -346,7 +346,7 @@ can use
 
 import numpy as np
 
-from empymod.filters import key_201_2012
+from empymod.filters import Hankel
 from empymod.kernel import reflections, angle_factor
 from empymod.utils import (check_model, check_frequency, check_dipole, _strvar,
                            get_off_ang, get_layer_nr, printstartfinish)
@@ -473,7 +473,7 @@ def dipole(src, rec, depth, res, freqtime, aniso=None, eperm=None, mperm=None,
     # - kernel.wavenumber()
 
     # DLF filter we use
-    filt = key_201_2012()
+    filt = Hankel().key_201_2012
 
     # 3.1. COMPUTE REQUIRED LAMBDAS for given hankel-filter-base
     lambd = filt.base/off[:, None]

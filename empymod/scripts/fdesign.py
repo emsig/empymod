@@ -237,8 +237,7 @@ from copy import deepcopy as dc
 
 from empymod.filters import DigitalFilter
 from empymod.model import dipole, dipole_k
-from empymod.filters import key_201_2009 as j0j1filt
-from empymod.filters import key_201_CosSin_2012 as sincosfilt
+from empymod.filters import Hankel, Fourier
 from empymod.utils import printstartfinish, timedelta, default_timer
 
 __all__ = ['design', 'save_filter', 'load_filter', 'plot_result',
@@ -785,9 +784,9 @@ def _plot_transform_pairs(fCI, r, k, axes, tit):
     for f in fCI:
         if f.name in ['j0', 'j1', 'j2', 'cos', 'sin']:
             if f.name[1] in ['0', '1', '2'] and f.name[0] == 'j':
-                filt = j0j1filt()
+                filt = Hankel().key_201_2009
             else:
-                filt = sincosfilt()
+                filt = Fourier().key_201_2012
             kk = filt.base/r[:, None]
             if f.name == 'j2':
                 lhs = f.lhs(kk)

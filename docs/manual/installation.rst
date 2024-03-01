@@ -13,7 +13,7 @@ or via ``pip``:
 
    pip install empymod
 
-Requirements are the modules ``scipy`` and ``numba``.
+Requirements are the modules ``scipy``, ``numba``, and ``libdlf``.
 
 The modeller empymod comes with add-ons (``empymod.scripts``). These add-ons
 provide some very specific, additional functionalities. Some of these add-ons

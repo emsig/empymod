@@ -25,7 +25,7 @@ import time
 import numpy as np
 
 
-from empymod import utils
+from empymod import utils, filters
 
 __all__ = ["save_input", "load_input", "save_data", "load_data"]
 
@@ -275,6 +275,8 @@ class _ComplexNumPyEncoder(json.JSONEncoder):
         # Convert NumPy arrays (includes complex)
         if isinstance(obj, np.ndarray):
             return obj.tolist()
+        if isinstance(obj, filters.DigitalFilter):
+            return obj.name
 
         # Let the base class default method raise the TypeError.
         return json.JSONEncoder.default(self, obj)

@@ -81,12 +81,12 @@ fEM = test_freq(res, off, f)
 fourier_dlf0 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = 1
 _, f, _, ftarg = utils.check_time(
-        t, 1, 'dlf', {'dlf': 'key_201_CosSin_2012', 'pts_per_dec': -1}, 0)
+        t, 1, 'dlf', {'dlf': 'key_201_2012', 'pts_per_dec': -1}, 0)
 fEM = test_freq(res, off, f)
 fourier_dlf1 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 # Signal = -1
 _, f, _, ftarg = utils.check_time(
-        t, -1, 'dlf', {'dlf': 'key_201_CosSin_2012', 'pts_per_dec': 20}, 0)
+        t, -1, 'dlf', {'dlf': 'key_201_2012', 'pts_per_dec': 20}, 0)
 fEM = test_freq(res, off, f)
 fourier_dlf2 = {'fEM': fEM, 'f': f, 'ftarg': ftarg}
 

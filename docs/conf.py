@@ -1,3 +1,4 @@
+import time
 import warnings
 from empymod import __version__
 from sphinx_gallery.sorting import FileNameSortKey
@@ -90,7 +91,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'empymod'
 author = 'The emsig community'
-copyright = f'2016, {author}'
+copyright = f'2016-{time.strftime("%Y")}, {author}'
 
 # |version| and |today| tags (|release|-tag is not used).
 version = __version__
