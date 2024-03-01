@@ -33,6 +33,7 @@ setup(
         "scipy>=1.9",
         "numba>=0.53",
         "libdlf",
+        "scooby",
     ],
     use_scm_version={
         "root": ".",
