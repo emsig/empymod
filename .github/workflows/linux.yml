@@ -129,7 +129,7 @@ jobs:
           cp ./tests/matplotlibrc ./.
           pytest --cov=empymod ${{ matrix.case.test }}
 
-      - name: Coveralls Parallel
+      - name: Coveralls
         uses: coverallsapp/github-action@v2
         with:
           flag-name: ${{ matrix.case.python-version }}-${{ matrix.case.name }}
