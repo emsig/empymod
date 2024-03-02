@@ -133,7 +133,7 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           parallel: true
-          flag-name: ${{ matrix.case.python-version }} ${{ matrix.case.name }} (${{ matrix.case.os }})
+          flag-name: ${{ matrix.case.python-version }}-${{ matrix.case.name }}
 
 
   coveralls_finish:
@@ -144,6 +144,7 @@ jobs:
       uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
+        carryforward: "3.9-minimal,3.10-plain,3.10-full,3.11-plain,3.11-full,3.12-plain,3.12-full"
 
   deploy:
     needs: test
