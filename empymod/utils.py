@@ -2032,7 +2032,7 @@ class Report(ScoobyReport):
         """Initiate a scooby.Report instance."""
 
         # Mandatory packages.
-        core = ['numpy', 'scipy', 'numba', 'empymod']
+        core = ['numpy', 'scipy', 'numba', 'empymod', 'libdlf']
 
         # Optional packages.
         optional = ['IPython', 'matplotlib']

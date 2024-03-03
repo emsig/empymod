@@ -1192,7 +1192,7 @@ def test_report(capsys):
     # Reporting is now done by the external package scooby.
     # We just ensure the shown packages do not change (core and optional).
     out1 = scooby.Report(
-            core=['numpy', 'scipy', 'numba', 'empymod'],
+            core=['numpy', 'scipy', 'numba', 'empymod', 'libdlf'],
             optional=['IPython', 'matplotlib'],
             ncol=3)
     out2 = utils.Report()
