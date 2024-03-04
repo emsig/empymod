@@ -72,7 +72,7 @@ jobs:
           conda config --show-sources
           conda config --show
           conda info -a
-          conda install numba "scipy!=1.9.0" pytest pytest-console-scripts setuptools-scm
+          conda install numba scipy pytest pytest-console-scripts setuptools-scm
 
       - name: Conda list
         shell: bash -l {0}
