@@ -122,7 +122,7 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
             htarg['int_pts'] = int_pts
         elif htype == 'qwe':
             _, htarg = utils.check_hankel(
-                    'qwe', {'maxint': 80, 'pts_per_dec': 100}, 0)
+                'qwe', {'rtol': 1e-11, 'maxint': 80, 'pts_per_dec': 100}, 0)
         if htype != 'quad':  # quad is always pts_per_dec
             # Analytical frequency-domain solution
             wvnr3, _, conv = calc(zsrc, zrec, lsrc, lrec, off, ang_fact, depth,
