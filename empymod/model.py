@@ -944,6 +944,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
         - If rec is electric, returns E [V/m].
         - If rec is magnetic, returns H [A/m].
+        - If rec is an electric loop, returns B [T].
 
         EMArray is a subclassed ndarray with `.pha` and `.amp` attributes
         (only relevant for frequency-domain data).
