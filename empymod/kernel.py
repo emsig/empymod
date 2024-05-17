@@ -460,7 +460,8 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
             pm = 1
             # layer_count = np.arange(depth.size - 2, minl - 1, -1)
             # izout = abs(lsrc - lrec)
-            layer_count = np.arange(nlayer - 2, -1,-1)  # iterate over interfaces, so n_layer-1, n-layer - 2 for pythonic counting
+            layer_count = np.arange(nlayer - 2, -1,
+                                    -1)  # iterate over interfaces, so n_layer-1, n-layer - 2 for pythonic counting
             izout = nlayer - 1
             minmax = pm * maxl
         else:
@@ -483,7 +484,8 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
             Gam[:, :, :nlayer, :])  # Stores Ref for each layer with source and receiver and inbetween
         rloc = np.zeros_like(Gam[:, :, 0, :])  # TODO: Not all of them are needed, can be reduced (storing previous one)
         if ana_deriv:
-            dRef = np.zeros(list(Gam[:, :, :nlayer, :].shape) + [nlayer], dtype=Gam.dtype)  # fifth dimension for derivative of dRef[i, ii, izout, iv] w.r.t. cond_n
+            dRef = np.zeros(list(Gam[:, :, :nlayer, :].shape) + [nlayer],
+                            dtype=Gam.dtype)  # fifth dimension for derivative of dRef[i, ii, izout, iv] w.r.t. cond_n
             drloc = np.zeros_like(Gam[:, :, 0, :], dtype=Gam.dtype)  # within layer n w.r.t. cond of layer n
             drloc_pm = np.zeros_like(Gam[:, :, 0, :], dtype=Gam.dtype)  # within layer n w.r.t. cond of layer n + pm
             dRef_dRepm = np.zeros_like(Gam[:, :, :nlayer, :], dtype=Gam.dtype)
@@ -511,12 +513,13 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
                             # TODO: Fix mistake in document Expressions for the gradients wrt conductivity
                             # drloc[i, ii, iv] = ra * dGam[i, ii, iz, iv] * (1 - rloc[i, ii, iv]) + Gam[i, ii, iz + pm, iv] * (1 + rloc[i, ii, iv])
                             # drloc[i, ii, iv] /= (rloca + rlocb)
-                            drloc[i,ii,iv] = (ra * dGam[i, ii, iz, iv] - Gam[i, ii, iz + pm, iv]) - rloc[i, ii, iv] * (ra * dGam[i,ii,iv] + Gam[i,ii,iz+pm,iv])
-                            drloc[i,ii,iv] /= (rloca + rlocb)
+                            drloc[i, ii, iv] = (ra * dGam[i, ii, iz, iv] - Gam[i, ii, iz + pm, iv]) - rloc[
+                                i, ii, iv] * (ra * dGam[i, ii, iv] + Gam[i, ii, iz + pm, iv])
+                            drloc[i, ii, iv] /= (rloca + rlocb)
                             # drloc[i, ii, iv] = (ra * dGam[i, ii, iz, iv] - Gam[i, ii, iz + pm, iv])/ (rloca + rlocb)
                             # drloc[i, ii, iv] += (-1*(ra * Gam[i, ii, iz, iv] - rb * Gam[i, ii, iz + pm, iv]) * (ra * dGam[i, ii, iz, iv] + Gam[i,ii,iz+pm,iv])) / (rloca + rlocb)**2
                             # Derivative of rloc of layer iz w.r.t. conductivity of iz + pm
-                            drloc_pm[i, ii, iv] = -rb * dGam[i, ii, iz+pm, iv] * (1 + rloc[i, ii, iv]) + \
+                            drloc_pm[i, ii, iv] = -rb * dGam[i, ii, iz + pm, iv] * (1 + rloc[i, ii, iv]) + \
                                                   Gam[i, ii, iz, iv] * (1 - rloc[i, ii, iv])
                             drloc_pm[i, ii, iv] /= (rloca + rlocb)
 
@@ -524,8 +527,8 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
             if iz == layer_count[0]:
                 Ref[:, :, iz, :] = rloc[:, :, :].copy()
                 if ana_deriv:
-                    dRef[:, :, iz, :, iz] = drloc[:,:,:].copy()
-                    dRef[:, :, iz, :, iz + pm] = drloc_pm[:,:,:].copy()
+                    dRef[:, :, iz, :, iz] = drloc[:, :, :].copy()
+                    dRef[:, :, iz, :, iz + pm] = drloc_pm[:, :, :].copy()
 
                     # TODO: (!!) What about the dREF in layer iz, but the derivative of the conductivity of layer iz+1?
                     # So in a 6-layered case, you have 5 global reflection coefficients, but 6 derivatives of the global reflection coefficients w.r.t. the conductivity of the layers
@@ -541,7 +544,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
-                            term = Ref[i, ii, iz+pm, iv] * np.exp(
+                            term = Ref[i, ii, iz + pm, iv] * np.exp(
                                 -2 * Gam[i, ii, iz + pm, iv] * ddepth)
                             Ref[i, ii, iz, iv] = (rloc[i, ii, iv] + term) / (
                                     1 + rloc[i, ii, iv] * term)
@@ -603,21 +606,20 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
                 dRp = dRef
     # Return reflections (minus and plus)
 
-
     if debug:
         if ana_deriv:
-            return Rm, Rp, dRm, dRp
+            return Rm, Rp, dRm, dRp, dGam
         else:
             return Rm, Rp
     else:
         if ana_deriv:
-            return Rm[:,:,minl:maxl,:], Rp[:,:,minl:maxl,:], dRm, dRp
+            return Rm[:, :, minl:maxl, :], Rp[:, :, minl:maxl, :], dRm, dRp, dGam
         else:
-            return Rm[:,:,minl:(maxl+1),:], Rp[:,:,minl:(maxl+1),:]
+            return Rm[:, :, minl:(maxl + 1), :], Rp[:, :, minl:(maxl + 1), :]
 
 
 @nb.njit(**_numba_setting)
-def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False):
+def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False, dRp=None, dRm=None, dGam=None):
     r"""Calculate Pu+, Pu-, Pd+, Pd-.
 
     .. math::
@@ -635,7 +637,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
 
     """
 
-    nfreq, noff, nlambda = Gam[:, :, 0, :].shape
+    nfreq, noff, nlayer, nlambda = Gam[:, :, :, :].shape
 
     # Variables
     nlsr = abs(lsrc - lrec) + 1  # nr of layers btw and incl. src and rec layer
@@ -657,6 +659,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
     # Rm and Rp; swapped if up=True
     Rmp = Rm
     Rpm = Rp
+    dRmp = dRm
+    dRpm = dRp
 
     # Boolean if plus or minus has to be calculated
     plusset = [13, 23, 33, 14, 24, 34, 15, 25, 35]
@@ -694,6 +698,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
             else:
                 dp = dm
             Rmp, Rpm = Rpm, Rmp
+            dRmp, dRpm = dRpm, dRmp
             first_layer, last_layer = last_layer, first_layer
             rsrcl = nlsr - 1  # src-layer in refl. (Rp/Rm), last (nlsr-1) if up
             izrange = range(nlsr - 2)
@@ -704,28 +709,67 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                 mupm = -1
 
         P = np.zeros_like(iGam)
+        dP = np.zeros(list(Gam[:, :, :nlayer, :].shape) + [nlayer],dtype=Gam.dtype)
 
         # Calculate Pu+, Pu-, Pd+, Pd-
         if lsrc == lrec:  # rec in src layer; Eqs  81/82, A-8/A-9
             if last_layer:  # If src/rec are in top (up) or bottom (down) layer
+                """
+                tRpm is zero, as there is no reflection from the bottom/top. 
+                dRpm is zero 
+                M = 1 
+                """
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
                             tRmp = Rmp[i, ii, 0, iv]
                             tiGam = iGam[i, ii, iv]
-                            P[i, ii, iv] = tRmp * np.exp(-tiGam * dm)
+                            E = np.exp(-tiGam * dm)
+                            P[i, ii, iv] = tRmp * E
+                            if ana_deriv:
+                                # Not all derivatives iterate over the number of layers, so 3dim
+                                # Depths; dp and dm are swapped if up=True
+                                # Rmp = Rm;  swapped if up=True
+                                # Rpm = Rp;  swapped if up=True
+                                # dm and dp swapped if up=True
+                                t1 = P[i, ii, iv] / tRmp[i, ii, iv]
+                                t7 = tRmp
+                                for iii in range(nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
+                                    t8 = -dm * E * dGam[i, ii, iii, iv]
+                                    dP[i, ii, iii, iv] = t1[i, ii, iv] * dRmp[i, ii, iii, iv] + t7 * t8
 
             else:  # If src and rec are in any layer in between
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
                             tiGam = iGam[i, ii, iv]
-                            tRpm = Rpm[i, ii, 0, iv]
+                            tRpm = Rpm[i, ii, 0, iv] # TODO: check if Rpm is indeed has only the R for one layer
                             tRmp = Rmp[i, ii, 0, iv]
-                            p1 = np.exp(-tiGam * dm)
-                            p2 = pm * tRpm * np.exp(-tiGam * (ds + dp))
-                            p3 = 1 - tRmp * tRpm * np.exp(-2 * tiGam * ds)
-                            P[i, ii, iv] = (p1 + p2) * tRmp / p3
+                            E1 = np.exp(-tiGam * dm)
+                            E2 = np.exp(-tiGam * (ds + dp))
+                            E3 = np.exp(-2 * tiGam * ds)
+                            p2 = pm * tRpm * E2
+                            M = 1 - tRmp * tRpm * E3
+                            P[i, ii, iv] = (E1 + p2) * tRmp / M
+                            if ana_deriv:
+                                # Not all derivatives iterate over the number of layers, so 3dim
+                                # Depths; dp and dm are swapped if up=True
+                                # Rmp = Rm;  swapped if up=True
+                                # Rpm = Rp;  swapped if up=True
+                                # dm and dp swapped if up=True
+                                t1 = P[i, ii, iv] / tRmp
+                                t3 = pm * tRmp / M * E2
+                                t5 = P[i, ii, iv] / M
+                                t7 = tRmp / M
+                                t9 = pm * tRpm * tRmp / M
+
+                                for iii in range(nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
+                                    t6 = tRpm * E3 * dRpm[i, ii, lsrc, iv,iii] + tRmp * E3 * dRmp[i, ii, lsrc, iv,iii] - 2 * tRpm * tRmp * ds * E1 * dGam[i, ii, iii, iv]
+                                    t8 = -dm * E1 * dGam[i, ii, iii, iv]
+                                    t10 = -(ds + dp) * E2 * dGam[i, ii, iii, iv]
+                                    dP[i, ii, iii, iv] = t1 * dRmp[i, ii, lsrc, iv, iii] + t3 * dRpm[
+                                        i, ii, lsrc, iv, iii] + t5 * t6 + t7 * t8 + t9 * t10
+
 
         else:  # rec above (up) / below (down) src layer
             #           # Eqs  95/96,  A-24/A-25 for rec above src layer
@@ -740,6 +784,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                             tiRpm = iRpm[i, ii, iv]
                             tiGam = iGam[i, ii, iv]
                             P[i, ii, iv] = (1 + tiRpm) * mupm * np.exp(-tiGam * dp)
+                            if ana_deriv:
+                                raise NotImplementedError("Case: first layer")
             else:
                 for i in range(nfreq):
                     for ii in range(noff):
@@ -751,6 +797,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                             p2 = pm * mupm * iRmp * np.exp(-tiGam * (ds + dm))
                             p3 = (1 + tRpm) / (1 - iRmp * tRpm * np.exp(-2 * tiGam * ds))
                             P[i, ii, iv] = (p1 + p2) * p3
+                            if ana_deriv:
+                                raise NotImplementedError("Case: rec is not in src layer")
 
             # If up or down and src is in last but one layer
             if up or (not up and lsrc + 1 < depth.size - 1):
@@ -761,6 +809,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                             tiRpm = Rpm[i, ii, rsrcl - 1 * pup, iv]
                             tiGam = Gam[i, ii, lsrc - 1 * pup, iv]
                             P[i, ii, iv] /= 1 + tiRpm * np.exp(-2 * tiGam * ddepth)
+                            if ana_deriv:
+                                raise NotImplementedError("Case: src is in last but one layer")
 
             # Second compute P for all other layers
             if nlsr > 2:
@@ -773,6 +823,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                                 piGam = Gam[i, ii, isr + iz + pup, iv]
                                 p1 = (1 + tiRpm) * np.exp(-piGam * ddepth)
                                 P[i, ii, iv] *= p1
+                                if ana_deriv:
+                                    raise NotImplementedError("Case: number of layers between src and rec > 2")
 
                     # If rec/src NOT in first/last layer (up/down)
                     if isr + iz != last:
@@ -784,15 +836,24 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                                     piGam2 = Gam[i, ii, isr + iz, iv]
                                     p1 = 1 + tiRpm * np.exp(-2 * piGam2 * ddepth)
                                     P[i, ii, iv] /= p1
+                                    if ana_deriv:
+                                        raise NotImplementedError("Case: If rec/src NOT in first/last layer (up/down)")
 
         # Store P in Pu/Pd
         if up:
             Pu = P
+            if ana_deriv:
+                dPu = dP
         else:
             Pd = P
+            if ana_deriv:
+                dPd = dP
 
     # Return fields (up- and downgoing)
-    return Pu, Pd
+    if ana_deriv:
+        return Pu, Pd, dPu, dPd
+    else:
+        return Pu, Pd
 
 
 # Angle Factor
