@@ -613,7 +613,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
             return Rm, Rp
     else:
         if ana_deriv:
-            return Rm[:, :, minl:maxl, :], Rp[:, :, minl:maxl, :], dRm, dRp, dGam
+            return Rm[:, :, minl:(maxl+1), :], Rp[:, :, minl:(maxl+1), :], dRm, dRp, dGam
         else:
             return Rm[:, :, minl:(maxl + 1), :], Rp[:, :, minl:(maxl + 1), :]
 
@@ -685,10 +685,12 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
         # No upgoing field if rec is in last layer or below src
         if up and (lrec == depth.size - 1 or lrec > lsrc):
             Pu = np.zeros_like(iGam)
+            dPu = np.zeros(list(iGam.shape) + [nlayer], dtype=Gam.dtype)
             continue
         # No downgoing field if rec is in first layer or above src
         if not up and (lrec == 0 or lrec < lsrc):
             Pd = np.zeros_like(iGam)
+            dPd = np.zeros(list(iGam.shape) + [nlayer], dtype=Gam.dtype)
             continue
 
         # Swaps if up=True
@@ -709,7 +711,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                 mupm = -1
 
         P = np.zeros_like(iGam)
-        dP = np.zeros(list(Gam[:, :, :nlayer, :].shape) + [nlayer],dtype=Gam.dtype)
+        dP = np.zeros(list(iGam.shape) + [nlayer],dtype=Gam.dtype)
 
         # Calculate Pu+, Pu-, Pd+, Pd-
         if lsrc == lrec:  # rec in src layer; Eqs  81/82, A-8/A-9
@@ -734,9 +736,13 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                                 # dm and dp swapped if up=True
                                 t1 = P[i, ii, iv] / tRmp[i, ii, iv]
                                 t7 = tRmp
-                                for iii in range(nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
-                                    t8 = -dm * E * dGam[i, ii, iii, iv]
-                                    dP[i, ii, iii, iv] = t1[i, ii, iv] * dRmp[i, ii, iii, iv] + t7 * t8
+                                for v in range(nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
+                                    if v == lsrc:
+                                        dgam = dGam[i,ii,lsrc,iv]
+                                    else:
+                                        dgam = 0
+                                    t8 = -dm * E * dgam
+                                    dP[i, ii, iv] = t1[i, ii, iv] * dRmp[i, ii, lsrc, iv, v] + t7 * t8
 
             else:  # If src and rec are in any layer in between
                 for i in range(nfreq):
@@ -757,18 +763,21 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                                 # Rmp = Rm;  swapped if up=True
                                 # Rpm = Rp;  swapped if up=True
                                 # dm and dp swapped if up=True
-                                t1 = P[i, ii, iv] / tRmp
+                                t1 = (E1 + p2) * 1 / M
                                 t3 = pm * tRmp / M * E2
-                                t5 = P[i, ii, iv] / M
+                                t5 = -1*P[i, ii, iv] / M
                                 t7 = tRmp / M
                                 t9 = pm * tRpm * tRmp / M
 
-                                for iii in range(nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
-                                    t6 = tRpm * E3 * dRpm[i, ii, lsrc, iv,iii] + tRmp * E3 * dRmp[i, ii, lsrc, iv,iii] - 2 * tRpm * tRmp * ds * E1 * dGam[i, ii, iii, iv]
-                                    t8 = -dm * E1 * dGam[i, ii, iii, iv]
-                                    t10 = -(ds + dp) * E2 * dGam[i, ii, iii, iv]
-                                    dP[i, ii, iii, iv] = t1 * dRmp[i, ii, lsrc, iv, iii] + t3 * dRpm[
-                                        i, ii, lsrc, iv, iii] + t5 * t6 + t7 * t8 + t9 * t10
+                                for v in range(nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
+                                    if v == lsrc:
+                                        dgam = dGam[i,ii,v,iv]
+                                    else:
+                                        dgam = 0
+                                    t6 = E3*(tRmp * dRpm[i, ii, lsrc, iv,v] + tRpm * dRmp[i, ii, lsrc, iv,v] - 2 * tRpm * tRmp * ds * dgam)
+                                    t8 = -dm * E1 * dgam
+                                    t10 = -(ds + dp) * E2 * dgam
+                                    dP[i, ii, iv, v] = t1 * dRmp[i, ii, lsrc, iv, v] + t3 * dRpm[i, ii, lsrc, iv, v] + t5 * t6 + t7 * t8 + t9 * t10
 
 
         else:  # rec above (up) / below (down) src layer

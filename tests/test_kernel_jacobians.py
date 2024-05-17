@@ -116,12 +116,12 @@ def test_fields_jacobian(njit):
     z_eH = 1j * omega * mu_0 * np.ones_like(e_zH)
     gamma2 = z_eH * e_zH
     Gam = np.sqrt(kappa ** 2 + gamma2).reshape(1, 1, -1, 1)
-    Rp, Rm, dRp, dRm, dGam = reflections(depth, e_zH, Gam, 0, 6, ana_deriv=True, z_eH=z_eH, debug=True)
+    Rp, Rm, dRp, dRm, dGam = reflections(depth, e_zH, Gam, 3, 3, ana_deriv=True, z_eH=z_eH, debug=False)
 
-    Pu, Pd, dPu, dPd  = fields(depth, Rp, Rm, Gam, lrec=3, lsrc=3, zsrc=22, ab=66, TM=True, ana_deriv=True, dRp=dRp, dRm=dRm, dGam=dGam)
+    Pu, Pd, dPu, dPd  = fields(depth, Rp.copy(), Rm.copy(), Gam.copy(), lrec=3, lsrc=3, zsrc=22, ab=66, TM=True, ana_deriv=True, dRp=dRp.copy(), dRm=dRm.copy(), dGam=dGam.copy())
 
     for cond_idx in np.arange(cond.size):
-        h = 1e-6
+        h = 1e-9
 
         cond_pert = cond.copy()
 
@@ -131,7 +131,7 @@ def test_fields_jacobian(njit):
         z_eH = 1j * omega * mu_0 * np.ones_like(e_zH)
         gamma2 = z_eH * e_zH
         Gam = np.sqrt(kappa ** 2 + gamma2).reshape(1, 1, -1, 1)
-        Rp_pert, Rm_pert = reflections(depth, e_zH, Gam, 0, 6, ana_deriv=False, z_eH=z_eH, debug=True)
+        Rp_pert, Rm_pert = reflections(depth, e_zH, Gam, 3, 3, ana_deriv=False, z_eH=z_eH, debug=False)
         Pu_pert, Pd_pert = fields(depth, Rp_pert, Rm_pert, Gam, lrec=3, lsrc=3, zsrc=22, ab=66, TM=True, ana_deriv=False,)
 
         cond_pert = cond.copy()
@@ -140,11 +140,14 @@ def test_fields_jacobian(njit):
         e_zH = e_zH.reshape(1, -1)
         gamma2 = z_eH * e_zH
         Gam = np.sqrt(kappa ** 2 + gamma2).reshape(1, 1, -1, 1)
-        Rp_pert2, Rm_pert2 = reflections(depth, e_zH, Gam, 0, 6, ana_deriv=False, z_eH=z_eH, debug=True)
+        Rp_pert2, Rm_pert2 = reflections(depth, e_zH, Gam, 3, 3, ana_deriv=False, z_eH=z_eH, debug=False)
         Pu_pert2, Pd_pert2 = fields(depth, Rp_pert2, Rm_pert2, Gam, lrec=3, lsrc=3, zsrc=22, ab=66, TM=True, ana_deriv=False,)
-        assert_allclose(dPu[0, 0, cond_idx, 0], (Pu_pert - Pu_pert2).flatten() / (2 * h), rtol=1e-6,
+        print(dPu[0, 0, 0, cond_idx])
+        print((Pu_pert - Pu_pert2).flatten() / (2 * h))
+        assert_allclose(dPu[0, 0, 0, cond_idx], (Pu_pert - Pu_pert2).flatten() / (2 * h), rtol=1e-6,
                         atol=1e-9, )  # TODO: Is this strict enough?
-        assert_allclose(dPd[0, 0, cond_idx, 0], (Pd_pert - Pd_pert2).flatten() / (2 * h), rtol=1e-6, atol=1e-9, )
+        #TODO: Increase presicion of (Pu_pert - Pu_pert2).flatten() / (2 * h)
+        assert_allclose(dPd[0, 0, 0, cond_idx], (Pd_pert - Pd_pert2).flatten() / (2 * h), rtol=1e-6, atol=1e-9, )
 
 
 def test_all_dir():
