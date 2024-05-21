@@ -95,8 +95,13 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
     # ** CALCULATE GREEN'S FUNCTIONS
     # Shape of PTM, PTE: (nfreq, noffs, nfilt)
-    PTM, PTE = greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                        zetaV, lambd, ab, xdirect, msrc, mrec)
+    if not ana_deriv:
+        PTM, PTE = greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
+                            zetaV, lambd, ab, xdirect, msrc, mrec,)
+    else:
+        PTM, PTE, dPTM, dPTE = greenfct(zsrc, zrec, lsrc, lrec, depth, etaH,
+                                        etaV, zetaH, zetaV, lambd, ab, xdirect,
+                                        msrc, mrec, ana_deriv=True)
 
     # ** AB-SPECIFIC COLLECTION OF PJ0, PJ1, AND PJ0b
 
@@ -151,6 +156,10 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 for iv in range(nlambda):
                     PJ0b[i, ii, iv] = sign / 2 * Ptot[i, ii, iv] * lambd[ii, iv]
                     PJ1[i, ii, iv] = -sign * Ptot[i, ii, iv]
+                    if ana_deriv:
+                        for v in range(nlayer):
+                            dPJ0b[i, ii, iv, v] = sign / 2 * dPtot[i, ii, iv, v] * lambd[ii, iv]
+                            dPJ1[i, ii, iv, v] = -sign * dPtot[i, ii, iv, v]
 
         if ab in [11, 22, 24, 15]:
             if ab in [22, 24]:
@@ -162,6 +171,10 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                     for iv in range(nlambda):
                         PJ0[i, ii, iv] = PTM[i, ii, iv] - PTE[i, ii, iv]
                         PJ0[i, ii, iv] *= lambd[ii, iv] / eightpi
+                        if ana_deriv:
+                            for v in range(nlayer):
+                                dPJ0[i, ii, iv, v] = dPTM[i, ii, iv, v] - dPTE[i, ii, iv, v]
+                                dPJ0[i, ii, iv, v] *= lambd[ii, iv] / eightpi
 
     elif ab in [13, 23, 31, 32, 34, 35, 16, 26]:  # Eqs 107, 113, 114, 115,
         if ab in [34, 26]:  # .   121, 125, 126, 127
@@ -171,6 +184,9 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 for iv in range(nlambda):
                     dlambd = lambd[ii, iv] * lambd[ii, iv]
                     PJ1[i, ii, iv] = sign * Ptot[i, ii, iv] * dlambd
+                    if ana_deriv:
+                        for v in range(nlayer):
+                            dPJ1[i, ii, iv, v] = sign * dPtot[i, ii, iv, v] * dlambd
 
     elif ab in [33, ]:  # Eq 116
         for i in range(nfreq):
@@ -178,9 +194,15 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 for iv in range(nlambda):
                     tlambd = lambd[ii, iv] * lambd[ii, iv] * lambd[ii, iv]
                     PJ0[i, ii, iv] = sign * Ptot[i, ii, iv] * tlambd
+                    if ana_deriv:
+                        for v in range(nlayer):
+                            dPJ0[i, ii, iv, v] = sign * dPtot[i, ii, iv, v] * tlambd
 
     # Return PJ0, PJ1, PJ0b
-    return PJ0, PJ1, PJ0b
+    if not ana_deriv:
+        return PJ0, PJ1, PJ0b
+    else:
+        return PJ0, PJ1, PJ0b, dPJ0, dPJ1, dPJ0b
 
 
 @nb.njit(**_numba_setting)
