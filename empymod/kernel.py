@@ -38,6 +38,7 @@ __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
 # Numba-settings
 _numba_setting = {'nogil': True, 'cache': True}
 _numba_with_fm = {'fastmath': True, **_numba_setting}
+nb.config.DISABLE_JIT = True  # Disable JIT for testing
 
 
 def __dir__():
@@ -89,7 +90,7 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     are correct, as no checks are carried out here.
 
     """
-    nfreq, _ = etaH.shape
+    nfreq, nlayer = etaH.shape
     noff, nlambda = lambd.shape
 
     # ** CALCULATE GREEN'S FUNCTIONS
@@ -102,17 +103,25 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     # Pre-allocate output
     if ab in [11, 22, 24, 15, 33]:
         PJ0 = np.zeros_like(PTM)
+        if ana_deriv:
+            dPJ0 = np.zeros((nfreq, noff, nlambda, nlayer), dtype=PTM.dtype)
     else:
         PJ0 = None
     if ab in [11, 12, 21, 22, 14, 24, 15, 25]:
         PJ0b = np.zeros_like(PTM)
+        if ana_deriv:
+            dPJ0b = np.zeros((nfreq, noff, nlambda, nlayer), dtype=PTM.dtype)
     else:
         PJ0b = None
     if ab not in [33, ]:
         PJ1 = np.zeros_like(PTM)
+        if ana_deriv:
+            dPJ1 = np.zeros((nfreq, noff, nlambda, nlayer), dtype=PTM.dtype)
     else:
         PJ1 = None
     Ptot = np.zeros_like(PTM)
+    if ana_deriv:
+        dPtot = np.zeros((nfreq, noff, nlambda, nlayer), dtype=PTM.dtype)
 
     # Calculate Ptot which is used in all cases
     fourpi = 4 * np.pi
@@ -120,6 +129,10 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         for ii in range(noff):
             for iv in range(nlambda):
                 Ptot[i, ii, iv] = (PTM[i, ii, iv] + PTE[i, ii, iv]) / fourpi
+                if ana_deriv:
+                    for v in range(nlayer):
+                        Ptot[i, ii, iv, v] = (PTM[i, ii, iv, v] + PTE[i, ii, iv, v]) / fourpi
+
 
     # If rec is magnetic switch sign (reciprocity MM/ME => EE/EM).
     if mrec:
@@ -172,7 +185,7 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
 @nb.njit(**_numba_setting)
 def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
-             ab, xdirect, msrc, mrec, ana_deriv: bool = False):
+             ab, xdirect, msrc, mrec, ana_deriv: bool = False, debug: bool = False):
     r"""Calculate Green's function for TM and TE.
 
     .. math::
@@ -235,21 +248,53 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                     for iv in range(nlambda):
                         l2 = lambd[ii, iv] * lambd[ii, iv]
                         Gam[i, ii, iii, iv] = np.sqrt(h_div_v * l2 + h_times_h)
-
         # Gamma in receiver layer
         lrecGam = Gam[:, :, lrec, :]
 
+        # Derivative of Gamma
+        if ana_deriv:
+            dGam = np.zeros_like(Gam, dtype=Gam.dtype)
+            # TODO: Extend to VTI case, currently isotropic only
+            if not np.array_equal(etaH, etaV):
+                raise NotImplementedError("Analytical derivatives are only implemented for isotropic models.")
+            if not np.array_equal(zetaH, zetaV):
+                raise NotImplementedError("Analytical derivatives are only implemented for isotropic models.")
+            for i in range(nfreq):
+                for ii in range(noff):
+                    for v in range(nlayer):
+                        for iv in range(nlambda):
+                            if TM:
+                                dGam[i, ii, v, iv] = z_eH[i, v] / (2 * Gam[i, ii, v, iv])
+                            else:
+                                dGam[i, ii, v, iv] = e_zH[i, v] / (2 * Gam[i, ii, v, iv])
+            # derivative of gamma in receiver layer
+            lrecdGam = dGam[:, :, lrec, :]
+
+
+        # Green's functions
+        green = np.zeros_like(lrecGam)
+
         # Reflection (coming from below (Rp) and above (Rm) rec)
         if depth.size > 1:  # Only if more than 1 layer
-            Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
+            if ana_deriv:
+                Rp, Rm, dRm, dRp = reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv=ana_deriv, dGam=dGam)
+                # Field at rec level (coming from below (Pu) and above (Pd) rec)
+                Pu, Pd, dPu, dPd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv=ana_deriv, dRp=dRp,
+                                          dRm=dRm, dGam=dGam)
+                dgreen = np.zeros_like(Gam)
+                dgreen = np.swapaxes(dgreen, 2, 3)  # for lrecGam, but number of layers for derivates as last axist
+            else:
+                Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
+                # Field at rec level (coming from below (Pu) and above (Pd) rec)
+                Pu, Pd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM)
 
             # Field propagators
             # (Up- (Wu) and downgoing (Wd), in rec layer); Eq 74
             Wu = np.zeros_like(lrecGam)
             Wd = np.zeros_like(lrecGam)
             if ana_deriv:  # Same number of dimensions of Wu, as Wu_n only depends on sigma_n and not sigma_n-1
-                dWu = np.zeros_like(lrecGam)
-                dWd = np.zeros_like(lrecGam)
+                dWu = np.zeros_like(lrecGam)# .swapaxes(2, 3)  # for lrecGam, but number of layers for derivates as last axist
+                dWd = np.zeros_like(lrecGam)# .swapaxes(2, 3)  # for lrecGam, but number of layers for derivates as last axist
 
             if lrec != depth.size - 1:  # No upgoing field prop. if rec in last
                 ddepth = depth[lrec + 1] - zrec
@@ -258,7 +303,8 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                         for iv in range(nlambda):
                             Wu[i, ii, iv] = np.exp(-lrecGam[i, ii, iv] * ddepth)
                             if ana_deriv:
-                                dWu[i, ii, iv] = -ddepth * Wu[i, ii, iv] * lrecGam[i, ii, iv] / (2 * etaH[lrec])
+                                    dWu[i, ii, iv] = -ddepth * Wu[i, ii, iv] * lrecdGam[i,ii,iv]
+
 
             if lrec != 0:  # No downgoing field propagator if rec in first
                 ddepth = zrec - depth[lrec]
@@ -267,13 +313,9 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                         for iv in range(nlambda):
                             Wd[i, ii, iv] = np.exp(-lrecGam[i, ii, iv] * ddepth)
                             if ana_deriv:
-                                dWd[i, ii, iv] = -ddepth * Wd[i, ii, iv] * lrecGam[i, ii, iv] / (2 * etaH[lrec])
+                                    dWd[i, ii, iv] = -ddepth * Wd[i, ii, iv] * lrecdGam[i,ii,iv]
 
-            # Field at rec level (coming from below (Pu) and above (Pd) rec)
-            Pu, Pd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM)
 
-        # Green's functions
-        green = np.zeros_like(lrecGam)
         if lsrc == lrec:  # Rec in src layer; Eqs 108, 109, 110, 117, 118, 122
 
             # Green's function depending on <ab>
@@ -284,6 +326,13 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                         for iv in range(nlambda):
                             green[i, ii, iv] = Pu[i, ii, iv] * Wu[i, ii, iv]
                             green[i, ii, iv] -= Pd[i, ii, iv] * Wd[i, ii, iv]
+                            if ana_deriv:
+                                for v in range(nlayer):
+                                    dgreen[i, ii, iv, v] = dPu[i, ii, iv, v] * Wu[i, ii, iv] - dPd[i, ii, iv, v] * Wd[i, ii, iv]
+                                    if v == lrec:
+                                        dgreen[i, ii, iv, v] += Pu[i, ii, iv] * dWu[i, ii, iv] - Pd[i, ii, iv] * dWd[i, ii, iv]
+
+
 
             elif depth.size > 1:
                 for i in range(nfreq):
@@ -291,6 +340,12 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                         for iv in range(nlambda):
                             green[i, ii, iv] = Pu[i, ii, iv] * Wu[i, ii, iv]
                             green[i, ii, iv] += Pd[i, ii, iv] * Wd[i, ii, iv]
+                            if ana_deriv:
+                                for v in range(nlayer):
+                                    dgreen[i, ii, iv, v] = dPu[i, ii, iv, v] * Wu[i, ii, iv] + dPd[i, ii, iv, v] * Wd[i, ii, iv]
+                                    if v == lrec:
+                                        dgreen[i, ii, iv, v] += Pu[i, ii, iv] * dWu[i, ii, iv] + Pd[i, ii, iv] * dWd[i, ii, iv]
+
 
             # Direct field, if it is computed in the wavenumber domain
             if not xdirect:
@@ -304,17 +359,25 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
                             # Direct field
                             directf = np.exp(-lrecGam[i, ii, iv] * ddepth)
+                            if ana_deriv:
+                                ddirectf = -ddepth * directf * lrecdGam[i, ii, iv]
 
                             # Swap TM for certain <ab>
                             if TM and ab in minus_ab:
                                 directf *= -1
+                                if ana_deriv:
+                                    ddirectf *= -1
 
                             # Multiply by zrec-zsrc-sign for certain <ab>
                             if ab in [13, 14, 15, 23, 24, 25, 31, 32]:
                                 directf *= dsign
+                                if ana_deriv:
+                                    ddirectf *= dsign
 
                             # Add direct field to Green's function
                             green[i, ii, iv] += directf
+                            if ana_deriv:
+                                dgreen[i, ii, iv, lrec] += ddirectf
 
         else:
 
@@ -342,8 +405,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                     for ii in range(noff):
                         for iv in range(nlambda):
                             green[i, ii, iv] = Pu[i, ii, iv] * (
-                                    Wu[i, ii, iv] + pmw * Rm[i, ii, 0, iv] *
-                                    fexp[i, ii, iv] * Wd[i, ii, iv])
+                                    Wu[i, ii, iv] + pmw * Rm[i, ii, 0, iv] * fexp[i, ii, iv] * Wd[i, ii, iv])
 
             elif lrec > lsrc:  # rec below src layer: Pu not used
                 #                Eqs 97-102 A26-A30, B16-B18
@@ -358,8 +420,16 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         # Store in corresponding variable
         if TM:
             gamTM, GTM = Gam, green
+            gTM = green.copy()
+            if ana_deriv:
+                dgamTM, dgTM = dGam, dgreen
+                dGTM = np.zeros_like(dgTM)
         else:
             gamTE, GTE = Gam, green
+            gTE = green.copy()
+            if ana_deriv:
+                dgamTE, dgTE = dGam, dgreen
+                dGTE = np.zeros_like(dgTE)
 
     # ** AB-SPECIFIC FACTORS AND CALCULATION OF PTOT'S
     # These are the factors inside the integrals
@@ -370,7 +440,19 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
             for ii in range(noff):
                 for iv in range(nlambda):
                     GTM[i, ii, iv] *= gamTM[i, ii, lrec, iv] / etaH[i, lrec]
-                    GTE[i, ii, iv] *= zetaH[i, lsrc] / gamTE[i, ii, lsrc, iv]
+                    GTE[i, ii, iv] *= zetaH[i, lsrc] / gamTE[i, ii, lsrc, iv]  # TODO: Why lrev vs lsrc?
+                    if ana_deriv:
+                        if lrec != lsrc:
+                            raise NotImplementedError("Possible error lsrc vs lrec for TM vs TE")
+                        for v in range(nlayer):
+                            # TODO: Problem here: derivative of kernel in  eq. 105-107 -> apply chain rule, sum f dGTM twice so this approach cannot be used.
+                            dGTM[i, ii, iv, v] = dgTM[i, ii, iv, v] * gamTM[i, ii, lrec, iv] / etaH[i, lrec]
+                            dGTE[i, ii, iv, v] = dgTE[i, ii, iv, v] * zetaH[i, lsrc] / gamTE[i, ii, lsrc, iv]
+                            # Extra term for s == n; dirac_sn
+                            if v == lrec:
+                                dGTM[i, ii, iv, v] += -0.5 * (gamTM[i, ii, lrec, iv] / etaH[i, lrec]) * gTM[i, ii, iv]
+                            if v == lsrc:
+                                dGTE[i, ii, iv, v] += -0.5 * (zetaH[i, lsrc] / (gamTE[i, ii, lsrc, iv] * etaH[i, lsrc])) * gTE[i, ii, iv]
 
     elif ab in [14, 15, 24, 25]:
         for i in range(nfreq):
@@ -421,11 +503,21 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                     GTM[i, ii, iv] *= fact / gamTM[i, ii, lsrc, iv]
 
     # Return Green's functions
-    return GTM, GTE
+    if debug:
+        if ana_deriv:
+            return gTM, gTE, dgTM, dgTE, gamTM, gamTE, dgamTM, dgamTE
+        else:
+            return gTM, gTE, gamTM, gamTE
+
+    else:
+        if ana_deriv:
+            return GTM, GTE, dGTM, dGTE
+        else:
+            return GTM, GTE
 
 
 @nb.njit(**_numba_with_fm)
-def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None, debug=False):
+def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, dGam=None, debug=False):
     # TODO:
     #    - Currently only isotropic
     #    - Think about providing dGam instead to avoid code duplication.
@@ -489,13 +581,6 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
             drloc = np.zeros_like(Gam[:, :, 0, :], dtype=Gam.dtype)  # within layer n w.r.t. cond of layer n
             drloc_pm = np.zeros_like(Gam[:, :, 0, :], dtype=Gam.dtype)  # within layer n w.r.t. cond of layer n + pm
             dRef_dRepm = np.zeros_like(Gam[:, :, :nlayer, :], dtype=Gam.dtype)
-            dGam = np.zeros_like(Gam, dtype=Gam.dtype)
-            # TODO: Extend to VTI case, currently isotropic only
-            for i in range(nfreq):
-                for ii in range(noff):
-                    for iz in range(nlayer):
-                        for iv in range(nlambda):
-                            dGam[i, ii, iz, iv] = z_eH[i, iz] / (2 * Gam[i, ii, iz, iv])
 
         # Calculate the reflection
         for idx, iz in enumerate(layer_count):
@@ -514,7 +599,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
                             # drloc[i, ii, iv] = ra * dGam[i, ii, iz, iv] * (1 - rloc[i, ii, iv]) + Gam[i, ii, iz + pm, iv] * (1 + rloc[i, ii, iv])
                             # drloc[i, ii, iv] /= (rloca + rlocb)
                             drloc[i, ii, iv] = (ra * dGam[i, ii, iz, iv] - Gam[i, ii, iz + pm, iv]) - rloc[
-                                i, ii, iv] * (ra * dGam[i, ii, iv] + Gam[i, ii, iz + pm, iv])
+                                i, ii, iv] * (ra * dGam[i, ii, iz, iv] + Gam[i, ii, iz + pm, iv])
                             drloc[i, ii, iv] /= (rloca + rlocb)
                             # drloc[i, ii, iv] = (ra * dGam[i, ii, iz, iv] - Gam[i, ii, iz + pm, iv])/ (rloca + rlocb)
                             # drloc[i, ii, iv] += (-1*(ra * Gam[i, ii, iz, iv] - rb * Gam[i, ii, iz + pm, iv]) * (ra * dGam[i, ii, iz, iv] + Gam[i,ii,iz+pm,iv])) / (rloca + rlocb)**2
@@ -608,12 +693,12 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, z_eH=None
 
     if debug:
         if ana_deriv:
-            return Rm, Rp, dRm, dRp, dGam
+            return Rm, Rp, dRm, dRp
         else:
             return Rm, Rp
     else:
         if ana_deriv:
-            return Rm[:, :, minl:(maxl+1), :], Rp[:, :, minl:(maxl+1), :], dRm, dRp, dGam
+            return Rm[:, :, minl:(maxl + 1), :], Rp[:, :, minl:(maxl + 1), :], dRm, dRp
         else:
             return Rm[:, :, minl:(maxl + 1), :], Rp[:, :, minl:(maxl + 1), :]
 
@@ -711,7 +796,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                 mupm = -1
 
         P = np.zeros_like(iGam)
-        dP = np.zeros(list(iGam.shape) + [nlayer],dtype=Gam.dtype)
+        dP = np.zeros(list(iGam.shape) + [nlayer], dtype=Gam.dtype)
 
         # Calculate Pu+, Pu-, Pd+, Pd-
         if lsrc == lrec:  # rec in src layer; Eqs  81/82, A-8/A-9
@@ -726,30 +811,31 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                         for iv in range(nlambda):
                             tRmp = Rmp[i, ii, 0, iv]
                             tiGam = iGam[i, ii, iv]
-                            E = np.exp(-tiGam * dm)
-                            P[i, ii, iv] = tRmp * E
+                            E1 = np.exp(-tiGam * dm)
+                            P[i, ii, iv] = tRmp * E1
                             if ana_deriv:
                                 # Not all derivatives iterate over the number of layers, so 3dim
                                 # Depths; dp and dm are swapped if up=True
                                 # Rmp = Rm;  swapped if up=True
                                 # Rpm = Rp;  swapped if up=True
                                 # dm and dp swapped if up=True
-                                t1 = P[i, ii, iv] / tRmp[i, ii, iv]
+                                t1 = E1
                                 t7 = tRmp
-                                for v in range(nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
+                                for v in range(nlayer):
+                                    # TODO: number of iterations may be reduced. Check the layers to iterate over
                                     if v == lsrc:
-                                        dgam = dGam[i,ii,lsrc,iv]
+                                        dgam = dGam[i, ii, lsrc, iv]
                                     else:
                                         dgam = 0
-                                    t8 = -dm * E * dgam
-                                    dP[i, ii, iv] = t1[i, ii, iv] * dRmp[i, ii, lsrc, iv, v] + t7 * t8
+                                    t8 = -dm * E1 * dgam
+                                    dP[i, ii, iv] = t1 * dRmp[i, ii, lsrc, iv, v] + t7 * t8
 
             else:  # If src and rec are in any layer in between
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
                             tiGam = iGam[i, ii, iv]
-                            tRpm = Rpm[i, ii, 0, iv] # TODO: check if Rpm is indeed has only the R for one layer
+                            tRpm = Rpm[i, ii, 0, iv]  # TODO: check if Rpm indeed has only the R for one layer
                             tRmp = Rmp[i, ii, 0, iv]
                             E1 = np.exp(-tiGam * dm)
                             E2 = np.exp(-tiGam * (ds + dp))
@@ -765,19 +851,22 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                                 # dm and dp swapped if up=True
                                 t1 = (E1 + p2) * 1 / M
                                 t3 = pm * tRmp / M * E2
-                                t5 = -1*P[i, ii, iv] / M
+                                t5 = -1 * P[i, ii, iv] / M
                                 t7 = tRmp / M
                                 t9 = pm * tRpm * tRmp / M
 
-                                for v in range(nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
+                                for v in range(
+                                        nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
                                     if v == lsrc:
-                                        dgam = dGam[i,ii,v,iv]
+                                        dgam = dGam[i, ii, v, iv]
                                     else:
                                         dgam = 0
-                                    t6 = E3*(tRmp * dRpm[i, ii, lsrc, iv,v] + tRpm * dRmp[i, ii, lsrc, iv,v] - 2 * tRpm * tRmp * ds * dgam)
+                                    t6 = E3 * (tRmp * dRpm[i, ii, lsrc, iv, v] + tRpm * dRmp[
+                                        i, ii, lsrc, iv, v] - 2 * tRpm * tRmp * ds * dgam)
                                     t8 = -dm * E1 * dgam
                                     t10 = -(ds + dp) * E2 * dgam
-                                    dP[i, ii, iv, v] = t1 * dRmp[i, ii, lsrc, iv, v] + t3 * dRpm[i, ii, lsrc, iv, v] + t5 * t6 + t7 * t8 + t9 * t10
+                                    dP[i, ii, iv, v] = t1 * dRmp[i, ii, lsrc, iv, v] + t3 * dRpm[
+                                        i, ii, lsrc, iv, v] + t5 * t6 + t7 * t8 + t9 * t10
 
 
         else:  # rec above (up) / below (down) src layer
