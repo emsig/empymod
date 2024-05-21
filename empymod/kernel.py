@@ -136,7 +136,7 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 Ptot[i, ii, iv] = (PTM[i, ii, iv] + PTE[i, ii, iv]) / fourpi
                 if ana_deriv:
                     for v in range(nlayer):
-                        Ptot[i, ii, iv, v] = (PTM[i, ii, iv, v] + PTE[i, ii, iv, v]) / fourpi
+                        dPtot[i, ii, iv, v] = (dPTM[i, ii, iv, v] + dPTE[i, ii, iv, v]) / fourpi
 
 
     # If rec is magnetic switch sign (reciprocity MM/ME => EE/EM).
@@ -299,14 +299,14 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         # Reflection (coming from below (Rp) and above (Rm) rec)
         if depth.size > 1:  # Only if more than 1 layer
             if ana_deriv:
-                Rp, Rm, dRm, dRp = reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv=ana_deriv, dGam=dGam)
+                Rp, Rm, dRp, dRm = reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv=ana_deriv, dGam=dGam)
                 # Field at rec level (coming from below (Pu) and above (Pd) rec)
                 Pu, Pd, dPu, dPd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv=ana_deriv, dRp=dRp,
                                           dRm=dRm, dGam=dGam)
                 dgreen = np.zeros_like(Gam)
                 dgreen = np.swapaxes(dgreen, 2, 3)  # for lrecGam, but number of layers for derivates as last axist
             else:
-                Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
+                Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc) # TODO: @Dieter, why switch here? reflections yiels Rm, Rp
                 # Field at rec level (coming from below (Pu) and above (Pd) rec)
                 Pu, Pd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM)
 
@@ -850,7 +850,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                                     else:
                                         dgam = 0
                                     t8 = -dm * E1 * dgam
-                                    dP[i, ii, iv] = t1 * dRmp[i, ii, lsrc, iv, v] + t7 * t8
+                                    dP[i, ii, iv, v] = t1 * dRmp[i, ii, lsrc, iv, v] + t7 * t8
 
             else:  # If src and rec are in any layer in between
                 for i in range(nfreq):

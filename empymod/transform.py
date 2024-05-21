@@ -45,7 +45,7 @@ def __dir__():
 # 1. Hankel transforms (wavenumber -> frequency)
 
 def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
-               zetaH, zetaV, xdirect, htarg, msrc, mrec):
+               zetaH, zetaV, xdirect, htarg, msrc, mrec, ana_deriv: bool = False):
     r"""Hankel Transform using the Digital Linear Filter method.
 
     The *Digital Linear Filter* method was introduced to geophysics by
@@ -104,14 +104,30 @@ def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     lambd, int_pts = get_dlf_points(htarg['dlf'], off, htarg['pts_per_dec'])
 
     # Call the kernel
-    PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                           zetaV, lambd, ab, xdirect, msrc, mrec)
+    if not ana_deriv:
+        PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
+                               zetaV, lambd, ab, xdirect, msrc, mrec)
+    else:
+        PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
+                               zetaV, lambd, ab, xdirect, msrc, mrec, ana_deriv)
+
 
     # Carry out the dlf
-    fEM = dlf(PJ, lambd, off, htarg['dlf'], htarg['pts_per_dec'],
+    fEM = dlf(PJ[:3], lambd, off, htarg['dlf'], htarg['pts_per_dec'],
               ang_fact=ang_fact, ab=ab, int_pts=int_pts)
 
-    return fEM, 1, True
+    if ana_deriv:
+        nlayers = PJ[3].shape[-1]
+        dfEM = np.zeros(list(fEM.shape) + [nlayers], dtype=fEM.dtype)
+        for i in range(nlayers):
+            dpj = (PJ[3][:, :,:, i], PJ[4][:, :,:, i], PJ[5][:, :, :, i])
+            dfEM[:,i] = dlf(dpj, lambd, off, htarg['dlf'], htarg['pts_per_dec'],ang_fact=ang_fact, ab=ab, int_pts=int_pts)
+
+    if not ana_deriv:
+        return fEM, 1, True
+    else:
+        return fEM, 1, True, dfEM
+
 
 
 def hankel_qwe(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,

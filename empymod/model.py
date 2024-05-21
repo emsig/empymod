@@ -562,7 +562,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
 
 def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
-           epermH=None, epermV=None, mpermH=None, mpermV=None, **kwargs):
+           epermH=None, epermV=None, mpermH=None, mpermV=None, ana_deriv=False, **kwargs):
     r"""Return EM fields due to infinitesimal small EM dipoles.
 
     Calculate the electromagnetic frequency- or time-domain field due to
@@ -768,7 +768,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     inp = (ab_calc, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH,
            etaV, zetaH, zetaV, xdirect, isfullspace, ht, htarg, msrc, mrec,
            loop_freq, loop_off)
-    EM, kcount, conv = fem(*inp)
+    if not ana_deriv:
+        EM, kcount, conv = fem(*inp)
+    else:
+        EM, kcount, conv, dEM = fem(*inp, ana_deriv=True)
 
     # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
@@ -779,16 +782,23 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
         # In case of QWE/QUAD, print Warning if not converged
         conv_warning(conv, ftarg, 'Fourier', verb)
+        if ana_deriv:
+            raise NotImplementedError("Time-domain jacobian not yet implemented ")
 
     # Reshape for number of sources
     EM = EM.reshape((-1, nrec, nsrc), order='F')
     if squeeze:
         EM = np.squeeze(EM)
+        if ana_deriv:
+            dEM = np.squeeze(dEM)
 
     # === 4.  FINISHED ============
     printstartfinish(verb, t0, kcount)
 
-    return EMArray(EM)
+    if not ana_deriv:
+        return EMArray(EM)
+    else:
+        return EMArray(EM), dEM
 
 
 def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
@@ -1746,7 +1756,7 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
 
 def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         zetaV, xdirect, isfullspace, ht, htarg, msrc, mrec, loop_freq,
-        loop_off, conv=True):
+        loop_off, conv=True, ana_deriv: bool = False):
     r"""Return electromagnetic frequency-domain response.
 
     This function is called from one of the modelling routines
@@ -1760,14 +1770,19 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
     """
     # Preallocate array
     fEM = np.zeros((freq.size, off.size), dtype=etaH.dtype)
+    if ana_deriv:
+        dfEM = np.zeros((freq.size, off.size, etaH.shape[1]), dtype=etaH.dtype)
 
     # Initialize kernel count
-    # (how many times the wavenumber-domain kernel was calld)
+    # (how many times the wavenumber-domain kernel was called)
     kcount = 0
 
     # If <ab> = 36 (or 63), fEM-field is zero
     if ab in [36, ]:
-        return fEM, kcount, conv
+        if ana_deriv:
+            return fEM, kcount, conv, dfEM
+        else:
+            return fEM, kcount, conv
 
     # Get full-space-solution if xdirect=True and model is a full-space or
     # if src and rec are in the same layer.
@@ -1775,6 +1790,8 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
         fEM += kernel.fullspace(off, angle, zsrc, zrec, etaH[:, lrec],
                                 etaV[:, lrec], zetaH[:, lrec], zetaV[:, lrec],
                                 ab, msrc, mrec)
+        if ana_deriv:
+            raise NotImplementedError("Analytical derivative not implemented ")
 
     # If `xdirect = None` we set it here to True, so it is NOT calculated in
     # the wavenumber domain. (Only reflected fields are returned.)
@@ -1796,10 +1813,13 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
                 out = calc(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab,
                            etaH[None, i, :], etaV[None, i, :],
                            zetaH[None, i, :], zetaV[None, i, :], xdir,
-                           htarg, msrc, mrec)
+                           htarg, msrc, mrec, ana_deriv=ana_deriv)
+
                 fEM[None, i, :] += out[0]
                 kcount += out[1]
                 conv *= out[2]
+                if ana_deriv:
+                    dfEM[None, i, :, :] += out[3]
 
         elif loop_off:
             for i in range(off.size):
@@ -1810,14 +1830,20 @@ def fem(ab, off, angle, zsrc, zrec, lsrc, lrec, depth, freq, etaH, etaV, zetaH,
                 fEM[:, None, i] += out[0]
                 kcount += out[1]
                 conv *= out[2]
+                if ana_deriv:
+                    dfEM[:, None, i, :] += out[3]
         else:
             out = calc(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH,
                        etaV, zetaH, zetaV, xdir, htarg, msrc, mrec)
             fEM += out[0]
             kcount += out[1]
             conv *= out[2]
-
-    return fEM, kcount, conv
+            if ana_deriv:
+                dfEM += out[3]
+    if not ana_deriv:
+        return fEM, kcount, conv
+    else:
+        return fEM, kcount, conv, dfEM
 
 
 def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
