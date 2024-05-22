@@ -30,6 +30,7 @@ root directory for more information regarding the involved licenses.
 
 
 import numpy as np
+import scipy as sp
 import numba as nb
 
 __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
@@ -97,7 +98,7 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     # Shape of PTM, PTE: (nfreq, noffs, nfilt)
     if not ana_deriv:
         PTM, PTE = greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
-                            zetaV, lambd, ab, xdirect, msrc, mrec,)
+                            zetaV, lambd, ab, xdirect, msrc, mrec, )
     else:
         PTM, PTE, dPTM, dPTE = greenfct(zsrc, zrec, lsrc, lrec, depth, etaH,
                                         etaV, zetaH, zetaV, lambd, ab, xdirect,
@@ -129,15 +130,14 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         dPtot = np.zeros((nfreq, noff, nlambda, nlayer), dtype=PTM.dtype)
 
     # Calculate Ptot which is used in all cases
-    fourpi = 4 * np.pi
+    fourpi = 4*np.pi
     for i in range(nfreq):
         for ii in range(noff):
             for iv in range(nlambda):
-                Ptot[i, ii, iv] = (PTM[i, ii, iv] + PTE[i, ii, iv]) / fourpi
+                Ptot[i, ii, iv] = (PTM[i, ii, iv] + PTE[i, ii, iv])/fourpi
                 if ana_deriv:
                     for v in range(nlayer):
-                        dPtot[i, ii, iv, v] = (dPTM[i, ii, iv, v] + dPTE[i, ii, iv, v]) / fourpi
-
+                        dPtot[i, ii, iv, v] = (dPTM[i, ii, iv, v] + dPTE[i, ii, iv, v])/fourpi
 
     # If rec is magnetic switch sign (reciprocity MM/ME => EE/EM).
     if mrec:
@@ -146,7 +146,7 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         sign = 1
 
     # Group into PJ0 and PJ1 for J0/J1 Hankel Transform
-    if ab in [11, 12, 21, 22, 14, 24, 15, 25]:  # Eqs 105, 106, 111, 112,
+    if ab in [11, 12, 21, 22, 14, 24, 15, 25]:    # Eqs 105, 106, 111, 112,
         # J2(kr) = 2/(kr)*J1(kr) - J0(kr)         #     119, 120, 123, 124
         if ab in [14, 22]:
             sign *= -1
@@ -154,49 +154,49 @@ def wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         for i in range(nfreq):
             for ii in range(noff):
                 for iv in range(nlambda):
-                    PJ0b[i, ii, iv] = sign / 2 * Ptot[i, ii, iv] * lambd[ii, iv]
-                    PJ1[i, ii, iv] = -sign * Ptot[i, ii, iv]
+                    PJ0b[i, ii, iv] = sign/2*Ptot[i, ii, iv]*lambd[ii, iv]
+                    PJ1[i, ii, iv] = -sign*Ptot[i, ii, iv]
                     if ana_deriv:
                         for v in range(nlayer):
-                            dPJ0b[i, ii, iv, v] = sign / 2 * dPtot[i, ii, iv, v] * lambd[ii, iv]
-                            dPJ1[i, ii, iv, v] = -sign * dPtot[i, ii, iv, v]
+                            dPJ0b[i, ii, iv, v] = sign/2*dPtot[i, ii, iv, v]*lambd[ii, iv]
+                            dPJ1[i, ii, iv, v] = -sign*dPtot[i, ii, iv, v]
 
         if ab in [11, 22, 24, 15]:
             if ab in [22, 24]:
                 sign *= -1
 
-            eightpi = sign * 8 * np.pi
+            eightpi = sign*8*np.pi
             for i in range(nfreq):
                 for ii in range(noff):
                     for iv in range(nlambda):
                         PJ0[i, ii, iv] = PTM[i, ii, iv] - PTE[i, ii, iv]
-                        PJ0[i, ii, iv] *= lambd[ii, iv] / eightpi
+                        PJ0[i, ii, iv] *= lambd[ii, iv]/eightpi
                         if ana_deriv:
                             for v in range(nlayer):
                                 dPJ0[i, ii, iv, v] = dPTM[i, ii, iv, v] - dPTE[i, ii, iv, v]
-                                dPJ0[i, ii, iv, v] *= lambd[ii, iv] / eightpi
+                                dPJ0[i, ii, iv, v] *= lambd[ii, iv]/eightpi
 
     elif ab in [13, 23, 31, 32, 34, 35, 16, 26]:  # Eqs 107, 113, 114, 115,
-        if ab in [34, 26]:  # .   121, 125, 126, 127
+        if ab in [34, 26]:                        # .   121, 125, 126, 127
             sign *= -1
         for i in range(nfreq):
             for ii in range(noff):
                 for iv in range(nlambda):
-                    dlambd = lambd[ii, iv] * lambd[ii, iv]
-                    PJ1[i, ii, iv] = sign * Ptot[i, ii, iv] * dlambd
+                    dlambd = lambd[ii, iv]*lambd[ii, iv]
+                    PJ1[i, ii, iv] = sign*Ptot[i, ii, iv]*dlambd
                     if ana_deriv:
                         for v in range(nlayer):
-                            dPJ1[i, ii, iv, v] = sign * dPtot[i, ii, iv, v] * dlambd
+                            dPJ1[i, ii, iv, v] = sign*dPtot[i, ii, iv, v]*dlambd
 
-    elif ab in [33, ]:  # Eq 116
+    elif ab in [33, ]:                            # Eq 116
         for i in range(nfreq):
             for ii in range(noff):
                 for iv in range(nlambda):
-                    tlambd = lambd[ii, iv] * lambd[ii, iv] * lambd[ii, iv]
-                    PJ0[i, ii, iv] = sign * Ptot[i, ii, iv] * tlambd
+                    tlambd = lambd[ii, iv]*lambd[ii, iv]*lambd[ii, iv]
+                    PJ0[i, ii, iv] = sign*Ptot[i, ii, iv]*tlambd
                     if ana_deriv:
                         for v in range(nlayer):
-                            dPJ0[i, ii, iv, v] = sign * dPtot[i, ii, iv, v] * tlambd
+                            dPJ0[i, ii, iv, v] = sign*dPtot[i, ii, iv, v]*tlambd
 
     # Return PJ0, PJ1, PJ0b
     if not ana_deriv:
@@ -256,7 +256,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
         # Define eta/zeta depending if TM or TE
         if TM:
-            e_zH, e_zV, z_eH = etaH, etaV, zetaH  # TM: zetaV not used
+            e_zH, e_zV, z_eH = etaH, etaV, zetaH   # TM: zetaV not used
         else:
             e_zH, e_zV, z_eH = zetaH, zetaV, etaH  # TE: etaV not used
 
@@ -265,11 +265,12 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         for i in range(nfreq):
             for ii in range(noff):
                 for iii in range(nlayer):
-                    h_div_v = e_zH[i, iii] / e_zV[i, iii]
-                    h_times_h = z_eH[i, iii] * e_zH[i, iii]
+                    h_div_v = e_zH[i, iii]/e_zV[i, iii]
+                    h_times_h = z_eH[i, iii]*e_zH[i, iii]
                     for iv in range(nlambda):
-                        l2 = lambd[ii, iv] * lambd[ii, iv]
-                        Gam[i, ii, iii, iv] = np.sqrt(h_div_v * l2 + h_times_h)
+                        l2 = lambd[ii, iv]*lambd[ii, iv]
+                        Gam[i, ii, iii, iv] = np.sqrt(h_div_v*l2 + h_times_h)
+
         # Gamma in receiver layer
         lrecGam = Gam[:, :, lrec, :]
 
@@ -286,12 +287,11 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                     for v in range(nlayer):
                         for iv in range(nlambda):
                             if TM:
-                                dGam[i, ii, v, iv] = z_eH[i, v] / (2 * Gam[i, ii, v, iv])
+                                dGam[i, ii, v, iv] = z_eH[i, v]/(2*Gam[i, ii, v, iv])
                             else:
-                                dGam[i, ii, v, iv] = e_zH[i, v] / (2 * Gam[i, ii, v, iv])
+                                dGam[i, ii, v, iv] = e_zH[i, v]/(2*Gam[i, ii, v, iv])
             # derivative of gamma in receiver layer
             lrecdGam = dGam[:, :, lrec, :]
-
 
         # Green's functions
         green = np.zeros_like(lrecGam)
@@ -306,7 +306,8 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 dgreen = np.zeros_like(Gam)
                 dgreen = np.swapaxes(dgreen, 2, 3)  # for lrecGam, but number of layers for derivates as last axist
             else:
-                Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc) # TODO: @Dieter, why switch here? reflections yiels Rm, Rp
+                Rp, Rm = reflections(depth, e_zH, Gam, lrec,
+                                     lsrc)  # TODO: @Dieter, why switch here? reflections yiels Rm, Rp
                 # Field at rec level (coming from below (Pu) and above (Pd) rec)
                 Pu, Pd = fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM)
 
@@ -315,28 +316,28 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
             Wu = np.zeros_like(lrecGam)
             Wd = np.zeros_like(lrecGam)
             if ana_deriv:  # Same number of dimensions of Wu, as Wu_n only depends on sigma_n and not sigma_n-1
-                dWu = np.zeros_like(lrecGam)# .swapaxes(2, 3)  # for lrecGam, but number of layers for derivates as last axist
-                dWd = np.zeros_like(lrecGam)# .swapaxes(2, 3)  # for lrecGam, but number of layers for derivates as last axist
+                dWu = np.zeros_like(
+                    lrecGam)  # .swapaxes(2, 3)  # for lrecGam, but number of layers for derivates as last axist
+                dWd = np.zeros_like(
+                    lrecGam)  # .swapaxes(2, 3)  # for lrecGam, but number of layers for derivates as last axist
 
-            if lrec != depth.size - 1:  # No upgoing field prop. if rec in last
+            if lrec != depth.size-1:  # No upgoing field prop. if rec in last
                 ddepth = depth[lrec + 1] - zrec
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
-                            Wu[i, ii, iv] = np.exp(-lrecGam[i, ii, iv] * ddepth)
+                            Wu[i, ii, iv] = np.exp(-lrecGam[i, ii, iv]*ddepth)
                             if ana_deriv:
-                                    dWu[i, ii, iv] = -ddepth * Wu[i, ii, iv] * lrecdGam[i,ii,iv]
+                                dWu[i, ii, iv] = -ddepth*Wu[i, ii, iv]*lrecdGam[i, ii, iv]
 
-
-            if lrec != 0:  # No downgoing field propagator if rec in first
+            if lrec != 0:     # No downgoing field propagator if rec in first
                 ddepth = zrec - depth[lrec]
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
-                            Wd[i, ii, iv] = np.exp(-lrecGam[i, ii, iv] * ddepth)
+                            Wd[i, ii, iv] = np.exp(-lrecGam[i, ii, iv]*ddepth)
                             if ana_deriv:
-                                    dWd[i, ii, iv] = -ddepth * Wd[i, ii, iv] * lrecdGam[i,ii,iv]
-
+                                dWd[i, ii, iv] = -ddepth*Wd[i, ii, iv]*lrecdGam[i, ii, iv]
 
         if lsrc == lrec:  # Rec in src layer; Eqs 108, 109, 110, 117, 118, 122
 
@@ -346,13 +347,15 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
-                            green[i, ii, iv] = Pu[i, ii, iv] * Wu[i, ii, iv]
-                            green[i, ii, iv] -= Pd[i, ii, iv] * Wd[i, ii, iv]
+                            green[i, ii, iv] = Pu[i, ii, iv]*Wu[i, ii, iv]
+                            green[i, ii, iv] -= Pd[i, ii, iv]*Wd[i, ii, iv]
                             if ana_deriv:
                                 for v in range(nlayer):
-                                    dgreen[i, ii, iv, v] = dPu[i, ii, iv, v] * Wu[i, ii, iv] - dPd[i, ii, iv, v] * Wd[i, ii, iv]
+                                    dgreen[i, ii, iv, v] = dPu[i, ii, iv, v]*Wu[i, ii, iv] - dPd[i, ii, iv, v]*Wd[
+                                        i, ii, iv]
                                     if v == lrec:
-                                        dgreen[i, ii, iv, v] += Pu[i, ii, iv] * dWu[i, ii, iv] - Pd[i, ii, iv] * dWd[i, ii, iv]
+                                        dgreen[i, ii, iv, v] += Pu[i, ii, iv]*dWu[i, ii, iv] - Pd[i, ii, iv]*dWd[
+                                            i, ii, iv]
 
 
 
@@ -360,14 +363,15 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
-                            green[i, ii, iv] = Pu[i, ii, iv] * Wu[i, ii, iv]
-                            green[i, ii, iv] += Pd[i, ii, iv] * Wd[i, ii, iv]
+                            green[i, ii, iv] = Pu[i, ii, iv]*Wu[i, ii, iv]
+                            green[i, ii, iv] += Pd[i, ii, iv]*Wd[i, ii, iv]
                             if ana_deriv:
                                 for v in range(nlayer):
-                                    dgreen[i, ii, iv, v] = dPu[i, ii, iv, v] * Wu[i, ii, iv] + dPd[i, ii, iv, v] * Wd[i, ii, iv]
+                                    dgreen[i, ii, iv, v] = dPu[i, ii, iv, v]*Wu[i, ii, iv] + dPd[i, ii, iv, v]*Wd[
+                                        i, ii, iv]
                                     if v == lrec:
-                                        dgreen[i, ii, iv, v] += Pu[i, ii, iv] * dWu[i, ii, iv] + Pd[i, ii, iv] * dWd[i, ii, iv]
-
+                                        dgreen[i, ii, iv, v] += Pu[i, ii, iv]*dWu[i, ii, iv] + Pd[i, ii, iv]*dWd[
+                                            i, ii, iv]
 
             # Direct field, if it is computed in the wavenumber domain
             if not xdirect:
@@ -380,9 +384,9 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                         for iv in range(nlambda):
 
                             # Direct field
-                            directf = np.exp(-lrecGam[i, ii, iv] * ddepth)
+                            directf = np.exp(-lrecGam[i, ii, iv]*ddepth)
                             if ana_deriv:
-                                ddirectf = -ddepth * directf * lrecdGam[i, ii, iv]
+                                ddirectf = -ddepth*directf*lrecdGam[i, ii, iv]
 
                             # Swap TM for certain <ab>
                             if TM and ab in minus_ab:
@@ -404,16 +408,16 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         else:
 
             # Calculate exponential factor
-            if lrec == depth.size - 1:
+            if lrec == depth.size-1:
                 ddepth = 0
             else:
-                ddepth = depth[lrec + 1] - depth[lrec]
+                ddepth = depth[lrec+1] - depth[lrec]
 
             fexp = np.zeros_like(lrecGam)
             for i in range(nfreq):
                 for ii in range(noff):
                     for iv in range(nlambda):
-                        fexp[i, ii, iv] = np.exp(-lrecGam[i, ii, iv] * ddepth)
+                        fexp[i, ii, iv] = np.exp(-lrecGam[i, ii, iv]*ddepth)
 
             # Sign-switch for Green calculation
             if TM and ab in [11, 12, 13, 21, 22, 23, 14, 24, 15, 25]:
@@ -426,18 +430,19 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
-                            green[i, ii, iv] = Pu[i, ii, iv] * (
-                                    Wu[i, ii, iv] + pmw * Rm[i, ii, 0, iv] * fexp[i, ii, iv] * Wd[i, ii, iv])
+                            green[i, ii, iv] = Pu[i, ii, iv]*(
+                                    Wu[i, ii, iv] + pmw*Rm[i, ii, 0, iv] *
+                                    fexp[i, ii, iv]*Wd[i, ii, iv])
 
             elif lrec > lsrc:  # rec below src layer: Pu not used
                 #                Eqs 97-102 A26-A30, B16-B18
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
-                            green[i, ii, iv] = Pd[i, ii, iv] * (
-                                    pmw * Wd[i, ii, iv] +
-                                    Rp[i, ii, abs(lsrc - lrec), iv] *
-                                    fexp[i, ii, iv] * Wu[i, ii, iv])
+                            green[i, ii, iv] = Pd[i, ii, iv]*(
+                                    pmw*Wd[i, ii, iv] +
+                                    Rp[i, ii, abs(lsrc-lrec), iv] *
+                                    fexp[i, ii, iv]*Wu[i, ii, iv])
 
         # Store in corresponding variable
         if TM:
@@ -461,36 +466,37 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         for i in range(nfreq):
             for ii in range(noff):
                 for iv in range(nlambda):
-                    GTM[i, ii, iv] *= gamTM[i, ii, lrec, iv] / etaH[i, lrec]
-                    GTE[i, ii, iv] *= zetaH[i, lsrc] / gamTE[i, ii, lsrc, iv]  # TODO: Why lrev vs lsrc?
+                    GTM[i, ii, iv] *= gamTM[i, ii, lrec, iv]/etaH[i, lrec]
+                    GTE[i, ii, iv] *= zetaH[i, lsrc]/gamTE[i, ii, lsrc, iv]  # TODO: Why lrev vs lsrc?
                     if ana_deriv:
                         if lrec != lsrc:
                             raise NotImplementedError("Possible error lsrc vs lrec for TM vs TE")
                         for v in range(nlayer):
                             # TODO: Problem here: derivative of kernel in  eq. 105-107 -> apply chain rule, sum f dGTM twice so this approach cannot be used.
-                            dGTM[i, ii, iv, v] = dgTM[i, ii, iv, v] * gamTM[i, ii, lrec, iv] / etaH[i, lrec]
-                            dGTE[i, ii, iv, v] = dgTE[i, ii, iv, v] * zetaH[i, lsrc] / gamTE[i, ii, lsrc, iv]
+                            dGTM[i, ii, iv, v] = dgTM[i, ii, iv, v]*gamTM[i, ii, lrec, iv]/etaH[i, lrec]
+                            dGTE[i, ii, iv, v] = dgTE[i, ii, iv, v]*zetaH[i, lsrc]/gamTE[i, ii, lsrc, iv]
                             # Extra term for s == n; dirac_sn
                             if v == lrec:
-                                dGTM[i, ii, iv, v] += -0.5 * (gamTM[i, ii, lrec, iv] / etaH[i, lrec]) * gTM[i, ii, iv]
+                                dGTM[i, ii, iv, v] += -0.5*(gamTM[i, ii, lrec, iv]/etaH[i, lrec])*gTM[i, ii, iv]
                             if v == lsrc:
-                                dGTE[i, ii, iv, v] += -0.5 * (zetaH[i, lsrc] / (gamTE[i, ii, lsrc, iv] * etaH[i, lsrc])) * gTE[i, ii, iv]
+                                dGTE[i, ii, iv, v] += -0.5*(zetaH[i, lsrc]/(gamTE[i, ii, lsrc, iv]*etaH[i, lsrc]))*gTE[
+                                    i, ii, iv]
 
     elif ab in [14, 15, 24, 25]:
         for i in range(nfreq):
-            fact = etaH[i, lsrc] / etaH[i, lrec]
+            fact = etaH[i, lsrc]/etaH[i, lrec]
             for ii in range(noff):
                 for iv in range(nlambda):
-                    GTM[i, ii, iv] *= fact * gamTM[i, ii, lrec, iv]
+                    GTM[i, ii, iv] *= fact*gamTM[i, ii, lrec, iv]
                     GTM[i, ii, iv] /= gamTM[i, ii, lsrc, iv]
 
     elif ab in [13, 23]:
         GTE = np.zeros_like(GTM)
         for i in range(nfreq):
-            fact = etaH[i, lsrc] / etaH[i, lrec] / etaV[i, lsrc]
+            fact = etaH[i, lsrc]/etaH[i, lrec]/etaV[i, lsrc]
             for ii in range(noff):
                 for iv in range(nlambda):
-                    GTM[i, ii, iv] *= -fact * gamTM[i, ii, lrec, iv]
+                    GTM[i, ii, iv] *= -fact*gamTM[i, ii, lrec, iv]
                     GTM[i, ii, iv] /= gamTM[i, ii, lsrc, iv]
 
     elif ab in [31, 32]:
@@ -503,31 +509,31 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     elif ab in [34, 35]:
         GTE = np.zeros_like(GTM)
         for i in range(nfreq):
-            fact = etaH[i, lsrc] / etaV[i, lrec]
+            fact = etaH[i, lsrc]/etaV[i, lrec]
             for ii in range(noff):
                 for iv in range(nlambda):
-                    GTM[i, ii, iv] *= fact / gamTM[i, ii, lsrc, iv]
+                    GTM[i, ii, iv] *= fact/gamTM[i, ii, lsrc, iv]
 
     elif ab in [16, 26]:
         GTM = np.zeros_like(GTE)
         for i in range(nfreq):
-            fact = zetaH[i, lsrc] / zetaV[i, lsrc]
+            fact = zetaH[i, lsrc]/zetaV[i, lsrc]
             for ii in range(noff):
                 for iv in range(nlambda):
-                    GTE[i, ii, iv] *= fact / gamTE[i, ii, lsrc, iv]
+                    GTE[i, ii, iv] *= fact/gamTE[i, ii, lsrc, iv]
 
     elif ab in [33, ]:
         GTE = np.zeros_like(GTM)
         for i in range(nfreq):
-            fact = etaH[i, lsrc] / etaV[i, lsrc] / etaV[i, lrec]
+            fact = etaH[i, lsrc]/etaV[i, lsrc]/etaV[i, lrec]
             for ii in range(noff):
                 for iv in range(nlambda):
-                    GTM[i, ii, iv] *= fact / gamTM[i, ii, lsrc, iv]
+                    GTM[i, ii, iv] *= fact/gamTM[i, ii, lsrc, iv]
 
     # Return Green's functions
     if debug:
         if ana_deriv:
-            return gTM, gTE, dgTM, dgTE, gamTM, gamTE, dgamTM, dgamTE
+            return gTM, gTE, dgTM, dgTE, gamTM, gamTE, dgamTM, dgamTE, Pu, dPu, Pd, dPd
         else:
             return gTM, gTE, gamTM, gamTE
 
@@ -577,18 +583,18 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, dGam=None
             layer_count = np.arange(nlayer - 2, -1,
                                     -1)  # iterate over interfaces, so n_layer-1, n-layer - 2 for pythonic counting
             izout = nlayer - 1
-            minmax = pm * maxl
+            minmax = pm*maxl
         else:
             pm = -1
             # layer_count = np.arange(1, maxl + 1, 1)
             layer_count = np.arange(1, nlayer, 1)
             izout = 0
-            minmax = pm * minl
+            minmax = pm*minl
 
         # If rec in last  and rec below src (plus) or
         # if rec in first and rec above src (minus), shift izout
         shiftplus = lrec < lsrc and lrec == 0 and not plus
-        shiftminus = lrec > lsrc and lrec == depth.size - 1 and plus
+        shiftminus = lrec > lsrc and lrec == depth.size-1 and plus
         if shiftplus or shiftminus:
             izout -= pm
 
@@ -612,22 +618,22 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, dGam=None
                 rb = e_zH[i, iz]
                 for ii in range(noff):
                     for iv in range(nlambda):
-                        rloca = ra * Gam[i, ii, iz, iv]
-                        rlocb = rb * Gam[i, ii, iz + pm, iv]
-                        rloc[i, ii, iv] = (rloca - rlocb) / (rloca + rlocb)
+                        rloca = ra*Gam[i, ii, iz, iv]
+                        rlocb = rb*Gam[i, ii, iz + pm, iv]
+                        rloc[i, ii, iv] = (rloca - rlocb)/(rloca + rlocb)
                         if ana_deriv:
                             # Derivative of rloc of layer iz w.r.t. conductivity of iz
                             # TODO: Fix mistake in document Expressions for the gradients wrt conductivity
                             # drloc[i, ii, iv] = ra * dGam[i, ii, iz, iv] * (1 - rloc[i, ii, iv]) + Gam[i, ii, iz + pm, iv] * (1 + rloc[i, ii, iv])
                             # drloc[i, ii, iv] /= (rloca + rlocb)
-                            drloc[i, ii, iv] = (ra * dGam[i, ii, iz, iv] - Gam[i, ii, iz + pm, iv]) - rloc[
-                                i, ii, iv] * (ra * dGam[i, ii, iz, iv] + Gam[i, ii, iz + pm, iv])
+                            drloc[i, ii, iv] = (ra*dGam[i, ii, iz, iv] - Gam[i, ii, iz + pm, iv]) - rloc[
+                                i, ii, iv]*(ra*dGam[i, ii, iz, iv] + Gam[i, ii, iz + pm, iv])
                             drloc[i, ii, iv] /= (rloca + rlocb)
                             # drloc[i, ii, iv] = (ra * dGam[i, ii, iz, iv] - Gam[i, ii, iz + pm, iv])/ (rloca + rlocb)
                             # drloc[i, ii, iv] += (-1*(ra * Gam[i, ii, iz, iv] - rb * Gam[i, ii, iz + pm, iv]) * (ra * dGam[i, ii, iz, iv] + Gam[i,ii,iz+pm,iv])) / (rloca + rlocb)**2
                             # Derivative of rloc of layer iz w.r.t. conductivity of iz + pm
-                            drloc_pm[i, ii, iv] = -rb * dGam[i, ii, iz + pm, iv] * (1 + rloc[i, ii, iv]) + \
-                                                  Gam[i, ii, iz, iv] * (1 - rloc[i, ii, iv])
+                            drloc_pm[i, ii, iv] = -rb*dGam[i, ii, iz + pm, iv]*(1 + rloc[i, ii, iv]) + \
+                                                  Gam[i, ii, iz, iv]*(1 - rloc[i, ii, iv])
                             drloc_pm[i, ii, iv] /= (rloca + rlocb)
 
             # In first layer tRef = rloc
@@ -651,40 +657,40 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, dGam=None
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
-                            term = Ref[i, ii, iz + pm, iv] * np.exp(
-                                -2 * Gam[i, ii, iz + pm, iv] * ddepth)
-                            Ref[i, ii, iz, iv] = (rloc[i, ii, iv] + term) / (
-                                    1 + rloc[i, ii, iv] * term)
+                            term = Ref[i, ii, iz + pm, iv]*np.exp(
+                                -2*Gam[i, ii, iz + pm, iv]*ddepth)
+                            Ref[i, ii, iz, iv] = (rloc[i, ii, iv] + term)/(
+                                    1 + rloc[i, ii, iv]*term)
                             if ana_deriv:
                                 # Derivative of tRef of layer iz w.r.t. conductivity of iz
                                 # Current dtRef is from previous layer, now recursively current tRef_prev and dtRef are for n + 1
-                                E = np.exp(-2 * Gam[i, ii, iz + pm, iv] * ddepth)
+                                E = np.exp(-2*Gam[i, ii, iz + pm, iv]*ddepth)
                                 # dRef[:, :, iz, :, iz] = (1 - tRef[i, ii, iv] * tRef_prev[i, ii, iv] * E)
                                 # dRef[:, :, iz, :, iz] /= (1 + rloc[i, ii, iv] * tRef_prev[i, ii, iv] * E)  # eq. 1.24 #TODO: move exponential out of the loop
-                                a = 1 - Ref[i, ii, iz, iv] * Ref[i, ii, iz + pm, iv] * E
-                                a /= (1 + rloc[i, ii, iv] * Ref[i, ii, iz + pm, iv] * E)
-                                dRef[i, ii, iz, iv, iz] = a * drloc[i, ii, iv]  # eq. 1.23
+                                a = 1 - Ref[i, ii, iz, iv]*Ref[i, ii, iz + pm, iv]*E
+                                a /= (1 + rloc[i, ii, iv]*Ref[i, ii, iz + pm, iv]*E)
+                                dRef[i, ii, iz, iv, iz] = a*drloc[i, ii, iv]  # eq. 1.23
 
                                 # Derivative of tRef of layer iz w.r.t. conductivity of iz + pm
-                                b = (1 - rloc[i, ii, iv] * Ref[i, ii, iz, iv]) * E
-                                b /= (1 + rloc[i, ii, iv] * Ref[i, ii, iz + pm, iv] * E)
+                                b = (1 - rloc[i, ii, iv]*Ref[i, ii, iz, iv])*E
+                                b /= (1 + rloc[i, ii, iv]*Ref[i, ii, iz + pm, iv]*E)
                                 dRef_dRepm[i, ii, iz, iv] = b.copy()
 
-                                c = Ref[i, ii, iz + pm, iv] * (1 - rloc[i, ii, iv] * Ref[i, ii, iz, iv])
-                                c /= (1 + rloc[i, ii, iv] * Ref[i, ii, iz + pm, iv] * E)
+                                c = Ref[i, ii, iz + pm, iv]*(1 - rloc[i, ii, iv]*Ref[i, ii, iz, iv])
+                                c /= (1 + rloc[i, ii, iv]*Ref[i, ii, iz + pm, iv]*E)
 
-                                d = -2 * ddepth * E * dGam[i, ii, iz, iv]
+                                d = -2*ddepth*E*dGam[i, ii, iz, iv]
 
-                                dRef[i, ii, iz, iv, iz + pm] = a * drloc_pm[i, ii, iv] + b * dRef[
-                                    i, ii, iz + pm, iv, iz + pm] + c * d
+                                dRef[i, ii, iz, iv, iz + pm] = a*drloc_pm[i, ii, iv] + b*dRef[
+                                    i, ii, iz + pm, iv, iz + pm] + c*d
 
                                 # Derivative of tRef of layer iz w.r.t. conductivity of iz + n*pm
                                 for n in range(1, idx + 1):  # recursively to iz + 2 and so on
-                                    npm = (n + 1) * pm
+                                    npm = (n + 1)*pm
                                     dRef[i, ii, iz, iv, iz + npm] = dRef[
-                                        i, ii, iz + n * pm, iv, iz + npm]  # Derivative w.r.t conductivity
+                                        i, ii, iz + n*pm, iv, iz + npm]  # Derivative w.r.t conductivity
                                     for m in np.arange(0, idx):  # Derivative w.r.t. other Ref's of other layers
-                                        dRef[i, ii, iz, iv, iz + npm] *= dRef_dRepm[i, ii, iz + m * pm, iv]
+                                        dRef[i, ii, iz, iv, iz + npm] *= dRef_dRepm[i, ii, iz + m*pm, iv]
 
             # TODO: This is wat it used to be, now it returns all Ref's!
             # The global reflection coefficient is given back for all layers
@@ -747,21 +753,21 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
     nfreq, noff, nlayer, nlambda = Gam[:, :, :, :].shape
 
     # Variables
-    nlsr = abs(lsrc - lrec) + 1  # nr of layers btw and incl. src and rec layer
+    nlsr = abs(lsrc-lrec)+1  # nr of layers btw and incl. src and rec layer
     rsrcl = 0  # src-layer in reflection (Rp/Rm), first if down
     izrange = range(2, nlsr)
     isr = lsrc
-    last = depth.size - 1
+    last = depth.size-1
 
     # Booleans if src in first or last layer; swapped if up=True
     first_layer = lsrc == 0
-    last_layer = lsrc == depth.size - 1
+    last_layer = lsrc == depth.size-1
 
     # Depths; dp and dm are swapped if up=True
-    if lsrc != depth.size - 1:
-        ds = depth[lsrc + 1] - depth[lsrc]
-        dp = depth[lsrc + 1] - zsrc
-    dm = zsrc - depth[lsrc]
+    if lsrc != depth.size-1:
+        ds = depth[lsrc+1]-depth[lsrc]
+        dp = depth[lsrc+1]-zsrc
+    dm = zsrc-depth[lsrc]
 
     # Rm and Rp; swapped if up=True
     Rmp = Rm
@@ -777,11 +783,11 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
         plus = ab not in plusset
 
     # Sign-switches
-    pm = 1  # + if plus=True, - if plus=False
+    pm = 1     # + if plus=True, - if plus=False
     if not plus:
         pm = -1
-    pup = -1  # + if up=True,   - if up=False
-    mupm = 1  # + except if up=True and plus=False
+    pup = -1   # + if up=True,   - if up=False
+    mupm = 1   # + except if up=True and plus=False
 
     # Gamma of source layer
     iGam = Gam[:, :, lsrc, :]
@@ -790,7 +796,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
     for up in [False, True]:
 
         # No upgoing field if rec is in last layer or below src
-        if up and (lrec == depth.size - 1 or lrec > lsrc):
+        if up and (lrec == depth.size-1 or lrec > lsrc):
             Pu = np.zeros_like(iGam)
             dPu = np.zeros(list(iGam.shape) + [nlayer], dtype=Gam.dtype)
             continue
@@ -809,8 +815,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
             Rmp, Rpm = Rpm, Rmp
             dRmp, dRpm = dRpm, dRmp
             first_layer, last_layer = last_layer, first_layer
-            rsrcl = nlsr - 1  # src-layer in refl. (Rp/Rm), last (nlsr-1) if up
-            izrange = range(nlsr - 2)
+            rsrcl = nlsr-1  # src-layer in refl. (Rp/Rm), last (nlsr-1) if up
+            izrange = range(nlsr-2)
             isr = lrec
             last = 0
             pup = 1
@@ -833,8 +839,8 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                         for iv in range(nlambda):
                             tRmp = Rmp[i, ii, 0, iv]
                             tiGam = iGam[i, ii, iv]
-                            E1 = np.exp(-tiGam * dm)
-                            P[i, ii, iv] = tRmp * E1
+                            E1 = np.exp(-tiGam*dm)
+                            P[i, ii, iv] = tRmp*E1
                             if ana_deriv:
                                 # Not all derivatives iterate over the number of layers, so 3dim
                                 # Depths; dp and dm are swapped if up=True
@@ -849,33 +855,33 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                                         dgam = dGam[i, ii, lsrc, iv]
                                     else:
                                         dgam = 0
-                                    t8 = -dm * E1 * dgam
-                                    dP[i, ii, iv, v] = t1 * dRmp[i, ii, lsrc, iv, v] + t7 * t8
+                                    t8 = -dm*E1*dgam
+                                    dP[i, ii, iv, v] = t1*dRmp[i, ii, lsrc, iv, v] + t7*t8
 
-            else:  # If src and rec are in any layer in between
+            else:           # If src and rec are in any layer in between
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
                             tiGam = iGam[i, ii, iv]
                             tRpm = Rpm[i, ii, 0, iv]  # TODO: check if Rpm indeed has only the R for one layer
                             tRmp = Rmp[i, ii, 0, iv]
-                            E1 = np.exp(-tiGam * dm)
-                            E2 = np.exp(-tiGam * (ds + dp))
-                            E3 = np.exp(-2 * tiGam * ds)
-                            p2 = pm * tRpm * E2
-                            M = 1 - tRmp * tRpm * E3
-                            P[i, ii, iv] = (E1 + p2) * tRmp / M
+                            E1 = np.exp(-tiGam*dm)
+                            E2 = np.exp(-tiGam*(ds + dp))
+                            E3 = np.exp(-2*tiGam*ds)
+                            p2 = pm*tRpm*E2
+                            M = 1 - tRmp*tRpm*E3
+                            P[i, ii, iv] = (E1 + p2)*tRmp/M
                             if ana_deriv:
                                 # Not all derivatives iterate over the number of layers, so 3dim
                                 # Depths; dp and dm are swapped if up=True
                                 # Rmp = Rm;  swapped if up=True
                                 # Rpm = Rp;  swapped if up=True
                                 # dm and dp swapped if up=True
-                                t1 = (E1 + p2) * 1 / M
-                                t3 = pm * tRmp / M * E2
-                                t5 = -1 * P[i, ii, iv] / M
-                                t7 = tRmp / M
-                                t9 = pm * tRpm * tRmp / M
+                                t1 = (E1 + p2)*1/M
+                                t3 = pm*tRmp/M*E2
+                                t5 = P[i, ii, iv]/M  # TODO: Check, does this term requires an additional *-1?
+                                t7 = tRmp/M
+                                t9 = pm*tRpm*tRmp/M
 
                                 for v in range(
                                         nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
@@ -883,15 +889,15 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                                         dgam = dGam[i, ii, v, iv]
                                     else:
                                         dgam = 0
-                                    t6 = E3 * (tRmp * dRpm[i, ii, lsrc, iv, v] + tRpm * dRmp[
-                                        i, ii, lsrc, iv, v] - 2 * tRpm * tRmp * ds * dgam)
-                                    t8 = -dm * E1 * dgam
-                                    t10 = -(ds + dp) * E2 * dgam
-                                    dP[i, ii, iv, v] = t1 * dRmp[i, ii, lsrc, iv, v] + t3 * dRpm[
-                                        i, ii, lsrc, iv, v] + t5 * t6 + t7 * t8 + t9 * t10
+                                    t6 = E3*(tRmp*dRpm[i, ii, lsrc, iv, v] + tRpm*dRmp[
+                                        i, ii, lsrc, iv, v] - 2*tRpm*tRmp*ds*dgam)
+                                    t8 = -dm*E1*dgam
+                                    t10 = -(ds + dp)*E2*dgam
+                                    dP[i, ii, iv, v] = t1*dRmp[i, ii, lsrc, iv, v] + t3*dRpm[
+                                        i, ii, lsrc, iv, v] + t5*t6 + t7*t8 + t9*t10
 
 
-        else:  # rec above (up) / below (down) src layer
+        else:           # rec above (up) / below (down) src layer
             #           # Eqs  95/96,  A-24/A-25 for rec above src layer
             #           # Eqs 103/104, A-32/A-33 for rec below src layer
 
@@ -903,7 +909,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                         for iv in range(nlambda):
                             tiRpm = iRpm[i, ii, iv]
                             tiGam = iGam[i, ii, iv]
-                            P[i, ii, iv] = (1 + tiRpm) * mupm * np.exp(-tiGam * dp)
+                            P[i, ii, iv] = (1 + tiRpm)*mupm*np.exp(-tiGam*dp)
                             if ana_deriv:
                                 raise NotImplementedError("Case: first layer")
             else:
@@ -913,48 +919,48 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                             iRmp = Rmp[i, ii, rsrcl, iv]
                             tiGam = iGam[i, ii, iv]
                             tRpm = iRpm[i, ii, iv]
-                            p1 = mupm * np.exp(-tiGam * dp)
-                            p2 = pm * mupm * iRmp * np.exp(-tiGam * (ds + dm))
-                            p3 = (1 + tRpm) / (1 - iRmp * tRpm * np.exp(-2 * tiGam * ds))
-                            P[i, ii, iv] = (p1 + p2) * p3
+                            p1 = mupm*np.exp(-tiGam*dp)
+                            p2 = pm*mupm*iRmp*np.exp(-tiGam * (ds+dm))
+                            p3 = (1 + tRpm)/(1 - iRmp*tRpm*np.exp(-2*tiGam*ds))
+                            P[i, ii, iv] = (p1 + p2)*p3
                             if ana_deriv:
                                 raise NotImplementedError("Case: rec is not in src layer")
 
             # If up or down and src is in last but one layer
-            if up or (not up and lsrc + 1 < depth.size - 1):
-                ddepth = depth[lsrc + 1 - 1 * pup] - depth[lsrc - 1 * pup]
+            if up or (not up and lsrc+1 < depth.size-1):
+                ddepth = depth[lsrc+1-1*pup]-depth[lsrc-1*pup]
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
-                            tiRpm = Rpm[i, ii, rsrcl - 1 * pup, iv]
-                            tiGam = Gam[i, ii, lsrc - 1 * pup, iv]
-                            P[i, ii, iv] /= 1 + tiRpm * np.exp(-2 * tiGam * ddepth)
+                            tiRpm = Rpm[i, ii, rsrcl-1*pup, iv]
+                            tiGam = Gam[i, ii, lsrc-1*pup, iv]
+                            P[i, ii, iv] /= 1 + tiRpm*np.exp(-2*tiGam*ddepth)
                             if ana_deriv:
                                 raise NotImplementedError("Case: src is in last but one layer")
 
             # Second compute P for all other layers
             if nlsr > 2:
                 for iz in izrange:
-                    ddepth = depth[isr + iz + pup + 1] - depth[isr + iz + pup]
+                    ddepth = depth[isr+iz+pup+1]-depth[isr+iz+pup]
                     for i in range(nfreq):
                         for ii in range(noff):
                             for iv in range(nlambda):
-                                tiRpm = Rpm[i, ii, iz + pup, iv]
-                                piGam = Gam[i, ii, isr + iz + pup, iv]
-                                p1 = (1 + tiRpm) * np.exp(-piGam * ddepth)
+                                tiRpm = Rpm[i, ii, iz+pup, iv]
+                                piGam = Gam[i, ii, isr+iz+pup, iv]
+                                p1 = (1+tiRpm)*np.exp(-piGam*ddepth)
                                 P[i, ii, iv] *= p1
                                 if ana_deriv:
                                     raise NotImplementedError("Case: number of layers between src and rec > 2")
 
                     # If rec/src NOT in first/last layer (up/down)
-                    if isr + iz != last:
-                        ddepth = depth[isr + iz + 1] - depth[isr + iz]
+                    if isr+iz != last:
+                        ddepth = depth[isr+iz+1] - depth[isr+iz]
                         for i in range(nfreq):
                             for ii in range(noff):
                                 for iv in range(nlambda):
                                     tiRpm = Rpm[i, ii, iz, iv]
-                                    piGam2 = Gam[i, ii, isr + iz, iv]
-                                    p1 = 1 + tiRpm * np.exp(-2 * piGam2 * ddepth)
+                                    piGam2 = Gam[i, ii, isr+iz, iv]
+                                    p1 = 1 + tiRpm*np.exp(-2*piGam2 * ddepth)
                                     P[i, ii, iv] /= p1
                                     if ana_deriv:
                                         raise NotImplementedError("Case: If rec/src NOT in first/last layer (up/down)")
@@ -1011,12 +1017,12 @@ def angle_factor(angle, ab, msrc, mrec):
     # Define fct (cos/sin) and angles to be tested
     if ab in [11, 22, 15, 24, 13, 31, 26, 35]:
         fct = np.cos
-        test_ang_1 = np.pi / 2
-        test_ang_2 = 3 * np.pi / 2
+        test_ang_1 = np.pi/2
+        test_ang_2 = 3*np.pi/2
     else:
         fct = np.sin
         test_ang_1 = np.pi
-        test_ang_2 = 2 * np.pi
+        test_ang_2 = 2*np.pi
 
     if ab in [11, 22, 15, 24, 12, 21, 14, 25]:
         eval_angle *= 2
@@ -1055,8 +1061,8 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
     the input and output parameters.
 
     """
-    xco = np.cos(angle) * off
-    yco = np.sin(angle) * off
+    xco = np.cos(angle)*off
+    yco = np.sin(angle)*off
 
     # Reciprocity switches for magnetic receivers
     if mrec:
@@ -1071,17 +1077,17 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
             zsrc, zrec = zrec, zsrc
 
     # Calculate TE/TM-variables
-    if ab not in [16, 26]:  # Calc TM
-        lGamTM = np.sqrt(zetaH * etaV)
-        RTM = np.sqrt(off * off + ((zsrc - zrec) * (zsrc - zrec) * etaH / etaV)[:, None])
-        uGamTM = np.exp(-lGamTM[:, None] * RTM) / (4 * np.pi * RTM *
-                                                   np.sqrt(etaH / etaV)[:, None])
+    if ab not in [16, 26]:                      # Calc TM
+        lGamTM = np.sqrt(zetaH*etaV)
+        RTM = np.sqrt(off*off + ((zsrc-zrec)*(zsrc-zrec)*etaH/etaV)[:, None])
+        uGamTM = np.exp(-lGamTM[:, None]*RTM)/(4*np.pi*RTM *
+                                               np.sqrt(etaH/etaV)[:, None])
 
     if ab not in [13, 23, 31, 32, 33, 34, 35]:  # Calc TE
-        lGamTE = np.sqrt(zetaV * etaH)
-        RTE = np.sqrt(off * off + (zsrc - zrec) * (zsrc - zrec) * (zetaH / zetaV)[:, None])
-        uGamTE = np.exp(-lGamTE[:, None] * RTE) / (4 * np.pi * RTE *
-                                                   np.sqrt(zetaH / zetaV)[:, None])
+        lGamTE = np.sqrt(zetaV*etaH)
+        RTE = np.sqrt(off*off+(zsrc-zrec)*(zsrc-zrec)*(zetaH/zetaV)[:, None])
+        uGamTE = np.exp(-lGamTE[:, None]*RTE)/(4*np.pi*RTE *
+                                               np.sqrt(zetaH/zetaV)[:, None])
 
     # Calculate responses
     if ab in [11, 12, 21, 22]:  # Eqs 45, 46
@@ -1101,19 +1107,19 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
             delta = 0
 
         # Calculate response
-        term1 = uGamTM * (3 * coo1 * coo2 / (RTM * RTM) - delta)
-        term1 *= 1 / (etaV[:, None] * RTM * RTM) + (lGamTM / etaV)[:, None] / RTM
-        term1 += uGamTM * zetaH[:, None] * coo1 * coo2 / (RTM * RTM)
+        term1 = uGamTM*(3*coo1*coo2/(RTM*RTM) - delta)
+        term1 *= 1/(etaV[:, None]*RTM*RTM) + (lGamTM/etaV)[:, None]/RTM
+        term1 += uGamTM*zetaH[:, None]*coo1*coo2/(RTM*RTM)
 
-        term2 = -delta * zetaH[:, None] * uGamTE
+        term2 = -delta*zetaH[:, None]*uGamTE
 
-        term3 = -zetaH[:, None] * coo1 * coo2 / (off * off) * (uGamTM - uGamTE)
+        term3 = -zetaH[:, None]*coo1*coo2/(off*off)*(uGamTM - uGamTE)
 
-        term4 = -np.sqrt(zetaH)[:, None] * (2 * coo1 * coo2 / (off * off) - delta)
+        term4 = -np.sqrt(zetaH)[:, None]*(2*coo1*coo2/(off*off) - delta)
         if np.any(zetaH.imag < 0):  # We need the sqrt where Im > 0.
-            term4 *= -1  # This if-statement corrects for it.
-        term4 *= np.exp(-lGamTM[:, None] * RTM) - np.exp(-lGamTE[:, None] * RTE)
-        term4 /= 4 * np.pi * np.sqrt(etaH)[:, None] * off * off
+            term4 *= -1     # This if-statement corrects for it.
+        term4 *= np.exp(-lGamTM[:, None]*RTM) - np.exp(-lGamTE[:, None]*RTE)
+        term4 /= 4*np.pi*np.sqrt(etaH)[:, None]*off*off
 
         gin = term1 + term2 + term3 + term4
 
@@ -1126,20 +1132,20 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
             coo = yco
 
         # Calculate response
-        term1 = (etaH / etaV)[:, None] * (zrec - zsrc) * coo / (RTM * RTM)
-        term2 = 3 / (RTM * RTM) + 3 * lGamTM[:, None] / RTM + (lGamTM * lGamTM)[:, None]
-        gin = term1 * term2 * uGamTM / etaV[:, None]
+        term1 = (etaH/etaV)[:, None]*(zrec - zsrc)*coo/(RTM*RTM)
+        term2 = 3/(RTM*RTM) + 3*lGamTM[:, None]/RTM + (lGamTM*lGamTM)[:, None]
+        gin = term1*term2*uGamTM/etaV[:, None]
 
     elif ab in [33, ]:  # Eq 48
 
         # Calculate response
-        term1 = (((etaH / etaV)[:, None] * (zsrc - zrec) / RTM) *
-                 ((etaH / etaV)[:, None] * (zsrc - zrec) / RTM) *
-                 (3 / (RTM * RTM) + 3 * lGamTM[:, None] / RTM +
-                  (lGamTM * lGamTM)[:, None]))
-        term2 = (-(etaH / etaV)[:, None] / RTM * (1 / RTM + lGamTM[:, None]) -
-                 (etaH * zetaH)[:, None])
-        gin = (term1 + term2) * uGamTM / etaV[:, None]
+        term1 = (((etaH/etaV)[:, None]*(zsrc - zrec)/RTM) *
+                 ((etaH/etaV)[:, None]*(zsrc - zrec)/RTM) *
+                 (3/(RTM*RTM) + 3*lGamTM[:, None]/RTM +
+                     (lGamTM*lGamTM)[:, None]))
+        term2 = (-(etaH/etaV)[:, None]/RTM*(1/RTM + lGamTM[:, None]) -
+                 (etaH*zetaH)[:, None])
+        gin = (term1 + term2)*uGamTM/etaV[:, None]
 
     elif ab in [14, 24, 15, 25]:  # Eq 49
 
@@ -1166,14 +1172,14 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
 
         # Calculate response
         def term(lGam, z_eH, z_eV, R, off, co1, co2):
-            fac = (lGam * z_eH / z_eV)[:, None] / R * np.exp(-lGam[:, None] * R)
-            term = 2 / (off * off) + lGam[:, None] / R + 1 / (R * R)
-            return fac * (co1 * co2 * term - delta)
+            fac = (lGam*z_eH/z_eV)[:, None]/R*np.exp(-lGam[:, None]*R)
+            term = 2/(off*off) + lGam[:, None]/R + 1/(R*R)
+            return fac*(co1*co2*term - delta)
 
         termTM = term(lGamTM, etaH, etaV, RTM, off, coo1, coo2)
         termTE = term(lGamTE, zetaH, zetaV, RTE, off, coo3, coo4)
-        mult = (zrec - zsrc) / (4 * np.pi * np.sqrt(etaH * zetaH)[:, None] * off * off)
-        gin = -mult * (pm * termTM + termTE)
+        mult = (zrec - zsrc)/(4*np.pi*np.sqrt(etaH*zetaH)[:, None]*off*off)
+        gin = -mult*(pm*termTM + termTE)
 
     elif ab in [34, 35, 16, 26]:  # Eqs 50, 51
 
@@ -1199,7 +1205,7 @@ def fullspace(off, angle, zsrc, zrec, etaH, etaV, zetaH, zetaV, ab, msrc,
             e_zV = zetaV
 
         # Calculate response
-        gin = coo * (e_zH / e_zV)[:, None] / R * (lGam[:, None] + 1 / R) * uGam
+        gin = coo*(e_zH/e_zV)[:, None]/R*(lGam[:, None] + 1/R)*uGam
 
     # If rec is magnetic switch sign (reciprocity MM/ME => EE/EM).
     if mrec:
@@ -1230,10 +1236,10 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     """
     from scipy import special  # Lazy for faster CLI load
 
-    xco = np.cos(angle) * off
-    yco = np.sin(angle) * off
-    res = np.real(1 / etaH[0, 0])
-    aniso = 1 / np.sqrt(np.real(etaV[0, 0]) * res)
+    xco = np.cos(angle)*off
+    yco = np.sin(angle)*off
+    res = np.real(1/etaH[0, 0])
+    aniso = 1/np.sqrt(np.real(etaV[0, 0])*res)
 
     # Define sval/time and dtype depending on signal.
     if signal is None:
@@ -1247,21 +1253,21 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         dtype = np.float64
 
     # Other defined parameters
-    rh = np.sqrt(xco ** 2 + yco ** 2)  # Horizontal distance in space
-    hp = abs(zrec + zsrc)  # Physical vertical distance
+    rh = np.sqrt(xco**2 + yco**2)  # Horizontal distance in space
+    hp = abs(zrec + zsrc)          # Physical vertical distance
     hm = abs(zrec - zsrc)
-    hsp = hp * aniso  # Scaled vertical distance
-    hsm = hm * aniso
-    rp = np.sqrt(xco ** 2 + yco ** 2 + hp ** 2)  # Physical distance
-    rm = np.sqrt(xco ** 2 + yco ** 2 + hm ** 2)
-    rsp = np.sqrt(xco ** 2 + yco ** 2 + hsp ** 2)  # Scaled distance
-    rsm = np.sqrt(xco ** 2 + yco ** 2 + hsm ** 2)
+    hsp = hp*aniso                 # Scaled vertical distance
+    hsm = hm*aniso
+    rp = np.sqrt(xco**2 + yco**2 + hp**2)    # Physical distance
+    rm = np.sqrt(xco**2 + yco**2 + hm**2)
+    rsp = np.sqrt(xco**2 + yco**2 + hsp**2)  # Scaled distance
+    rsm = np.sqrt(xco**2 + yco**2 + hsm**2)
     #
-    mu_0 = 4e-7 * np.pi  # Magn. perm. of free space  [H/m]
-    tp = mu_0 * rp ** 2 / (res * 4)  # Diffusion time
-    tm = mu_0 * rm ** 2 / (res * 4)
-    tsp = mu_0 * rsp ** 2 / (res * aniso ** 2 * 4)  # Scaled diffusion time
-    tsm = mu_0 * rsm ** 2 / (res * aniso ** 2 * 4)
+    mu_0 = 4e-7*np.pi                   # Magn. perm. of free space  [H/m]
+    tp = mu_0*rp**2/(res*4)             # Diffusion time
+    tm = mu_0*rm**2/(res*4)
+    tsp = mu_0*rsp**2/(res*aniso**2*4)  # Scaled diffusion time
+    tsm = mu_0*rsm**2/(res*aniso**2*4)
 
     # delta-fct delta_\alpha\beta
     if ab in [11, 22, 33]:
@@ -1288,53 +1294,53 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
     # Exponential diffusion functions for m=0,1,2
 
     if signal is None:  # Frequency-domain
-        f0p = np.exp(-2 * np.sqrt(sval * tp))
-        f0m = np.exp(-2 * np.sqrt(sval * tm))
-        fs0p = np.exp(-2 * np.sqrt(sval * tsp))
-        fs0m = np.exp(-2 * np.sqrt(sval * tsm))
+        f0p = np.exp(-2*np.sqrt(sval*tp))
+        f0m = np.exp(-2*np.sqrt(sval*tm))
+        fs0p = np.exp(-2*np.sqrt(sval*tsp))
+        fs0m = np.exp(-2*np.sqrt(sval*tsm))
 
-        f1p = np.sqrt(sval) * f0p
-        f1m = np.sqrt(sval) * f0m
-        fs1p = np.sqrt(sval) * fs0p
-        fs1m = np.sqrt(sval) * fs0m
+        f1p = np.sqrt(sval)*f0p
+        f1m = np.sqrt(sval)*f0m
+        fs1p = np.sqrt(sval)*fs0p
+        fs1m = np.sqrt(sval)*fs0m
 
-        f2p = sval * f0p
-        f2m = sval * f0m
-        fs2p = sval * fs0p
-        fs2m = sval * fs0m
+        f2p = sval*f0p
+        f2m = sval*f0m
+        fs2p = sval*fs0p
+        fs2m = sval*fs0m
 
     elif abs(signal) == 1:  # Time-domain step response
         # Replace F(m) with F(m-2)
-        f0p = special.erfc(np.sqrt(tp / time))
-        f0m = special.erfc(np.sqrt(tm / time))
-        fs0p = special.erfc(np.sqrt(tsp / time))
-        fs0m = special.erfc(np.sqrt(tsm / time))
+        f0p = sp.special.erfc(np.sqrt(tp/time))
+        f0m = sp.special.erfc(np.sqrt(tm/time))
+        fs0p = sp.special.erfc(np.sqrt(tsp/time))
+        fs0m = sp.special.erfc(np.sqrt(tsm/time))
 
-        f1p = np.exp(-tp / time) / np.sqrt(np.pi * time)
-        f1m = np.exp(-tm / time) / np.sqrt(np.pi * time)
-        fs1p = np.exp(-tsp / time) / np.sqrt(np.pi * time)
-        fs1m = np.exp(-tsm / time) / np.sqrt(np.pi * time)
+        f1p = np.exp(-tp/time)/np.sqrt(np.pi*time)
+        f1m = np.exp(-tm/time)/np.sqrt(np.pi*time)
+        fs1p = np.exp(-tsp/time)/np.sqrt(np.pi*time)
+        fs1m = np.exp(-tsm/time)/np.sqrt(np.pi*time)
 
-        f2p = f1p * np.sqrt(tp) / time
-        f2m = f1m * np.sqrt(tm) / time
-        fs2p = fs1p * np.sqrt(tsp) / time
-        fs2m = fs1m * np.sqrt(tsm) / time
+        f2p = f1p*np.sqrt(tp)/time
+        f2m = f1m*np.sqrt(tm)/time
+        fs2p = fs1p*np.sqrt(tsp)/time
+        fs2m = fs1m*np.sqrt(tsm)/time
 
     else:  # Time-domain impulse response
-        f0p = np.sqrt(tp / (np.pi * time ** 3)) * np.exp(-tp / time)
-        f0m = np.sqrt(tm / (np.pi * time ** 3)) * np.exp(-tm / time)
-        fs0p = np.sqrt(tsp / (np.pi * time ** 3)) * np.exp(-tsp / time)
-        fs0m = np.sqrt(tsm / (np.pi * time ** 3)) * np.exp(-tsm / time)
+        f0p = np.sqrt(tp/(np.pi*time**3))*np.exp(-tp/time)
+        f0m = np.sqrt(tm/(np.pi*time**3))*np.exp(-tm/time)
+        fs0p = np.sqrt(tsp/(np.pi*time**3))*np.exp(-tsp/time)
+        fs0m = np.sqrt(tsm/(np.pi*time**3))*np.exp(-tsm/time)
 
-        f1p = (tp / time - 0.5) / np.sqrt(tp) * f0p
-        f1m = (tm / time - 0.5) / np.sqrt(tm) * f0m
-        fs1p = (tsp / time - 0.5) / np.sqrt(tsp) * fs0p
-        fs1m = (tsm / time - 0.5) / np.sqrt(tsm) * fs0m
+        f1p = (tp/time - 0.5)/np.sqrt(tp)*f0p
+        f1m = (tm/time - 0.5)/np.sqrt(tm)*f0m
+        fs1p = (tsp/time - 0.5)/np.sqrt(tsp)*fs0p
+        fs1m = (tsm/time - 0.5)/np.sqrt(tsm)*fs0m
 
-        f2p = (tp / time - 1.5) / time * f0p
-        f2m = (tm / time - 1.5) / time * f0m
-        fs2p = (tsp / time - 1.5) / time * fs0p
-        fs2m = (tsm / time - 1.5) / time * fs0m
+        f2p = (tp/time - 1.5)/time*f0p
+        f2m = (tm/time - 1.5)/time*f0m
+        fs2p = (tsp/time - 1.5)/time*fs0p
+        fs2m = (tsm/time - 1.5)/time*fs0m
 
     # Pre-allocate arrays
     gs0m = np.zeros(np.shape(x), dtype=dtype)
@@ -1358,65 +1364,65 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
         iih = np.invert(izh)  # invert of izh
 
         # fab
-        fab = rh ** 2 * delta - x * y
+        fab = rh**2*delta-x*y
 
         # TM-mode coefficients
-        gs0p = res * aniso * (3 * x * y - rsp ** 2 * delta) / (4 * np.pi * rsp ** 5)
-        gs0m = res * aniso * (3 * x * y - rsm ** 2 * delta) / (4 * np.pi * rsm ** 5)
-        gs1p[iir] = (((3 * x[iir] * y[iir] - rsp[iir] ** 2 * delta) / rsp[iir] ** 4 -
-                      (x[iir] * y[iir] - fab[iir]) / rh[iir] ** 4) *
-                     np.sqrt(mu_0 * res) / (4 * np.pi))
-        gs1m[iir] = (((3 * x[iir] * y[iir] - rsm[iir] ** 2 * delta) / rsm[iir] ** 4 -
-                      (x[iir] * y[iir] - fab[iir]) / rh[iir] ** 4) *
-                     np.sqrt(mu_0 * res) / (4 * np.pi))
-        gs2p[iir] = ((mu_0 * x[iir] * y[iir]) / (4 * np.pi * aniso * rsp[iir]) *
-                     (1 / rsp[iir] ** 2 - 1 / rh[iir] ** 2))
-        gs2m[iir] = ((mu_0 * x[iir] * y[iir]) / (4 * np.pi * aniso * rsm[iir]) *
-                     (1 / rsm[iir] ** 2 - 1 / rh[iir] ** 2))
+        gs0p = res*aniso*(3*x*y - rsp**2*delta)/(4*np.pi*rsp**5)
+        gs0m = res*aniso*(3*x*y - rsm**2*delta)/(4*np.pi*rsm**5)
+        gs1p[iir] = (((3*x[iir]*y[iir] - rsp[iir]**2*delta)/rsp[iir]**4 -
+                     (x[iir]*y[iir] - fab[iir])/rh[iir]**4) *
+                     np.sqrt(mu_0*res)/(4*np.pi))
+        gs1m[iir] = (((3*x[iir]*y[iir] - rsm[iir]**2*delta)/rsm[iir]**4 -
+                     (x[iir]*y[iir] - fab[iir])/rh[iir]**4) *
+                     np.sqrt(mu_0*res)/(4*np.pi))
+        gs2p[iir] = ((mu_0*x[iir]*y[iir])/(4*np.pi*aniso*rsp[iir]) *
+                     (1/rsp[iir]**2 - 1/rh[iir]**2))
+        gs2m[iir] = ((mu_0*x[iir]*y[iir])/(4*np.pi*aniso*rsm[iir]) *
+                     (1/rsm[iir]**2 - 1/rh[iir]**2))
 
         # TM-mode for numerical singularities rh=0 (hm!=0)
-        gs1p[izr * iih] = -np.sqrt(mu_0 * res) * delta / (4 * np.pi * hsp ** 2)
-        gs1m[izr * iih] = -np.sqrt(mu_0 * res) * delta / (4 * np.pi * hsm ** 2)
-        gs2p[izr * iih] = -mu_0 * delta / (8 * np.pi * aniso * hsp)
-        gs2m[izr * iih] = -mu_0 * delta / (8 * np.pi * aniso * hsm)
+        gs1p[izr*iih] = -np.sqrt(mu_0*res)*delta/(4*np.pi*hsp**2)
+        gs1m[izr*iih] = -np.sqrt(mu_0*res)*delta/(4*np.pi*hsm**2)
+        gs2p[izr*iih] = -mu_0*delta/(8*np.pi*aniso*hsp)
+        gs2m[izr*iih] = -mu_0*delta/(8*np.pi*aniso*hsm)
 
         # TE-mode coefficients
-        g0p = res * (3 * fab - rp ** 2 * delta) / (2 * np.pi * rp ** 5)
-        g1m[iir] = (np.sqrt(mu_0 * res) * (x[iir] * y[iir] - fab[iir]) /
-                    (4 * np.pi * rh[iir] ** 4))
-        g1p[iir] = (g1m[iir] + np.sqrt(mu_0 * res) * (3 * fab[iir] -
-                                                      rp[iir] ** 2 * delta) / (2 * np.pi * rp[iir] ** 4))
-        g2p[iir] = mu_0 * fab[iir] / (4 * np.pi * rp[iir]) * (2 / rp[iir] ** 2 -
-                                                              1 / rh[iir] ** 2)
-        g2m[iir] = -mu_0 * fab[iir] / (4 * np.pi * rh[iir] ** 2 * rm[iir])
+        g0p = res*(3*fab - rp**2*delta)/(2*np.pi*rp**5)
+        g1m[iir] = (np.sqrt(mu_0*res)*(x[iir]*y[iir] - fab[iir]) /
+                    (4*np.pi*rh[iir]**4))
+        g1p[iir] = (g1m[iir] + np.sqrt(mu_0*res)*(3*fab[iir] -
+                    rp[iir]**2*delta)/(2*np.pi*rp[iir]**4))
+        g2p[iir] = mu_0*fab[iir]/(4*np.pi*rp[iir])*(2/rp[iir]**2 -
+                                                    1/rh[iir]**2)
+        g2m[iir] = -mu_0*fab[iir]/(4*np.pi*rh[iir]**2*rm[iir])
 
         # TE-mode for numerical singularities rh=0 (hm!=0)
-        g1m[izr * iih] = np.zeros(np.shape(g1m[izr * iih]), dtype=dtype)
-        g1p[izr * iih] = -np.sqrt(mu_0 * res) * delta / (2 * np.pi * hp ** 2)
-        g2m[izr * iih] = mu_0 * delta / (8 * np.pi * hm)
-        g2p[izr * iih] = mu_0 * delta / (8 * np.pi * hp)
+        g1m[izr*iih] = np.zeros(np.shape(g1m[izr*iih]), dtype=dtype)
+        g1p[izr*iih] = -np.sqrt(mu_0*res)*delta/(2*np.pi*hp**2)
+        g2m[izr*iih] = mu_0*delta/(8*np.pi*hm)
+        g2p[izr*iih] = mu_0*delta/(8*np.pi*hp)
 
         # Bessel functions for airwave
         def BI(gamH, hp, nr, xim):
             r"""Return BI_nr."""
-            return np.exp(-np.real(gamH) * hp) * special.ive(nr, xim)
+            return np.exp(-np.real(gamH)*hp)*sp.special.ive(nr, xim)
 
         def BK(xip, nr):
             r"""Return BK_nr."""
             if np.isrealobj(xip):
                 # To keep it real in Laplace-domain [exp(-1j*0) = 1-0j].
-                return special.kve(nr, xip)
+                return sp.special.kve(nr, xip)
             else:
-                return np.exp(-1j * np.imag(xip)) * special.kve(nr, xip)
+                return np.exp(-1j*np.imag(xip))*sp.special.kve(nr, xip)
 
         # Airwave calculation
         def airwave(sval, hp, rp, res, fab, delta):
             r"""Return airwave."""
             # Parameters
-            zeta = sval * mu_0
-            gamH = np.sqrt(zeta / res)
-            xip = gamH * (rp + hp) / 2
-            xim = gamH * (rp - hp) / 2
+            zeta = sval*mu_0
+            gamH = np.sqrt(zeta/res)
+            xip = gamH*(rp + hp)/2
+            xim = gamH*(rp - hp)/2
 
             # Bessel functions
             BI0 = BI(gamH, hp, 0, xim)
@@ -1426,15 +1432,15 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
             BK1 = BK(xip, 1)
 
             # Calculation
-            P1 = (sval * mu_0) ** (3 / 2) * fab * hp / (4 * np.sqrt(res))
-            P2 = 4 * BI1 * BK0 - (3 * BI0 - 4 * np.sqrt(res) * BI1 / (np.sqrt(sval * mu_0) *
-                                                                      (rp + hp)) + BI2) * BK1
-            P3 = 3 * fab / rp ** 2 - delta
-            P4 = (sval * mu_0 * hp * rp * (BI0 * BK0 - BI1 * BK1) +
-                  np.sqrt(res * sval * mu_0) * BI0 * BK1 *
-                  (rp + hp) + np.sqrt(res * sval * mu_0) * BI1 * BK0 * (rp - hp))
+            P1 = (sval*mu_0)**(3/2)*fab*hp/(4*np.sqrt(res))
+            P2 = 4*BI1*BK0 - (3*BI0 - 4*np.sqrt(res)*BI1/(np.sqrt(sval*mu_0) *
+                              (rp + hp)) + BI2)*BK1
+            P3 = 3*fab/rp**2 - delta
+            P4 = (sval*mu_0*hp*rp*(BI0*BK0 - BI1*BK1) +
+                  np.sqrt(res*sval*mu_0)*BI0*BK1 *
+                  (rp + hp) + np.sqrt(res*sval*mu_0)*BI1*BK0*(rp - hp))
 
-            return (P1 * P2 - P3 * P4) / (4 * np.pi * rp ** 3)
+            return (P1*P2 - P3*P4)/(4*np.pi*rp**3)
 
         # Airwave depending on signal
         if signal is None:  # Frequency-domain
@@ -1448,67 +1454,67 @@ def halfspace(off, angle, zsrc, zrec, etaH, etaV, freqtime, ab, signal,
             # Coefficients Dk
             def coeff_dk(k, K):
                 r"""Return coefficients Dk for k, K."""
-                n = np.arange((k + 1) // 2, min([k, K / 2]) + .5, 1)
-                Dk = n ** (K / 2) * special.factorial(2 * n) / special.factorial(n)
-                Dk /= special.factorial(n - 1) * special.factorial(k - n)
-                Dk /= special.factorial(2 * n - k) * special.factorial(K / 2 - n)
-                return Dk.sum() * (-1) ** (k + K / 2)
+                n = np.arange((k+1)//2, min([k, K/2])+.5, 1)
+                Dk = n**(K/2)*sp.special.factorial(2*n)/sp.special.factorial(n)
+                Dk /= sp.special.factorial(n-1)*sp.special.factorial(k-n)
+                Dk /= sp.special.factorial(2*n-k)*sp.special.factorial(K/2-n)
+                return Dk.sum()*(-1)**(k+K/2)
 
-            for k in range(1, K + 1):
-                sval = k * np.log(2) / time
+            for k in range(1, K+1):
+                sval = k*np.log(2)/time
                 cair = airwave(sval, hp, rp, res, fab, delta)
-                air += coeff_dk(k, K) * cair.real / k
+                air += coeff_dk(k, K)*cair.real/k
 
         else:  # Time-domain impulse response
-            thp = mu_0 * hp ** 2 / (4 * res)
-            trh = mu_0 * rh ** 2 / (8 * res)
-            P1 = (mu_0 ** 2 * hp * np.exp(-thp / time)) / (res * 32 * np.pi * time ** 3)
-            P2 = 2 * (delta - (x * y) / rh ** 2) * special.ive(1, trh / time)
-            P3 = mu_0 / (2 * res * time) * (rh ** 2 * delta - x * y) - delta
-            P4 = special.ive(0, trh / time) - special.ive(1, trh / time)
+            thp = mu_0*hp**2/(4*res)
+            trh = mu_0*rh**2/(8*res)
+            P1 = (mu_0**2*hp*np.exp(-thp/time))/(res*32*np.pi*time**3)
+            P2 = 2*(delta - (x*y)/rh**2)*sp.special.ive(1, trh/time)
+            P3 = mu_0/(2*res*time)*(rh**2*delta - x*y)-delta
+            P4 = sp.special.ive(0, trh/time) - sp.special.ive(1, trh/time)
 
-            air = P1 * (P2 - P3 * P4)
+            air = P1*(P2 - P3*P4)
 
     elif ab in [13, 23, 31, 32]:  # 2. {3, alpha}, {alpha, 3}
         # TM-mode
-        gs0m = 3 * x * res * aniso ** 3 * (zrec - zsrc) / (4 * np.pi * rsm ** 5)
-        gs0p = rev * 3 * x * res * aniso ** 3 * hp / (4 * np.pi * rsp ** 5)
-        gs1m = (np.sqrt(mu_0 * res) * 3 * aniso ** 2 * x * (zrec - zsrc) /
-                (4 * np.pi * rsm ** 4))
-        gs1p = rev * np.sqrt(mu_0 * res) * 3 * aniso ** 2 * x * hp / (4 * np.pi * rsp ** 4)
-        gs2m = mu_0 * x * aniso * (zrec - zsrc) / (4 * np.pi * rsm ** 3)
-        gs2p = rev * mu_0 * x * aniso * hp / (4 * np.pi * rsp ** 3)
+        gs0m = 3*x*res*aniso**3*(zrec - zsrc)/(4*np.pi*rsm**5)
+        gs0p = rev*3*x*res*aniso**3*hp/(4*np.pi*rsp**5)
+        gs1m = (np.sqrt(mu_0*res)*3*aniso**2*x*(zrec - zsrc) /
+                (4*np.pi*rsm**4))
+        gs1p = rev*np.sqrt(mu_0*res)*3*aniso**2*x*hp/(4*np.pi*rsp**4)
+        gs2m = mu_0*x*aniso*(zrec - zsrc)/(4*np.pi*rsm**3)
+        gs2p = rev*mu_0*x*aniso*hp/(4*np.pi*rsp**3)
 
     elif ab == 33:  # 3. {3, 3}
         # TM-mode
-        gs0m = res * aniso ** 3 * (3 * hsm ** 2 - rsm ** 2) / (4 * np.pi * rsm ** 5)
-        gs0p = -res * aniso ** 3 * (3 * hsp ** 2 - rsp ** 2) / (4 * np.pi * rsp ** 5)
-        gs1m = np.sqrt(mu_0 * res) * aniso ** 2 * (3 * hsm ** 2 - rsm ** 2) / (4 * np.pi * rsm ** 4)
-        gs1p = -np.sqrt(mu_0 * res) * aniso ** 2 * (3 * hsp ** 2 - rsp ** 2) / (4 * np.pi * rsp ** 4)
-        gs2m = mu_0 * aniso * (hsm ** 2 - rsm ** 2) / (4 * np.pi * rsm ** 3)
-        gs2p = -mu_0 * aniso * (hsp ** 2 - rsp ** 2) / (4 * np.pi * rsp ** 3)
+        gs0m = res*aniso**3*(3*hsm**2 - rsm**2)/(4*np.pi*rsm**5)
+        gs0p = -res*aniso**3*(3*hsp**2 - rsp**2)/(4*np.pi*rsp**5)
+        gs1m = np.sqrt(mu_0*res)*aniso**2*(3*hsm**2 - rsm**2)/(4*np.pi*rsm**4)
+        gs1p = -np.sqrt(mu_0*res)*aniso**2*(3*hsp**2 - rsp**2)/(4*np.pi*rsp**4)
+        gs2m = mu_0*aniso*(hsm**2 - rsm**2)/(4*np.pi*rsm**3)
+        gs2p = -mu_0*aniso*(hsp**2 - rsp**2)/(4*np.pi*rsp**3)
 
     # Direct field
-    direct_TM = gs0m * fs0m + gs1m * fs1m + gs2m * fs2m
-    direct_TE = g1m * f1m + g2m * f2m
+    direct_TM = gs0m*fs0m + gs1m*fs1m + gs2m*fs2m
+    direct_TE = g1m*f1m + g2m*f2m
     direct = direct_TM + direct_TE
 
     # Reflection
-    reflect_TM = gs0p * fs0p + gs1p * fs1p + gs2p * fs2p
-    reflect_TE = g0p * f0p + g1p * f1p + g2p * f2p
+    reflect_TM = gs0p*fs0p + gs1p*fs1p + gs2p*fs2p
+    reflect_TE = g0p*f0p + g1p*f1p + g2p*f2p
     reflect = reflect_TM + reflect_TE
 
     # If switch-off, subtract switch-on from DC value
     if signal == -1:
-        direct_TM = direct_TM[-1] - direct_TM[:-1]
-        direct_TE = direct_TE[-1] - direct_TE[:-1]
-        direct = direct[-1] - direct[:-1]
+        direct_TM = direct_TM[-1]-direct_TM[:-1]
+        direct_TE = direct_TE[-1]-direct_TE[:-1]
+        direct = direct[-1]-direct[:-1]
 
-        reflect_TM = reflect_TM[-1] - reflect_TM[:-1]
-        reflect_TE = reflect_TE[-1] - reflect_TE[:-1]
-        reflect = reflect[-1] - reflect[:-1]
+        reflect_TM = reflect_TM[-1]-reflect_TM[:-1]
+        reflect_TE = reflect_TE[-1]-reflect_TE[:-1]
+        reflect = reflect[-1]-reflect[:-1]
 
-        air = air[-1] - air[:-1]
+        air = air[-1]-air[:-1]
 
     # Return, depending on 'solution'
     if solution == 'dfs':

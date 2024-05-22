@@ -189,7 +189,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
           - `dlf`: string of filter name in :mod:`empymod.filters` or the
             filter method itself. (default:
-            :func:`empymod.filters.key_201_2009`)
+            ``empymod.filters.Hankel().key_201_2009``)
           - `pts_per_dec`: points per decade; (default: 0):
 
             - If 0: Standard DLF.
@@ -238,7 +238,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
           - `dlf`: string of filter name in :mod:`empymod.filters` or the
             filter method itself. (Default:
-            :func:`empymod.filters.key_201_CosSin_2012`)
+            ``empymod.filters.Fourier().key_201_2012``)
           - `pts_per_dec`: points per decade; (default: -1)
 
             - If 0: Standard DLF.
@@ -351,7 +351,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           ...:    direct field    :  Comp. in wavenumber domain
           ...:    frequency  [Hz] :  1
           ...:    Hankel          :  DLF (Fast Hankel Transform)
-          ...:      > Filter      :  Key 201 (2009)
+          ...:      > Filter      :  key_201_2009
           ...:      > DLF type    :  Standard
           ...:    Loop over       :  None (all vectorized)
           ...:    Source(s)       :  1 bipole(s)
@@ -954,6 +954,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
         - If rec is electric, returns E [V/m].
         - If rec is magnetic, returns H [A/m].
+        - If rec is an electric loop, returns B [T].
 
         EMArray is a subclassed ndarray with `.pha` and `.amp` attributes
         (only relevant for frequency-domain data).
@@ -991,7 +992,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
           ...:    direct field    :  Comp. in wavenumber domain
           ...:    frequency  [Hz] :  1
           ...:    Hankel          :  DLF (Fast Hankel Transform)
-          ...:      > Filter      :  Key 201 (2009)
+          ...:      > Filter      :  key_201_2009
           ...:      > DLF type    :  Standard
           ...:    Loop over       :  None (all vectorized)
           ...:    Source(s)       :  1 dipole(s)
