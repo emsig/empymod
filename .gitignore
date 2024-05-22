@@ -25,12 +25,3 @@ empymod/version.py
 build/
 dist/
 empymod.egg-info/
-.idea/empymod.iml
-.idea/inspectionProfiles/profiles_settings.xml
-.idea/inspectionProfiles/Project_Default.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-private-dev/tests.py
-private-dev/tests.py
-private-dev/tests.py
