@@ -63,7 +63,7 @@ efield = empymod.dipole(
 # ----
 
 # Create a similar colormap as Hunziker et al., 2015.
-cmap = plt.cm.get_cmap("jet", 61)
+cmap = plt.get_cmap("jet", 61)
 
 plt.figure(figsize=(9, 8))
 
