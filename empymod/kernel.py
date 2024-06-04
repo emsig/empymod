@@ -686,11 +686,10 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, dGam=None
 
                                 # Derivative of tRef of layer iz w.r.t. conductivity of iz + n*pm
                                 for n in range(1, idx + 1):  # recursively to iz + 2 and so on
-                                    npm = (n + 1)*pm
-                                    dRef[i, ii, iz, iv, iz + npm] = dRef[
-                                        i, ii, iz + n*pm, iv, iz + npm]  # Derivative w.r.t conductivity
-                                    for m in np.arange(0, idx):  # Derivative w.r.t. other Ref's of other layers
-                                        dRef[i, ii, iz, iv, iz + npm] *= dRef_dRepm[i, ii, iz + m*pm, iv]
+                                    dRef[i, ii, iz, iv, iz + (n + 1)*pm] = dRef[
+                                        i, ii, iz + n*pm, iv, iz + (n + 1)*pm]  # Derivative w.r.t conductivity
+                                    for m in np.arange(0, n):  # Derivative w.r.t. other Ref's of other layers
+                                        dRef[i, ii, iz, iv, iz + (n + 1)*pm] *= dRef_dRepm[i, ii, iz + m*pm, iv]
 
             # TODO: This is wat it used to be, now it returns all Ref's!
             # The global reflection coefficient is given back for all layers
