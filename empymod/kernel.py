@@ -600,15 +600,13 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, dGam=None
 
         # Pre-allocate Ref and rloc
         # The number of the reflection coeff = the number of the interfaces : nlayer - 1
-        Ref = np.zeros_like(
-            Gam[:, :, :nlayer, :])  # Stores Ref for each layer with source and receiver and inbetween
-        rloc = np.zeros_like(Gam[:, :, 0, :])  # TODO: Not all of them are needed, can be reduced (storing previous one)
+        Ref = np.zeros_like(Gam)  # Stores Ref for each layer with source and receiver and inbetween
+        rloc = np.zeros_like(Gam[:, :, 0, :])  # Not all of them are needed, can be reduced (storing previous one)
         if ana_deriv:
-            dRef = np.zeros(list(Gam[:, :, :nlayer, :].shape) + [nlayer],
-                            dtype=Gam.dtype)  # fifth dimension for derivative of dRef[i, ii, izout, iv] w.r.t. cond_n
+            dRef = np.zeros(list(Gam.shape) + [nlayer],dtype=Gam.dtype)  # fifth dimension for derivative of dRef[i, ii, izout, iv] w.r.t. cond_n
             drloc = np.zeros_like(Gam[:, :, 0, :], dtype=Gam.dtype)  # within layer n w.r.t. cond of layer n
             drloc_pm = np.zeros_like(Gam[:, :, 0, :], dtype=Gam.dtype)  # within layer n w.r.t. cond of layer n + pm
-            dRef_dRepm = np.zeros_like(Gam[:, :, :nlayer, :], dtype=Gam.dtype)
+            dRef_dRepm = np.zeros_like(Gam, dtype=Gam.dtype)
 
         # Calculate the reflection
         for idx, iz in enumerate(layer_count):
@@ -648,8 +646,6 @@ def reflections(depth, e_zH, Gam, lrec, lsrc, ana_deriv: bool = False, dGam=None
                     # So, I guess, we are forgetting one contribution, namely \partial R_{n} / \partial \sigma_{n+1}
                     # R_{n} explicitly depends on \sigma_{n+1} via rloc_{n}.
                     # I think, in the current implementation, we totally ignore the conductivity in the last layer, except via drloc_pm.
-
-
             else:
                 ddepth = depth[iz + 1 + pm] - depth[iz + pm]
 
@@ -882,8 +878,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM, ana_deriv: bool = False
                                 t7 = tRmp/M
                                 t9 = pm*tRpm*tRmp/M
 
-                                for v in range(
-                                        nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
+                                for v in range(nlayer):  # TODO: number of iterations may be reduced. Check the layers to iterate over
                                     if v == lsrc:
                                         dgam = dGam[i, ii, v, iv]
                                     else:
