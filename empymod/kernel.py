@@ -509,12 +509,12 @@ def reflections(depth, e_zH, Gam, lrec, lsrc):
 
         # Store Ref in Rm/Rp
         if plus:
-            Rm = out
-        else:
             Rp = out
+        else:
+            Rm = out
 
     # Return reflections (minus and plus)
-    return Rm, Rp
+    return Rp, Rm
 
 
 @nb.njit(**_numba_setting)
