@@ -116,6 +116,7 @@ html_theme_options = {
     "external_links": [
         {"name": "emsig", "url": "https://emsig.xyz"},
     ],
+    'navigation_with_keys': True,
     # "use_edit_page_button": True,
 }
 

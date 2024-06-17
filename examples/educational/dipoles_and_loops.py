@@ -263,7 +263,7 @@ def plot_result(data1, data2, x, title, vmin=-15., vmax=-7., rx=0):
     error_r = np.abs((data1.real-data2.real)/data1.real)*100
     cf2 = plt.pcolormesh(rx, rx, np.log10(error_r), vmin=-2, vmax=2,
                          linewidth=0, rasterized=True,
-                         cmap=plt.cm.get_cmap("RdBu_r", 8),
+                         cmap=plt.get_cmap("RdBu_r", 8),
                          shading='nearest')
 
     # Plot Im(data)
@@ -284,7 +284,7 @@ def plot_result(data1, data2, x, title, vmin=-15., vmax=-7., rx=0):
     error_i = np.abs((data1.imag-data2.imag)/data1.imag)*100
     plt.pcolormesh(rx, rx, np.log10(error_i), vmin=-2, vmax=2,
                    linewidth=0, rasterized=True,
-                   cmap=plt.cm.get_cmap("RdBu_r", 8),
+                   cmap=plt.get_cmap("RdBu_r", 8),
                    shading='nearest')
 
     # Colorbars

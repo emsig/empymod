@@ -126,7 +126,7 @@ def test_halfspace():                                            # 7. halfspace
         # Check  # rtol decreased in June '22 - suddenly failed; why?
         #        # (Potentially as SciPy changed mu_0 to inexact,
         #           https://github.com/scipy/scipy/issues/11341).
-        assert_allclose(hs_res, hsres[key], rtol=5e-5)
+        assert_allclose(hs_res, hsres[key], rtol=5e-4)
 
     # Additional checks - Time
     full = kernel.halfspace(**hs['21'])

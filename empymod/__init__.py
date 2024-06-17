@@ -32,7 +32,7 @@ from empymod.utils import EMArray, set_minimum, get_minimum, Report
 from empymod.scripts import fdesign, tmtemod
 from empymod.model import analytical, gpr, dipole_k, fem, tem
 
-__all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts',
+__all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts', 'io',
            'bipole', 'dipole', 'loop', 'EMArray', 'set_minimum', 'get_minimum',
            'DigitalFilter', 'Report']
 
