@@ -32,3 +32,9 @@ Open-source full 3D electromagnetic modeller for 1D VTI media
 
 Available through ``conda`` and ``pip``; consult the `documentation
 <https://empymod.emsig.xyz>`_ for detailed installation instructions.
+
+**Wrappers**
+
+- A Julia wrapper for empymod was created by `@ruboerner
+  <https://github.com/ruboerner>`_ and is available from
+  https://github.com/ruboerner/EmpymodWrapper.jl.

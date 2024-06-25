@@ -10,6 +10,16 @@ v2.3.x
 """"""
 
 
+v2.3.1: Julia wrapper
+---------------------
+
+**2024-06-25**
+
+- @ruboerner created a Julia wrapper for empymod! Added a note in this regard
+  to the README and the installation instructions.
+- Small maintenance things and doc improvements.
+
+
 v2.3.0: libdlf and scooby
 -------------------------
 

@@ -39,3 +39,8 @@ folder ``path-to-your-conda-env/conda-meta/``.
     Until v2 empymod did not use Numba but instead optionally NumExpr. Use
     **v1.10.x** if you cannot use Numba or want to use NumExpr. However, no
     new features will land in v1, only bugfixes.
+
+.. admonition:: Julia wrapper
+
+    A Julia wrapper for empymod was created by @ruboerner and is available from
+    `github.com/ruboerner/EmpymodWrapper.jl <https://github.com/ruboerner/EmpymodWrapper.jl>`_.
