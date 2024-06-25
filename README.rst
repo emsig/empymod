@@ -34,5 +34,6 @@ Available through ``conda`` and ``pip``; consult the `documentation
 <https://empymod.emsig.xyz>`_ for detailed installation instructions.
 
 **Wrappers**
+
 - A Julia wrapper for empymod was created by @ruboerner and is available from
   https://github.com/ruboerner/EmpymodWrapper.jl.
