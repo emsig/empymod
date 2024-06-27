@@ -130,10 +130,8 @@ jobs:
           pytest --cov=empymod ${{ matrix.case.test }}
 
       - name: Coveralls
-        # [pin v20201129]
-        uses: AndreMiras/coveralls-python-action@f5fd5c309b39d01599fb92c72d4f7409ea78aec9
-        # v Did not work when tried; final coverage was wrong v
-        # uses: coverallsapp/github-action@v2
+        # [pin @develop@20230609]
+        uses: AndreMiras/coveralls-python-action@65c1672f0b8a201702d86c81b79187df74072505
         with:
           parallel: true
           flag-name: ${{ matrix.case.python-version }} ${{ matrix.case.name }} (${{ matrix.case.os }})
@@ -144,10 +142,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      # [pin v20201129]
-      uses: AndreMiras/coveralls-python-action@f5fd5c309b39d01599fb92c72d4f7409ea78aec9
-      # v Did not work when tried; final coverage was wrong v
-      # uses: coverallsapp/github-action@v2
+      # [pin @develop@20230609]
+      uses: AndreMiras/coveralls-python-action@65c1672f0b8a201702d86c81b79187df74072505
       with:
         parallel-finished: true
 
