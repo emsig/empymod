@@ -142,8 +142,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-        # [pin @develop@20230609]
-        uses: AndreMiras/coveralls-python-action@65c1672f0b8a201702d86c81b79187df74072505
+      # [pin @develop@20230609]
+      uses: AndreMiras/coveralls-python-action@65c1672f0b8a201702d86c81b79187df74072505
       with:
         parallel-finished: true
 
