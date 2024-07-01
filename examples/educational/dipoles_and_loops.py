@@ -122,7 +122,7 @@ loo_dip_on = empymod.loop(signal=1, **inp)
 fs = 16  # Fontsize
 
 # Figure
-fig = plt.figure(figsize=(12, 8))
+fig = plt.figure(figsize=(12, 8), constrained_layout=True)
 
 # Frequency Domain
 plt.subplot(231)
@@ -198,10 +198,8 @@ plt.text(1.05, 0.5, "Time Domain", {'fontsize': fs},
          rotation=-90, clip_on=False, transform=plt.gca().transAxes)
 
 fig.text(-0.01, 0.5, 'Amplitude; e-rec (V/m); m-rec (A/m)',
-         va='center', rotation='vertical', fontsize=fs, color='.4')
+         va='center', rotation='vertical', fontsize=fs, color='.4');
 
-plt.tight_layout()
-plt.show()
 
 ###############################################################################
 # The figure shows the main points of Equations (2) and (3):
@@ -299,8 +297,7 @@ def plot_result(data1, data2, x, title, vmin=-15., vmax=-7., rx=0):
     fig.text(0.08, 0.5, 'Crossline Offset (m)', rotation=90, fontsize=14)
 
     # Title
-    fig.suptitle(title, y=.95, fontsize=20)
-    plt.show()
+    fig.suptitle(title, y=.95, fontsize=20);
 
 
 ###############################################################################

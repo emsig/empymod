@@ -62,9 +62,7 @@ plt.plot(pani, pdepth, 'k')
 plt.xlim([0, 2])
 plt.ylim([1.5*depth[-1], -100])
 plt.xlabel(r'Anisotropy $\lambda (-)$')
-ax2.yaxis.tick_right()
-
-plt.show()
+ax2.yaxis.tick_right();
 
 ###############################################################################
 # 1. Frequency response for f = 1 Hz
@@ -102,10 +100,7 @@ ax2 = plt.subplot(2, 2, 2)
 plt.title(r'Phase ($^\circ$)')
 plt.plot(fx/1000, fEMBG.pha(deg=True), label='BG')
 plt.plot(fx/1000, fEM.pha(deg=True), label='Anomaly')
-plt.xlabel('Offset (km)')
-
-plt.show()
-
+plt.xlabel('Offset (km)');
 
 ###############################################################################
 # 2. Crossplot
@@ -167,9 +162,7 @@ plt.xlabel('Offset (km)')
 plt.ylabel('Frequency (Hz)')
 plt.yticks([-1.5, -1, -.5, 0, .5], ('0.03', '0.10', '0.32', '1.00', '3.16'))
 
-fig.suptitle(name+': src-x, rec-x', fontsize=18, y=1.05)
-
-plt.show()
+fig.suptitle(name+': src-x, rec-x', fontsize=18, y=1.05);
 
 ###############################################################################
 

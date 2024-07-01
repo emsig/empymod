@@ -62,9 +62,7 @@ plt.plot(pani, pdepth, 'k')
 plt.xlim([0, 2])
 plt.ylim([1.5*depth[-1], -100])
 plt.xlabel(r'Anisotropy $\lambda (-)$')
-ax2.yaxis.tick_right()
-
-plt.show()
+ax2.yaxis.tick_right();
 
 ###############################################################################
 # Frequency response for f = 1 Hz
@@ -112,9 +110,7 @@ plt.plot(fx/1000, fEMBG.pha(deg=True), label='BG')
 plt.plot(fx/1000, fEM.pha(deg=True), label='Anomaly')
 plt.plot(fx/1000, fEMBGbp.pha(deg=True), '--', label='BG bipole')
 plt.plot(fx/1000, fEMbp.pha(deg=True), '--', label='Anomaly bipole')
-plt.xlabel('Offset (km)')
-
-plt.show()
+plt.xlabel('Offset (km)');
 
 ###############################################################################
 

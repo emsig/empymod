@@ -95,10 +95,7 @@ plt.suptitle('Analytical fullspace solution\nDifference between full ' +
 cax, kw = plt.matplotlib.colorbar.make_axes(
         [axs[0], axs[1]], location='right', fraction=.05, pad=0.05, aspect=20)
 cb = plt.colorbar(cf2, cax=cax, ticks=10**(-(np.arange(13.)[::-1])+2), **kw)
-cb.set_label(r'Relative Error $(\%)$')
-
-# Show
-plt.show()
+cb.set_label(r'Relative Error $(\%)$');
 
 ###############################################################################
 

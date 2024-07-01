@@ -91,9 +91,7 @@ plt.semilogy(-1, 1, 'C0-', label='Target')     # "
 plt.legend()
 plt.xlabel('Offset (km)')
 plt.ylim([1e-17, 1e-9])
-plt.xlim([0, 15])
-
-plt.show()
+plt.xlim([0, 15]);
 
 ###############################################################################
 # The result shows that mainly the TM-mode contributions are sensitive to the
@@ -122,9 +120,7 @@ plt.legend()
 plt.xlabel('Offset (km)')
 plt.ylabel('Electric field amplitude (V/m)')
 plt.ylim([1e-17, 1e-9])
-plt.xlim([0, 15])
-
-plt.show()
+plt.xlim([0, 15]);
 
 ###############################################################################
 

@@ -75,8 +75,7 @@ plt.plot(np.r_[0, t], np.r_[0, imtg/ntg], 'r', label='Hydrocarbon reservoir')
 plt.axis([-.02, 0.06, 0, 1.02])
 plt.xlabel('Time (s)')
 plt.ylabel(r'Normalized derivative ($\Omega$/m$^2$/s)')
-plt.legend()
-plt.show()
+plt.legend();
 
 ###############################################################################
 # Original Figure

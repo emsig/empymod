@@ -143,7 +143,7 @@ print('Rel. error 5 pt DLF ::', ' %   ; '.join(
       [f'{i:G}' for i in np.round(relerror*100, 1)]), '%')
 
 # Figure
-plt.figure(figsize=(10, 4))
+plt.figure(figsize=(10, 4), constrained_layout=True)
 plt.suptitle(r'DLF example for $J_0$ Hankel transform using 5 pt filter',
              y=1.05)
 
@@ -169,10 +169,7 @@ for i, val in enumerate(x):
     plt.loglog(val, x_val_filt[i], 'o', label='5 pt DLF output x = '+str(val))
 plt.legend()
 plt.xlabel(r'$x$')
-plt.xlim([x_x.min(), x_x.max()])
-
-plt.tight_layout()
-plt.show()
+plt.xlim([x_x.min(), x_x.max()]);
 
 ###############################################################################
 # 3. Difference between standard, lagged convolution, and splined DLF
@@ -250,9 +247,7 @@ plt.ylim([-0.1, 1.1])
 plt.gca().twinx()
 plt.yticks([0, 1], (r'$x-f$', r'$x-t$'))
 plt.ylabel('Fourier transform')
-plt.ylim([-0.1, 1.1])
-
-plt.show()
+plt.ylim([-0.1, 1.1]);
 
 ###############################################################################
 # 3.2 Lagged Convolution DLF
@@ -328,9 +323,7 @@ plt.ylim([-0.1, 1.1])
 plt.gca().twinx()
 plt.yticks([0, 0.5, 1], (r'$x-f$', r'$x-t$', r'$x-t$'))
 plt.ylabel('Fourier transform')
-plt.ylim([-0.1, 1.1])
-
-plt.show()
+plt.ylim([-0.1, 1.1]);
 
 ###############################################################################
 # 3.3 Splined DLF
@@ -406,9 +399,7 @@ plt.ylim([-0.1, 1.1])
 plt.gca().twinx()
 plt.yticks([0, 0.5, 1], (r'$x-f$', r'$x-f$', r'$x-t$'))
 plt.ylabel('Fourier transform')
-plt.ylim([-0.1, 1.1])
-
-plt.show()
+plt.ylim([-0.1, 1.1]);
 
 ###############################################################################
 # 4. Example for the Hankel transform
@@ -497,10 +488,7 @@ plt.semilogy(x/1000, np.abs((laggedco-resp)/resp), label='Lagged')
 plt.semilogy(x/1000, np.abs((spline10-resp)/resp), label='Splined 10/dec')
 plt.semilogy(x/1000, np.abs((spline30-resp)/resp), label='Splined 30/dec')
 plt.semilogy(x/1000, np.abs((splin100-resp)/resp), label='Splined 100/dec')
-plt.xlabel('Offset (km)')
-
-plt.tight_layout()
-plt.show()
+plt.xlabel('Offset (km)');
 
 ###############################################################################
 # Runtimes and number of required wavenumbers for each method:
@@ -608,10 +596,7 @@ plt.semilogy(t, np.abs((tstandard-tresp)/tresp), label='Standard')
 plt.semilogy(t, np.abs((tlaggedco-tresp)/tresp), label='Lagged')
 plt.semilogy(t, np.abs((tsplined4-tresp)/tresp), label='Splined 4/dec')
 plt.semilogy(t, np.abs((tspline10-tresp)/tresp), label='Splined 10/dec')
-plt.xlabel('Time (s)')
-
-plt.tight_layout()
-plt.show()
+plt.xlabel('Time (s)');
 
 ###############################################################################
 # Runtimes and number of required frequencies for each method:

@@ -193,7 +193,7 @@ def repeated(ax, pm):
 ###############################################################################
 
 # Create figure
-fig = plt.figure(figsize=(8, 3.5))
+fig = plt.figure(figsize=(8, 3.5), constrained_layout=True)
 
 # Left-handed system
 ax1 = fig.add_subplot(121, projection=Axes3D.name, facecolor='w')
@@ -209,10 +209,7 @@ ax2.axis('off')
 plt.title('Right-handed system (RHS)\nfor positive $z$ upwards', fontsize=12)
 ax2.text(7, 0, -5, r"$-\varphi$", color='C1', fontsize=14)
 
-repeated(ax2, 1)
-
-plt.tight_layout()
-plt.show()
+repeated(ax2, 1);
 
 
 ###############################################################################
@@ -274,7 +271,7 @@ rhs = empymod.dipole(
 # Plotting the two confirms that the results agree, no matter if we use the LHS
 # or the RHS definition.
 
-plt.figure(figsize=(9, 4))
+plt.figure(figsize=(9, 4), constrained_layout=True)
 
 ax1 = plt.subplot(121)
 plt.title('Real')
@@ -298,10 +295,7 @@ plt.xlabel('Offset (km)')
 plt.ylabel('$E_x$ (V/m)')
 plt.legend()
 ax2.yaxis.set_label_position("right")
-ax2.yaxis.tick_right()
-
-plt.tight_layout()
-plt.show()
+ax2.yaxis.tick_right();
 
 
 ###############################################################################
@@ -336,10 +330,7 @@ plt.plot(times, lhs, 'C0', label='LHS')
 plt.plot(times, rhs, 'C1--', label='RHS')
 plt.xlabel('Time (s)')
 plt.ylabel('$E_x$ (V/m)')
-plt.legend()
-
-plt.show()
-
+plt.legend();
 
 ###############################################################################
 # Bipole [x, y, z, azimuth, dip]
@@ -371,10 +362,7 @@ plt.plot(times, lhs, 'C0', label='LHS')
 plt.plot(times, rhs, 'C1--', label='RHS')
 plt.xlabel('Time (s)')
 plt.ylabel('$E_x$ (V/m)')
-plt.legend()
-
-plt.show()
-
+plt.legend();
 
 ###############################################################################
 

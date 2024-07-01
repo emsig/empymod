@@ -121,9 +121,7 @@ def plotit(depth, a, n, res1, res2, res3, title):
     plt.legend(loc='best')
     plt.title(title)
     plt.xlabel('AB/2 (m)')
-    plt.ylabel(r'Apparent resistivity $\rho_a (\Omega\,$m)')
-
-    plt.show()
+    plt.ylabel(r'Apparent resistivity $\rho_a (\Omega\,$m)');
 
 
 ###############################################################################

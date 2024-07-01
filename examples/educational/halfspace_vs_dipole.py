@@ -55,8 +55,7 @@ for ab in all_abs:
     EM = empymod.dipole(**inpEMdip, **modHS, ab=ab, signal=0, depth=0)
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab, signal=0)
     plot_t(EM, HS, 'Impulse HS', i)
-plt.suptitle('Impulse HS')
-plt.show()
+plt.suptitle('Impulse HS');
 
 ###############################################################################
 # Switch-on HS
@@ -68,8 +67,7 @@ for ab in all_abs:
     EM = empymod.dipole(**inpEMdip, **modHS, ab=ab, signal=1, depth=0)
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab, signal=1)
     plot_t(EM, HS, 'Switch-on HS', i)
-plt.suptitle('Switch-on HS')
-plt.show()
+plt.suptitle('Switch-on HS');
 
 ###############################################################################
 # Switch-off HS
@@ -81,8 +79,7 @@ for ab in all_abs:
     EM = empymod.dipole(**inpEMdip, **modHS, ab=ab, signal=-1, depth=0)
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab, signal=-1)
     plot_t(EM, HS, 'Switch-off HS', i)
-plt.suptitle('Switch-off HS')
-plt.show()
+plt.suptitle('Switch-off HS');
 
 ###############################################################################
 # Impulse FS
@@ -94,8 +91,7 @@ for ab in all_abs:
     EM = empymod.dipole(**inpEMdip, **modFS, ab=ab, signal=0, depth=[])
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab, signal=0)
     plot_t(EM, HS, 'Impulse FS', i)
-plt.suptitle('Impulse FS')
-plt.show()
+plt.suptitle('Impulse FS');
 
 ###############################################################################
 # Switch-on FS
@@ -107,8 +103,7 @@ for ab in all_abs:
     EM = empymod.dipole(**inpEMdip, **modFS, ab=ab, signal=1, depth=[])
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab, signal=1)
     plot_t(EM, HS, 'Switch-on FS', i)
-plt.suptitle('Switch-on FS')
-plt.show()
+plt.suptitle('Switch-on FS');
 
 ###############################################################################
 # Switch-off FS
@@ -122,8 +117,7 @@ for ab in all_abs:
     EM = empymod.dipole(**inpEMdip, **modFS, ab=ab, signal=-1, depth=[])
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab, signal=-1)
     plot_t(EM, HS, 'Switch-off FS', i)
-plt.suptitle('Switch-off FS')
-plt.show()
+plt.suptitle('Switch-off FS');
 
 ###############################################################################
 # Frequency domain
@@ -152,8 +146,7 @@ for ab in all_abs:
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab)
     plot_f(EM, HS, 'Frequency HS', i)
 plt.figure('Frequency HS')
-plt.suptitle('Frequency HS')
-plt.show()
+plt.suptitle('Frequency HS');
 
 ###############################################################################
 # Fullspace
@@ -165,8 +158,7 @@ for ab in all_abs:
     EM = empymod.dipole(**inpEMdip, **modFS, ab=ab, depth=[])
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab)
     plot_f(EM, HS, 'Frequency FS', i)
-plt.suptitle('Frequency FS')
-plt.show()
+plt.suptitle('Frequency FS');
 
 ###############################################################################
 

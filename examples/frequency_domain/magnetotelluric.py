@@ -184,7 +184,7 @@ phase_empy = np.arctan2(Z.imag, Z.real)
 # Plot results
 # ------------
 #
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4), constrained_layout=True)
 
 ax1.set_title('Apparent resistivity')
 ax1.plot(frequencies, apres_mt1d, label='MT-1D')
@@ -202,10 +202,7 @@ ax2.set_xscale('log')
 ax2.yaxis.tick_right()
 ax2.set_xlabel('Frequency (Hz)')
 ax2.set_ylabel('Phase (degree)')
-ax2.yaxis.set_label_position("right")
-
-fig.tight_layout()
-fig.show()
+ax2.yaxis.set_label_position("right");
 
 
 ###############################################################################

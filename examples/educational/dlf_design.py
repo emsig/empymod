@@ -112,9 +112,7 @@ def plotresult(depth, res, zsrc, zrec):
     plt.legend()
     plt.xticks([0, 5e3, 10e3, 15e3, 20e3])
     plt.xlim([0, 20e3])
-    plt.ylim([1e-14, 1])
-
-    plt.show()
+    plt.ylim([1e-14, 1]);
 
 
 ###############################################################################

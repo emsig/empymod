@@ -107,9 +107,7 @@ plt.suptitle('Comparison of all source-receiver combinations, electric ' +
              'and magnetic', y=0.93, fontsize=16)
 fig.text(0.5, 0.18, 'X-Offset (km)', ha='center', fontsize=14)
 fig.text(0.01, 0.5, 'Y-Offset (km)', va='center', rotation='vertical',
-         fontsize=14)
-
-plt.show()
+         fontsize=14);
 
 ###############################################################################
 

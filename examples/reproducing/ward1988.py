@@ -186,9 +186,7 @@ plt.xlim([1e-5, 1e3])
 plt.yticks(10**np.arange(-11., 0))
 plt.ylim([1e-11, 1e-1])
 plt.xlabel('time (ms)')
-plt.legend()
-
-plt.show()
+plt.legend();
 
 ###############################################################################
 # Original Figure
@@ -219,7 +217,7 @@ inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
 fhz_num = empymod.loop(**inp)
 
 # Figure
-plt.figure(figsize=(5, 5))
+plt.figure(figsize=(5, 5), constrained_layout=True)
 
 plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
 plt.plot(freq, pos(-fhz_num.real), 'C0--')
@@ -233,11 +231,7 @@ plt.xlim([1e-1, 1e5])
 plt.ylim([1e-12, 1e-6])
 plt.xlabel('FREQUENCY (Hz)')
 plt.ylabel('$H_z$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-
-plt.show()
+plt.legend();
 
 ###############################################################################
 # Original Figure
@@ -261,7 +255,7 @@ inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
 fhz_num = empymod.loop(**inp)
 
 # Figure
-plt.figure(figsize=(5, 5))
+plt.figure(figsize=(5, 5), constrained_layout=True)
 
 plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
 plt.plot(freq, pos(-fhz_num.real), 'C0--')
@@ -275,11 +269,7 @@ plt.xlim([1e-1, 1e5])
 plt.ylim([1e-12, 1e-6])
 plt.xlabel('FREQUENCY (Hz)')
 plt.ylabel(r'$H_{\rho}$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-
-plt.show()
+plt.legend();
 
 ###############################################################################
 # Original Figure
@@ -303,7 +293,7 @@ fhz_num = empymod.loop(signal=1, **inp)
 fdhz_num = empymod.loop(signal=0, **inp)
 
 # Figure
-plt.figure(figsize=(5, 6))
+plt.figure(figsize=(5, 6), constrained_layout=True)
 
 ax1 = plt.subplot(111)
 plt.plot(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
@@ -329,10 +319,7 @@ plt.xlim([1e-3, 2e3])
 plt.yticks(10**np.arange(-16., -7))
 plt.ylim([1e-17, 1e-7])
 plt.ylabel(r'$h_{\rho}$ (A/m)')
-plt.legend(loc=5)
-
-plt.tight_layout()
-plt.show()
+plt.legend(loc=5);
 
 ###############################################################################
 # Original Figure
@@ -361,7 +348,7 @@ inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
 fhz_num = empymod.bipole(**inp)
 
 # Figure
-plt.figure(figsize=(5, 5))
+plt.figure(figsize=(5, 5), constrained_layout=True)
 
 plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
 plt.plot(freq, pos(-fhz_num.real), 'C0--')
@@ -375,11 +362,7 @@ plt.xlim([1e-1, 1e6])
 plt.ylim([1e-8, 1e-1])
 plt.xlabel('frequency (Hz)')
 plt.ylabel('$H_z$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-
-plt.show()
+plt.legend();
 
 ###############################################################################
 # Original Figure
@@ -410,7 +393,7 @@ fhz_num = empymod.bipole(signal=-1, **inp)
 fdhz_num = empymod.bipole(signal=0, **inp)
 
 # Figure
-plt.figure(figsize=(4, 6))
+plt.figure(figsize=(4, 6), constrained_layout=True)
 
 ax1 = plt.subplot(111)
 plt.plot(time*1e3, pos(fdhz_num), 'C0-', label=r'dhz/dt (A/m-s)')
@@ -426,10 +409,7 @@ plt.yticks(10**np.arange(-7., 4))
 plt.ylim([1e-7, 5e3])
 
 plt.xlabel('time (ms)')
-plt.legend()
-
-plt.tight_layout()
-plt.show()
+plt.legend();
 
 ###############################################################################
 # Original Figure
@@ -453,7 +433,7 @@ inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
 fhz_num = empymod.loop(**inp)
 
 # Figure
-plt.figure(figsize=(5, 5))
+plt.figure(figsize=(5, 5), constrained_layout=True)
 
 plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
 plt.plot(freq, pos(-fhz_num.real), 'C0--')
@@ -467,11 +447,7 @@ plt.xlim([1e-2, 1e5])
 plt.ylim([1e-13, 1e-6])
 plt.xlabel('frequency (Hz)')
 plt.ylabel('$H_z$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-
-plt.show()
+plt.legend();
 
 ###############################################################################
 # Original Figure
@@ -495,7 +471,7 @@ inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
 fhz_num = empymod.loop(**inp)
 
 # Figure
-plt.figure(figsize=(5, 5))
+plt.figure(figsize=(5, 5), constrained_layout=True)
 
 plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
 plt.plot(freq, pos(-fhz_num.real), 'C0--')
@@ -509,10 +485,7 @@ plt.xlim([1e-2, 1e5])
 plt.ylim([1e-13, 1e-6])
 plt.xlabel('Frequency (Hz)')
 plt.ylabel(r'$H_{\rho}$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-plt.show()
+plt.legend();
 
 ###############################################################################
 # Original Figure
@@ -537,7 +510,7 @@ fhz_num = empymod.loop(signal=1, **inp)
 fdhz_num = empymod.loop(signal=0, **inp)
 
 # Figure
-plt.figure(figsize=(5, 5))
+plt.figure(figsize=(5, 5), constrained_layout=True)
 
 ax1 = plt.subplot(111)
 
@@ -564,10 +537,7 @@ plt.xlim([1e-4, 1e3])
 plt.yticks(10**np.arange(-14., -3))
 plt.ylim([1e-14, 1e-4])
 plt.ylabel(r'$h_{\rho}$ (A/m)')
-plt.legend(loc=5)
-
-plt.tight_layout()
-plt.show()
+plt.legend(loc=5);
 
 ###############################################################################
 # Original Figure
@@ -592,7 +562,7 @@ fhz_num = empymod.loop(signal=1, **inp)
 fdhz_num = empymod.loop(signal=0, **inp)
 
 # Figure
-plt.figure(figsize=(5, 5))
+plt.figure(figsize=(5, 5), constrained_layout=True)
 
 ax1 = plt.subplot(111)
 
@@ -619,10 +589,7 @@ plt.xlim([1e-4, 1e3])
 plt.yticks(10**np.arange(-16., -5))
 plt.ylim([1e-16, 1e-6])
 plt.ylabel(r'$h_{\rho}$ (A/m)')
-plt.legend(loc=5)
-
-plt.tight_layout()
-plt.show()
+plt.legend(loc=5);
 
 ###############################################################################
 # Original Figure
