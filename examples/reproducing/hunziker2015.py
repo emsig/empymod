@@ -83,7 +83,7 @@ plt.xlabel('Offset (km)')
 plt.ylabel('Offset (km)')
 plt.pcolormesh(x/1e3, y/1e3, efield.pha(deg=False, unwrap=False, lag=True),
                cmap=cmap, vmin=-np.pi, vmax=np.pi, shading='nearest')
-plt.colorbar();
+plt.colorbar()
 
 
 ###############################################################################

@@ -186,7 +186,7 @@ plt.xlim([1e-5, 1e3])
 plt.yticks(10**np.arange(-11., 0))
 plt.ylim([1e-11, 1e-1])
 plt.xlabel('time (ms)')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 # Original Figure
@@ -231,7 +231,7 @@ plt.xlim([1e-1, 1e5])
 plt.ylim([1e-12, 1e-6])
 plt.xlabel('FREQUENCY (Hz)')
 plt.ylabel('$H_z$ (A/m)')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 # Original Figure
@@ -269,7 +269,7 @@ plt.xlim([1e-1, 1e5])
 plt.ylim([1e-12, 1e-6])
 plt.xlabel('FREQUENCY (Hz)')
 plt.ylabel(r'$H_{\rho}$ (A/m)')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 # Original Figure
@@ -319,7 +319,7 @@ plt.xlim([1e-3, 2e3])
 plt.yticks(10**np.arange(-16., -7))
 plt.ylim([1e-17, 1e-7])
 plt.ylabel(r'$h_{\rho}$ (A/m)')
-plt.legend(loc=5);
+plt.legend(loc=5)
 
 ###############################################################################
 # Original Figure
@@ -362,7 +362,7 @@ plt.xlim([1e-1, 1e6])
 plt.ylim([1e-8, 1e-1])
 plt.xlabel('frequency (Hz)')
 plt.ylabel('$H_z$ (A/m)')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 # Original Figure
@@ -409,7 +409,7 @@ plt.yticks(10**np.arange(-7., 4))
 plt.ylim([1e-7, 5e3])
 
 plt.xlabel('time (ms)')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 # Original Figure
@@ -447,7 +447,7 @@ plt.xlim([1e-2, 1e5])
 plt.ylim([1e-13, 1e-6])
 plt.xlabel('frequency (Hz)')
 plt.ylabel('$H_z$ (A/m)')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 # Original Figure
@@ -485,7 +485,7 @@ plt.xlim([1e-2, 1e5])
 plt.ylim([1e-13, 1e-6])
 plt.xlabel('Frequency (Hz)')
 plt.ylabel(r'$H_{\rho}$ (A/m)')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 # Original Figure
@@ -537,7 +537,7 @@ plt.xlim([1e-4, 1e3])
 plt.yticks(10**np.arange(-14., -3))
 plt.ylim([1e-14, 1e-4])
 plt.ylabel(r'$h_{\rho}$ (A/m)')
-plt.legend(loc=5);
+plt.legend(loc=5)
 
 ###############################################################################
 # Original Figure
@@ -589,7 +589,7 @@ plt.xlim([1e-4, 1e3])
 plt.yticks(10**np.arange(-16., -5))
 plt.ylim([1e-16, 1e-6])
 plt.ylabel(r'$h_{\rho}$ (A/m)')
-plt.legend(loc=5);
+plt.legend(loc=5)
 
 ###############################################################################
 # Original Figure

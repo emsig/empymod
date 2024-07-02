@@ -83,7 +83,7 @@ plt.semilogx(t, res_1, label=r'$\varepsilon_{air}=1$')
 plt.semilogx(t, res_0, label=r'$\varepsilon_{air}=0$')
 plt.xlabel(r'Time $[s]$')
 plt.ylabel(r'Amplitude $[V/(m\,s)]$')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 # Version 1.7.0 and older

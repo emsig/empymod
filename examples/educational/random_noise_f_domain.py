@@ -209,7 +209,7 @@ for ax in axs:
     ax.set_aspect('equal')
     ax.set_ylabel('Imaginary part')
     ax.set_xlim([-4, 10])
-ax2.set_xlabel('Real part');
+ax2.set_xlabel('Real part')
 
 
 ###############################################################################

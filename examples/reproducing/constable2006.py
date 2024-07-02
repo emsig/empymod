@@ -111,7 +111,7 @@ plt.plot(x/1000, np.abs(rtg/rhs), 'k', label='Radial')
 plt.plot(x/1000, np.abs(atg/ahs), 'k--', label='Azimuthal')
 plt.axis([0, 20, 0, 70])
 plt.xlabel('Range (km)')
-plt.legend();
+plt.legend()
 
 _ = np.seterr(**oldsettings)
 

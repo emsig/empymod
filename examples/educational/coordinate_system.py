@@ -209,7 +209,7 @@ ax2.axis('off')
 plt.title('Right-handed system (RHS)\nfor positive $z$ upwards', fontsize=12)
 ax2.text(7, 0, -5, r"$-\varphi$", color='C1', fontsize=14)
 
-repeated(ax2, 1);
+repeated(ax2, 1)
 
 
 ###############################################################################
@@ -295,7 +295,7 @@ plt.xlabel('Offset (km)')
 plt.ylabel('$E_x$ (V/m)')
 plt.legend()
 ax2.yaxis.set_label_position("right")
-ax2.yaxis.tick_right();
+ax2.yaxis.tick_right()
 
 
 ###############################################################################
@@ -330,7 +330,7 @@ plt.plot(times, lhs, 'C0', label='LHS')
 plt.plot(times, rhs, 'C1--', label='RHS')
 plt.xlabel('Time (s)')
 plt.ylabel('$E_x$ (V/m)')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 # Bipole [x, y, z, azimuth, dip]
@@ -362,7 +362,7 @@ plt.plot(times, lhs, 'C0', label='LHS')
 plt.plot(times, rhs, 'C1--', label='RHS')
 plt.xlabel('Time (s)')
 plt.ylabel('$E_x$ (V/m)')
-plt.legend();
+plt.legend()
 
 ###############################################################################
 

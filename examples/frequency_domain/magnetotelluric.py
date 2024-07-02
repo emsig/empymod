@@ -202,7 +202,7 @@ ax2.set_xscale('log')
 ax2.yaxis.tick_right()
 ax2.set_xlabel('Frequency (Hz)')
 ax2.set_ylabel('Phase (degree)')
-ax2.yaxis.set_label_position("right");
+ax2.yaxis.set_label_position("right")
 
 
 ###############################################################################

@@ -71,7 +71,7 @@ plt.plot(freq, 1e9*fresp.imag, 'C1.', label='Req. imag frequencies')
 plt.legend()
 plt.xscale('log')
 plt.xlabel('Frequency (Hz)')
-plt.ylabel('$E_x$ (nV/m)');
+plt.ylabel('$E_x$ (nV/m)')
 
 ###############################################################################
 # Fourier transform
@@ -102,7 +102,7 @@ plt.plot(time, tresp2*1e12, 'k', lw=2, label='empymod')
 plt.plot(time, tresp*1e12, 'C0--', label='manual Fourier transform')
 plt.legend()
 plt.xlabel('Time (s)')
-plt.ylabel('$E_x$ (uV/m)');
+plt.ylabel('$E_x$ (uV/m)')
 
 ###############################################################################
 

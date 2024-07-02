@@ -276,7 +276,7 @@ plt.legend()
 plt.yscale('log')
 plt.xscale('log')
 plt.ylabel('$H_z$ (A/m)')
-plt.xlabel('time (s)');
+plt.xlabel('time (s)')
 
 ###############################################################################
 

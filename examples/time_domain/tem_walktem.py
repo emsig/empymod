@@ -122,7 +122,7 @@ plt.plot(np.r_[-9, hm_waveform_times*1e3, 2], np.r_[0, hm_waveform_current, 0],
          '-.', label='High moment')
 plt.xlabel('Time (ms)')
 plt.xlim([-9, 0.5])
-plt.legend();
+plt.legend()
 
 
 ###############################################################################
@@ -446,7 +446,7 @@ ax1.yaxis.set_minor_locator(LogLocator(subs='all', numticks=20))
 ax2.yaxis.set_minor_locator(LogLocator(subs='all', numticks=20))
 ax1.yaxis.set_minor_formatter(NullFormatter())
 ax2.yaxis.set_minor_formatter(NullFormatter())
-plt.grid(which='both', c='w');
+plt.grid(which='both', c='w')
 
 ###############################################################################
 empymod.Report()

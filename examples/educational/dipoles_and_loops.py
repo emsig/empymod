@@ -198,7 +198,7 @@ plt.text(1.05, 0.5, "Time Domain", {'fontsize': fs},
          rotation=-90, clip_on=False, transform=plt.gca().transAxes)
 
 fig.text(-0.01, 0.5, 'Amplitude; e-rec (V/m); m-rec (A/m)',
-         va='center', rotation='vertical', fontsize=fs, color='.4');
+         va='center', rotation='vertical', fontsize=fs, color='.4')
 
 
 ###############################################################################
@@ -297,7 +297,7 @@ def plot_result(data1, data2, x, title, vmin=-15., vmax=-7., rx=0):
     fig.text(0.08, 0.5, 'Crossline Offset (m)', rotation=90, fontsize=14)
 
     # Title
-    fig.suptitle(title, y=.95, fontsize=20);
+    fig.suptitle(title, y=.95, fontsize=20)
 
 
 ###############################################################################
