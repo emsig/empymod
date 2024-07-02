@@ -10,8 +10,8 @@ electric x-directed source) between a
 
 where the latter is located at the center of the former.
 
-A common rule of thumb `¹`_ is that a finite length bipole can be approximated by
-an infinitesimal small dipole, if the receivers are further away than five
+A common rule of thumb `¹`_ is that a finite length bipole can be approximated
+by an infinitesimal small dipole, if the receivers are further away than five
 times the bipole length. In this case, this would be from 4 km onwards (five
 times 800 m).
 

@@ -23,7 +23,7 @@ plt.style.use('ggplot')
 # ------------
 
 x = np.arange(526)*20. - 500
-x[x==0] += 1e-3  # Avoid warning message regarding 0 offset.
+x[x == 0] += 1e-3  # Avoid warning message regarding 0 offset.
 rx = np.tile(x[:, None], x.size)
 ry = rx.transpose()
 inp = {
