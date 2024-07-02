@@ -8,6 +8,7 @@ docs/savefig/
 docs/gallery/*/
 docs/my*.json
 docs/my*.txt
+docs/sg_execution_times.rst
 
 # Pytest and coverage related
 htmlcov

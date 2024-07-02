@@ -113,7 +113,6 @@ plt.axis([0, 20, 0, 70])
 plt.xlabel('Range (km)')
 plt.legend()
 
-plt.show()
 _ = np.seterr(**oldsettings)
 
 ###############################################################################

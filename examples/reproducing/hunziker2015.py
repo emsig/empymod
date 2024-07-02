@@ -65,7 +65,7 @@ efield = empymod.dipole(
 # Create a similar colormap as Hunziker et al., 2015.
 cmap = plt.get_cmap("jet", 61)
 
-plt.figure(figsize=(9, 8))
+plt.figure(figsize=(9, 8), constrained_layout=True)
 
 # 1. Amplitude
 plt.subplot(211)
@@ -84,9 +84,6 @@ plt.ylabel('Offset (km)')
 plt.pcolormesh(x/1e3, y/1e3, efield.pha(deg=False, unwrap=False, lag=True),
                cmap=cmap, vmin=-np.pi, vmax=np.pi, shading='nearest')
 plt.colorbar()
-
-plt.tight_layout()
-plt.show()
 
 
 ###############################################################################

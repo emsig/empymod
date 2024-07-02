@@ -123,7 +123,6 @@ plt.plot(np.r_[-9, hm_waveform_times*1e3, 2], np.r_[0, hm_waveform_current, 0],
 plt.xlabel('Time (ms)')
 plt.xlim([-9, 0.5])
 plt.legend()
-plt.show()
 
 
 ###############################################################################
@@ -387,7 +386,7 @@ hm_empymod_con = walktem('hm', depth=[30], res=[10, 1])
 # 4. Comparison
 # -------------
 
-plt.figure(figsize=(9, 5))
+plt.figure(figsize=(9, 5), constrained_layout=True)
 
 # Plot result resistive model
 ax1 = plt.subplot(121)
@@ -448,10 +447,6 @@ ax2.yaxis.set_minor_locator(LogLocator(subs='all', numticks=20))
 ax1.yaxis.set_minor_formatter(NullFormatter())
 ax2.yaxis.set_minor_formatter(NullFormatter())
 plt.grid(which='both', c='w')
-
-# Finish off
-plt.tight_layout()
-plt.show()
 
 ###############################################################################
 empymod.Report()

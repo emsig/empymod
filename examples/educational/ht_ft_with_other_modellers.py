@@ -73,8 +73,6 @@ plt.xscale('log')
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('$E_x$ (nV/m)')
 
-plt.show()
-
 ###############################################################################
 # Fourier transform
 # -----------------
@@ -105,8 +103,6 @@ plt.plot(time, tresp*1e12, 'C0--', label='manual Fourier transform')
 plt.legend()
 plt.xlabel('Time (s)')
 plt.ylabel('$E_x$ (uV/m)')
-
-plt.show()
 
 ###############################################################################
 

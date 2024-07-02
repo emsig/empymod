@@ -161,7 +161,6 @@ plt.semilogx(t, ftl, 'C2-.', label='FFTLog')
 plt.semilogx(t, fft, 'C3:', label='FFT')
 plt.legend(loc='best')
 plt.ylim([-.1*np.max(ex), 1.1*np.max(ex)])
-plt.show()
 
 ###############################################################################
 
@@ -174,7 +173,6 @@ plt.plot(t, abs(sin-ex)/ex, 'C1--', label='Sine Filter')
 plt.plot(t, abs(ftl-ex)/ex, 'C2-.', label='FFTLog')
 plt.plot(t, abs(fft-ex)/ex, 'C3:', label='FFT')
 plt.legend(loc='best')
-plt.show()
 
 ###############################################################################
 # => The error is comparable in all cases. `FFT` is not too good at later
@@ -218,7 +216,6 @@ plt.semilogx(t, qwe, 'C0-', label='QWE')
 plt.semilogx(t, sin, 'C1--', label='Sine Filter')
 plt.semilogx(t, ftl, 'C2-.', label='FFTLog')
 plt.legend(loc='best')
-plt.show()
 
 ###############################################################################
 
@@ -230,7 +227,6 @@ plt.loglog(t, abs(qwe-ex)/ex, 'C0-', label='QWE')
 plt.plot(t, abs(sin-ex)/ex, 'C1--', label='Sine Filter')
 plt.plot(t, abs(ftl-ex)/ex, 'C2-.', label='FFTLog')
 plt.legend(loc='best')
-plt.show()
 
 ###############################################################################
 # Switch-off
@@ -262,7 +258,6 @@ plt.semilogx(t, qwe, 'C0-', label='QWE')
 plt.semilogx(t, sin, 'C1--', label='Cosine/Sine Filter')
 plt.semilogx(t, ftl, 'C2-.', label='FFTLog')
 plt.legend(loc='best')
-plt.show()
 
 ###############################################################################
 
@@ -274,7 +269,6 @@ plt.loglog(t, abs(qwe-ex)/ex, 'C0-', label='QWE')
 plt.plot(t, abs(sin-ex)/ex, 'C1--', label='Sine Filter')
 plt.plot(t, abs(ftl-ex)/ex, 'C2-.', label='FFTLog')
 plt.legend(loc='best')
-plt.show()
 
 ###############################################################################
 # Example 2: Air-seawater-halfspace
@@ -328,7 +322,6 @@ plt.semilogx(t, sin, 'C1--', label='Sine Filter')
 plt.semilogx(t, ftl, 'C2-.', label='FFTLog')
 plt.semilogx(t, fft, 'C3:', label='FFT')
 plt.legend(loc='best')
-plt.show()
 
 ###############################################################################
 # Step response
@@ -358,7 +351,6 @@ plt.semilogx(t, sin, 'C1--', label='Sine Filter')
 plt.semilogx(t, ftl, 'C2-.', label='FFTLog')
 plt.ylim([-.1e-12, 1.5*qwe.max()])
 plt.legend(loc='best')
-plt.show()
 
 ###############################################################################
 

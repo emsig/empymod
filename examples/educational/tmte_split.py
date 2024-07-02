@@ -93,8 +93,6 @@ plt.xlabel('Offset (km)')
 plt.ylim([1e-17, 1e-9])
 plt.xlim([0, 15])
 
-plt.show()
-
 ###############################################################################
 # The result shows that mainly the TM-mode contributions are sensitive to the
 # reservoir. For TM, all modes contribute significantly except $T^{+-}$, which
@@ -123,8 +121,6 @@ plt.xlabel('Offset (km)')
 plt.ylabel('Electric field amplitude (V/m)')
 plt.ylim([1e-17, 1e-9])
 plt.xlim([0, 15])
-
-plt.show()
 
 ###############################################################################
 

@@ -109,8 +109,6 @@ fig.text(0.5, 0.18, 'X-Offset (km)', ha='center', fontsize=14)
 fig.text(0.01, 0.5, 'Y-Offset (km)', va='center', rotation='vertical',
          fontsize=14)
 
-plt.show()
-
 ###############################################################################
 
 empymod.Report()

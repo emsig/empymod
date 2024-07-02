@@ -257,7 +257,7 @@ def pos(data):
     return np.where(data > 0, data, np.nan)
 
 
-plt.figure()
+plt.figure(constrained_layout=True)
 plt.title('Switch-off')
 plt.plot(times, pos(out_bipole), '-', label='Regular Bipole')
 plt.plot(times, pos(-out_bipole), '--', label='')
@@ -277,8 +277,6 @@ plt.yscale('log')
 plt.xscale('log')
 plt.ylabel('$H_z$ (A/m)')
 plt.xlabel('time (s)')
-plt.tight_layout()
-plt.show()
 
 ###############################################################################
 

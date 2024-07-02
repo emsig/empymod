@@ -76,7 +76,6 @@ plt.axis([-.02, 0.06, 0, 1.02])
 plt.xlabel('Time (s)')
 plt.ylabel(r'Normalized derivative ($\Omega$/m$^2$/s)')
 plt.legend()
-plt.show()
 
 ###############################################################################
 # Original Figure

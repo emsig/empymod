@@ -8,11 +8,11 @@ matplotlib
 setuptools_scm
 
 # FOR DOCUMENTATION
-sphinx
+sphinx>=7.3
 numpydoc
 sphinx_design
 sphinx_numfig
-sphinx_gallery
+sphinx_gallery>=0.16
 memory_profiler
 pydata_sphinx_theme
 sphinx_automodapi

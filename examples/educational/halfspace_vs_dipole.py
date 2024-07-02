@@ -56,7 +56,6 @@ for ab in all_abs:
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab, signal=0)
     plot_t(EM, HS, 'Impulse HS', i)
 plt.suptitle('Impulse HS')
-plt.show()
 
 ###############################################################################
 # Switch-on HS
@@ -69,7 +68,6 @@ for ab in all_abs:
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab, signal=1)
     plot_t(EM, HS, 'Switch-on HS', i)
 plt.suptitle('Switch-on HS')
-plt.show()
 
 ###############################################################################
 # Switch-off HS
@@ -82,7 +80,6 @@ for ab in all_abs:
     HS = empymod.analytical(**inpEM, **modFS, solution='dhs', ab=ab, signal=-1)
     plot_t(EM, HS, 'Switch-off HS', i)
 plt.suptitle('Switch-off HS')
-plt.show()
 
 ###############################################################################
 # Impulse FS
@@ -95,7 +92,6 @@ for ab in all_abs:
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab, signal=0)
     plot_t(EM, HS, 'Impulse FS', i)
 plt.suptitle('Impulse FS')
-plt.show()
 
 ###############################################################################
 # Switch-on FS
@@ -108,7 +104,6 @@ for ab in all_abs:
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab, signal=1)
     plot_t(EM, HS, 'Switch-on FS', i)
 plt.suptitle('Switch-on FS')
-plt.show()
 
 ###############################################################################
 # Switch-off FS
@@ -123,7 +118,6 @@ for ab in all_abs:
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab, signal=-1)
     plot_t(EM, HS, 'Switch-off FS', i)
 plt.suptitle('Switch-off FS')
-plt.show()
 
 ###############################################################################
 # Frequency domain
@@ -153,7 +147,6 @@ for ab in all_abs:
     plot_f(EM, HS, 'Frequency HS', i)
 plt.figure('Frequency HS')
 plt.suptitle('Frequency HS')
-plt.show()
 
 ###############################################################################
 # Fullspace
@@ -166,7 +159,6 @@ for ab in all_abs:
     HS = empymod.analytical(**inpEM, **modFS, solution='dfs', ab=ab)
     plot_f(EM, HS, 'Frequency FS', i)
 plt.suptitle('Frequency FS')
-plt.show()
 
 ###############################################################################
 
