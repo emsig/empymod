@@ -1,11 +1,16 @@
 """
-Full wavefield vs diffusive approx. for a fullspace
-===================================================
+Full wavefield vs diffusive approximation for a fullspace
+=========================================================
 
-Play around to see that the difference is getting bigger for
+Example comparison of the electric field using the complete Maxwell's
+equations, and the electric field using the diffusive or quasi-static
+approximation.
 
-- higher frequencies,
-- higher eperm/mperm.
+You can play around with the parameters to see that the difference is getting
+bigger for
+
+- higher frequencies, and
+- higher electric permittivity / magnetic permeability.
 
 """
 import empymod
@@ -17,26 +22,20 @@ plt.style.use('ggplot')
 # Define model
 # ------------
 
-x = (np.arange(526))*20-500
-rx = np.repeat([x, ], np.size(x), axis=0)
+x = np.arange(526)*20. - 500
+x[x==0] += 1e-3  # Avoid warning message regarding 0 offset.
+rx = np.tile(x[:, None], x.size)
 ry = rx.transpose()
-zsrc = 150
-zrec = 200
-res = 1/3
-freq = 0.5
-ab = 11
-aniso = np.sqrt(3/.3)
-perm = 1
 inp = {
-    'src': [0, 0, zsrc],
-    'rec': [rx.ravel(), ry.ravel(), zrec],
-    'res': res,
-    'freqtime': freq,
-    'aniso': aniso,
-    'ab': ab,
-    'epermH': perm,
-    'mpermH': perm,
-    'verb': 0
+    'src': [0, 0, 0],                     # Source [x, y, z]
+    'rec': [rx.ravel(), ry.ravel(), 50],  # Receiver [x, y, z]
+    'res': 1/3,                           # Resistivity
+    'freqtime': 0.5,                      # Frequency
+    'aniso': np.sqrt(10),                 # Anisotropy
+    'ab': 11,                             # Configuration; 11=Exx
+    'epermH': 1.0,                        # Electric permittivity
+    'mpermH': 1.0,                        # Magnetic permeability
+    'verb': 1,                            # Verbosity
 }
 
 ###############################################################################
@@ -44,12 +43,10 @@ inp = {
 # -----------
 
 # Halfspace
-hs = empymod.analytical(**inp, solution='dfs')
-hs = hs.reshape(np.shape(rx))
+hs = empymod.analytical(solution='dfs', **inp).reshape(rx.shape)
 
 # Fullspace
-fs = empymod.analytical(**inp)
-fs = fs.reshape(np.shape(rx))
+fs = empymod.analytical(**inp).reshape(rx.shape)
 
 # Relative error (%)
 amperr = np.abs((fs.amp() - hs.amp())/fs.amp())*100
@@ -60,42 +57,38 @@ phaerr = np.abs((fs.pha(unwrap=False) - hs.pha(unwrap=False)) /
 # Plot
 # ----
 
-fig, axs = plt.subplots(figsize=(10, 4.2), nrows=1, ncols=2)
+fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(9, 5), sharey=True, constrained_layout=True)
+fig.suptitle('Analytical fullspace solution\nDifference between full ' +
+             'wavefield and diffusive approximation.')
 
 # Min and max, properties
 vmin = 1e-10
 vmax = 1e0
-props = {'levels': np.logspace(np.log10(vmin), np.log10(vmax), 50),
-         'locator': plt.matplotlib.ticker.LogLocator(), 'cmap': 'Greys'}
+props = {
+    'levels': np.logspace(np.log10(vmin), np.log10(vmax), 50),
+    'locator': plt.matplotlib.ticker.LogLocator(),
+    'cmap': 'Greys',
+}
 
 # Plot amplitude error
-plt.sca(axs[0])
-plt.title(r'(a) Amplitude')
-cf1 = plt.contourf(rx/1000, ry/1000, amperr.clip(vmin, vmax), **props)
-plt.ylabel('Crossline offset (km)')
-plt.xlabel('Inline offset (km)')
-plt.xlim(min(x)/1000, max(x)/1000)
-plt.ylim(min(x)/1000, max(x)/1000)
-plt.axis('equal')
+ax1.set_title('Amplitude')
+cf1 = ax1.contourf(rx/1000, ry/1000, amperr.clip(vmin, vmax), **props)
+ax1.set_ylabel('Crossline offset (km)')
 
 # Plot phase error
-plt.sca(axs[1])
-plt.title(r'(b) Phase')
-cf2 = plt.contourf(rx/1000, ry/1000, phaerr.clip(vmin, vmax), **props)
-plt.xlabel('Inline offset (km)')
-plt.xlim(min(x)/1000, max(x)/1000)
-plt.ylim(min(x)/1000, max(x)/1000)
-plt.axis('equal')
+ax2.set_title('Phase')
+cf2 = ax2.contourf(rx/1000, ry/1000, phaerr.clip(vmin, vmax), **props)
 
-# Title
-plt.suptitle('Analytical fullspace solution\nDifference between full ' +
-             'wavefield and diffusive approximation.', y=1.1)
+for ax in [ax1, ax2]:
+    ax.set_xlabel('Inline offset (km)')
+    ax.set_xlim(min(x)/1000, max(x)/1000)
+    ax.set_ylim(min(x)/1000, max(x)/1000)
+    ax.axis('equal')
 
 # Plot colorbar
-cax, kw = plt.matplotlib.colorbar.make_axes(
-        [axs[0], axs[1]], location='right', fraction=.05, pad=0.05, aspect=20)
-cb = plt.colorbar(cf2, cax=cax, ticks=10**(-(np.arange(13.)[::-1])+2), **kw)
-cb.set_label(r'Relative Error $(\%)$')
+cb = plt.colorbar(cf2, ax=[ax1, ax2], ticks=10**(-(np.arange(13.)[::-1])+2))
+cb.set_label('Relative Error (%)')
 
 ###############################################################################
 
