@@ -2,7 +2,7 @@
 fdesign-paper: Werthmüller et al., 2019, Geophysics
 ===================================================
 
-See the notebooks in the repo `empymod/article-fdesign
+See the notebooks in the repo `emsig/article-fdesign
 <https://github.com/emsig/article-fdesign>`_ for:
 
     Werthmüller, D., K. Key, and E. Slob, 2019, **A tool for designing digital
