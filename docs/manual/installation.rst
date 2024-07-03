@@ -18,7 +18,8 @@ Requirements are the modules ``scipy``, ``numba``, and ``libdlf``.
 The modeller empymod comes with add-ons (``empymod.scripts``). These add-ons
 provide some very specific, additional functionalities. Some of these add-ons
 have additional, optional dependencies such as matplotlib. See the
-*Add-ons*-section for their documentation.
+*Add-ons*-section for their documentation. For interactive plots you will need
+ipympl in addition to matplotlib.
 
 If you are new to Python we recommend using a Python distribution, which will
 ensure that all dependencies are met, specifically properly compiled versions

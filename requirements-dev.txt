@@ -17,6 +17,7 @@ memory_profiler
 pydata_sphinx_theme
 sphinx_automodapi
 ipykernel
+ipympl
 
 # FOR TESTING
 asv
