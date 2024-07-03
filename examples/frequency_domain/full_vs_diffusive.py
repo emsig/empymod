@@ -91,5 +91,4 @@ cb = plt.colorbar(cf2, ax=[ax1, ax2], ticks=10**(-(np.arange(13.)[::-1])+2))
 cb.set_label('Relative Error (%)')
 
 ###############################################################################
-
 empymod.Report()

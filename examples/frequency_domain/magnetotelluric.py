@@ -10,7 +10,7 @@ lightning or the interaction between the Earth's magnetic field and solar wind.
 Ubiquitous in MT is the plane-wave approximation, hence, that the source signal
 is a plane wave hitting the Earth's surface. Having a 1D source (vertical plane
 wave) for a layered, 1D model reduces the computation of the impedances and
-from there the apparent resistivity and apparent phase a simple recursion
+from there to the apparent resistivity and apparent phase to a simple recursion
 algorithm. As such it does not make sense to use a full EM wavefield algorithm
 with three-dimensional sources such as empymod to compute MT responses.
 However, it is still interesting to see if we can compute MT impedances with a
@@ -85,19 +85,20 @@ magnetotelluric response of the layered structure.
 
 --------
 
+Note that in this example we assume that positive z points upwards.
+
 **Reference**:
 
-- Chave, A., and Jones, A. (Eds.). (2012). The Magnetotelluric Method: Theory
+- Chave, A., and Jones, A. (Eds.), 2012. The Magnetotelluric Method: Theory
   and Practice. Cambridge: Cambridge University Press;
-  https://doi.org/10.1017/CBO9781139020138.
-- Pedersen, J., Hermance, J.F. Least squares inversion of one-dimensional
-  magnetotelluric data: An assessment of procedures employed by Brown
-  University. Surv Geophys 8, 187–231 (1986);
-  https://doi.org/10.1007/BF01902413.
+  `DOI: 10.1017/CBO9781139020138 <https://doi.org/10.1017/CBO9781139020138>`_.
+- Pedersen, J., and Hermance, J.F., 1986. Least squares inversion of
+  one-dimensional magnetotelluric data: An assessment of procedures employed by
+  Brown University. Surveys in Geophysics 8, 187–231 (1986);
+  `DOI: 10.1007/BF01902413 <https://doi.org/10.1007/BF01902413>`_.
 - This example was strongly motivated by Andrew Pethicks blog post
-  https://www.digitalearthlab.com/tutorial/tutorial-1d-mt-forward.
-
-
+  `tutorial-1d-mt-forward
+  <https://www.digitalearthlab.com/tutorial/tutorial-1d-mt-forward>`_.
 
 """
 import empymod
@@ -111,7 +112,7 @@ plt.style.use('ggplot')
 # --------------------------------------
 
 resistivities = np.array([2e14, 300, 2500, 0.8, 3000, 2500])
-depths = np.array([0, 200, 600, 640, 1140])
+depths = np.array([0, -200, -600, -640, -1140])
 frequencies = np.logspace(-4, 5, 101)
 omega = 2 * np.pi * frequencies
 
@@ -128,7 +129,7 @@ Z_j = np.sqrt(2j * np.pi * frequencies * mu_0 * resistivities[-1])
 for j in range(depths.size-1, 0, -1):
 
     # Thickness
-    t_j = depths[j] - depths[j-1]
+    t_j = depths[j-1] - depths[j]
 
     # Intrinsic impedance
     z_oj = np.sqrt(1j * omega * mu_0 * resistivities[j])
@@ -161,8 +162,8 @@ phase_mt1d = np.arctan2(Z_j.imag, Z_j.real)
 
 dist = 1_000_000_000  # 1 million kilometer (!)
 inp = {
-    'src': (-dist, -dist, -dist),
-    'rec': (0, 0, 0.1),
+    'src': (dist, dist, dist),
+    'rec': (0, 0, -0.1),
     'res': resistivities,
     'depth': depths,
     'freqtime': frequencies,
@@ -171,7 +172,7 @@ inp = {
 
 # Get Ex, Hy.
 ex = empymod.dipole(ab=11, **inp)
-hy = empymod.dipole(ab=51, **inp)
+hy = -empymod.dipole(ab=51, **inp)
 
 # Impedance.
 Z = ex/hy
@@ -187,23 +188,19 @@ phase_empy = np.arctan2(Z.imag, Z.real)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4), constrained_layout=True)
 
 ax1.set_title('Apparent resistivity')
-ax1.plot(frequencies, apres_mt1d, label='MT-1D')
-ax1.plot(frequencies, apres_empy, '--', label='empymod')
-ax1.set_xscale('log')
-ax1.set_yscale('log')
+ax1.loglog(frequencies, apres_mt1d, label='MT-1D')
+ax1.loglog(frequencies, apres_empy, '--', label='empymod')
 ax1.set_xlabel('Frequency (Hz)')
-ax1.set_ylabel(r'Apparent resistivity ($\Omega\,$m)')
+ax1.set_ylabel(r'Apparent resistivity (Ω m)')
 ax1.legend()
 
 ax2.set_title('Phase')
-ax2.plot(frequencies, phase_mt1d*180/np.pi)
-ax2.plot(frequencies, phase_empy*180/np.pi, '--')
-ax2.set_xscale('log')
+ax2.semilogx(frequencies, phase_mt1d*180/np.pi)
+ax2.semilogx(frequencies, phase_empy*180/np.pi, '--')
 ax2.yaxis.tick_right()
 ax2.set_xlabel('Frequency (Hz)')
-ax2.set_ylabel('Phase (degree)')
+ax2.set_ylabel('Phase (°)')
 ax2.yaxis.set_label_position("right")
-
 
 ###############################################################################
 empymod.Report()

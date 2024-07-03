@@ -24,7 +24,6 @@ _`¹` See, e.g., page 288 of **Spies, B. R., and F. C. Frischknecht**, 1991,
 loop as a magnetic point dipole, but similar approximations are used for finite
 vs point electric dipoles.
 
-
 """
 import empymod
 import numpy as np
@@ -124,5 +123,4 @@ ax2.set_ylabel('Phase (°)')
 ax2.legend(ncols=2, loc='upper center')
 
 ###############################################################################
-
 empymod.Report()
