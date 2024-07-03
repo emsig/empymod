@@ -16,7 +16,6 @@ The notebooks contain:
   transforms
 - GPR example with a digital filter
 
-
 """
 pass  # THIS IS NOT AN ACTUAL EXAMPLE, see text above for the actual repo
 # sphinx_gallery_thumbnail_path = '_static/thumbs/werthmuller2019_GEO.jpg'

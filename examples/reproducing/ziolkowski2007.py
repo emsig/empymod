@@ -14,7 +14,6 @@ MTEM example.
 """
 import empymod
 import numpy as np
-from copy import deepcopy as dc
 import matplotlib.pyplot as plt
 
 ###############################################################################
@@ -25,57 +24,54 @@ import matplotlib.pyplot as plt
 t = np.linspace(0.001, 0.06, 101)
 
 # Target model
-inp2 = {'src': [0, 0, 0.001],
-        'rec': [1000, 0, 0.001],
-        'depth': [0, 500, 525],
-        'res': [2e14, 20, 500, 20],
-        'freqtime': t,
-        'verb': 1}
+inp_tg = {
+    'src': [0, 0, 0.001],
+    'rec': [1000, 0, 0.001],
+    'depth': [0, 500, 525],
+    'res': [2e14, 20, 500, 20],
+    'freqtime': t,
+    'verb': 1,
+}
 
 # HS model
-inp1 = dc(inp2)
-inp1['depth'] = inp2['depth'][0]
-inp1['res'] = inp2['res'][:2]
+inp_hs = inp_tg.copy()
+inp_hs['depth'] = inp_tg['depth'][0]
+inp_hs['res'] = inp_tg['res'][:2]
 
 # Compute responses
-sths = empymod.dipole(**inp1, signal=1)  # Step, HS
-sttg = empymod.dipole(**inp2, signal=1)  # " "   Target
-imhs = empymod.dipole(**inp1, signal=0, ft='fftlog')  # Impulse, HS
-imtg = empymod.dipole(**inp2, signal=0, ft='fftlog')  # " "      Target
+sths = empymod.dipole(**inp_hs, signal=1)               # Step, Halfspace
+sttg = empymod.dipole(**inp_tg, signal=1)               # Step, Target
+imhs = empymod.dipole(**inp_hs, signal=0, ft='fftlog')  # Impulse, Halfspace
+imtg = empymod.dipole(**inp_tg, signal=0, ft='fftlog')  # Impulse, Target
 
 ###############################################################################
 # Plot
 # ----
 
-plt.figure(figsize=(9, 4))
-plt.subplots_adjust(wspace=.3)
+fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(8, 4), sharex=True, constrained_layout=True)
 
 # Step response
-plt.subplot(121)
-plt.title('(a)')
-plt.plot(np.r_[0, 0, t], np.r_[0, sths[0], sths], 'k',
+ax1.set_title('(a)')
+ax1.plot(np.r_[0, 0, t], np.r_[0, sths[0], sths], 'k',
          label='Uniform half-space')
-plt.plot(np.r_[0, 0, t], np.r_[0, sttg[0], sttg], 'r',
+ax1.plot(np.r_[0, 0, t], np.r_[0, sttg[0], sttg], 'r',
          label='Hydrocarbon reservoir')
-plt.axis([-.02, 0.06, 0, 8e-9])
-plt.xlabel('Time (s)')
-plt.ylabel('Electric field amplitude (V/m/A-m)')
-plt.legend()
+ax1.axis([-.02, 0.06, 0, 8e-9])
+ax1.set_xlabel('Time (s)')
+ax1.set_ylabel('Electric field amplitude (V/m/A-m)')
+ax1.legend()
 
 # Impulse response
-plt.subplot(122)
-plt.title('(b)')
-
-# Normalize by max-response
-ntg = np.max(np.r_[imtg, imhs])
-
-plt.plot(np.r_[0, 0, t], np.r_[2, 0, imhs/ntg], 'k',
-         label='Uniform half-space')
-plt.plot(np.r_[0, t], np.r_[0, imtg/ntg], 'r', label='Hydrocarbon reservoir')
-plt.axis([-.02, 0.06, 0, 1.02])
-plt.xlabel('Time (s)')
-plt.ylabel(r'Normalized derivative ($\Omega$/m$^2$/s)')
-plt.legend()
+ax2.set_title('(b)')
+ax2.plot(np.r_[0, 0, t], np.r_[2, 0, imhs/imtg.max()],
+         'k', label='Uniform half-space')
+ax2.plot(np.r_[0, t], np.r_[0, imtg/imtg.max()],
+         'r', label='Hydrocarbon reservoir')
+ax2.axis([-.02, 0.06, 0, 1.02])
+ax2.set_xlabel('Time (s)')
+ax2.set_ylabel('Normalized derivative (Ω/m²/s)')
+ax2.legend()
 
 ###############################################################################
 # Original Figure
@@ -87,5 +83,4 @@ plt.legend()
 #
 
 ###############################################################################
-
 empymod.Report()

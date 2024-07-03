@@ -66,7 +66,6 @@ to as *lagged convolution DLF*, or for :math:`f(l)`, which we call here
 import empymod
 import numpy as np
 import matplotlib.pyplot as plt
-from copy import deepcopy as dc
 plt.style.use('ggplot')
 # sphinx_gallery_thumbnail_number = 3
 
@@ -542,7 +541,7 @@ plt.xlabel('Offset (km)')
 t = np.logspace(0, 2, 100)
 xt = 2000
 
-tparam = dc(params)
+tparam = params.copy()
 tparam['rec'] = [xt, 0, 200]
 tparam['freqtime'] = t
 tparam['signal'] = 0  # Impulse response

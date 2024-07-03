@@ -56,7 +56,7 @@ ax1.semilogx(np.repeat(res_bg, 2), p_depth, 'k')
 ax1.set_xlim([0.08, 500])
 ax1.set_ylim([-1800, 100])
 ax1.set_ylabel('Depth (m)')
-ax1.set_xlabel('Resistivity ρₕ (Ω m)')
+ax1.set_xlabel('Resistivity ρₕ (Ωm)')
 
 # Plot anisotropies
 ax2.plot(np.repeat(aniso, 2), p_depth, 'k')

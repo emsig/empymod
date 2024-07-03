@@ -191,7 +191,7 @@ ax1.set_title('Apparent resistivity')
 ax1.loglog(frequencies, apres_mt1d, label='MT-1D')
 ax1.loglog(frequencies, apres_empy, '--', label='empymod')
 ax1.set_xlabel('Frequency (Hz)')
-ax1.set_ylabel(r'Apparent resistivity (Ω m)')
+ax1.set_ylabel('Apparent resistivity (Ω m)')
 ax1.legend()
 
 ax2.set_title('Phase')

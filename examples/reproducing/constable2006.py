@@ -14,7 +14,6 @@ CSEM example.
 """
 import empymod
 import numpy as np
-from copy import deepcopy as dc
 import matplotlib.pyplot as plt
 
 empymod.set_minimum(min_off=1e-10)
@@ -32,86 +31,85 @@ empymod.set_minimum(min_off=1e-10)
 x = np.linspace(0, 20000, 101)
 
 # TG model
-inp3 = {'src': [0, 0, 900],
-        'rec': [x, np.zeros(x.shape), 1000],
-        'depth': [0, 1000, 2000, 2100],
-        'res': [2e14, 0.3, 1, 100, 1],
-        'freqtime': 1,
-        'verb': 1}
+inp_tg = {
+    'src': [0, 0, 900],
+    'rec': [x, 0, 1000],
+    'depth': [0, 1000, 2000, 2100],
+    'res': [2e14, 0.3, 1, 100, 1],
+    'freqtime': 1,
+    'verb': 1,
+}
 
 # HS model
-inp4 = dc(inp3)
-inp4['depth'] = inp3['depth'][:2]
-inp4['res'] = inp3['res'][:3]
+inp_hs = inp_tg.copy()
+inp_hs['depth'] = inp_tg['depth'][:2]
+inp_hs['res'] = inp_tg['res'][:3]
 
 # Compute radial responses
-rhs = empymod.dipole(**inp4)  # Step, HS
-rhs = empymod.utils.EMArray(np.nan_to_num(rhs))
-rtg = empymod.dipole(**inp3)  # " "   Target
-rtg = empymod.utils.EMArray(np.nan_to_num(rtg))
+rhs = empymod.dipole(ab=11, **inp_hs)  # Halfspace
+rtg = empymod.dipole(ab=11, **inp_tg)  # Target
 
 # Compute azimuthal response
-ahs = empymod.dipole(**inp4, ab=22)  # Step, HS
-ahs = empymod.utils.EMArray(np.nan_to_num(ahs))
-atg = empymod.dipole(**inp3, ab=22)  # " "   Target
-atg = empymod.utils.EMArray(np.nan_to_num(atg))
+ahs = empymod.dipole(ab=22, **inp_hs)  # Halfspace
+atg = empymod.dipole(ab=22, **inp_tg)  # Target
 
 
 ###############################################################################
 # Plot
 # ----
 
-plt.figure(figsize=(9, 13))
-plt.subplots_adjust(wspace=.3, hspace=.3)
+fig, axs = plt.subplots(3, 2, figsize=(9, 13), constrained_layout=True)
 oldsettings = np.geterr()
 _ = np.seterr(all='ignore')
 
 # Radial amplitude
-plt.subplot(321)
-plt.title('(a) Radial mode fields')
-plt.plot(x/1000, np.log10(rtg.amp()), 'k', label='Model')
-plt.plot(x/1000, np.log10(rhs.amp()), 'k-.', label='Half-space response')
-plt.axis([0, 20, -18, -8])
-plt.xlabel('Range (km)')
-plt.ylabel(r'Log$_{10}$(E-field magnitude, V/Am$^2$)')
-plt.legend()
+axs[0, 0].set_title('(a) Radial mode fields')
+axs[0, 0].plot(x/1000, np.log10(rtg.amp()), 'k', label='Model')
+axs[0, 0].plot(x/1000, np.log10(rhs.amp()), 'k-.', label='Half-space response')
+axs[0, 0].axis([0, 20, -18, -8])
+axs[0, 0].set_xlabel('Range (km)')
+axs[0, 0].set_xticks([0, 5, 10, 15, 20])
+axs[0, 0].set_ylabel('Log10(E-field magnitude, V/Am²)')
+axs[0, 0].legend()
 
 # Radial phase
-plt.subplot(323)
-plt.title('(b) Radial mode phase')
-plt.plot(x/1000, rtg.pha(deg=True), 'k')
-plt.plot(x/1000, rhs.pha(deg=True), 'k-.')
-plt.axis([0, 20, -500, 0])
-plt.xlabel('Range (km)')
-plt.ylabel('Phase (degrees)')
+axs[1, 0].set_title('(b) Radial mode phase')
+axs[1, 0].plot(x/1000, rtg.pha(deg=True), 'k')
+axs[1, 0].plot(x/1000, rhs.pha(deg=True), 'k-.')
+axs[1, 0].axis([0, 20, -500, 0])
+axs[1, 0].set_xlabel('Range (km)')
+axs[1, 0].set_xticks([0, 5, 10, 15, 20])
+axs[1, 0].set_ylabel('Phase (degrees)')
 
 # Azimuthal amplitude
-plt.subplot(325)
-plt.title('(c) Azimuthal mode fields')
-plt.plot(x/1000, np.log10(atg.amp()), 'k', label='Model')
-plt.plot(x/1000, np.log10(ahs.amp()), 'k-.', label='Half-space response')
-plt.axis([0, 20, -18, -8])
-plt.xlabel('Range (km)')
-plt.ylabel(r'Log$_{10}$(E-field magnitude, V/Am$^2$)')
-plt.legend()
+axs[2, 0].set_title('(c) Azimuthal mode fields')
+axs[2, 0].plot(x/1000, np.log10(atg.amp()), 'k', label='Model')
+axs[2, 0].plot(x/1000, np.log10(ahs.amp()), 'k-.', label='Half-space response')
+axs[2, 0].axis([0, 20, -18, -8])
+axs[2, 0].set_xlabel('Range (km)')
+axs[2, 0].set_xticks([0, 5, 10, 15, 20])
+axs[2, 0].set_ylabel('Log10(E-field magnitude, V/Am²)')
+axs[2, 0].legend()
 
 # Azimuthal phase
-plt.subplot(322)
-plt.title('(d) Azimuthal mode phase')
-plt.plot(x/1000, atg.pha(deg=True)+180, 'k')
-plt.plot(x/1000, ahs.pha(deg=True)+180, 'k-.')
-plt.axis([0, 20, -500, 0])
-plt.xlabel('Range (km)')
-plt.ylabel('Phase (degrees)')
+axs[0, 1].set_title('(d) Azimuthal mode phase')
+axs[0, 1].plot(x/1000, atg.pha(deg=True)+180, 'k')
+axs[0, 1].plot(x/1000, ahs.pha(deg=True)+180, 'k-.')
+axs[0, 1].axis([0, 20, -500, 0])
+axs[0, 1].set_xlabel('Range (km)')
+axs[0, 1].set_xticks([0, 5, 10, 15, 20])
+axs[0, 1].set_ylabel('Phase (degrees)')
 
 # Normalized
-plt.subplot(324)
-plt.title('(e) Normalized E-field magnitude')
-plt.plot(x/1000, np.abs(rtg/rhs), 'k', label='Radial')
-plt.plot(x/1000, np.abs(atg/ahs), 'k--', label='Azimuthal')
-plt.axis([0, 20, 0, 70])
-plt.xlabel('Range (km)')
-plt.legend()
+axs[1, 1].set_title('(e) Normalized E-field magnitude')
+axs[1, 1].plot(x/1000, np.abs(rtg/rhs), 'k', label='Radial')
+axs[1, 1].plot(x/1000, np.abs(atg/ahs), 'k--', label='Azimuthal')
+axs[1, 1].axis([0, 20, 0, 70])
+axs[1, 1].set_xlabel('Range (km)')
+axs[1, 1].set_xticks([0, 5, 10, 15, 20])
+axs[1, 1].legend()
+
+axs[2, 1].axis('off')
 
 _ = np.seterr(**oldsettings)
 
@@ -125,5 +123,4 @@ _ = np.seterr(**oldsettings)
 #
 
 ###############################################################################
-
 empymod.Report()
