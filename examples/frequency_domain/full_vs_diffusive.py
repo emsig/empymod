@@ -87,7 +87,7 @@ for ax in [ax1, ax2]:
     ax.axis('equal')
 
 # Plot colorbar
-cb = plt.colorbar(cf2, ax=[ax1, ax2], ticks=10**(-(np.arange(13.)[::-1])+2))
+cb = plt.colorbar(cf2, ax=[ax1, ax2], ticks=10**np.arange(-10, 1.))
 cb.set_label('Relative Error (%)')
 
 ###############################################################################

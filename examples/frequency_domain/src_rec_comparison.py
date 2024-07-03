@@ -1,12 +1,12 @@
 """
-Comparison of all src-rec combinations
-======================================
+Comparison of all source-receiver combinations
+==============================================
 
-Comparison of all source-receiver combinations; electric and magnetic
+Comparison of all source-receiver combinations; both electric and magnetic.
 
-We compute the secondary field for a simple model of a 1 Ohm.m halfspace below
-air. Source is 50 m above the surface in the air, receivers are on the surface,
-frequency is 1 Hz.
+We compute the secondary field for a simple model of a 1 Ωm halfspace below
+air. The source is 50 m above the surface in the air, receivers are on the
+surface, frequency is 1 Hz.
 
 """
 import empymod
@@ -19,40 +19,43 @@ plt.style.use('ggplot')
 # ------------
 
 x = np.linspace(-10, 10, 101)*1000
-rx = np.repeat([x, ], np.size(x), axis=0)
+rx = np.tile(x[:, None], x.size)
 ry = rx.transpose()
-inp = {'src': [0, 0, -50],
-       'rec': [rx.ravel(), ry.ravel(), 0],
-       'depth': 0,
-       'res': [2e14, 1],
-       'freqtime': 1,
-       'xdirect': None,  # Secondary field comp., req. empymod >= v1.6.1.
-       'htarg': {'pts_per_dec': -1},  # To speed-up the calculation
-       'verb': 0}
+inp = {
+    'src': [0, 0, -50],
+    'rec': [rx.ravel(), ry.ravel(), 0],
+    'depth': 0,
+    'res': [2e14, 1],
+    'freqtime': 1,
+    'xdirect': None,  # Secondary field comp., req. empymod >= v1.6.1.
+    'htarg': {'pts_per_dec': -1},  # To speed-up the computation
+    'verb': 0,
+}
 
 ###############################################################################
 # Compute
 # -------
 
 # All possible combinations
-pab = [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26,
-       31, 32, 33, 34, 35, 36, 41, 42, 43, 44, 45, 46,
-       51, 52, 53, 54, 55, 56, 61, 62, 63, 64, 65, 66]
+pab = (np.arange(60)+11).reshape(6, 10)[:, :6].ravel()
+print(pab)
 
 # Compute and store them in fs
 fs = dict()
 for ab in pab:
-    fs[str(ab)] = empymod.dipole(ab=ab, **inp).reshape(np.shape(rx))
+    fs[str(ab)] = empymod.dipole(ab=ab, **inp).reshape(rx.shape).amp()
 
 ###############################################################################
 # Plot
 # ----
 
-fig, axs = plt.subplots(figsize=(10, 12), nrows=6, ncols=6)
+fig, axs = plt.subplots(6, 6, figsize=(10, 11.5), constrained_layout=True)
 axs = axs.ravel()
+fig.suptitle('Comparison of all source-receiver combinations, electric ' +
+             'and magnetic', fontsize=16)
 
 # Labels
-label1 = ['x', 'y', 'z']
+label1 = ['ˣ', 'ʸ', 'ᶻ']
 label2 = ['E', 'H']
 
 # Colour settings
@@ -63,52 +66,47 @@ props = {'levels': np.logspace(np.log10(vmin), np.log10(vmax), 50),
 
 # Loop over combinations
 for i, val in enumerate(pab):
-    plt.sca(axs[i])
+    ax = axs[i]
 
     # Axis settings
-    plt.xlim(min(x)/1000, max(x)/1000)
-    plt.ylim(min(x)/1000, max(x)/1000)
-    plt.axis('equal')
+    ax.set_xlim(min(x)/1000, max(x)/1000)
+    ax.set_ylim(min(x)/1000, max(x)/1000)
+    ax.axis('equal')
 
     # Plot the contour
-    cf = plt.contourf(
-            rx/1000, ry/1000, np.abs(fs[str(val)]).clip(vmin, vmax), **props)
+    cf = ax.contourf(rx/1000, ry/1000, fs[str(val)].clip(vmin, vmax), **props)
 
     # Add titels
     if i < 6:
-        label = r'Src: '
+        label = 'Src: '
         label += label2[0] if i < 3 else label2[1]
-        label += '$_' + label1[i % 3] + '$'
-        plt.title(label, fontsize=12)
-
-    # Remove unnecessary x-tick labels
-    if i < 30:
-        plt.xticks([-10, 0, 10], ())
-
-    # Remove unnecessary y-tick labels; add y-labels
-    if i % 6 != 0:
-        plt.yticks([-10, 0, 10], ())
-    else:
-        label = r'Rec: '
+        label += label1[i % 3]
+        ax.xaxis.set_label_position("top")
+        ax.set_xlabel(label, fontsize=12)
+    if i % 6 == 5:
+        label = 'Rec: '
         label += label2[0] if i < 18 else label2[1]
-        label += '$_' + label1[(i // 6) % 3] + '$'
-        plt.ylabel(label, fontsize=12)
+        label += label1[(i // 6) % 3]
+        ax.yaxis.set_label_position("right")
+        ax.set_ylabel(label, fontsize=12)
+
+    # Remove unnecessary tick labels
+    if i < 30:
+        ax.set_xticks([-10, 0, 10], ())
+    if i % 6 != 0:
+        ax.set_yticks([-10, 0, 10], ())
+
+    # Add offset labels
+    if i == 32:
+        ax.set_xlabel('X-Offset (km)', fontsize=14)
+    elif i == 18:
+        ax.set_ylabel('y-Offset (km)', fontsize=14)
 
 # Colour bar
-cax, kw = plt.matplotlib.colorbar.make_axes(
-        axs, location='bottom', fraction=.05, pad=0.1, aspect=30)
 cb = plt.colorbar(
-        cf, cax=cax, ticks=np.logspace(np.log10(vmin), np.log10(vmax), 8),
-        **kw)
-cb.set_label(r'Amplitude V/m (el. rec) or T (mag. rec)')
-
-# Annotate
-plt.suptitle('Comparison of all source-receiver combinations, electric ' +
-             'and magnetic', y=0.93, fontsize=16)
-fig.text(0.5, 0.18, 'X-Offset (km)', ha='center', fontsize=14)
-fig.text(0.01, 0.5, 'Y-Offset (km)', va='center', rotation='vertical',
-         fontsize=14)
+        cf, ax=axs, orientation='horizontal',
+        ticks=np.logspace(np.log10(vmin), np.log10(vmax), 8))
+cb.set_label('Amplitude in V/m (electric receiver) or T (magnetic receiver)')
 
 ###############################################################################
-
 empymod.Report()

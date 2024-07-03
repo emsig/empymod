@@ -2,7 +2,10 @@
 A simple frequency-domain example
 =================================
 
-For a single frequency and a crossplot frequency vs offset.
+A simple frequency-domain empymod example for a
+
+- single frequency, and a
+- crossplot of a range of frequencies versus a range of offsets.
 """
 import empymod
 import numpy as np
@@ -14,54 +17,42 @@ plt.style.use('ggplot')
 # Define models
 # -------------
 
-name = 'Example Model'         # Model name
-depth = [0, 300, 1000, 1200]   # Layer boundaries
-res = [2e14, 0.3, 1, 50, 1]    # Anomaly resistivities
-resBG = [2e14, 0.3, 1, 1, 1]   # Background resistivities
-aniso = [1, 1, 1.5, 1.5, 1.5]  # Layer anis. (same for anomaly & backg.)
+depth = [0, -300, -1000, -1200]   # Layer boundaries
+res_tg = [2e14, 0.3, 1, 50, 1]    # Anomaly resistivities
+res_bg = [2e14, 0.3, 1, 1, 1]     # Background resistivities
+aniso = [1, 1, 1.5, 1.5, 1.5]     # Layer anis. (same for anomaly & backg.)
 
 # Modelling parameters
 verb = 0
 ab = 11   # source and receiver x-directed
 
 # Spatial parameters
-zsrc = 250                    # Src-depth
-zrec = 300                    # Rec-depth
-fx = np.arange(20, 101)*100   # Offsets
-fy = np.zeros(fx.size)        # 0s
+zsrc = -250                     # Source depth
+zrec = -300                     # Receiver depth
+recx = np.arange(20, 101)*100   # Receiver offsets
 
 ###############################################################################
 # Plot models
 # ~~~~~~~~~~~
 
-pdepth = np.repeat(np.r_[-100, depth], 2)
-pdepth[:-1] = pdepth[1:]
-pdepth[-1] = 2*depth[-1]
-pres = np.repeat(res, 2)
-presBG = np.repeat(resBG, 2)
-pani = np.repeat(aniso, 2)
+p_depth = np.repeat(np.r_[100, depth, 2*depth[-1]], 2)[1:-1]
 
 # Create figure
-fig = plt.figure(figsize=(7, 5), facecolor='w')
-fig.subplots_adjust(wspace=.25, hspace=.4)
-plt.suptitle(name, fontsize=20)
+fig, (ax1, ax2) = plt.subplots(1, 2, constrained_layout=True, sharey=True)
+fig.suptitle("Model", fontsize=16)
 
 # Plot Resistivities
-ax1 = plt.subplot(1, 2, 1)
-plt.plot(pres, pdepth, 'r')
-plt.plot(presBG, pdepth, 'k')
-plt.xscale('log')
-plt.xlim([.2*np.array(res).min(), 2*np.array(res)[1:].max()])
-plt.ylim([1.5*depth[-1], -100])
-plt.ylabel('Depth (m)')
-plt.xlabel(r'Resistivity $\rho_h\ (\Omega\,\rm{m})$')
+ax1.semilogx(np.repeat(res_tg, 2), p_depth, 'C0')
+ax1.semilogx(np.repeat(res_bg, 2), p_depth, 'k')
+ax1.set_xlim([0.08, 500])
+ax1.set_ylim([-1800, 100])
+ax1.set_ylabel('Depth (m)')
+ax1.set_xlabel('Resistivity ρₕ (Ω m)')
 
 # Plot anisotropies
-ax2 = plt.subplot(1, 2, 2)
-plt.plot(pani, pdepth, 'k')
-plt.xlim([0, 2])
-plt.ylim([1.5*depth[-1], -100])
-plt.xlabel(r'Anisotropy $\lambda (-)$')
+ax2.plot(np.repeat(aniso, 2), p_depth, 'k')
+ax2.set_xlim([0, 2])
+ax2.set_xlabel('Anisotropy λ (-)')
 ax2.yaxis.tick_right()
 
 ###############################################################################
@@ -71,36 +62,40 @@ ax2.yaxis.tick_right()
 # Compute
 # ~~~~~~~
 
-inpdat = {'src': [0, 0, zsrc], 'rec': [fx, fy, zrec], 'depth': depth,
-          'freqtime': 1, 'aniso': aniso, 'ab': ab,
-          'htarg': {'pts_per_dec': -1}, 'verb': verb}
+# For 1 frequency, f=1Hz
+inpdat = {
+    'src': [0, 0, zsrc],
+    'rec': [recx, 0, zrec],
+    'depth': depth,
+    'freqtime': 1,
+    'aniso': aniso,
+    'ab': ab,
+    'htarg': {'pts_per_dec': -1},
+    'verb': verb
+}
 
-fEM = empymod.dipole(**inpdat, res=res)
-fEMBG = empymod.dipole(**inpdat, res=resBG)
-
+fEM_tg = empymod.dipole(res=res_tg, **inpdat)
+fEM_bg = empymod.dipole(res=res_bg, **inpdat)
 
 ###############################################################################
 # Plot
 # ~~~~
 
-fig = plt.figure(figsize=(8, 6), facecolor='w')
-fig.subplots_adjust(wspace=.25, hspace=.4)
-fig.suptitle(name+': src-x, rec-x; f = 1 Hz', fontsize=16, y=1)
+fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, constrained_layout=True)
+
+ax1.set_title("Eₓₓ; f = 1 Hz")
 
 # Plot Amplitude
-ax1 = plt.subplot(2, 2, 1)
-plt.semilogy(fx/1000, fEMBG.amp(), label='BG')
-plt.semilogy(fx/1000, fEM.amp(), label='Anomaly')
-plt.legend(loc='best')
-plt.title(r'Amplitude (V/(A m$^2$))')
-plt.xlabel('Offset (km)')
+ax1.semilogy(recx/1000, fEM_bg.amp(), label='Dipole: background')
+ax1.semilogy(recx/1000, fEM_tg.amp(), label='Dipole: anomaly')
+ax1.set_ylabel('Amplitude (V/(Am²))')
+ax1.legend(loc='lower left')
 
 # Plot Phase
-ax2 = plt.subplot(2, 2, 2)
-plt.title(r'Phase ($^\circ$)')
-plt.plot(fx/1000, fEMBG.pha(deg=True), label='BG')
-plt.plot(fx/1000, fEM.pha(deg=True), label='Anomaly')
-plt.xlabel('Offset (km)')
+ax2.plot(recx/1000, fEM_bg.pha(deg=True))
+ax2.plot(recx/1000, fEM_tg.pha(deg=True))
+ax2.set_xlabel('Offset (km)')
+ax2.set_ylabel('Phase (°)')
 
 ###############################################################################
 # 2. Crossplot
@@ -109,61 +104,58 @@ plt.xlabel('Offset (km)')
 # Compute
 # ~~~~~~~
 
-# Compute responses
-freq = np.logspace(-1.5, .5, 33)  # 33 frequencies from -1.5 to 0.5 (logspace)
-inpdat = {'src': [0, 0, zsrc], 'rec': [fx, fy, zrec], 'depth': depth,
-          'freqtime': freq, 'aniso': aniso, 'ab': ab,
-          'htarg': {'pts_per_dec': -1}, 'verb': verb}
+# For 33 frequencies from -1.5 to 0.5 (logspace)
+freq = np.logspace(-1.5, .5, 33)
+inpdat = {
+    'src': [0, 0, zsrc],
+    'rec': [recx, 0, zrec],
+    'depth': depth,
+    'freqtime': freq,
+    'aniso': aniso,
+    'ab': ab,
+    'htarg': {'pts_per_dec': -1},
+    'verb': verb,
+}
 
-xfEM = empymod.dipole(**inpdat, res=res)
-xfEMBG = empymod.dipole(**inpdat, res=resBG)
-
+xfEM_tg = empymod.dipole(**inpdat, res=res_tg)
+xfEM_bg = empymod.dipole(**inpdat, res=res_bg)
 
 ###############################################################################
 # Plot
 # ~~~~
 
 lfreq = np.log10(freq)
+lamp = np.log10(xfEM_tg.amp())
+namp = (xfEM_tg/xfEM_bg).amp()  # Target divided by background
 
 # Create figure
-fig = plt.figure(figsize=(10, 4), facecolor='w')
-fig.subplots_adjust(wspace=.25, hspace=.4)
+fig, (ax1, ax2) = plt.subplots(
+    1, 2, sharex=True, sharey=True, constrained_layout=True)
 
 # Plot absolute (amplitude) in log10
-ax1 = plt.subplot(1, 2, 2)
-plt.title(r'Normalized $|E_A/E_{BG}|\ (-)$')
-plt.imshow(np.abs(xfEM/xfEMBG), interpolation='bicubic',
-           extent=[fx[0]/1000, fx[-1]/1000, lfreq[0], lfreq[-1]],
-           origin='lower', aspect='auto')
-plt.grid(False)
-plt.colorbar()
-CS = plt.contour(fx/1000, lfreq, np.abs(xfEM/xfEMBG), [1, 3, 5, 7], colors='k')
-plt.clabel(CS, inline=1, fontsize=10)
-plt.ylim([lfreq[0], lfreq[-1]])
-plt.xlim([fx[0]/1000, fx[-1]/1000])
-plt.xlabel('Offset (km)')
-plt.ylabel('Frequency (Hz)')
-plt.yticks([-1.5, -1, -.5, 0, .5], ('0.03', '0.10', '0.32', '1.00', '3.16'))
+ax1.set_title('Amplitude')
+cf1 = ax1.contourf(recx/1000, lfreq, lamp, levels=50)
+CS1 = ax1.contour(recx/1000, lfreq, lamp, [-14, -13, -12, -11], colors='k')
+plt.clabel(CS1, inline=1, fontsize=10)
+ax1.set_xlabel('Offset (km)')
+ax1.set_ylabel('Frequency (Hz)')
+ax1.set_yticks([-1.5, -1, -.5, 0, .5],
+               ('0.03', '0.10', '0.32', '1.00', '3.16'))
+cb1 = plt.colorbar(cf1, ax=ax1, orientation='horizontal',
+                   ticks=np.arange(-14., -9))
+cb1.set_label('log10|Eᵗ| (V/(Am²)')
 
 # Plot normalized
-ax2 = plt.subplot(1, 2, 1)
-plt.title(r'Absolute log10$|E_A|$ (V/A/m$^2$)')
-plt.imshow(np.log10(np.abs(xfEM)), interpolation='bicubic',
-           extent=[fx[0]/1000, fx[-1]/1000, lfreq[0], lfreq[-1]],
-           origin='lower', aspect='auto')
-plt.grid(False)
-plt.colorbar()
-CS = plt.contour(fx/1000, lfreq, np.log10(np.abs(xfEM)),
-                 [-14, -13, -12, -11], colors='k')
-plt.clabel(CS, inline=1, fontsize=10)
-plt.ylim([lfreq[0], lfreq[-1]])
-plt.xlim([fx[0]/1000, fx[-1]/1000])
-plt.xlabel('Offset (km)')
-plt.ylabel('Frequency (Hz)')
-plt.yticks([-1.5, -1, -.5, 0, .5], ('0.03', '0.10', '0.32', '1.00', '3.16'))
-
-fig.suptitle(name+': src-x, rec-x', fontsize=18, y=1.05)
+ax2.set_title('Normalized Amplitude')
+cf2 = ax2.contourf(recx/1000, lfreq, namp, levels=50, cmap='plasma')
+CS2 = ax2.contour(recx/1000, lfreq, namp, [1, 3, 5, 7], colors='k')
+plt.clabel(CS2, inline=1, fontsize=10)
+ax2.set_ylim([lfreq[0], lfreq[-1]])
+ax2.set_xlim([recx[0]/1000, recx[-1]/1000])
+ax2.set_xlabel('Offset (km)')
+cb2 = plt.colorbar(cf2, ax=ax2, orientation='horizontal',
+                   ticks=np.arange(1., 9))
+cb2.set_label('|Eᵗ/Eᵇ| (-)')
 
 ###############################################################################
-
 empymod.Report()
