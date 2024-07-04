@@ -10,6 +10,16 @@ v2.3.x
 """"""
 
 
+latest
+------
+
+- Gallery Update Part I:
+  - Update for Jupyterlab (ipympl/widget) 
+  - Replaced implicit by explicit pyplots
+  - Use by default a positiv z-upwards coordinate system
+  - Part I: frequency domain; reproducing; published
+
+
 v2.3.1: Julia wrapper
 ---------------------
 
