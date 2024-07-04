@@ -114,8 +114,6 @@ def plotresult(depth, res, zsrc, zrec):
     plt.xlim([0, 20e3])
     plt.ylim([1e-14, 1])
 
-    plt.show()
-
 
 ###############################################################################
 # Plot the individual models

@@ -85,8 +85,6 @@ plt.xlabel(r'Time $[s]$')
 plt.ylabel(r'Amplitude $[V/(m\,s)]$')
 plt.legend()
 
-plt.show()
-
 ###############################################################################
 # Version 1.7.0 and older
 # ~~~~~~~~~~~~~~~~~~~~~~~

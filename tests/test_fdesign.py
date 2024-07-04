@@ -133,6 +133,7 @@ def test_save_load_filter(tmpdir):
     assert_allclose(filt.base, dat2[1].base)
 
 
+@pytest.mark.filterwarnings("ignore:FigureCanvasAgg is non-interactive")
 @pytest.mark.skipif(not plt, reason="Matplotlib not installed.")
 class TestFiguresMatplotlib:
 

@@ -71,7 +71,7 @@ def hz(t, res, r, m=1.):
     t : array
         Times (t)
     res : float
-        Halfspace resistivity (Ohm.m)
+        Halfspace resistivity (Ωm)
     r : float
         Offset (m)
     m : float, optional
@@ -106,7 +106,7 @@ def dhzdt(t, res, r, m=1.):
     t : array
         Times (t)
     res : float
-        Halfspace resistivity (Ohm.m)
+        Halfspace resistivity (Ωm)
     r : float
         Offset (m)
     m : float, optional
@@ -130,65 +130,61 @@ def dhzdt(t, res, r, m=1.):
 
 
 ###############################################################################
-# Survey parameters
-# ~~~~~~~~~~~~~~~~~
-
-time = np.logspace(-8, 0, 301)
-
-src = [0, 0, 0, 0, 90]
-rec = [100, 0, 0, 0, 90]
-depth = 0
-res = [2e14, 100]
-
-###############################################################################
-# Analytical result
-# ~~~~~~~~~~~~~~~~~
-
-hz_ana = hz(time, res[1], rec[0])
-dhz_ana = dhzdt(time, res[1], rec[0])
-
-###############################################################################
-# Numerical result
-# ~~~~~~~~~~~~~~~~
-
-eperm = [0, 0]  # Reduce early time numerical noise (diffusive approx for air)
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'freqtime': time, 'verb': 1, 'xdirect': True, 'epermH': eperm}
-
-hz_num = empymod.loop(signal=-1, **inp)
-dhz_num = empymod.loop(signal=0, **inp)
-
-###############################################################################
-# Plot the result
-# ~~~~~~~~~~~~~~~
-
 
 def pos(data):
     """Return positive data; set negative data to NaN."""
     return np.where(data > 0, data, np.nan)
 
 
-plt.figure(figsize=(5, 6))
+###############################################################################
+# Analytical result
+# ~~~~~~~~~~~~~~~~~
 
-plt.plot(time*1e3, pos(dhz_ana), 'k-', lw=2, label='Ward & Hohmann')
-plt.plot(time*1e3, pos(-dhz_ana), 'k--', lw=2)
-plt.plot(time*1e3, pos(dhz_num), 'C1-', label='empymod; dHz/dt')
-plt.plot(time*1e3, pos(-dhz_num), 'C1--')
+time = np.logspace(-8, 0, 301)
+offset = 100
+resistivity = 100
+hz_ana = hz(time, resistivity, offset)
+dhz_ana = dhzdt(time, resistivity, offset)
 
-plt.plot(time*1e3, pos(hz_ana), 'k-', lw=2)
-plt.plot(time*1e3, pos(-hz_ana), 'k--', lw=2)
-plt.plot(time*1e3, pos(hz_num), 'C0-', label='empymod; Hz')
-plt.plot(time*1e3, pos(-hz_num), 'C0--')
+###############################################################################
+# Numerical result
+# ~~~~~~~~~~~~~~~~
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-5, 1e3])
-plt.yticks(10**np.arange(-11., 0))
-plt.ylim([1e-11, 1e-1])
-plt.xlabel('time (ms)')
-plt.legend()
+inp1 = {
+    'src': [0, 0, 0, 0, 90],
+    'rec': [offset, 0, 0, 0, 90],
+    'depth': 0,
+    'res': [2e24, resistivity],
+    'freqtime': time,
+    'verb': 1,
+    'xdirect': True,
+    'epermH': [0, 0],  # Reduce early time numerical noise (diff. approx.)
+}
 
-plt.show()
+hz_num = empymod.loop(signal=-1, **inp1)
+dhz_num = empymod.loop(signal=0, **inp1)
+
+###############################################################################
+# Plot the result
+# ~~~~~~~~~~~~~~~
+
+fig1, ax1 = plt.subplots(1, 1, figsize=(5, 6))
+
+ax1.loglog(time*1e3, pos(dhz_ana), 'k-', lw=2, label='Ward & Hohmann')
+ax1.loglog(time*1e3, pos(-dhz_ana), 'k--', lw=2)
+ax1.loglog(time*1e3, pos(dhz_num), 'C1-', label='empymod; dHz/dt')
+ax1.loglog(time*1e3, pos(-dhz_num), 'C1--')
+
+ax1.loglog(time*1e3, pos(hz_ana), 'k-', lw=2)
+ax1.loglog(time*1e3, pos(-hz_ana), 'k--', lw=2)
+ax1.loglog(time*1e3, pos(hz_num), 'C0-', label='empymod; Hz')
+ax1.loglog(time*1e3, pos(-hz_num), 'C0--')
+
+ax1.set_xlim([1e-5, 1e3])
+ax1.set_yticks(10**np.arange(-11., 0))
+ax1.set_ylim([1e-11, 1e-1])
+ax1.set_xlabel('time (ms)')
+ax1.legend()
 
 ###############################################################################
 # Original Figure
@@ -206,38 +202,32 @@ plt.show()
 # Ward and Hohmann, 1988, Fig 4.2
 # -------------------------------
 
-# Survey parameters
+# Frequencies
 freq = np.logspace(-1, 5, 301)
-src = [0, 0, 0, 0, 90]
-rec = [100, 0, 0, 0, 90]
-depth = 0
-res = [2e14, 100]
 
 # Computation
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'freqtime': freq, 'verb': 1}
-fhz_num = empymod.loop(**inp)
+fhz_num = empymod.loop(
+    src=[0, 0, 0, 0, 90],
+    rec=[100, 0, 0, 0, 90],
+    depth=0,
+    res=[2e14, 100],
+    freqtime=freq,
+    verb=1,
+)
 
 # Figure
-plt.figure(figsize=(5, 5))
+fig2, ax2 = plt.subplots(1, 1, figsize=(5, 5), constrained_layout=True)
 
-plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
-plt.plot(freq, pos(-fhz_num.real), 'C0--')
+ax2.loglog(freq, pos(fhz_num.real), 'C0-', label='Real')
+ax2.loglog(freq, pos(-fhz_num.real), 'C0--')
 
-plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
-plt.plot(freq, pos(-fhz_num.imag), 'C1--')
+ax2.loglog(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+ax2.loglog(freq, pos(-fhz_num.imag), 'C1--')
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-1, 1e5])
-plt.ylim([1e-12, 1e-6])
-plt.xlabel('FREQUENCY (Hz)')
-plt.ylabel('$H_z$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-
-plt.show()
+ax2.axis([1e-1, 1e5, 1e-12, 1e-6])
+ax2.set_xlabel('FREQUENCY (Hz)')
+ax2.set_ylabel('Hz (A/m)')
+ax2.legend()
 
 ###############################################################################
 # Original Figure
@@ -248,38 +238,32 @@ plt.show()
 # Ward and Hohmann, 1988, Fig 4.3
 # -------------------------------
 
-# Survey parameters
+# Frequencies
 freq = np.logspace(-1, 5, 301)
-src = [0, 0, 0, 0, 90]
-rec = [100, 0, 0, 0, 0]
-depth = 0
-res = [2e14, 100]
 
 # Computation
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'freqtime': freq, 'verb': 1}
-fhz_num = empymod.loop(**inp)
+fhz_num = empymod.loop(
+    src=[0, 0, 0, 0, 90],
+    rec=[100, 0, 0, 0, 0],
+    depth=0,
+    res=[2e14, 100],
+    freqtime=freq,
+    verb=1,
+)
 
 # Figure
-plt.figure(figsize=(5, 5))
+fig3, ax3 = plt.subplots(1, 1, figsize=(5, 5), constrained_layout=True)
 
-plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
-plt.plot(freq, pos(-fhz_num.real), 'C0--')
+ax3.loglog(freq, pos(fhz_num.real), 'C0-', label='Real')
+ax3.loglog(freq, pos(-fhz_num.real), 'C0--')
 
-plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
-plt.plot(freq, pos(-fhz_num.imag), 'C1--')
+ax3.loglog(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+ax3.loglog(freq, pos(-fhz_num.imag), 'C1--')
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-1, 1e5])
-plt.ylim([1e-12, 1e-6])
-plt.xlabel('FREQUENCY (Hz)')
-plt.ylabel(r'$H_{\rho}$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-
-plt.show()
+ax3.axis([1e-1, 1e5, 1e-12, 1e-6])
+ax3.set_xlabel('FREQUENCY (Hz)')
+ax3.set_ylabel('Hρ (A/m)')
+ax3.legend()
 
 ###############################################################################
 # Original Figure
@@ -289,50 +273,40 @@ plt.show()
 # Ward and Hohmann, 1988, Fig 4.5
 # -------------------------------
 
-# Survey parameters
+# Times
 time = np.logspace(-6, 0.5, 301)
-src = [0, 0, 0, 0, 90]
-rec = [100, 0, 0, 0, 0]
-depth = 0
-res = [2e14, 100]
 
 # Computation
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'epermH': eperm, 'freqtime': time, 'verb': 1}
-fhz_num = empymod.loop(signal=1, **inp)
-fdhz_num = empymod.loop(signal=0, **inp)
+inp4 = {
+    'src': [0, 0, 0, 0, 90],
+    'rec': [100, 0, 0, 0, 0],
+    'depth': 0,
+    'res': [2e14, 100],
+    'epermH': [0, 0],
+    'freqtime': time,
+    'verb': 1,
+}
+fhz_num = empymod.loop(signal=1, **inp4)
+fdhz_num = empymod.loop(signal=0, **inp4)
 
 # Figure
-plt.figure(figsize=(5, 6))
+fig4, ax4 = plt.subplots(1, 1, figsize=(5, 6), constrained_layout=True)
 
-ax1 = plt.subplot(111)
-plt.plot(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
-plt.plot(time*1e3, pos(-fdhz_num), 'C0--')
+ax4.loglog(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
+ax4.loglog(time*1e3, pos(-fdhz_num), 'C0--')
+ax4.axis([1e-3, 2e3, 1e-11, 1e-1])
+ax4.set_yticks(10**np.arange(-11., -1))
+ax4.set_xlabel('time (ms)')
+ax4.set_ylabel('∂hρ/∂t (A/m-s)')
+ax4.legend(loc=8)
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-3, 2e3])
-plt.yticks(10**np.arange(-11., -1))
-plt.ylim([1e-11, 1e-1])
-plt.xlabel('time (ms)')
-plt.ylabel(r'$\frac{\partial h_{\rho}}{\partial t}$ (A/m-s)')
-plt.legend(loc=8)
-
-ax2 = ax1.twinx()
-
-plt.plot(time*1e3, pos(fhz_num), 'C1-', label='Hz')
-plt.plot(time*1e3, pos(-fhz_num), 'C1--')
-
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-3, 2e3])
-plt.yticks(10**np.arange(-16., -7))
-plt.ylim([1e-17, 1e-7])
-plt.ylabel(r'$h_{\rho}$ (A/m)')
-plt.legend(loc=5)
-
-plt.tight_layout()
-plt.show()
+ax4b = ax4.twinx()
+ax4b.loglog(time*1e3, pos(fhz_num), 'C1-', label='Hz')
+ax4b.loglog(time*1e3, pos(-fhz_num), 'C1--')
+ax4b.axis([1e-3, 2e3, 1e-17, 1e-7])
+ax4b.set_yticks(10**np.arange(-16., -7))
+ax4b.set_ylabel('hρ (A/m)')
+ax4b.legend(loc=5)
 
 ###############################################################################
 # Original Figure
@@ -343,43 +317,36 @@ plt.show()
 # Ward and Hohmann, 1988, Fig 4.7
 # -------------------------------
 
-# Survey parameters
+# Frequencies and loop characteristics
+freq = np.logspace(-1, np.log10(250000), 301)
 radius = 50
 area = radius**2*np.pi
-freq = np.logspace(-1, np.log10(250000), 301)
-src = [radius, 0, 0, 90, 0]
-rec = [0, 0, 0, 0, 90]
-depth = 0
-res = [2e14, 100]
-strength = area/(radius/2)
-mrec = True
 
 # Computation
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'freqtime': freq, 'strength': strength, 'mrec': mrec,
-       'verb': 1}
-fhz_num = empymod.bipole(**inp)
+fhz_num = empymod.bipole(
+    src=[radius, 0, 0, 90, 0],
+    rec=[0, 0, 0, 0, 90],
+    depth=0,
+    res=[2e14, 100],
+    freqtime=freq,
+    strength=area/(radius/2),
+    mrec=True,
+    verb=1,
+)
 
 # Figure
-plt.figure(figsize=(5, 5))
+fig5, ax5 = plt.subplots(1, 1, figsize=(5, 5), constrained_layout=True)
 
-plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
-plt.plot(freq, pos(-fhz_num.real), 'C0--')
+ax5.loglog(freq, pos(fhz_num.real), 'C0-', label='Real')
+ax5.loglog(freq, pos(-fhz_num.real), 'C0--')
 
-plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
-plt.plot(freq, pos(-fhz_num.imag), 'C1--')
+ax5.loglog(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+ax5.loglog(freq, pos(-fhz_num.imag), 'C1--')
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-1, 1e6])
-plt.ylim([1e-8, 1e-1])
-plt.xlabel('frequency (Hz)')
-plt.ylabel('$H_z$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-
-plt.show()
+ax5.axis([1e-1, 1e6, 1e-8, 1e-1])
+ax5.set_xlabel('frequency (Hz)')
+ax5.set_ylabel('Hz (A/m)')
+ax5.legend()
 
 ###############################################################################
 # Original Figure
@@ -390,46 +357,40 @@ plt.show()
 # Ward and Hohmann, 1988, Fig 4.8
 # -------------------------------
 
-# Survey parameters
+# Times and loop characteristics
+time = np.logspace(-7, -1, 301)
 radius = 50
 area = radius**2*np.pi
-time = np.logspace(-7, -1, 301)
-src = [radius, 0, 0, 90, 0]
-rec = [0, 0, 0, 0, 90]
-depth = 0
-res = [2e14, 100]
-strength = area/(radius/2)
-mrec = True
 
 # Computation
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'freqtime': time, 'strength': strength, 'mrec': mrec,
-       'epermH': eperm, 'verb': 1}
+inp6 = {
+    'src': [radius, 0, 0, 90, 0],
+    'rec': [0, 0, 0, 0, 90],
+    'depth': 0,
+    'res': [2e14, 100],
+    'freqtime': time,
+    'strength': area/(radius/2),
+    'mrec': True,
+    'epermH': [0, 0],
+    'verb': 1,
+}
 
-fhz_num = empymod.bipole(signal=-1, **inp)
-fdhz_num = empymod.bipole(signal=0, **inp)
+fhz_num = empymod.bipole(signal=-1, **inp6)
+fdhz_num = empymod.bipole(signal=0, **inp6)
 
 # Figure
-plt.figure(figsize=(4, 6))
+fig6, ax6 = plt.subplots(1, 1, figsize=(4, 6), constrained_layout=True)
 
-ax1 = plt.subplot(111)
-plt.plot(time*1e3, pos(fdhz_num), 'C0-', label=r'dhz/dt (A/m-s)')
-plt.plot(time*1e3, pos(-fdhz_num), 'C0--')
+ax6.loglog(time*1e3, pos(fdhz_num), 'C0-', label='dhz/dt (A/m-s)')
+ax6.loglog(time*1e3, pos(-fdhz_num), 'C0--')
 
-plt.plot(time*1e3, pos(fhz_num), 'C1-', label='hz (A/m)')
-plt.plot(time*1e3, pos(-fhz_num), 'C1--')
+ax6.plot(time*1e3, pos(fhz_num), 'C1-', label='hz (A/m)')
+ax6.plot(time*1e3, pos(-fhz_num), 'C1--')
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-4, 1e2])
-plt.yticks(10**np.arange(-7., 4))
-plt.ylim([1e-7, 5e3])
-
-plt.xlabel('time (ms)')
-plt.legend()
-
-plt.tight_layout()
-plt.show()
+ax6.axis([1e-4, 1e2, 1e-7, 5e3])
+ax6.set_yticks(10**np.arange(-7., 4))
+ax6.set_xlabel('time (ms)')
+ax6.legend()
 
 ###############################################################################
 # Original Figure
@@ -440,38 +401,32 @@ plt.show()
 # Ward and Hohmann, 1988, Fig 2.2
 # -------------------------------
 
-# Survey parameters
+# Frequencies
 freq = np.logspace(-2, 5, 301)
-src = [0, 0, 0, 0, 0]
-rec = [0, 100, 0, 0, 0]
-depth = []
-res = 100
 
 # Computation
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'freqtime': freq, 'verb': 1}
-fhz_num = empymod.loop(**inp)
+fhz_num = empymod.loop(
+    src=[0, 0, 0, 0, 0],
+    rec=[0, 100, 0, 0, 0],
+    depth=[],
+    res=100,
+    freqtime=freq,
+    verb=1,
+)
 
 # Figure
-plt.figure(figsize=(5, 5))
+fig7, ax7 = plt.subplots(1, 1, figsize=(5, 5), constrained_layout=True)
 
-plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
-plt.plot(freq, pos(-fhz_num.real), 'C0--')
+ax7.loglog(freq, pos(fhz_num.real), 'C0-', label='Real')
+ax7.loglog(freq, pos(-fhz_num.real), 'C0--')
 
-plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
-plt.plot(freq, pos(-fhz_num.imag), 'C1--')
+ax7.loglog(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+ax7.loglog(freq, pos(-fhz_num.imag), 'C1--')
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-2, 1e5])
-plt.ylim([1e-13, 1e-6])
-plt.xlabel('frequency (Hz)')
-plt.ylabel('$H_z$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-
-plt.show()
+ax7.axis([1e-2, 1e5, 1e-13, 1e-6])
+ax7.set_xlabel('frequency (Hz)')
+ax7.set_ylabel('Hz (A/m)')
+ax7.legend()
 
 ###############################################################################
 # Original Figure
@@ -482,37 +437,32 @@ plt.show()
 # Ward and Hohmann, 1988, Fig 2.3
 # -------------------------------
 
-# Survey parameters
+# Frequencies
 freq = np.logspace(-2, 5, 301)
-src = [0, 0, 0, 0, 0]
-rec = [100, 0, 0, 0, 0]
-depth = []
-res = 100
 
 # Computation
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'freqtime': freq, 'verb': 1}
-fhz_num = empymod.loop(**inp)
+fhz_num = empymod.loop(
+    src=[0, 0, 0, 0, 0],
+    rec=[100, 0, 0, 0, 0],
+    depth=[],
+    res=100,
+    freqtime=freq,
+    verb=1,
+)
 
 # Figure
-plt.figure(figsize=(5, 5))
+fig8, ax8 = plt.subplots(1, 1, figsize=(5, 5), constrained_layout=True)
 
-plt.plot(freq, pos(fhz_num.real), 'C0-', label='Real')
-plt.plot(freq, pos(-fhz_num.real), 'C0--')
+ax8.loglog(freq, pos(fhz_num.real), 'C0-', label='Real')
+ax8.loglog(freq, pos(-fhz_num.real), 'C0--')
 
-plt.plot(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
-plt.plot(freq, pos(-fhz_num.imag), 'C1--')
+ax8.loglog(freq, pos(fhz_num.imag), 'C1-', label='Imaginary')
+ax8.loglog(freq, pos(-fhz_num.imag), 'C1--')
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-2, 1e5])
-plt.ylim([1e-13, 1e-6])
-plt.xlabel('Frequency (Hz)')
-plt.ylabel(r'$H_{\rho}$ (A/m)')
-plt.legend()
-
-plt.tight_layout()
-plt.show()
+ax8.axis([1e-2, 1e5, 1e-13, 1e-6])
+ax8.set_xlabel('Frequency (Hz)')
+ax8.set_ylabel('Hρ (A/m)')
+ax8.legend()
 
 ###############################################################################
 # Original Figure
@@ -523,51 +473,43 @@ plt.show()
 # Ward and Hohmann, 1988, Fig 2.4
 # -------------------------------
 
-# Survey parameters
+# Times
 time = np.logspace(-7, 0, 301)
-src = [0, 0, 0, 0, 0]
-rec = [0, 100, 0, 0, 0]
-depth = []
-res = 100
 
 # Computation
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'xdirect': True, 'freqtime': time, 'verb': 1}
-fhz_num = empymod.loop(signal=1, **inp)
-fdhz_num = empymod.loop(signal=0, **inp)
+inp9 = {
+    'src': [0, 0, 0, 0, 0],
+    'rec': [0, 100, 0, 0, 0],
+    'depth': [],
+    'res': 100,
+    'xdirect': True,
+    'freqtime': time,
+    'verb': 1,
+}
+fhz_num = empymod.loop(signal=1, **inp9)
+fdhz_num = empymod.loop(signal=0, **inp9)
 
 # Figure
-plt.figure(figsize=(5, 5))
+fig9, ax9 = plt.subplots(1, 1, figsize=(5, 5), constrained_layout=True)
 
-ax1 = plt.subplot(111)
+ax9.loglog(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
+ax9.loglog(time*1e3, pos(-fdhz_num), 'C0--')
 
-plt.plot(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
-plt.plot(time*1e3, pos(-fdhz_num), 'C0--')
+ax9.axis([1e-4, 1e3, 1e-12, 1e-2])
+ax9.set_yticks(10**np.arange(-12., -1))
+ax9.set_xlabel('time (ms)')
+ax9.set_ylabel('∂hρ/∂t (A/m-s)')
+ax9.legend(loc=8)
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-4, 1e3])
-plt.yticks(10**np.arange(-12., -1))
-plt.ylim([1e-12, 1e-2])
-plt.xlabel('time (ms)')
-plt.ylabel(r'$\frac{\partial h_{\rho}}{\partial t}$ (A/m-s)')
-plt.legend(loc=8)
+ax9b = ax9.twinx()
 
-ax2 = ax1.twinx()
+ax9b.loglog(time*1e3, pos(fhz_num), 'C1-', label='Hz')
+ax9b.loglog(time*1e3, pos(-fhz_num), 'C1--')
 
-plt.plot(time*1e3, pos(fhz_num), 'C1-', label='Hz')
-plt.plot(time*1e3, pos(-fhz_num), 'C1--')
-
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-4, 1e3])
-plt.yticks(10**np.arange(-14., -3))
-plt.ylim([1e-14, 1e-4])
-plt.ylabel(r'$h_{\rho}$ (A/m)')
-plt.legend(loc=5)
-
-plt.tight_layout()
-plt.show()
+ax9b.axis([1e-4, 1e3, 1e-14, 1e-4])
+ax9b.set_yticks(10**np.arange(-14., -3))
+ax9b.set_ylabel('hρ (A/m)')
+ax9b.legend(loc=5)
 
 ###############################################################################
 # Original Figure
@@ -578,51 +520,43 @@ plt.show()
 # Ward and Hohmann, 1988, Fig 2.5
 # -------------------------------
 
-# Survey parameters
+# Times
 time = np.logspace(-7, 0, 301)
-src = [0, 0, 0, 0, 0]
-rec = [100, 0, 0, 0, 0]
-depth = []
-res = 100
 
 # Computation
-inp = {'src': src, 'rec': rec, 'depth': depth, 'res': res,
-       'xdirect': True, 'freqtime': time, 'verb': 1}
-fhz_num = empymod.loop(signal=1, **inp)
-fdhz_num = empymod.loop(signal=0, **inp)
+inp10 = {
+    'src': [0, 0, 0, 0, 0],
+    'rec': [100, 0, 0, 0, 0],
+    'depth': [],
+    'res': 100,
+    'xdirect': True,
+    'freqtime': time,
+    'verb': 1,
+}
+fhz_num = empymod.loop(signal=1, **inp10)
+fdhz_num = empymod.loop(signal=0, **inp10)
 
 # Figure
-plt.figure(figsize=(5, 5))
+fig10, ax10 = plt.subplots(1, 1, figsize=(5, 5), constrained_layout=True)
 
-ax1 = plt.subplot(111)
+ax10.loglog(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
+ax10.loglog(time*1e3, pos(-fdhz_num), 'C0--')
 
-plt.plot(time*1e3, pos(fdhz_num), 'C0-', label='dHz/dt')
-plt.plot(time*1e3, pos(-fdhz_num), 'C0--')
+ax10.axis([1e-4, 1e3, 1e-12, 1e-2])
+ax10.set_yticks(10**np.arange(-12., -1))
+ax10.set_xlabel('time (ms)')
+ax10.set_ylabel('∂hρ/∂t (A/m-s)')
+ax10.legend(loc=8)
 
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-4, 1e3])
-plt.yticks(10**np.arange(-12., -1))
-plt.ylim([1e-12, 1e-2])
-plt.xlabel('time (ms)')
-plt.ylabel(r'$\frac{\partial h_{\rho}}{\partial t}$ (A/m-s)')
-plt.legend(loc=8)
+ax10b = ax10.twinx()
 
-ax2 = ax1.twinx()
+ax10b.loglog(time*1e3, pos(fhz_num), 'C1-', label='Hz')
+ax10b.loglog(time*1e3, pos(-fhz_num), 'C1--')
 
-plt.plot(time*1e3, pos(fhz_num), 'C1-', label='Hz')
-plt.plot(time*1e3, pos(-fhz_num), 'C1--')
-
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim([1e-4, 1e3])
-plt.yticks(10**np.arange(-16., -5))
-plt.ylim([1e-16, 1e-6])
-plt.ylabel(r'$h_{\rho}$ (A/m)')
-plt.legend(loc=5)
-
-plt.tight_layout()
-plt.show()
+ax10b.axis([1e-4, 1e3, 1e-16, 1e-6])
+ax10b.set_yticks(10**np.arange(-16., -5))
+ax10b.set_ylabel('hρ (A/m)')
+ax10b.legend(loc=5)
 
 ###############################################################################
 # Original Figure

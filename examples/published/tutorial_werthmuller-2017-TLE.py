@@ -2,7 +2,7 @@
 empymod-tutorial: Werthmüller, 2017, The Leading Edge
 =====================================================
 
-See the notebooks in the repo `empymod/article-tle2017
+See the notebooks in the repo `emsig/article-tle2017
 <https://github.com/emsig/article-tle2017>`_ for:
 
     Werthmüller, D., 2017, **Getting started with controlled-source
