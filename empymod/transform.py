@@ -26,16 +26,19 @@ root directory for more information regarding the involved licenses.
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 # License for the specific language governing permissions and limitations under
 # the License.
-
+import ctypes as ct
 
 import numpy as np
 import scipy as sp
 
 from empymod import kernel
 
-__all__ = ['hankel_dlf', 'hankel_qwe', 'hankel_quad', 'fourier_dlf',
-           'fourier_qwe', 'fourier_fftlog', 'fourier_fft', 'dlf', 'qwe',
-           'get_dlf_points', 'get_fftlog_input']
+
+ckernel = np.ctypeslib.load_library("wavenumber", ".")
+
+__all__ = ['hankel_dlf', 'hankel_cdlf', 'hankel_qwe', 'hankel_quad',
+           'fourier_dlf', 'fourier_qwe', 'fourier_fftlog', 'fourier_fft',
+           'dlf', 'qwe', 'get_dlf_points', 'get_fftlog_input']
 
 
 def __dir__():
@@ -111,6 +114,56 @@ def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     # Call the kernel
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
                            zetaV, lambd, ab, xdirect, msrc, mrec)
+
+    # Carry out the dlf
+    fEM = dlf(PJ, lambd, off, htarg['dlf'], htarg['pts_per_dec'],
+              ang_fact=ang_fact, ab=ab, int_pts=int_pts)
+
+    return fEM, 1, True
+
+
+def hankel_cdlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+                zetaH, zetaV, xdirect, htarg, msrc, mrec):
+    r"""Hankel Transform using the Digital Linear Filter method.
+
+    This function is the same as :func:`hankel_dlf`, but uses a C-version of
+    the kernel.
+    """
+
+    # Compute required lambdas for given Hankel-filter-base
+    lambd, int_pts = get_dlf_points(htarg['dlf'], off, htarg['pts_per_dec'])
+
+    # Call the kernel
+    c_doublep = ct.POINTER(ct.c_double)
+    nfreq, nlayer = etaH.shape
+    noff, nlambda = lambd.shape
+    PJ0 = np.zeros((nfreq, noff, nlambda), dtype=complex)
+    PJ1 = np.zeros((nfreq, noff, nlambda), dtype=complex)
+    PJ0b = np.zeros((nfreq, noff, nlambda), dtype=complex)
+    ckernel.wavenumber(
+        int(nfreq), int(noff), int(nlayer), int(nlambda),
+        ct.c_double(zsrc), ct.c_double(zrec),
+        int(lsrc), int(lrec),
+        depth.ctypes.data_as(c_doublep),
+        etaH.ctypes.data_as(c_doublep),
+        etaV.ctypes.data_as(c_doublep),
+        zetaH.ctypes.data_as(c_doublep),
+        zetaV.ctypes.data_as(c_doublep),
+        lambd.ctypes.data_as(c_doublep),
+        int(ab), int(xdirect), int(msrc), int(mrec),
+        PJ0.ctypes.data_as(c_doublep),
+        PJ1.ctypes.data_as(c_doublep),
+        PJ0b.ctypes.data_as(c_doublep)
+    )
+
+    # Collect the output
+    if ab not in [11, 22, 24, 15, 33]:
+        PJ0 = None
+    if ab not in [11, 12, 21, 22, 14, 24, 15, 25]:
+        PJ0b = None
+    if ab in [33, ]:
+        PJ1 = None
+    PJ = (PJ0, PJ1, PJ0b)
 
     # Carry out the dlf
     fEM = dlf(PJ, lambd, off, htarg['dlf'], htarg['pts_per_dec'],

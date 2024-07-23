@@ -22,8 +22,8 @@ CFLAGS= -fPIC -Ofast -ftree-loop-vectorize -ffast-math -fopt-info-optimized -fun
 	$(CC) -c $(CFLAGS) $(OPTC) $<
 
 clean:
-	rm -f core *.o
+	rm -f *.o
 
 deepclean:
-	rm -rf core *.o *.so *.h5 __pycache__
+	rm -rf *.o *.so
 
