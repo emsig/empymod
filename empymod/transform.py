@@ -26,6 +26,7 @@ root directory for more information regarding the involved licenses.
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 # License for the specific language governing permissions and limitations under
 # the License.
+import os
 import ctypes as ct
 
 import numpy as np
@@ -34,7 +35,9 @@ import scipy as sp
 from empymod import kernel
 
 
-ckernel = np.ctypeslib.load_library("wavenumber", ".")
+ckernel = np.ctypeslib.load_library(
+    "wavenumber", os.path.dirname(os.path.realpath(__file__))
+)
 
 __all__ = ['hankel_dlf', 'hankel_cdlf', 'hankel_qwe', 'hankel_quad',
            'fourier_dlf', 'fourier_qwe', 'fourier_fftlog', 'fourier_fft',
