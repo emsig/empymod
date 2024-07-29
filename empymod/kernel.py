@@ -656,12 +656,14 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
             # If up or down and src is in last but one layer
             if up or (not up and lsrc+1 < nlayer-1):
                 ddepth = depth[lsrc+1-1*pup]-depth[lsrc-1*pup]
-                for i in range(nfreq):
-                    for ii in range(noff):
-                        for iv in range(nlambda):
-                            tiRpm = Rpm[i, ii, rsrcl-1*pup, iv]
-                            tiGam = Gam[i, ii, lsrc-1*pup, iv]
-                            P[i, ii, iv] /= 1 + tiRpm*np.exp(-2*tiGam*ddepth)
+                if np.isfinite(ddepth):
+                    for i in range(nfreq):
+                        for ii in range(noff):
+                            for iv in range(nlambda):
+                                tiRpm = Rpm[i, ii, rsrcl-1*pup, iv]
+                                tiGam = Gam[i, ii, lsrc-1*pup, iv]
+                                fact = tiRpm*np.exp(-2*tiGam*ddepth)
+                                P[i, ii, iv] /= 1 + fact
 
             # Second compute P for all other layers
             if nlsr > 2:
