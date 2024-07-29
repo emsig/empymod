@@ -23,7 +23,7 @@ void fields(int nfreq, int noff, int nlayer, int nlambda, double *depth, double 
 {
     double ds, dm, dp, ftmp, ddepth; 
     int nlsr, rsrcl, isr, last, pm, mupm, i, ii, iv, iz, iii, iiii;
-    int pup, up, itmp;
+    int pup, up, itmp,izstart, izend;
     int g1, g2, g3, n1, n2, m1, m2, m3;
     bool first_layer, last_layer, plus;
     double complex *P, *Rmp, *Rpm;
@@ -48,6 +48,8 @@ void fields(int nfreq, int noff, int nlayer, int nlambda, double *depth, double 
     // Variables
     nlsr = abs(lsrc-lrec)+1;  // nr of layers btw and incl. src and rec layer
     rsrcl = 0;  // src-layer in reflection (Rp/Rm), first if down
+    izstart=2;
+    izend=nlsr;
     isr = lsrc;
     last = nlayer-1;
 
@@ -102,7 +104,7 @@ void fields(int nfreq, int noff, int nlayer, int nlambda, double *depth, double 
             continue;
         }
         // No downgoing field if rec is in first layer or above src
-        if (up==0 && (lrec && 0 || lrec < lsrc)) {
+        if (up==0 && (lrec==0 || lrec < lsrc)) {
             memset(Pd,0,nfreq*noff*nlambda*sizeof(double complex));
             continue;
         }
@@ -123,8 +125,8 @@ void fields(int nfreq, int noff, int nlayer, int nlambda, double *depth, double 
             itmp=first_layer;
             first_layer=last_layer; 
             last_layer=itmp;
-
             rsrcl = nlsr-1;  // src-layer in refl. (Rp/Rm), last (nlsr-1) if up
+            izstart=0;
             isr = lrec;
             last = 0;
             pup = 1;
@@ -154,7 +156,6 @@ void fields(int nfreq, int noff, int nlayer, int nlambda, double *depth, double 
                 }
             }
             else {           // If src and rec are in any layer in between
-//fprintf(stderr,"up=%d lsrc=%d lrec=%d last_layer=%d first_layer=%d\n", up, lsrc, lrec, last_layer, first_layer);
 //fprintf(stderr,"nfreq=%d noff=%d nlayer=%d nlambda=%d\n",nfreq, noff, nlayer, nlambda);
                 for (i=0;i<nfreq;i++) { 
                     for (ii=0;ii<noff;ii++) {
@@ -189,6 +190,7 @@ fprintf(stderr,"P[%d][%d][%d]\n",  i, ii, iv);
             }
         }
         else{           // rec above (up) / below (down) src layer
+//fprintf(stderr,"rec above (up) / below (down) src layer up=%d lsrc=%d lrec=%d last_layer=%d first_layer=%d dp=%d nlsr=%d\n", up, lsrc, lrec, last_layer, first_layer, dp,nlsr);
             //           // Eqs  95/96,  A-24/A-25 for rec above src layer
             //           // Eqs 103/104, A-32/A-33 for rec below src layer
     
@@ -225,12 +227,14 @@ fprintf(stderr,"P[%d][%d][%d]\n",  i, ii, iv);
             // If up or down and src is in last but one layer
             if (up==1 || (up==0 && ((lsrc+1) < nlayer-1))) {
                 ddepth = depth[lsrc+1-1*pup]-depth[lsrc-1*pup];
-                for (i=0;i<nfreq;i++) { 
-                    for (ii=0;ii<noff;ii++) { 
-#pragma ivdep
-                        for (iv=0;iv<nlambda;iv++) { 
-                            tiRpm = Rpm[i*m3+ii*m2+(rsrcl-1*pup)*m1+iv];
-                            P[i*n2+ii*n1+iv] /= 1 + tiRpm*cexp(-2*Gam[i*g3+ii*g2+(lsrc-1*pup)*g1+iv]*ddepth);
+                if (!isinf(ddepth)) {
+                    for (i=0;i<nfreq;i++) { 
+                        for (ii=0;ii<noff;ii++) { 
+                            #pragma ivdep
+                            for (iv=0;iv<nlambda;iv++) { 
+                                tiRpm = Rpm[i*m3+ii*m2+(rsrcl-1*pup)*m1+iv];
+                                P[i*n2+ii*n1+iv] = P[i*n2+ii*n1+iv] / (1 + tiRpm*cexp(-2*Gam[i*g3+ii*g2+(lsrc-1*pup)*g1+iv]*ddepth));
+                            }
                         }
                     }
                 }
@@ -238,7 +242,7 @@ fprintf(stderr,"P[%d][%d][%d]\n",  i, ii, iv);
 
             // Second compute P for all other layers
             if (nlsr > 2){
-                for (iz=2-2*up;iz<nlsr-2*up;iz++) { 
+                for (iz=izstart;iz<izend;iz++) { 
                     ddepth = depth[isr+iz+pup+1]-depth[isr+iz+pup];
                     for (i=0;i<nfreq;i++) { 
                         for (ii=0;ii<noff;ii++) { 
@@ -253,7 +257,7 @@ fprintf(stderr,"P[%d][%d][%d]\n",  i, ii, iv);
                     }
 
                     // If rec/src NOT in first/last layer (up/down)
-                    if (isr+iz != last){
+                    if ((isr+iz) != last){
                         ddepth = depth[isr+iz+1] - depth[isr+iz];
                         for (i=0;i<nfreq;i++) { 
                             for (ii=0;ii<noff;ii++) { 
