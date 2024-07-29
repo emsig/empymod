@@ -55,7 +55,7 @@ def iuSpline(x, y, *args, **kwargs):
 
 # 1. Hankel transforms (wavenumber -> frequency)
 
-def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+def hankel_cdlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
                zetaH, zetaV, xdirect, htarg, msrc, mrec):
     r"""Hankel Transform using the Digital Linear Filter method.
 
@@ -125,7 +125,7 @@ def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     return fEM, 1, True
 
 
-def hankel_cdlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
                 zetaH, zetaV, xdirect, htarg, msrc, mrec):
     r"""Hankel Transform using the Digital Linear Filter method.
 

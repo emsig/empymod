@@ -17,6 +17,10 @@ install:
 	cd empymod && make && cd ..
 	python -m pip install --no-build-isolation --no-deps -e .
 
+complete:
+	cd empymod && make complete && cd ..
+	python -m pip install --no-build-isolation --no-deps -e .
+
 dev-install:
 	cd empymod && make && cd ..
 	python -m pip install -r requirements-dev.txt && python -m pip install --no-build-isolation --no-deps -e .

@@ -1,5 +1,7 @@
 all: wavenumber.so
 
+complete: fields.so reflections.so greenfct.so wavenumber.so
+
 fields.so: fields.o
 	gcc -shared -o $@ fields.o -lm
 
