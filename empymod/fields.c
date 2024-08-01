@@ -127,6 +127,7 @@ void fields(int nfreq, int noff, int nlayer, int nlambda, double *depth, double 
             last_layer=itmp;
             rsrcl = nlsr-1;  // src-layer in refl. (Rp/Rm), last (nlsr-1) if up
             izstart=0;
+            izend=nlsr-2;
             isr = lrec;
             last = 0;
             pup = 1;
