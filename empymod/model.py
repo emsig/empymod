@@ -302,6 +302,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         If True, the output is squeezed. If False, the output will always be of
         ``ndim=3``, (nfreqtime, nrec, nsrc).
 
+    ecurrent : bool, default: False
+        TODO description ecurrent
+
 
     Returns
     -------
@@ -310,6 +313,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         - If rec is electric, returns E [V/m].
         - If rec is magnetic, returns H [A/m].
+        - TODO description ecurrent; check for msrc=True
 
         EMArray is a subclassed ndarray with `.pha` and `.amp` attributes
         (only relevant for frequency-domain data).
@@ -544,7 +548,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
 
-    # Multiplication with frequency-dependent loop factors.
+    # Multiply with eta of the source layer to obtain the electric current.
     if ecurrent:
         EM *= etaH[:, lsrc, None]
 
