@@ -383,7 +383,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
          'ecurrent'],
         [2, 'dlf', {}, 'dlf', {}, False, None, True, False], kwargs,
     )
-    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
+    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze, ecurrent = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
