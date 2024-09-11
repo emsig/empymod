@@ -379,8 +379,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     """
     # Get kwargs with defaults.
     out = get_kwargs(
-        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
-        [2, 'dlf', {}, 'dlf', {}, False, None, True], kwargs,
+        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze',
+         'ecurrent'],
+        [2, 'dlf', {}, 'dlf', {}, False, None, True, False], kwargs,
     )
     verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
 
@@ -542,6 +543,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
+
+    # Multiplication with frequency-dependent loop factors.
+    if ecurrent:
+        EM *= etaH[:, lsrc, None]
 
     # Do f->t transform if required
     if signal is not None:
