@@ -533,6 +533,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 src_rec_w *= np.tile(rec_w, isrc)
             sEM *= src_rec_w
 
+            # Multiply with eta of the rec-layer if ecurrent.
+            if ecurrent:
+                print(sEM.shape, etaH.shape, etaH[:, lrec, None].shape)
+                sEM *= etaH[:, lrec, None]
+
             # Add this src-rec signal
             if nrec == nrecz:
                 if nsrc == nsrcz:  # Case 1: Looped over each src and each rec
@@ -547,10 +552,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
-
-    # Multiply with eta of the source layer to obtain the electric current.
-    if ecurrent:
-        EM *= etaH[:, lsrc, None]
 
     # Do f->t transform if required
     if signal is not None:
