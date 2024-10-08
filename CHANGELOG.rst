@@ -26,7 +26,7 @@ The code is now compatible for numpy v2.
 
 - Maintenance:
 
-  - Bumped minimum required Python to Python 3.9.
+  - Bumped minimum required Python to Python 3.9; dropped requirement on Numba.
   - Testing: dropped Python 3.9 (Python 3.13 not added yet).
   - Update for NumPy v2: mainly ``np.infty`` to ``np.inf``, and ``np.float_``
     to ``np.float64``.
