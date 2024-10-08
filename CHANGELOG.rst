@@ -15,7 +15,7 @@ v2.3.2: NumPy v2
 
 **2024-10-08**
 
-The code is now compatible for numpy v2.
+The code is now compatible with NumPy v2.
 
 - Gallery Update Part I:
 
@@ -169,7 +169,7 @@ v2.1.4: Squeeze
   ``analytical`` take a new keyword argument ``squeeze``, which is set to
   ``True`` by default. If true, the output is squeezed (status quo); if false,
   the output is always a three-dimensional array ``(nfreqtime, nrec, nsrc)``.
-- One can define new ``+np.inf`` as interface. Only use-case is to enforce a
+- One can define new ``+np.infty`` as interface. Only use-case is to enforce a
   coordinate system in a two-layer case with an interface at ``z`` (see example
   coordinate system in the educational section of the gallery).
 
