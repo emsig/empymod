@@ -115,7 +115,7 @@ def test_ComplexNumPyEncoder():
 
     # NumPy types
     assert type(test.default(np.int_(1))) is int
-    assert type(test.default(np.float_(1))) is float
+    assert type(test.default(np.float64(1))) is float
     assert type(test.default(np.bool_(1))) is bool
     assert type(test.default(np.array([[1., 1.], [1., 1.]]))) is list
 

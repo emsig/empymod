@@ -47,7 +47,7 @@ zetaH = np.outer(2j*np.pi*freq, mpermH*mu_0)
 zetaV = np.outer(2j*np.pi*freq, mpermV*mu_0)
 filt = filters.Hankel().key_51_2012
 lambd = filt.base/np.array([0.001, 1, 100, 10000])[:, None]
-depth = np.array([-np.infty, 0, 150, 300, 500, 600])
+depth = np.array([-np.inf, 0, 150, 300, 500, 600])
 inp1 = {'zsrc': 100.,
         'zrec': 650.,
         'lsrc': np.array(1),

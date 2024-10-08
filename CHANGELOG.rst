@@ -10,14 +10,26 @@ v2.3.x
 """"""
 
 
-latest
-------
+v2.3.2: NumPy v2
+----------------
+
+**2024-10-08**
+
+The code is now compatible for numpy v2.
 
 - Gallery Update Part I:
+
   - Update for Jupyterlab (ipympl/widget) 
   - Replaced implicit by explicit pyplots
   - Use by default a positiv z-upwards coordinate system
   - Part I: frequency domain; reproducing; published
+
+- Maintenance:
+
+  - Update for NumPy v2: mainly ``np.infty`` to ``np.inf``, and ``np.float_``
+    to ``np.float64``.
+  - Some fixes to address warnings regarding the deprecated conversion of an
+    array with ndim > 0 to a scalar.
 
 
 v2.3.1: Julia wrapper
@@ -155,7 +167,7 @@ v2.1.4: Squeeze
   ``analytical`` take a new keyword argument ``squeeze``, which is set to
   ``True`` by default. If true, the output is squeezed (status quo); if false,
   the output is always a three-dimensional array ``(nfreqtime, nrec, nsrc)``.
-- One can define new ``+np.infty`` as interface. Only use-case is to enforce a
+- One can define new ``+np.inf`` as interface. Only use-case is to enforce a
   coordinate system in a two-layer case with an interface at ``z`` (see example
   coordinate system in the educational section of the gallery).
 

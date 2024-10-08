@@ -414,7 +414,7 @@ def test_check_model(capsys):
     out, _ = capsys.readouterr()
     assert "* WARNING :: Parameter aniso < " in out
     assert "   direct field    :  Comp. in frequency domain" in out
-    assert_allclose(depth, [-np.infty, 0])
+    assert_allclose(depth, [-np.inf, 0])
     assert_allclose(res, [1e20, 20])
     assert_allclose(aniso, [1, np.sqrt(1e-20/20)])
     assert_allclose(epermH, [0, 1])
@@ -435,13 +435,13 @@ def test_check_model(capsys):
     out, _ = capsys.readouterr()
     assert "   direct field    :  Not calculated (secondary field)" in out
 
-    # Check -np.infty is added to depth
+    # Check -np.inf is added to depth
     out = utils.check_model([], 2, 1, 1, 1, 1, 1, True, 1)
-    assert_allclose(out[0], -np.infty)
+    assert_allclose(out[0], -np.inf)
 
-    # Check -np.infty is not added if it is already in depth
-    out = utils.check_model(-np.infty, 2, 1, 1, 1, 1, 1, True, 1)
-    assert_allclose(out[0], -np.infty)
+    # Check -np.inf is not added if it is already in depth
+    out = utils.check_model(-np.inf, 2, 1, 1, 1, 1, 1, True, 1)
+    assert_allclose(out[0], -np.inf)
 
     # Check verbosity and fullspace
     utils.check_model(0, [1, 1], [2, 2], [10, 10], [1, 1], None, [3, 3], True,
@@ -932,15 +932,15 @@ def test_get_geo_fact():
 
 def test_get_layer_nr():
     bip = np.array([0, 0, 300])
-    lbip, zbip = utils.get_layer_nr(bip, np.array([-np.infty, 500]))
+    lbip, zbip = utils.get_layer_nr(bip, np.array([-np.inf, 500]))
     assert lbip == 0
     assert zbip == 300
-    lbip, _ = utils.get_layer_nr(bip, np.array([-np.infty, 0, 300, 500]))
+    lbip, _ = utils.get_layer_nr(bip, np.array([-np.inf, 0, 300, 500]))
     assert lbip == 1
-    lbip, _ = utils.get_layer_nr(bip, np.array([-np.infty, 0, 200]))
+    lbip, _ = utils.get_layer_nr(bip, np.array([-np.inf, 0, 200]))
     assert lbip == 2
     bip = np.array([np.zeros(4), np.zeros(4), np.arange(4)*100])
-    lbip, _ = utils.get_layer_nr(bip, np.array([-np.infty, 0, 200]))
+    lbip, _ = utils.get_layer_nr(bip, np.array([-np.inf, 0, 200]))
     assert_allclose(lbip, [0, 1, 1, 2])
 
 
