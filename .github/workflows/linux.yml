@@ -44,22 +44,22 @@ jobs:
           - python-version: "3.11"
             name: plain
             os: ubuntu
-            conda: "numba scipy scooby libdlf"
+            conda: "numba 'scipy>=1.9' scooby libdlf"
             test: ""
           - python-version: "3.11"
             name: full
             os: ubuntu
-            conda: "numba scipy scooby libdlf matplotlib pytest-mpl"
+            conda: "numba 'scipy>=1.9' scooby libdlf matplotlib pytest-mpl"
             test: "--mpl"
           - python-version: "3.12"
             name: plain
             os: ubuntu
-            conda: "numba scipy scooby libdlf"
+            conda: "numba 'scipy>=1.9' scooby libdlf"
             test: ""
           - python-version: "3.12"
             name: full
             os: ubuntu
-            conda: "numba scipy scooby libdlf matplotlib pytest-mpl"
+            conda: "numba 'scipy>=1.9' scooby libdlf matplotlib pytest-mpl"
             test: "--mpl"
 
     env:
@@ -115,7 +115,7 @@ jobs:
       - name: Test with pytest
         shell: bash -l {0}
         run: |
-          python -m pip install .
+	      python -m pip install --no-build-isolation --use-pep517 --no-deps .
           cp ./tests/matplotlibrc ./.
           pytest --cov=empymod ${{ matrix.case.test }}
 
