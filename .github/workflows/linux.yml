@@ -36,21 +36,11 @@ jobs:
       matrix:
         os: [ubuntu, ]  # macos, windows]  # Only Linux currently.
         case:
-          - python-version: "3.9"
+          - python-version: "3.10"
             name: minimal
             os: ubuntu
             conda: "'numba=0.53' 'scipy=1.9' scooby libdlf"
             test: ""
-          - python-version: "3.10"
-            name: plain
-            os: ubuntu
-            conda: "numba scipy scooby libdlf"
-            test: ""
-          - python-version: "3.10"
-            name: full
-            os: ubuntu
-            conda: "numba scipy scooby libdlf matplotlib pytest-mpl"
-            test: "--mpl"
           - python-version: "3.11"
             name: plain
             os: ubuntu

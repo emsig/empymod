@@ -26,6 +26,8 @@ The code is now compatible for numpy v2.
 
 - Maintenance:
 
+  - Bumped minimum required Python to Python 3.9.
+  - Testing: dropped Python 3.9 (Python 3.13 not added yet).
   - Update for NumPy v2: mainly ``np.infty`` to ``np.inf``, and ``np.float_``
     to ``np.float64``.
   - Some fixes to address warnings regarding the deprecated conversion of an

@@ -10,7 +10,7 @@
 .. image:: https://img.shields.io/conda/v/conda-forge/empymod.svg
    :target: https://anaconda.org/conda-forge/empymod/
    :alt: conda-forge
-.. image:: https://img.shields.io/badge/python-3.8+-blue.svg
+.. image:: https://img.shields.io/badge/python-3.10+-blue.svg
    :target: https://www.python.org/downloads/
    :alt: Supported Python Versions
 .. image:: https://img.shields.io/badge/platform-linux,win,osx-blue.svg
