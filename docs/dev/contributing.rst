@@ -11,10 +11,8 @@ Good places to get started is to browse the existing issues, check out the
 roadmap, or have a look at any open PR:
 
 - `Issues <https://github.com/emsig/empymod/issues>`_;
+- `Roadmap <https://github.com/emsig/empymod/issues/223>`_;
 - `PR's <https://github.com/emsig/empymod/pulls>`_.
-
-.. GOT DELETED BY GITHUB
-   `Roadmap-project <https://github.com/emsig/empymod/projects/3>`_;
 
 There are various different ways to get in touch, see
 `emsig.xyz#contributing-contact <https://emsig.xyz/#contributing-contact>`_.

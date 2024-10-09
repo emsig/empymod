@@ -26,7 +26,7 @@ The code is now compatible with NumPy v2.
 
 - Bumped the minimum requirements to:
 
-  - Python 3.9
+  - Python 3.10
   - SciPy 1.10
   - Numba, libdlf, scooby (without minimum version)
 
