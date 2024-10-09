@@ -13,7 +13,7 @@ v2.3.x
 v2.3.2: NumPy v2
 ----------------
 
-**2024-10-08**
+**2024-10-09**
 
 The code is now compatible with NumPy v2.
 
@@ -23,6 +23,12 @@ The code is now compatible with NumPy v2.
   - Replaced implicit by explicit pyplots
   - Use by default a positiv z-upwards coordinate system
   - Part I: frequency domain; reproducing; published
+
+- Bumped the minimum requirements to:
+
+  - Python 3.9
+  - SciPy 1.10
+  - Numba, libdlf, scooby (without minimum version)
 
 - Maintenance:
 
@@ -72,7 +78,7 @@ dependency.
 - Maintenance:
 
   - Bumped the minimum requirements to:
-  
+
     - Python 3.9
     - SciPy 1.9
     - Numba 0.53
