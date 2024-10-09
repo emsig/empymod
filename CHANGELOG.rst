@@ -32,10 +32,9 @@ The code is now compatible with NumPy v2.
 
 - Maintenance:
 
-  - Bumped minimum required Python to Python 3.9; dropped requirement on Numba.
   - Testing: dropped Python 3.9 (Python 3.13 not added yet).
-  - Update for NumPy v2: mainly ``np.infty`` to ``np.inf``, and ``np.float_``
-    to ``np.float64``.
+  - Update for NumPy v2: mainly ``np.infty -> np.inf``,
+    ``np.float_ -> np.float64``.
   - Some fixes to address warnings regarding the deprecated conversion of an
     array with ndim > 0 to a scalar.
 

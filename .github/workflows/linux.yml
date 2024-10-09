@@ -44,22 +44,22 @@ jobs:
           - python-version: "3.11"
             name: plain
             os: ubuntu
-            conda: "numba 'scipy>=1.9' scooby libdlf"
+            conda: "numba 'scipy>=1.10' scooby libdlf"
             test: ""
           - python-version: "3.11"
             name: full
             os: ubuntu
-            conda: "numba 'scipy>=1.9' scooby libdlf matplotlib pytest-mpl"
+            conda: "numba 'scipy>=1.10' scooby libdlf matplotlib pytest-mpl"
             test: "--mpl"
           - python-version: "3.12"
             name: plain
             os: ubuntu
-            conda: "numba 'scipy>=1.9' scooby libdlf"
+            conda: "numba 'scipy>=1.10' scooby libdlf"
             test: ""
           - python-version: "3.12"
             name: full
             os: ubuntu
-            conda: "numba 'scipy>=1.9' scooby libdlf matplotlib pytest-mpl"
+            conda: "numba 'scipy>=1.10' scooby libdlf matplotlib pytest-mpl"
             test: "--mpl"
 
     env:
