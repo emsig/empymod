@@ -30,7 +30,7 @@ setup(
     },
     python_requires=">=3.10",
     install_requires=[
-        "scipy>=1.9",
+        "scipy>=1.10",
         "numba",
         "libdlf",
         "scooby",
