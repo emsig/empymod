@@ -60,8 +60,8 @@ FFTLog
 
 FFTLog is the logarithmic analogue to the Fast Fourier Transform FFT originally
 proposed by [Talm78]_. The code used by ``empymod`` was published in Appendix B
-of [Hami00]_ and is publicly available at `casa.colorado.edu/~ajsh/FFTLog
-<http://casa.colorado.edu/~ajsh/FFTLog>`_. From the ``FFTLog``-website:
+of [Hami00]_ and is publicly available at `jila.colorado.edu/~ajsh/FFTLog
+<https://jila.colorado.edu/~ajsh/FFTLog>`_. From the ``FFTLog``-website:
 
 *FFTLog is a set of fortran subroutines that compute the fast Fourier or Hankel
 (= Fourier-Bessel) transform of a periodic sequence of logarithmically spaced

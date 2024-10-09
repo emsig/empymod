@@ -148,5 +148,4 @@ linkcheck_ignore = [
     "https://software.seg.org",
     "https://wiki.seg.org/wiki",                # Requires human-check
     "https://www.cambridge.org/9781107058620",
-    "https://jila.colorado.edu/~ajsh/FFTLog",   # SSL Error
 ]
