@@ -81,5 +81,5 @@ jobs:
       - name: Test with pytest
         shell: bash -l {0}
         run: |
-          python -m pip install .
+          make install
           pytest

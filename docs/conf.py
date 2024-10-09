@@ -142,6 +142,10 @@ html_css_files = [
 # is responsible for resolving them.
 linkcheck_ignore = [
     "https://doi.org/*",  # DOIs should be permanent (their entire purpose)
-    "https://conahcyt.mx",  # Check fails; check later again!
-    "https://software.seg.org",  # Page cannot be reached.
+    # Pages which fail with linkcheck, but can be reached manually
+    # How do we check these?
+    "https://conahcyt.mx",
+    "https://software.seg.org",
+    "https://wiki.seg.org/wiki",                # Requires human-check
+    "https://www.cambridge.org/9781107058620",
 ]

@@ -33,7 +33,7 @@ References
    power spectrum: Monthly Notices of the Royal Astronomical Society, 312,
    pages 257--284; DOI: `10.1046/j.1365-8711.2000.03071.x
    <https://doi.org/10.1046/j.1365-8711.2000.03071.x>`_; Website of FFTLog:
-   `casa.colorado.edu/~ajsh/FFTLog <http://casa.colorado.edu/~ajsh/FFTLog>`_.
+   `jila.colorado.edu/~ajsh/FFTLog <https://jila.colorado.edu/~ajsh/FFTLog>`_.
 .. [HuTS15] Hunziker, J., J. Thorbecke, and E. Slob, 2015, The electromagnetic
    response in a layered vertical transverse isotropic medium: A new look at an
    old problem: Geophysics, 80(1), F1--F18; DOI: `10.1190/geo2013-0411.1

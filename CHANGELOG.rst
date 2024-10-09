@@ -10,14 +10,33 @@ v2.3.x
 """"""
 
 
-latest
-------
+v2.3.2: NumPy v2
+----------------
+
+**2024-10-09**
+
+The code is now compatible with NumPy v2.
 
 - Gallery Update Part I:
+
   - Update for Jupyterlab (ipympl/widget) 
   - Replaced implicit by explicit pyplots
   - Use by default a positiv z-upwards coordinate system
   - Part I: frequency domain; reproducing; published
+
+- Bumped the minimum requirements to:
+
+  - Python 3.9
+  - SciPy 1.10
+  - Numba, libdlf, scooby (without minimum version)
+
+- Maintenance:
+
+  - Testing: dropped Python 3.9 (Python 3.13 not added yet).
+  - Update for NumPy v2: mainly ``np.infty -> np.inf``,
+    ``np.float_ -> np.float64``.
+  - Some fixes to address warnings regarding the deprecated conversion of an
+    array with ndim > 0 to a scalar.
 
 
 v2.3.1: Julia wrapper
@@ -58,7 +77,7 @@ dependency.
 - Maintenance:
 
   - Bumped the minimum requirements to:
-  
+
     - Python 3.9
     - SciPy 1.9
     - Numba 0.53

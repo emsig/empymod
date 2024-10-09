@@ -18,6 +18,7 @@ pydata_sphinx_theme
 sphinx_automodapi
 ipykernel
 ipympl
+pickleshare
 
 # FOR TESTING
 asv

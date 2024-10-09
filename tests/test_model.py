@@ -735,17 +735,17 @@ def test_coordinate_systems():
         orig = dipole(depth=z0, res=[air, hs], **inpLHS, **inp)
 
         # Alternatives LHS: low to high and high to low
-        LHSl2h = dipole(depth=[z0, np.infty], res=[air, hs], **inpLHS, **inp)
-        LHSh2l = dipole(depth=[np.infty, z0], res=[hs, air], **inpLHS, **inp)
+        LHSl2h = dipole(depth=[z0, np.inf], res=[air, hs], **inpLHS, **inp)
+        LHSh2l = dipole(depth=[np.inf, z0], res=[hs, air], **inpLHS, **inp)
 
         assert_allclose(orig, LHSl2h)
         assert_allclose(orig, LHSh2l)
 
         # Alternatives LHS: low to high and high to low
         RHSlth = sign*dipole(
-            depth=[-np.infty, -z0], res=[hs, air], **inpRHS, **inp)
+            depth=[-np.inf, -z0], res=[hs, air], **inpRHS, **inp)
         RHSh2l = sign*dipole(
-            depth=[-z0, -np.infty], res=[air, hs], **inpRHS, **inp)
+            depth=[-z0, -np.inf], res=[air, hs], **inpRHS, **inp)
 
         assert_allclose(orig, RHSlth, rtol=5e-6)
         assert_allclose(orig, RHSh2l, rtol=5e-6)

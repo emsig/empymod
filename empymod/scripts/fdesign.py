@@ -638,10 +638,10 @@ def plot_result(filt, full, prntres=True):
         else:   # (c) if several spacing and several shift values
             field = np.ma.masked_where(np.isinf(minfield), field)
             plt.pcolormesh(shift, spacing, field, cmap=cmap, shading='nearest')
-            plt.xlim([shift[0]-np.diff(shift[:2])/2,
-                      shift[-1]+np.diff(shift[-2:])/2])
-            plt.ylim([spacing[0]-np.diff(spacing[:2])/2,
-                      spacing[-1]+np.diff(spacing[-2:])/2])
+            plt.xlim([shift[0]-np.diff(shift[:2])[0]/2,
+                      shift[-1]+np.diff(shift[-2:])[0]/2])
+            plt.ylim([spacing[0]-np.diff(spacing[:2])[0]/2,
+                      spacing[-1]+np.diff(spacing[-2:])[0]/2])
             plt.ylabel('Spacing')
             plt.xlabel('Shift')
             plt.colorbar()

@@ -695,7 +695,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     Returns
     -------
     depth : array
-        Depths of layer interfaces, adds -infty at beginning if not present.
+        Depths of layer interfaces, adds -inf at beginning if not present.
 
     res : array
         As input, checked for size.
@@ -736,13 +736,13 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
     # Add -infinity at the beginning
     # => The top-layer (-infinity to first interface) is layer 0.
     if depth.size == 0:
-        depth = np.array([-np.infty, ])
+        depth = np.array([-np.inf, ])
     else:
-        if depth[0] != -np.infty:
-            depth = np.r_[-np.infty, depth]
+        if depth[0] != -np.inf:
+            depth = np.r_[-np.inf, depth]
 
-        # Remove +np.infty (can be used to define 2-layer coordinate system).
-        if depth[-1] == np.infty:
+        # Remove +np.inf (can be used to define 2-layer coordinate system).
+        if depth[-1] == np.inf:
             depth = depth[:-1]
 
     # Check if the user provided a model for etaH/etaV/zetaH/zetaV
@@ -1479,9 +1479,9 @@ def get_layer_nr(inp, depth):
     """
     zinp = np.array(inp[2], dtype=np.float64)
 
-    #  depth = [-infty : last interface]; create additional depth-array
-    # pdepth = [fist interface : +infty]
-    pdepth = np.concatenate((depth[1:], np.array([np.infty])))
+    #  depth = [-inf : last interface]; create additional depth-array
+    # pdepth = [fist interface : +inf]
+    pdepth = np.concatenate((depth[1:], np.array([np.inf])))
 
     # Broadcast arrays
     b_zinp = np.atleast_1d(zinp)[:, None]

@@ -262,10 +262,12 @@ sPJ1i = iuSpline(np.log(ilambd), PJ1.imag)
 sPJ0br = iuSpline(np.log(ilambd), PJ0b.real)
 sPJ0bi = iuSpline(np.log(ilambd), PJ0b.imag)
 ang_fact = kernel.angle_factor(angle, ab, msrc, mrec)
-iinp = {'a': a, 'b': b, 'epsabs': atol, 'epsrel': rtol, 'limit': limit}
+iinp = {'a': float(a), 'b': float(b), 'epsabs': float(atol),
+        'epsrel': float(rtol), 'limit': int(limit)}
 quad = {'inp': {'sPJ0r': sPJ0r, 'sPJ0i': sPJ0i, 'sPJ1r': sPJ1r, 'sPJ1i': sPJ1i,
-                'sPJ0br': sPJ0br, 'sPJ0bi': sPJ0bi, 'ab': ab, 'off': off,
-                'ang_fact': ang_fact, 'iinp': iinp},
+                'sPJ0br': sPJ0br, 'sPJ0bi': sPJ0bi, 'ab': ab,
+                'off': float(off[0]), 'ang_fact': float(ang_fact[0]),
+                'iinp': iinp},
         'res': np.squeeze(freqres)}
 
 # # I -- Store data # #
