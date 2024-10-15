@@ -108,7 +108,7 @@ jobs:
 
       - name: Flake8
         shell: bash -l {0}
-        run: flake8 docs/conf.py setup.py empymod/ tests/ examples/
+        run: flake8 docs/conf.py empymod/ tests/ examples/
 
       - name: Test with pytest
         shell: bash -l {0}
