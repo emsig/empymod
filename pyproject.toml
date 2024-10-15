@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "empymod"
+description = "Open-source full 3D electromagnetic modeller for 1D VTI media"
+readme = "README.rst"
+requires-python = ">=3.10"
+authors = [
+  {name = "The emsig community", email = "info@emsig.xyz"},
+]
+dependencies = [
+    "scipy>=1.10",
+    "numba",
+    "libdlf",
+    "scooby",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+]
+dynamic = ["version"]
+
+[project.license]
+file = "LICENSE"
+
+[project.urls]
+Homepage = "https://emsig.xyz"
+Documentation = "https://empymod.emsig.xyz"
+Repository = "https://github.com/emsig/empymod"
+
+[project.optional-dependencies]
+docs = [
+    "matplotlib",
+    "sphinx>=7.3",
+    "numpydoc",
+    "sphinx_design",
+    "sphinx_numfig",
+    "sphinx_gallery>=0.16",
+    "memory_profiler",
+    "pydata_sphinx_theme",
+    "sphinx_automodapi",
+    "ipykernel",
+    "ipympl",
+    "pickleshare",
+]
+
+tests = [
+    "asv",
+    "flake8",
+    "pytest",
+    "coveralls",
+    "pytest_cov",
+    "pytest_mpl",
+    "flake8-pyproject",
+    "pytest-console-scripts",
+]
+
+all = [
+    "empymod[docs]",
+    "empymod[tests]",
+]
+
+build = [
+    "setuptools_scm>=8",
+    "setuptools>=64",
+]
+
+[project.scripts]
+empymod = "empymod.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["empymod*"]
+
+[tool.setuptools_scm]
+version_file = "empymod/version.py"
+
+[tool.flake8]
+per-file-ignores = [
+    "__init__.py: F401, F403, F821",
+]
+
+[tool.coverage.run]
+relative_files = true

@@ -10,6 +10,14 @@ v2.3.x
 """"""
 
 
+latest
+------
+
+- Maintenance:
+
+  - Changed from ``setup.py`` to ``pyproject.toml``.
+
+
 v2.3.2: NumPy v2
 ----------------
 

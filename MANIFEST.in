@@ -5,9 +5,8 @@ prune .github
 exclude MANIFEST.in
 exclude CHANGELOG.rst
 exclude Makefile
-exclude requirements.txt
-exclude requirements-dev.txt
-exclude setup.cfg
 exclude .gitignore
-exclude .coveragerc
 exclude .readthedocs.yml
+exclude .git_archival.txt
+exclude .gitattributes
+exclude pyproject.toml

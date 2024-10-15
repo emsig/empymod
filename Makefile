@@ -14,10 +14,10 @@ help:
 	@echo ""
 
 install:
-	python -m pip install --no-build-isolation --use-pep517 --no-deps -e .
+	python -m pip install -e .
 
 dev-install:
-	python -m pip install -r requirements-dev.txt && python -m pip install --no-build-isolation --use-pep517 --no-deps -e .
+	python -m pip install -e .[all]
 
 .ONESHELL:
 pytest:
@@ -28,7 +28,7 @@ pytest:
 	rm  matplotlibrc
 
 flake8:
-	flake8 docs/conf.py setup.py empymod/ tests/ examples/
+	flake8 docs/conf.py empymod/ tests/ examples/
 
 html:
 	cd docs && make html
