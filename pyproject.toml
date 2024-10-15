@@ -68,6 +68,9 @@ build = [
     "setuptools>=64",
 ]
 
+[project.scripts]
+empymod = "empymod.__main__:main"
+
 [tool.setuptools.packages.find]
 include = ["empymod*"]
 
@@ -79,5 +82,5 @@ per-file-ignores = [
     "__init__.py: F401, F403, F821",
 ]
 
-[project.scripts]
-empymod = "empymod.__main__:main"
+[tool.coverage.run]
+relative_files = true
