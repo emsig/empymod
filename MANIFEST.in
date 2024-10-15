@@ -11,3 +11,5 @@ exclude setup.cfg
 exclude .gitignore
 exclude .coveragerc
 exclude .readthedocs.yml
+exclude .git_archival.txt
+exclude .gitattributes
