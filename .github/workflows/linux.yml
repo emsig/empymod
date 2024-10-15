@@ -100,7 +100,7 @@ jobs:
           conda config --show-sources
           conda config --show
           conda info -a
-          conda install ${{ matrix.case.conda }} pytest pytest-cov pytest-console-scripts coveralls flake8 pyproject-flake8 setuptools-scm
+          conda install ${{ matrix.case.conda }} pytest pytest-cov pytest-console-scripts coveralls flake8 flake8-pyproject setuptools-scm
 
       - name: Conda list
         shell: bash -l {0}
