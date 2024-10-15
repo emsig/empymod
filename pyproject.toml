@@ -54,7 +54,7 @@ tests = [
     "coveralls",
     "pytest_cov",
     "pytest_mpl",
-    "Flake8-pyproject",
+    "pyproject-flake8",
     "pytest-console-scripts",
 ]
 
