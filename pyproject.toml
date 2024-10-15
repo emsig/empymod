@@ -75,7 +75,6 @@ empymod = "empymod.__main__:main"
 include = ["empymod*"]
 
 [tool.setuptools_scm]
-local_scheme = "no-local-version"
 version_file = "empymod/version.py"
 
 [tool.flake8]
