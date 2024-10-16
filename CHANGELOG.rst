@@ -10,12 +10,16 @@ v2.3.x
 """"""
 
 
-latest
-------
+v2.3.3 pyproject.toml
+---------------------
 
-- Maintenance:
+**2024-10-16**
 
-  - Changed from ``setup.py`` to ``pyproject.toml``.
+Small maintenance release:
+
+- Update credits to reflect current situation.
+- Changed from ``setup.py`` to ``pyproject.toml``.
+- Some maintenance in tests and docs.
 
 
 v2.3.2: NumPy v2
