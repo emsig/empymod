@@ -20,6 +20,7 @@ Small maintenance release:
 - Update credits to reflect current situation.
 - Changed from ``setup.py`` to ``pyproject.toml``.
 - Some maintenance in tests and docs.
+- Small modifications to the kernel.
 
 
 v2.3.2: NumPy v2
