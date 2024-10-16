@@ -241,7 +241,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         lrecGam = Gam[:, :, lrec, :]
 
         # Reflection (coming from below (Rp) and above (Rm) rec)
-        if depth.size > 1:  # Only if more than 1 layer
+        if nlayer > 1:  # Only if more than 1 layer
             Rp, Rm = reflections(depth, e_zH, Gam, lrec, lsrc)
 
             # Field propagators
@@ -249,7 +249,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
             Wu = np.zeros_like(lrecGam)
             Wd = np.zeros_like(lrecGam)
 
-            if lrec != depth.size-1:  # No upgoing field prop. if rec in last
+            if lrec != nlayer-1:  # No upgoing field prop. if rec in last
                 ddepth = depth[lrec + 1] - zrec
                 for i in range(nfreq):
                     for ii in range(noff):
@@ -272,14 +272,14 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
 
             # Green's function depending on <ab>
             # (If only one layer, no reflections/fields)
-            if depth.size > 1 and ab in [13, 23, 31, 32, 14, 24, 15, 25]:
+            if nlayer > 1 and ab in [13, 23, 31, 32, 14, 24, 15, 25]:
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
                             green[i, ii, iv] = Pu[i, ii, iv]*Wu[i, ii, iv]
                             green[i, ii, iv] -= Pd[i, ii, iv]*Wd[i, ii, iv]
 
-            elif depth.size > 1:
+            elif nlayer > 1:
                 for i in range(nfreq):
                     for ii in range(noff):
                         for iv in range(nlambda):
@@ -313,7 +313,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
         else:
 
             # Calculate exponential factor
-            if lrec == depth.size-1:
+            if lrec == nlayer-1:
                 ddepth = 0
             else:
                 ddepth = depth[lrec+1] - depth[lrec]
@@ -436,7 +436,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc):
     """
 
     # Get numbers and max/min layer.
-    nfreq, noff, nlambda = Gam[:, :, 0, :].shape
+    nfreq, noff, nlayer, nlambda = Gam.shape
     maxl = max([lrec, lsrc])
     minl = min([lrec, lsrc])
 
@@ -446,7 +446,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc):
         # Switches depending if plus or minus
         if plus:
             pm = 1
-            layer_count = np.arange(depth.size-2, minl-1, -1)
+            layer_count = np.arange(nlayer-2, minl-1, -1)
             izout = abs(lsrc-lrec)
             minmax = pm*maxl
         else:
@@ -458,7 +458,7 @@ def reflections(depth, e_zH, Gam, lrec, lsrc):
         # If rec in last  and rec below src (plus) or
         # if rec in first and rec above src (minus), shift izout
         shiftplus = lrec < lsrc and lrec == 0 and not plus
-        shiftminus = lrec > lsrc and lrec == depth.size-1 and plus
+        shiftminus = lrec > lsrc and lrec == nlayer-1 and plus
         if shiftplus or shiftminus:
             izout -= pm
 
@@ -536,21 +536,21 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
 
     """
 
-    nfreq, noff, nlambda = Gam[:, :, 0, :].shape
+    nfreq, noff, nlayer, nlambda = Gam.shape
 
     # Variables
     nlsr = abs(lsrc-lrec)+1  # nr of layers btw and incl. src and rec layer
     rsrcl = 0  # src-layer in reflection (Rp/Rm), first if down
     izrange = range(2, nlsr)
     isr = lsrc
-    last = depth.size-1
+    last = nlayer-1
 
     # Booleans if src in first or last layer; swapped if up=True
     first_layer = lsrc == 0
-    last_layer = lsrc == depth.size-1
+    last_layer = lsrc == nlayer-1
 
     # Depths; dp and dm are swapped if up=True
-    if lsrc != depth.size-1:
+    if lsrc != nlayer-1:
         ds = depth[lsrc+1]-depth[lsrc]
         dp = depth[lsrc+1]-zsrc
     dm = zsrc-depth[lsrc]
@@ -580,7 +580,7 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
     for up in [False, True]:
 
         # No upgoing field if rec is in last layer or below src
-        if up and (lrec == depth.size-1 or lrec > lsrc):
+        if up and (lrec == nlayer-1 or lrec > lsrc):
             Pu = np.zeros_like(iGam)
             continue
         # No downgoing field if rec is in first layer or above src
@@ -654,14 +654,16 @@ def fields(depth, Rp, Rm, Gam, lrec, lsrc, zsrc, ab, TM):
                             P[i, ii, iv] = (p1 + p2) * p3
 
             # If up or down and src is in last but one layer
-            if up or (not up and lsrc+1 < depth.size-1):
+            if up or (not up and lsrc+1 < nlayer-1):
                 ddepth = depth[lsrc+1-1*pup]-depth[lsrc-1*pup]
-                for i in range(nfreq):
-                    for ii in range(noff):
-                        for iv in range(nlambda):
-                            tiRpm = Rpm[i, ii, rsrcl-1*pup, iv]
-                            tiGam = Gam[i, ii, lsrc-1*pup, iv]
-                            P[i, ii, iv] /= 1 + tiRpm*np.exp(-2*tiGam*ddepth)
+                if np.isfinite(ddepth):
+                    for i in range(nfreq):
+                        for ii in range(noff):
+                            for iv in range(nlambda):
+                                tiRpm = Rpm[i, ii, rsrcl-1*pup, iv]
+                                tiGam = Gam[i, ii, lsrc-1*pup, iv]
+                                fact = tiRpm*np.exp(-2*tiGam*ddepth)
+                                P[i, ii, iv] /= 1 + fact
 
             # Second compute P for all other layers
             if nlsr > 2:
