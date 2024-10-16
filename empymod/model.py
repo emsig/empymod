@@ -302,6 +302,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         If True, the output is squeezed. If False, the output will always be of
         ``ndim=3``, (nfreqtime, nrec, nsrc).
 
+    ecurrent : bool, default: False
+        TODO description ecurrent
+
 
     Returns
     -------
@@ -310,6 +313,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         - If rec is electric, returns E [V/m].
         - If rec is magnetic, returns H [A/m].
+        - TODO description ecurrent; check for msrc=True
 
         EMArray is a subclassed ndarray with `.pha` and `.amp` attributes
         (only relevant for frequency-domain data).
@@ -379,10 +383,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     """
     # Get kwargs with defaults.
     out = get_kwargs(
-        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
-        [2, 'dlf', {}, 'dlf', {}, False, None, True], kwargs,
+        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze',
+         'ecurrent'],
+        [2, 'dlf', {}, 'dlf', {}, False, None, True, False], kwargs,
     )
-    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
+    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze, ecurrent = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -527,6 +532,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 src_rec_w *= np.repeat(src_w, irec)
                 src_rec_w *= np.tile(rec_w, isrc)
             sEM *= src_rec_w
+
+            # Multiply with eta of the rec-layer if ecurrent.
+            if ecurrent:
+                print(sEM.shape, etaH.shape, etaH[:, lrec, None].shape)
+                sEM *= etaH[:, lrec, None]
 
             # Add this src-rec signal
             if nrec == nrecz:
