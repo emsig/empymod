@@ -11,6 +11,7 @@ authors = [
   {name = "The emsig community", email = "info@emsig.xyz"},
 ]
 dependencies = [
+    "numpy",
     "scipy>=1.10",
     "numba",
     "libdlf",
@@ -33,22 +34,20 @@ Repository = "https://github.com/emsig/empymod"
 
 [project.optional-dependencies]
 docs = [
-    "matplotlib",
+    "ipympl",
     "sphinx>=7.3",
     "numpydoc",
+    "ipykernel",
+    "matplotlib",
+    "pickleshare",
     "sphinx_design",
     "sphinx_numfig",
     "sphinx_gallery>=0.16",
     "memory_profiler",
-    "pydata_sphinx_theme",
     "sphinx_automodapi",
-    "ipykernel",
-    "ipympl",
-    "pickleshare",
+    "pydata_sphinx_theme",
 ]
-
 tests = [
-    "asv",
     "flake8",
     "pytest",
     "coveralls",
@@ -57,12 +56,10 @@ tests = [
     "flake8-pyproject",
     "pytest-console-scripts",
 ]
-
 all = [
     "empymod[docs]",
     "empymod[tests]",
 ]
-
 build = [
     "setuptools_scm>=8",
     "setuptools>=64",
