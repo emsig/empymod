@@ -151,8 +151,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
         isotropic behaviour is assumed.
 
-    msrc, mrec : bool, default: False
+    msrc, mrec : bool or string, default: False
         If True, source/receiver (msrc/mrec) is magnetic, else electric.
+        The receiver can also be `'j'`, in which case the electriccurrent
+        density is returned.
 
     srcpts, recpts : int, default: 1
         Number of integration points for bipole source/receiver:
@@ -304,6 +306,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     ecurrent : bool, default: False
         TODO description ecurrent
+        TODO : make mrec='j' instead, similar to loop
 
 
     Returns
@@ -313,7 +316,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         - If rec is electric, returns E [V/m].
         - If rec is magnetic, returns H [A/m].
-        - TODO description ecurrent; check for msrc=True
+        - If rec is `j`, returns J [A/m2].
 
         EMArray is a subclassed ndarray with `.pha` and `.amp` attributes
         (only relevant for frequency-domain data).
@@ -383,11 +386,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     """
     # Get kwargs with defaults.
     out = get_kwargs(
-        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze',
-         'ecurrent'],
+        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
         [2, 'dlf', {}, 'dlf', {}, False, None, True, False], kwargs,
     )
-    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze, ecurrent = out
+    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -426,6 +428,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # nsrcz/nrecz are number of unique src/rec-pole depths
     src, nsrc, nsrcz, srcdipole = check_bipole(src, 'src')
     rec, nrec, nrecz, recdipole = check_bipole(rec, 'rec')
+
+    # Check if receiver is a `j`.
+    if mrec == 'j':
+        rec_j = True
+        mrec = False
+    else:
+        rec_j = False
 
     # === 3. EM-FIELD CALCULATION ============
 
@@ -492,6 +501,12 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     # Get layer number in which rec resides
                     lrec, zrec = get_layer_nr(tirec, depth)
 
+                    # Check eta at receiver level
+                    # (should be done anisotropically).
+                    if rec_j and verb > 0 and etaH[0, lrec] != etaV[0, lrec]:
+                        print("* WARNING :: `etaH != mtaV` at receiver level, "
+                              "only `etaH` considered for loop factor.")
+
                     # Gather variables
                     finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq,
                             etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht,
@@ -534,8 +549,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             sEM *= src_rec_w
 
             # Multiply with eta of the rec-layer if ecurrent.
-            if ecurrent:
-                print(sEM.shape, etaH.shape, etaH[:, lrec, None].shape)
+            if rec_j:
                 sEM *= etaH[:, lrec, None]
 
             # Add this src-rec signal
@@ -1129,7 +1143,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
                 # Get layer number in which rec resides
                 lrec, zrec = get_layer_nr(tirec, depth)
 
-                # Check mu at receiver level.
+                # Check mu at receiver level (should be done anisotropically).
                 if rec_loop and verb > 0 and mpermH[lrec] != mpermV[lrec]:
                     print("* WARNING :: `mpermH != mpermV` at receiver level, "
                           "only `mpermH` considered for loop factor.")
