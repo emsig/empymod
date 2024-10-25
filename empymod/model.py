@@ -153,10 +153,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     msrc, mrec : bool or string, default: False
         If True, source/receiver (msrc/mrec) is magnetic, else electric.
-        The receiver can also be `'j'`, in which case the electric current
-        density is returned (with the approximation that the current density is
-        proportional to the electric field, J=σE). Only implemented for
-        isotropic resistivities and electric permittivities at receiver level.
+        The receiver can also be set to `mrec='j'`, in which case the electric
+        current density is returned (with the approximation that the current
+        density is proportional to the electric field, J=σE). Only implemented
+        for isotropic resistivities and electric permittivities at receiver
+        level.
 
     srcpts, recpts : int, default: 1
         Number of integration points for bipole source/receiver:
@@ -499,11 +500,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     # Get layer number in which rec resides
                     lrec, zrec = get_layer_nr(tirec, depth)
 
-                    # Check eta at receiver level
-                    # (should be done anisotropically).
+                    # Check eta at receiver level (only isotropic implemented).
                     if rec_j and verb > 0 and etaH[0, lrec] != etaV[0, lrec]:
                         print("* WARNING :: `etaH != etaV` at receiver level, "
-                              "only `etaH` considered for loop factor.")
+                              "only `etaH` considered for e-current density.")
 
                     # Gather variables
                     finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq,
@@ -1142,7 +1142,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
                 # Get layer number in which rec resides
                 lrec, zrec = get_layer_nr(tirec, depth)
 
-                # Check mu at receiver level (should be done anisotropically).
+                # Check mu at receiver level (only isotropic implemented).
                 if rec_loop and verb > 0 and mpermH[lrec] != mpermV[lrec]:
                     print("* WARNING :: `mpermH != mpermV` at receiver level, "
                           "only `mpermH` considered for loop factor.")
