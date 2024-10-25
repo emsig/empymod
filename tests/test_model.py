@@ -588,6 +588,28 @@ class TestBipole:
         assert_allclose(out[:, 0], b)
         assert_allclose(out[:, 1], d)
 
+    def test_j(self, capsys):
+        # Compare a electric * sigma with j
+        inp = {
+            'src': [-25, 25, -25, 25, 100, 170.7107],
+            'rec': [8000, 200, 300, 0, 0],
+            'depth': [0, 250],
+            'res': [1e20, 0.3, 5],
+            'freqtime': 1,
+        }
+        efield = bipole(**inp)
+        ecurr = bipole(mrec='j', **inp)
+        assert_allclose(efield/5, ecurr)
+
+        # Check warning
+        inp['aniso'] = [1, 1, 2]
+        efield = bipole(**inp)
+        _, _ = capsys.readouterr()  # Empty it
+        ecurr = bipole(mrec='j', **inp)
+        out, _ = capsys.readouterr()
+        assert_allclose(efield/5, ecurr)
+        assert "* WARNING :: `etaH != etaV` at receiver level, " in out
+
 
 def test_dipole():
     # As this is a subset of bipole, just run two tests to ensure

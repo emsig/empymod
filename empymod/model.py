@@ -151,8 +151,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         #mpermH = #mpermV = #res. If mpermH is provided but not mpermV,
         isotropic behaviour is assumed.
 
-    msrc, mrec : bool, default: False
+    msrc, mrec : bool or string, default: False
         If True, source/receiver (msrc/mrec) is magnetic, else electric.
+        The receiver can also be set to `mrec='j'`, in which case the electric
+        current density is returned (with the approximation that the current
+        density is proportional to the electric field, J=σE). Only implemented
+        for isotropic resistivities and electric permittivities at receiver
+        level.
 
     srcpts, recpts : int, default: 1
         Number of integration points for bipole source/receiver:
@@ -209,7 +214,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             - If > 0, interpolation is used.
 
           - `diff_quad`: criteria when to swap to QUAD (only relevant if
-            pts_per_dec=-1) (default: 100)
+            pts_per_dec>0) (default: 100)
           - `a`: lower limit for QUAD (default: first interval from QWE)
           - `b`: upper limit for QUAD (default: last interval from QWE)
           - `limit`: limit for quad (default: maxint)
@@ -310,6 +315,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         - If rec is electric, returns E [V/m].
         - If rec is magnetic, returns H [A/m].
+        - If rec is `j`, returns J [A/m2].
 
         EMArray is a subclassed ndarray with `.pha` and `.amp` attributes
         (only relevant for frequency-domain data).
@@ -422,6 +428,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     src, nsrc, nsrcz, srcdipole = check_bipole(src, 'src')
     rec, nrec, nrecz, recdipole = check_bipole(rec, 'rec')
 
+    # Check if receiver is a `j`.
+    if mrec == 'j':
+        rec_j = True
+        mrec = False
+    else:
+        rec_j = False
+
     # === 3. EM-FIELD CALCULATION ============
 
     # Pre-allocate output EM array
@@ -487,6 +500,11 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     # Get layer number in which rec resides
                     lrec, zrec = get_layer_nr(tirec, depth)
 
+                    # Check eta at receiver level (only isotropic implemented).
+                    if rec_j and verb > 0 and etaH[0, lrec] != etaV[0, lrec]:
+                        print("* WARNING :: `etaH != etaV` at receiver level, "
+                              "only `etaH` considered for e-current density.")
+
                     # Gather variables
                     finp = (off, angle, zsrc, zrec, lsrc, lrec, depth, freq,
                             etaH, etaV, zetaH, zetaV, xdirect, isfullspace, ht,
@@ -527,6 +545,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 src_rec_w *= np.repeat(src_w, irec)
                 src_rec_w *= np.tile(rec_w, isrc)
             sEM *= src_rec_w
+
+            # Multiply with eta of the rec-layer if ecurrent.
+            if rec_j:
+                sEM *= etaH[:, lrec, None]
 
             # Add this src-rec signal
             if nrec == nrecz:
@@ -898,7 +920,8 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
         - True: Magnetic dipole receiver;
         - False: Electric dipole receiver;
-        - 'loop': Magnetic receiver consisting of an electric-wire loop.
+        - 'loop': Magnetic receiver consisting of an electric-wire loop. Only
+          implemented for isotropic magnetic permeability at loop levels.
 
     recpts : int, default: 1
         Number of integration points for bipole receiver:
@@ -1119,7 +1142,7 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
                 # Get layer number in which rec resides
                 lrec, zrec = get_layer_nr(tirec, depth)
 
-                # Check mu at receiver level.
+                # Check mu at receiver level (only isotropic implemented).
                 if rec_loop and verb > 0 and mpermH[lrec] != mpermV[lrec]:
                     print("* WARNING :: `mpermH != mpermV` at receiver level, "
                           "only `mpermH` considered for loop factor.")
