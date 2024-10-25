@@ -153,8 +153,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     msrc, mrec : bool or string, default: False
         If True, source/receiver (msrc/mrec) is magnetic, else electric.
-        The receiver can also be `'j'`, in which case the electriccurrent
-        density is returned.
+        The receiver can also be `'j'`, in which case the electric current
+        density is returned (with the approximation that the current density is
+        proportional to the electric field, J=σE).
 
     srcpts, recpts : int, default: 1
         Number of integration points for bipole source/receiver:
@@ -304,10 +305,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         If True, the output is squeezed. If False, the output will always be of
         ``ndim=3``, (nfreqtime, nrec, nsrc).
 
-    ecurrent : bool, default: False
-        TODO description ecurrent
-        TODO : make mrec='j' instead, similar to loop
-
 
     Returns
     -------
@@ -387,7 +384,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # Get kwargs with defaults.
     out = get_kwargs(
         ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
-        [2, 'dlf', {}, 'dlf', {}, False, None, True, False], kwargs,
+        [2, 'dlf', {}, 'dlf', {}, False, None, True], kwargs,
     )
     verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
 

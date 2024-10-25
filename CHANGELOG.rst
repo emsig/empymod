@@ -10,6 +10,14 @@ v2.3.x
 """"""
 
 
+v2.4.0 El. current density
+--------------------------
+
+**2024-10-25**
+
+The ``mrec`` keyword in ``empymod.bipole`` can now be set to ``j``, in which case the electric current density (A/m2) is returned.
+
+
 v2.3.3 pyproject.toml
 ---------------------
 

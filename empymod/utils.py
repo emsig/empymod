@@ -1797,7 +1797,7 @@ def get_kwargs(names, defaults, kwargs):
     known_keys = set([
             'depth', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'signal',
             'ab', 'freqtime', 'freq', 'wavenumber', 'solution', 'cf', 'gain',
-            'msrc', 'srcpts', 'mrec', 'recpts', 'strength', 'squeeze',
+            'msrc', 'srcpts', 'mrec', 'recpts', 'strength', 'squeeze'
     ])
 
     # Loop over wanted parameters.
