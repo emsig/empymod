@@ -155,7 +155,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         If True, source/receiver (msrc/mrec) is magnetic, else electric.
         The receiver can also be `'j'`, in which case the electric current
         density is returned (with the approximation that the current density is
-        proportional to the electric field, J=σE).
+        proportional to the electric field, J=σE). Only implemented for
+        isotropic resistivities and electric permittivities at receiver level.
 
     srcpts, recpts : int, default: 1
         Number of integration points for bipole source/receiver:
@@ -212,7 +213,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
             - If > 0, interpolation is used.
 
           - `diff_quad`: criteria when to swap to QUAD (only relevant if
-            pts_per_dec=-1) (default: 100)
+            pts_per_dec>0) (default: 100)
           - `a`: lower limit for QUAD (default: first interval from QWE)
           - `b`: upper limit for QUAD (default: last interval from QWE)
           - `limit`: limit for quad (default: maxint)
@@ -501,7 +502,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     # Check eta at receiver level
                     # (should be done anisotropically).
                     if rec_j and verb > 0 and etaH[0, lrec] != etaV[0, lrec]:
-                        print("* WARNING :: `etaH != mtaV` at receiver level, "
+                        print("* WARNING :: `etaH != etaV` at receiver level, "
                               "only `etaH` considered for loop factor.")
 
                     # Gather variables
@@ -919,7 +920,8 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
 
         - True: Magnetic dipole receiver;
         - False: Electric dipole receiver;
-        - 'loop': Magnetic receiver consisting of an electric-wire loop.
+        - 'loop': Magnetic receiver consisting of an electric-wire loop. Only
+          implemented for isotropic magnetic permeability at loop levels.
 
     recpts : int, default: 1
         Number of integration points for bipole receiver:
