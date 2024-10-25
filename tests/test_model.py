@@ -608,7 +608,7 @@ class TestBipole:
         ecurr = bipole(mrec='j', **inp)
         out, _ = capsys.readouterr()
         assert_allclose(efield/5, ecurr)
-        assert "* WARNING :: `etaH != mtaV` at receiver level, " in out
+        assert "* WARNING :: `etaH != etaV` at receiver level, " in out
 
 
 def test_dipole():
