@@ -117,6 +117,12 @@ html_theme_options = {
     ],
     'navigation_with_keys': True,
     # "use_edit_page_button": True,
+    "analytics": {
+        # The domain you'd like to use for this analytics instance
+        "plausible_analytics_domain": "empymod.emsig.xyz",
+        # The analytics script that is served by Plausible
+        "plausible_analytics_url": "https://plausible.io/js/plausible.js",
+    },
 }
 
 html_context = {
