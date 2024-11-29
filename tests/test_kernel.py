@@ -3,7 +3,7 @@ import numpy as np
 from os.path import join, dirname
 from numpy.testing import assert_allclose
 
-from empymod import kernel
+from empymod import kernel, _ckernel
 from empymod import bipole
 
 # No input checks are carried out in kernel, by design. Input checks are
@@ -21,9 +21,11 @@ DATAKERNEL = np.load(join(dirname(__file__), 'data/kernel.npz'),
                      allow_pickle=True)
 
 
-@pytest.mark.parametrize("njit", [True, False])
+@pytest.mark.parametrize("njit", [True, False, 'c'])
 def test_wavenumber(njit):                                      # 1. wavenumber
-    if njit:
+    if njit == 'c':
+        wavenumber = _ckernel.wavenumber
+    elif njit:
         wavenumber = kernel.wavenumber
     else:
         wavenumber = kernel.wavenumber.py_func
@@ -48,9 +50,11 @@ def test_wavenumber(njit):                                      # 1. wavenumber
             assert out[2] is None
 
 
-@pytest.mark.parametrize("njit", [True, False])
+@pytest.mark.parametrize("njit", [True, False, 'c'])
 def test_greenfct(njit):                                          # 2. greenfct
-    if njit:
+    if njit == 'c':
+        greenfct = _ckernel.greenfct
+    elif njit:
         greenfct = kernel.greenfct
     else:
         greenfct = kernel.greenfct.py_func
@@ -66,9 +70,11 @@ def test_greenfct(njit):                                          # 2. greenfct
             assert_allclose(out[1], val[i+1][1])
 
 
-@pytest.mark.parametrize("njit", [True, False])
+@pytest.mark.parametrize("njit", [True, False, 'c'])
 def test_reflections(njit):                                    # 3. reflections
-    if njit:
+    if njit == 'c':
+        reflections = _ckernel.reflections
+    elif njit:
         reflections = kernel.reflections
     else:
         reflections = kernel.reflections.py_func
@@ -80,9 +86,11 @@ def test_reflections(njit):                                    # 3. reflections
         assert_allclose(Rm, val[2])
 
 
-@pytest.mark.parametrize("njit", [True, False])
+@pytest.mark.parametrize("njit", [True, False, 'c'])
 def test_fields(njit):                                              # 4. fields
-    if njit:
+    if njit == 'c':
+        fields = _ckernel.fields
+    elif njit:
         fields = kernel.fields
     else:
         fields = kernel.fields.py_func

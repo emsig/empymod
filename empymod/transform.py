@@ -26,16 +26,15 @@ root directory for more information regarding the involved licenses.
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 # License for the specific language governing permissions and limitations under
 # the License.
-
-
 import numpy as np
 import scipy as sp
 
-from empymod import kernel
+from empymod import kernel, _ckernel
 
-__all__ = ['hankel_dlf', 'hankel_qwe', 'hankel_quad', 'fourier_dlf',
-           'fourier_qwe', 'fourier_fftlog', 'fourier_fft', 'dlf', 'qwe',
-           'get_dlf_points', 'get_fftlog_input']
+
+__all__ = ['hankel_dlf', 'hankel_cdlf', 'hankel_qwe', 'hankel_quad',
+           'fourier_dlf', 'fourier_qwe', 'fourier_fftlog', 'fourier_fft',
+           'dlf', 'qwe', 'get_dlf_points', 'get_fftlog_input']
 
 
 def __dir__():
@@ -111,6 +110,28 @@ def hankel_dlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
     # Call the kernel
     PJ = kernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
                            zetaV, lambd, ab, xdirect, msrc, mrec)
+
+    # Carry out the dlf
+    fEM = dlf(PJ, lambd, off, htarg['dlf'], htarg['pts_per_dec'],
+              ang_fact=ang_fact, ab=ab, int_pts=int_pts)
+
+    return fEM, 1, True
+
+
+def hankel_cdlf(zsrc, zrec, lsrc, lrec, off, ang_fact, depth, ab, etaH, etaV,
+                zetaH, zetaV, xdirect, htarg, msrc, mrec):
+    r"""Hankel Transform using the Digital Linear Filter method.
+
+    This function is the same as :func:`hankel_dlf`, but uses a C-version of
+    the kernel.
+    """
+
+    # Compute required lambdas for given Hankel-filter-base
+    lambd, int_pts = get_dlf_points(htarg['dlf'], off, htarg['pts_per_dec'])
+
+    # Call the kernel
+    PJ = _ckernel.wavenumber(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH,
+                             zetaV, lambd, ab, xdirect, msrc, mrec)
 
     # Carry out the dlf
     fEM = dlf(PJ, lambd, off, htarg['dlf'], htarg['pts_per_dec'],
