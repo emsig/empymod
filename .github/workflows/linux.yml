@@ -61,6 +61,16 @@ jobs:
             os: ubuntu
             conda: "numba 'scipy>=1.10' scooby libdlf matplotlib pytest-mpl"
             test: "--mpl"
+          - python-version: "3.13"
+            name: plain
+            os: ubuntu
+            conda: "numba 'scipy>=1.10' scooby libdlf"
+            test: ""
+          - python-version: "3.13"
+            name: full
+            os: ubuntu
+            conda: "numba 'scipy>=1.10' scooby libdlf matplotlib pytest-mpl"
+            test: "--mpl"
 
     env:
       # Used for coveralls flag

@@ -10,6 +10,15 @@ v2.3.x
 """"""
 
 
+latest
+------
+
+
+- Maintenance
+
+  - Testing: added Python 3.13.
+
+
 v2.4.0 El. current density
 --------------------------
 
