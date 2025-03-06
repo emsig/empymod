@@ -320,7 +320,7 @@ ax4b.legend(loc=5)
 # Frequencies and loop characteristics
 freq = np.logspace(-1, np.log10(250000), 301)
 radius = 50
-area = radius**2*np.pi
+circumference = 2 * np.pi * radius
 
 # Computation
 fhz_num = empymod.bipole(
@@ -329,7 +329,7 @@ fhz_num = empymod.bipole(
     depth=0,
     res=[2e14, 100],
     freqtime=freq,
-    strength=area/(radius/2),
+    strength=circumference,
     mrec=True,
     verb=1,
 )
@@ -360,7 +360,7 @@ ax5.legend()
 # Times and loop characteristics
 time = np.logspace(-7, -1, 301)
 radius = 50
-area = radius**2*np.pi
+circumference = 2 * np.pi * radius
 
 # Computation
 inp6 = {
@@ -369,7 +369,7 @@ inp6 = {
     'depth': 0,
     'res': [2e14, 100],
     'freqtime': time,
-    'strength': area/(radius/2),
+    'strength': circumference,
     'mrec': True,
     'epermH': [0, 0],
     'verb': 1,
