@@ -6,20 +6,24 @@ Version 2
 ~~~~~~~~~
 
 
-v2.3.x
+v2.4.x
 """"""
 
 
-latest
-------
+v2.4.1 GEM-2 and DUALEM-842
+---------------------------
+
+**2025-03-10**
 
 - Gallery
 
   - New example *In-Phase and Quadrature*, demonstrating DUALEM-842 and GEM-2.
+  - Clarification in the example *Ward and Hohmann*.
 
 - Maintenance
 
   - Testing: added Python 3.13; moved Mac/Win to 3.13.
+  - Added plausible to website.
 
 
 v2.4.0 El. current density
@@ -28,6 +32,10 @@ v2.4.0 El. current density
 **2024-10-25**
 
 The ``mrec`` keyword in ``empymod.bipole`` can now be set to ``j``, in which case the electric current density (A/m2) is returned.
+
+
+v2.3.x
+""""""
 
 
 v2.3.3 pyproject.toml
@@ -122,7 +130,6 @@ dependency.
   - Fix remaining outdated ``python setup.py`` commands.
 
   - Many small things to keep the package updated.
-
 
 
 v2.2.x
