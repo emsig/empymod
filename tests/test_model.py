@@ -1073,7 +1073,7 @@ def test_dipole_k():
     assert_allclose(w_res1, np.zeros(res['PJ1'].shape, dtype=np.complex128))
 
 
-def test_ip_and_q():
+def test_ip_and_q(capsys):
     # Very simple tests; the function is only a wrapper, so we just test
     # the functionality.
 
@@ -1119,6 +1119,11 @@ def test_ip_and_q():
     IP3, Q3 = model.ip_and_q(**model2, **system)
     assert_allclose(IP3, 0.0)
     assert_allclose(Q3, 0.0)
+
+    _, _ = capsys.readouterr()
+    _, _ = model.ip_and_q(**model1, **{**system, 'src': [0, 0, 0]})
+    out, _ = capsys.readouterr()
+    assert 'has not been tested' in out
 
 
 def test_fem():
