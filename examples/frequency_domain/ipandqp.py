@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
+
 ###############################################################################
 # In-phase and Quadrature function
 # --------------------------------
@@ -20,8 +21,9 @@ plt.style.use('ggplot')
 def IPandQP(model, system, scale=1e6):
     """Return In-Phase and Quadrature for provided model and system.
 
-    Uses the function `empymod.dipole` with `xdirect=None` for the secondary field, and
-    with `xdirect=True` for the analytical fullspace solution for the primary field.
+    Uses the function `empymod.dipole` with `xdirect=None` for the secondary
+    field, and with `xdirect=True` for the analytical fullspace solution for
+    the primary field.
 
     Parameters
     ----------
@@ -35,7 +37,8 @@ def IPandQP(model, system, scale=1e6):
         Set are `signal=None`; `ft` and `ftarg` have hence no effect.
 
     scale : float, default: 1e6 (ppm)
-        Scale with which the ratio is multiplied. E.g., 1e3 for ppt, 1e6 for ppm.
+        Scale with which the ratio is multiplied. E.g., 1e3 for ppt, 1e6 for
+        ppm.
 
 
     Returns
@@ -44,20 +47,26 @@ def IPandQP(model, system, scale=1e6):
     IP, QP : ndarrays
         In-phase and quadrature values.
     """
-    
-    # Secondary magnetic field (xdirect=None means no direct field / no airwave)
+
+    # Secondary magnetic field (xdirect=None means no direct field / no
+    # airwave)
     Hs = empymod.dipole(xdirect=None, **system, **model)
-    
-    # Primary magnetic field (a fullspace of air, hence ONLY the direct field / primary field)
+
+    # Primary magnetic field (a fullspace of air, hence ONLY the direct field /
+    # primary field)
     Hp = empymod.dipole(
         xdirect=True,
         # For PERP (46, 64), the Hp is zero; the HCP-Hp is used instead.
-        # Frischknecht et al. 1991, p. 111 (EM Methods in Applied Geophysics, Vol 2)
-        **{**system, 'ab': system['ab'] if system['ab'] not in [46, 64] else 66},
+        # Frischknecht et al. 1991, p. 111 (EM Methods in Applied Geophysics,
+        # Vol 2)
+        **{
+            **system,
+            'ab': system['ab'] if system['ab'] not in [46, 64] else 66
+        },
         # Take only the first value of each parameter, and set depth to empty.
         **{**{k: v[0] for k, v in model.items() if k != 'depth'}, 'depth': []}
     )
-    
+
     # Take the ratio, multiply by scale
     H = scale * Hs / Hp
 
@@ -83,7 +92,7 @@ GEM2 = {
 }
 
 
-model={
+model = {
     'depth': [0, 2, 5],
     'res': [2e14, 50, 0.1, 50],
     # Other parameters
@@ -100,13 +109,14 @@ IP, QP = IPandQP(model=model, system=GEM2)
 
 height = 1.0  # Equipment height
 
+
 def dualem(height, model, ab=[66, 55, 46], scale=1e3):
     DUALEM842S = {
         'src': [0, 0, -height],
         'freqtime': 9000,
-        'verb': 1,   
+        'verb': 1,
     }
-    
+
     IP = np.zeros((len(ab), 3))
     QP = np.zeros((len(ab), 3))
 
@@ -123,7 +133,8 @@ def dualem(height, model, ab=[66, 55, 46], scale=1e3):
 
     return IP, QP
 
-model={
+
+model = {
     'depth': [0, 2, 5],
     'res': [2e14, 50, 0.1, 50],
     # Other parameters
