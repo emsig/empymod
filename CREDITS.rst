@@ -64,3 +64,4 @@ certainly incomplete list (get in touch if you think you should appear here):
 - `Ralph-Uwe Börner <https://github.com/ruboerner>`_
 - `Leon Foks <https://github.com/leonfoks>`_
 - `Erlend Finden <https://github.com/efinden>`_
+- `María Carrizo Mascarell <https://github.com/mariacarrizo>`_.

@@ -13,10 +13,13 @@ v2.3.x
 latest
 ------
 
+- Gallery
+
+  - New example *In-Phase and Quadrature*, demonstrating DUALEM-842 and GEM-2.
 
 - Maintenance
 
-  - Testing: added Python 3.13.
+  - Testing: added Python 3.13; moved Mac/Win to 3.13.
 
 
 v2.4.0 El. current density
