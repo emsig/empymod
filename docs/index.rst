@@ -123,7 +123,7 @@ empymod Documentation
         .. dropdown:: About the name and logo of empymod
 
             The name **empymod** is a portmanteau of *electromagnetic* (em),
-            *python* (py), and *modelling* (mod): empymod is a an electromagnetic
+            *python* (py), and *modelling* (mod): empymod is an electromagnetic
             modeller in python.
 
             The name in the logo plays with the fact that *py* in python is
