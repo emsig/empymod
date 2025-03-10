@@ -25,7 +25,7 @@ from empymod import transform
 
 # Import most important functions
 from empymod.filters import DigitalFilter
-from empymod.model import bipole, dipole, loop
+from empymod.model import bipole, dipole, loop, ip_and_q
 from empymod.utils import EMArray, set_minimum, get_minimum, Report
 
 # For top-namespace
@@ -33,8 +33,8 @@ from empymod.scripts import fdesign, tmtemod
 from empymod.model import analytical, gpr, dipole_k, fem, tem
 
 __all__ = ['model', 'utils', 'filters', 'transform', 'kernel', 'scripts', 'io',
-           'bipole', 'dipole', 'loop', 'EMArray', 'set_minimum', 'get_minimum',
-           'DigitalFilter', 'Report']
+           'bipole', 'dipole', 'loop', 'ip_and_q', 'EMArray', 'set_minimum',
+           'get_minimum', 'DigitalFilter', 'Report']
 
 # Version defined in utils, so we can easier use it within the package itself.
 __version__ = utils.__version__

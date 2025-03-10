@@ -10,9 +10,9 @@ wave) over the primary field (direct wave, usually the airwave). This ratio is
 often multiplied by a factor, and then given as, for instance, ppt (factor 1e3)
 or ppm (factor 1e6).
 
-In this example we define a function to compute the in-phase and quadrature
-components for a given model and a given system, and demonstrate it with the
-GEM-2 and the DUALEM-842 equipments.
+This example demonstrates the use of :func:`empymod.model.ip_and_q`, the
+wrapper to obtain in-phase and quadrature components for a given model and a
+given system, with the GEM-2 and the DUALEM-842 equipments.
 
 
 **Reference**
@@ -31,76 +31,6 @@ import empymod
 import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
-
-
-###############################################################################
-# In-phase and Quadrature function
-# --------------------------------
-#
-# For a description of the parameters see :func:`empymod.model.dipole`.
-
-def IPandQ(model, system, scale=1e3):
-    """Return In-Phase and Quadrature components for provided model and system.
-
-    This function takes two dictionaries, one collecting the model parameters,
-    and one the system parameters, and a scaling factor. For a description of
-    the parameters refer to the function `empymod.model.dipole`.
-
-    Only implemented for magnetic sources and receivers, in the f-domain.
-
-
-    Parameters
-    ----------
-    model : dict
-        - Required: `depth`, `res`.
-        - Optional: `aniso`, `epermH`, `epermV`, `mpermH`, `mpermV`
-
-    system : dict
-        - Required: `src`, `rec`, `freqtime`, and `ab` (only [4-6][4-6]).
-        - Optional: `verb`, `ht`, `htarg`, `loop`, and `squeeze`.
-        - Set: `xdirect` and `signal=None`; `ft`; `ftarg` have hence no effect.
-
-    scale : float, default: 1e3 (ppt)
-        Multiplication factor. E.g., 1e3 for ppt, 1e6 for ppm.
-
-
-    Returns
-    -------
-
-    IP, Q : ndarrays
-        In-phase and quadrature values.
-
-    """
-
-    # Ensure source and receiver are magnetic.
-    if int(system.get('ab', 11)) not in [44, 45, 46, 54, 55, 56, 64, 65, 66]:
-        raise ValueError("Only implemented for magnetic sources/receivers.")
-
-    # Ensure signal is None.
-    if system.get('signal'):
-        raise ValueError("Only implemented for frequency domain.")
-
-    # Secondary magnetic field (xdirect=None means no direct field)
-    Hs = empymod.dipole(xdirect=None, **system, **model)
-
-    # Primary magnetic field (a fullspace of air, hence ONLY the direct field)
-    Hp = empymod.dipole(
-        xdirect=True,
-        # For PERP, ab=[46;64], Hp is zero; instead use Hp of the HCP config.
-        # Frischknecht et al., 1991, p. 111; doi: 10.1190/1.9781560802686.ch3.
-        **{
-            **system,
-            'ab': system['ab'] if system['ab'] not in [46, 64] else 66
-        },
-        # Take only the first value of each parameter, and set depth to empty.
-        **{**{k: v[0] for k, v in model.items() if k != 'depth'}, 'depth': []}
-    )
-
-    # Take the ratio, multiply by scale
-    H = scale * Hs / Hp
-
-    # Return In-phase and Quadrature
-    return H.real, H.imag
 
 
 ###############################################################################
@@ -134,7 +64,7 @@ model1 = {
     # Optionally additional parameters: aniso, epermH, epermV, mpermV
 }
 
-IP1, Q1 = IPandQ(model=model1, system=GEM2)
+IP1, Q1 = empymod.ip_and_q(**model1, **GEM2)
 
 fig1, ax1 = plt.subplots(1, 1)
 ax1.semilogx(freq, IP1, '-o', label='In-phase')
@@ -181,7 +111,9 @@ def dualem(height, model, ab, scale=1e3):
         DUALEM842S['rec'] = [offset, [0, 0, 0], -height]
         DUALEM842S['ab'] = a
 
-        IP[i, :], Q[i, :] = IPandQ(model, DUALEM842S, scale)
+        IP[i, :], Q[i, :] = empymod.ip_and_q(
+            **model, **DUALEM842S, scale=scale
+        )
 
     return IP, Q
 

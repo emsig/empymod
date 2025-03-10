@@ -43,3 +43,7 @@ API reference
     .. grid-item-card::
 
         Analytical: :func:`empymod.model.analytical`
+
+    .. grid-item-card::
+
+        In-phase and Quadrature: :func:`empymod.model.ip_and_q`

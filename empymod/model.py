@@ -21,6 +21,7 @@ Further routines are:
 - :func:`analytical`: Calculate analytical fullspace and halfspace solutions.
 - :func:`dipole_k`: Calculate the electromagnetic wavenumber-domain solution.
 - :func:`gpr`: Calculate the Ground-Penetrating Radar (GPR) response.
+- :func:`ip_and_q`: Calculate in-phase and quadrature responses.
 
 The :func:`dipole_k` routine can be used if you are interested in the
 wavenumber-domain result, without Hankel nor Fourier transform. It calls
@@ -51,7 +52,7 @@ The modelling routines make use of the following two core routines:
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 # License for the specific language governing permissions and limitations under
 # the License.
-
+import copy
 
 import numpy as np
 
@@ -62,8 +63,8 @@ from empymod.utils import (
         check_solution, get_abs, get_geo_fact, get_azm_dip, get_off_ang,
         get_layer_nr, get_kwargs, printstartfinish, conv_warning, EMArray)
 
-__all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k', 'fem',
-           'tem']
+__all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k',
+           'ip_and_q', 'fem', 'tem']
 
 
 def __dir__():
@@ -1764,6 +1765,87 @@ def dipole_k(src, rec, depth, res, freq, wavenumber, ab=11, aniso=None,
     printstartfinish(verb, t0, 1)
 
     return np.squeeze(PJ0), np.squeeze(PJ1)
+
+
+def ip_and_q(**kwargs):
+    """Return In-Phase and Quadrature components for provided model and system.
+
+    This wrapper calls :func:`dipole` two times:
+
+    - 1st: with `xdirect=None` for the secondary field Hs.
+    - 2nd: with `xdirect=True`, and only the first value of all model
+      parameters and an empty `depth`-parameter for the primary field Hp.
+
+    It then returns the real (in-phase) and imaginary (quadrature) components
+    of the ratio Hs/Hp, scaled by `scale`.
+
+    This function takes the same input parameters as :func:`dipole`; see the
+    documentation of dipole for the descriptions. In addition, it takes a
+    `scale` parameter.
+
+    This function is only implemented for frequency-domain data of magnetic
+    sources and receivers.
+
+
+    Parameters
+    ----------
+    All parameters : See :func:`dipole`.
+      - Restrictions compared to  :func:`dipole`:
+
+        - `ab` has to be one of [44, 45, 46, 54, 55, 56, 64, 65, 66]
+          (magnetic source and receiver).
+        - `xdirect` is ignored; it is first set to `None` for Hs, and then to
+          `True` for Hp.
+        - `signal` has to be `None` (frequency domain); `ft` and `ftarg` have
+          hence no effect.
+
+    scale : float, default: 1e3 (ppt)
+        Multiplication factor. E.g., 1e3 for ppt, 1e6 for ppm.
+
+
+    Returns
+    -------
+
+    IP, Q : ndarrays
+        In-phase and quadrature values.
+
+    """
+
+    # Ensure source and receiver are magnetic.
+    if int(kwargs.get('ab', 11)) not in [44, 45, 46, 54, 55, 56, 64, 65, 66]:
+        raise ValueError("Only implemented for magnetic sources/receivers.")
+
+    # Ensure signal is None.
+    if kwargs.get('signal', None) is not None:
+        raise ValueError("Only implemented for frequency domain.")
+
+    # Get or set scale
+    scale = kwargs.pop('scale', 1e3)
+
+    # Secondary magnetic field (xdirect=None means no direct field)
+    Hs = dipole(**{**kwargs, 'xdirect': None})
+
+    # Primary magnetic field
+    new = copy.deepcopy(kwargs)
+
+    # For PERP, ab=[46;64], Hp is zero; instead use Hp of the HCP config.
+    # Frischknecht et al., 1991, p. 111; doi: 10.1190/1.9781560802686.ch3.
+    new['ab'] = new['ab'] if new['ab'] not in [46, 64] else 66
+
+    # Take only the first value of each parameter, and set depth to empty.
+    new['depth'] = []
+    for k in ['res', 'aniso', 'epermH', 'epermV', 'mpermH', 'mpermV']:
+        if k in kwargs.keys():
+            new[k] = np.atleast_1d(kwargs[k])[0]
+
+    # Primary magnetic field (a fullspace of air, hence ONLY the direct field)
+    Hp = dipole(**{**new, 'xdirect': True})
+
+    # Take the ratio, multiply by scale
+    H = scale * Hs / Hp
+
+    # Return In-phase and Quadrature
+    return H.real, H.imag
 
 
 # Core modelling routines

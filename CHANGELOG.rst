@@ -6,14 +6,20 @@ Version 2
 ~~~~~~~~~
 
 
-v2.4.x
+v2.5.x
 """"""
 
 
-v2.4.1 GEM-2 and DUALEM-842
----------------------------
+v2.5.0 In-phase and quadrature
+------------------------------
 
 **2025-03-10**
+
+- Modelling routines: New function ``ip_and_q``; this function is a wrapper,
+  taking the same input as ``dipole``. It then computes two responses, the
+  secondary and the primary field, and returns the in-phase and quadrature
+  components as common in profiling measurements using small sources. It only
+  works for magnetic sources and receivers, and the frequency domain.
 
 - Gallery
 
@@ -24,6 +30,10 @@ v2.4.1 GEM-2 and DUALEM-842
 
   - Testing: added Python 3.13; moved Mac/Win to 3.13.
   - Added plausible to website.
+
+
+v2.4.x
+""""""
 
 
 v2.4.0 El. current density
