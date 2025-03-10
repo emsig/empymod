@@ -39,7 +39,7 @@ plt.style.use('ggplot')
 #
 # For a description of the parameters see :func:`empymod.model.dipole`.
 
-def IPandQP(model, system, scale=1e3):
+def IPandQ(model, system, scale=1e3):
     """Return In-Phase and Quadrature components for provided model and system.
 
     This function takes two dictionaries, one collecting the model parameters,
@@ -67,7 +67,7 @@ def IPandQP(model, system, scale=1e3):
     Returns
     -------
 
-    IP, QP : ndarrays
+    IP, Q : ndarrays
         In-phase and quadrature values.
 
     """
@@ -134,14 +134,14 @@ model1 = {
     # Optionally additional parameters: aniso, epermH, epermV, mpermV
 }
 
-IP1, QP1 = IPandQP(model=model1, system=GEM2)
+IP1, Q1 = IPandQ(model=model1, system=GEM2)
 
 fig1, ax1 = plt.subplots(1, 1)
 ax1.semilogx(freq, IP1, '-o', label='In-phase')
-ax1.semilogx(freq, QP1, '-o', label='Quadrature')
+ax1.semilogx(freq, Q1, '-o', label='Quadrature')
 ax1.set_title('GEM-2')
 ax1.set_xlabel('Frequency (Hz)')
-ax1.set_ylabel('IP or QP (ppt)')
+ax1.set_ylabel('IP or Q (ppt)')
 ax1.legend()
 
 
@@ -169,7 +169,7 @@ def dualem(height, model, ab, scale=1e3):
 
     # Pre-allocate output
     IP = np.zeros((len(ab), 3))
-    QP = np.zeros((len(ab), 3))
+    Q = np.zeros((len(ab), 3))
 
     # Loop over configurations
     for i, a in enumerate(ab):
@@ -181,9 +181,9 @@ def dualem(height, model, ab, scale=1e3):
         DUALEM842S['rec'] = [offset, [0, 0, 0], -height]
         DUALEM842S['ab'] = a
 
-        IP[i, :], QP[i, :] = IPandQP(model, DUALEM842S, scale)
+        IP[i, :], Q[i, :] = IPandQ(model, DUALEM842S, scale)
 
-    return IP, QP
+    return IP, Q
 
 
 # Define your model
@@ -196,15 +196,15 @@ model2 = {
 
 
 ab = [66, 55, 46]
-IP2, QP2 = dualem(height, model=model2, ab=ab)
+IP2, Q2 = dualem(height, model=model2, ab=ab)
 
 fig2, ax2 = plt.subplots(1, 1)
 off = [2, 4, 8]
 ax2.plot(off, IP2.T, '-o', label=[f"IP ab={a}" for a in ab])
-ax2.plot(off, QP2.T, '-o', label=[f"QP ab={a}" for a in ab])
+ax2.plot(off, Q2.T, '-o', label=[f"Q ab={a}" for a in ab])
 ax2.set_title('DUALEM-842')
 ax2.set_xlabel('Offset (m)')
-ax2.set_ylabel('IP or QP (ppt)')
+ax2.set_ylabel('IP or Q (ppt)')
 ax2.legend()
 
 
