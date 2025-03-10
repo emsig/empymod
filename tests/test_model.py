@@ -1073,6 +1073,54 @@ def test_dipole_k():
     assert_allclose(w_res1, np.zeros(res['PJ1'].shape, dtype=np.complex128))
 
 
+def test_ip_and_q():
+    # Very simple tests; the function is only a wrapper, so we just test
+    # the functionality.
+
+    # Status Quo
+    system = {
+        'src': [0, 0, -1],
+        'rec': [2, 0, -1],
+        'freqtime': [1.0, 100.0, 10000.0],
+        'ab': 66,
+        'verb': 1,
+    }
+
+    model1 = {
+        'depth': [0, 2, 5],
+        'res': [2e14, 50, 0.1, 50],
+        'aniso': [1, 1.2, 1, 1],
+        'epermH': [0, 1, 1.1, 1],
+        'epermV': [0, 1, 1, 1.1],
+        'mpermH': [1, 1, 1.5, 1],
+        'mpermV': [1, 1.1, 1, 1],
+    }
+
+    IP1, Q1 = model.ip_and_q(**model1, **system)
+    assert_allclose(IP1, [-8.03041994, -7.929775, 18.53988624])
+    assert_allclose(Q1, [0.0126156904, 1.23806259, 16.3291884])
+
+    IP2, Q2 = model.ip_and_q(**model1, **system, scale=1e6)
+    assert_allclose(IP1*1e3, IP2)
+    assert_allclose(Q1*1e3, Q2)
+
+    # Test errors
+    with pytest.raises(ValueError, match="Only implemented for magnetic"):
+        model.ip_and_q(**model1, **{**system, 'ab': 13})
+
+    with pytest.raises(ValueError, match="Only implemented for frequency"):
+        model.ip_and_q(**model1, **{**system, 'signal': 0})
+
+    with pytest.raises(ValueError, match="Only implemented for frequency"):
+        model.ip_and_q(**model1, **{**system, 'signal': 1})
+
+    # Fullspace - no secondary field -> zeros
+    model2 = {'depth': [0], 'res': [50, 50]}
+    IP3, Q3 = model.ip_and_q(**model2, **system)
+    assert_allclose(IP3, 0.0)
+    assert_allclose(Q3, 0.0)
+
+
 def test_fem():
     # Just ensure functionality stays the same, with one example.
     for i in ['1', '2', '3', '4', '5']:
