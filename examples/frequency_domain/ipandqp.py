@@ -157,7 +157,7 @@ ax1.legend()
 height = 1.0  # Equipment height
 
 
-def dualem(height, model, ab=[66, 55, 46], scale=1e3):
+def dualem(height, model, ab, scale=1e3):
     """We wrap the system to accommodate the different configurations."""
 
     # The system
