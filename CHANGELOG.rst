@@ -13,6 +13,9 @@ v2.3.x
 latest
 ------
 
+- Gallery
+
+  - New example *In-Phase and Quadrature*, demonstrating DUALEM-842 and GEM-2.
 
 - Maintenance
 
