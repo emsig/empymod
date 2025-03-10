@@ -10,6 +10,13 @@ v2.5.x
 """"""
 
 
+*latest*
+--------
+
+- Modelling routines: Add warning to ``ip_and_q`` if ``src_z!=rec_z``; not
+  thoroughly tested.
+
+
 v2.5.0 In-phase and quadrature
 ------------------------------
 

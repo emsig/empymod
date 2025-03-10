@@ -67,3 +67,4 @@ certainly incomplete list (get in touch if you think you should appear here):
 - `María Carrizo Mascarell <https://github.com/mariacarrizo>`_
 - `Wouter Deleersnyder <https://github.com/WouterDls>`_
 - `Lukas Aigner <https://github.com/aignerlukas>`_
+- `Jan Thorbecke <https://github.com/JanThorbecke>`_

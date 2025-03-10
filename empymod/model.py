@@ -1786,6 +1786,10 @@ def ip_and_q(**kwargs):
     This function is only implemented for frequency-domain data of magnetic
     sources and receivers.
 
+    Warning: Only the case where source and receiver are at the same height has
+    been tested; if you encounter any issues with other configurations, please
+    let us know!
+
 
     Parameters
     ----------
@@ -1818,6 +1822,12 @@ def ip_and_q(**kwargs):
     # Ensure signal is None.
     if kwargs.get('signal', None) is not None:
         raise ValueError("Only implemented for frequency domain.")
+
+    # Warning that it has not been thoroughly tested.
+    verb = kwargs.get('verb', 2)
+    if verb > 0 and not np.allclose(kwargs['src'][2], kwargs['rec'][2]):
+        print("* WARNING :: `src_z != rec_z`: has not been tested; "
+              "please report back any issues you might encounter.")
 
     # Get or set scale
     scale = kwargs.pop('scale', 1e3)
