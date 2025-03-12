@@ -1079,21 +1079,21 @@ def test_ip_and_q(capsys):
 
     # Status Quo
     system = {
-        'src': [0, 0, -1],
-        'rec': [2, 0, -1],
-        'freqtime': [1.0, 100.0, 10000.0],
-        'ab': 66,
-        'verb': 1,
+        "src": [0, 0, -1],
+        "rec": [2, 0, -1],
+        "freqtime": [1.0, 100.0, 10000.0],
+        "ab": 66,
+        "verb": 1,
     }
 
     model1 = {
-        'depth': [0, 2, 5],
-        'res': [2e14, 50, 0.1, 50],
-        'aniso': [1, 1.2, 1, 1],
-        'epermH': [0, 1, 1.1, 1],
-        'epermV': [0, 1, 1, 1.1],
-        'mpermH': [1, 1, 1.5, 1],
-        'mpermV': [1, 1.1, 1, 1],
+        "depth": [0, 2, 5],
+        "res": [2e14, 50, 0.1, 50],
+        "aniso": [1, 1.2, 1, 1],
+        "epermH": [0, 1, 1.1, 1],
+        "epermV": [0, 1, 1, 1.1],
+        "mpermH": [1, 1, 1.5, 1],
+        "mpermV": [1, 1.1, 1, 1],
     }
 
     IP1, Q1 = model.ip_and_q(**model1, **system)
@@ -1106,24 +1106,24 @@ def test_ip_and_q(capsys):
 
     # Test errors
     with pytest.raises(ValueError, match="Only implemented for magnetic"):
-        model.ip_and_q(**model1, **{**system, 'ab': 13})
+        model.ip_and_q(**model1, **{**system, "ab": 13})
 
     with pytest.raises(ValueError, match="Only implemented for frequency"):
-        model.ip_and_q(**model1, **{**system, 'signal': 0})
+        model.ip_and_q(**model1, **{**system, "signal": 0})
 
     with pytest.raises(ValueError, match="Only implemented for frequency"):
-        model.ip_and_q(**model1, **{**system, 'signal': 1})
+        model.ip_and_q(**model1, **{**system, "signal": 1})
 
     # Fullspace - no secondary field -> zeros
-    model2 = {'depth': [0], 'res': [50, 50]}
+    model2 = {"depth": [0], "res": [50, 50]}
     IP3, Q3 = model.ip_and_q(**model2, **system)
     assert_allclose(IP3, 0.0)
     assert_allclose(Q3, 0.0)
 
     _, _ = capsys.readouterr()
-    _, _ = model.ip_and_q(**model1, **{**system, 'src': [0, 0, 0]})
+    _, _ = model.ip_and_q(**model1, **{**system, "src": [0, 0, 0]})
     out, _ = capsys.readouterr()
-    assert 'has not been tested' in out
+    assert "This function is experimental" in out
 
 
 def test_fem():

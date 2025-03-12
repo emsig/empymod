@@ -10,11 +10,16 @@ v2.5.x
 """"""
 
 
-*latest*
---------
+v2.5.1 IP/Q clarifications
+--------------------------
 
-- Modelling routines: Add warning to ``ip_and_q`` if ``src_z!=rec_z``; not
-  thoroughly tested.
+**2025-03-12**
+
+
+- Modelling routines ``ip_and_q``:
+
+  - Use the corresponding co-planar loop configuration for the primary field.
+  - Add warning to it that it is experimental.
 
 
 v2.5.0 In-phase and quadrature
