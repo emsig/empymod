@@ -1775,6 +1775,8 @@ def ip_and_q(**kwargs):
     - 1st: with `xdirect=None` for the secondary field Hs.
     - 2nd: with `xdirect=True`, and only the first value of all model
       parameters and an empty `depth`-parameter for the primary field Hp.
+      For the primary field, the co-planar field of the source configuration is
+      used.
 
     It then returns the real (in-phase) and imaginary (quadrature) components
     of the ratio Hs/Hp, scaled by `scale`.
@@ -1786,9 +1788,17 @@ def ip_and_q(**kwargs):
     This function is only implemented for frequency-domain data of magnetic
     sources and receivers.
 
-    Warning: Only the case where source and receiver are at the same height has
-    been tested; if you encounter any issues with other configurations, please
-    let us know!
+    .. note::
+
+        This function is experimental. Please let us know if you encounter any
+        issues when using this function!
+
+        Also note that for the primary field computation, the co-planar field
+        of the source direction is used. Hence:
+
+        - Hp for ab=44 is used for ab in [44, 54, 64],
+        - Hp for ab=55 is used for ab in [45, 55, 65],
+        - Hp for ab=66 is used for ab in [46, 56, 66].
 
 
     Parameters
@@ -1826,8 +1836,8 @@ def ip_and_q(**kwargs):
     # Warning that it has not been thoroughly tested.
     verb = kwargs.get('verb', 2)
     if verb > 0 and not np.allclose(kwargs['src'][2], kwargs['rec'][2]):
-        print("* WARNING :: `src_z != rec_z`: has not been tested; "
-              "please report back any issues you might encounter.")
+        print("* WARNING :: This function is experimental. Please let us know "
+              "if you encounter any issues when using this function!")
 
     # Get or set scale
     scale = kwargs.pop('scale', 1e3)
@@ -1838,9 +1848,13 @@ def ip_and_q(**kwargs):
     # Primary magnetic field
     new = copy.deepcopy(kwargs)
 
-    # For PERP, ab=[46;64], Hp is zero; instead use Hp of the HCP config.
-    # Frischknecht et al., 1991, p. 111; doi: 10.1190/1.9781560802686.ch3.
-    new['ab'] = new['ab'] if new['ab'] not in [46, 64] else 66
+    # For the primary field, use the co-planar field of source configuration.
+    if new['ab'] in [44, 54, 64]:
+        new['ab'] = 44
+    elif new['ab'] in [45, 55, 65]:
+        new['ab'] = 55
+    elif new['ab'] in [46, 56, 66]:
+        new['ab'] = 66
 
     # Take only the first value of each parameter, and set depth to empty.
     new['depth'] = []

@@ -1079,21 +1079,21 @@ def test_ip_and_q(capsys):
 
     # Status Quo
     system = {
-        'src': [0, 0, -1],
-        'rec': [2, 0, -1],
-        'freqtime': [1.0, 100.0, 10000.0],
-        'ab': 66,
-        'verb': 1,
+        "src": [0, 0, -1],
+        "rec": [2, 0, -1],
+        "freqtime": [1.0, 100.0, 10000.0],
+        "ab": 66,
+        "verb": 1,
     }
 
     model1 = {
-        'depth': [0, 2, 5],
-        'res': [2e14, 50, 0.1, 50],
-        'aniso': [1, 1.2, 1, 1],
-        'epermH': [0, 1, 1.1, 1],
-        'epermV': [0, 1, 1, 1.1],
-        'mpermH': [1, 1, 1.5, 1],
-        'mpermV': [1, 1.1, 1, 1],
+        "depth": [0, 2, 5],
+        "res": [2e14, 50, 0.1, 50],
+        "aniso": [1, 1.2, 1, 1],
+        "epermH": [0, 1, 1.1, 1],
+        "epermV": [0, 1, 1, 1.1],
+        "mpermH": [1, 1, 1.5, 1],
+        "mpermV": [1, 1.1, 1, 1],
     }
 
     IP1, Q1 = model.ip_and_q(**model1, **system)
@@ -1104,26 +1104,34 @@ def test_ip_and_q(capsys):
     assert_allclose(IP1*1e3, IP2)
     assert_allclose(Q1*1e3, Q2)
 
+    IP3, Q3 = model.ip_and_q(**model1, **{**system, 'ab': 44})
+    assert_allclose(IP3, [-1.3563986, -1.38122726, -7.4560389])
+    assert_allclose(Q3, [-0.00299279869, -0.293418700, -3.40236993])
+
+    IP4, Q4 = model.ip_and_q(**model1, **{**system, 'ab': 55})
+    assert_allclose(IP4, [-10.74321713, -10.69222953, 3.62780845])
+    assert_allclose(Q4, [0.00663009305, 0.651225190, 9.52444857])
+
     # Test errors
     with pytest.raises(ValueError, match="Only implemented for magnetic"):
-        model.ip_and_q(**model1, **{**system, 'ab': 13})
+        model.ip_and_q(**model1, **{**system, "ab": 13})
 
     with pytest.raises(ValueError, match="Only implemented for frequency"):
-        model.ip_and_q(**model1, **{**system, 'signal': 0})
+        model.ip_and_q(**model1, **{**system, "signal": 0})
 
     with pytest.raises(ValueError, match="Only implemented for frequency"):
-        model.ip_and_q(**model1, **{**system, 'signal': 1})
+        model.ip_and_q(**model1, **{**system, "signal": 1})
 
     # Fullspace - no secondary field -> zeros
-    model2 = {'depth': [0], 'res': [50, 50]}
-    IP3, Q3 = model.ip_and_q(**model2, **system)
-    assert_allclose(IP3, 0.0)
-    assert_allclose(Q3, 0.0)
+    model2 = {"depth": [0], "res": [50, 50]}
+    IP5, Q5 = model.ip_and_q(**model2, **system)
+    assert_allclose(IP5, 0.0)
+    assert_allclose(Q5, 0.0)
 
     _, _ = capsys.readouterr()
-    _, _ = model.ip_and_q(**model1, **{**system, 'src': [0, 0, 0]})
+    _, _ = model.ip_and_q(**model1, **{**system, "src": [0, 0, 0]})
     out, _ = capsys.readouterr()
-    assert 'has not been tested' in out
+    assert "This function is experimental" in out
 
 
 def test_fem():
