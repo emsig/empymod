@@ -1104,6 +1104,14 @@ def test_ip_and_q(capsys):
     assert_allclose(IP1*1e3, IP2)
     assert_allclose(Q1*1e3, Q2)
 
+    IP3, Q3 = model.ip_and_q(**model1, **{**system, 'ab': 44})
+    assert_allclose(IP3, [-1.3563986, -1.38122726, -7.4560389])
+    assert_allclose(Q3, [-0.00299279869, -0.293418700, -3.40236993])
+
+    IP4, Q4 = model.ip_and_q(**model1, **{**system, 'ab': 55})
+    assert_allclose(IP4, [-10.74321713, -10.69222953, 3.62780845])
+    assert_allclose(Q4, [0.00663009305, 0.651225190, 9.52444857])
+
     # Test errors
     with pytest.raises(ValueError, match="Only implemented for magnetic"):
         model.ip_and_q(**model1, **{**system, "ab": 13})
@@ -1116,9 +1124,9 @@ def test_ip_and_q(capsys):
 
     # Fullspace - no secondary field -> zeros
     model2 = {"depth": [0], "res": [50, 50]}
-    IP3, Q3 = model.ip_and_q(**model2, **system)
-    assert_allclose(IP3, 0.0)
-    assert_allclose(Q3, 0.0)
+    IP5, Q5 = model.ip_and_q(**model2, **system)
+    assert_allclose(IP5, 0.0)
+    assert_allclose(Q5, 0.0)
 
     _, _ = capsys.readouterr()
     _, _ = model.ip_and_q(**model1, **{**system, "src": [0, 0, 0]})
