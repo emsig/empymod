@@ -10,11 +10,20 @@ v2.5.x
 """"""
 
 
+v2.5.2 TEM-FAST
+---------------
+
+**2025-09-06**
+
+- Gallery
+
+  - New example *TEM: AEMR TEM-FAST 48 system*, contributed by @aignerlukas.
+
+
 v2.5.1 IP/Q clarifications
 --------------------------
 
 **2025-03-12**
-
 
 - Modelling routines ``ip_and_q``:
 
