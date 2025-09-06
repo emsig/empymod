@@ -1,12 +1,14 @@
 """
 TEM: AEMR TEM-FAST 48 system
-=================
-**In this example we compute the TEM response from the TEM-FAST 48 system.
+============================
 
-This example was contributed by Lukas Aigner (@aignerlukas), who was interested
+**In this example we compute the TEM response from the TEM-FAST 48 system.**
+
+This example was contributed by Lukas Aigner (`@aignerlukas
+<https://github.com/aignerlukas>`_), who was interested
 in modelling the TEM-FAST system, which is used at the TU Wien.
 If you are interested and want to use this work please have a look at the
-corresponding paper: https://doi.org/10.1016/j.jappgeo.2024.105334
+corresponding paper Aigner et al. (2024).
 
 The modeller ``empymod`` models the electromagnetic (EM) full wavefield Greens
 function for electric and magnetic point sources and receivers. As such, it can
@@ -17,7 +19,18 @@ things involved than just computing the EM Greens function.
 What is not included in ``empymod`` at this moment (but hopefully in the
 future), but is required to model TEM data, is to **account for arbitrary
 source waveform**, and to apply a **lowpass filter**. So we generate these two
-things here, and create our own wrapper to model TEM data.
+things here, and create our own wrapper to model TEM data. See also the example
+:ref:`sphx_glr_gallery_tdomain_tem_walktem.py`, on which this example
+builds upon.
+
+**References**
+
+- **Aigner, L., D. Werthmüller, and A. Flores Orozco, 2024**,
+  Sensitivity analysis of inverted model parameters from transient
+  electromagnetic measurements affected by induced polarization effects;
+  *Journal of Applied Geophysics*, Volume 223, Pages 105334, doi:
+  `10.1016/j.jappgeo.2024.105334
+  <https://doi.org/10.1016/j.jappgeo.2024.105334>`_.
 
 """
 import empymod
@@ -27,14 +40,15 @@ from scipy.special import roots_legendre
 from matplotlib.ticker import LogLocator, NullFormatter
 from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
 plt.style.use('ggplot')
-
+# sphinx_gallery_thumbnail_number = 2
 
 ###############################################################################
 # 1. TEM-FAST 48 Waveform and other characteristics
+# -------------------------------------------------
+#
 # The TEM-FASt system uses a "time-key" value to determine the number of gates,
 # the front ramp and the length of the current pulse.
-# We are using values that correspond to a time-key of 5
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# We are using values that correspond to a time-key of 5.
 turn_on_ramp = -3.0E-06
 turn_off_ramp = 0.95E-06
 on_time = 3.75E-03
@@ -59,7 +73,6 @@ plt.title('Waveform')
 plt.plot(np.r_[-9, waveform_times*1e3, 2], np.r_[0, waveform_current, 0])
 plt.xlabel('Time (ms)')
 plt.xlim([-4, 0.5])
-plt.legend()
 
 
 ###############################################################################
@@ -312,7 +325,7 @@ def pelton_res(inp, p_dict):
 
 ###############################################################################
 # 3. Computation non-IP
-# --------------
+# ---------------------
 
 depths = [8, 20]
 rhos = [25, 5, 50]
@@ -326,7 +339,7 @@ response = temfast(off_time=time_gates, waveform_times=waveform_times,
 
 ###############################################################################
 # 4. Computation with IP
-# --------------
+# ----------------------
 depths = [8, 20]
 rhos = [25, 5, 50]
 charg = np.r_[0, 0.9, 0]
