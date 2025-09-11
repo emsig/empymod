@@ -97,15 +97,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
         - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
 
-        Dimensions:
-
-        - The coordinates x, y, and z (dipole) or x0, x1, y0, y1, z0, and z1
-          (bipole) can be single values or arrays.
-        - The variables x and y (dipole) or x0, x1, y0, and y1 (bipole) must
-          have the same dimensions.
-        - The variables z, azimuth, and dip (dipole) or z0 and z1 (bipole) must
-          either be single values or having the same dimension as the other
-          coordinates.
+        For `N` sources or receivers, all variables must be of size `N` or 1
+        (in the latter case it will be expanded to `N`).
 
         Angles (coordinate system is either left-handed with positive z down or
         right-handed with positive z up; East-North-Depth):
@@ -858,15 +851,8 @@ def loop(src, rec, depth, res, freqtime, signal=None, aniso=None, epermH=None,
         - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
         - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
 
-        Dimensions:
-
-        - The coordinates x, y, and z (dipole) or x0, x1, y0, y1, z0, and z1
-          (bipole) can be single values or arrays.
-        - The variables x and y (dipole) or x0, x1, y0, and y1 (bipole) must
-          have the same dimensions.
-        - The variables z, azimuth, and dip (dipole) or z0 and z1 (bipole) must
-          either be single values or having the same dimension as the other
-          coordinates.
+        For `N` sources or receivers, all variables must be of size `N` or 1
+        (in the latter case it will be expanded to `N`).
 
         Angles (coordinate system is either left-handed with positive z down or
         right-handed with positive z up; East-North-Depth):
