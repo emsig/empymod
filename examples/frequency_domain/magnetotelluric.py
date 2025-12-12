@@ -123,7 +123,7 @@ omega = 2 * np.pi * frequencies
 # Using the variable names as in the paper.
 
 # Initiate recursive formula with impedance of the deepest layer.
-Z_j = np.sqrt(2j * np.pi * frequencies * mu_0 * resistivities[-1])
+Z_j = np.sqrt(1j * omega * mu_0 * resistivities[-1])
 
 # Move up the stack of layers till the top (without air).
 for j in range(depths.size-1, 0, -1):

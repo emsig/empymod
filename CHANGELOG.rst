@@ -10,6 +10,14 @@ v2.5.x
 """"""
 
 
+latest
+------
+
+- Maintenance
+
+  - Testing: added Python 3.14; removed Python 3.10.
+
+
 v2.5.2 TEM-FAST
 ---------------
 
