@@ -36,21 +36,11 @@ jobs:
       matrix:
         os: [ubuntu, ]  # macos, windows]  # Only Linux currently.
         case:
-          - python-version: "3.10"
+          - python-version: "3.11"
             name: minimal
             os: ubuntu
             conda: "numba 'scipy=1.10' scooby libdlf"
             test: ""
-          - python-version: "3.11"
-            name: plain
-            os: ubuntu
-            conda: "numba 'scipy>=1.10' scooby libdlf"
-            test: ""
-          - python-version: "3.11"
-            name: full
-            os: ubuntu
-            conda: "numba 'scipy>=1.10' scooby libdlf matplotlib pytest-mpl"
-            test: "--mpl"
           - python-version: "3.12"
             name: plain
             os: ubuntu
@@ -67,6 +57,16 @@ jobs:
             conda: "numba 'scipy>=1.10' scooby libdlf"
             test: ""
           - python-version: "3.13"
+            name: full
+            os: ubuntu
+            conda: "numba 'scipy>=1.10' scooby libdlf matplotlib pytest-mpl"
+            test: "--mpl"
+          - python-version: "3.14"
+            name: plain
+            os: ubuntu
+            conda: "numba 'scipy>=1.10' scooby libdlf"
+            test: ""
+          - python-version: "3.14"
             name: full
             os: ubuntu
             conda: "numba 'scipy>=1.10' scooby libdlf matplotlib pytest-mpl"
@@ -81,7 +81,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
         with:
           # Need to fetch more than the last commit so that setuptools-scm can
           # create the correct version string. If the number of commits since
@@ -97,7 +97,7 @@ jobs:
         run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup miniconda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v3.2.0
         with:
           auto-update-conda: true
           python-version: ${{ matrix.case.python-version }}
@@ -129,7 +129,7 @@ jobs:
           pytest --cov=empymod ${{ matrix.case.test }}
 
       - name: Coveralls
-        # [pin @develop@20230609]
+        # [pin @develop@20240509]
         uses: AndreMiras/coveralls-python-action@65c1672f0b8a201702d86c81b79187df74072505
         with:
           parallel: true
@@ -141,7 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      # [pin @develop@20230609]
+      # [pin @develop@20240509]
       uses: AndreMiras/coveralls-python-action@65c1672f0b8a201702d86c81b79187df74072505
       with:
         parallel-finished: true
@@ -156,7 +156,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.1
         with:
           # Need to fetch more than the last commit so that setuptools-scm can
           # create the correct version string. If the number of commits since
@@ -172,7 +172,7 @@ jobs:
         run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6.1.0
         with:
           python-version: "3.11"
 
@@ -199,7 +199,7 @@ jobs:
 
       - name: Publish to Test PyPI
         if: success()
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v1.13.0
         with:
           user: __token__
           password: ${{ secrets.TEST_PYPI_PASSWORD }}
@@ -211,7 +211,7 @@ jobs:
       - name: Publish to PyPI
         # Only for releases
         if: success() && github.event_name == 'release'
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v1.13.0
         with:
           user: __token__
           password: ${{ secrets.PYPI_PASSWORD }}
