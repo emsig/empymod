@@ -108,7 +108,7 @@ def test_check_bipole():
 
     # x.size != y.size
     pole = [[0, 0], [10, 20, 30], [100, 0, 100], 0, 0]
-    with pytest.raises(ValueError, match='Parameter tvar-y has wrong shape'):
+    with pytest.raises(ValueError, match='Parameter tvar-x has wrong shape'):
         utils.check_bipole(pole, 'tvar')
 
     # # Bipole stuff

@@ -249,34 +249,18 @@ def check_bipole(inp, name):
 
     """
 
-    def chck_dipole(inp, name):
+    def chck_dipole(inp, name, maxpoles):
         r"""Check inp for shape and type."""
         # Check x, y, and z
-        inp_x = _check_var(inp[0], float, 1, name+'-x')
-        inp_y = _check_var(inp[1], float, 1, name+'-y')
-        inp_z = _check_var(inp[2], float, 1, name+'-z')
+        inp_x = _check_var(inp[0], float, 1, name+'-x', (1,), (maxpoles,))
+        inp_y = _check_var(inp[1], float, 1, name+'-y', (1,), (maxpoles,))
+        inp_z = _check_var(inp[2], float, 1, name+'-z', (1,), (maxpoles,))
 
         # Expand x or y coordinate if necessary.
-        if inp_x.size != inp_y.size:
-            if inp_x.size == 1:
-                inp_x = np.repeat(inp_x, inp_y.size)
-            elif inp_y.size == 1:
-                inp_y = np.repeat(inp_y, inp_x.size)
-            else:
-                raise ValueError(
-                    f"Parameters {name}-x and {name}-y must be of same size "
-                    "or be a single value; provided: "
-                    f"{inp_x.shape}; {inp_y.shape}."
-                )
-
-        # If x/y=1, but z not => expand
-        if inp_z.size > 1 and inp_x.size == 1:
-            inp_x = np.repeat(inp_x, inp_z.size)
-            inp_y = np.repeat(inp_y, inp_z.size)
-
-        # If x/y!=1 and z!=1, check!
-        else:
-            _check_shape(inp_z, name+'-z', (1,), inp_x.shape)
+        if inp_x.size != maxpoles:
+            inp_x = np.repeat(inp_x, maxpoles)
+        if inp_y.size != maxpoles:
+            inp_y = np.repeat(inp_y, maxpoles)
 
         # Check if all depths are the same, if so replace by one value
         if np.all(np.isclose(inp_z-inp_z[0], 0)):
@@ -293,27 +277,16 @@ def check_bipole(inp, name):
     # Flag if it is a dipole or not
     isdipole = narr == 5
 
+    # Get number of {d;b}ipoles
+    maxpoles = max([np.atleast_1d(par).size for par in inp])
+
     if isdipole:  # dipole checks
         # Check x, y, and z
-        out = chck_dipole(inp, name)
+        out = chck_dipole(inp, name, maxpoles)
 
         # Check azimuth and dip
-        inp_a = _check_var(inp[3], float, 1, 'azimuth')
-        inp_d = _check_var(inp[4], float, 1, 'dip')
-
-        # Expand x/y coordinate or azm/dip if necessary.
-        # THINK ABOUT IT!
-        for inp_ad, ad_name in ([inp_a, 'azimuth'], [inp_d, 'dip']):
-            if inp_ad.size != 1 and out[0].shape != inp_ad.shape:
-                if out[0].size == 1:
-                    out[0] = np.repeat(out[0], inp_ad.size)
-                    out[1] = np.repeat(out[1], inp_ad.size)
-                else:
-                    raise ValueError(
-                        f"Parameter {name}-x and {name}-y must be of same size "
-                        "or be a single value; provided: "
-                        f"{inp_x.shape}; {inp_y.shape}."
-                    )
+        inp_a = _check_var(inp[3], float, 1, 'azimuth', (1,), (maxpoles,))
+        inp_d = _check_var(inp[4], float, 1, 'dip', (1,), (maxpoles,))
 
         # How many different depths
         nz = out[2].size
@@ -329,25 +302,15 @@ def check_bipole(inp, name):
 
     else:         # bipole checks
         # Check each pole for x, y, and z
-        out0 = chck_dipole(inp[::2], name+'-1')   # [x0, y0, z0]
-        out1 = chck_dipole(inp[1::2], name+'-2')  # [x1, y1, z1]
+        out0 = chck_dipole(inp[::2], name+'-1', maxpoles)   # [x0, y0, z0]
+        out1 = chck_dipole(inp[1::2], name+'-2', maxpoles)  # [x1, y1, z1]
 
-        # If one pole has a single depth, but the other has various
-        # depths, we have to repeat the single depth, as we will have
-        # to loop over them.
-        for i in range(3):
-            if out0[i].size != out1[i].size:
-                if out0[i].size == 1:
-                    out0[i] = np.repeat(out0[i], out1[i].size)
-                elif out1[i].size == 1:
-                    out1[i] = np.repeat(out1[i], out0[i].size)
-                else:
-                    raise ValueError("TODO")
-
-        # Think about it. Same as above, but for the coordinates.
-        # 1. Test that x0, x1 have same dimension
-        # 2. If x0.shape != 1 and z0.shape != 1: check
-        # 3. if z.shape > x0.shape -> expand
+        # Expand z coordinate if necessary.
+        if maxpoles > 1 and (out0[2].size > 1 or out1[2].size > 1):
+            if out0[2].size == 1:
+                out0[2] = np.repeat(out0[2], maxpoles)
+            if out1[2].size == 1:
+                out1[2] = np.repeat(out1[2], maxpoles)
 
         # Check if inp is a dipole instead of a bipole
         # (This is a problem, as we would could not define the angles then.)
