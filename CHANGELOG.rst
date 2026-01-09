@@ -10,8 +10,10 @@ v2.5.x
 """"""
 
 
-latest
-------
+v2.5.3: Flexible bipole coordinates
+-----------------------------------
+
+**2026-01-09**
 
 - Modelling routines: The definition of sources and receivers is now more
   flexible for all routines: all parameters  can now be either of shape
