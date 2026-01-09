@@ -92,24 +92,38 @@ def test_check_bipole():
 
     # Multiple azimuth
     pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], [0, 1, 2], 1]
+    pole, _, _, _ = utils.check_bipole(pole, 'tvar')
     assert_allclose(pole[0], np.array([0, 0, 0]))
     assert_allclose(pole[1], np.array([10, 20, 30]))
     assert_allclose(pole[2], np.array([100, 0, 100]))
     assert_allclose(pole[3], np.array([0, 1, 2]))
     assert_allclose(pole[4], np.array([1, 1, 1]))
+    assert pole[4].size == 3
 
     # Multiple dip
     pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 1, [0, 1, 2]]
+    pole, _, _, _ = utils.check_bipole(pole, 'tvar')
     assert_allclose(pole[0], np.array([0, 0, 0]))
     assert_allclose(pole[1], np.array([10, 20, 30]))
     assert_allclose(pole[2], np.array([100, 0, 100]))
     assert_allclose(pole[3], np.array([1, 1, 1]))
+    assert pole[3].size == 3
     assert_allclose(pole[4], np.array([0, 1, 2]))
 
     # x.size != y.size
     pole = [[0, 0], [10, 20, 30], [100, 0, 100], 0, 0]
-    with pytest.raises(ValueError, match='Parameter tvar-y has wrong shape'):
+    with pytest.raises(ValueError, match='Parameter tvar-x has wrong shape'):
         utils.check_bipole(pole, 'tvar')
+
+    pole = [[0, 0], 10, 0, 0, 0]
+    pole, _, _, _ = utils.check_bipole(pole, 'tvar')
+    assert pole[1].size == 2
+    assert_allclose(pole[1], np.array([10, 10]))
+
+    pole = [10, [0, 0], 0, 0, 0]
+    pole, _, _, _ = utils.check_bipole(pole, 'tvar')
+    assert pole[0].size == 2
+    assert_allclose(pole[0], np.array([10, 10]))
 
     # # Bipole stuff
 
