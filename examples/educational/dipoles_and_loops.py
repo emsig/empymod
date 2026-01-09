@@ -351,11 +351,11 @@ rec_dip = [rxx, ryy, 10]
 
 square_pts = +empymod.dipole(src=[+0.5, +0.0, 0], rec=rec_dip, ab=42,
                              **model).reshape(np.shape(rx))
-square_pts += empymod.dipole(src=[+0.0, +0.5, 0], rec=rec_dip, ab=41,
+square_pts -= empymod.dipole(src=[+0.0, +0.5, 0], rec=rec_dip, ab=41,
                              **model).reshape(np.shape(rx))
 square_pts -= empymod.dipole(src=[-0.5, +0.0, 0], rec=rec_dip, ab=42,
                              **model).reshape(np.shape(rx))
-square_pts -= empymod.dipole(src=[+0.0, -0.5, 0], rec=rec_dip, ab=41,
+square_pts += empymod.dipole(src=[+0.0, -0.5, 0], rec=rec_dip, ab=41,
                              **model).reshape(np.shape(rx))
 
 plot_result(epm_loop, square_pts, x, 'Loop made of four points',

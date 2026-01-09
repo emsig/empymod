@@ -13,6 +13,11 @@ v2.5.x
 latest
 ------
 
+- Gallery
+
+  - New example *Comparison to Biot-Savart*, contributed by @SylvesterOester.
+  - Fix bug in dipole/loop example.
+
 - Maintenance
 
   - Testing: added Python 3.14; removed Python 3.10.
