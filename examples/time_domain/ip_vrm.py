@@ -18,16 +18,6 @@ plt.style.use('ggplot')
 
 
 ###############################################################################
-
-# Configuration: Choose output field type
-compute_B_field = True  # True = B field (T), False = dB/dt (T/s)
-
-# Display configuration
-field_type = "B field (T)" if compute_B_field else "dB/dt (T/s)"
-print(f"Output field type: {field_type}")
-
-
-###############################################################################
 # Survey Setup
 # ------------
 #
@@ -154,8 +144,8 @@ axs[1].set_xscale('symlog', linthresh=0.4, linscale=0.5)
 # ## Waveform Functions
 #
 # These functions handle the trapezoid waveform convolution for the
-# simulations. They are adapted from the WalkTEM example
-# (https://empymod.emsig.xyz/en/stable/gallery/tdomain/tem_walktem.html).
+# simulations. They are adapted from the `WalkTEM example
+# <https://empymod.emsig.xyz/en/stable/gallery/tdomain/tem_walktem.html>`_.
 #
 # Key differences between B field and dB/dt:
 # - For B field: bipole source strength is `mu_0 * loop_current`
@@ -285,7 +275,7 @@ def convert_freq_to_time(EM, freq, time, ft, ftarg, time_channels, nodes_times,
 # ---------------------------------------------
 #
 # This function implements VRM modeling, which is supported but not computed
-# within `empymod`.
+# within ``empymod``.
 
 def vrm_from_mu(inp, p_dict):
     """
@@ -324,8 +314,9 @@ def vrm_from_mu(inp, p_dict):
 # ------------------
 #
 # This function implements Cole-Cole IP modeling, which is supported but not
-# computed within `empymod`. For more info on the Pelton model refer to the [IP
-# example](https://empymod.emsig.xyz/en/stable/gallery/tdomain/cole_cole_ip.html).
+# computed within ``empymod``. For more info on the Pelton model refer to the
+# `IP example
+# <https://empymod.emsig.xyz/en/stable/gallery/tdomain/cole_cole_ip.html>`_.
 
 def pelton_cole_cole_model(inp, p_dict):
     """
@@ -417,10 +408,8 @@ def simulate_empymod(inp, res, times, compute_B_field=True, loop_current=1.0,
 
 
 ###############################################################################
-# ## Subsurface Model
-
-# In[51]:
-
+# Subsurface Model
+# ----------------
 
 inp = {
     'res': np.array([2e14, 1.0, 100]),
