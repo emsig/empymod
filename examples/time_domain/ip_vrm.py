@@ -141,16 +141,18 @@ axs[1].set_xscale('symlog', linthresh=0.4, linscale=0.5)
 
 
 ###############################################################################
-# ## Waveform Functions
+# Waveform Functions
+# ------------------
 #
 # These functions handle the trapezoid waveform convolution for the
 # simulations. They are adapted from the `WalkTEM example
 # <https://empymod.emsig.xyz/en/stable/gallery/tdomain/tem_walktem.html>`_.
 #
 # Key differences between B field and dB/dt:
+#
 # - For B field: bipole source strength is `mu_0 * loop_current`
 # - For dB/dt: bipole source strength is `loop_current`, and we multiply by
-# `i*omega*mu_0` before frequency-to-time conversion
+#   `i*omega*mu_0` before frequency-to-time conversion
 
 def get_time(time_channels, nodes_times):
     """
