@@ -68,3 +68,4 @@ certainly incomplete list (get in touch if you think you should appear here):
 - `Wouter Deleersnyder <https://github.com/WouterDls>`_
 - `Lukas Aigner <https://github.com/aignerlukas>`_
 - `Jan Thorbecke <https://github.com/JanThorbecke>`_
+- `Nick Williams <https://github.com/orerocks>`_

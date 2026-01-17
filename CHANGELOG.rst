@@ -10,6 +10,16 @@ v2.5.x
 """"""
 
 
+*latest*
+--------
+
+
+- Gallery
+
+  - New example *IP and VRM*, based on a notebook from @orerocks.
+
+
+
 v2.5.3: Flexible bipole coordinates
 -----------------------------------
 
