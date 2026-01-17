@@ -5,7 +5,7 @@ IP and VRM
 Induced Polarization (IP) and Viscous Remanent Magnetization (VRM): Comparison
 of responses of a model with only conductivities, IP, VRM, and IP+VRM.
 
-This example is based on a contribution from ? ? (`@orerocks
+This example is based on a contribution from Nick Williams (`@orerocks
 <https://github.com/orerocks>`_).
 """
 import empymod
