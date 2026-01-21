@@ -750,6 +750,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
 
     # Check if the user provided a model for etaH/etaV/zetaH/zetaV
     if isinstance(res, dict):
+        res = copy.deepcopy(res)
         res_dict, res = res, res['res']
     else:
         res_dict = False
@@ -824,7 +825,10 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
         # Loop over key, value pair and check
         for key, value in res_dict.items():
             if key not in ['res', 'func_eta', 'func_zeta']:
-                res_dict[key] = check_inp(value, key, None)
+                res_dict[key] = check_inp(value, key, None)[::swap]
+                # Print model parameters
+                if verb > 2:
+                    print(f"   {key:11} [?] :  {_strvar(res_dict[key])}")
 
         # Put res back
         res_dict['res'] = res
