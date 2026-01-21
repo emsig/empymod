@@ -501,7 +501,7 @@ class TestBipole:
         assert_allclose(out0f, out1f)
         assert_allclose(out0t, out1t)
 
-    def test_cole_cole(self):
+    def test_cole_cole(self, capsys):
         # Check user-hook for eta/zeta
 
         def func_eta(inp, pdict):
@@ -518,25 +518,35 @@ class TestBipole:
 
             return etaH, etaV
 
-        model = {'src': [0, 0, 500, 0, 0], 'rec': [500, 0, 600, 0, 0],
-                 'depth': [0, 550], 'freqtime': [0.1, 1, 10]}
-        res = np.array([2, 10, 5])
-        fact = np.array([2, 2, 2])
-        eta = {'res': fact*res, 'fact': fact, 'func_eta': func_eta}
-        zeta = {'res': res, 'fact': fact, 'func_zeta': func_zeta}
+        for rev in [1, -1]:
+            model = {
+                'src': [0, 0, 500, 0, 0], 'rec': [500, 0, 600, 0, 0],
+                'depth': [0, rev*550], 'freqtime': [0.1, 1, 10], 'verb': 3,
+            }
+            res = np.array([2, 10, 5])
+            fact = np.array([1.5, 2, 2.5])
+            eta = {'res': fact*res, 'fact': fact, 'func_eta': func_eta}
+            zeta = {'res': res, 'fact': fact, 'func_zeta': func_zeta}
 
-        # Frequency domain
-        standard = bipole(res=res, **model)
-        outeta = bipole(res=eta, **model)
-        assert_allclose(standard, outeta)
-        outzeta = bipole(res=zeta, mpermH=fact, mpermV=fact, **model)
-        assert_allclose(standard, outzeta)
-        # Time domain
-        standard = bipole(res=res, signal=0, **model)
-        outeta = bipole(res=eta, signal=0, **model)
-        assert_allclose(standard, outeta)
-        outzeta = bipole(res=zeta, signal=0, mpermH=fact, mpermV=fact, **model)
-        assert_allclose(standard, outzeta)
+            # Frequency domain
+            standard = bipole(res=res, **model)
+            _, _ = capsys.readouterr()
+            outeta = bipole(res=eta, **model)
+            out, _ = capsys.readouterr()
+            if rev == 1:
+                assert "fact            :  1.5 2 2.5" in out
+            else:
+                assert "fact            :  2.5 2 1.5" in out
+            assert_allclose(standard, outeta)
+            outzeta = bipole(res=zeta, mpermH=fact, mpermV=fact, **model)
+            assert_allclose(standard, outzeta)
+            # Time domain
+            standard = bipole(res=res, signal=0, **model)
+            outeta = bipole(res=eta, signal=0, **model)
+            assert_allclose(standard, outeta)
+            outzeta = bipole(
+                res=zeta, signal=0, mpermH=fact, mpermV=fact, **model)
+            assert_allclose(standard, outzeta)
 
     def test_src_rec_definitions(self):
         inp = {'depth': [0, -250], 'res': [1e20, 0.3, 5], 'freqtime': 1.23456}

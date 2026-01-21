@@ -828,7 +828,7 @@ def check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV, xdirect,
                 res_dict[key] = check_inp(value, key, None)[::swap]
                 # Print model parameters
                 if verb > 2:
-                    print(f"   {key:11} [?] :  {_strvar(res_dict[key])}")
+                    print(f"   {key:16}:  {_strvar(res_dict[key])}")
 
         # Put res back
         res_dict['res'] = res

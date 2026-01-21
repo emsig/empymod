@@ -10,14 +10,21 @@ v2.5.x
 """"""
 
 
-*latest*
---------
+v2.5.4: Bugfix ext. fcts with z+ up
+-----------------------------------
 
+**2026-01-21**
+
+- Bugfix: Since v1.10.5, one can provide depth also in decreasing order.
+  Internally, all parameters are reversed then. However, parameters in
+  user-provided ``func_eta`` and ``func_zeta`` were not reversed, so far the
+  user had to take care of this (and hence define them differently to the rest,
+  which is a bug really). Now any provided parameter in the ``res``-dict is
+  also reversed. If verb>2, these parameters are finally also printed.
 
 - Gallery
 
   - New example *IP and VRM*, based on a notebook from @orerocks.
-
 
 
 v2.5.3: Flexible bipole coordinates
