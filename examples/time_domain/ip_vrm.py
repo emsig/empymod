@@ -419,7 +419,7 @@ inp = {
     'inp': {
         'src': src_bipole,
         'rec': rec,
-        'depth': [0.0, -50.0],
+        'depth': [0.0, 50.0],
         'verb': 1,
     }
 }
