@@ -516,7 +516,7 @@ def check_hankel(ht, htarg, verb):
     targ = {}
     args = copy.deepcopy(htarg)
 
-    if ht == 'dlf':     # DLF
+    if ht in ['dlf', 'cdlf']:     # DLF
 
         # If filter is a name (str), get it
         targ['dlf'] = args.pop('dlf', filters.Hankel().key_201_2009)
@@ -890,7 +890,7 @@ def check_loop(loop, ht, htarg, verb):
 
     # Define if to loop over frequencies or over offsets
     lagged_splined_dlf = False
-    if ht == 'dlf':
+    if ht in ['dlf', 'cdlf']:
         if htarg['pts_per_dec'] != 0:
             lagged_splined_dlf = True
 

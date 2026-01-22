@@ -16,7 +16,7 @@ DATA = np.load(join(dirname(__file__), 'data/transform.npz'),
                allow_pickle=True)
 
 
-@pytest.mark.parametrize("htype", ['dlf', 'qwe', 'quad'])
+@pytest.mark.parametrize("htype", ['cdlf', 'dlf', 'qwe', 'quad'])
 def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
     # Compare wavenumber-domain calculation / DLF with analytical
     # frequency-domain fullspace solution
