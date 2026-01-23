@@ -56,7 +56,7 @@ __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
            'check_bipole', 'check_ab', 'check_solution', 'get_abs',
            'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
            'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum',
-           'Report']
+           'Report', 'check_waveform']
 
 # 0. General settings
 
@@ -961,7 +961,7 @@ def check_loop(loop, ht, htarg, verb):
     return loop_freq, loop_off
 
 
-def check_time(time, signal, ft, ftarg, verb):
+def check_time(time, signal, ft, ftarg, verb, new=False):
     r"""Check time domain specific input parameters.
 
     This check-function is called from one of the modelling routines in
@@ -1004,6 +1004,11 @@ def check_time(time, signal, ft, ftarg, verb):
         checked with signal.
 
     """
+
+    if new and isinstance(signal, dict):
+        time, signal, waveform = check_waveform(time, **signal)
+    else:
+        waveform = None
 
     # Check time and input signal
     time = check_time_only(time, signal, verb)
@@ -1249,7 +1254,11 @@ def check_time(time, signal, ft, ftarg, verb):
     if args and verb > 0:
         print(f"* WARNING :: Unknown ftarg {args} for method '{ft}'")
 
-    return time, freq, ft, targ
+    # Make backwards compatible with old signature possibility?
+    if new:
+        return time, freq, ft, targ, signal, waveform
+    else:
+        return time, freq, ft, targ
 
 
 def check_time_only(time, signal, verb):
@@ -1299,6 +1308,70 @@ def check_time_only(time, signal, verb):
         _prnt_min_max_val(time, "   time        [s] : ", verb)
 
     return time
+
+
+def check_waveform(time, nodes, amplitudes, signal=0, nquad=3):
+
+    # The waveform function (here and in model.bipole) is based on work
+    # from Kerry Key.
+
+    # Waveform segments.
+    dt = np.diff(nodes)
+    dI = np.diff(amplitudes)
+    dIdt = dI/dt
+
+    # Gauss-Legendre Quadrature; 3 is generally good enough.
+    # (Roots/weights could be cached.)
+    g_x, gauss_weight = sp.special.roots_legendre(nquad)
+
+    # Pre-allocate
+    comp_time = np.zeros((time.size, nquad, dIdt.size))
+    wave_weight = np.zeros((time.size, dIdt.size))
+    wave_index = np.zeros((time.size, dIdt.size), dtype=bool)
+
+    # Loop over wave segments.
+    wi = 0
+    for i, cdIdt in enumerate(dIdt):
+
+        # We only have to consider segments with a change of current.
+        if cdIdt == 0.0:
+            continue
+
+        # If wanted time is before a wave element, ignore it.
+        wave_ind = nodes[i] < time
+        if wave_ind.sum() == 0:
+            continue
+
+        # Start and end for this wave-segment for all times.
+        ta = time[wave_ind] - nodes[i]
+        tb = time[wave_ind] - nodes[i+1]
+
+        # If wanted time is within a wave element, we cut the element.
+        tb[nodes[i+1] > time[wave_ind]] = 0.0  # Cut elements
+
+        # Gauss-Legendre for this wave segment. See
+        # https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
+        # for the change of interval, which makes this a bit more complex.
+        comp_time[:, :, wi] = np.outer((tb-ta)/2, g_x)+(ta+tb)[:, None]/2
+
+        wave_weight[:, wi] = (tb-ta)/2*cdIdt
+        wave_index[:, wi] = wave_ind
+
+        wi += 1
+
+    comp_time = comp_time[:, :, :wi]
+    wave_weight = wave_weight[:, :wi]
+    wave_index = wave_index[:, :wi]
+
+    comp_time_flat, map_time = np.unique(comp_time, return_inverse=True)
+    waveform = {
+        'map_time': map_time,
+        'wave_weight': wave_weight,
+        'wave_index': wave_index,
+        'gauss_weight': gauss_weight,
+    }
+
+    return comp_time_flat, signal, waveform
 
 
 def check_solution(solution, signal, ab, msrc, mrec):
@@ -1820,7 +1893,7 @@ def get_kwargs(names, defaults, kwargs):
 
     - ALL functions: src, rec, res, aniso, epermH, epermV, mpermH, mpermV, verb
     - ONLY gpr: cf, gain
-    - ONLY bipole: msrc, srcpts
+    - ONLY bipole: msrc, srcpts, bandpass
     - ONLY dipole_k: freq, wavenumber
     - ONLY analytical: solution
     - ONLY bipole, loop: mrec, recpts, strength
@@ -1849,9 +1922,9 @@ def get_kwargs(names, defaults, kwargs):
     """
     # Known keys (excludes keys present in ALL routines).
     known_keys = set([
-            'depth', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'signal',
-            'ab', 'freqtime', 'freq', 'wavenumber', 'solution', 'cf', 'gain',
-            'msrc', 'srcpts', 'mrec', 'recpts', 'strength', 'squeeze'
+        'depth', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'signal',
+        'ab', 'freqtime', 'freq', 'wavenumber', 'solution', 'cf', 'gain',
+        'msrc', 'srcpts', 'mrec', 'recpts', 'strength', 'squeeze', 'bandpass',
     ])
 
     # Loop over wanted parameters.

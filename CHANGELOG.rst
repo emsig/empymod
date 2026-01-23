@@ -15,6 +15,9 @@ v2.5.x
 
 - Modelling routines:
 
+  - Arbitrary waveforms: Time-domain modelling can new be done not only for
+    impulse (``signal=0``), step-on (``signal=1``), and step-off
+    (``signal=-1``), but for any arbitrary piecewise linear waveform.
   - Merged ``loop`` into ``bipole``; there is no need for a special routine.
     Simply use ``bipole`` with ``msrc='b'`` and ``mrec=True`` for the same
     effect. As a result, ``empymod.utils.check_bipole`` changed its signature.
