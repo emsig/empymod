@@ -173,7 +173,7 @@ def test_check_bipole(capsys):
     out, _ = capsys.readouterr()
     assert 'Source type     :  Magnetic flux' in out
     assert mx is True
-    assert xtype is 'b'
+    assert xtype == 'b'
     assert_allclose(pole[4], [10, 20])
     assert_allclose(pole[5], [0, 0])
     assert nout == 2
