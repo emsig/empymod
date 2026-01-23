@@ -444,25 +444,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Check src and rec, get flags if dipole or not
     # nsrcz/nrecz are number of unique src/rec-pole depths
-    src, nsrc, nsrcz, srcdipole = check_bipole(src, 'src')
-    rec, nrec, nrecz, recdipole = check_bipole(rec, 'rec')
-
-    # Check if receiver is a `j`.
-    if mrec == 'j':
-        rec_j = True
-        mrec = False
-    else:
-        rec_j = False
-    if mrec in ['b', 'loop']:  # 'loop' for backwards comp.
-        rec_b = True
-        mrec = True
-    else:
-        rec_b = False
-    if msrc == 'b':
-        src_b = True
-        msrc = True
-    else:
-        src_b = False
+    src, nsrc, nsrcz, srcdipole, msrc, stype = check_bipole(src, 'src', msrc)
+    rec, nrec, nrecz, recdipole, mrec, rtype = check_bipole(rec, 'rec', mrec)
 
     # === 3. EM-FIELD CALCULATION ============
 
@@ -563,14 +546,14 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                         conv *= out[2]
 
                     # Multiply with eta of the rec-layer if ecurrent.
-                    if rec_j:
+                    if rtype == 'j':
                         # Check eta at receiver level (only isotropic impl.).
                         if verb > 0 and etaH[0, lrec] != etaV[0, lrec]:
                             warn_ecurrent = True
                         abEM *= etaH[:, lrec, None]
 
                     # Multiply with zeta of the rec-layer if flux.
-                    elif rec_b:
+                    elif rtype == 'b':
                         # Check zeta at receiver level (only isotropic impl.).
                         if verb > 0 and zetaH[0, lrec] != zetaV[0, lrec]:
                             warn_rec_flux = True
@@ -580,7 +563,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                     rEM += abEM*recg_w[irg]
 
                 # Multiply with zeta of the src-layer if flux.
-                if src_b:
+                if stype == 'b':
                     # Check zeta at source level (only isotropic impl.).
                     if verb > 0 and zetaH[0, lsrc] != zetaV[0, lsrc]:
                         warn_src_flux = True

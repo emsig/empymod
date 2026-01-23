@@ -10,6 +10,19 @@ v2.5.x
 """"""
 
 
+*latest*
+--------
+
+- Modelling routines:
+
+  - Merged ``loop`` into ``bipole``; there is no need for a special routine.
+    Simply use ``bipole`` with ``msrc='b'`` and ``mrec=True`` for the same
+    effect. As a result, ``empymod.utils.check_bipole`` changed its signature.
+    Both, ``empymod.model.loop`` and ``empymod.utils.check_bipole``'s old
+    signature are deprecated and will be removed in v3.
+
+
+
 v2.5.4: Bugfix ext. fcts with z+ up
 -----------------------------------
 

@@ -27,6 +27,7 @@ This module consists of four groups of functions:
 
 # Mandatory imports
 import copy
+import warnings
 import numpy as np
 import scipy as sp
 from timeit import default_timer
@@ -216,7 +217,7 @@ def check_ab(ab, verb):
     return ab_calc, msrc, mrec
 
 
-def check_bipole(inp, name):
+def check_bipole(inp, name, mx=None):
     r"""Check di-/bipole parameters.
 
     This check-function is called from one of the modelling routines in
@@ -233,6 +234,10 @@ def check_bipole(inp, name):
     name : str, {'src', 'rec'}
         Pole-type.
 
+    mx : bool or string, default: False
+        Dipole type.
+        None is only for backwards compatibility, will be removed.
+
     Returns
     -------
     inp : list
@@ -247,7 +252,35 @@ def check_bipole(inp, name):
     isdipole : bool
         True if inp is a dipole.
 
+    mx : bool
+        Dipole flag electric / magnetic.
+        Not returned if mx=None (backwards compatibility, will be removed).
+
+    xtype : None or str
+        None (only mx applies), ``'b'``, or ``'j'``.
+        Not returned if mx=None (backwards compatibility, will be removed).
+
     """
+
+    # Check mrec, msrc
+    if mx is not None:
+        # Receiver
+        if name == 'rec':
+            if mx == 'j':
+                mx, xtype = False, mx
+            elif mx in ['b', 'loop']:  # 'loop' for backwards comp.
+                mx, xtype = True, 'b'
+            else:
+                mx, xtype = mx, None
+        # Source
+        elif name == 'src':
+            if mx == 'b':
+                mx, xtype = True, mx
+            else:
+                mx, xtype = mx, None
+        # As 'rec' or 'src' is not enforced, handle any other name
+        else:
+            mx, xtype = mx, None
 
     def chck_dipole(inp, name, maxpoles):
         r"""Check inp for shape and type."""
@@ -326,7 +359,17 @@ def check_bipole(inp, name):
         # How many different depths
         nz = out[4].size
 
-    return out, out[0].size, nz, isdipole
+    if mx is None:
+        msg = (
+            "The signature of `empymod.utils.check_bipole` changed from `inp, "
+            "ninp, ninpz, isdipole = check_bipole(inp, name)` to `inp, ninp, "
+            "ninpz, isdipole, mx, xtype = check_bipole(inp, name, mx)`. "
+            "The old signature will be removed in v3.0."
+        )
+        warnings.warn(msg, DeprecationWarning)
+        return out, out[0].size, nz, isdipole
+    else:
+        return out, out[0].size, nz, isdipole, mx, xtype
 
 
 def check_dipole(inp, name, verb):

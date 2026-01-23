@@ -820,7 +820,8 @@ class TestLoop:
         # 1.a: msrc-mrec; nrec==nrecz, nsrc!=nsrcz.
         rec = [100, 0, 0, 23, -50]
         src = [[0, 0, 0], [0, 0, 0], 0, 45, 33]
-        loo = loop(src, rec, depth, res, freq)
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
+            loo = loop(src, rec, depth, res, freq)
         bip = bipole(src, rec, depth, res, freq, msrc=True, mrec=True)
         bip *= 2j*np.pi*freq[:, None]*4e-7*np.pi
         assert_allclose(bip, loo, rtol=1e-4, atol=1e-18)
@@ -828,7 +829,8 @@ class TestLoop:
         # 1.b: msrc-erec; nrec!=nrecz, nsrc!=nsrcz.
         rec = [[100, 200, 300], [-10, 0, 10], 0, 23, -50]
         src = [[0, 0, 0], [0, 0, 0], 0, 45, 33]
-        loo = loop(src, rec, depth, res, freq, mrec=False, strength=np.pi)
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
+            loo = loop(src, rec, depth, res, freq, mrec=False, strength=np.pi)
         bip = bipole(src, rec, depth, res, freq, msrc=True, mrec=False,
                      strength=np.pi)*2j*np.pi*freq[:, None, None]*4e-7*np.pi
         assert_allclose(bip, loo, rtol=1e-4, atol=1e-18)
@@ -836,7 +838,8 @@ class TestLoop:
         # 1.c: msrc-looprec; nrec==nrecz, nsrc!=nsrcz.
         rec = [[100, 100, 100], [0, 0, 0], [-10, 0, 10], 23, -50]
         src = [[0, 0, 0], [0, 0, 0], 0, 45, 33]
-        loo = loop(src, rec, depth, res, freq, mrec='loop')
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
+            loo = loop(src, rec, depth, res, freq, mrec='loop')
         bip = bipole(src, rec, depth, res, freq, msrc=True, mrec=True)
         bip *= (2j*np.pi*freq[:, None, None]*4e-7*np.pi)**2
         assert_allclose(bip, loo, rtol=1e-4, atol=1e-18)
@@ -847,8 +850,9 @@ class TestLoop:
         src = [[0, 0, 0], [0, 0, 0], [-10, 0, 10], 45, 33]
         mpermH = [1, 1, 1]
         mpermV = [1.5, 2, 1]
-        loo = loop(src, rec, depth, res, freq, mrec='loop', mpermH=mpermH,
-                   mpermV=mpermV)
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
+            loo = loop(src, rec, depth, res, freq, mrec='loop', mpermH=mpermH,
+                       mpermV=mpermV)
         out, _ = capsys.readouterr()
         bip = bipole(src, rec, depth, res, freq, msrc=True, mrec=True,
                      mpermH=mpermH, mpermV=mpermV)
@@ -868,8 +872,9 @@ class TestLoop:
         time = np.logspace(-4, 0, 301)
 
         # Calculation.
-        fhz_num2 = loop(src, rec, [], res, time, mrec=False, xdirect=True,
-                        verb=1, signal=1)
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
+            fhz_num2 = loop(src, rec, [], res, time, mrec=False, xdirect=True,
+                            verb=1, signal=1)
 
         # Analytical solution.
         mu_0 = 4e-7*np.pi
@@ -895,8 +900,9 @@ class TestLoop:
         res = 100.
 
         # Calculation.
-        fhz_num1 = loop(src, rec, 0, [2e14, res], time, xdirect=True, verb=1,
-                        epermH=[0, 1], epermV=[0, 1], signal=0)
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
+            fhz_num1 = loop(src, rec, 0, [2e14, res], time, xdirect=True,
+                            verb=1, epermH=[0, 1], epermV=[0, 1], signal=0)
 
         # Analytical solution.
         theta = np.sqrt(mu_0/(4*res*time))
@@ -937,13 +943,15 @@ class TestLoop:
         # Frequency domain
         etabip = bipole(res=eta, msrc=True, mrec=True, **model)
         etabip *= 2j*np.pi*freq*4e-7*np.pi
-        etaloo = loop(res=eta, **model)
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
+            etaloo = loop(res=eta, **model)
         assert_allclose(etabip, etaloo)
 
         zetabip = bipole(res=zeta, mpermH=fact, mpermV=fact, msrc=True,
                          mrec=True, **model)
         zetabip *= 2j*np.pi*freq*4e-7*np.pi
-        zetaloo = loop(res=zeta, mpermH=fact, mpermV=fact, **model)
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
+            zetaloo = loop(res=zeta, mpermH=fact, mpermV=fact, **model)
         assert_allclose(zetabip, zetaloo)
 
 
@@ -1219,8 +1227,9 @@ class TestSqueeze:
                'rec': [1000, 2000, 300, 0, 0],
                'freqtime': 1.0, 'depth': [], 'res': 1.0}
 
-        a = loop(**inp)
-        b = loop(squeeze=False, **inp)
+        with pytest.warns(DeprecationWarning, match='in v3.0; use'):
+            a = loop(**inp)
+            b = loop(squeeze=False, **inp)
 
         assert a.shape == (2, )
         assert b.shape == (1, 1, 2)
