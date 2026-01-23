@@ -30,19 +30,17 @@ API reference
 
     .. grid-item-card::
 
-        Bipole: :func:`empymod.model.bipole`
+        Arbitrary oriented, finite-length dipoles: :func:`empymod.model.bipole`
 
     .. grid-item-card::
 
-        Dipole: :func:`empymod.model.dipole`
+        Infinitesimal small, grid-oriented dipoles:
+        :func:`empymod.model.dipole`
 
     .. grid-item-card::
 
-        Loop: :func:`empymod.model.loop`
-
-    .. grid-item-card::
-
-        Analytical: :func:`empymod.model.analytical`
+        Analytical full- and half-space solutions:
+        :func:`empymod.model.analytical`
 
     .. grid-item-card::
 

@@ -243,7 +243,7 @@ pelton_model = {'res': res_0, 'rho_0': res_0, 'm': m,
                 'tau': tau, 'c': c, 'func_eta': pelton_et_al}
 
 # Compute
-out_bipole = empymod.bipole(res=res_0, **model)
+out_dipole = empymod.bipole(res=res_0, **model)
 out_cole = empymod.bipole(res=cole_model, **model)
 out_cole_perm = empymod.bipole(res=cole_perm_model, **model)
 out_pelton = empymod.bipole(res=pelton_model, **model)
@@ -259,8 +259,8 @@ def pos(data):
 
 plt.figure(constrained_layout=True)
 plt.title('Switch-off')
-plt.plot(times, pos(out_bipole), '-', label='Regular Bipole')
-plt.plot(times, pos(-out_bipole), '--', label='')
+plt.plot(times, pos(out_dipole), '-', label='Regular Dipole')
+plt.plot(times, pos(-out_dipole), '--', label='')
 
 plt.plot(times, pos(out_cole), '-', label='Cole and Cole (1941) Conductivity')
 plt.plot(times, pos(-out_cole), '--', label='')

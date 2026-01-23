@@ -1042,7 +1042,7 @@ def test_get_azm_dip(capsys):
                     0.284444444444445, 0.239314335249683, 0.118463442528094]))
     assert out[4] == 5
     assert_allclose(out[5], 33541.01966249684483)
-    assert outstr[:47] == "   Source(s)       :  1 bipole(s)\n     > intpts"
+    assert outstr[:47] == "   Source(s)       :  1 dipole(s)\n     > intpts"
 
     # Bipole, rec, ninpz = 2, intpts = 1, verbose
     inp = [np.array([-50, 0]), np.array([50, 0]), np.array([0, -50]),
@@ -1057,7 +1057,7 @@ def test_get_azm_dip(capsys):
     assert out[3] == 1
     assert out[4] == 1
     assert out[5] == 100
-    assert outstr[:47] == "   Receiver(s)     :  1 bipole(s)\n     > intpts"
+    assert outstr[:47] == "   Receiver(s)     :  1 dipole(s)\n     > intpts"
 
 
 def test_get_kwargs(capsys):

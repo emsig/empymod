@@ -65,7 +65,7 @@ def comp_appres(depth, res, a, n, srcpts=1, recpts=1, verb=1):
     res : Resistivities of the layers, one more than depths (lower HS).
     a : Dipole length.
     n : Separation factors.
-    srcpts, recpts : If < 3, bipoles are approximated as dipoles.
+    srcpts, recpts : If < 3, finite dipoles are approximated as point dipoles.
     verb : Verbosity.
 
     Returns
