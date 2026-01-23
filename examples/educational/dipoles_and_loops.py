@@ -95,7 +95,7 @@ inp = {'src': src, 'rec': rec, 'depth': [], 'res': 1/cond, 'verb': 1}
 inp['freqtime'] = freq
 fee_dip_dip = empymod.bipole(**inp)
 fmm_dip_dip = empymod.bipole(msrc=True, mrec=True, **inp)
-f_loo_dip = empymod.loop(**inp)
+f_loo_dip = empymod.bipole(msrc='b', mrec=True, **inp)
 
 # Time domain
 inp['freqtime'] = time
@@ -111,9 +111,9 @@ dip_dip_im = empymod.bipole(signal=0, msrc=True, mrec=True, **inp)
 dip_dip_on = empymod.bipole(signal=1, msrc=True, mrec=True, **inp)
 
 # mm loop-dip
-loo_dip_of = empymod.loop(signal=-1, **inp)
-loo_dip_im = empymod.loop(signal=0, **inp)
-loo_dip_on = empymod.loop(signal=1, **inp)
+loo_dip_of = empymod.bipole(msrc='b', mrec=True, signal=-1, **inp)
+loo_dip_im = empymod.bipole(msrc='b', mrec=True, signal=0, **inp)
+loo_dip_on = empymod.bipole(msrc='b', mrec=True, signal=1, **inp)
 
 ###############################################################################
 # Plot the result
@@ -334,8 +334,8 @@ model = {
 # Compute ``empymod.loop`` result
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-epm_loop = empymod.loop(src=[0, 0, 0, 0, 90], rec=[rxx, ryy, 10, 0, 0],
-                        **model).reshape(np.shape(rx))
+epm_loop = empymod.bipole(src=[0, 0, 0, 0, 90], rec=[rxx, ryy, 10, 0, 0],
+                          msrc='b', mrec=True, **model).reshape(np.shape(rx))
 
 ###############################################################################
 # 2.1 Point dipoles at (x, y) using ``empymod.dipole``

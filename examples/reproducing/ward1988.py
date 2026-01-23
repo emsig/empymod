@@ -152,7 +152,9 @@ dhz_ana = dhzdt(time, resistivity, offset)
 
 inp1 = {
     'src': [0, 0, 0, 0, 90],
+    'msrc': 'b',
     'rec': [offset, 0, 0, 0, 90],
+    'mrec': True,
     'depth': 0,
     'res': [2e24, resistivity],
     'freqtime': time,
@@ -161,8 +163,8 @@ inp1 = {
     'epermH': [0, 0],  # Reduce early time numerical noise (diff. approx.)
 }
 
-hz_num = empymod.loop(signal=-1, **inp1)
-dhz_num = empymod.loop(signal=0, **inp1)
+hz_num = empymod.bipole(signal=-1, **inp1)
+dhz_num = empymod.bipole(signal=0, **inp1)
 
 ###############################################################################
 # Plot the result
@@ -206,9 +208,11 @@ ax1.legend()
 freq = np.logspace(-1, 5, 301)
 
 # Computation
-fhz_num = empymod.loop(
+fhz_num = empymod.bipole(
     src=[0, 0, 0, 0, 90],
+    msrc='b',
     rec=[100, 0, 0, 0, 90],
+    mrec=True,
     depth=0,
     res=[2e14, 100],
     freqtime=freq,
@@ -242,9 +246,11 @@ ax2.legend()
 freq = np.logspace(-1, 5, 301)
 
 # Computation
-fhz_num = empymod.loop(
+fhz_num = empymod.bipole(
     src=[0, 0, 0, 0, 90],
+    msrc='b',
     rec=[100, 0, 0, 0, 0],
+    mrec=True,
     depth=0,
     res=[2e14, 100],
     freqtime=freq,
@@ -279,15 +285,17 @@ time = np.logspace(-6, 0.5, 301)
 # Computation
 inp4 = {
     'src': [0, 0, 0, 0, 90],
+    'msrc': 'b',
     'rec': [100, 0, 0, 0, 0],
+    'mrec': True,
     'depth': 0,
     'res': [2e14, 100],
     'epermH': [0, 0],
     'freqtime': time,
     'verb': 1,
 }
-fhz_num = empymod.loop(signal=1, **inp4)
-fdhz_num = empymod.loop(signal=0, **inp4)
+fhz_num = empymod.bipole(signal=1, **inp4)
+fdhz_num = empymod.bipole(signal=0, **inp4)
 
 # Figure
 fig4, ax4 = plt.subplots(1, 1, figsize=(5, 6), constrained_layout=True)
@@ -405,9 +413,11 @@ ax6.legend()
 freq = np.logspace(-2, 5, 301)
 
 # Computation
-fhz_num = empymod.loop(
+fhz_num = empymod.bipole(
     src=[0, 0, 0, 0, 0],
+    msrc='b',
     rec=[0, 100, 0, 0, 0],
+    mrec=True,
     depth=[],
     res=100,
     freqtime=freq,
@@ -441,9 +451,11 @@ ax7.legend()
 freq = np.logspace(-2, 5, 301)
 
 # Computation
-fhz_num = empymod.loop(
+fhz_num = empymod.bipole(
     src=[0, 0, 0, 0, 0],
+    msrc='b',
     rec=[100, 0, 0, 0, 0],
+    mrec=True,
     depth=[],
     res=100,
     freqtime=freq,
@@ -479,15 +491,17 @@ time = np.logspace(-7, 0, 301)
 # Computation
 inp9 = {
     'src': [0, 0, 0, 0, 0],
+    'msrc': 'b',
     'rec': [0, 100, 0, 0, 0],
+    'mrec': True,
     'depth': [],
     'res': 100,
     'xdirect': True,
     'freqtime': time,
     'verb': 1,
 }
-fhz_num = empymod.loop(signal=1, **inp9)
-fdhz_num = empymod.loop(signal=0, **inp9)
+fhz_num = empymod.bipole(signal=1, **inp9)
+fdhz_num = empymod.bipole(signal=0, **inp9)
 
 # Figure
 fig9, ax9 = plt.subplots(1, 1, figsize=(5, 5), constrained_layout=True)
@@ -526,15 +540,17 @@ time = np.logspace(-7, 0, 301)
 # Computation
 inp10 = {
     'src': [0, 0, 0, 0, 0],
+    'msrc': 'b',
     'rec': [100, 0, 0, 0, 0],
+    'mrec': True,
     'depth': [],
     'res': 100,
     'xdirect': True,
     'freqtime': time,
     'verb': 1,
 }
-fhz_num = empymod.loop(signal=1, **inp10)
-fdhz_num = empymod.loop(signal=0, **inp10)
+fhz_num = empymod.bipole(signal=1, **inp10)
+fdhz_num = empymod.bipole(signal=0, **inp10)
 
 # Figure
 fig10, ax10 = plt.subplots(1, 1, figsize=(5, 5), constrained_layout=True)
