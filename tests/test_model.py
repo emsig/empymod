@@ -854,8 +854,8 @@ class TestLoop:
                      mpermH=mpermH, mpermV=mpermV)
         bip *= (2j*np.pi*freq[:, None, None]*4e-7*np.pi)**2
         assert_allclose(bip, loo, rtol=1e-4, atol=1e-18)
-        assert '* WARNING :: `mpermH != mpermV` at source level, ' in out
-        assert '* WARNING :: `mpermH != mpermV` at receiver level, ' in out
+        assert '* WARNING :: `zetaH != zetaV` at source level, ' in out
+        assert '* WARNING :: `zetaH != zetaV` at receiver level, ' in out
 
     def test_iso_fs(self):
         # 2. Test with isotropic full-space solution, Ward and Hohmann, 1988.
