@@ -70,7 +70,7 @@ def test_check_ab(capsys):
         utils.check_ab([12, ], 0)
 
 
-def test_check_bipole():
+def test_check_bipole(capsys):
     # Wrong size
     with pytest.raises(ValueError, match='Parameter tvar has wrong length!'):
         utils.check_bipole([0, 0, 0], 'tvar', True)
@@ -128,7 +128,10 @@ def test_check_bipole():
     assert_allclose(pole[1], np.array([10, 10]))
 
     pole = [10, [0, 0], 0, 0, 0]
-    pole, _, _, _, mx, xtype = utils.check_bipole(pole, 'rec', 'b')
+    _, _ = capsys.readouterr()
+    pole, _, _, _, mx, xtype = utils.check_bipole(pole, 'rec', 'b', verb=3)
+    out, _ = capsys.readouterr()
+    assert 'Receiver type   :  Magnetic flux' in out
     assert mx is True
     assert xtype == 'b'
     assert pole[0].size == 2
@@ -144,8 +147,11 @@ def test_check_bipole():
     # Normal case
     ipole = [0, 0, 1000, 1000, 10, 20]
     inp_type = type(ipole[0])
+    _, _ = capsys.readouterr()
     pole, nout, outz, isdipole, mx, xtype = utils.check_bipole(
-            ipole, 'rec', 'j')
+            ipole, 'rec', 'j', verb=3)
+    out, _ = capsys.readouterr()
+    assert 'Receiver type   :  Electric current' in out
     assert mx is False
     assert xtype == 'j'
     out_type = type(ipole[0])
@@ -162,7 +168,10 @@ def test_check_bipole():
 
     # Pole one has variable depths
     pole = [[0, 0], [10, 10], [0, 0], [20, 30], [10, 20], 0]
-    pole, nout, outz, _, mx, xtype = utils.check_bipole(pole, 'src', 'b')
+    _, _ = capsys.readouterr()
+    pole, nout, outz, _, mx, xtype = utils.check_bipole(pole, 'src', 'b', 3)
+    out, _ = capsys.readouterr()
+    assert 'Source type     :  Magnetic flux' in out
     assert mx is True
     assert xtype is 'b'
     assert_allclose(pole[4], [10, 20])

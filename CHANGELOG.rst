@@ -18,8 +18,10 @@ v2.5.x
   - Merged ``loop`` into ``bipole``; there is no need for a special routine.
     Simply use ``bipole`` with ``msrc='b'`` and ``mrec=True`` for the same
     effect. As a result, ``empymod.utils.check_bipole`` changed its signature.
-    Both, ``empymod.model.loop`` and ``empymod.utils.check_bipole``'s old
-    signature are deprecated and will be removed in v3.
+    For ``bipole``, it new prints the source and receiver type (electric field,
+    magnetic field, magnetic flux, or electric current). Both,
+    ``empymod.model.loop`` and ``empymod.utils.check_bipole``'s old signature
+    are deprecated and will be removed in v3.
 
 
 

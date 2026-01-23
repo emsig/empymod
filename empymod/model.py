@@ -379,6 +379,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           ...:      > Filter      :  key_201_2009
           ...:      > DLF type    :  Standard
           ...:    Loop over       :  None (all vectorized)
+          ...:    Source type     : Electric field
+          ...:    Receiver type   : Electric field
           ...:    Source(s)       :  1 dipole(s)
           ...:      > intpts      :  1 (as dipole)
           ...:      > length  [m] :  100
@@ -444,8 +446,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Check src and rec, get flags if dipole or not
     # nsrcz/nrecz are number of unique src/rec-pole depths
-    src, nsrc, nsrcz, srcdipole, msrc, stype = check_bipole(src, 'src', msrc)
-    rec, nrec, nrecz, recdipole, mrec, rtype = check_bipole(rec, 'rec', mrec)
+    source = check_bipole(src, 'src', msrc, verb)
+    src, nsrc, nsrcz, srcdipole, msrc, stype = source
+    receiver = check_bipole(rec, 'rec', mrec, verb)
+    rec, nrec, nrecz, recdipole, mrec, rtype = receiver
 
     # === 3. EM-FIELD CALCULATION ============
 

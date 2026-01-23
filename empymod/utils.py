@@ -217,7 +217,7 @@ def check_ab(ab, verb):
     return ab_calc, msrc, mrec
 
 
-def check_bipole(inp, name, mx=None):
+def check_bipole(inp, name, mx=None, verb=1):
     r"""Check di-/bipole parameters.
 
     This check-function is called from one of the modelling routines in
@@ -234,9 +234,12 @@ def check_bipole(inp, name, mx=None):
     name : str, {'src', 'rec'}
         Pole-type.
 
-    mx : bool or string, default: False
+    mx : bool or string {False, True, 'b', 'j'}
         Dipole type.
         None is only for backwards compatibility, will be removed.
+
+    verb : {0, 1, 2, 3, 4}
+        Level of verbosity.
 
     Returns
     -------
@@ -264,20 +267,34 @@ def check_bipole(inp, name, mx=None):
 
     # Check mrec, msrc
     if mx is not None:
+
         # Receiver
         if name == 'rec':
             if mx == 'j':
                 mx, xtype = False, mx
+                ptype = 'Electric current'
             elif mx in ['b', 'loop']:  # 'loop' for backwards comp.
                 mx, xtype = True, 'b'
+                ptype = 'Magnetic flux'
             else:
                 mx, xtype = mx, None
+                ptype = ['Electric', 'Magnetic'][mx] + ' field'
+
+            if verb > 2:
+                print(f"   Receiver type   :  {ptype}")
+
         # Source
         elif name == 'src':
             if mx == 'b':
                 mx, xtype = True, mx
+                ptype = 'Magnetic flux'
             else:
                 mx, xtype = mx, None
+                ptype = ['Electric', 'Magnetic'][mx] + ' field'
+
+            if verb > 2:
+                print(f"   Source type     :  {ptype}")
+
         # As 'rec' or 'src' is not enforced, handle any other name
         else:
             mx, xtype = mx, None
@@ -363,7 +380,7 @@ def check_bipole(inp, name, mx=None):
         msg = (
             "The signature of `empymod.utils.check_bipole` changed from `inp, "
             "ninp, ninpz, isdipole = check_bipole(inp, name)` to `inp, ninp, "
-            "ninpz, isdipole, mx, xtype = check_bipole(inp, name, mx)`. "
+            "ninpz, isdipole, mx, xtype = check_bipole(inp, name, mx, verb)`. "
             "The old signature will be removed in v3.0."
         )
         warnings.warn(msg, DeprecationWarning)
