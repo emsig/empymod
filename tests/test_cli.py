@@ -130,9 +130,11 @@ class TestRun:
             'input': join(tmpdir, 't.json'),
             'output': join(tmpdir, 'out.txt')
         }
-        run(args_dict)
+        with pytest.warns(DeprecationWarning, match='in v3.0.'):
+            run(args_dict)
         out = empymod.io.load_data(join(tmpdir, 'out.txt'))
-        assert_allclose(out, empymod.loop(**inp))
+        with pytest.warns(DeprecationWarning, match='in v3.0.'):
+            assert_allclose(out, empymod.loop(**inp))
 
     def test_analytical_json(self, tmpdir):
 

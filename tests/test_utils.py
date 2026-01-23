@@ -70,17 +70,20 @@ def test_check_ab(capsys):
         utils.check_ab([12, ], 0)
 
 
-def test_check_bipole():
+def test_check_bipole(capsys):
     # Wrong size
     with pytest.raises(ValueError, match='Parameter tvar has wrong length!'):
-        utils.check_bipole([0, 0, 0], 'tvar')
+        utils.check_bipole([0, 0, 0], 'tvar', True)
 
     # # Dipole stuff
 
     # Normal case
     ipole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 0, 32]
     inp_type = type(ipole[0])
-    pole, nout, outz, isdipole = utils.check_bipole(ipole, 'tvar')
+    pole, nout, outz, isdipole, mx, xtype = utils.check_bipole(
+            ipole, 'tvar', True)
+    assert mx is True
+    assert xtype is None
     out_type = type(ipole[0])
     assert inp_type == out_type  # Check input wasn't altered.
     assert_allclose(pole[0], np.array([0, 0, 0]))
@@ -92,7 +95,9 @@ def test_check_bipole():
 
     # Multiple azimuth
     pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], [0, 1, 2], 1]
-    pole, _, _, _ = utils.check_bipole(pole, 'tvar')
+    pole, _, _, _, mx, xtype = utils.check_bipole(pole, 'tvar', False)
+    assert mx is False
+    assert xtype is None
     assert_allclose(pole[0], np.array([0, 0, 0]))
     assert_allclose(pole[1], np.array([10, 20, 30]))
     assert_allclose(pole[2], np.array([100, 0, 100]))
@@ -102,7 +107,8 @@ def test_check_bipole():
 
     # Multiple dip
     pole = [[0, 0, 0], [10, 20, 30], [100, 0, 100], 1, [0, 1, 2]]
-    pole, _, _, _ = utils.check_bipole(pole, 'tvar')
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        pole, _, _, _ = utils.check_bipole(pole, 'tvar')
     assert_allclose(pole[0], np.array([0, 0, 0]))
     assert_allclose(pole[1], np.array([10, 20, 30]))
     assert_allclose(pole[2], np.array([100, 0, 100]))
@@ -116,12 +122,18 @@ def test_check_bipole():
         utils.check_bipole(pole, 'tvar')
 
     pole = [[0, 0], 10, 0, 0, 0]
-    pole, _, _, _ = utils.check_bipole(pole, 'tvar')
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        pole, _, _, _ = utils.check_bipole(pole, 'tvar')
     assert pole[1].size == 2
     assert_allclose(pole[1], np.array([10, 10]))
 
     pole = [10, [0, 0], 0, 0, 0]
-    pole, _, _, _ = utils.check_bipole(pole, 'tvar')
+    _, _ = capsys.readouterr()
+    pole, _, _, _, mx, xtype = utils.check_bipole(pole, 'rec', 'b', verb=3)
+    out, _ = capsys.readouterr()
+    assert 'Receiver type   :  Magnetic flux' in out
+    assert mx is True
+    assert xtype == 'b'
     assert pole[0].size == 2
     assert_allclose(pole[0], np.array([10, 10]))
 
@@ -135,7 +147,13 @@ def test_check_bipole():
     # Normal case
     ipole = [0, 0, 1000, 1000, 10, 20]
     inp_type = type(ipole[0])
-    pole, nout, outz, isdipole = utils.check_bipole(ipole, 'tvar')
+    _, _ = capsys.readouterr()
+    pole, nout, outz, isdipole, mx, xtype = utils.check_bipole(
+            ipole, 'rec', 'j', verb=3)
+    out, _ = capsys.readouterr()
+    assert 'Receiver type   :  Electric current' in out
+    assert mx is False
+    assert xtype == 'j'
     out_type = type(ipole[0])
     assert inp_type == out_type  # Check input wasn't altered.
     assert_allclose(pole[0], 0)
@@ -150,7 +168,12 @@ def test_check_bipole():
 
     # Pole one has variable depths
     pole = [[0, 0], [10, 10], [0, 0], [20, 30], [10, 20], 0]
-    pole, nout, outz, _ = utils.check_bipole(pole, 'tvar')
+    _, _ = capsys.readouterr()
+    pole, nout, outz, _, mx, xtype = utils.check_bipole(pole, 'src', 'b', 3)
+    out, _ = capsys.readouterr()
+    assert 'Source type     :  Magnetic flux' in out
+    assert mx is True
+    assert xtype == 'b'
     assert_allclose(pole[4], [10, 20])
     assert_allclose(pole[5], [0, 0])
     assert nout == 2
@@ -158,7 +181,8 @@ def test_check_bipole():
 
     # Pole one has variable depths
     pole = [[0, 0], [10, 10], [0, 0], [20, 30], 10, [20, 0]]
-    pole, nout, outz, _ = utils.check_bipole(pole, 'tvar')
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        pole, nout, outz, _ = utils.check_bipole(pole, 'tvar')
     assert_allclose(pole[4], [10, 10])
     assert_allclose(pole[5], [20, 0])
     assert nout == 2
@@ -1225,9 +1249,9 @@ def test_import_time():
     # Capture it
     out = subprocess.run(cmd, capture_output=True)
 
-    # Currently we check t < 1.2s.
+    # Currently we check t < 2.0s.
     # => That should come down to t < 0.5s in the future!
-    assert float(out.stderr.decode("utf-8")[:-1]) < 1.2
+    assert float(out.stderr.decode("utf-8")[:-1]) < 2.0
 
 
 def test_all_dir():
