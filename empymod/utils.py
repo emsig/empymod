@@ -218,7 +218,7 @@ def check_ab(ab, verb):
 
 
 def check_bipole(inp, name, mx=None, verb=1):
-    r"""Check di-/bipole parameters.
+    r"""Check finite-length dipole parameters.
 
     This check-function is called from one of the modelling routines in
     :mod:`empymod.model`. Consult these modelling routines for a detailed
@@ -229,7 +229,7 @@ def check_bipole(inp, name, mx=None, verb=1):
     inp : list of floats or arrays
         Coordinates of inp (m):
         [dipole-x, dipole-y, dipole-z, azimuth, dip] or.
-        [bipole-x0, bipole-x1, bipole-y0, bipole-y1, bipole-z0, bipole-z1].
+        [dipole-x0, dipole-x1, dipole-y0, dipole-y1, dipole-z0, dipole-z1].
 
     name : str, {'src', 'rec'}
         Pole-type.
@@ -322,7 +322,7 @@ def check_bipole(inp, name, mx=None, verb=1):
     narr = len(inp)
     if narr not in [5, 6]:
         raise ValueError(f"Parameter {name} has wrong length! : "
-                         f"{narr} instead of 5 (dipole) or 6 (bipole).")
+                         f"{narr} instead of 5 or 6.")
 
     # Flag if it is a dipole or not
     isdipole = narr == 5
@@ -350,7 +350,7 @@ def check_bipole(inp, name, mx=None, verb=1):
 
         out = [*out, inp_a, inp_d]
 
-    else:         # bipole checks
+    else:         # finite-length dipole checks
         # Check each pole for x, y, and z
         out0 = chck_dipole(inp[::2], name+'-1', maxpoles)   # [x0, y0, z0]
         out1 = chck_dipole(inp[1::2], name+'-2', maxpoles)  # [x1, y1, z1]
@@ -362,8 +362,8 @@ def check_bipole(inp, name, mx=None, verb=1):
             if out1[2].size == 1:
                 out1[2] = np.repeat(out1[2], maxpoles)
 
-        # Check if inp is a dipole instead of a bipole
-        # (This is a problem, as we would could not define the angles then.)
+        # Check if inp is an inf. small dipole instead of a finite dipole (this
+        # is a problem, as we would could not define the angles then).
         if not np.all((out0[0] != out1[0]) + (out0[1] != out1[1]) +
                       (out0[2] != out1[2])):
             raise ValueError(f"At least one of <{name}> is a point dipole, "
@@ -1385,7 +1385,7 @@ def get_abs(msrc, mrec, srcazm, srcdip, recazm, recdip, verb):
     Returns
     -------
     ab_calc : array of int
-        ab's to calculate for this bipole.
+        ab's to calculate for this dipole.
 
     """
 
@@ -1538,7 +1538,7 @@ def get_layer_nr(inp, depth):
     Returns
     -------
     linp : int or array_like of int
-        Layer number(s) in which inp resides (plural only if bipole).
+        Layer number(s) in which inp resides (plural only if finite dipole).
 
     zinp : float or array
         inp[2] (depths).
@@ -1625,17 +1625,17 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     inp : list of floats or arrays
         Input coordinates (m):
 
-        - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
+        - [x0, x1, y0, y1, z0, z1] (dipole of finite length)
         - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
 
     iz : int
-        Index of current di-/bipole depth (-).
+        Index of current dipole depth (-).
 
     ninpz : int
-        Total number of di-/bipole depths (ninpz = 1 or npinz = nsrc) (-).
+        Total number of dipole depths (ninpz = 1 or npinz = nsrc) (-).
 
     intpts : int
-        Number of integration points for bipole (-).
+        Number of integration points for dipole (-).
 
     isdipole : bool
         Boolean if inp is a dipole.
@@ -1678,7 +1678,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     """
     global _min_off
 
-    # Get this di-/bipole
+    # Get this dipole
     if ninpz == 1:  # If there is only one distinct depth, all at once
         tinp = inp
     else:  # If there are several depths, we take the current one
@@ -1693,7 +1693,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
     # Check source strength variable
     strength = _check_var(strength, float, 0, 'strength', ())
 
-    # Dipole/Bipole specific
+    # Infinitesimal small / finite length specific
     if isdipole:
 
         # If input is a dipole, set intpts to 1
@@ -1722,7 +1722,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         dy = np.squeeze(tinp[3] - tinp[2])
         dz = np.squeeze(tinp[5] - tinp[4])
 
-        # Length of bipole
+        # Length of dipole
         dl = np.atleast_1d(np.linalg.norm(
             np.array([dx, dy, dz], dtype=object), axis=0))
 
@@ -1752,7 +1752,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
             if ninpz == 1:
                 zinp = zinp[:, 0]
 
-        else:  # If intpts < 3: Calculate bipole at tinp-centre for dip/azm
+        else:  # If intpts < 3: Calculate dipole at tinp-centre for dip/azm
 
             # Set intpts to 1
             intpts = 1
@@ -1767,7 +1767,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
 
         # Scaling
         inp_w = np.ones(dl.size)
-        if strength > 0:  # If strength > 0, we scale it by bipole-length
+        if strength > 0:  # If strength > 0, we scale it by dipole-length
             inp_w *= dl
             if name == 'src':  # If source, additionally by source strength
                 inp_w *= strength
@@ -1786,13 +1786,13 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
         else:
             longname = '   Receiver(s)     : '
 
-        # Print dipole/bipole information
+        # Print dipole information
         if isdipole:
             print(f"{longname} {tout[0].size} dipole(s)")
             tname = ['x  ', 'y  ', 'z  ']
             prntinp = tout
         else:
-            print(f"{longname} {int(tout[0].size/intpts)} bipole(s)")
+            print(f"{longname} {int(tout[0].size/intpts)} dipole(s)")
             tname = ['x_c', 'y_c', 'z_c']
             if intpts == 1:
                 print("     > intpts      :  1 (as dipole)")
@@ -1803,7 +1803,7 @@ def get_azm_dip(inp, iz, ninpz, intpts, isdipole, strength, name, verb):
                            np.atleast_1d(tinp[2])[0] + dy/2,
                            np.atleast_1d(tinp[4])[0] + dz/2]
 
-            # Print bipole length and strength
+            # Print dipole length and strength
             _prnt_min_max_val(dl, "     > length  [m] : ", verb)
             print(f"     > strength[A] :  {_strvar(strength)}")
 

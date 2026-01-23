@@ -270,7 +270,7 @@ def temfast(off_time, waveform_times, model, square_side=12.5):
     # parameter possible to provide to empymod.model.bipole.
     hs = square_side / 2  # half side length
     EM = empymod.model.bipole(
-        src=[hs, hs,   0, hs, 0, 0],  # El. bipole source; half of one side.
+        src=[hs, hs,   0, hs, 0, 0],  # El. dipole source; half of one side.
         rec=[0, 0, 0, 0, 90],         # Receiver at the origin, vertical.
         depth=depth,                  # Depth-model, including air-interface.
         res=res,                      # if with IP, res is a dictionary with
