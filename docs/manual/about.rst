@@ -21,7 +21,7 @@ Features
 
 - Modelling routines:
 
-  - ``bipole``: arbitrary oriented, finite length bipoles with given source
+  - ``bipole``: arbitrary oriented, finite-length dipoles with given source
     strength; space-frequency and space-time domains.
   - ``dipole``: infinitesimal small dipoles oriented along the principal axes,
     normalized field; space-frequency and space-time domains.

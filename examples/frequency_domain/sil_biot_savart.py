@@ -15,7 +15,7 @@ by using the Biot-Savart law for an infinite wire, given by
 where :math:`I` is the source strength, :math:`\mu_0` is the magnetic
 permeability of free space, and :math:`r` is distance.
 
-Let us consider a line source approximated as a very long, but finite bipole
+Let us consider a line source approximated as a very long, but finite dipole
 with lots of source points, and compare it to the Biot-Savart solution.
 
 .. note::
@@ -37,7 +37,7 @@ plt.style.use('ggplot')
 #
 # We set the line in the xy-plane at zero depth. The line runs from 0 to 90
 # metres. This is arbitrary. However, do note that if you would like to
-# investigate the behaviour of the bipole at further distances, the line/bipole
+# investigate the behaviour of the dipole at further distances, the line/dipole
 # should be extended with more source points for it to approximate an infinite
 # wire.
 
@@ -103,7 +103,7 @@ wire_hsz = empymod.bipole(**inp_hs, rec=rec_z)
 # Calculate Biot-Savart
 # ---------------------
 #
-# To investigate the angle between the Biot-Savart and empymod bipole solution,
+# To investigate the angle between the Biot-Savart and empymod dipole solution,
 # one needs the total field to produce the unit vectors of both solutions.
 
 # Calculate total magnetic fields
@@ -198,7 +198,7 @@ ax4.plot(radii, abs(angle_diff_bs_hs), 'C3+-')
 
 ###############################################################################
 # The total field and By and Bz components are compared. The bottom right shows
-# the angle difference between the vectors of the Biot-Savart and bipole
+# the angle difference between the vectors of the Biot-Savart and dipole
 # half-space solution.
 #
 # If we take a finite length wire, eventually Biot-Savart for an infinite

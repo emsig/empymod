@@ -3,8 +3,8 @@ Getting started
 
 The main modelling routine is :func:`empymod.model.bipole`, which can compute
 the electromagnetic frequency- or time-domain field due to arbitrary finite
-electric or magnetic bipole sources, measured by arbitrary finite electric or
-magnetic bipole receivers. The model is defined by horizontal resistivity and
+electric or magnetic dipole sources, measured by arbitrary finite electric or
+magnetic dipole receivers. The model is defined by horizontal resistivity and
 anisotropy, horizontal and vertical electric permittivities and horizontal and
 vertical magnetic permeabilities. By default, the electromagnetic response is
 normalized to source and receiver of 1 m length, and source strength of 1 A.
@@ -27,7 +27,7 @@ source frequencies.
 
 .. ipython::
 
-  In [1]: # x-directed bipole source: x0, x1, y0, y1, z0, z1
+  In [1]: # x-directed dipole source: x0, x1, y0, y1, z0, z1
      ...: source = [-50, 50, 0, 0, -100, -100]
      ...: # Source frequency
      ...: frequency = 1

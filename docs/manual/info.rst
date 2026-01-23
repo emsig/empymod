@@ -46,8 +46,8 @@ own, problem-specific modelling routine!
 
 
 
-Depths, Rotation, and Bipole
-----------------------------
+Depths, Rotation, and finite-length Dipoles
+-------------------------------------------
 
 **Depths**: Computation of many source and receiver positions is fastest if
 they remain at the same depth, as they can be computed in one kernel call. If
@@ -55,19 +55,19 @@ depths do change, one has to loop over them. Note: Sources or receivers placed
 on a layer interface are considered in the upper layer.
 
 **Rotation**: Sources and receivers aligned along the principal axes x, y, and
-z can be computed in one kernel call. For arbitrary oriented di- or bipoles, 3
-kernel calls are required. If source and receiver are arbitrary oriented, 9
-(3x3) kernel calls are required.
+z can be computed in one kernel call. For arbitrary oriented dipoles, 3 kernel
+calls are required. If source and receiver are arbitrary oriented, 9 (3x3)
+kernel calls are required.
 
-**Bipole**: Bipoles increase the computation time by the amount of integration
-points used. For a source and a receiver bipole with each 5 integration points
-you need 25 (5x5) kernel calls. You can compute it in 1 kernel call if you set
-both integration points to 1, and therefore compute the bipole as if they were
-dipoles at their centre.
+**Finite-length dipole**: Finite-length dipoles increase the computation time
+by the amount of integration points used. For a source and a receiver dipole
+with each 5 integration points you need 25 (5x5) kernel calls. You can compute
+it in 1 kernel call if you set both integration points to 1, and therefore
+compute the dipole as if they were dipoles at their centre.
 
 **Example**: For 1 source and 10 receivers, all at the same depth, 1 kernel
 call is required.  If all receivers are at different depths, 10 kernel calls
-are required. If you make source and receivers bipoles with 5 integration
+are required. If you make source and receivers dipoles with 5 integration
 points, 250 kernel calls are required.  If you rotate the source arbitrary
 horizontally, 500 kernel calls are required. If you rotate the receivers too,
 in the horizontal plane, 1'000 kernel calls are required. If you rotate the
@@ -75,13 +75,13 @@ receivers also vertically, 1'500 kernel calls are required. If you rotate the
 source vertically too, 2'250 kernel calls are required. So your computation
 will take 2'250 times longer! No matter how fast the kernel is, this will take
 a long time. Therefore carefully plan how precise you want to define your
-source and receiver bipoles.
+source and receiver dipoles.
 
 .. table:: Example as a table for comparison: 1 source, 10 receiver (one or
            many frequencies).
 
     +----------------+--------+-------+------+-------+-------+------+---------+
-    |                |    source bipole      |        receiver bipole         |
+    |                |    source dipole      |        receiver dipole         |
     +================+========+=======+======+=======+=======+======+=========+
     |**kernel calls**| intpts |azimuth|  dip |intpts |azimuth|  dip | diff. z |
     +----------------+--------+-------+------+-------+-------+------+---------+

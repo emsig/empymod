@@ -299,10 +299,10 @@ ax2.yaxis.tick_right()
 
 
 ###############################################################################
-# Bipole [x1, x2, y1, y2, z1, z2]
+# Dipole [x1, x2, y1, y2, z1, z2]
 # -------------------------------
 #
-# A time-domain example using rotated bipoles, where we define them as
+# A time-domain example using rotated dipoles, where we define them as
 # :math:`[x_1, x_2, y_1, y_2, z_1, z_2]`.
 
 times = np.linspace(0.1, 10, 301)
@@ -333,10 +333,10 @@ plt.ylabel('$E_x$ (V/m)')
 plt.legend()
 
 ###############################################################################
-# Bipole [x, y, z, azimuth, dip]
+# Dipole [x, y, z, azimuth, dip]
 # ------------------------------
 #
-# A very similar time-domain example using rotated bipoles, but this time
+# A very similar time-domain example using rotated dipoles, but this time
 # defining them as :math:`[x, y, z, \theta, \varphi]`. Note that
 # :math:`\varphi` has to change the sign, while :math:`\theta` does not.
 

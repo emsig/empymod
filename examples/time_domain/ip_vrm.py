@@ -34,7 +34,7 @@ src_x = np.r_[
 src_y = np.r_[
     np.arange(10), np.ones(10)*10, np.arange(10, -1, -1), np.zeros(10)
 ]*40 - 200
-src_bipole = [src_x[:-1],  src_x[1:], src_y[:-1], src_y[1:], 0, 0]
+src_dipole = [src_x[:-1],  src_x[1:], src_y[:-1], src_y[1:], 0, 0]
 
 # Receiver locations: One outside, one inside; vertical
 rec = [[-400., 0], [0, 0], [0, 0], 0, 90]
@@ -150,8 +150,8 @@ axs[1].set_xscale('symlog', linthresh=0.4, linscale=0.5)
 #
 # Key differences between B field and dB/dt:
 #
-# - For B field: bipole source strength is `mu_0 * loop_current`
-# - For dB/dt: bipole source strength is `loop_current`, and we multiply by
+# - For B field: dipole source strength is `mu_0 * loop_current`
+# - For dB/dt: dipole source strength is `loop_current`, and we multiply by
 #   `i*omega*mu_0` before frequency-to-time conversion
 
 def get_time(time_channels, nodes_times):
@@ -417,7 +417,7 @@ inp = {
     'res': np.array([2e14, 1.0, 100]),
     'times': times,
     'inp': {
-        'src': src_bipole,
+        'src': src_dipole,
         'rec': rec,
         'depth': [0.0, 50.0],
         'verb': 1,

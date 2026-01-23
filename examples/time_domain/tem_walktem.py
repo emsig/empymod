@@ -320,7 +320,7 @@ def walktem(moment, depth, res):
     # We only define a few parameters here. You could extend this for any
     # parameter possible to provide to empymod.model.bipole.
     EM = empymod.model.bipole(
-        src=[20, 20,   0, 20, 0, 0],  # El. bipole source; half of one side.
+        src=[20, 20,   0, 20, 0, 0],  # El. dipole source; half of one side.
         rec=[0, 0, 0, 0, 90],         # Receiver at the origin, vertical.
         depth=np.r_[0, depth],        # Depth-model, adding air-interface.
         res=np.r_[2e14, res],         # Provided resistivity model, adding air.
@@ -344,7 +344,7 @@ def walktem(moment, depth, res):
     #         strength=1,
     #         # ... all other parameters remain the same
     #     )
-    #     EM = EM.sum(axis=1)  # Sum all source bipoles
+    #     EM = EM.sum(axis=1)  # Sum all source dipoles
 
     # Multiply the frequecny-domain result with
     # \mu for H->B, and i\omega for B->dB/dt.
