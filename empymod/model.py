@@ -8,11 +8,11 @@ Principal routines:
 - :func:`bipole`
 - :func:`dipole`
 
-The main routine is :func:`bipole`, which can model bipole source(s) and bipole
-receiver(s) of arbitrary direction, for electric or magnetic (field or flux)
-sources and receivers, both in frequency and in time. A subset of
-:func:`bipole` is :func:`dipole`, which models infinitesimal small dipoles
-along the principal axes x, y, and z.
+The main routine is :func:`bipole`, which can model finite-length dipole
+source(s) and dipole receiver(s) of arbitrary direction, for electric or
+magnetic (field or flux) sources and receivers, both in frequency and in time.
+A subset of :func:`bipole` is :func:`dipole`, which models infinitesimal small
+dipoles along the principal axes x, y, and z.
 
 Further routines are:
 
@@ -103,8 +103,12 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     src, rec : list of floats or arrays
         Source and receiver coordinates (m):
 
-        - [x0, x1, y0, y1, z0, z1] (bipole of finite length)
+        - [x0, x1, y0, y1, z0, z1] (dipole of finite length)
         - [x, y, z, azimuth, dip]  (dipole, infinitesimal small)
+
+        Note that when the coordinates are defined as finite length dipoles, it
+        will still return an infinitesimal small dipole at its center unless
+        ``srctpts;recpts`` is set to a value of 3 or higher.
 
         For `N` sources or receivers, all variables must be of size `N` or 1
         (in the latter case it will be expanded to `N`).
@@ -171,10 +175,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           permittivities at receiver level.
 
     srcpts, recpts : int, default: 1
-        Number of integration points for bipole source/receiver:
+        Number of integration points for dipole source/receiver:
 
-        - srcpts/recpts < 3  : bipole, but calculated as dipole at centre
-        - srcpts/recpts >= 3 : bipole
+        - srcpts/recpts < 3  : infinitesimal small dipole at the center.
+        - srcpts/recpts >= 3 : finite length approximation with `N` points.
 
     strength : float, default: 0.0
         Source strength (A):
@@ -346,7 +350,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
        In [1]: import empymod
           ...: import numpy as np
-          ...: # x-directed bipole source: x0, x1, y0, y1, z0, z1
+          ...: # x-directed dipole source: x0, x1, y0, y1, z0, z1
           ...: src = [-50, 50, 0, 0, 100, 100]
           ...: # x-directed dipole receiver-array: x, y, z, azimuth, dip
           ...: rec = [np.arange(1, 11)*500, np.zeros(10), 200, 0, 0]
@@ -375,7 +379,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           ...:      > Filter      :  key_201_2009
           ...:      > DLF type    :  Standard
           ...:    Loop over       :  None (all vectorized)
-          ...:    Source(s)       :  1 bipole(s)
+          ...:    Source(s)       :  1 dipole(s)
           ...:      > intpts      :  1 (as dipole)
           ...:      > length  [m] :  100
           ...:      > strength[A] :  0
@@ -516,9 +520,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
                 rEM = np.zeros((freq.size, isrz), dtype=etaH.dtype)
 
                 for irg in range(recpts):  # Loop over rec integration pts
-                    # Note, if source or receiver is a bipole, but horizontal
+                    # Note, if source or receiver is a dipole, but horizontal
                     # (dip=0), then calculation could be sped up by not looping
-                    # over the bipole elements, but calculate it all in one go.
+                    # over the dipole elements, but calculate it all in one go.
 
                     # This integration receiver
                     tirec = [trec[0][irg::recpts], trec[1][irg::recpts],
@@ -649,7 +653,7 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     depth.
 
     Use the functions :func:`bipole` to calculate dipoles with arbitrary angles
-    or bipoles of finite length and arbitrary angle.
+    or dipoles of finite length and arbitrary angle.
 
     The function :func:`dipole` could be replaced by :func:`bipole` (all there
     is to do is translate ``ab`` into ``msrc``, ``mrec``, ``azimuth``'s and
