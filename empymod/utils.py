@@ -1005,13 +1005,14 @@ def check_time(time, signal, ft, ftarg, verb, new=False):
 
     """
 
-    if new and isinstance(signal, dict):
-        time, signal, waveform = check_waveform(time, **signal)
-    else:
-        waveform = None
-
     # Check time and input signal
-    time = check_time_only(time, signal, verb)
+    out = check_time_only(time, signal, verb, new)
+    if new:
+        time, waveform = out
+        if isinstance(waveform, dict):
+            signal = waveform['signal']
+    else:
+        time = out
 
     # Ensure ft is all lowercase
     ft = ft.lower()
@@ -1256,12 +1257,12 @@ def check_time(time, signal, ft, ftarg, verb, new=False):
 
     # Make backwards compatible with old signature possibility?
     if new:
-        return time, freq, ft, targ, signal, waveform
+        return time, freq, ft, targ, waveform
     else:
         return time, freq, ft, targ
 
 
-def check_time_only(time, signal, verb):
+def check_time_only(time, signal, verb, new=False):
     r"""Check time and signal parameters.
 
     This check-function is called from one of the modelling routines in
@@ -1294,9 +1295,15 @@ def check_time_only(time, signal, verb):
     global _min_time
 
     # Check input signal
-    if int(signal) not in [-1, 0, 1]:
-        raise ValueError("<signal> must be one of: [None, -1, 0, 1]; "
+    if isinstance(signal, dict) and new:
+        time, signal = check_waveform(time, **signal)
+        # TODO print waveform info
+    elif int(signal) not in [-1, 0, 1]:
+        raise ValueError("<signal> must be one of: [None, -1, 0, 1, dict]; "
                          f"<signal> provided: {signal}")
+    else:
+        pass
+        # TODO print signal info
 
     # Check time
     time = _check_var(time, float, 1, 'time')
@@ -1307,7 +1314,10 @@ def check_time_only(time, signal, verb):
     if verb > 2:
         _prnt_min_max_val(time, "   time        [s] : ", verb)
 
-    return time
+    if new:
+        return time, signal
+    else:
+        return time
 
 
 def check_waveform(time, nodes, amplitudes, signal=0, nquad=3):
@@ -1365,13 +1375,14 @@ def check_waveform(time, nodes, amplitudes, signal=0, nquad=3):
 
     comp_time_flat, map_time = np.unique(comp_time, return_inverse=True)
     waveform = {
+        'signal': signal,
         'map_time': map_time,
         'wave_weight': wave_weight,
         'wave_index': wave_index,
         'gauss_weight': gauss_weight,
     }
 
-    return comp_time_flat, signal, waveform
+    return comp_time_flat, waveform
 
 
 def check_solution(solution, signal, ab, msrc, mrec):

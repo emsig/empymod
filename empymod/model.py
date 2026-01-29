@@ -427,8 +427,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     if signal is None:
         freq = freqtime
     else:
-        outtime = check_time(freqtime, signal, ft, ftarg, verb, True)
-        time, freq, ft, ftarg, signal, waveform = outtime
+        outtime = check_time(freqtime, signal, ft, ftarg, verb, new=True)
+        time, freq, ft, ftarg, signal = outtime
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
@@ -616,17 +616,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
         # In case of QWE/QUAD, print Warning if not converged
         conv_warning(conv, ftarg, 'Fourier', verb)
-
-        # Apply waveform
-        if waveform:
-            map_time = waveform['map_time'][:, :, :]
-            wave_weight = waveform['wave_weight'][:, :, None]
-            wave_index = waveform['wave_index'][:, :, None]
-            gauss_weight = waveform['gauss_weight'][None, :, None, None]
-
-            # Convert to time domain and apply waveform
-            EM = np.sum(np.sum(EM[map_time] * gauss_weight, axis=1) *
-                        wave_weight * wave_index, axis=1)
 
     # Reshape for number of sources
     EM = EM.reshape((-1, nrec, nsrc), order='F')
@@ -1643,6 +1632,12 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
     it can speed-up the calculation by omitting input-checks.
 
     """
+    if isinstance(signal, dict):
+        waveform = signal
+        signal = waveform['signal']
+    else:
+        waveform = False
+
     # 1. Scale frequencies if switch-on/off response
     # Step function for causal times is like a unit fct, therefore an impulse
     # in frequency domain
@@ -1660,4 +1655,17 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
         tEM[:, i] += out[0]
         conv *= out[1]
 
-    return tEM*2/np.pi, conv  # Scaling from Fourier transform
+    tEM *= 2/np.pi  # Scaling from Fourier transform
+
+    # Apply waveform
+    if waveform:
+        map_time = waveform['map_time'][:, :, :]
+        wave_weight = waveform['wave_weight'][:, :, None]
+        wave_index = waveform['wave_index'][:, :, None]
+        gauss_weight = waveform['gauss_weight'][None, :, None, None]
+
+        # Convert to time domain and apply waveform
+        tEM = np.sum(np.sum(tEM[map_time] * gauss_weight, axis=1) *
+                     wave_weight * wave_index, axis=1)
+
+    return tEM, conv
