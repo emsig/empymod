@@ -1336,8 +1336,7 @@ def check_waveform(time, nodes, amplitudes, signal=0, nquad=3):
 
     # Pre-allocate
     comp_time = np.zeros((time.size, nquad, dIdt.size))
-    wave_weight = np.zeros((time.size, dIdt.size))
-    wave_index = np.zeros((time.size, dIdt.size), dtype=bool)
+    segment_weight = np.zeros((time.size, dIdt.size))
 
     # Loop over wave segments.
     wi = 0
@@ -1348,41 +1347,41 @@ def check_waveform(time, nodes, amplitudes, signal=0, nquad=3):
             continue
 
         # If wanted time is before a wave element, ignore it.
-        wave_ind = nodes[i] < time
-        if wave_ind.sum() == 0:
+        ind = nodes[i] < time
+        if ind.sum() == 0:
             continue
 
         # Start and end for this wave-segment for all times.
-        ta = time[wave_ind] - nodes[i]
-        tb = time[wave_ind] - nodes[i+1]
+        ta = time[ind] - nodes[i]
+        tb = time[ind] - nodes[i+1]
 
         # If wanted time is within a wave element, we cut the element.
-        tb[nodes[i+1] > time[wave_ind]] = 0.0  # Cut elements
+        tb[nodes[i+1] > time[ind]] = 0.0  # Cut elements
 
         # Gauss-Legendre for this wave segment. See
         # https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
         # for the change of interval, which makes this a bit more complex.
-        comp_time[:, :, wi] = np.outer((tb-ta)/2, g_x)+(ta+tb)[:, None]/2
+        comp_time[ind, :, wi] = np.outer((tb-ta)/2, g_x)+(ta+tb)[:, None]/2
 
-        wave_weight[:, wi] = (tb-ta)/2*cdIdt
-        wave_index[:, wi] = wave_ind
+        segment_weight[ind, wi] = (tb-ta)/2*cdIdt
 
         wi += 1
 
     comp_time = comp_time[:, :, :wi]
-    wave_weight = wave_weight[:, :wi]
-    wave_index = wave_index[:, :wi]
+    segment_weight = segment_weight[:, :wi]
 
     comp_time_flat, map_time = np.unique(comp_time, return_inverse=True)
-    waveform = {
-        'signal': signal,
-        'map_time': map_time,
-        'wave_weight': wave_weight,
-        'wave_index': wave_index,
-        'gauss_weight': gauss_weight,
-    }
 
-    return comp_time_flat, waveform
+    def apply_waveform(resp):
+        """Waveform function."""
+
+        # Gauss quadrature of each segment
+        resp = np.sum(resp[map_time]*gauss_weight[None, :, None, None], axis=1)
+
+        # Sum over waveform elements
+        return np.sum(resp*segment_weight[:, :, None], axis=1)
+
+    return comp_time_flat, {'signal': signal, 'apply_waveform': apply_waveform}
 
 
 def check_solution(solution, signal, ab, msrc, mrec):

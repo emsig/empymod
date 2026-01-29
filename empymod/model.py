@@ -137,13 +137,26 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     freqtime : array_like
         Frequencies f (Hz) if ``signal==None``, else times t (s); (f, t > 0).
 
-    signal : {None, 0, 1, -1}, default: None
+    signal : {None, -1, 0, 1, dict}, default: None
         Source signal:
 
         - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
+        - dict : Arbitrary waveform
+
+          For an arbitrary waveform, the dictionary must contain the following
+          keyword-value pairs:
+
+          - nodes : array_like
+              Nodes of the waveform.
+          - amplitudes : array_like
+              Amplitudes (current) of the waveform.
+          - signal : {-1, 0, 1}, default: 0
+              Signal that is convolved with the waveform.
+          - nquad : int, default: 3
+              Number of quadrature points for the waveform segments.
 
     aniso : array_like, default: ones
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
@@ -325,8 +338,16 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         If True, the output is squeezed. If False, the output will always be of
         ``ndim=3``, (nfreqtime, nrec, nsrc).
 
-    bandbass : dict or None, default: None
-        TODO
+    bandpass : {dict, None}, default: None
+        A dictionary containing any function that is applied to the
+        frequency-domain result. The signature of the function must be
+        ``func(inp, p_dict)``, where ``inp`` is the dictionary you provide, and
+        ``p_dict`` is a dictionary that contains all parameters so far computed
+        in empymod ``[locals()]``. Any change to the frequency domain result
+        must be done in-place, and the function does not return anything. Refer
+        to the time-domain loop examples in the gallery. The dictionary must
+        contain at least the keyword ``'func'``, containing the actual
+        function, but can contain any other parameters too.
 
 
     Returns
@@ -407,7 +428,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        Out[2]: (1.6880934577857306e-10-3.083031298956568e-10j)
 
     """
-
     # Get kwargs with defaults.
     out = get_kwargs(
         [
@@ -619,8 +639,6 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
 
     # Reshape for number of sources
     EM = EM.reshape((-1, nrec, nsrc), order='F')
-
-    # Squeeze empty dimensions
     if squeeze:
         EM = np.squeeze(EM)
 
@@ -1632,11 +1650,12 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
     it can speed-up the calculation by omitting input-checks.
 
     """
+    # Check if standard signal or arbitrary waveform
     if isinstance(signal, dict):
-        waveform = signal
-        signal = waveform['signal']
+        apply_waveform = signal['apply_waveform']
+        signal = signal['signal']
     else:
-        waveform = False
+        apply_waveform = False
 
     # 1. Scale frequencies if switch-on/off response
     # Step function for causal times is like a unit fct, therefore an impulse
@@ -1658,14 +1677,7 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
     tEM *= 2/np.pi  # Scaling from Fourier transform
 
     # Apply waveform
-    if waveform:
-        map_time = waveform['map_time'][:, :, :]
-        wave_weight = waveform['wave_weight'][:, :, None]
-        wave_index = waveform['wave_index'][:, :, None]
-        gauss_weight = waveform['gauss_weight'][None, :, None, None]
-
-        # Convert to time domain and apply waveform
-        tEM = np.sum(np.sum(tEM[map_time] * gauss_weight, axis=1) *
-                     wave_weight * wave_index, axis=1)
+    if apply_waveform:
+        tEM = apply_waveform(tEM)
 
     return tEM, conv
