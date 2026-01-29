@@ -1979,15 +1979,15 @@ def get_kwargs(names, defaults, kwargs):
 
     - ALL functions: src, rec, res, aniso, epermH, epermV, mpermH, mpermV, verb
     - ONLY gpr: cf, gain
-    - ONLY bipole: msrc, srcpts, bandpass
+    - ONLY bipole: msrc, srcpts, mrec, recpts, strength
+    - ONLY bipole, dipole: bandpass
     - ONLY dipole_k: freq, wavenumber
     - ONLY analytical: solution
-    - ONLY bipole, loop: mrec, recpts, strength
-    - ONLY bipole, dipole, loop, gpr: ht, htarg, ft, ftarg, xdirect, loop
-    - ONLY bipole, dipole, loop, analytical: signal, squeeze
+    - ONLY bipole, dipole, gpr: ht, htarg, ft, ftarg, xdirect, loop
+    - ONLY bipole, dipole, analytical: signal, squeeze
     - ONLY dipole, analytical, gpr, dipole_k: ab
-    - ONLY bipole, dipole, loop, gpr, dipole_k: depth
-    - ONLY bipole, dipole, loop, analytical, gpr: freqtime
+    - ONLY bipole, dipole, gpr, dipole_k: depth
+    - ONLY bipole, dipole, analytical, gpr: freqtime
 
     Parameters
     ----------
