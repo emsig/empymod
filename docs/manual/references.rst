@@ -42,9 +42,7 @@ References
 .. [Key09] Key, K., 2009, 1D inversion of multicomponent, multifrequency marine
    CSEM data: Methodology and synthetic studies for resolving thin resistive
    layers: Geophysics, 74(2), F9--F20; DOI: `10.1190/1.3058434
-   <https://doi.org/10.1190/1.3058434>`_. Software:
-   `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-   <https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
+   <https://doi.org/10.1190/1.3058434>`_.
 .. [Key12] Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
    Geophysics, 77(3), F21--F30; DOI: `10.1190/geo2011-0237.1
    <https://doi.org/10.1190/geo2011-0237.1>`_; Software:
