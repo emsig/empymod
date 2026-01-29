@@ -16,8 +16,8 @@ namely:
   Aleksander Mousatov.
 - 2018-2021: `Delft University of Technology <https://www.tudelft.nl>`_;
   through the *Gitaro.JIM* project (till 05/2021, emg3d v1.0.0), funded by
-  `MarTERA <https://www.martera.eu>`_ as part of Horizon 2020, a funding scheme
-  of the European Research Area.
+  MarTERA as part of Horizon 2020, a funding scheme of the European Research
+  Area.
 - 2021-2022: `TERRASYS Geophysics GmbH & Co. KG
   <https://www.terrasysgeo.com>`_.
 - 2021-2024: `Delft University of Technology <https://www.tudelft.nl>`_ through

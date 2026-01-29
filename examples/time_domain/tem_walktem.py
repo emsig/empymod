@@ -11,13 +11,8 @@ things involved than just computing the EM Greens function.
 **In this example we are going to compute a TEM response, in particular from
 the system** WalkTEM, and compare it with data obtained from `AarhusInv
 <https://hgg.au.dk/software/aarhusinv>`_. However, you can use and adapt this
-example to model other TEM systems, such as skyTEM, SIROTEM, TEM-FAST, or any
-other system.
-
-What is not included in ``empymod`` at this moment (but hopefully in the
-future), but is required to model TEM data, is to **account for arbitrary
-source waveform**, and to apply a **lowpass filter**. So we generate these two
-things here, and create our own wrapper to model TEM data.
+example to model other TEM systems, such as skyTEM, SIROTEM, TEM-FAST
+(:ref:`sphx_glr_gallery_tdomain_tem_temfast.py`), or any other system.
 
 The incentive for this example came from Leon Foks (`@leonfoks
 <https://github.com/leonfoks>`_) for `GeoBIPy
@@ -29,10 +24,9 @@ based on work from Kerry Key (`@kerrykey <https://github.com/kerrykey>`_).
 import empymod
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.special import roots_legendre
-from matplotlib.ticker import LogLocator, NullFormatter
-from scipy.interpolate import InterpolatedUnivariateSpline as iuSpline
+
 plt.style.use('ggplot')
+
 # sphinx_gallery_thumbnail_number = 2
 
 ###############################################################################
@@ -107,267 +101,132 @@ hm_aarhus_con = np.array([
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Low moment
-lm_waveform_times = np.r_[-1.041E-03, -9.850E-04, 0.000E+00, 4.000E-06]
-lm_waveform_current = np.r_[0.0, 1.0, 1.0, 0.0]
+lm_waveform_times = np.array([-1.041e-3, -9.850e-4, 0, 4e-6])
+lm_waveform_current = np.array([0.0, 1.0, 1.0, 0.0])
 
 # High moment
-hm_waveform_times = np.r_[-8.333E-03, -8.033E-03, 0.000E+00, 5.600E-06]
-hm_waveform_current = np.r_[0.0, 1.0, 1.0, 0.0]
+hm_waveform_times = np.array([-8.333e-3, -8.033e-3, 0, 5.6e-6])
+hm_waveform_current = np.array([0.0, 1.0, 1.0, 0.0])
 
-plt.figure()
-plt.title('Waveforms')
-plt.plot(np.r_[-9, lm_waveform_times*1e3, 2], np.r_[0, lm_waveform_current, 0],
-         label='Low moment')
-plt.plot(np.r_[-9, hm_waveform_times*1e3, 2], np.r_[0, hm_waveform_current, 0],
-         '-.', label='High moment')
-plt.xlabel('Time (ms)')
-plt.xlim([-9, 0.5])
-plt.legend()
+# Plot them
+fig, ax = plt.subplots(1, 1, constrained_layout=True)
+ax.set_title('Waveforms')
+ax.plot(np.r_[-9, lm_waveform_times*1e3, 2], np.r_[0, lm_waveform_current, 0],
+        label='Low moment')
+ax.plot(np.r_[-9, hm_waveform_times*1e3, 2], np.r_[0, hm_waveform_current, 0],
+        '-.', label='High moment')
+ax.set_xlabel('Time (ms)')
+ax.set_xlim([-9, 0.5])
+ax.legend()
 
 
 ###############################################################################
 # 2. ``empymod`` implementation
 # -----------------------------
-def waveform(times, resp, times_wanted, wave_time, wave_amp, nquad=3):
-    """Apply a source waveform to the signal.
+#
+# We model the big source square loop by computing only half of one side of
+# the electric square loop and approximating the finite length dipole with 3
+# point dipole sources. The result is then multiplied by 8, to account for
+# all eight half-sides of the square loop.
+#
+# The implementation here assumes a central loop configuration, where the
+# receiver (1 m² area) is at the origin, and the source is a 40x40 m electric
+# loop, centered around the origin.
+#
+# Note: This approximation of only using half of one of the four sides
+#       obviously only works for central, horizontal square loops. If your loop
+#       is arbitrary rotated, then you have to model all four sides of the loop
+#       and sum it up.
+#
+# As an example, if the receiver wouldn't be in the center, we would have to
+# model the actual complete loop (no symmetry to take advantage of).
+#
+# .. code-block:: python
+#
+#     EM = empymod.model.bipole(
+#         src=[[20, 20, -20, -20],  # x1
+#              [20, -20, -20, 20],  # x2
+#              [-20, 20, 20, -20],  # y1
+#              [20, 20, -20, -20],  # y2
+#              0, 0],               # z1, z2
+#         strength=1,
+#         # ... all other parameters remain the same
+#     )
+#     EM = EM.sum(axis=1)  # Sum all source dipoles
 
-    Parameters
-    ----------
-    times : ndarray
-        Times of computed input response; should start before and end after
-        `times_wanted`.
-
-    resp : ndarray
-        EM-response corresponding to `times`.
-
-    times_wanted : ndarray
-        Wanted times.
-
-    wave_time : ndarray
-        Time steps of the wave.
-
-    wave_amp : ndarray
-        Amplitudes of the wave corresponding to `wave_time`, usually
-        in the range of [0, 1].
-
-    nquad : int
-        Number of Gauss-Legendre points for the integration. Default is 3.
-
-    Returns
-    -------
-    resp_wanted : ndarray
-        EM field for `times_wanted`.
-
-    """
-
-    # Interpolate on log.
-    PP = iuSpline(np.log10(times), resp)
-
-    # Wave time steps.
-    dt = np.diff(wave_time)
-    dI = np.diff(wave_amp)
-    dIdt = dI/dt
-
-    # Gauss-Legendre Quadrature; 3 is generally good enough.
-    # (Roots/weights could be cached.)
-    g_x, g_w = roots_legendre(nquad)
-
-    # Pre-allocate output.
-    resp_wanted = np.zeros_like(times_wanted)
-
-    # Loop over wave segments.
-    for i, cdIdt in enumerate(dIdt):
-
-        # We only have to consider segments with a change of current.
-        if cdIdt == 0.0:
-            continue
-
-        # If wanted time is before a wave element, ignore it.
-        ind_a = wave_time[i] < times_wanted
-        if ind_a.sum() == 0:
-            continue
-
-        # If wanted time is within a wave element, we cut the element.
-        ind_b = wave_time[i+1] > times_wanted[ind_a]
-
-        # Start and end for this wave-segment for all times.
-        ta = times_wanted[ind_a]-wave_time[i]
-        tb = times_wanted[ind_a]-wave_time[i+1]
-        tb[ind_b] = 0.0  # Cut elements
-
-        # Gauss-Legendre for this wave segment. See
-        # https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
-        # for the change of interval, which makes this a bit more complex.
-        logt = np.log10(np.outer((tb-ta)/2, g_x)+(ta+tb)[:, None]/2)
-        fact = (tb-ta)/2*cdIdt
-        resp_wanted[ind_a] += fact*np.sum(np.array(PP(logt)*g_w), axis=1)
-
-    return resp_wanted
+def bandpass(inp, p_dict):
+    """Butterworth-type filter (implemented from simpegEM1D.Waveforms.py)."""
+    cutofffreq = 4.5e5  # As stated in the WalkTEM manual
+    h = (1 + 1j*p_dict["freq"]/cutofffreq)**-1
+    h *= (1 + 1j*p_dict["freq"]/3e5)**-1
+    p_dict["EM"] *= h[:, None]
 
 
-###############################################################################
-def get_time(time, r_time):
-    """Additional time for ramp.
-
-    Because of the arbitrary waveform, we need to compute some times before and
-    after the actually wanted times for interpolation of the waveform.
-
-    Some implementation details: The actual times here don't really matter. We
-    create a vector of time.size+2, so it is similar to the input times and
-    accounts that it will require a bit earlier and a bit later times. Really
-    important are only the minimum and maximum times. The Fourier DLF, with
-    `pts_per_dec=-1`, computes times from minimum to at least the maximum,
-    where the actual spacing is defined by the filter spacing. It subsequently
-    interpolates to the wanted times. Afterwards, we interpolate those again to
-    compute the actual waveform response.
-
-    Note: We could first call `waveform`, and get the actually required times
-          from there. This would make this function obsolete. It would also
-          avoid the double interpolation, first in `empymod.model.time` for the
-          Fourier DLF with `pts_per_dec=-1`, and second in `waveform`. Doable.
-          Probably not or marginally faster. And the code would become much
-          less readable.
-
-    Parameters
-    ----------
-    time : ndarray
-        Desired times
-
-    r_time : ndarray
-        Waveform times
-
-    Returns
-    -------
-    time_req : ndarray
-        Required times
-    """
-    tmin = np.log10(max(time.min()-r_time.max(), 1e-10))
-    tmax = np.log10(time.max()-r_time.min())
-    return np.logspace(tmin, tmax, time.size+2)
-
-
-###############################################################################
 def walktem(moment, depth, res):
     """Custom wrapper of empymod.model.bipole.
 
     Here, we compute WalkTEM data using the ``empymod.model.bipole`` routine as
-    an example. We could achieve the same using ``empymod.model.dipole`` or
-    ``empymod.model.loop``.
-
-    We model the big source square loop by computing only half of one side of
-    the electric square loop and approximating the finite length dipole with 3
-    point dipole sources. The result is then multiplied by 8, to account for
-    all eight half-sides of the square loop.
-
-    The implementation here assumes a central loop configuration, where the
-    receiver (1 m2 area) is at the origin, and the source is a 40x40 m electric
-    loop, centered around the origin.
-
-    Note: This approximation of only using half of one of the four sides
-          obviously only works for central, horizontal square loops. If your
-          loop is arbitrary rotated, then you have to model all four sides of
-          the loop and sum it up.
+    an example. Everything is fixed except for the moment, the depth model, and
+    the resistivity model.
 
 
     Parameters
     ----------
-    moment : str {'lm', 'hm'}
-        Moment. If 'lm', above defined ``lm_off_time``, ``lm_waveform_times``,
+    moment : str {"lm", "hm"}
+        Moment. If "lm", above defined ``lm_off_time``, ``lm_waveform_times``,
         and ``lm_waveform_current`` are used. Else, the corresponding
         ``hm_``-parameters.
 
     depth : ndarray
-        Depths of the resistivity model (see ``empymod.model.bipole`` for more
-        info.)
+        Depths of the resistivity model interfaces (see
+        ``empymod.model.bipole`` for more info), without 0.
 
     res : ndarray
         Resistivities of the resistivity model (see ``empymod.model.bipole``
-        for more info.)
+        for more info), without air.
 
     Returns
     -------
     WalkTEM : EMArray
-        WalkTEM response (dB/dt).
+        WalkTEM response [dB/dt].
 
     """
 
-    # Get the measurement time and the waveform corresponding to the provided
-    # moment.
-    if moment == 'lm':
+    # Get measurement time and waveform corresponding to the provided moment.
+    if moment == "lm":
         off_time = lm_off_time
-        waveform_times = lm_waveform_times
-        waveform_current = lm_waveform_current
-    elif moment == 'hm':
+        nodes = lm_waveform_times
+        amplitudes = lm_waveform_current
+    elif moment == "hm":
         off_time = hm_off_time
-        waveform_times = hm_waveform_times
-        waveform_current = hm_waveform_current
+        nodes = hm_waveform_times
+        amplitudes = hm_waveform_current
     else:
         raise ValueError("Moment must be either 'lm' or 'hm'!")
 
-    # === GET REQUIRED TIMES ===
-    time = get_time(off_time, waveform_times)
+    # Collect signal
+    signal = {"nodes": nodes, "amplitudes": amplitudes, "signal": 1}
+    delay = 1.8e-7  # As stated in the WalkTEM manual
 
-    # === GET REQUIRED FREQUENCIES ===
-    time, freq, ft, ftarg = empymod.utils.check_time(
-        time=time,          # Required times
-        signal=1,           # Switch-on response
-        ft='dlf',           # Use DLF
-        ftarg={'dlf': 'key_81_2009'},  # Short, fast filter; if you
-        verb=2,                 # need higher accuracy choose a longer filter.
-    )
-
-    # === COMPUTE FREQUENCY-DOMAIN RESPONSE ===
+    # === COMPUTE RESPONSE ===
     # We only define a few parameters here. You could extend this for any
     # parameter possible to provide to empymod.model.bipole.
     EM = empymod.model.bipole(
-        src=[20, 20,   0, 20, 0, 0],  # El. dipole source; half of one side.
-        rec=[0, 0, 0, 0, 90],         # Receiver at the origin, vertical.
-        depth=np.r_[0, depth],        # Depth-model, adding air-interface.
-        res=np.r_[2e14, res],         # Provided resistivity model, adding air.
-        # aniso=aniso,                # Here you could implement anisotropy...
-        #                             # ...or any parameter accepted by bipole.
-        freqtime=freq,                # Required frequencies.
-        mrec=True,                    # It is an el. source, but a magn. rec.
-        strength=8,                   # To account for 4 sides of square loop.
-        srcpts=3,                     # Approx. the finite dip. with 3 points.
-        htarg={'dlf': 'key_101_2009'},  # Short filter, so fast.
+        src=[20, 20, 0, 20, 0, 0],  # El. dipole source; half of one side.
+        rec=[0, 0, 0, 0, 90],       # Receiver at the origin, vertical.
+        depth=np.r_[0, depth],      # Depth-model, adding air-interface.
+        res=np.r_[2e14, res],       # Provided resistivity model, adding air.
+        freqtime=off_time + delay,  # Wanted times
+        signal=signal,              # Waveform
+        mrec="b",                   # Receiver: dB/dt
+        strength=8,                 # To account for 8 quarters of square.
+        srcpts=3,                   # Approx. the finite dip. with 3 points.
+        ftarg={"dlf": "key_81_2009"},  # Shorter, faster filters.
+        htarg={"dlf": "key_101_2009", "pts_per_dec": -1},
+        bandpass={"func": bandpass},
     )
-    # Note: If the receiver wouldn't be in the center, we would have to model
-    # the actual complete loop (no symmetry to take advantage of).
-    #
-    #     EM = empymod.model.bipole(
-    #         src=[[20, 20, -20, -20],  # x1
-    #              [20, -20, -20, 20],  # x2
-    #              [-20, 20, 20, -20],  # y1
-    #              [20, 20, -20, -20],  # y2
-    #              0, 0],               # z1, z2
-    #         strength=1,
-    #         # ... all other parameters remain the same
-    #     )
-    #     EM = EM.sum(axis=1)  # Sum all source dipoles
 
-    # Multiply the frequecny-domain result with
-    # \mu for H->B, and i\omega for B->dB/dt.
-    EM *= 2j*np.pi*freq*4e-7*np.pi
-
-    # === Butterworth-type filter (implemented from simpegEM1D.Waveforms.py)===
-    # Note: Here we just apply one filter. But it seems that WalkTEM can apply
-    #       two filters, one before and one after the so-called front gate
-    #       (which might be related to ``delay_rst``, I am not sure about that
-    #       part.)
-    cutofffreq = 4.5e5               # As stated in the WalkTEM manual
-    h = (1+1j*freq/cutofffreq)**-1   # First order type
-    h *= (1+1j*freq/3e5)**-1
-    EM *= h
-
-    # === CONVERT TO TIME DOMAIN ===
-    delay_rst = 1.8e-7               # As stated in the WalkTEM manual
-    EM, _ = empymod.model.tem(EM[:, None], np.array([1]),
-                              freq, time+delay_rst, 1, ft, ftarg)
-    EM = np.squeeze(EM)
-
-    # === APPLY WAVEFORM ===
-    return waveform(time, EM, off_time, waveform_times, waveform_current)
+    return EM
 
 
 ###############################################################################
@@ -382,71 +241,61 @@ hm_empymod_res = walktem('hm', depth=[75], res=[500, 20])
 lm_empymod_con = walktem('lm', depth=[30], res=[10, 1])
 hm_empymod_con = walktem('hm', depth=[30], res=[10, 1])
 
+
 ###############################################################################
 # 4. Comparison
 # -------------
 
-plt.figure(figsize=(9, 5), constrained_layout=True)
+fig, axs = plt.subplots(1, 2, figsize=(9, 5), constrained_layout=True)
+ax1, ax2 = axs
 
 # Plot result resistive model
-ax1 = plt.subplot(121)
-plt.title('Resistive Model')
+ax1.set_title("Resistive Model")
 
 # AarhusInv
-plt.plot(lm_off_time, lm_aarhus_res, 'd', mfc='.4', mec='.4',
-         label="Aarhus LM")
-plt.plot(hm_off_time, hm_aarhus_res, 's', mfc='.4', mec='.4',
-         label="Aarhus HM")
+ax1.loglog(lm_off_time, lm_aarhus_res, "d", c=".4", label="Aarhus LM")
+ax1.loglog(hm_off_time, hm_aarhus_res, "s", c=".4", label="Aarhus HM")
 
 # empymod
-plt.plot(lm_off_time, lm_empymod_res, 'r+', ms=7, label="empymod LM")
-plt.plot(hm_off_time, hm_empymod_res, 'cx', label="empymod HM")
+ax1.loglog(lm_off_time, lm_empymod_res, "r+", ms=7, label="empymod LM")
+ax1.loglog(hm_off_time, hm_empymod_res, "cx", label="empymod HM")
 
 # Difference
-plt.plot(lm_off_time, np.abs((lm_aarhus_res - lm_empymod_res)), 'm.')
-plt.plot(hm_off_time, np.abs((hm_aarhus_res - hm_empymod_res)), 'b.')
+ax1.loglog(lm_off_time, np.abs((lm_aarhus_res - lm_empymod_res)), "m.")
+ax1.loglog(hm_off_time, np.abs((hm_aarhus_res - hm_empymod_res)), "b.")
 
-# Plot settings
-plt.xscale('log')
-plt.yscale('log')
-plt.xlabel("Time(s)")
-plt.ylabel(r"$\mathrm{d}\mathrm{B}_\mathrm{z}\,/\,\mathrm{d}t$")
-plt.grid(which='both', c='w')
-plt.legend(title='Data', loc=1)
+# Legend
+ax1.legend(title="Data")
 
 # Plot result conductive model
-ax2 = plt.subplot(122)
-plt.title('Conductive Model')
+ax2.set_title("Conductive Model")
 ax2.yaxis.set_label_position("right")
 ax2.yaxis.tick_right()
 
 # AarhusInv
-plt.plot(lm_off_time, lm_aarhus_con, 'd', mfc='.4', mec='.4')
-plt.plot(hm_off_time, hm_aarhus_con, 's', mfc='.4', mec='.4')
+ax2.loglog(lm_off_time, lm_aarhus_con, "d", c=".4")
+ax2.loglog(hm_off_time, hm_aarhus_con, "s", c=".4")
 
 # empymod
-plt.plot(lm_off_time, lm_empymod_con, 'r+', ms=7)
-plt.plot(hm_off_time, hm_empymod_con, 'cx')
+ax2.loglog(lm_off_time, lm_empymod_con, "r+", ms=7)
+ax2.loglog(hm_off_time, hm_empymod_con, "cx")
 
 # Difference
-plt.plot(lm_off_time, np.abs((lm_aarhus_con - lm_empymod_con)), 'm.',
-         label=r"$|\Delta_\mathrm{LM}|$")
-plt.plot(hm_off_time, np.abs((hm_aarhus_con - hm_empymod_con)), 'b.',
-         label=r"$|\Delta_\mathrm{HM}|$")
+lm_diff = np.abs((lm_aarhus_con - lm_empymod_con))
+ax2.loglog(lm_off_time, lm_diff, "m.", label=r"$|\Delta_\mathrm{LM}|$")
+hm_diff = np.abs((hm_aarhus_con - hm_empymod_con))
+ax2.loglog(hm_off_time, hm_diff, "b.", label=r"$|\Delta_\mathrm{HM}|$")
 
-# Plot settings
-plt.xscale('log')
-plt.yscale('log')
-plt.xlabel("Time(s)")
-plt.ylabel(r"$\mathrm{d}\mathrm{B}_\mathrm{z}\,/\,\mathrm{d}t$")
-plt.legend(title='Difference', loc=3)
+# Legend
+ax2.legend(title="Difference", loc=3)
 
-# Force minor ticks on logscale
-ax1.yaxis.set_minor_locator(LogLocator(subs='all', numticks=20))
-ax2.yaxis.set_minor_locator(LogLocator(subs='all', numticks=20))
-ax1.yaxis.set_minor_formatter(NullFormatter())
-ax2.yaxis.set_minor_formatter(NullFormatter())
-plt.grid(which='both', c='w')
+# Labels and Settings
+for ax in axs:
+    ax.set_ylabel(r"$\mathrm{d}\mathrm{B}_\mathrm{z}\,/\,\mathrm{d}t$")
+    ax.set_xlabel("Time(s)")
+    ax.grid(True, which="both", axis="both")
+    ax.yaxis.get_minor_locator().numticks = 30
+
 
 ###############################################################################
 empymod.Report()

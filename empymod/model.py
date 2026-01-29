@@ -325,6 +325,9 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         If True, the output is squeezed. If False, the output will always be of
         ``ndim=3``, (nfreqtime, nrec, nsrc).
 
+    bandbass : dict or None, default: None
+        TODO
+
 
     Returns
     -------
@@ -404,12 +407,16 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
        Out[2]: (1.6880934577857306e-10-3.083031298956568e-10j)
 
     """
+
     # Get kwargs with defaults.
     out = get_kwargs(
-        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
-        [2, 'dlf', {}, 'dlf', {}, False, None, True], kwargs,
+        [
+            'verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze',
+            'bandpass',
+        ],
+        [2, 'dlf', {}, 'dlf', {}, False, None, True, None], kwargs,
     )
-    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
+    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze, bandpass = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -420,7 +427,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     if signal is None:
         freq = freqtime
     else:
-        time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+        outtime = check_time(freqtime, signal, ft, ftarg, verb, True)
+        time, freq, ft, ftarg, signal, waveform = outtime
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
@@ -598,6 +606,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
 
+    # Apply user-provided bandpass filter
+    if isinstance(bandpass, dict) and 'func' in bandpass:
+        bandpass['func'](bandpass, locals())
+
     # Do f->t transform if required
     if signal is not None:
         EM, conv = tem(EM, EM[0, :], freq, time, signal, ft, ftarg)
@@ -605,8 +617,21 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         # In case of QWE/QUAD, print Warning if not converged
         conv_warning(conv, ftarg, 'Fourier', verb)
 
+        # Apply waveform
+        if waveform:
+            map_time = waveform['map_time'][:, :, :]
+            wave_weight = waveform['wave_weight'][:, :, None]
+            wave_index = waveform['wave_index'][:, :, None]
+            gauss_weight = waveform['gauss_weight'][None, :, None, None]
+
+            # Convert to time domain and apply waveform
+            EM = np.sum(np.sum(EM[map_time] * gauss_weight, axis=1) *
+                        wave_weight * wave_index, axis=1)
+
     # Reshape for number of sources
     EM = EM.reshape((-1, nrec, nsrc), order='F')
+
+    # Squeeze empty dimensions
     if squeeze:
         EM = np.squeeze(EM)
 

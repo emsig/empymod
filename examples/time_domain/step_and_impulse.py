@@ -59,7 +59,7 @@ colors = [color['color'] for color in list(plt.rcParams['axes.prop_cycle'])]
 # Equations 3.2 and 3.3 in Werthmüller, D., 2009, Inversion of multi-transient
 # EM data from anisotropic media: M.S. thesis, TU Delft, ETH Zürich, RWTH
 # Aachen; UUID: `f4b071c1-8e55-4ec5-86c6-a2d54c3eda5a
-# <https://repository.tudelft.nl/islandora/object/uuid:f4b071c1-8e55-4ec5-86c6-a2d54c3eda5a>`_.
+# <https://resolver.tudelft.nl/uuid:f4b071c1-8e55-4ec5-86c6-a2d54c3eda5a>`_.
 #
 # Analytical functions
 # ~~~~~~~~~~~~~~~~~~~~

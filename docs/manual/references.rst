@@ -20,7 +20,7 @@ References
 .. [Ghos70] Ghosh, D. P.,  1970, The application of linear filter theory to the
    direct interpretation of geoelectrical resistivity measurements: Ph.D.
    Thesis, TU Delft; UUID: `88a568bb-ebee-4d7b-92df-6639b42da2b2
-   <http://resolver.tudelft.nl/uuid:88a568bb-ebee-4d7b-92df-6639b42da2b2>`_.
+   <https://resolver.tudelft.nl/uuid:88a568bb-ebee-4d7b-92df-6639b42da2b2>`_.
 .. [GuSi97] Guptasarma, D., and B. Singh, 1997, New digital linear filters for
    Hankel J0 and J1 transforms: Geophysical Prospecting, 45, 745--762; DOI:
    `10.1046/j.1365-2478.1997.500292.x
@@ -42,9 +42,7 @@ References
 .. [Key09] Key, K., 2009, 1D inversion of multicomponent, multifrequency marine
    CSEM data: Methodology and synthetic studies for resolving thin resistive
    layers: Geophysics, 74(2), F9--F20; DOI: `10.1190/1.3058434
-   <https://doi.org/10.1190/1.3058434>`_. Software:
-   `marineemlab.ucsd.edu/Projects/Occam/1DCSEM
-   <https://marineemlab.ucsd.edu/Projects/Occam/1DCSEM>`_.
+   <https://doi.org/10.1190/1.3058434>`_.
 .. [Key12] Key, K., 2012, Is the fast Hankel transform faster than quadrature?:
    Geophysics, 77(3), F21--F30; DOI: `10.1190/geo2011-0237.1
    <https://doi.org/10.1190/geo2011-0237.1>`_; Software:
