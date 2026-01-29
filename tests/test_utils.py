@@ -559,7 +559,8 @@ def test_check_time(capsys):
 
     # # DLF # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'dlf', {}, 4)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, f, ft, ftarg = utils.check_time(time, 0, 'dlf', {}, 4)
     out, _ = capsys.readouterr()
     assert "   time        [s] :  3" in out
     assert "   Fourier         :  DLF (Sine-Filter)" in out
@@ -579,12 +580,14 @@ def test_check_time(capsys):
     assert ftarg['kind'] == 'sin'
 
     # filter-string and unknown parameter
-    _, f, _, ftarg = utils.check_time(
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, f, _, ftarg = utils.check_time(
             time, -1, 'dlf',
             {'dlf': 'key_201_2012', 'kind': 'cos', 'notused': 1},
             4)
     out, _ = capsys.readouterr()
     outstr = "   time        [s] :  3\n"
+    outstr = "   signal          :  -1\n"
     outstr += "   Fourier         :  DLF (Cosine-Filter)\n     > Filter"
     assert outstr in out
     assert "WARNING :: Unknown ftarg {'notused': 1} for method 'dlf'" in out
@@ -597,7 +600,8 @@ def test_check_time(capsys):
     assert ftarg['kind'] == 'cos'
 
     # filter instance
-    _, _, _, ftarg = utils.check_time(
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(
             time, 1, 'dlf',
             {'dlf': filters.Fourier().key_201_2012, 'kind': 'sin'}, 0)
     assert ftarg['dlf'].name == filters.Fourier().key_201_2012.name
@@ -606,7 +610,8 @@ def test_check_time(capsys):
 
     # pts_per_dec
     out, _ = capsys.readouterr()  # clear buffer
-    _, _, _, ftarg = utils.check_time(time, 0, 'dlf', {'pts_per_dec': 30}, 4)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(time, 0, 'dlf', {'pts_per_dec': 30}, 4)
     assert ftarg['dlf'].name == filters.Fourier().key_201_2012.name
     assert ftarg['pts_per_dec'] == 30
     assert ftarg['kind'] == 'sin'
@@ -614,7 +619,8 @@ def test_check_time(capsys):
     assert "     > DLF type    :  Splined, 30.0 pts/dec" in out
 
     # filter-string and pts_per_dec
-    _, _, _, ftarg = utils.check_time(
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(
             time, 0, 'dlf',
             {'dlf': 'key_81_2009', 'pts_per_dec': -1, 'kind': 'cos'}, 4)
     out, _ = capsys.readouterr()
@@ -624,7 +630,8 @@ def test_check_time(capsys):
     assert ftarg['kind'] == 'cos'
 
     # pts_per_dec
-    _, freq, _, ftarg = utils.check_time(
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, freq, _, ftarg = utils.check_time(
             time, 0, 'dlf', {'pts_per_dec': 0, 'kind': 'sin'}, 4)
     out, _ = capsys.readouterr()
     assert "     > DLF type    :  Standard" in out
@@ -633,7 +640,8 @@ def test_check_time(capsys):
     assert_allclose(np.ravel(f_base/(2*np.pi*time[:, None])), freq)
 
     # filter-string and pts_per_dec
-    _, _, _, ftarg = utils.check_time(
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(
             time, 0, 'dlf',
             {'dlf': 'key_81_2009', 'pts_per_dec': 50, 'kind': 'cos'}, 0)
     assert ftarg['dlf'].name == filters.Fourier().key_81_2009.name
@@ -641,7 +649,8 @@ def test_check_time(capsys):
     assert ftarg['kind'] == 'cos'
 
     # just kind
-    _, f, _, ftarg = utils.check_time(
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, f, _, ftarg = utils.check_time(
             time, 0, 'dlf', {'kind': 'sin'}, 0)
     assert ftarg['pts_per_dec'] == -1
     assert_allclose(f[:9], f1)
@@ -650,17 +659,20 @@ def test_check_time(capsys):
 
     # Assert it can be called repetitively
     _, _ = capsys.readouterr()
-    _, _, _, ftarg = utils.check_time(time, 0, 'dlf', {}, 1)
-    _, _, _, _ = utils.check_time(time, 0, 'dlf', ftarg, 1)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(time, 0, 'dlf', {}, 1)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, _ = utils.check_time(time, 0, 'dlf', ftarg, 1)
     out, _ = capsys.readouterr()
     assert out == ""
 
     # # QWE # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'qwe', {}, 4)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, f, ft, ftarg = utils.check_time(time, 0, 'qwe', {}, 4)
     out, _ = capsys.readouterr()
     outstr = "   Fourier         :  Quadrature-with-Extrapolation\n     > rtol"
-    assert out[24:87] == outstr
+    assert out[48:111] == outstr
     assert ft == 'qwe'
     assert ftarg['rtol'] == 1e-8
     assert ftarg['atol'] == 1e-20
@@ -683,7 +695,8 @@ def test_check_time(capsys):
     assert ftarg['sincos'] is np.sin
 
     # only limit
-    _, _, _, ftarg = utils.check_time(time, 1, 'qwe', {'limit': 30}, 0)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(time, 1, 'qwe', {'limit': 30}, 0)
     assert ftarg['rtol'] == 1e-8
     assert ftarg['atol'] == 1e-20
     assert ftarg['nquad'] == 21
@@ -696,7 +709,8 @@ def test_check_time(capsys):
     assert ftarg['sincos'] is np.sin
 
     # all arguments
-    _, _, _, ftarg = utils.check_time(
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(
             time, -1, 'qwe',
             {'rtol': 1e-3, 'atol': 1e-4, 'nquad': 31, 'maxint': 20,
              'pts_per_dec': 30, 'diff_quad': 200, 'a': 0.01, 'b': 0.2,
@@ -719,14 +733,17 @@ def test_check_time(capsys):
 
     # Assert it can be called repetitively
     _, _ = capsys.readouterr()
-    _, _, _, ftarg = utils.check_time(time, 0, 'qwe', {}, 1)
-    _, _, _, _ = utils.check_time(time, 0, 'qwe', ftarg, 1)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(time, 0, 'qwe', {}, 1)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, _ = utils.check_time(time, 0, 'qwe', ftarg, 1)
     out, _ = capsys.readouterr()
     assert out == ""
 
     # # FFTLog # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'fftlog', {}, 4)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, f, ft, ftarg = utils.check_time(time, 0, 'fftlog', {}, 4)
     out, _ = capsys.readouterr()
     outstr = "   Fourier         :  FFTLog\n     > pts_per_dec"
     assert outstr in out
@@ -759,7 +776,8 @@ def test_check_time(capsys):
     assert_allclose(f, fres, rtol=1e-5)
 
     # Several parameters
-    _, _, _, ftarg = utils.check_time(
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(
             time, -1, 'fftlog',
             {'pts_per_dec': 10, 'add_dec': [-3, 4], 'q': 2}, 0)
     assert ftarg['pts_per_dec'] == 10
@@ -772,14 +790,17 @@ def test_check_time(capsys):
 
     # Assert it can be called repetitively
     _, _ = capsys.readouterr()
-    _, _, _, ftarg = utils.check_time(time, 0, 'fftlog', {}, 1)
-    _, _, _, _ = utils.check_time(time, 0, 'fftlog', ftarg, 1)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, ftarg = utils.check_time(time, 0, 'fftlog', {}, 1)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, _, _, _ = utils.check_time(time, 0, 'fftlog', ftarg, 1)
     out, _ = capsys.readouterr()
     assert out == ""
 
     # # FFT # #
     # verbose
-    _, f, ft, ftarg = utils.check_time(time, 0, 'fft', {}, 4)
+    with pytest.warns(DeprecationWarning, match='in v3.0.'):
+        _, f, ft, ftarg = utils.check_time(time, 0, 'fft', {}, 4)
     out, _ = capsys.readouterr()
     assert "Fourier         :  Fast Fourier Transform FFT\n     > dfreq" in out
     assert "     > pts_per_dec :  (linear)" in out
@@ -794,14 +815,15 @@ def test_check_time(capsys):
     assert_allclose(f[-5:], fres[-5:])
 
     # Several parameters
-    _, _, _, ftarg = utils.check_time(
-            time, 0, 'fft', {'dfreq': 1e-3, 'nfreq': 2**15+1, 'ntot': 3}, 0)
+    _, _, _, ftarg, _ = utils.check_time(
+        time, 0, 'fft', {'dfreq': 1e-3, 'nfreq': 2**15+1, 'ntot': 3}, 0, True)
     assert ftarg['dfreq'] == 0.001
     assert ftarg['nfreq'] == 2**15+1
     assert ftarg['ntot'] == 2**16
 
     # Several parameters; pts_per_dec
-    _, f, _, ftarg = utils.check_time(time, 0, 'fft', {'pts_per_dec': 5}, 3)
+    _, f, _, ftarg, _ = utils.check_time(
+        time, 0, 'fft', {'pts_per_dec': 5}, 3, True)
     out, _ = capsys.readouterr()
     assert "     > pts_per_dec :  5" in out
     assert ftarg['dfreq'] == 0.002
@@ -819,8 +841,8 @@ def test_check_time(capsys):
 
     # Assert it can be called repetitively
     _, _ = capsys.readouterr()
-    _, _, _, ftarg = utils.check_time(time, 0, 'fft', {}, 1)
-    _, _, _, _ = utils.check_time(time, 0, 'fft', ftarg, 1)
+    _, _, _, ftarg, _ = utils.check_time(time, 0, 'fft', {}, 1, True)
+    _, _, _, _, _ = utils.check_time(time, 0, 'fft', ftarg, 1, True)
     out, _ = capsys.readouterr()
     assert out == ""
 
@@ -828,26 +850,26 @@ def test_check_time(capsys):
 
     # minimum time
     _ = utils.check_time(
-            0, 0, 'dlf', {'dlf': 'key_201_2012', 'kind': 'cos'}, 1)
+            0, 0, 'dlf', {'dlf': 'key_201_2012', 'kind': 'cos'}, 1, True)
     out, _ = capsys.readouterr()
     assert out[:21] == "* WARNING :: Times < "
 
     # Signal != -1, 0, 1
     with pytest.raises(ValueError, match='<signal> must be one of:'):
-        utils.check_time(time, -2, 'dlf', {}, 0)
+        utils.check_time(time, -2, 'dlf', {}, 0, True)
 
     # ft != cos, sin, dlf, qwe, fftlog,
     with pytest.raises(ValueError, match='<ft> must be one of:'):
-        utils.check_time(time, 0, 'bla', {}, 0)
+        utils.check_time(time, 0, 'bla', {}, 0, True)
 
     # filter missing attributes
     dlf = filters.DigitalFilter('test')
     with pytest.raises(AttributeError, match='DLF-filter is missing some att'):
-        utils.check_time(time, 0, 'dlf', {'dlf': dlf}, 1)
+        utils.check_time(time, 0, 'dlf', {'dlf': dlf}, 1, True)
 
     # filter with wrong kind
     with pytest.raises(ValueError, match="'kind' must be either 'sin' or"):
-        utils.check_time(time, 0, 'dlf', {'kind': 'wrongkind'}, 1)
+        utils.check_time(time, 0, 'dlf', {'kind': 'wrongkind'}, 1, True)
 
 
 def test_check_solution(capsys):

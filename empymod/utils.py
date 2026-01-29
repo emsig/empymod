@@ -973,13 +973,13 @@ def check_time(time, signal, ft, ftarg, verb, new=False):
     time : array_like
         Times t (s).
 
-    signal : {None, 0, 1, -1}
+    signal : {-1, 0, 1, dict}
         Source signal:
 
-        - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
+        - dict : Arbitrary waveform
 
     ft : {'dlf', 'qwe', 'fftlog', 'fft'}
         Flag for Fourier transform.
@@ -989,6 +989,9 @@ def check_time(time, signal, ft, ftarg, verb, new=False):
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
+
+    new : bool, default=False
+        For backwards compatibility.
 
 
     Returns
@@ -1002,6 +1005,10 @@ def check_time(time, signal, ft, ftarg, verb, new=False):
     ft, ftarg
         Checked if valid and set to defaults if not provided,
         checked with signal.
+
+    signal
+        Signal, checked for input and with waveform function, if applicable.
+        Only returned if new=True.
 
     """
 
@@ -1255,10 +1262,16 @@ def check_time(time, signal, ft, ftarg, verb, new=False):
     if args and verb > 0:
         print(f"* WARNING :: Unknown ftarg {args} for method '{ft}'")
 
-    # Make backwards compatible with old signature possibility?
+    # Backwards compatible return.
     if new:
         return time, freq, ft, targ, waveform
     else:
+        msg = (
+            "The signature of `empymod.utils.check_time` changed from "
+            "returning `time, freq, ft, targ` to returning `time, freq, ft, "
+            "targ, waveform`. The old signature will be removed in v3.0."
+        )
+        warnings.warn(msg, DeprecationWarning)
         return time, freq, ft, targ
 
 
@@ -1274,16 +1287,19 @@ def check_time_only(time, signal, verb, new=False):
     time : array_like
         Times t (s).
 
-    signal : {None, 0, 1, -1}
+    signal : {-1, 0, 1, dict}
         Source signal:
 
-        - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
+        - dict : Arbitrary waveform
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
+
+    new : bool, default=False
+        For backwards compatibility.
 
 
     Returns
@@ -1291,19 +1307,12 @@ def check_time_only(time, signal, verb, new=False):
     time : float
         Time, checked for size and assured min_time.
 
+    signal
+        Signal, checked for input and with waveform function, if applicable.
+        Only returned if new=True.
+
     """
     global _min_time
-
-    # Check input signal
-    if isinstance(signal, dict) and new:
-        time, signal = check_waveform(time, **signal)
-        # TODO print waveform info
-    elif int(signal) not in [-1, 0, 1]:
-        raise ValueError("<signal> must be one of: [None, -1, 0, 1, dict]; "
-                         f"<signal> provided: {signal}")
-    else:
-        pass
-        # TODO print signal info
 
     # Check time
     time = _check_var(time, float, 1, 'time')
@@ -1314,16 +1323,75 @@ def check_time_only(time, signal, verb, new=False):
     if verb > 2:
         _prnt_min_max_val(time, "   time        [s] : ", verb)
 
+    # Check input signal
+    if isinstance(signal, dict) and new:
+        time, signal = check_waveform(time, **signal, verb=verb)
+        if verb > 2:
+            print(f"   signal          :  {signal['signal']}")
+
+    elif int(signal) not in [-1, 0, 1]:
+        raise ValueError("<signal> must be one of: [None, -1, 0, 1, dict]; "
+                         f"<signal> provided: {signal}")
+    elif verb > 2:
+        print(f"   signal          :  {signal}")
+
+    # Backwards compatible return.
     if new:
         return time, signal
     else:
+        msg = (
+            "The signature of `empymod.utils.check_time_only` changed from "
+            "returning `time` to returning `time, signal`. "
+            "The old signature will be removed in v3.0."
+        )
+        warnings.warn(msg, DeprecationWarning)
         return time
 
 
-def check_waveform(time, nodes, amplitudes, signal=0, nquad=3):
+def check_waveform(time, nodes, amplitudes, verb, signal=0, nquad=3):
+    r"""Check waveform dict and create waveform function.
 
-    # The waveform function (here and in model.bipole) is based on work
-    # from Kerry Key.
+    This check-function is called from :mod:`empymod.utils.check_time_only`.
+
+    The waveform function is based on work from Kerry Key (DIPOLE1D).
+
+
+    Parameters
+    ----------
+    time : array_like
+        Times t (s).
+
+    nodes : array_like
+        Waveform nodes, for which amplitudes are provided.
+
+    amplitudes : array_like
+        Waveform amplitudes corresponding to the nodes.
+
+    verb : {0, 1, 2, 3, 4}
+        Level of verbosity.
+
+    signal : {-1, 0, 1}, default: 0
+        Source signal to use for convolution:
+
+        - -1 : Switch-off time-domain response
+        - 0 : Impulse time-domain response
+        - +1 : Switch-on time-domain response
+
+    nquad : int, default : 3
+        Quadrature points for wave segments.
+
+
+    Returns
+    -------
+    time : float
+        Time required to compute for the waveform.
+
+    signal
+        Signal dictionary, containing the signal itself and the waveform
+        function.
+
+    """
+    global _min_time
 
     # Waveform segments.
     dt = np.diff(nodes)
@@ -1356,7 +1424,7 @@ def check_waveform(time, nodes, amplitudes, signal=0, nquad=3):
         tb = time[ind] - nodes[i+1]
 
         # If wanted time is within a wave element, we cut the element.
-        tb[nodes[i+1] > time[ind]] = 0.0  # Cut elements
+        tb[nodes[i+1] > time[ind]] = 0.0
 
         # Gauss-Legendre for this wave segment. See
         # https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
@@ -1367,10 +1435,13 @@ def check_waveform(time, nodes, amplitudes, signal=0, nquad=3):
 
         wi += 1
 
+    # Cut arrays to number of relevant segments.
     comp_time = comp_time[:, :, :wi]
     segment_weight = segment_weight[:, :wi]
 
+    # Get unique times to compute, with reverse indices.
     comp_time_flat, map_time = np.unique(comp_time, return_inverse=True)
+    comp_time_flat[comp_time_flat < _min_time] = _min_time
 
     def apply_waveform(resp):
         """Waveform function."""
@@ -1380,6 +1451,11 @@ def check_waveform(time, nodes, amplitudes, signal=0, nquad=3):
 
         # Sum over waveform elements
         return np.sum(resp*segment_weight[:, :, None], axis=1)
+
+    if verb > 2:
+        _prnt_min_max_val(comp_time_flat, "   time comp.  [s] : ", verb)
+        print(f"   wave nodes  [s] :  {_strvar(nodes)}")
+        print(f"   wave ampl.  [-] :  {_strvar(amplitudes)}")
 
     return comp_time_flat, {'signal': signal, 'apply_waveform': apply_waveform}
 

@@ -820,7 +820,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     # Check times and Fourier Transform arguments, get required frequencies
     # (freq = freqtime if `signal=None`)
     if signal is not None:
-        time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+        out = check_time(freqtime, signal, ft, ftarg, verb, True)
+        time, freq, ft, ftarg, _ = out
     else:
         freq = freqtime
 
@@ -1084,7 +1085,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     # Check times or frequencies
     if signal is not None:
-        freqtime = check_time_only(freqtime, signal, verb)
+        freqtime, _ = check_time_only(freqtime, signal, verb, True)
 
     # Check layer parameters
     model = check_model([], res, aniso, epermH, epermV, mpermH, mpermV, True,
@@ -1218,7 +1219,7 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
     # === 1.  CHECK TIME ============
 
     # Check times and Fourier Transform arguments, get required frequencies
-    time, freq, ft, ftarg = check_time(freqtime, 0, ft, ftarg, verb)
+    time, freq, ft, ftarg, _ = check_time(freqtime, 0, ft, ftarg, verb, True)
 
     # === 2. CALL DIPOLE ============
 

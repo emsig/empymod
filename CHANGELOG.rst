@@ -17,21 +17,31 @@ v2.5.x
 
   - ``bipole``:
 
-    - Arbitrary waveforms: Time-domain modelling can new be done not only for
-      impulse (``signal=0``), step-on (``signal=1``), and step-off
-      (``signal=-1``), but for any arbitrary piecewise linear waveform.
-
-    - Bandpass filters can now be applied to the frequency domain result
-      through user-provided functions. 
+    - Arbitrary waveforms: Time-domain modelling can new be done for any
+      arbitrary piecewise linear waveform, in addition to impulse
+      (``signal=0``), step-on (``signal=1``), and step-off (``signal=-1``)
+      responses.
+    - User-defined bandpass filters can now be applied to the frequency domain
+      result through user-provided functions.
 
   - Merged ``loop`` into ``bipole``; there is no need for a special routine.
     Simply use ``bipole`` with ``msrc='b'`` and ``mrec=True`` for the same
-    effect. As a result, ``empymod.utils.check_bipole`` changed its signature.
-    For ``bipole``, it new prints the source and receiver type (electric field,
-    magnetic field, magnetic flux, or electric current). Both,
-    ``empymod.model.loop`` and ``empymod.utils.check_bipole``'s old signature
-    are deprecated and will be removed in v3.
+    effect.
 
+- New prints (if verbose):
+
+  - The source/receiver types are new printed.
+  - The signal/waveform is new printed.
+
+- New function ``empymod.utils.check_waveform``, to check the waveform.
+
+- New deprecations (will be removed in v3):
+
+  - ``empymod.model.loop`` will be removed in v3.
+  - ``empymod.utils.check_bipole``: Now returns also the src/rec field and
+    type.
+  - ``empymod.utils.check_time``: Now also returns the signal.
+  - ``empymod.utils.check_time_only``: Now also returns the signal.
 
 
 v2.5.4: Bugfix ext. fcts with z+ up
@@ -152,7 +162,7 @@ The code is now compatible with NumPy v2.
 
 - Gallery Update Part I:
 
-  - Update for Jupyterlab (ipympl/widget) 
+  - Update for Jupyterlab (ipympl/widget)
   - Replaced implicit by explicit pyplots
   - Use by default a positiv z-upwards coordinate system
   - Part I: frequency domain; reproducing; published
