@@ -15,7 +15,7 @@ v2.5.x
 
 - Modelling routines:
 
-  - ``bipole``:
+  - ``bipole`` and ``dipole``:
 
     - Arbitrary waveforms: Time-domain modelling can new be done for any
       arbitrary piecewise linear waveform, in addition to impulse

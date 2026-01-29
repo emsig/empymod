@@ -611,7 +611,8 @@ def test_check_time(capsys):
     # pts_per_dec
     out, _ = capsys.readouterr()  # clear buffer
     with pytest.warns(DeprecationWarning, match='in v3.0.'):
-        _, _, _, ftarg = utils.check_time(time, 0, 'dlf', {'pts_per_dec': 30}, 4)
+        _, _, _, ftarg = utils.check_time(
+            time, 0, 'dlf', {'pts_per_dec': 30}, 4)
     assert ftarg['dlf'].name == filters.Fourier().key_201_2012.name
     assert ftarg['pts_per_dec'] == 30
     assert ftarg['kind'] == 'sin'
