@@ -20,7 +20,7 @@ References
 .. [Ghos70] Ghosh, D. P.,  1970, The application of linear filter theory to the
    direct interpretation of geoelectrical resistivity measurements: Ph.D.
    Thesis, TU Delft; UUID: `88a568bb-ebee-4d7b-92df-6639b42da2b2
-   <http://resolver.tudelft.nl/uuid:88a568bb-ebee-4d7b-92df-6639b42da2b2>`_.
+   <https://resolver.tudelft.nl/uuid:88a568bb-ebee-4d7b-92df-6639b42da2b2>`_.
 .. [GuSi97] Guptasarma, D., and B. Singh, 1997, New digital linear filters for
    Hankel J0 and J1 transforms: Geophysical Prospecting, 45, 745--762; DOI:
    `10.1046/j.1365-2478.1997.500292.x
