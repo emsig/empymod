@@ -1443,6 +1443,11 @@ def check_waveform(time, nodes, amplitudes, verb, signal=0, nquad=3):
     comp_time_flat, map_time = np.unique(comp_time, return_inverse=True)
     comp_time_flat[comp_time_flat < _min_time] = _min_time
 
+    if comp_time_flat.size == 0:
+        raise ValueError(
+            "All wanted times are before provided waveform; aborting."
+        )
+
     def apply_waveform(resp):
         """Waveform function."""
 

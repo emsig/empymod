@@ -816,14 +816,15 @@ def test_check_time(capsys):
     assert_allclose(f[-5:], fres[-5:])
 
     # Several parameters
-    _, _, _, ftarg, _ = utils.check_time(
+    _, _, _, ftarg, sig = utils.check_time(
         time, 0, 'fft', {'dfreq': 1e-3, 'nfreq': 2**15+1, 'ntot': 3}, 0, True)
     assert ftarg['dfreq'] == 0.001
     assert ftarg['nfreq'] == 2**15+1
     assert ftarg['ntot'] == 2**16
+    assert sig == 0
 
     # Several parameters; pts_per_dec
-    _, f, _, ftarg, _ = utils.check_time(
+    _, f, _, ftarg, sig = utils.check_time(
         time, 0, 'fft', {'pts_per_dec': 5}, 3, True)
     out, _ = capsys.readouterr()
     assert "     > pts_per_dec :  5" in out
@@ -831,6 +832,7 @@ def test_check_time(capsys):
     assert ftarg['nfreq'] == 2048
     assert ftarg['ntot'] == 2048
     assert ftarg['pts_per_dec'] == 5
+    assert sig == 0
     outf = np.array([2.00000000e-03, 3.22098066e-03, 5.18735822e-03,
                      8.35419026e-03, 1.34543426e-02, 2.16680888e-02,
                      3.48962474e-02, 5.62000691e-02, 9.05096680e-02,
@@ -871,6 +873,58 @@ def test_check_time(capsys):
     # filter with wrong kind
     with pytest.raises(ValueError, match="'kind' must be either 'sin' or"):
         utils.check_time(time, 0, 'dlf', {'kind': 'wrongkind'}, 1, True)
+
+
+def test_check_time_only(capsys):
+    time = np.array([1, 2, 3])
+
+    out, _ = capsys.readouterr()
+    waveform = {
+        'nodes': [-1, -.8, -.2, 0],
+        'amplitudes': [0, 1, 1, 0],
+    }
+    _, signal = utils.check_time_only(time, waveform, 3, True)
+    out, _ = capsys.readouterr()
+    assert 'signal          :  0' in out
+    assert 'wave nodes  [s] :  -1 -0.8 -0.2 0' in out
+    assert 'wave ampl.  [-] :  0 1 1 0' in out
+    assert signal['signal'] == 0
+
+
+def test_check_waveform(capsys):
+    time = np.array([.1, .2, .3])
+
+    out, _ = capsys.readouterr()
+    waveform = {
+        'nodes': [-1, -.8, -.2, .15],
+        'amplitudes': [0, 1, 1, 0],
+    }
+
+    otime, signal = utils.check_waveform(time, **waveform, verb=3)
+    out, _ = capsys.readouterr()
+    assert 'time comp.  [s] :  0.0338105 - 1.27746 : 18' in out
+    assert signal['signal'] == 0
+    tEM = np.ones((otime.size, 1))
+    EM = signal['apply_waveform'](tEM)
+    assert EM.shape == (time.size, 1)
+    print(EM[0][0])
+    assert_allclose(EM, [[-0.14285714285714313], [0], [0]])  # Only status quo
+
+    # empty comp times
+    with pytest.raises(ValueError, match='provided waveform; aborting'):
+        time = np.array([1])
+        waveform = {'nodes': [2, 3], 'amplitudes': [0, 1], }
+        _ = utils.check_waveform(time, **waveform, verb=3)
+
+    # some times before
+    time = np.array([.05, .1, .2])
+    waveform = {
+        'nodes': [.15, 1],
+        'amplitudes': [0, 1],
+    }
+    otime, signal = utils.check_waveform(time, **waveform, verb=3)
+    # Only status quo
+    assert_allclose(otime, [1e-20, 5.635083e-3, 2.5e-2, 4.436492e-2])
 
 
 def test_check_solution(capsys):
