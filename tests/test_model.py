@@ -693,6 +693,94 @@ def test_dipole():
     assert_allclose(standard, outzeta)
 
 
+def test_bandpass():
+    def bandpass(inp, p_inp):
+        f = p_inp['freq']
+        p_inp['EM'][f < 1] *= 0
+        p_inp['EM'][f > 1] *= inp['fact']
+
+    mod = {
+        'depth': [0],
+        'res': [1.5, 5],
+        'freqtime': np.array([0.1, 10]),
+    }
+
+    # bipole()
+    bip = {
+        'src': [0, 0, 0, 90, 0],
+        'rec': [8000, 200, 300, 0, 0],
+    }
+    efield = bipole(**bip, **mod)
+    fact = 2
+    bp = bipole(bandpass={'func': bandpass, 'fact': fact}, **bip, **mod)
+    assert_allclose(0+0j, bp[0])
+    assert_allclose(fact*efield[1], bp[1])
+
+    # dipole()
+    dip = {
+        'src': [0, 0, 0],
+        'rec': [8000, 200, 300],
+        'ab': 14,
+    }
+    efield = dipole(**dip, **mod)
+    fact = 2
+    bp = dipole(bandpass={'func': bandpass, 'fact': fact}, **dip, **mod)
+    assert_allclose(0+0j, bp[0])
+    assert_allclose(fact*efield[1], bp[1])
+
+
+def test_waveform():
+    # Compare waveforms against signal=-1, 0, 1.
+
+    time = np.logspace(-1, 1, 11)
+
+    inp = {
+        'src': [0, 0, 0.001, 0, 0],
+        'rec': [6000, 0, 0.001, 0, 0],
+        'depth': [0],
+        'res': [2e14, 10],
+        'aniso': [1, 2],
+        'epermH': [0, 1],
+        'xdirect': True,
+        'freqtime': time,
+        'ftarg': {'dlf': 'key_81_2009'},
+        'verb': 1,
+    }
+
+    # Step-on : Factor -1
+    signal = 1
+    ramp = {'nodes': [-0.1e-6, 0.1e-6], 'amplitudes': [0, 1], 'signal': 1}
+    out1 = bipole(**inp, signal=signal)
+    out2 = bipole(**inp, signal=ramp)
+    assert_allclose(out1, -out2)
+
+    # Step off
+    signal = -1
+    ramp = {'nodes': [-0.1e-6, 0.1e-6], 'amplitudes': [1, 0], 'signal': -1}
+    out1 = bipole(**inp, signal=signal)
+    out2 = bipole(**inp, signal=ramp)
+    assert_allclose(out1, out2)
+
+    # Impulse
+    signal = 0
+    ramp1 = {'nodes': [-1e-5, -0.5e-6, 0, 0.5e-6, 1e-5],
+             'amplitudes': [0, 0, 2e6, 0, 0], 'signal': 1}
+    ramp2 = {'nodes': [-1e-5, -0.5e-6, 0, 0.5e-6, 1e-5],
+             'amplitudes': [0, 0, 2e6, 0, 0], 'signal': -1}
+    ramp3 = {'nodes': [-1e-6, 0], 'amplitudes': [1, 0], 'signal': 0}
+    ramp4 = {'nodes': [-1e-6, 0], 'amplitudes': [0, 1], 'signal': 0}
+
+    out0 = bipole(**inp, signal=signal)
+    out1 = bipole(**inp, signal=ramp1)
+    out2 = bipole(**inp, signal=ramp2)
+    out3 = bipole(**inp, signal=ramp3)
+    out4 = bipole(**inp, signal=ramp4)
+    assert_allclose(out0, -out1, atol=2e-13)
+    assert_allclose(out0, out2, atol=2e-13)
+    assert_allclose(out0, out3, atol=2e-13)
+    assert_allclose(out0, -out4, atol=2e-13)
+
+
 def test_all_depths():
     # Test RHS/LHS low-to-high/high-to-low
     src = [0, 0, 10]
