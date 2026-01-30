@@ -43,6 +43,12 @@ v2.5.x
   - ``empymod.utils.check_time``: Now also returns the signal.
   - ``empymod.utils.check_time_only``: Now also returns the signal.
 
+- Bumped the minimum requirements to:
+
+  - Python 3.11
+  - NumPy 2.0
+  - SciPy, Numba, libdlf, scooby (without minimum version)
+
 
 v2.5.4: Bugfix ext. fcts with z+ up
 -----------------------------------
