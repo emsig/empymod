@@ -218,24 +218,22 @@ A common alternative to this trick is to apply a lowpass filter to filter out
 the unstable high frequencies.
 
 
-TEM / Loops
------------
+Loops (FEM/TEM)
+---------------
 
 The kernel of ``empymod`` computes the electric and magnetic Green's functions
 for infinitesimal small dipoles. Combining various of these small dipoles
 allows to model any kind of source and receiver configurations, including
-loops, as frequently used in TEM (time-domain EM) measurements. To make the
-correct assembly of dipoles is not always trivial, and the easiest way is
-probably to look for a similar example and modify it. Here a list of loop
-examples in the gallery:
+loops. To make the correct assembly of dipoles is not always trivial, and the
+easiest way is probably to look for a similar example and modify it. Here a
+list of loop examples in the gallery:
 
-- :ref:`sphx_glr_gallery_fdomain_ipandq.py` (f-domain, but loop equipments,
-  GEM-2 & DUALEM-842);
+- :ref:`sphx_glr_gallery_fdomain_ipandq.py` (GEM-2 & DUALEM-842);
 - :ref:`sphx_glr_gallery_tdomain_ip_vrm.py`;
-- :ref:`sphx_glr_gallery_tdomain_tem_temfast.py`;
-- :ref:`sphx_glr_gallery_tdomain_tem_walktem.py`;
+- :ref:`sphx_glr_gallery_tdomain_tem_temfast.py` (TEM-FAST);
+- :ref:`sphx_glr_gallery_tdomain_tem_walktem.py` (Walk-TEM);
 - :ref:`sphx_glr_gallery_educational_dipoles_and_loops.py`;
-- :ref:`sphx_glr_gallery_reproducing_ward1988.py` (f- & t-demain).
+- :ref:`sphx_glr_gallery_reproducing_ward1988.py`.
 
 
 Hook for user-defined computation of :math:`\eta` and :math:`\zeta`
