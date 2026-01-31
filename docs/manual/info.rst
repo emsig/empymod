@@ -154,8 +154,8 @@ the example
 :ref:`sphx_glr_gallery_educational_dlf_standard_lagged_splined.py`.
 
 
-Looping
--------
+Looping to reduce memory
+------------------------
 
 By default, you can compute many offsets and many frequencies all in one go,
 vectorized (for the *DLF*), which is the default. The ``loop`` parameter gives
@@ -218,6 +218,26 @@ A common alternative to this trick is to apply a lowpass filter to filter out
 the unstable high frequencies.
 
 
+TEM / Loops
+-----------
+
+The kernel of ``empymod`` computes the electric and magnetic Green's functions
+for infinitesimal small dipoles. Combining various of these small dipoles
+allows to model any kind of source and receiver configurations, including
+loops, as frequently used in TEM (time-domain EM) measurements. To make the
+correct assembly of dipoles is not always trivial, and the easiest way is
+probably to look for a similar example and modify it. Here a list of loop
+examples in the gallery:
+
+- :ref:`sphx_glr_gallery_fdomain_ipandq.py` (f-domain, but loop equipments,
+  GEM-2 & DUALEM-842);
+- :ref:`sphx_glr_gallery_tdomain_ip_vrm.py`;
+- :ref:`sphx_glr_gallery_tdomain_tem_temfast.py`;
+- :ref:`sphx_glr_gallery_tdomain_tem_walktem.py`;
+- :ref:`sphx_glr_gallery_educational_dipoles_and_loops.py`;
+- :ref:`sphx_glr_gallery_reproducing_ward1988.py` (f- & t-demain).
+
+
 Hook for user-defined computation of :math:`\eta` and :math:`\zeta`
 -------------------------------------------------------------------
 
@@ -266,10 +286,45 @@ characteristics:
 And then you call ``empymod`` with ``res={'res': res-array, 'tau': tau,
 'func_eta': my_new_eta}``.
 
-Have a look at the corresponding example in the Gallery, where this hook is
-exploited in the low-frequency range to use the Cole-Cole model for IP
-computation. It could also be used in the high-frequency range to model
-dielectricity.
+Have a look at, e.g., the :ref:`sphx_glr_gallery_tdomain_cole_cole_ip.py`
+example in the Gallery, where this hook is exploited in the low-frequency range
+to use the Cole-Cole model for IP computation. It could also be used in the
+high-frequency range to model dielectricity.
+
+
+Hook for user-defined bandpass filter
+-------------------------------------
+
+Similar to the hooks described above, there is since ``empymod v2.6.0`` a hook
+to apply a bandpass filter (or any function) to the frequency domain result, by
+proving a specific dictionary as ``bandpass`` argument. The signature of the
+function must be ``func(inp, p_dict)``, where ``inp`` is the dictionary you
+provide, and ``p_dict`` is a dictionary that contains all parameters so far
+computed in empymod ``[locals()]``. Any change to the frequency domain result
+must be done in-place, and the function does not return anything. Refer to the
+time-domain loop examples in the gallery. The dictionary must contain at least
+the keyword ``'func'``, containing the actual function, but can contain any
+other parameters too.
+
+**Dummy example**
+
+.. code-block:: python
+
+    def my_bandpass(inp, p_dict):
+        # Your computations, using the parameters you provided
+        # in `inp` and the parameters from empymod in `p_dict`.
+        # In the example line below, we provide, e.g.,  inp["cutoff"]
+        # Modification must happen in-place to "EM", nothing is returned.
+
+        # Here just a simple cutoff to show the principle.
+        p_dict["EM"][p_inp["freq"] > inp["cutoff"] *= 0
+
+And then you call ``empymod`` with ``bandpass={"cutoff": 1e6, "func":
+my_bandpass}``.
+
+Have a look at, e.g., the :ref:`sphx_glr_gallery_tdomain_tem_walktem.py`
+example in the Gallery, where this hook is applied.
+
 
 
 Zero horizontal offset

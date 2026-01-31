@@ -6,12 +6,16 @@ Version 2
 ~~~~~~~~~
 
 
-v2.5.x
+v2.6.x
 """"""
 
 
-*latest*
---------
+v2.6.0: Arbitrary waveforms
+---------------------------
+
+**2026-01-31**
+
+This version finally introduces the possibility for arbitrary waveforms.
 
 - Modelling routines:
 
@@ -38,16 +42,23 @@ v2.5.x
 - New deprecations (will be removed in v3):
 
   - ``empymod.model.loop`` will be removed in v3.
-  - ``empymod.utils.check_bipole``: Now returns also the src/rec field and
-    type.
-  - ``empymod.utils.check_time``: Now also returns the signal.
-  - ``empymod.utils.check_time_only``: Now also returns the signal.
+  - ``empymod.utils.check_bipole``: New signature, it now returns also the
+    src/rec field and
+    type; old signature will be removed in v3.
+  - ``empymod.utils.check_time``: New signature, it now also returns the
+    signal; old signature will be removed in v3.
+  - ``empymod.utils.check_time_only``: New signature, it now also returns the
+    signal; old signature will be removed in v3.
 
 - Bumped the minimum requirements to:
 
   - Python 3.11
   - NumPy 2.0
   - SciPy, Numba, libdlf, scooby (without minimum version)
+
+
+v2.5.x
+""""""
 
 
 v2.5.4: Bugfix ext. fcts with z+ up
