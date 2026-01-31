@@ -137,13 +137,26 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     freqtime : array_like
         Frequencies f (Hz) if ``signal==None``, else times t (s); (f, t > 0).
 
-    signal : {None, 0, 1, -1}, default: None
+    signal : {None, -1, 0, 1, dict}, default: None
         Source signal:
 
         - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
+        - dict : Arbitrary waveform
+
+          For an arbitrary waveform, the dictionary must contain the following
+          keyword-value pairs:
+
+          - nodes : array_like
+              Nodes of the waveform.
+          - amplitudes : array_like
+              Amplitudes (current) of the waveform.
+          - signal : {-1, 0, 1}, default: 0
+              Signal that is convolved with the waveform.
+          - nquad : int, default: 3
+              Number of quadrature points for the waveform segments.
 
     aniso : array_like, default: ones
         Anisotropies lambda = sqrt(rho_v/rho_h) (-); #aniso = #res.
@@ -325,6 +338,17 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
         If True, the output is squeezed. If False, the output will always be of
         ``ndim=3``, (nfreqtime, nrec, nsrc).
 
+    bandpass : {dict, None}, default: None
+        A dictionary containing any function that is applied to the
+        frequency-domain result. The signature of the function must be
+        ``func(inp, p_dict)``, where ``inp`` is the dictionary you provide, and
+        ``p_dict`` is a dictionary that contains all parameters so far computed
+        in empymod ``[locals()]``. Any change to the frequency domain result
+        must be done in-place, and the function does not return anything. Refer
+        to the time-domain loop examples in the gallery. The dictionary must
+        contain at least the keyword ``'func'``, containing the actual
+        function, but can contain any other parameters too.
+
 
     Returns
     -------
@@ -406,10 +430,13 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     """
     # Get kwargs with defaults.
     out = get_kwargs(
-        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
-        [2, 'dlf', {}, 'dlf', {}, False, None, True], kwargs,
+        [
+            'verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze',
+            'bandpass',
+        ],
+        [2, 'dlf', {}, 'dlf', {}, False, None, True, None], kwargs,
     )
-    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
+    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze, bandpass = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -420,7 +447,8 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     if signal is None:
         freq = freqtime
     else:
-        time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+        outtime = check_time(freqtime, signal, ft, ftarg, verb, new=True)
+        time, freq, ft, ftarg, signal = outtime
 
     # Check layer parameters
     model = check_model(depth, res, aniso, epermH, epermV, mpermH, mpermV,
@@ -598,6 +626,10 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
     # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
 
+    # Apply user-provided bandpass filter
+    if isinstance(bandpass, dict) and 'func' in bandpass:
+        bandpass['func'](bandpass, locals())
+
     # Do f->t transform if required
     if signal is not None:
         EM, conv = tem(EM, EM[0, :], freq, time, signal, ft, ftarg)
@@ -682,13 +714,26 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     freqtime : array_like
         Frequencies f (Hz) if ``signal==None``, else times t (s); (f, t > 0).
 
-    signal : {None, 0, 1, -1}, default: None
+    signal : {None, -1, 0, 1, dict}, default: None
         Source signal:
 
         - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
+        - dict : Arbitrary waveform
+
+          For an arbitrary waveform, the dictionary must contain the following
+          keyword-value pairs:
+
+          - nodes : array_like
+              Nodes of the waveform.
+          - amplitudes : array_like
+              Amplitudes (current) of the waveform.
+          - signal : {-1, 0, 1}, default: 0
+              Signal that is convolved with the waveform.
+          - nquad : int, default: 3
+              Number of quadrature points for the waveform segments.
 
     ab : int, default: 11
         Source-receiver configuration.
@@ -740,6 +785,17 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
         If True, the output is squeezed. If False, the output will always be of
         ``ndim=3``, (nfreqtime, nrec, nsrc).
 
+    bandpass : {dict, None}, default: None
+        A dictionary containing any function that is applied to the
+        frequency-domain result. The signature of the function must be
+        ``func(inp, p_dict)``, where ``inp`` is the dictionary you provide, and
+        ``p_dict`` is a dictionary that contains all parameters so far computed
+        in empymod ``[locals()]``. Any change to the frequency domain result
+        must be done in-place, and the function does not return anything. Refer
+        to the time-domain loop examples in the gallery. The dictionary must
+        contain at least the keyword ``'func'``, containing the actual
+        function, but can contain any other parameters too.
+
 
     Returns
     -------
@@ -775,10 +831,13 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     """
     # Get kwargs with defaults.
     out = get_kwargs(
-        ['verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze'],
-        [2, 'dlf', {}, 'dlf', {}, False, None, True], kwargs,
+        [
+            'verb', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'squeeze',
+            'bandpass',
+        ],
+        [2, 'dlf', {}, 'dlf', {}, False, None, True, None], kwargs,
     )
-    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze = out
+    verb, ht, htarg, ft, ftarg, xdirect, loop, squeeze, bandpass = out
 
     # === 1.  LET'S START ============
     t0 = printstartfinish(verb)
@@ -788,7 +847,8 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
     # Check times and Fourier Transform arguments, get required frequencies
     # (freq = freqtime if `signal=None`)
     if signal is not None:
-        time, freq, ft, ftarg = check_time(freqtime, signal, ft, ftarg, verb)
+        out = check_time(freqtime, signal, ft, ftarg, verb, True)
+        time, freq, ft, ftarg, signal = out
     else:
         freq = freqtime
 
@@ -839,6 +899,10 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
 
     # In case of QWE/QUAD, print Warning if not converged
     conv_warning(conv, htarg, 'Hankel', verb)
+
+    # Apply user-provided bandpass filter
+    if isinstance(bandpass, dict) and 'func' in bandpass:
+        bandpass['func'](bandpass, locals())
 
     # Do f->t transform if required
     if signal is not None:
@@ -1052,7 +1116,7 @@ def analytical(src, rec, res, freqtime, solution='fs', signal=None, ab=11,
 
     # Check times or frequencies
     if signal is not None:
-        freqtime = check_time_only(freqtime, signal, verb)
+        freqtime, _ = check_time_only(freqtime, signal, verb, True)
 
     # Check layer parameters
     model = check_model([], res, aniso, epermH, epermV, mpermH, mpermV, True,
@@ -1186,7 +1250,7 @@ def gpr(src, rec, depth, res, freqtime, cf, gain=None, ab=11, aniso=None,
     # === 1.  CHECK TIME ============
 
     # Check times and Fourier Transform arguments, get required frequencies
-    time, freq, ft, ftarg = check_time(freqtime, 0, ft, ftarg, verb)
+    time, freq, ft, ftarg, _ = check_time(freqtime, 0, ft, ftarg, verb, True)
 
     # === 2. CALL DIPOLE ============
 
@@ -1618,6 +1682,13 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
     it can speed-up the calculation by omitting input-checks.
 
     """
+    # Check if standard signal or arbitrary waveform
+    if isinstance(signal, dict):
+        apply_waveform = signal['apply_waveform']
+        signal = signal['signal']
+    else:
+        apply_waveform = False
+
     # 1. Scale frequencies if switch-on/off response
     # Step function for causal times is like a unit fct, therefore an impulse
     # in frequency domain
@@ -1635,4 +1706,10 @@ def tem(fEM, off, freq, time, signal, ft, ftarg, conv=True):
         tEM[:, i] += out[0]
         conv *= out[1]
 
-    return tEM*2/np.pi, conv  # Scaling from Fourier transform
+    tEM *= 2/np.pi  # Scaling from Fourier transform
+
+    # Apply waveform
+    if apply_waveform:
+        tEM = apply_waveform(tEM)
+
+    return tEM, conv

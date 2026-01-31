@@ -6,23 +6,59 @@ Version 2
 ~~~~~~~~~
 
 
-v2.5.x
+v2.6.x
 """"""
 
 
-*latest*
---------
+v2.6.0: Arbitrary waveforms
+---------------------------
+
+**2026-01-31**
+
+This version finally introduces the possibility for arbitrary waveforms.
 
 - Modelling routines:
 
+  - ``bipole`` and ``dipole``:
+
+    - Arbitrary waveforms: Time-domain modelling can new be done for any
+      arbitrary piecewise linear waveform, in addition to impulse
+      (``signal=0``), step-on (``signal=1``), and step-off (``signal=-1``)
+      responses.
+    - User-defined bandpass filters can now be applied to the frequency domain
+      result through user-provided functions.
+
   - Merged ``loop`` into ``bipole``; there is no need for a special routine.
     Simply use ``bipole`` with ``msrc='b'`` and ``mrec=True`` for the same
-    effect. As a result, ``empymod.utils.check_bipole`` changed its signature.
-    For ``bipole``, it new prints the source and receiver type (electric field,
-    magnetic field, magnetic flux, or electric current). Both,
-    ``empymod.model.loop`` and ``empymod.utils.check_bipole``'s old signature
-    are deprecated and will be removed in v3.
+    effect.
 
+- New prints (if verbose):
+
+  - The source/receiver types are new printed.
+  - The signal/waveform is new printed.
+
+- New function ``empymod.utils.check_waveform``, to check the waveform.
+
+- New deprecations (will be removed in v3):
+
+  - ``empymod.model.loop`` will be removed in v3.
+  - ``empymod.utils.check_bipole``: New signature, it now returns also the
+    src/rec field and
+    type; old signature will be removed in v3.
+  - ``empymod.utils.check_time``: New signature, it now also returns the
+    signal; old signature will be removed in v3.
+  - ``empymod.utils.check_time_only``: New signature, it now also returns the
+    signal; old signature will be removed in v3.
+
+- Bumped the minimum requirements to:
+
+  - Python 3.11
+  - NumPy 2.0
+  - SciPy, Numba, libdlf, scooby (without minimum version)
+
+
+v2.5.x
+""""""
 
 
 v2.5.4: Bugfix ext. fcts with z+ up
@@ -143,7 +179,7 @@ The code is now compatible with NumPy v2.
 
 - Gallery Update Part I:
 
-  - Update for Jupyterlab (ipympl/widget) 
+  - Update for Jupyterlab (ipympl/widget)
   - Replaced implicit by explicit pyplots
   - Use by default a positiv z-upwards coordinate system
   - Part I: frequency domain; reproducing; published

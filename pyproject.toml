@@ -6,13 +6,13 @@ build-backend = "setuptools.build_meta"
 name = "empymod"
 description = "Open-source full 3D electromagnetic modeller for 1D VTI media"
 readme = "README.rst"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
   {name = "The emsig community", email = "info@emsig.xyz"},
 ]
 dependencies = [
-    "numpy",
-    "scipy>=1.10",
+    "numpy>=2.0.0",
+    "scipy",
     "numba",
     "libdlf",
     "scooby",

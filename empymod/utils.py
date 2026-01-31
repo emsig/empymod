@@ -56,7 +56,7 @@ __all__ = ['EMArray', 'check_time_only', 'check_time', 'check_model',
            'check_bipole', 'check_ab', 'check_solution', 'get_abs',
            'get_geo_fact', 'get_azm_dip', 'get_off_ang', 'get_layer_nr',
            'printstartfinish', 'conv_warning', 'set_minimum', 'get_minimum',
-           'Report']
+           'Report', 'check_waveform']
 
 # 0. General settings
 
@@ -961,7 +961,7 @@ def check_loop(loop, ht, htarg, verb):
     return loop_freq, loop_off
 
 
-def check_time(time, signal, ft, ftarg, verb):
+def check_time(time, signal, ft, ftarg, verb, new=False):
     r"""Check time domain specific input parameters.
 
     This check-function is called from one of the modelling routines in
@@ -973,13 +973,13 @@ def check_time(time, signal, ft, ftarg, verb):
     time : array_like
         Times t (s).
 
-    signal : {None, 0, 1, -1}
+    signal : {-1, 0, 1, dict}
         Source signal:
 
-        - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
+        - dict : Arbitrary waveform
 
     ft : {'dlf', 'qwe', 'fftlog', 'fft'}
         Flag for Fourier transform.
@@ -989,6 +989,9 @@ def check_time(time, signal, ft, ftarg, verb):
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
+
+    new : bool, default=False
+        For backwards compatibility.
 
 
     Returns
@@ -1003,10 +1006,20 @@ def check_time(time, signal, ft, ftarg, verb):
         Checked if valid and set to defaults if not provided,
         checked with signal.
 
+    signal
+        Signal, checked for input and with waveform function, if applicable.
+        Only returned if new=True.
+
     """
 
     # Check time and input signal
-    time = check_time_only(time, signal, verb)
+    out = check_time_only(time, signal, verb, new)
+    if new:
+        time, waveform = out
+        if isinstance(waveform, dict):
+            signal = waveform['signal']
+    else:
+        time = out
 
     # Ensure ft is all lowercase
     ft = ft.lower()
@@ -1249,10 +1262,20 @@ def check_time(time, signal, ft, ftarg, verb):
     if args and verb > 0:
         print(f"* WARNING :: Unknown ftarg {args} for method '{ft}'")
 
-    return time, freq, ft, targ
+    # Backwards compatible return.
+    if new:
+        return time, freq, ft, targ, waveform
+    else:
+        msg = (
+            "The signature of `empymod.utils.check_time` changed from "
+            "returning `time, freq, ft, targ` to returning `time, freq, ft, "
+            "targ, waveform`. The old signature will be removed in v3.0."
+        )
+        warnings.warn(msg, DeprecationWarning)
+        return time, freq, ft, targ
 
 
-def check_time_only(time, signal, verb):
+def check_time_only(time, signal, verb, new=False):
     r"""Check time and signal parameters.
 
     This check-function is called from one of the modelling routines in
@@ -1264,16 +1287,19 @@ def check_time_only(time, signal, verb):
     time : array_like
         Times t (s).
 
-    signal : {None, 0, 1, -1}
+    signal : {-1, 0, 1, dict}
         Source signal:
 
-        - None: Frequency-domain response
         - -1 : Switch-off time-domain response
         - 0 : Impulse time-domain response
         - +1 : Switch-on time-domain response
+        - dict : Arbitrary waveform
 
     verb : {0, 1, 2, 3, 4}
         Level of verbosity.
+
+    new : bool, default=False
+        For backwards compatibility.
 
 
     Returns
@@ -1281,13 +1307,12 @@ def check_time_only(time, signal, verb):
     time : float
         Time, checked for size and assured min_time.
 
+    signal
+        Signal, checked for input and with waveform function, if applicable.
+        Only returned if new=True.
+
     """
     global _min_time
-
-    # Check input signal
-    if int(signal) not in [-1, 0, 1]:
-        raise ValueError("<signal> must be one of: [None, -1, 0, 1]; "
-                         f"<signal> provided: {signal}")
 
     # Check time
     time = _check_var(time, float, 1, 'time')
@@ -1298,7 +1323,146 @@ def check_time_only(time, signal, verb):
     if verb > 2:
         _prnt_min_max_val(time, "   time        [s] : ", verb)
 
-    return time
+    # Check input signal
+    if isinstance(signal, dict) and new:
+        time, signal = check_waveform(time, **signal, verb=verb)
+        if verb > 2:
+            print(f"   signal          :  {signal['signal']}")
+
+    elif int(signal) not in [-1, 0, 1]:
+        raise ValueError("<signal> must be one of: [None, -1, 0, 1, dict]; "
+                         f"<signal> provided: {signal}")
+    elif verb > 2:
+        print(f"   signal          :  {signal}")
+
+    # Backwards compatible return.
+    if new:
+        return time, signal
+    else:
+        msg = (
+            "The signature of `empymod.utils.check_time_only` changed from "
+            "returning `time` to returning `time, signal`. "
+            "The old signature will be removed in v3.0."
+        )
+        warnings.warn(msg, DeprecationWarning)
+        return time
+
+
+def check_waveform(time, nodes, amplitudes, verb, signal=0, nquad=3):
+    r"""Check waveform dict and create waveform function.
+
+    This check-function is called from :mod:`empymod.utils.check_time_only`.
+
+    The waveform function is based on work from Kerry Key (DIPOLE1D).
+
+
+    Parameters
+    ----------
+    time : array_like
+        Times t (s).
+
+    nodes : array_like
+        Waveform nodes, for which amplitudes are provided.
+
+    amplitudes : array_like
+        Waveform amplitudes corresponding to the nodes.
+
+    verb : {0, 1, 2, 3, 4}
+        Level of verbosity.
+
+    signal : {-1, 0, 1}, default: 0
+        Source signal to use for convolution:
+
+        - -1 : Switch-off time-domain response
+        - 0 : Impulse time-domain response
+        - +1 : Switch-on time-domain response
+
+    nquad : int, default : 3
+        Quadrature points for wave segments.
+
+
+    Returns
+    -------
+    time : float
+        Time required to compute for the waveform.
+
+    signal
+        Signal dictionary, containing the signal itself and the waveform
+        function.
+
+    """
+    global _min_time
+
+    # Waveform segments.
+    dt = np.diff(nodes)
+    dI = np.diff(amplitudes)
+    dIdt = dI/dt
+
+    # Gauss-Legendre Quadrature; 3 is generally good enough.
+    # (Roots/weights could be cached.)
+    g_x, gauss_weight = sp.special.roots_legendre(nquad)
+
+    # Pre-allocate
+    comp_time = np.zeros((time.size, nquad, dIdt.size))
+    segment_weight = np.zeros((time.size, dIdt.size))
+
+    # Loop over wave segments.
+    wi = 0
+    for i, cdIdt in enumerate(dIdt):
+
+        # We only have to consider segments with a change of current.
+        if cdIdt == 0.0:
+            continue
+
+        # If wanted time is before a wave element, ignore it.
+        ind = nodes[i] < time
+        if ind.sum() == 0:
+            continue
+
+        # Start and end for this wave-segment for all times.
+        ta = time[ind] - nodes[i]
+        tb = time[ind] - nodes[i+1]
+
+        # If wanted time is within a wave element, we cut the element.
+        tb[nodes[i+1] > time[ind]] = 0.0
+
+        # Gauss-Legendre for this wave segment. See
+        # https://en.wikipedia.org/wiki/Gaussian_quadrature#Change_of_interval
+        # for the change of interval, which makes this a bit more complex.
+        comp_time[ind, :, wi] = np.outer((tb-ta)/2, g_x)+(ta+tb)[:, None]/2
+
+        segment_weight[ind, wi] = (tb-ta)/2*cdIdt
+
+        wi += 1
+
+    # Cut arrays to number of relevant segments.
+    comp_time = comp_time[:, :, :wi]
+    segment_weight = segment_weight[:, :wi]
+
+    # Get unique times to compute, with reverse indices.
+    comp_time_flat, map_time = np.unique(comp_time, return_inverse=True)
+    comp_time_flat[comp_time_flat < _min_time] = _min_time
+
+    if comp_time_flat.size == 0:
+        raise ValueError(
+            "All wanted times are before provided waveform; aborting."
+        )
+
+    def apply_waveform(resp):
+        """Waveform function."""
+
+        # Gauss quadrature of each segment
+        resp = np.sum(resp[map_time]*gauss_weight[None, :, None, None], axis=1)
+
+        # Sum over waveform elements
+        return np.sum(resp*segment_weight[:, :, None], axis=1)
+
+    if verb > 2:
+        _prnt_min_max_val(comp_time_flat, "   time comp.  [s] : ", verb)
+        print(f"   wave nodes  [s] :  {_strvar(nodes)}")
+        print(f"   wave ampl.  [-] :  {_strvar(amplitudes)}")
+
+    return comp_time_flat, {'signal': signal, 'apply_waveform': apply_waveform}
 
 
 def check_solution(solution, signal, ab, msrc, mrec):
@@ -1820,15 +1984,15 @@ def get_kwargs(names, defaults, kwargs):
 
     - ALL functions: src, rec, res, aniso, epermH, epermV, mpermH, mpermV, verb
     - ONLY gpr: cf, gain
-    - ONLY bipole: msrc, srcpts
+    - ONLY bipole: msrc, srcpts, mrec, recpts, strength
+    - ONLY bipole, dipole: bandpass
     - ONLY dipole_k: freq, wavenumber
     - ONLY analytical: solution
-    - ONLY bipole, loop: mrec, recpts, strength
-    - ONLY bipole, dipole, loop, gpr: ht, htarg, ft, ftarg, xdirect, loop
-    - ONLY bipole, dipole, loop, analytical: signal, squeeze
+    - ONLY bipole, dipole, gpr: ht, htarg, ft, ftarg, xdirect, loop
+    - ONLY bipole, dipole, analytical: signal, squeeze
     - ONLY dipole, analytical, gpr, dipole_k: ab
-    - ONLY bipole, dipole, loop, gpr, dipole_k: depth
-    - ONLY bipole, dipole, loop, analytical, gpr: freqtime
+    - ONLY bipole, dipole, gpr, dipole_k: depth
+    - ONLY bipole, dipole, analytical, gpr: freqtime
 
     Parameters
     ----------
@@ -1849,9 +2013,9 @@ def get_kwargs(names, defaults, kwargs):
     """
     # Known keys (excludes keys present in ALL routines).
     known_keys = set([
-            'depth', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'signal',
-            'ab', 'freqtime', 'freq', 'wavenumber', 'solution', 'cf', 'gain',
-            'msrc', 'srcpts', 'mrec', 'recpts', 'strength', 'squeeze'
+        'depth', 'ht', 'htarg', 'ft', 'ftarg', 'xdirect', 'loop', 'signal',
+        'ab', 'freqtime', 'freq', 'wavenumber', 'solution', 'cf', 'gain',
+        'msrc', 'srcpts', 'mrec', 'recpts', 'strength', 'squeeze', 'bandpass',
     ])
 
     # Loop over wanted parameters.
