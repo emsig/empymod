@@ -39,8 +39,9 @@ colors = [color['color'] for color in list(plt.rcParams['axes.prop_cycle'])]
 # .. math::
 #
 #     E_x(\rho_h,\lambda,r,t) = \frac{\rho_h}{2 \pi r^3} \left[ 2\lambda +
-#     \rm{erf}\left(\frac{\tau_h}{2}\right) - 2\lambda
-#     \rm{erf}\left(\frac{\tau_h}{2\lambda}\right) + \frac{\tau_h}{\sqrt{\pi}}
+#     \mathrm{erf}\left(\frac{\tau_h}{2}\right) - 2\lambda
+#     \mathrm{erf}\left(\frac{\tau_h}{2\lambda}\right) +
+#     \frac{\tau_h}{\sqrt{\pi}}
 #     \exp\left(- \frac{\tau_h^2}{4\lambda^2}\right)   \right]
 #
 # Time Domain: Impulse Response :math:`\mathbf{\delta(t)}`

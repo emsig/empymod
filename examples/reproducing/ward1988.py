@@ -33,16 +33,17 @@ from scipy.constants import mu_0
 # .. math::
 #
 #     h_z = \frac{m}{4\pi r^3} \left[
-#           \frac{9}{2\theta^2 r^2} \rm{erf}(\theta r) - \rm{erf}(\theta r) -
+#           \frac{9}{2\theta^2 r^2} \mathrm{erf}(\theta r) -
+#           \mathrm{erf}(\theta r) -
 #           \frac{1}{\pi^{1/2}} \left(\frac{9}{\theta r} + 4\theta r\right)
-#           \exp(-\theta^2 r^2) \right] \, , \qquad (4.69\rm{a})
+#           \exp(-\theta^2 r^2) \right] \, , \qquad (4.69\mathrm{a})
 #
 # and
 #
 # .. math::
 #
 #     \frac{\partial h_z}{\partial t} = -\frac{m\rho}{2\pi\mu_0 r^5} \left[
-#          9\rm{erf}(\theta r) -
+#          9\mathrm{erf}(\theta r) -
 #          \frac{2\theta r}{\pi^{1/2}} \left(9 + 6\theta^2 r^2 +
 #          4\theta^4 r^4\right) \exp(-\theta^2 r^2) \right] \, , \qquad (4.70)
 #

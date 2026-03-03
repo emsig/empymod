@@ -45,7 +45,7 @@ where
     :label: ph-13
 
     z_{oj} \equiv \text{intrinsic impedance}
-        \equiv \sqrt{\rm{i}\omega \mu \rho_j} \, ,
+        \equiv \sqrt{\mathrm{i}\omega \mu \rho_j} \, ,
 
 .. math::
     :label: ph-14

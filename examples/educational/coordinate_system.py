@@ -57,12 +57,13 @@ coordinate systems:
   - ``depth = [0, -100, -1000, -1050]``: **RHS** (+z up)
 
 - A source or a receiver *exactly on* a boundary is taken as being in the lower
-  layer. Hence, if :math:`z_\rm{rec} = z_0`, where :math:`z_0` is the surface,
-  then the receiver is taken as in the air in the LHS, but as in the subsurface
-  in the RHS. Similarly, if :math:`z_\rm{rec} = z_\rm{seafloor}`, then the
-  receiver is taken as in the sea in the LHS, but as in the subsurface in the
-  RHS. This can be avoided by never placing it exactly on a boundary, but
-  slightly (e.g., 1 mm) in the layer where you want to have it.
+  layer. Hence, if :math:`z_\mathrm{rec} = z_0`, where :math:`z_0` is the
+  surface, then the receiver is taken as in the air in the LHS, but as in the
+  subsurface in the RHS. Similarly, if :math:`z_\mathrm{rec} =
+  z_\mathrm{seafloor}`, then the receiver is taken as in the sea in the LHS,
+  but as in the subsurface in the RHS. This can be avoided by never placing it
+  exactly on a boundary, but slightly (e.g., 1 mm) in the layer where you want
+  to have it.
 
 - Sign switches:
 
