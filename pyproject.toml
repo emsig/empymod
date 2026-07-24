@@ -82,3 +82,9 @@ per-file-ignores = [
 
 [tool.coverage.run]
 relative_files = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+filterwarnings = [
+    "ignore:Unknown pytest.mark.mpl_image_compare",
+]
