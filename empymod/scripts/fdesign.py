@@ -736,7 +736,7 @@ def _call_qc_transform_pairs(n, ispacing, ishift, fI, fC, r, r_def, reim):
 
     # Plot QC
     fig, axs = plt.subplots(figsize=(9.5, 6), nrows=2, ncols=2,
-                            num="Transform pairs")
+                            num="Transform pairs", clear=True)
     axs = axs.ravel()
     plt.subplots_adjust(wspace=.3, hspace=.4)
 

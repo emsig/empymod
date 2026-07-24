@@ -137,7 +137,7 @@ def test_save_load_filter(tmpdir):
 @pytest.mark.skipif(not plt, reason="Matplotlib not installed.")
 class TestFiguresMatplotlib:
 
-    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=18)  # IMPROVE!
+    @pytest.mark.mpl_image_compare(remove_text=True)
     def test_plot_result1(self):
         switch_off_matplotlib_agg_warning()
         # Quick run `design` with all verb/plot on, just to check that no
@@ -148,6 +148,7 @@ class TestFiguresMatplotlib:
 
         # plot_result for min amplitude
         dat1 = DATA['case1'][()]
+        plt.close('all')
         fdesign.plot_result(dat1[1], dat1[2], prntres=True)
         return plt.gcf()
 
@@ -156,6 +157,7 @@ class TestFiguresMatplotlib:
         switch_off_matplotlib_agg_warning()
         # plot_result one shift several spacings
         dat5 = DATA['case5'][()]
+        plt.close('all')
         fdesign.plot_result(dat5[1], dat5[2])
         return plt.gcf()
 
@@ -164,10 +166,11 @@ class TestFiguresMatplotlib:
         switch_off_matplotlib_agg_warning()
         # plot_result several shifts one spacing for max r
         dat6 = DATA['case6'][()]
+        plt.close('all')
         fdesign.plot_result(dat6[1], dat6[2])
         return plt.gcf()
 
-    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=8)
+    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
     def test_call_qc_transform_pairs1(self):
         switch_off_matplotlib_agg_warning()
         # plot_transform_pair "normal" case
@@ -176,6 +179,7 @@ class TestFiguresMatplotlib:
         fC = (fdesign.j0_3(5), fdesign.j1_3(5))
         fC[0].rhs = fC[0].rhs(r)
         fC[1].rhs = fC[1].rhs(r)
+        plt.close('all')
         fdesign._call_qc_transform_pairs(101, (0.06, 0.07, 0.01), (-1, 1, 0.3),
                                          fI, fC, r, (0, 0, 2), np.real)
         return plt.gcf()
@@ -188,11 +192,12 @@ class TestFiguresMatplotlib:
         fI = (fdesign.j0_1(5), fdesign.j1_1(5))
         fC = fdesign.empy_hankel('j2', 950, 1000, 1, 1)
         fC.rhs = fC.rhs(r)
+        plt.close('all')
         fdesign._call_qc_transform_pairs(101, (0.06, 0.07, 0.01), (-1, 1, 0.3),
                                          fI, [fC, ], r, (0, 0, 2), np.imag)
         return plt.gcf()
 
-    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
+    @pytest.mark.mpl_image_compare(remove_text=True)
     def test_call_qc_transform_pairs3(self):
         switch_off_matplotlib_agg_warning()
         # plot_transform_pair Sine/Cosine
@@ -201,6 +206,7 @@ class TestFiguresMatplotlib:
         fC = (fdesign.sin_2(), fdesign.cos_2())
         fC[0].rhs = fC[0].rhs(r)
         fC[1].rhs = fC[1].rhs(r)
+        plt.close('all')
         fdesign._call_qc_transform_pairs(101, (0.06, 0.07, 0.01), (-1, 1, 0.3),
                                          fI, fC, r, (0, 0, 2), np.imag)
         return plt.gcf()
@@ -223,6 +229,7 @@ class TestFiguresMatplotlib:
         rhs = np.dot(f.lhs(k), filt.j0)/r
         rel_error = np.abs((rhs - f.rhs)/f.rhs)
         imin = np.where(rel_error > 0.01)[0][0]
+        plt.close('all')
         fdesign._plot_inversion(f, rhs, r, k, imin, spacing, shift, cvar)
         return plt.gcf()
 
@@ -247,6 +254,7 @@ class TestFiguresMatplotlib:
         rhs = rhs0 + rhs1
         rel_error = np.abs((rhs - f.rhs)/f.rhs)
         imin = np.where(rel_error > 0.01)[0][0]
+        plt.close('all')
         fdesign._plot_inversion(f, rhs, r, k, imin, spacing, shift, cvar)
         return plt.gcf()
 
