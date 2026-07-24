@@ -61,7 +61,7 @@ def test_hankel(htype):                             # 1. DLF / 2. QWE / 3. QUAD
             assert_allclose(np.squeeze(wvnr0), np.squeeze(freq0))
 
         # # # 1. Spline; One angle # # #
-        _, htarg = utils.check_hankel(htype, {'pts_per_dec': 80}, 0)
+        _, htarg = utils.check_hankel(htype, {'pts_per_dec': 100}, 0)
         if htype == 'quad':  # Lower atol to ensure convergence
             _, htarg = utils.check_hankel('quad', {'rtol': 1e-8}, 0)
         elif htype == 'dlf':  # Adjust htarg for dlf

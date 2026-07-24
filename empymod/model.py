@@ -238,7 +238,7 @@ def bipole(src, rec, depth, res, freqtime, signal=None, aniso=None,
           - ``atol``: absolute tolerance (default: 1e-30)
           - ``nquad``: order of Gaussian quadrature (default: 51)
           - ``maxint``: maximum number of partial integral intervals
-            (default: 40)
+            (default: 100)
           - ``pts_per_dec``: points per decade; (default: 0)
 
             - If 0, no interpolation is used.
