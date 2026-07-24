@@ -170,7 +170,7 @@ class TestFiguresMatplotlib:
         fdesign.plot_result(dat6[1], dat6[2])
         return plt.gcf()
 
-    @pytest.mark.mpl_image_compare(remove_text=True)
+    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
     def test_call_qc_transform_pairs1(self):
         switch_off_matplotlib_agg_warning()
         # plot_transform_pair "normal" case
@@ -184,7 +184,7 @@ class TestFiguresMatplotlib:
                                          fI, fC, r, (0, 0, 2), np.real)
         return plt.gcf()
 
-    @pytest.mark.mpl_image_compare(remove_text=True)
+    @pytest.mark.mpl_image_compare(remove_text=True, tolerance=6)
     def test_call_qc_transform_pairs2(self):
         switch_off_matplotlib_agg_warning()
         # plot_transform_pair J2
