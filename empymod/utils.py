@@ -2253,7 +2253,7 @@ class Report(ScoobyReport):
         core = ['numpy', 'scipy', 'numba', 'empymod', 'libdlf']
 
         # Optional packages.
-        optional = ['IPython', 'matplotlib']
+        optional = ['IPython', 'matplotlib', 'empygrad']
 
         super().__init__(additional=add_pckg, core=core, optional=optional,
                          ncol=ncol, text_width=text_width, sort=sort)
