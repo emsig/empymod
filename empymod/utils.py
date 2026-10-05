@@ -2207,7 +2207,7 @@ class Report(ScoobyReport):
     Always shown are the OS, number of CPU(s), `numpy`, `scipy`, `numba`,
     `empymod`, `sys.version`, and time/date.
 
-    Additionally shown are, if they can be imported, `IPython`, and
+    Additionally shown are, if they can be imported, `empygrad`, `IPython`, and
     `matplotlib`. It also shows MKL information, if available.
 
     All modules provided in `add_pckg` are also shown.
@@ -2253,7 +2253,7 @@ class Report(ScoobyReport):
         core = ['numpy', 'scipy', 'numba', 'empymod', 'libdlf']
 
         # Optional packages.
-        optional = ['IPython', 'matplotlib']
+        optional = ['IPython', 'matplotlib', 'empygrad']
 
         super().__init__(additional=add_pckg, core=core, optional=optional,
                          ncol=ncol, text_width=text_width, sort=sort)
