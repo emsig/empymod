@@ -62,6 +62,11 @@ from empymod.utils import (
         check_solution, get_abs, get_geo_fact, get_azm_dip, get_off_ang,
         get_layer_nr, get_kwargs, printstartfinish, conv_warning, EMArray)
 
+try:
+    import empygrad
+except ImportError:
+    empygrad = None
+
 __all__ = ['bipole', 'dipole', 'loop', 'analytical', 'gpr', 'dipole_k',
            'ip_and_q', 'fem', 'tem']
 
@@ -829,6 +834,22 @@ def dipole(src, rec, depth, res, freqtime, signal=None, ab=11, aniso=None,
        Out[1]: (1.6880934577857306e-10-3.083031298956568e-10j)
 
     """
+
+    # Crude wrapper for empygrad for testing purposes.
+    if kwargs.pop('gradient', False):
+        if empygrad:
+            return empygrad.dipole(
+                src, rec, depth, res, freqtime, signal, ab, aniso, epermH,
+                epermV, mpermH, mpermV, **kwargs
+            )
+        else:
+            msg = (
+                "Keyword `gradient` requires the missing soft dependency "
+                "empygrad."
+            )
+            warnings.warn(msg, UserWarning)
+            return False
+
     # Get kwargs with defaults.
     out = get_kwargs(
         [
