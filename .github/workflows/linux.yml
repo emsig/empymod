@@ -36,40 +36,40 @@ jobs:
       matrix:
         os: [ubuntu, ]  # macos, windows]  # Only Linux currently.
         case:
-          - python-version: "3.11"
+          - python-version: "3.12"
             name: minimal
             os: ubuntu
             conda: "numba 'numpy==2.0.0' scipy scooby libdlf"
             test: ""
-          - python-version: "3.12"
-            name: plain
-            os: ubuntu
-            conda: "numba 'numpy>=2.0.0' scipy scooby libdlf"
-            test: ""
-          - python-version: "3.12"
-            name: full
-            os: ubuntu
-            conda: "numba 'numpy>=2.0.0' scipy scooby libdlf matplotlib pytest-mpl"
-            test: "--mpl"
           - python-version: "3.13"
             name: plain
             os: ubuntu
-            conda: "numba 'numpy>=2.0.0' scipy scooby libdlf"
+            conda: "numba 'numpy' scipy scooby libdlf"
             test: ""
           - python-version: "3.13"
             name: full
             os: ubuntu
-            conda: "numba 'numpy>=2.0.0' scipy scooby libdlf matplotlib pytest-mpl"
+            conda: "numba 'numpy' scipy scooby libdlf matplotlib pytest-mpl"
             test: "--mpl"
           - python-version: "3.14"
             name: plain
             os: ubuntu
-            conda: "numba 'numpy>=2.0.0' scipy scooby libdlf"
+            conda: "numba 'numpy' scipy scooby libdlf"
             test: ""
           - python-version: "3.14"
             name: full
             os: ubuntu
-            conda: "numba 'numpy>=2.0.0' scipy scooby libdlf matplotlib pytest-mpl"
+            conda: "numba 'numpy' scipy scooby libdlf matplotlib pytest-mpl"
+            test: "--mpl"
+          - python-version: "3.15"
+            name: plain
+            os: ubuntu
+            conda: "numba 'numpy' scipy scooby libdlf"
+            test: ""
+          - python-version: "3.15"
+            name: full
+            os: ubuntu
+            conda: "numba 'numpy' scipy scooby libdlf matplotlib pytest-mpl"
             test: "--mpl"
 
     env:
@@ -81,7 +81,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v7.0.1
         with:
           # Need to fetch more than the last commit so that setuptools-scm can
           # create the correct version string. If the number of commits since
@@ -97,7 +97,7 @@ jobs:
         run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup miniconda
-        uses: conda-incubator/setup-miniconda@v3.2.0
+        uses: conda-incubator/setup-miniconda@v4.1.0
         with:
           auto-update-conda: true
           python-version: ${{ matrix.case.python-version }}
@@ -156,7 +156,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v7.0.1
         with:
           # Need to fetch more than the last commit so that setuptools-scm can
           # create the correct version string. If the number of commits since
@@ -172,7 +172,7 @@ jobs:
         run: git fetch origin 'refs/tags/*:refs/tags/*'
 
       - name: Setup Python
-        uses: actions/setup-python@v6.1.0
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.11"
 
@@ -199,7 +199,7 @@ jobs:
 
       - name: Publish to Test PyPI
         if: success()
-        uses: pypa/gh-action-pypi-publish@v1.13.0
+        uses: pypa/gh-action-pypi-publish@v1.14.3
         with:
           user: __token__
           password: ${{ secrets.TEST_PYPI_PASSWORD }}
@@ -211,7 +211,7 @@ jobs:
       - name: Publish to PyPI
         # Only for releases
         if: success() && github.event_name == 'release'
-        uses: pypa/gh-action-pypi-publish@v1.13.0
+        uses: pypa/gh-action-pypi-publish@v1.14.3
         with:
           user: __token__
           password: ${{ secrets.PYPI_PASSWORD }}
