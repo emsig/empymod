@@ -10,6 +10,18 @@ v2.6.x
 """"""
 
 
+v2.6.1: Fix for numba v0.68
+---------------------------
+
+**2026-10-23**
+
+- Bug fix to keep it working with numba v0.68.
+
+- Maintenance
+
+  - Testing: added Python 3.15; removed Python 3.11.
+
+
 v2.6.0: Arbitrary waveforms
 ---------------------------
 
