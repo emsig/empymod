@@ -27,10 +27,10 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v7.0.1
 
       - name: Setup Python
-        uses: actions/setup-python@v6.1.0
+        uses: actions/setup-python@v4.1.0
         with:
           python-version: "3.13"
 
