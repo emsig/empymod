@@ -38,7 +38,6 @@ __all__ = ['wavenumber', 'angle_factor', 'fullspace', 'greenfct',
 
 # Numba-settings
 _numba_setting = {'nogil': True, 'cache': True}
-_numba_with_fm = {'fastmath': True, **_numba_setting}
 
 
 def __dir__():
@@ -418,7 +417,7 @@ def greenfct(zsrc, zrec, lsrc, lrec, depth, etaH, etaV, zetaH, zetaV, lambd,
     return GTM, GTE
 
 
-@nb.njit(**_numba_with_fm)
+@nb.njit(**_numba_setting)
 def reflections(depth, e_zH, Gam, lrec, lsrc):
     r"""Calculate Rp, Rm.
 
