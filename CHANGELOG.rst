@@ -6,6 +6,15 @@ Version 2
 ~~~~~~~~~
 
 
+*latest*
+--------
+
+
+- Maintenance
+
+  - Changed license declaration in accordance with PEP 639.
+
+
 v2.6.x
 """"""
 
