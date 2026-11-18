@@ -1191,7 +1191,7 @@ def check_time(time, signal, ft, ftarg, verb, new=False):
         # Calculate minimum and maximum required frequency
         minf = np.log10(1/time.max()) + targ['add_dec'][0]
         maxf = np.log10(1/time.min()) + targ['add_dec'][1]
-        n = np.int64((maxf - minf)*targ['pts_per_dec']) + 1
+        n = np.int64((maxf - minf)*targ['pts_per_dec'])
 
         # Initialize FFTLog, get required parameters
         freq, tcalc, dlnr, kr, rk = transform.get_fftlog_input(
