@@ -9,6 +9,9 @@ Version 2
 *latest*
 --------
 
+- Bug fix to actually use `pts_per_dec` points (or close to) in FFTLog,
+  reported by @rcgiri-physics. (Before, it was likely less if start/end-time
+  were not integer log10 numbers (difference should be tiny).
 
 - Maintenance
 
