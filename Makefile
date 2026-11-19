@@ -14,9 +14,11 @@ help:
 	@echo ""
 
 install:
+	cd empymod && make && cd ..
 	python -m pip install -e .
 
 dev-install:
+	cd empymod && make && cd ..
 	python -m pip install -e .[all]
 
 .ONESHELL:
@@ -46,6 +48,7 @@ linkcheck:
 	cd docs && make linkcheck
 
 clean:
+	cd empymod && make deepclean && cd ..
 	python -m pip uninstall empymod -y
 	rm -rf build/ dist/ .eggs/ empymod.egg-info/ empymod/version.py  # build
 	rm -rf */__pycache__/ */*/__pycache__/      # python cache

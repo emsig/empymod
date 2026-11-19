@@ -12,6 +12,10 @@ from empymod import bipole, dipole, analytical, loop
 from empymod.model import gpr, dipole_k, fem, tem
 from empymod.kernel import fullspace, halfspace
 
+# NOTE: To test the c-kernel, uncomment the following two lines.
+# from empymod import transform
+# transform.hankel_dlf = transform.hankel_cdlf
+
 # These are kind of macro-tests, as they check the final results.
 # I try to use different parameters for each test, to cover a wide range of
 # possibilities. It won't be possible to check all the possibilities though.

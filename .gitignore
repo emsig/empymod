@@ -26,3 +26,7 @@ empymod/version.py
 build/
 dist/
 empymod.egg-info/
+
+# C
+*.o
+*.so
