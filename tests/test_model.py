@@ -1240,6 +1240,22 @@ def test_ip_and_q(capsys):
     assert "This function is experimental" in out
 
 
+@pytest.mark.parametrize("ab", [46, 56, 66])
+def test_ip_and_q_simpeg(ab):
+    # Independent layered-earth values from create_data/simpeg.py. At equal
+    # height the two perpendicular receivers have zero direct coupling; all
+    # three readings use the vertical coplanar primary field as reference.
+    with np.load(join(dirname(__file__), 'data/simpeg.npz')) as data:
+        freq = data['frequencies']
+        expected = data[str(ab)]
+    ip, q = model.ip_and_q(
+        src=[0, 0, -0.16], rec=[6, 8, -0.16], depth=[0, 1, 2],
+        res=[1e14, 1000, 10, 1000], epermH=[0, 0, 0, 0],
+        freqtime=freq, ab=ab, verb=0)
+    # The two solvers use different numerical Hankel filters.
+    assert_allclose(np.column_stack((ip, q)), expected, rtol=1e-5, atol=1e-8)
+
+
 def test_fem():
     # Just ensure functionality stays the same, with one example.
     for i in ['1', '2', '3', '4', '5']:
