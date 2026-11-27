@@ -1,4 +1,10 @@
-"""Regenerate the ppt values for test_ip_and_q_simpeg with SimPEG 0.26.0."""
+"""Generate the IP/Q reference data in ppt with SimPEG 0.26.0.
+
+Run ``python -I tests/create_data/simpeg.py`` from the repository root.
+Isolated mode lets the script import the installed SimPEG package.
+"""
+from pathlib import Path
+
 import numpy as np
 from simpeg import maps
 from simpeg.electromagnetics import frequency_domain as fdem
@@ -29,5 +35,10 @@ def reference(frequency):
 
 
 if __name__ == "__main__":
-    for frequency in (1000., 10000.):
-        print(frequency, np.array2string(reference(frequency), precision=9))
+    frequencies = np.array([1000., 10000.])
+    readings = np.stack([reference(f) for f in frequencies])
+    output = Path(__file__).resolve().parents[1] / "data" / "simpeg.npz"
+    np.savez_compressed(
+        output, frequencies=frequencies, **{
+            str(ab): readings[:, i, :] for i, ab in enumerate((46, 56, 66))
+        })
